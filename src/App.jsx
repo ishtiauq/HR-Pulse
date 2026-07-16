@@ -10,6 +10,42 @@ import Attendance from './components/Attendance.jsx'
 import { loadOrInitializeDatabase, updateAppDataFile } from './services/googleDrive.js'
 import { Menu } from 'lucide-react'
 
+const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
+
+const textEncoder = new TextEncoder()
+const textDecoder = new TextDecoder()
+
+const toBase64 = (bytes) => btoa(String.fromCharCode(...bytes))
+const fromBase64 = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))
+
+const deriveAesKey = async (material) => {
+  const digest = await crypto.subtle.digest('SHA-256', textEncoder.encode(material))
+  return crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt'])
+}
+
+const encryptJson = async (value, keyMaterial) => {
+  const iv = crypto.getRandomValues(new Uint8Array(12))
+  const key = await deriveAesKey(keyMaterial)
+  const plaintext = textEncoder.encode(JSON.stringify(value))
+  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext)
+  return JSON.stringify({
+    iv: toBase64(iv),
+    data: toBase64(new Uint8Array(ciphertext))
+  })
+}
+
+const decryptJson = async (payload, keyMaterial) => {
+  const parsed = JSON.parse(payload)
+  if (!parsed?.iv || !parsed?.data) return null
+  const key = await deriveAesKey(keyMaterial)
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: fromBase64(parsed.iv) },
+    key,
+    fromBase64(parsed.data)
+  )
+  return JSON.parse(textDecoder.decode(new Uint8Array(decrypted)))
+}
+
 export default function App() {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('hr_pulse_user')
@@ -36,14 +72,6 @@ export default function App() {
   }
 
   const [employees, setEmployees] = useState(() => {
-    const saved = localStorage.getItem('hr_pulse_employees')
-    if (saved) {
-      try {
-        return JSON.parse(saved)
-      } catch (e) {
-        console.error('Failed to parse saved employees:', e)
-      }
-    }
     return [
       { 
         id: 'EMP-101', 
@@ -173,8 +201,36 @@ export default function App() {
 
   // LocalStorage persistence effects
   useEffect(() => {
-    localStorage.setItem('hr_pulse_employees', JSON.stringify(employees))
-  }, [employees])
+    const loadEmployeesFromStorage = async () => {
+      const saved = localStorage.getItem(EMPLOYEES_STORAGE_KEY)
+      if (!saved) return
+      try {
+        const keyMaterial = user?.token || 'hr-pulse-local-fallback-key'
+        const parsed = await decryptJson(saved, keyMaterial)
+        if (Array.isArray(parsed)) {
+          setEmployees(parsed)
+        }
+      } catch (e) {
+        console.error('Failed to decrypt saved employees:', e)
+      }
+    }
+
+    loadEmployeesFromStorage()
+  }, [user?.token])
+
+  useEffect(() => {
+    const persistEmployees = async () => {
+      try {
+        const keyMaterial = user?.token || 'hr-pulse-local-fallback-key'
+        const encrypted = await encryptJson(employees, keyMaterial)
+        localStorage.setItem(EMPLOYEES_STORAGE_KEY, encrypted)
+      } catch (e) {
+        console.error('Failed to encrypt employees for storage:', e)
+      }
+    }
+
+    persistEmployees()
+  }, [employees, user?.token])
 
   useEffect(() => {
     localStorage.setItem('hr_pulse_payroll', JSON.stringify(payroll))
