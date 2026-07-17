@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Save, DollarSign, Sliders, Info, Percent, Building2, Bell, Globe, Mail, Plus, Trash2 } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Save, DollarSign, Sliders, Info, Percent, Building2, Bell, Globe, Mail, Plus, Trash2, Upload, Activity, X } from 'lucide-react'
 import AdSlot from './AdSlot.jsx'
 
 export default function Settings({ settings, setSettings, addLog }) {
@@ -13,6 +13,16 @@ export default function Settings({ settings, setSettings, addLog }) {
   const [companyName, setCompanyName] = useState(settings.company?.name || 'HR Pulse Ltd.')
   const [companyEmail, setCompanyEmail] = useState(settings.company?.email || 'hr@hrpulse.io')
   const [companyWebsite, setCompanyWebsite] = useState(settings.company?.website || 'www.hrpulse.io')
+
+  // Logo states
+  const [logo, setLogo] = useState(settings.company?.logo || '')
+  const [logoX, setLogoX] = useState(settings.company?.logoX || 0)
+  const [logoY, setLogoY] = useState(settings.company?.logoY || 0)
+  const [logoZoom, setLogoZoom] = useState(settings.company?.logoZoom || 1)
+  
+  const [showLogoModal, setShowLogoModal] = useState(false)
+  const [dragStart, setDragStart] = useState(null)
+  const fileInputRef = useRef(null)
 
   // Notification states
   const [syncAlerts, setSyncAlerts] = useState(settings.notifications?.syncAlerts ?? true)
@@ -43,9 +53,19 @@ export default function Settings({ settings, setSettings, addLog }) {
     setIsSaving(true)
     setTimeout(() => {
       const updatedSettings = {
+        ...settings,
         currency,
         salaryStructure,
-        company: { name: companyName, email: companyEmail, website: companyWebsite },
+        company: { 
+          ...settings.company,
+          name: companyName, 
+          email: companyEmail, 
+          website: companyWebsite,
+          logo,
+          logoX,
+          logoY,
+          logoZoom
+        },
         notifications: { syncAlerts, emailDigests }
       }
       
@@ -70,6 +90,10 @@ export default function Settings({ settings, setSettings, addLog }) {
       setCompanyName('HR Pulse Ltd.')
       setCompanyEmail('hr@hrpulse.io')
       setCompanyWebsite('www.hrpulse.io')
+      setLogo('')
+      setLogoX(0)
+      setLogoY(0)
+      setLogoZoom(1)
     } else {
       setSyncAlerts(true)
       setEmailDigests(false)
@@ -80,6 +104,53 @@ export default function Settings({ settings, setSettings, addLog }) {
     if (item.type === 'deduction') return 'var(--accent-danger)'
     const colors = ['var(--accent-primary)', 'var(--accent-success)', 'var(--accent-info)', 'var(--accent-warning)', '#ec4899', '#8b5cf6']
     return colors[index % colors.length]
+  }
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setLogo(reader.result)
+        setLogoX(0)
+        setLogoY(0)
+        setLogoZoom(1)
+        setShowLogoModal(true)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    }
+  }
+
+  const handlePointerDown = (e) => {
+    e.preventDefault()
+    setDragStart({ x: e.clientX - logoX, y: e.clientY - logoY })
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }
+
+  const handlePointerMove = (e) => {
+    if (!dragStart) return
+    setLogoX(e.clientX - dragStart.x)
+    setLogoY(e.clientY - dragStart.y)
+  }
+
+  const handlePointerUp = (e) => {
+    if (dragStart) {
+      setDragStart(null)
+    }
+  }
+
+  const handleRemoveLogo = () => {
+    setLogo('')
+    setLogoX(0)
+    setLogoY(0)
+    setLogoZoom(1)
+    setShowLogoModal(false)
   }
 
   // Render Submenu Content Panel
@@ -273,6 +344,72 @@ export default function Settings({ settings, setSettings, addLog }) {
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '8px' }}>
+              {/* Brand Logo */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Brand Logo</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div 
+                    onClick={() => {
+                      if (logo) {
+                        setShowLogoModal(true)
+                      } else {
+                        triggerFileInput()
+                      }
+                    }}
+                    title={logo ? "Edit Custom Logo" : "Upload Custom Logo"}
+                    style={{
+                      width: '64px',
+                      height: '64px',
+                      borderRadius: '16px',
+                      background: 'var(--accent-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 4px 12px var(--accent-primary-glow)',
+                      flexShrink: 0,
+                      cursor: 'pointer',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}
+                  >
+                    {logo ? (
+                      <img 
+                        src={logo} 
+                        alt="Logo" 
+                        style={{ 
+                          width: '100%', 
+                          height: '100%', 
+                          objectFit: 'cover',
+                          transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`,
+                          transformOrigin: 'center'
+                        }} 
+                      />
+                    ) : (
+                      <Activity size={28} color="#ffffff" style={{ animation: 'pulse 2s infinite' }} />
+                    )}
+                  </div>
+                  <div>
+                    <button 
+                      onClick={triggerFileInput}
+                      className="btn-outline" 
+                      style={{ padding: '6px 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Upload size={14} /> Upload New Logo
+                    </button>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
+                      Click on the logo to reposition or resize it.
+                    </p>
+                  </div>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    onChange={handleLogoUpload} 
+                    accept="image/*" 
+                    style={{ display: 'none' }} 
+                  />
+                </div>
+              </div>
+
               {/* Name */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Legal Entity Name</label>
@@ -464,6 +601,107 @@ export default function Settings({ settings, setSettings, addLog }) {
 
       {/* Ad slot */}
       <AdSlot type="horizontal" style={{ marginTop: '20px' }} />
+
+      {/* Logo Settings Modal */}
+      {showLogoModal && (
+        <div className="modal-overlay">
+          <div className="modal-container" style={{ maxWidth: '400px', zIndex: 1000 }}>
+            <div className="modal-header">
+              <h2>Edit Brand Logo</h2>
+              <button className="modal-close" onClick={() => setShowLogoModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center' }}>
+              <p style={{ color: 'var(--text-secondary)', textAlign: 'center', fontSize: '0.9rem', margin: 0 }}>
+                Drag the image to reposition it, or use the slider below to zoom.
+              </p>
+
+              {/* Preview Area */}
+              <div 
+                style={{
+                  width: '120px',
+                  height: '120px',
+                  borderRadius: '24px',
+                  background: 'var(--accent-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 8px 24px var(--accent-primary-glow)',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  cursor: dragStart ? 'grabbing' : 'grab',
+                  touchAction: 'none'
+                }}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
+                onPointerLeave={handlePointerUp}
+              >
+                {logo ? (
+                  <img 
+                    src={logo} 
+                    alt="Logo Preview" 
+                    draggable="false"
+                    style={{ 
+                      width: '100%', 
+                      height: '100%', 
+                      objectFit: 'cover',
+                      transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`,
+                      transformOrigin: 'center',
+                      pointerEvents: 'none'
+                    }} 
+                  />
+                ) : (
+                  <Activity size={40} color="#ffffff" style={{ animation: 'pulse 2s infinite' }} />
+                )}
+              </div>
+
+              {/* Zoom Slider */}
+              <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Zoom</span>
+                <input 
+                  type="range" 
+                  min="0.5" 
+                  max="3" 
+                  step="0.05" 
+                  value={logoZoom}
+                  onChange={(e) => setLogoZoom(parseFloat(e.target.value))}
+                  style={{ flex: 1, accentColor: 'var(--accent-primary)' }}
+                />
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+                <button 
+                  className="btn-outline" 
+                  style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                  onClick={triggerFileInput}
+                >
+                  <Upload size={16} /> Replace
+                </button>
+                <button 
+                  className="btn-outline" 
+                  style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--accent-danger)', borderColor: 'rgba(239, 68, 68, 0.2)' }}
+                  onClick={handleRemoveLogo}
+                >
+                  <Trash2 size={16} /> Remove
+                </button>
+              </div>
+              
+              <button 
+                className="btn-primary" 
+                style={{ width: '100%' }}
+                onClick={() => setShowLogoModal(false)}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

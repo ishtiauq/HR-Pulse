@@ -170,17 +170,35 @@ export default function App() {
     }
   })
 
-  const [settings, setSettings] = useState({
-    currency: '$',
-    salaryStructure: [
-      { id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' },
-      { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' },
-      { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' },
-      { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' },
-      { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }
-    ],
-    company: { name: 'HR Pulse Ltd.', email: 'hr@hrpulse.io', website: 'www.hrpulse.io' },
-    notifications: { syncAlerts: true, emailDigests: false }
+  const [settings, setSettings] = useState(() => {
+    const saved = localStorage.getItem('hr_pulse_settings')
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch (e) {
+        console.error('Failed to parse saved settings:', e)
+      }
+    }
+    return {
+      currency: '$',
+      salaryStructure: [
+        { id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' },
+        { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' },
+        { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' },
+        { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' },
+        { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }
+      ],
+      company: { 
+        name: 'HR Pulse Ltd.', 
+        email: 'hr@hrpulse.io', 
+        website: 'www.hrpulse.io',
+        logo: '',
+        logoX: 0,
+        logoY: 0,
+        logoZoom: 1
+      },
+      notifications: { syncAlerts: true, emailDigests: false }
+    }
   })
 
   const [syncLogs, setSyncLogs] = useState(() => {
@@ -378,19 +396,25 @@ export default function App() {
     })
   }
 
-  const handleSetSettings = async (updatedSettings) => {
-    setSettings(updatedSettings)
-    
-    // Auto-save changes back to Google Drive
-    if (user && !user.isSimulated && settingsFileId && driveConnected) {
-      updateAppDataFile(settingsFileId, updatedSettings, user.token)
-        .then(() => {
-          addLog('Settings Saved', 'System configurations synced to Google Drive.', 'success')
-        })
-        .catch((err) => {
-          addLog('Save Failed', 'Could not save settings configurations to cloud: ' + err.message, 'danger')
-        })
-    }
+  const handleSetSettings = async (updater) => {
+    setSettings((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      
+      // LocalStorage persistence
+      localStorage.setItem('hr_pulse_settings', JSON.stringify(next))
+      
+      // Auto-save changes back to Google Drive
+      if (user && !user.isSimulated && settingsFileId && driveConnected) {
+        updateAppDataFile(settingsFileId, next, user.token)
+          .then(() => {
+            addLog('Settings Saved', 'System configurations synced to Google Drive.', 'success')
+          })
+          .catch((err) => {
+            addLog('Save Failed', 'Could not save settings configurations to cloud: ' + err.message, 'danger')
+          })
+      }
+      return next
+    })
   }
 
   const handleSetAttendance = async (updater) => {
@@ -565,6 +589,8 @@ export default function App() {
         onLogout={handleLogout}
         mobileOpen={mobileMenuOpen}
         setMobileOpen={setMobileMenuOpen}
+        settings={settings}
+        setSettings={handleSetSettings}
       />
       <main className="content-container">
         {renderContent()}

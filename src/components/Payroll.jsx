@@ -383,8 +383,7 @@ Thank you for your service!
               <div className="glossy-icon-container" style={{
                 width: '48px',
                 height: '48px',
-                background: 'linear-gradient(135deg, var(--accent-primary) 0%, #0284c7 100%)',
-                color: '#0b0c0e'
+                color: 'var(--accent-primary)'
               }}>
                 <CreditCard size={22} className="glossy-svg" />
               </div>
@@ -399,8 +398,7 @@ Thank you for your service!
               <div className="glossy-icon-container" style={{
                 width: '48px',
                 height: '48px',
-                background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-                color: '#ffffff'
+                color: 'var(--accent-info)'
               }}>
                 <CreditCard size={22} className="glossy-svg" />
               </div>

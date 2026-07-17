@@ -177,8 +177,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <div className="glossy-icon-container" style={{
             width: '48px',
             height: '48px',
-            background: 'linear-gradient(135deg, var(--accent-primary) 0%, #60a5fa 100%)',
-            color: '#ffffff'
+            color: 'var(--accent-primary)'
           }}>
             <Users size={22} className="glossy-svg" />
           </div>
@@ -193,8 +192,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <div className="glossy-icon-container" style={{
             width: '48px',
             height: '48px',
-            background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-            color: '#ffffff'
+            color: 'var(--accent-success)'
           }}>
             <Users size={22} className="glossy-svg" />
           </div>
@@ -209,8 +207,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <div className="glossy-icon-container" style={{
             width: '48px',
             height: '48px',
-            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-            color: '#ffffff'
+            color: 'var(--accent-warning)'
           }}>
             <Calendar size={22} className="glossy-svg" />
           </div>
@@ -225,8 +222,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <div className="glossy-icon-container" style={{
             width: '48px',
             height: '48px',
-            background: driveConnected ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-            color: '#ffffff'
+            color: driveConnected ? 'var(--accent-success)' : 'var(--accent-danger)'
           }}>
             <Cloud size={22} className="glossy-svg" />
           </div>

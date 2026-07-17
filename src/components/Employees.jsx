@@ -209,21 +209,22 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               width: '100%',
-              padding: '12px 16px 12px 42px',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border-color)',
+              padding: '14px 16px 14px 46px',
+              borderRadius: '30px',
+              border: 'none',
               background: 'var(--bg-secondary)',
               color: 'var(--text-primary)',
-              fontSize: '0.9rem',
+              fontSize: '0.95rem',
               outline: 'none',
-              transition: 'border-color var(--transition-fast)'
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.03)',
+              transition: 'all var(--transition-fast)'
             }}
-            onFocus={(e) => e.target.style.borderColor = 'var(--accent-primary)'}
-            onBlur={(e) => e.target.style.borderColor = 'var(--border-color)'}
+            onFocus={(e) => e.target.style.boxShadow = '0 8px 32px rgba(59, 130, 246, 0.1)'}
+            onBlur={(e) => e.target.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.03)'}
           />
           <Search size={18} style={{
             position: 'absolute',
-            left: '14px',
+            left: '18px',
             top: '50%',
             transform: 'translateY(-50%)',
             color: 'var(--text-muted)'
@@ -237,21 +238,24 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               key={dept}
               onClick={() => setDeptFilter(dept)}
               style={{
-                padding: '8px 16px',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid transparent',
-                background: deptFilter === dept ? 'var(--bg-tertiary)' : 'transparent',
-                color: deptFilter === dept ? 'var(--text-primary)' : 'var(--text-secondary)',
+                padding: '8px 18px',
+                borderRadius: '24px',
+                border: 'none',
+                background: deptFilter === dept ? 'var(--bg-active-tab)' : 'var(--bg-secondary)',
+                color: deptFilter === dept ? 'var(--text-active-tab)' : 'var(--text-secondary)',
+                boxShadow: deptFilter === dept ? '0 4px 12px rgba(59, 130, 246, 0.15)' : '0 4px 12px rgba(0,0,0,0.02)',
                 cursor: 'pointer',
-                fontWeight: 700,
+                fontWeight: 600,
                 fontSize: '0.85rem',
                 transition: 'all var(--transition-fast)'
               }}
               onMouseEnter={(e) => {
-                if (deptFilter !== dept) e.currentTarget.style.background = 'rgba(0, 0, 0, 0.02)'
+                if (deptFilter !== dept) {
+                  e.currentTarget.style.background = 'var(--bg-tertiary)';
+                }
               }}
               onMouseLeave={(e) => {
-                if (deptFilter !== dept) e.currentTarget.style.background = 'transparent'
+                if (deptFilter !== dept) e.currentTarget.style.background = 'var(--bg-secondary)'
               }}
             >
               {dept}

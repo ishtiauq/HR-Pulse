@@ -1,6 +1,93 @@
-import { LayoutDashboard, Users, Database, Settings, Activity, LogOut, X, CreditCard, Calendar } from 'lucide-react'
+import { LayoutDashboard, Users, Database, Settings, Activity, LogOut, X, CreditCard, Calendar, Upload, Trash2 } from 'lucide-react'
+import { useState, useRef } from 'react'
 
-export default function Sidebar({ currentView, setCurrentView, driveConnected, user, onLogout, mobileOpen, setMobileOpen }) {
+export default function Sidebar({ currentView, setCurrentView, driveConnected, user, onLogout, mobileOpen, setMobileOpen, settings, setSettings }) {
+  const [showLogoModal, setShowLogoModal] = useState(false)
+  const fileInputRef = useRef(null)
+
+  const [dragStart, setDragStart] = useState(null)
+
+  const logo = settings?.company?.logo || ''
+  const logoX = settings?.company?.logoX || 0
+  const logoY = settings?.company?.logoY || 0
+  const logoZoom = settings?.company?.logoZoom || 1
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setSettings(prev => ({
+          ...prev,
+          company: {
+            ...prev.company,
+            logo: reader.result,
+            logoX: 0,
+            logoY: 0,
+            logoZoom: 1
+          }
+        }))
+        setShowLogoModal(true)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    }
+  }
+
+  const handlePointerDown = (e) => {
+    e.preventDefault()
+    setDragStart({ x: e.clientX - logoX, y: e.clientY - logoY })
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }
+
+  const handlePointerMove = (e) => {
+    if (!dragStart) return
+    setSettings(prev => ({
+      ...prev,
+      company: {
+        ...prev.company,
+        logoX: e.clientX - dragStart.x,
+        logoY: e.clientY - dragStart.y
+      }
+    }))
+  }
+
+  const handlePointerUp = (e) => {
+    if (dragStart) {
+      setDragStart(null)
+    }
+  }
+
+  const handleRemoveLogo = () => {
+    setSettings(prev => ({
+      ...prev,
+      company: {
+        ...prev.company,
+        logo: '',
+        logoX: 0,
+        logoY: 0,
+        logoZoom: 1
+      }
+    }))
+    setShowLogoModal(false)
+  }
+
+  const handleZoomChange = (e) => {
+    const val = parseFloat(e.target.value)
+    setSettings(prev => ({
+      ...prev,
+      company: {
+        ...prev.company,
+        logoZoom: val
+      }
+    }))
+  }
+
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'employees', label: 'Employees', icon: Users },
@@ -22,21 +109,53 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
       {/* Top Split Card: Brand Header */}
       <div className="sidebar-brand-card">
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '10px',
-            background: 'var(--accent-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 12px var(--accent-primary-glow)',
-            flexShrink: 0
-          }}>
-            <Activity size={18} color="#ffffff" style={{
-              animation: 'pulse 2s infinite'
-            }} />
+          <div 
+            onClick={() => {
+              if (logo) {
+                setShowLogoModal(true)
+              } else {
+                triggerFileInput()
+              }
+            }}
+            title={logo ? "Edit Custom Logo" : "Upload Custom Logo"}
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '10px',
+              background: 'var(--accent-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px var(--accent-primary-glow)',
+              flexShrink: 0,
+              cursor: 'pointer',
+              overflow: 'hidden',
+              position: 'relative'
+            }}
+          >
+            {logo ? (
+              <img 
+                src={logo} 
+                alt="Logo" 
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'cover',
+                  transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`,
+                  transformOrigin: 'center'
+                }} 
+              />
+            ) : (
+              <Activity size={18} color="#ffffff" style={{ animation: 'pulse 2s infinite' }} />
+            )}
           </div>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleLogoUpload} 
+            accept="image/*" 
+            style={{ display: 'none' }} 
+          />
           <div>
             <h2 style={{
               fontSize: '1.2rem',
@@ -57,7 +176,6 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
           </div>
         </div>
 
-        {/* Mobile Close Button */}
         <button 
           onClick={() => setMobileOpen(false)}
           className="sidebar-close-btn"
@@ -86,7 +204,7 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
                   borderRadius: 'var(--radius-md)',
                   border: 'none',
                   background: isActive ? 'var(--accent-primary)' : 'transparent',
-                  color: isActive ? 'var(--text-active-tab)' : 'var(--text-secondary)',
+                  color: isActive ? '#ffffff' : 'var(--text-secondary)',
                   fontSize: '0.95rem',
                   fontWeight: 700,
                   textAlign: 'left',
@@ -244,6 +362,107 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
           100% { opacity: 0.6; }
         }
       `}</style>
+
+      {/* Logo Settings Modal */}
+      {showLogoModal && (
+        <div className="modal-overlay">
+          <div className="modal-container" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h2>Edit Brand Logo</h2>
+              <button className="modal-close" onClick={() => setShowLogoModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '24px', alignItems: 'center' }}>
+              <p style={{ color: 'var(--text-secondary)', textAlign: 'center', fontSize: '0.9rem', margin: 0 }}>
+                Drag the image to reposition it, or use the slider below to zoom.
+              </p>
+
+              {/* Preview Area */}
+              <div 
+                style={{
+                  width: '120px',
+                  height: '120px',
+                  borderRadius: '24px',
+                  background: 'var(--accent-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 8px 24px var(--accent-primary-glow)',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  cursor: dragStart ? 'grabbing' : 'grab',
+                  touchAction: 'none'
+                }}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
+                onPointerLeave={handlePointerUp}
+              >
+                {logo ? (
+                  <img 
+                    src={logo} 
+                    alt="Logo Preview" 
+                    draggable="false"
+                    style={{ 
+                      width: '100%', 
+                      height: '100%', 
+                      objectFit: 'cover',
+                      transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`,
+                      transformOrigin: 'center',
+                      pointerEvents: 'none'
+                    }} 
+                  />
+                ) : (
+                  <Activity size={40} color="#ffffff" style={{ animation: 'pulse 2s infinite' }} />
+                )}
+              </div>
+
+              {/* Zoom Slider */}
+              <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Zoom</span>
+                <input 
+                  type="range" 
+                  min="0.5" 
+                  max="3" 
+                  step="0.05" 
+                  value={logoZoom}
+                  onChange={handleZoomChange}
+                  style={{ flex: 1, accentColor: 'var(--accent-primary)' }}
+                />
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+                <button 
+                  className="btn-outline" 
+                  style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                  onClick={triggerFileInput}
+                >
+                  <Upload size={16} /> Replace
+                </button>
+                <button 
+                  className="btn-outline" 
+                  style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--accent-danger)', borderColor: 'rgba(239, 68, 68, 0.2)' }}
+                  onClick={handleRemoveLogo}
+                >
+                  <Trash2 size={16} /> Remove
+                </button>
+              </div>
+              
+              <button 
+                className="btn-primary" 
+                style={{ width: '100%' }}
+                onClick={() => setShowLogoModal(false)}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   )
 }
