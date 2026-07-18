@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useModal } from '../services/useModal.js'
 import { Calendar as CalendarIcon, Plus, Edit, Trash2, ChevronLeft, ChevronRight, FileText, Users, Gift, AlertTriangle, Clock, X } from 'lucide-react'
+import AdSlot from './AdSlot'
 import { formatDate } from '../services/date.js'
 
 const EVENT_TYPES = [
@@ -355,6 +356,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
           </div>
         </div>
       )}
+      <AdSlot />
     </div>
   )
 }

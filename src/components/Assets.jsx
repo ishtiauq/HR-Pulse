@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature } from 'lucide-react'
+import AdSlot from './AdSlot'
 import { useModal } from '../services/useModal.js'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
@@ -607,6 +608,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
           </div>
         </div>
       )}
+      <AdSlot />
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { useModal } from '../services/useModal.js'
 import { FileText, Search, Upload, Download, Trash2, Folder, X, FileSpreadsheet, FileImage, FileArchive, File } from 'lucide-react'
+import AdSlot from './AdSlot'
 import { formatDate } from '../services/date.js'
 
 const CATEGORIES = [
@@ -291,6 +292,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
           </div>
         </div>
       )}
+      <AdSlot />
     </div>
   )
 }

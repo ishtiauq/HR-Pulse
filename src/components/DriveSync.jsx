@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Database, HardDrive, CloudOff, CloudLightning, ArrowLeftRight, Download, UploadCloud, Info, FileJson, Check, AlertCircle, RefreshCw, Eye, X, Trash2, Shield, RotateCcw } from 'lucide-react'
+import AdSlot from './AdSlot'
 import { useModal } from '../services/useModal.js'
 import { getLocalCacheSizeMB, clearLocalCache } from '../services/db.js'
 import { createBackup, listBackups, restoreBackup } from '../services/googleDrive.js'
@@ -24,14 +25,14 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, syn
   const [timeSinceSync, setTimeSinceSync] = useState(2)
   const [timeUntilSync, setTimeUntilSync] = useState(13)
   const [previewFile, setPreviewFile] = useState(null)
-  useModal(() => setSelectedRestoreBackup(null))
-  useModal(() => setPreviewFile(null))
   const [cacheSize, setCacheSize] = useState('0.00')
   const [isClearing, setIsClearing] = useState(false)
   const [backupsList, setBackupsList] = useState([])
   const [isBackingUp, setIsBackingUp] = useState(false)
   const [isRestoring, setIsRestoring] = useState(false)
   const [selectedRestoreBackup, setSelectedRestoreBackup] = useState(null)
+  useModal(() => setSelectedRestoreBackup(null))
+  useModal(() => setPreviewFile(null))
   
   useEffect(() => {
     const fetchCacheSize = async () => {
@@ -480,6 +481,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, syn
           to { opacity: 1; transform: scale(1); }
         }
       `}</style>
+      <AdSlot />
     </div>
   )
 }

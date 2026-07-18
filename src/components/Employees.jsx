@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Cpu } from 'lucide-react'
+import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Cpu, Users } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
@@ -9,11 +9,10 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [deptFilter, setDeptFilter] = useState('All')
   const [showAddForm, setShowAddForm] = useState(false)
-  useModal(() => setViewingEmployee(null))
-  useModal(() => handleCloseForm())
   const [editingEmployee, setEditingEmployee] = useState(null)
   const [viewingEmployee, setViewingEmployee] = useState(null)
   const [imageErrors, setImageErrors] = useState({})
+  useModal(() => setViewingEmployee(null))
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300)
@@ -37,6 +36,13 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       setSelectedEmployeeId(null)
     }
   }, [selectedEmployeeId, employees, setSelectedEmployeeId])
+
+  useEffect(() => {
+    if (!showAddForm) return
+    const handleEsc = (e) => { if (e.key === 'Escape') handleCloseForm() }
+    window.addEventListener('keydown', handleEsc)
+    return () => window.removeEventListener('keydown', handleEsc)
+  }, [showAddForm])
 
   const getAvatarFallback = (name) => {
     const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
@@ -463,7 +469,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
             <path d="M11 8v6"></path>
             <path d="M8 11h6"></path>
           </svg>
-          <h3 style={{ fontSize: '1.2rem', color: '#374151', marginBottom: '16px', fontWeight: 600 }}>No employees found in this department</h3>
+          <h3 style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', marginBottom: '16px', fontWeight: 600 }}>No employees found in this department</h3>
           <button onClick={() => {setSearchTerm(''); setDeptFilter('All')}} className="btn btn-secondary">Clear Filters</button>
         </div>
       ) : (

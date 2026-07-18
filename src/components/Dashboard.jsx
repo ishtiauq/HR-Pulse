@@ -337,7 +337,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 transition: 'all var(--transition-fast)'
               }}
             >
-              <h4 className="tabular-nums" style={{ fontSize: '2.2rem', color: '#f59e0b', fontWeight: 800 }}>{todayStats.onLeave}</h4>
+              <h4 className="tabular-nums" style={{ fontSize: '2.2rem', color: 'var(--accent-warning)', fontWeight: 800 }}>{todayStats.onLeave}</h4>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '4px' }}>On Leave</span>
               {renderAvatarStack(attendanceDetails.onLeave)}
             </div>
@@ -399,7 +399,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                       <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
                         <div style={{ position: 'relative' }}>
                           <img src={e.avatar} alt={e.name} style={{ width: '36px', height: '36px', borderRadius: '50%', filter: 'grayscale(100%)' }} />
-                          <div style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', backgroundColor: '#f59e0b', borderRadius: '50%', border: '2px solid #fff' }} />
+                          <div style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', backgroundColor: 'var(--accent-warning)', borderRadius: '50%', border: '2px solid var(--bg-secondary)' }} />
                         </div>
                         <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{e.name}</span>
                       </div>
@@ -415,7 +415,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                       <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
                         <div style={{ position: 'relative' }}>
                           <img src={e.avatar} alt={e.name} style={{ width: '36px', height: '36px', borderRadius: '50%', filter: 'grayscale(100%) opacity(0.7)' }} />
-                          <div style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', backgroundColor: '#ef4444', borderRadius: '50%', border: '2px solid #fff' }} />
+                          <div style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', backgroundColor: 'var(--accent-danger)', borderRadius: '50%', border: '2px solid var(--bg-secondary)' }} />
                         </div>
                         <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{e.name}</span>
                       </div>
@@ -463,7 +463,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                       height: '30px',
                       borderRadius: '50%',
                       background: 'rgba(239, 68, 68, 0.08)',
-                      color: '#ef4444',
+                      color: 'var(--accent-danger)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -477,7 +477,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                       height: '30px',
                       borderRadius: '50%',
                       background: 'rgba(245, 158, 11, 0.08)',
-                      color: '#f59e0b',
+                      color: 'var(--accent-warning)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',

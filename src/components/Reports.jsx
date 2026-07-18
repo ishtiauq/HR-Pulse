@@ -3,6 +3,7 @@ import {
   BarChart3, FileText, Download, Calendar, Mail, 
   PieChart as PieChartIcon, TrendingUp, Users, Clock, AlertTriangle 
 } from 'lucide-react'
+import AdSlot from './AdSlot'
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell,
@@ -479,6 +480,7 @@ export default function Reports({ employees, payroll, attendance, addLog, addToa
         )}
       </div>
 
+      <AdSlot />
     </div>
   )
 }

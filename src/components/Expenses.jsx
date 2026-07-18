@@ -1,5 +1,6 @@
 import { useState, useRef, useMemo } from 'react'
 import { Receipt, Plus, Upload, Check, X as XIcon, Clock, DollarSign, Filter, Search, Download, AlertTriangle, PieChart as PieChartIcon } from 'lucide-react'
+import AdSlot from './AdSlot'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
 export default function Expenses({ employees, expenses, setExpenses, settings, addLog, addToast, addAuditLog, simulatedRole }) {
@@ -441,6 +442,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
           </div>
         </div>
       )}
+      <AdSlot />
     </div>
   )
 }

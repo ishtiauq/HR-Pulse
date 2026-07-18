@@ -335,7 +335,7 @@ export default function Login({ onLogin }) {
         }
 
         .gradient-text-blue {
-          background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+          background: linear-gradient(135deg, #1e40af 0%, var(--accent-primary) 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
         }
@@ -485,7 +485,7 @@ export default function Login({ onLogin }) {
           bottom: 125%;
           left: 50%;
           transform: translateX(-50%);
-          background: #1e293b;
+          background: var(--text-primary);
           color: #ffffff;
           padding: 10px 14px;
           border-radius: 8px;
@@ -507,7 +507,7 @@ export default function Login({ onLogin }) {
           margin-left: -6px;
           border-width: 6px;
           border-style: solid;
-          border-color: #1e293b transparent transparent transparent;
+          border-color: var(--text-primary) transparent transparent transparent;
         }
 
         .connect-button-wrapper:hover .connect-button-tooltip {

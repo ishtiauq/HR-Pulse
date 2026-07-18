@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Megaphone, Plus, Image as ImageIcon, FileText, Send, Calendar, Clock, Edit, Trash2, Users, AlertTriangle, MessageSquare, Heart, ThumbsUp, PartyPopper } from 'lucide-react'
+import AdSlot from './AdSlot'
 import { formatDateTime } from '../services/date.js'
 
 export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser }) {
@@ -259,6 +260,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
           )}
         </div>
       )}
+      <AdSlot />
     </div>
   )
 }
