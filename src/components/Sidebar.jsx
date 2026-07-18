@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Database, Settings, Activity, LogOut, X, CreditCard, Calendar, Upload, Trash2, Moon, Sun, HelpCircle, BarChart3, Receipt, Megaphone, Monitor } from 'lucide-react'
+import { LayoutDashboard, Users, Database, Settings, Activity, LogOut, X, CreditCard, Calendar, Upload, Trash2, Moon, Sun, HelpCircle, BarChart3, Receipt, Megaphone, Monitor, CalendarDays, FileText } from 'lucide-react'
 import { useState, useRef } from 'react'
 
 export default function Sidebar({ currentView, setCurrentView, driveConnected, user, onLogout, mobileOpen, setMobileOpen, settings, setSettings, isDarkMode, setIsDarkMode, simulatedRole, dbStatus }) {
@@ -92,6 +92,8 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
   const allMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'announcements', label: 'Announcements', icon: Megaphone },
+    { id: 'calendar', label: 'Calendar', icon: CalendarDays },
+    { id: 'documents', label: 'Documents', icon: FileText },
     { id: 'employees', label: 'Employees', icon: Users },
     { id: 'payroll', label: 'Payroll', icon: CreditCard },
     { id: 'attendance', label: 'Leaves & Attendance', icon: Calendar },
@@ -105,13 +107,13 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
   const menuItems = allMenuItems.filter(item => {
     if (simulatedRole === 'Admin') return true
     if (simulatedRole === 'Employee') {
-      return ['dashboard', 'attendance', 'expenses'].includes(item.id)
+      return ['dashboard', 'attendance', 'expenses', 'calendar'].includes(item.id)
     }
     if (simulatedRole === 'Payroll Manager') {
-      return ['dashboard', 'employees', 'payroll', 'reports', 'expenses'].includes(item.id)
+      return ['dashboard', 'employees', 'payroll', 'reports', 'expenses', 'calendar', 'documents'].includes(item.id)
     }
     if (simulatedRole === 'HR Manager') {
-      return ['dashboard', 'employees', 'attendance', 'payroll', 'reports', 'expenses'].includes(item.id)
+      return ['dashboard', 'employees', 'attendance', 'payroll', 'reports', 'expenses', 'calendar', 'documents'].includes(item.id)
     }
     return false
   })

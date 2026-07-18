@@ -11,6 +11,8 @@ import Reports from './components/Reports.jsx'
 import Expenses from './components/Expenses.jsx'
 import Announcements from './components/Announcements.jsx'
 import Assets from './components/Assets.jsx'
+import Calendar from './components/Calendar.jsx'
+import Documents from './components/Documents.jsx'
 import EmployeePortal from './components/EmployeePortal.jsx'
 import { readMeta, writeMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBackup, createBackup } from './services/googleDrive.js'
 import { clearLocalCache } from './services/db.js'
@@ -113,13 +115,13 @@ export default function App() {
   const hasPermission = (resource) => {
     if (simulatedRole === 'Admin') return true
     if (simulatedRole === 'Employee') {
-      return ['dashboard', 'attendance', 'expenses'].includes(resource)
+      return ['dashboard', 'attendance', 'expenses', 'calendar'].includes(resource)
     }
     if (simulatedRole === 'Payroll Manager') {
-      return ['dashboard', 'employees', 'payroll', 'reports', 'expenses'].includes(resource)
+      return ['dashboard', 'employees', 'payroll', 'reports', 'expenses', 'calendar', 'documents'].includes(resource)
     }
     if (simulatedRole === 'HR Manager') {
-      return ['dashboard', 'employees', 'attendance', 'payroll', 'reports', 'expenses'].includes(resource)
+      return ['dashboard', 'employees', 'attendance', 'payroll', 'reports', 'expenses', 'calendar', 'documents'].includes(resource)
     }
     return false
   }
@@ -367,6 +369,27 @@ export default function App() {
     ]
   })
 
+  // CALENDAR EVENTS STATE
+  const [events, setEvents] = useState(() => {
+    const saved = localStorage.getItem('hr_pulse_events')
+    if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(e) } }
+    return [
+      { id: 'evt-1', title: 'Company Town Hall', date: '2026-07-20', time: '14:00', type: 'meeting', description: 'Quarterly all-hands meeting', createdBy: 'EMP-101', createdAt: new Date().toISOString() },
+      { id: 'evt-2', title: 'Independence Day', date: '2026-08-15', time: '', type: 'holiday', description: 'National holiday', createdBy: 'EMP-101', createdAt: new Date().toISOString() },
+      { id: 'evt-3', title: 'Sarah\'s Birthday', date: '2026-07-30', time: '', type: 'birthday', description: '', createdBy: 'EMP-101', createdAt: new Date().toISOString() },
+    ]
+  })
+
+  // DOCUMENTS STATE
+  const [documents, setDocuments] = useState(() => {
+    const saved = localStorage.getItem('hr_pulse_documents')
+    if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(e) } }
+    return [
+      { id: 'doc-1', name: 'Employee Handbook 2026', category: 'hr-docs', description: 'Official company policies and procedures handbook', fileName: 'Employee_Handbook_2026.pdf', fileSize: 2450000, fileType: 'application/pdf', uploadedBy: 'EMP-101', uploadedAt: new Date().toISOString() },
+      { id: 'doc-2', name: 'Q2 Financial Report', category: 'reports', description: 'Quarterly financial performance report', fileName: 'Q2_Financial_Report.xlsx', fileSize: 1800000, fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', uploadedBy: 'EMP-101', uploadedAt: new Date().toISOString() },
+    ]
+  })
+
   // NEW ROSTER & SHIFT STATES
   const [roster, setRoster] = useState(() => {
     const saved = localStorage.getItem('hr_pulse_roster')
@@ -539,6 +562,14 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('hr_pulse_asset_requests', JSON.stringify(assetRequests))
   }, [assetRequests])
+
+  useEffect(() => {
+    localStorage.setItem('hr_pulse_events', JSON.stringify(events))
+  }, [events])
+
+  useEffect(() => {
+    localStorage.setItem('hr_pulse_documents', JSON.stringify(documents))
+  }, [documents])
 
   // Auto-Post Birthdays & Anniversaries
   useEffect(() => {
@@ -996,6 +1027,20 @@ export default function App() {
       return next
     })
   }
+  const handleSetEvents = (updater) => {
+    setEvents((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      return next
+    })
+  }
+
+  const handleSetDocuments = (updater) => {
+    setDocuments((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      return next
+    })
+  }
+
   // Function to simulate Google Drive activity log update
   const addLog = (action, details, status = 'success') => {
     const newLog = {
@@ -1192,6 +1237,30 @@ export default function App() {
             simulatedRole={simulatedRole}
           />
         )
+      case 'calendar':
+        return (
+          <Calendar
+            events={events}
+            setEvents={handleSetEvents}
+            employees={employees}
+            addLog={addLog}
+            addToast={addToast}
+            currentUser={user}
+            simulatedRole={simulatedRole}
+          />
+        )
+      case 'documents':
+        return (
+          <Documents
+            documents={documents}
+            setDocuments={handleSetDocuments}
+            employees={employees}
+            addLog={addLog}
+            addToast={addToast}
+            currentUser={user}
+            simulatedRole={simulatedRole}
+          />
+        )
       case 'assets':
         return (
           <Assets
@@ -1309,6 +1378,8 @@ export default function App() {
       { id: 'page-payroll', category: 'Pages', label: 'Go to Payroll', action: () => setCurrentView('payroll'), keywords: 'payroll salary pay compensation' },
       { id: 'page-attendance', category: 'Pages', label: 'Go to Attendance & Leaves', action: () => setCurrentView('attendance'), keywords: 'attendance leaves roster schedule timeoff vacation' },
       { id: 'page-announcements', category: 'Pages', label: 'Go to Announcements', action: () => setCurrentView('announcements'), keywords: 'announcements news posts updates' },
+      { id: 'page-calendar', category: 'Pages', label: 'Go to Calendar', action: () => setCurrentView('calendar'), keywords: 'calendar events meetings holidays schedule' },
+      { id: 'page-documents', category: 'Pages', label: 'Go to Documents', action: () => setCurrentView('documents'), keywords: 'documents files upload download manager' },
       { id: 'page-assets', category: 'Pages', label: 'Go to Assets', action: () => setCurrentView('assets'), keywords: 'assets inventory devices macbook laptop' },
       { id: 'page-reports', category: 'Pages', label: 'Go to Reports', action: () => setCurrentView('reports'), keywords: 'reports analytics charts download' },
       { id: 'page-expenses', category: 'Pages', label: 'Go to Expenses', action: () => setCurrentView('expenses'), keywords: 'expenses claims reimbursements money' },
