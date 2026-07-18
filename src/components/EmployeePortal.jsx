@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, AlertTriangle } from 'lucide-react'
+import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, AlertTriangle, Upload } from 'lucide-react'
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -51,12 +51,49 @@ export default function EmployeePortal({
 }) {
   const [activeTab, setActiveTab] = useState('dashboard') // dashboard, attendance, payslips, leave, profile
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+  const [showPunchModal, setShowPunchModal] = useState(false)
+  const [punchType, setPunchType] = useState('In')
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768)
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
+
+  const handlePunchSubmit = () => {
+    const today = new Date().toISOString().split('T')[0]
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    
+    const todayLogs = attendance?.dailyLogs?.[today] || {}
+    const myLog = todayLogs[currentUser.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
+    
+    let updatedLog = { ...myLog }
+    if (punchType === 'In') {
+      updatedLog.status = 'Present'
+      updatedLog.checkIn = nowTime
+    } else {
+      updatedLog.checkOut = nowTime
+      if (updatedLog.checkIn !== '--') {
+        updatedLog.hours = '9.0'
+      }
+    }
+    
+    const newLogs = {
+      ...attendance.dailyLogs,
+      [today]: {
+        ...todayLogs,
+        [currentUser.id]: updatedLog
+      }
+    }
+    
+    setAttendance(prev => ({
+      ...prev,
+      dailyLogs: newLogs
+    }))
+    
+    setShowPunchModal(false)
+    addToast(`Successfully clocked ${punchType.toLowerCase()} at ${nowTime}.`, 'success')
+  }
 
   if (!currentUser) {
     return <div style={{ padding: '20px' }}>Loading portal...</div>
@@ -176,9 +213,10 @@ export default function EmployeePortal({
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
                 style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
                   background: 'transparent', border: 'none', cursor: 'pointer',
-                  color: active ? 'var(--accent-primary)' : 'var(--text-secondary)'
+                  color: active ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                  flex: 1, minHeight: '44px', padding: '6px'
                 }}
               >
                 <Icon size={20} />
@@ -186,6 +224,35 @@ export default function EmployeePortal({
               </button>
             )
           })}
+        </div>
+      )}
+
+      {showPunchModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 11000, backdropFilter: 'blur(4px)' }}>
+          <div className="glass-card" style={{ padding: '24px', width: '90%', maxWidth: '400px', background: 'var(--bg-secondary)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <h3 style={{ margin: 0 }}>Attendance Punch</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Select punch type for today (<strong>{new Date().toLocaleDateString()}</strong>):</p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                className={`btn ${punchType === 'In' ? 'btn-primary' : 'btn-secondary'}`} 
+                style={{ flex: 1, minHeight: '44px' }} 
+                onClick={() => setPunchType('In')}
+              >
+                Clock In
+              </button>
+              <button 
+                className={`btn ${punchType === 'Out' ? 'btn-primary' : 'btn-secondary'}`} 
+                style={{ flex: 1, minHeight: '44px' }} 
+                onClick={() => setPunchType('Out')}
+              >
+                Clock Out
+              </button>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
+              <button className="btn btn-secondary" style={{ minHeight: '44px' }} onClick={() => setShowPunchModal(false)}>Cancel</button>
+              <button className="btn btn-primary" style={{ minHeight: '44px' }} onClick={handlePunchSubmit}>Confirm Punch</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -254,7 +321,7 @@ function DashboardView({ currentUser, attendance, expenses, announcements, setAc
               <Download size={24} style={{ color: 'var(--accent-success)' }} />
               Download Payslip
             </button>
-            <button className="btn btn-secondary" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }} onClick={() => alert('Biometric scan active or request manual punch.')}>
+            <button className="btn btn-secondary" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }} onClick={() => setShowPunchModal(true)}>
               <Clock size={24} style={{ color: 'var(--accent-warning)' }} />
               Mark Attendance
             </button>
@@ -523,6 +590,8 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [reason, setReason] = useState('')
+  const [receipt, setReceipt] = useState(null)
+  const [receiptName, setReceiptName] = useState('')
 
   const handleApply = (e) => {
     e.preventDefault()
@@ -535,13 +604,15 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
       startDate,
       endDate,
       reason,
-      status: 'Pending'
+      status: 'Pending',
+      receipt,
+      receiptName
     }
 
     setAttendance(prev => ({ ...prev, leaves: [newLeave, ...(prev.leaves || [])] }))
     addToast('Leave request submitted successfully!', 'success')
     addLog('Leave Requested', `${currentUser.name} requested ${type} leave.`, 'info')
-    setStartDate(''); setEndDate(''); setReason('')
+    setStartDate(''); setEndDate(''); setReason(''); setReceipt(null); setReceiptName('')
   }
 
   return (
@@ -562,6 +633,44 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
             <input type="date" className="form-input" style={{ flex: 1 }} value={endDate} onChange={e => setEndDate(e.target.value)} required />
           </div>
           <textarea className="form-input" placeholder="Reason / Handover notes" rows="3" value={reason} onChange={e => setReason(e.target.value)} required />
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Attach Receipt / Medical Certificate</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <label 
+                className="btn btn-secondary" 
+                style={{ 
+                  margin: 0, padding: '10px 16px', display: 'inline-flex', alignItems: 'center', gap: '8px', 
+                  minHeight: '44px', cursor: 'pointer', fontSize: '0.85rem'
+                }}
+              >
+                <Upload size={16} /> 
+                <span>{receiptName ? 'Change Document' : 'Upload File'}</span>
+                <input 
+                  type="file" 
+                  accept="image/*,application/pdf" 
+                  style={{ display: 'none' }} 
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setReceiptName(file.name);
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setReceipt(reader.result);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }} 
+                />
+              </label>
+              {receiptName && (
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '200px' }}>
+                  {receiptName}
+                </span>
+              )}
+            </div>
+          </div>
+
           <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start' }}><Send size={16} /> Submit Request</button>
         </form>
       </div>
@@ -569,22 +678,32 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
       <div className="glass-card" style={{ padding: '24px' }}>
         <h3 style={{ marginTop: 0 }}>Application History</h3>
         <div className="table-container">
-          <table className="w-full">
+          <table className="w-full" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr>
-                <th>Type</th>
-                <th>Dates</th>
-                <th>Reason</th>
-                <th>Status</th>
+              <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>
+                <th style={{ padding: '12px' }}>Type</th>
+                <th style={{ padding: '12px' }}>Dates</th>
+                <th style={{ padding: '12px' }}>Reason</th>
+                <th style={{ padding: '12px' }}>Receipt</th>
+                <th style={{ padding: '12px' }}>Status</th>
               </tr>
             </thead>
             <tbody>
               {myLeaves.map(l => (
-                <tr key={l.id}>
-                  <td>{l.leaveType}</td>
-                  <td>{l.startDate} to {l.endDate}</td>
-                  <td>{l.reason}</td>
-                  <td>
+                <tr key={l.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '12px' }}>{l.leaveType}</td>
+                  <td style={{ padding: '12px' }}>{l.startDate} to {l.endDate}</td>
+                  <td style={{ padding: '12px' }}>{l.reason}</td>
+                  <td style={{ padding: '12px' }}>
+                    {l.receipt ? (
+                      <a href={l.receipt} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'underline', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', minHeight: '44px' }}>
+                        <FileText size={14} /> View
+                      </a>
+                    ) : (
+                      <span style={{ color: 'var(--text-muted)' }}>None</span>
+                    )}
+                  </td>
+                  <td style={{ padding: '12px' }}>
                     <span style={{ 
                       padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600,
                       background: l.status === 'Approved' ? 'rgba(34, 197, 94, 0.2)' : l.status === 'Rejected' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(234, 179, 8, 0.2)',
@@ -595,7 +714,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
                   </td>
                 </tr>
               ))}
-              {myLeaves.length === 0 && <tr><td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No leave history found.</td></tr>}
+              {myLeaves.length === 0 && <tr><td colSpan="5" style={{ padding: '12px', textAlign: 'center', color: 'var(--text-secondary)' }}>No leave history found.</td></tr>}
             </tbody>
           </table>
         </div>

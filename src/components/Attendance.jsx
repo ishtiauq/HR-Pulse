@@ -80,6 +80,13 @@ export default function Attendance({
             </span>
           )}
         </button>
+        <button
+          onClick={() => setActiveTab('daily')}
+          className={`tab-btn ${activeTab === 'daily' ? 'active' : ''}`}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: activeTab === 'daily' ? 'var(--bg-secondary)' : 'transparent', border: 'none', borderRadius: '8px', color: activeTab === 'daily' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: activeTab === 'daily' ? 700 : 500, cursor: 'pointer', whiteSpace: 'nowrap' }}
+        >
+          <Clock size={18} /> Daily Attendance Logs
+        </button>
       </div>
 
       {activeTab === 'roster' && (
@@ -118,6 +125,15 @@ export default function Attendance({
           attendance={attendance} 
           setAttendance={setAttendance} 
           addToast={addToast} 
+        />
+      )}
+
+      {activeTab === 'daily' && (
+        <DailyAttendance 
+          employees={employees} 
+          attendance={attendance} 
+          setAttendance={setAttendance} 
+          addToast={addToast}
         />
       )}
       
@@ -443,12 +459,14 @@ function LeaveRequests({ employees, attendance, setAttendance, addToast }) {
         <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '40px' }}>No pending leave requests.</div>
       ) : (
         <div className="table-container">
-          <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse' }}>
+          <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)' }}>
                 <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }}>Employee</th>
                 <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }}>Type</th>
                 <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }}>Dates</th>
+                <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }}>Reason</th>
+                <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }}>Receipt</th>
                 <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }}>Action</th>
               </tr>
             </thead>
@@ -460,10 +478,20 @@ function LeaveRequests({ employees, attendance, setAttendance, addToast }) {
                     <td style={{ padding: '12px', fontWeight: 500 }}>{emp?.name || leave.employeeId}</td>
                     <td style={{ padding: '12px', fontSize: '0.9rem' }}>{leave.leaveType}</td>
                     <td style={{ padding: '12px', fontSize: '0.85rem' }}>{leave.startDate} to {leave.endDate}</td>
+                    <td style={{ padding: '12px', fontSize: '0.85rem' }}>{leave.reason || '--'}</td>
+                    <td style={{ padding: '12px', fontSize: '0.85rem' }}>
+                      {leave.receipt ? (
+                        <a href={leave.receipt} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'underline', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', minHeight: '44px' }}>
+                          <FileText size={14} /> View
+                        </a>
+                      ) : (
+                        <span style={{ color: 'var(--text-muted)' }}>None</span>
+                      )}
+                    </td>
                     <td style={{ padding: '12px' }}>
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="btn btn-primary" style={{ padding: '4px 10px', fontSize: '0.8rem' }} onClick={() => handleApproveLeave(leave.id)}>Approve</button>
-                        <button className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '0.8rem', color: 'var(--accent-danger)' }} onClick={() => handleRejectLeave(leave.id)}>Reject</button>
+                        <button className="btn btn-primary" style={{ padding: '4px 10px', fontSize: '0.8rem', minHeight: '44px' }} onClick={() => handleApproveLeave(leave.id)}>Approve</button>
+                        <button className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '0.8rem', color: 'var(--accent-danger)', minHeight: '44px' }} onClick={() => handleRejectLeave(leave.id)}>Reject</button>
                       </div>
                     </td>
                   </tr>
@@ -473,6 +501,169 @@ function LeaveRequests({ employees, attendance, setAttendance, addToast }) {
           </table>
         </div>
       )}
+    </div>
+  )
+}
+
+function DailyAttendance({ employees, attendance, setAttendance, addToast }) {
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0])
+  const logs = attendance?.dailyLogs?.[selectedDate] || {}
+  
+  const handleStatusChange = (empId, status) => {
+    const currentLog = logs[empId] || { checkIn: '--', checkOut: '--', hours: '0.0' }
+    let checkIn = currentLog.checkIn
+    let checkOut = currentLog.checkOut
+    let hours = currentLog.hours
+    
+    if (status === 'Present') {
+      checkIn = '09:00 AM'
+      checkOut = '06:00 PM'
+      hours = '9.0'
+    } else if (status === 'Late') {
+      checkIn = '09:30 AM'
+      checkOut = '06:00 PM'
+      hours = '8.5'
+    } else if (status === 'Absent') {
+      checkIn = '--'
+      checkOut = '--'
+      hours = '0.0'
+    }
+    
+    const newLogs = {
+      ...attendance.dailyLogs,
+      [selectedDate]: {
+        ...logs,
+        [empId]: { status, checkIn, checkOut, hours }
+      }
+    }
+    
+    setAttendance(prev => ({
+      ...prev,
+      dailyLogs: newLogs
+    }))
+    addToast(`Marked ${employees.find(e => e.id === empId)?.name} as ${status}.`, 'success')
+  }
+  
+  const handleTimeChange = (empId, field, val) => {
+    const currentLog = logs[empId] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
+    const updatedLog = { ...currentLog, [field]: val }
+    
+    if (updatedLog.checkIn !== '--' && updatedLog.checkOut !== '--') {
+      updatedLog.status = updatedLog.status === 'Absent' ? 'Present' : updatedLog.status
+      updatedLog.hours = '9.0'
+    }
+    
+    const newLogs = {
+      ...attendance.dailyLogs,
+      [selectedDate]: {
+        ...logs,
+        [empId]: updatedLog
+      }
+    }
+    
+    setAttendance(prev => ({
+      ...prev,
+      dailyLogs: newLogs
+    }))
+  }
+
+  return (
+    <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+        <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-primary)' }}>Daily Attendance Logging</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Select Date:</span>
+          <input 
+            type="date" 
+            className="form-input" 
+            style={{ width: '160px', minHeight: '44px' }} 
+            value={selectedDate} 
+            onChange={e => setSelectedDate(e.target.value)} 
+          />
+        </div>
+      </div>
+
+      <div className="table-container" style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+        <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: 'var(--bg-tertiary)' }}>
+              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>Employee</th>
+              <th style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid var(--border-color)' }}>Status</th>
+              <th style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid var(--border-color)' }}>Check In</th>
+              <th style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid var(--border-color)' }}>Check Out</th>
+              <th style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid var(--border-color)' }}>Hours</th>
+              <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid var(--border-color)' }}>Quick Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employees.map(emp => {
+              const log = logs[emp.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
+              return (
+                <tr key={emp.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <img src={emp.avatar} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{emp.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{emp.role}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '12px', textAlign: 'center' }}>
+                    <span style={{ 
+                      padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600,
+                      background: log.status === 'Present' ? 'var(--accent-success-glow)' : log.status === 'Late' ? 'var(--accent-warning-glow)' : 'var(--accent-danger-glow)',
+                      color: log.status === 'Present' ? 'var(--accent-success)' : log.status === 'Late' ? 'var(--accent-warning)' : 'var(--accent-danger)'
+                    }}>{log.status}</span>
+                  </td>
+                  <td style={{ padding: '12px', textAlign: 'center' }}>
+                    <input 
+                      type="text" 
+                      value={log.checkIn} 
+                      onChange={e => handleTimeChange(emp.id, 'checkIn', e.target.value)}
+                      style={{ width: '80px', textAlign: 'center', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '4px', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                    />
+                  </td>
+                  <td style={{ padding: '12px', textAlign: 'center' }}>
+                    <input 
+                      type="text" 
+                      value={log.checkOut} 
+                      onChange={e => handleTimeChange(emp.id, 'checkOut', e.target.value)}
+                      style={{ width: '80px', textAlign: 'center', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '4px', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                    />
+                  </td>
+                  <td style={{ padding: '12px', textAlign: 'center', fontWeight: 600 }}>{log.hours}</td>
+                  <td style={{ padding: '12px', textAlign: 'right' }}>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                      <button 
+                        className="btn btn-secondary" 
+                        style={{ padding: '6px 12px', fontSize: '0.75rem', minHeight: '44px', borderColor: 'var(--accent-success)', color: 'var(--accent-success)' }}
+                        onClick={() => handleStatusChange(emp.id, 'Present')}
+                      >
+                        Present
+                      </button>
+                      <button 
+                        className="btn btn-secondary" 
+                        style={{ padding: '6px 12px', fontSize: '0.75rem', minHeight: '44px', borderColor: 'var(--accent-warning)', color: 'var(--accent-warning)' }}
+                        onClick={() => handleStatusChange(emp.id, 'Late')}
+                      >
+                        Late
+                      </button>
+                      <button 
+                        className="btn btn-secondary" 
+                        style={{ padding: '6px 12px', fontSize: '0.75rem', minHeight: '44px', borderColor: 'var(--accent-danger)', color: 'var(--accent-danger)' }}
+                        onClick={() => handleStatusChange(emp.id, 'Absent')}
+                      >
+                        Absent
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

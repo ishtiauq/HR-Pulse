@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle } from 'lucide-react'
+import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Cpu } from 'lucide-react'
 import AdSlot from './AdSlot.jsx'
 
 export default function Employees({ employees, setEmployees, addLog, driveConnected, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast, selectedEmployeeId, setSelectedEmployeeId }) {
@@ -250,10 +250,88 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
           <h1 style={{ fontSize: '2.7rem', marginBottom: '4px', fontWeight: 900, letterSpacing: '-0.04em' }}>Employee Directory</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Manage records, contact logs, and sync status for personnel.</p>
         </div>
-        <button className="btn btn-primary" onClick={handleOpenAddForm}>
-          <Plus size={16} />
-          Add Employee
-        </button>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary" onClick={() => document.getElementById('csv-file-input').click()}>
+            <FileSpreadsheet size={16} />
+            Import CSV
+          </button>
+          <input 
+            id="csv-file-input" 
+            type="file" 
+            accept=".csv" 
+            style={{ display: 'none' }} 
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                  const csvText = event.target.result;
+                  try {
+                    const lines = csvText.split('\n');
+                    const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+                    const imported = [];
+                    for (let i = 1; i < lines.length; i++) {
+                      if (!lines[i].trim()) continue;
+                      const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+                      const emp = {};
+                      headers.forEach((header, index) => {
+                        emp[header] = cols[index] || '';
+                      });
+                      if (emp.id && emp.name) {
+                        emp.avatar = emp.avatar || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200`;
+                        emp.updated_at = new Date().toISOString();
+                        imported.push(emp);
+                      }
+                    }
+                    if (imported.length > 0) {
+                      setEmployees(prev => {
+                        const existingIds = new Set(prev.map(e => e.id));
+                        const filteredImport = imported.filter(e => !existingIds.has(e.id));
+                        return [...prev, ...filteredImport];
+                      });
+                      addToast(`Successfully imported ${imported.length} employees from CSV.`, 'success');
+                    } else {
+                      addToast('No valid employee records found in CSV.', 'warning');
+                    }
+                  } catch (err) {
+                    addToast('Failed to parse CSV file: ' + err.message, 'danger');
+                  }
+                };
+                reader.readAsText(file);
+              }
+            }}
+          />
+          <button className="btn btn-secondary" onClick={() => {
+            const mockEmps = [];
+            for (let i = 1; i <= 100; i++) {
+              const id = `emp-mock-${1000 + i}`;
+              mockEmps.push({
+                id,
+                name: `Mock Employee ${i}`,
+                role: i % 3 === 0 ? 'Developer' : i % 3 === 1 ? 'Designer' : 'Manager',
+                department: i % 2 === 0 ? 'Engineering' : 'Product',
+                email: `mock.emp.${i}@company.com`,
+                status: 'Active',
+                salary: 5000 + (i * 50),
+                avatar: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200`,
+                updated_at: new Date().toISOString()
+              });
+            }
+            setEmployees(prev => {
+              const existingIds = new Set(prev.map(e => e.id));
+              const filteredMock = mockEmps.filter(e => !existingIds.has(e.id));
+              return [...prev, ...filteredMock];
+            });
+            addToast('Successfully generated 100 mock employees.', 'success');
+          }}>
+            <Cpu size={16} />
+            Generate 100 Mock Employees
+          </button>
+          <button className="btn btn-primary" onClick={handleOpenAddForm}>
+            <Plus size={16} />
+            Add Employee
+          </button>
+        </div>
       </div>
 
       {/* Filters Toolbar */}

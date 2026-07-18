@@ -295,6 +295,55 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, syn
             </button>
           </div>
         </div>
+
+        {/* Data Integrity Testing */}
+        <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
+          <div>
+            <h4 style={{ fontSize: '1rem', color: 'var(--accent-danger)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AlertCircle size={18} /> Data Integrity Testing
+            </h4>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              Simulate cloud database corruption by writing duplicate IDs to `employees.json` in your Google Drive. Reloading the app will trigger validation alerts and backup recovery flows.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button 
+              className="btn btn-secondary" 
+              style={{ flex: 1, justifyContent: 'center', borderColor: 'var(--accent-danger)', color: 'var(--accent-danger)' }} 
+              onClick={() => {
+                const MOCK_DRIVE_KEY = 'hr_pulse_mock_drive_files';
+                const driveRaw = localStorage.getItem(MOCK_DRIVE_KEY);
+                if (driveRaw) {
+                  try {
+                    const drive = JSON.parse(driveRaw);
+                    if (drive['employees']) {
+                      const employees = drive['employees'].content;
+                      if (Array.isArray(employees) && employees.length > 0) {
+                        const duplicate = { ...employees[0], name: employees[0].name + " (Duplicate)" };
+                        employees.push(duplicate);
+                        drive['employees'].content = employees;
+                        drive['employees'].modifiedTime = new Date().toISOString();
+                        localStorage.setItem(MOCK_DRIVE_KEY, JSON.stringify(drive));
+                        alert('Corruption simulated successfully! Please reload the page to trigger the integrity validator.');
+                      } else {
+                        alert('Mock drive has no employees to duplicate. Please load data first.');
+                      }
+                    } else {
+                      alert('Employees table not found in mock drive. Please sync first.');
+                    }
+                  } catch (e) {
+                    alert('Error writing corruption: ' + e.message);
+                  }
+                } else {
+                  alert('No mock drive found in localStorage. Please log in as a simulated user first.');
+                }
+              }}
+            >
+              Simulate Drive Corruption
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Backup Browser Widget */}

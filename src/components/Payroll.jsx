@@ -19,6 +19,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
 
   // Bulk Action State
   const [selectedRows, setSelectedRows] = useState([])
+  const [scrollTop, setScrollTop] = useState(0)
 
   const currency = settings?.currency || '$'
   const structure = settings?.salaryStructure || [
@@ -167,6 +168,23 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
     const matchesStatus = statusFilter === 'All' || entry.status === statusFilter
     return matchesSearch && matchesStatus
   }) : []
+
+  const containerHeight = 600 // px
+  const rowHeight = 75 // px
+  const overscan = 5
+  
+  const handleScroll = (e) => {
+    setScrollTop(e.target.scrollTop)
+  }
+
+  const totalRows = filteredEntries.length
+  const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan)
+  const endIndex = Math.min(totalRows - 1, Math.floor((scrollTop + containerHeight) / rowHeight) + overscan)
+  
+  const visibleEntries = filteredEntries.slice(startIndex, endIndex + 1)
+  
+  const paddingTop = startIndex * rowHeight
+  const paddingBottom = Math.max(0, (totalRows - endIndex - 1) * rowHeight)
 
   // Execute payment and reduce loan remaining balances
   const handleExecutePayment = (entry) => {
@@ -628,7 +646,11 @@ Thank you for your service!
           )}
 
           {/* Payroll Table */}
-          <div className="glass-card table-scroll-wrapper" style={{ padding: '0', overflow: 'hidden' }}>
+          <div 
+            className="glass-card table-scroll-wrapper" 
+            style={{ padding: '0', maxHeight: '600px', overflowY: 'auto' }}
+            onScroll={handleScroll}
+          >
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1050px' }}>
                 <thead>
@@ -652,7 +674,8 @@ Thank you for your service!
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredEntries.map(entry => {
+                  {paddingTop > 0 && <tr style={{ height: `${paddingTop}px` }}><td colSpan="9" style={{ padding: 0 }} /></tr>}
+                  {visibleEntries.map(entry => {
                   const emp = entry.employee
                   const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
                   const netPay = entry.baseSalary + entry.allowance - entry.deductions - entry.advance - loanDeduction
@@ -708,22 +731,25 @@ Thank you for your service!
                       {/* Loan */}
                       <td style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <span>Remaining: {currency}{entry.loan.remaining}</span>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Inst: {currency}{entry.loan.installment}/mo</span>
-                          </div>
+                          {entry.loan.total > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Inst: {currency}{loanDeduction}</span>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Rem: {currency}{entry.loan.remaining}</span>
+                            </div>
+                          ) : (
+                            <span style={{ color: 'var(--text-muted)' }}>None</span>
+                          )}
                         </div>
                       </td>
 
-                      <td style={{ padding: '16px', fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>{currency}{netPay.toLocaleString()}</td>
-                      
+                      {/* Net pay */}
+                      <td style={{ padding: '16px', fontSize: '0.9rem', fontWeight: 700, color: isPaid ? 'var(--accent-success)' : 'var(--text-primary)' }}>
+                        {currency}{netPay.toLocaleString()}
+                      </td>
+
+                      {/* Status */}
                       <td style={{ padding: '16px' }}>
                         <span style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '4px 10px',
-                          borderRadius: '20px',
                           fontSize: '0.75rem',
                           fontWeight: 600,
                           backgroundColor: isPaid ? 'var(--accent-success-glow)' : 'var(--accent-warning-glow)',
@@ -824,6 +850,7 @@ Thank you for your service!
                     </tr>
                   )
                 })}
+                {paddingBottom > 0 && <tr style={{ height: `${paddingBottom}px` }}><td colSpan="9" style={{ padding: 0 }} /></tr>}
               </tbody>
             </table>
             </div>

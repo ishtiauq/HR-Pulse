@@ -1097,3 +1097,27 @@ html.dark .toast-progress { background: rgba(255,255,255,0.2); }
   left: 0;
   z-index: 10;
 }
+
+/* Enforce min-height of 44px on buttons and form inputs for accessible mobile touch targets */
+.btn {
+  min-height: 44px !important;
+}
+
+.form-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  outline: none;
+  font-family: var(--font-sans);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-primary-glow);
+}

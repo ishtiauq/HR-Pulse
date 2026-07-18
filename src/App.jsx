@@ -53,6 +53,23 @@ const decryptJson = async (payload, keyMaterial) => {
   return JSON.parse(textDecoder.decode(new Uint8Array(decrypted)))
 }
 
+function timestampArrayChanges(prev, next) {
+  if (!Array.isArray(prev) || !Array.isArray(next)) return next;
+  const prevMap = new Map(prev.map(item => [item.id, item]));
+  return next.map(item => {
+    const prevItem = prevMap.get(item.id);
+    if (!prevItem) {
+      return { ...item, updated_at: new Date().toISOString() };
+    }
+    const cleanPrev = { ...prevItem, updated_at: undefined, _conflict: undefined };
+    const cleanItem = { ...item, updated_at: undefined, _conflict: undefined };
+    if (JSON.stringify(cleanPrev) !== JSON.stringify(cleanItem)) {
+      return { ...item, updated_at: new Date().toISOString() };
+    }
+    return item;
+  });
+}
+
 export default function App() {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('hr_pulse_user')
@@ -599,19 +616,26 @@ export default function App() {
   // Real Google Drive synchronization effect
   useEffect(() => {
     const handleOnline = () => {
-      if (user && !user.isSimulated && metaManifest) {
-        flushPendingWrites(user.token, metaManifest, (conflicts, data, tableName) => {
-          if (conflicts && conflicts.length > 0) {
-            setSyncConflicts(c => [...c, ...conflicts]);
-            addToast(`Offline changes synced. Conflicts detected in ${tableName}.`, 'warning');
-            if (tableName === 'employees') setEmployees(data);
-            if (tableName === 'payroll') setPayroll(data);
-            if (tableName === 'settings') setSettings(data);
-            if (tableName === 'attendance') setAttendance(data);
-          } else {
-            addToast(`Offline changes synced successfully for ${tableName}.`, 'success');
+      if (user && metaManifest) {
+        flushPendingWrites(
+          user.token, 
+          metaManifest, 
+          (conflicts, data, tableName) => {
+            if (conflicts && conflicts.length > 0) {
+              setSyncConflicts(c => [...c, ...conflicts]);
+              addToast(`Offline changes synced. Conflicts detected in ${tableName}.`, 'warning');
+              if (tableName === 'employees') setEmployees(data);
+              if (tableName === 'payroll') setPayroll(data);
+              if (tableName === 'settings') setSettings(data);
+              if (tableName === 'attendance_logs') setAttendance(prev => ({ ...prev, dailyLogs: data }));
+              if (tableName === 'leave_requests') setAttendance(prev => ({ ...prev, leaves: data }));
+              if (tableName === 'leave_balances') setAttendance(prev => ({ ...prev, balances: data }));
+            }
+          },
+          (syncedCount) => {
+            addToast(`${syncedCount} changes synced`, 'success');
           }
-        });
+        );
       }
     };
     window.addEventListener('online', handleOnline);
@@ -620,7 +644,7 @@ export default function App() {
 
   useEffect(() => {
     const syncDatabase = async () => {
-      if (!user || user.isSimulated || !driveConnected) {
+      if (!user || !driveConnected) {
         setIsAppLoading(false)
         return
       }
@@ -785,9 +809,9 @@ export default function App() {
 
   const handleSetEmployees = async (updater) => {
     setEmployees((prev) => {
-      const next = typeof updater === 'function' ? updater(prev) : updater
+      const next = timestampArrayChanges(prev, typeof updater === 'function' ? updater(prev) : updater)
       
-      if (user && !user.isSimulated && driveConnected && metaManifest) {
+      if (user && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
         writeTable('employees', next, meta, user.token)
           .then(({ updatedData, conflicts, offline }) => {
@@ -816,7 +840,7 @@ export default function App() {
     setPayroll((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       
-      if (user && !user.isSimulated && driveConnected && metaManifest) {
+      if (user && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
         writeTable('payroll', next, meta, user.token)
           .then(({ updatedData, conflicts, offline }) => {
@@ -846,7 +870,7 @@ export default function App() {
       const next = typeof updater === 'function' ? updater(prev) : updater
       localStorage.setItem('hr_pulse_settings', JSON.stringify(next))
       
-      if (user && !user.isSimulated && driveConnected && metaManifest) {
+      if (user && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
         writeTable('settings', next, meta, user.token)
           .then(({ updatedData, conflicts, offline }) => {
@@ -873,11 +897,14 @@ export default function App() {
 
   const handleSetAttendance = async (updater) => {
     setAttendance((prev) => {
-      const next = typeof updater === 'function' ? updater(prev) : updater
+      const rawNext = typeof updater === 'function' ? updater(prev) : updater
+      const next = {
+        ...rawNext,
+        leaves: timestampArrayChanges(prev.leaves, rawNext.leaves)
+      }
       
-      if (user && !user.isSimulated && driveConnected && metaManifest) {
+      if (user && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
-        // We trigger all three writes asynchronously
         Promise.all([
           writeTable('leave_requests', next.leaves, meta, user.token),
           writeTable('leave_balances', next.balances, meta, user.token),
@@ -896,8 +923,8 @@ export default function App() {
 
   const handleSetExpenses = (updater) => {
     setExpenses((prev) => {
-      const next = typeof updater === 'function' ? updater(prev) : updater
-      if (user && !user.isSimulated && driveConnected && metaManifest) {
+      const next = timestampArrayChanges(prev, typeof updater === 'function' ? updater(prev) : updater)
+      if (user && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
         writeTable('expenses', next, meta, user.token)
           .then(({ updatedData, conflicts, offline }) => {

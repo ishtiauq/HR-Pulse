@@ -9,18 +9,48 @@ const DRIVE_UPLOAD_URL = 'https://www.googleapis.com/upload/drive/v3/files';
 const DRIVE_FILES_URL = 'https://www.googleapis.com/drive/v3/files';
 const FOLDER_NAME = 'HR-Pulse-DB';
 
-// Simple string hashing for checksums
-function generateChecksum(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
+const MOCK_DRIVE_KEY = 'hr_pulse_mock_drive_files';
+
+function isMockToken(token) {
+  return !token || token.startsWith('mock-');
+}
+
+function getMockDrive() {
+  const raw = localStorage.getItem(MOCK_DRIVE_KEY);
+  if (raw) {
+    try {
+      return JSON.parse(raw);
+    } catch (e) {
+      console.error("Failed to parse mock drive", e);
+    }
   }
-  return hash.toString(16);
+  
+  const defaultDrive = {
+    '_meta.json': {
+      id: 'mock-file-_meta.json',
+      name: '_meta.json',
+      content: { schema_version: "1.0", last_sync: new Date().toISOString(), files: {} },
+      modifiedTime: new Date().toISOString(),
+      size: 150,
+      parents: ['mock-folder-root-id']
+    }
+  };
+  localStorage.setItem(MOCK_DRIVE_KEY, JSON.stringify(defaultDrive));
+  return defaultDrive;
+}
+
+function saveMockDrive(drive) {
+  localStorage.setItem(MOCK_DRIVE_KEY, JSON.stringify(drive));
 }
 
 export async function fetchUserProfile(token) {
+  if (isMockToken(token)) {
+    return {
+      name: 'Ishtiauq Ahmed (Simulated)',
+      email: 'ishtiauq@gmail.com',
+      picture: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
+    };
+  }
   const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
     headers: { Authorization: `Bearer ${token}` }
   });
@@ -32,6 +62,9 @@ export async function fetchUserProfile(token) {
  * Find or create the root database folder in Google Drive
  */
 export async function getOrCreateDbFolder(token) {
+  if (isMockToken(token)) {
+    return 'mock-folder-root-id';
+  }
   const query = encodeURIComponent(`name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
   const url = `${DRIVE_FILES_URL}?q=${query}&fields=files(id,name)`;
   
@@ -65,6 +98,21 @@ export async function getOrCreateDbFolder(token) {
  * Search for a file inside a specific folder
  */
 export async function findFileInFolder(filename, folderId, token) {
+  if (isMockToken(token)) {
+    const drive = getMockDrive();
+    if (filename === '_backups') {
+      return { id: 'mock-folder-_backups-id', name: '_backups', modifiedTime: new Date().toISOString() };
+    }
+    if (folderId === 'mock-folder-_backups-id') {
+      const found = Object.values(drive).find(f => f.name === filename && f.parents?.includes(folderId));
+      return found ? { id: found.id, name: found.name, modifiedTime: found.modifiedTime } : null;
+    }
+    const file = drive[filename];
+    if (file) {
+      return { id: file.id, name: file.name, modifiedTime: file.modifiedTime };
+    }
+    return null;
+  }
   const query = encodeURIComponent(`name='${filename}' and '${folderId}' in parents and trashed=false`);
   const url = `${DRIVE_FILES_URL}?q=${query}&fields=files(id,name,modifiedTime)`;
   
@@ -78,6 +126,14 @@ export async function findFileInFolder(filename, folderId, token) {
  * Read file contents as JSON
  */
 export async function readFileContents(fileId, token) {
+  if (isMockToken(token)) {
+    const drive = getMockDrive();
+    const file = Object.values(drive).find(f => f.id === fileId);
+    if (file) {
+      return file.content;
+    }
+    throw new Error(`Mock file ${fileId} not found`);
+  }
   const url = `${DRIVE_FILES_URL}/${fileId}?alt=media`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error(`Failed to read file ${fileId}`);
@@ -88,6 +144,25 @@ export async function readFileContents(fileId, token) {
  * Create a new file in a specific folder
  */
 export async function createFileInFolder(filename, folderId, content, token) {
+  if (isMockToken(token)) {
+    const drive = getMockDrive();
+    const id = `mock-file-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+    const newFile = {
+      id,
+      name: filename,
+      content,
+      modifiedTime: new Date().toISOString(),
+      size: JSON.stringify(content).length,
+      parents: [folderId]
+    };
+    if (folderId === 'mock-folder-_backups-id') {
+      drive[id] = newFile;
+    } else {
+      drive[filename] = newFile;
+    }
+    saveMockDrive(drive);
+    return { id, name: filename, modifiedTime: newFile.modifiedTime };
+  }
   const metadata = {
     name: filename,
     parents: [folderId]
@@ -123,6 +198,18 @@ export async function createFileInFolder(filename, folderId, content, token) {
  * Update existing file contents
  */
 export async function updateFileContents(fileId, content, token) {
+  if (isMockToken(token)) {
+    const drive = getMockDrive();
+    const file = Object.values(drive).find(f => f.id === fileId);
+    if (file) {
+      file.content = content;
+      file.modifiedTime = new Date().toISOString();
+      file.size = JSON.stringify(content).length;
+      saveMockDrive(drive);
+      return { id: file.id, name: file.name, modifiedTime: file.modifiedTime };
+    }
+    throw new Error(`Mock file ${fileId} not found to update`);
+  }
   const url = `${DRIVE_UPLOAD_URL}/${fileId}?uploadType=media`;
   const res = await fetch(url, {
     method: 'PATCH',
@@ -280,7 +367,17 @@ async function releaseLock(folderId, metaObj, token) {
   }
 }
 
-function resolveConflict(localData, remoteData, tableName) {
+function generateChecksum(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash.toString(16);
+}
+
+function resolveConflict(localData, remoteData, tableName, localModified) {
   let mergedData = localData;
   let conflicts = [];
 
@@ -297,20 +394,35 @@ function resolveConflict(localData, remoteData, tableName) {
       const r = remoteMap.get(id);
 
       if (l && r) {
-        // Both modified/exist
-        const lTime = new Date(l.updated_at || 0).getTime();
-        const rTime = new Date(r.updated_at || 0).getTime();
-        
         if (JSON.stringify(l) === JSON.stringify(r)) {
           mergedData.push(r); // Same, just keep remote
-        } else if (rTime > lTime) {
-          // Remote is newer but local also changed? Keep remote, flag conflict
-          const resolved = { ...r, _conflict: true };
-          mergedData.push(resolved);
-          conflicts.push({ file: tableName, recordId: id, localValue: l, remoteValue: r, resolution: 'Kept Remote' });
         } else {
-          // Local is newer or same time (local wins)
-          mergedData.push(l);
+          // Check if both were modified
+          const lTime = new Date(l.updated_at || 0).getTime();
+          const rTime = new Date(r.updated_at || 0).getTime();
+          
+          const localChanged = lTime > (localModified || 0);
+          const remoteChanged = rTime > (localModified || 0);
+          
+          if (localChanged && remoteChanged) {
+            // Conflict: both edited since last sync!
+            // Auto-merge: local changes overwrite remote fields
+            const merged = { ...r, ...l, _conflict: true };
+            mergedData.push(merged);
+            conflicts.push({ 
+              file: tableName, 
+              recordId: id, 
+              localValue: l, 
+              remoteValue: r, 
+              resolution: 'Auto-Merged' 
+            });
+          } else if (remoteChanged) {
+            // Only remote changed
+            mergedData.push(r);
+          } else {
+            // Only local changed
+            mergedData.push(l);
+          }
         }
       } else if (r) {
         mergedData.push(r); // Only exists in remote
@@ -360,7 +472,7 @@ export async function writeTable(tableName, data, fallbackMeta, token) {
     if (localModified && remoteModified > localModified) {
       console.warn(`Conflict detected for ${tableName}! Remote is newer.`);
       const remoteData = await readFileContents(file.id, token);
-      const result = resolveConflict(data, remoteData, tableName);
+      const result = resolveConflict(data, remoteData, tableName, localModified);
       data = result.mergedData;
       conflictsFound = result.conflicts;
       
@@ -391,13 +503,14 @@ export async function writeTable(tableName, data, fallbackMeta, token) {
   return { updatedData: data, conflicts: conflictsFound, offline: false };
 }
 
-export async function flushPendingWrites(token, metaObj, onConflictDetected) {
+export async function flushPendingWrites(token, metaObj, onConflictDetected, onSyncComplete) {
   if (!navigator.onLine) return;
   
   const pending = await getPendingWrites();
   if (pending.length === 0) return;
   
   console.log(`Flushing ${pending.length} pending writes...`);
+  let syncedCount = 0;
   
   for (const item of pending) {
     const tableName = item.filename.replace('.json', '');
@@ -407,11 +520,16 @@ export async function flushPendingWrites(token, metaObj, onConflictDetected) {
         onConflictDetected(result.conflicts, result.updatedData, tableName);
       }
       await removePendingWrite(item.id);
+      syncedCount++;
     } catch (err) {
       console.error(`Failed to flush pending write for ${item.filename}`, err);
       // Stop flushing if we hit an error so order is preserved
       break; 
     }
+  }
+
+  if (onSyncComplete && syncedCount > 0) {
+    onSyncComplete(syncedCount);
   }
 }
 
@@ -455,6 +573,13 @@ export async function createBackup(token, isAuto = false) {
 }
 
 export async function listBackups(token) {
+  if (isMockToken(token)) {
+    const drive = getMockDrive();
+    return Object.values(drive)
+      .filter(f => f.parents?.includes('mock-folder-_backups-id'))
+      .map(f => ({ id: f.id, name: f.name, modifiedTime: f.modifiedTime, size: f.size }))
+      .sort((a, b) => new Date(b.modifiedTime) - new Date(a.modifiedTime));
+  }
   const folderId = await getFolderId(token);
   const backupsFolder = await findFileInFolder('_backups', folderId, token);
   if (!backupsFolder) return [];
@@ -510,6 +635,21 @@ async function getOrCreateFolder(folderName, parentId, token) {
 }
 
 async function pruneBackups(token, backupsFolderId) {
+  if (isMockToken(token)) {
+    const drive = getMockDrive();
+    const backupFiles = Object.values(drive)
+      .filter(f => f.parents?.includes(backupsFolderId) && f.name.includes('auto_backup_'))
+      .sort((a, b) => new Date(b.modifiedTime) - new Date(a.modifiedTime));
+    
+    if (backupFiles.length > 11) {
+      const toDelete = backupFiles.slice(11);
+      for (const f of toDelete) {
+        delete drive[f.id];
+      }
+      saveMockDrive(drive);
+    }
+    return;
+  }
   const url = `${DRIVE_FILES_URL}?q='${backupsFolderId}'+in+parents+and+trashed=false+and+name+contains+'auto_backup_'&fields=files(id,name,modifiedTime)&orderBy=modifiedTime desc`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   const data = await res.json();
