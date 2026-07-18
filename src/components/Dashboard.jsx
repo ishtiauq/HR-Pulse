@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Users, Cloud, RefreshCw, Activity, FileText, Calendar, Gift, Award } from 'lucide-react'
+import { LayoutDashboard, Users, Cloud, RefreshCw, Activity, FileText, Calendar, Gift, Award } from 'lucide-react'
 import AdSlot from './AdSlot'
+import { formatDateShort } from '../services/date.js'
 
 export default function Dashboard({ employees, driveConnected, onSync, attendance, setCurrentView }) {
   const [totalEmployees, setTotalEmployees] = useState(0)
@@ -103,7 +104,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
             role: emp.role,
             date: bdayThisYear,
             daysRemaining: diffDays,
-            label: `Birthday (${new Date(emp.dob).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })})`
+            label: `Birthday (${formatDateShort(emp.dob)})`
           })
         }
       }
@@ -129,7 +130,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
               role: emp.role,
               date: workversaryThisYear,
               daysRemaining: diffDays,
-              label: `${years}${getOrdinalSuffix(years)} Anniversary (${new Date(emp.joiningDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })})`
+              label: `${years}${getOrdinalSuffix(years)} Anniversary (${formatDateShort(emp.joiningDate)})`
             })
           }
         }
@@ -177,16 +178,11 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <h1 style={{ fontSize: '2.7rem', marginBottom: '4px', fontWeight: 900, letterSpacing: '-0.04em' }}>Welcome to HR Pulse</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            Here is the real-time operational overview of your Google Drive HRM database.
-            <span style={{ fontSize: '0.8rem', padding: '2px 8px', background: 'var(--bg-tertiary)', borderRadius: '12px', fontWeight: 600 }}>
-              Last Synced: {syncLogs.length > 0 ? syncLogs[0].timestamp : 'Never'}
-            </span>
-          </p>
-        </div>
+      <div className="page-header">
+        <h1 className="page-title">
+          <LayoutDashboard size={28} className="page-title-icon" />
+          Dashboard
+        </h1>
         <button className="btn btn-primary" onClick={handleManualSync}>
           <RefreshCw size={16} />
           Sync Database

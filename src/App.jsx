@@ -18,6 +18,7 @@ import { readMeta, writeMeta, readTable, writeTable, flushPendingWrites, checkAn
 import { clearLocalCache } from './services/db.js'
 import { validateDatabase } from './services/validator.js'
 import { Menu, Bell, AlertTriangle, Search, Layout, User, History, Moon, Settings as SettingsIcon, HardDrive, FileText, Sparkles, Trash2 } from 'lucide-react'
+import { useModal } from './services/useModal.js'
 
 const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
 
@@ -88,6 +89,7 @@ export default function App() {
   const [dbStatus, setDbStatus] = useState('healthy') // 'healthy', 'rebuilding', 'corruption'
   const [dataIntegrityIssues, setDataIntegrityIssues] = useState([])
   const [showCorruptionModal, setShowCorruptionModal] = useState(false)
+  useModal(() => setShowCorruptionModal(false))
   const [syncConflicts, setSyncConflicts] = useState([])
   const [metaManifest, setMetaManifest] = useState(null)
   const [isAppLoading, setIsAppLoading] = useState(true)
@@ -1594,8 +1596,7 @@ export default function App() {
                     clearLocalCache().then(() => window.location.reload())
                   }
                 }} 
-                className="btn" 
-                style={{ background: 'var(--accent-danger)', color: '#fff', border: 'none' }}
+                className="btn btn-danger"
               >
                 Reset Database
               </button>
@@ -1604,8 +1605,8 @@ export default function App() {
         )}
 
         {showCorruptionModal && (
-          <div className="modal-overlay">
-            <div className="modal-container" style={{ maxWidth: '600px' }}>
+          <div className="modal-overlay" onClick={() => setShowCorruptionModal(false)}>
+            <div className="modal-container" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()}>
               <div className="modal-header">
                 <h2 style={{ color: 'var(--accent-danger)' }}>Data Integrity Report</h2>
                 <button className="modal-close" onClick={() => setShowCorruptionModal(false)}>✕</button>

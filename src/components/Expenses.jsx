@@ -150,11 +150,11 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={{ fontSize: '2rem', marginBottom: '4px', fontWeight: 700 }}>Expenses</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Manage reimbursements and financial claims.</p>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h1 className="page-title">
+          <Receipt size={28} className="page-title-icon" />
+          Expenses
+        </h1>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button className={`btn ${activeTab === 'submit' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setActiveTab('submit')}>
             <Plus size={16} /> Submit
@@ -267,7 +267,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
 
           <div className="glass-card" style={{ overflow: 'hidden' }}>
             <div style={{ overflowX: 'auto' }}>
-              <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <table className="data-table table-striped" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <th style={{ padding: '16px' }}><input type="checkbox" onChange={(e) => setSelectedExpenses(e.target.checked ? pendingQueue.map(q => q.id) : [])} checked={selectedExpenses.length === pendingQueue.length && pendingQueue.length > 0} /></th>
@@ -377,7 +377,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
 
           <div className="glass-card" style={{ overflow: 'hidden' }}>
             <div style={{ overflowX: 'auto' }}>
-              <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <table className="data-table table-striped" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Employee</th>

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, AlertTriangle, Upload } from 'lucide-react'
+import { useModal } from '../services/useModal.js'
+import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -52,6 +54,7 @@ export default function EmployeePortal({
   const [activeTab, setActiveTab] = useState('dashboard') // dashboard, attendance, payslips, leave, profile
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const [showPunchModal, setShowPunchModal] = useState(false)
+  useModal(() => setShowPunchModal(false))
   const [punchType, setPunchType] = useState('In')
 
   useEffect(() => {
@@ -203,7 +206,7 @@ export default function EmployeePortal({
           display: 'flex', justifyContent: 'space-around', alignItems: 'center',
           padding: '12px 8px', zIndex: 100,
           backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-          backgroundColor: 'rgba(30, 41, 59, 0.85)'
+          background: 'var(--bg-secondary)'
         }}>
           {navItems.map(item => {
             const active = activeTab === item.id
@@ -228,10 +231,10 @@ export default function EmployeePortal({
       )}
 
       {showPunchModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 11000, backdropFilter: 'blur(4px)' }}>
-          <div className="glass-card" style={{ padding: '24px', width: '90%', maxWidth: '400px', background: 'var(--bg-secondary)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 11000, backdropFilter: 'blur(4px)' }} onClick={() => setShowPunchModal(false)}>
+          <div className="glass-card" style={{ padding: '24px', width: '90%', maxWidth: '400px', background: 'var(--bg-secondary)', display: 'flex', flexDirection: 'column', gap: '16px' }} onClick={e => e.stopPropagation()}>
             <h3 style={{ margin: 0 }}>Attendance Punch</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Select punch type for today (<strong>{new Date().toLocaleDateString()}</strong>):</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Select punch type for today (<strong>{formatDate(new Date().toISOString().split('T')[0])}</strong>):</p>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button 
                 className={`btn ${punchType === 'In' ? 'btn-primary' : 'btn-secondary'}`} 
@@ -341,7 +344,7 @@ function DashboardView({ currentUser, attendance, expenses, announcements, setAc
                 <div key={ann.id} className="glass-card" style={{ padding: '16px', borderLeft: ann.priority === 'Urgent' ? '4px solid var(--accent-danger)' : 'none', cursor: 'pointer' }} onClick={() => setActiveTab('announcements')}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', fontWeight: 600 }}>{ann.category}</span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(ann.date).toLocaleDateString()}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{formatDate(ann.date)}</span>
                   </div>
                   <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', color: 'var(--text-primary)' }}>{ann.title}</h4>
                   <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ann.content}</p>
@@ -368,7 +371,7 @@ function AttendanceView({
   settings,
   addToast 
 }) {
-  const currentMonth = new Date().toLocaleString('default', { month: 'long', year: 'numeric' })
+  const currentMonth = formatMonthYear(new Date().toISOString().split('T')[0])
   const [activeSubTab, setActiveSubTab] = useState('roster') // 'roster', 'swap', 'overtime'
 
   // Generate current week dates
@@ -463,7 +466,7 @@ function AttendanceView({
                 background: template ? `${template.color}15` : 'var(--bg-secondary)',
                 display: 'flex', flexDirection: 'column', gap: '8px'
               }}>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{formatDateWithWeekday(date.toISOString().split('T')[0])}</div>
                 {template ? (
                   <>
                     <div style={{ fontWeight: 700, color: template.color }}>{template.name}</div>
@@ -551,7 +554,7 @@ function PayslipsView({ currentUser, payroll, addToast }) {
         </div>
       ) : (
         <div className="table-container">
-          <table className="w-full">
+          <table className="w-full table-striped">
             <thead>
               <tr>
                 <th>Date</th>
@@ -678,7 +681,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
       <div className="glass-card" style={{ padding: '24px' }}>
         <h3 style={{ marginTop: 0 }}>Application History</h3>
         <div className="table-container">
-          <table className="w-full" style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table className="w-full table-striped" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>
                 <th style={{ padding: '12px' }}>Type</th>
@@ -931,7 +934,7 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
         ) : (
           visiblePosts.map(post => {
             const author = post.authorId === 'system' ? { name: 'System Auto-Post', avatar: '' } : employees.find(e => e.id === post.authorId) || { name: 'Unknown User' }
-            const dateStr = new Date(post.date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+            const dateStr = formatDateTime(post.date)
             const isUrgent = post.priority === 'Urgent'
 
             return (

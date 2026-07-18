@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react'
-import { Save, DollarSign, Sliders, Info, Percent, Building2, Bell, Globe, Mail, Plus, Trash2, Upload, Activity, X, ShieldCheck, List, FileSpreadsheet, Download, Receipt, CalendarClock } from 'lucide-react'
+import { Save, Settings as SettingsIcon, DollarSign, Sliders, Info, Percent, Building2, Bell, Globe, Mail, Plus, Trash2, Upload, Activity, X, ShieldCheck, List, FileSpreadsheet, Download, Receipt, CalendarClock } from 'lucide-react'
+import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
+import { formatDateTime } from '../services/date.js'
 
 export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, simulatedRole, syncConflicts, setSyncConflicts }) {
   const [activeSubmenu, setActiveSubmenu] = useState('payroll')
@@ -34,6 +36,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const [logoZoom, setLogoZoom] = useState(settings.company?.logoZoom || 1)
   
   const [showLogoModal, setShowLogoModal] = useState(false)
+  useModal(() => setShowLogoModal(false))
   const [dragStart, setDragStart] = useState(null)
   const fileInputRef = useRef(null)
 
@@ -102,6 +105,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   }
 
   const [showResetModal, setShowResetModal] = useState(false)
+  useModal(() => setShowResetModal(false))
   const [sampleGross, setSampleGross] = useState(5000)
   const [hoveredComponentId, setHoveredComponentId] = useState(null)
   
@@ -685,7 +689,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           if (!filteredAudit.length) return
           const headers = ['Timestamp', 'User', 'Action', 'Entity', 'Details', 'IP Address']
           const rows = filteredAudit.map(log => [
-            new Date(log.timestamp).toLocaleString(),
+            formatDateTime(log.timestamp),
             log.user,
             log.action,
             log.entity,
@@ -749,7 +753,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             </div>
 
             <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-              <table className="table" style={{ minWidth: '800px' }}>
+              <table className="table-responsive table table-striped" style={{ minWidth: '800px' }}>
                 <thead style={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--bg-primary)' }}>
                   <tr>
                     <th>Timestamp</th>
@@ -768,7 +772,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                   ) : (
                     filteredAudit.map(log => (
                       <tr key={log.id}>
-                        <td style={{ fontSize: '0.8rem' }}>{new Date(log.timestamp).toLocaleString()}</td>
+                        <td style={{ fontSize: '0.8rem' }}>{formatDateTime(log.timestamp)}</td>
                         <td style={{ fontWeight: 600, fontSize: '0.85rem' }}>{log.user}</td>
                         <td>
                           <span style={{ 
@@ -801,7 +805,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             </div>
 
             <div className="table-responsive">
-              <table className="table" style={{ width: '100%' }}>
+              <table className="table table-striped" style={{ width: '100%' }}>
                 <thead>
                   <tr>
                     <th>File</th>
@@ -898,8 +902,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             {activeSessions.length > 1 && (
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
                 <button 
-                  className="btn" 
-                  style={{ background: 'var(--accent-danger)', color: '#fff', padding: '8px 16px', fontSize: '0.9rem', fontWeight: 600, border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                  className="btn btn-danger"
                   onClick={() => {
                     setActiveSessions(prev => prev.filter(s => s.current))
                     if (addToast) addToast("All other devices signed out", "success")
@@ -922,10 +925,10 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
       
       {/* Title Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <h1 style={{ fontSize: '2rem', marginBottom: '4px', fontWeight: 700 }}>System Settings</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Configure structural settings, company profiles, and system behaviors.</p>
-        </div>
+        <h1 className="page-title">
+          <SettingsIcon size={28} className="page-title-icon" />
+          System Settings
+        </h1>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button className="btn btn-secondary" onClick={() => setShowResetModal(true)}>Reset Defaults</button>
           <button className="btn btn-primary" onClick={handleSave} disabled={isSaving || isOver100}>
@@ -1155,8 +1158,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
       {/* Logo Settings Modal */}
       {showLogoModal && (
-        <div className="modal-overlay">
-          <div className="modal-container" style={{ maxWidth: '400px', zIndex: 1000 }}>
+        <div className="modal-overlay" onClick={() => setShowLogoModal(false)}>
+          <div className="modal-container" style={{ maxWidth: '400px', zIndex: 1000 }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Edit Brand Logo</h2>
               <button className="modal-close" onClick={() => setShowLogoModal(false)}>
@@ -1256,8 +1259,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
       {/* Reset Confirmation Modal */}
       {showResetModal && (
-        <div className="modal-overlay">
-          <div className="modal-container" style={{ maxWidth: '400px', zIndex: 1000 }}>
+        <div className="modal-overlay" onClick={() => setShowResetModal(false)}>
+          <div className="modal-container" style={{ maxWidth: '400px', zIndex: 1000 }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Confirm Reset</h2>
               <button className="modal-close" onClick={() => setShowResetModal(false)}>

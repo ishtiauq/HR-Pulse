@@ -1,9 +1,12 @@
 import { LayoutDashboard, Users, Database, Settings, Activity, LogOut, X, CreditCard, Calendar, Upload, Trash2, Moon, Sun, HelpCircle, BarChart3, Receipt, Megaphone, Monitor, CalendarDays, FileText } from 'lucide-react'
 import { useState, useRef } from 'react'
+import { useModal } from '../services/useModal.js'
 
 export default function Sidebar({ currentView, setCurrentView, driveConnected, user, onLogout, mobileOpen, setMobileOpen, settings, setSettings, isDarkMode, setIsDarkMode, simulatedRole, dbStatus }) {
   const [showLogoModal, setShowLogoModal] = useState(false)
   const [showCheatSheet, setShowCheatSheet] = useState(false)
+  useModal(() => setShowCheatSheet(false))
+  useModal(() => setShowLogoModal(false))
   const fileInputRef = useRef(null)
 
   const [dragStart, setDragStart] = useState(null)
@@ -390,8 +393,8 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
 
       {/* Keyboard Shortcuts Cheat Sheet Modal */}
       {showCheatSheet && (
-        <div className="modal-overlay">
-          <div className="modal-container" style={{ maxWidth: '400px' }}>
+        <div className="modal-overlay" onClick={() => setShowCheatSheet(false)}>
+          <div className="modal-container" style={{ maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Keyboard Shortcuts</h2>
               <button className="modal-close" onClick={() => setShowCheatSheet(false)}>
@@ -440,8 +443,8 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
 
       {/* Logo Settings Modal */}
       {showLogoModal && (
-        <div className="modal-overlay">
-          <div className="modal-container" style={{ maxWidth: '400px' }}>
+        <div className="modal-overlay" onClick={() => setShowLogoModal(false)}>
+          <div className="modal-container" style={{ maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Edit Brand Logo</h2>
               <button className="modal-close" onClick={() => setShowLogoModal(false)}>

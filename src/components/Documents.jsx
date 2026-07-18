@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react'
+import { useModal } from '../services/useModal.js'
 import { FileText, Search, Upload, Download, Trash2, Folder, X, FileSpreadsheet, FileImage, FileArchive, File } from 'lucide-react'
+import { formatDate } from '../services/date.js'
 
 const CATEGORIES = [
   { id: 'hr-docs', label: 'HR Documents', icon: Folder, color: '#3b82f6' },
@@ -38,6 +40,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
   const [formCategory, setFormCategory] = useState('hr-docs')
   const [formDescription, setFormDescription] = useState('')
   const [formFile, setFormFile] = useState(null)
+  useModal(() => { setShowUploadModal(false); resetForm() })
 
   const resetForm = () => {
     setFormName('')
@@ -108,11 +111,6 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
 
   const getCategoryInfo = (catId) => CATEGORIES.find(c => c.id === catId) || CATEGORIES[5]
 
-  const formatDate = (dateStr) => {
-    const d = new Date(dateStr)
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  }
-
   const filteredDocs = documents.filter(d => {
     const matchSearch = !search || d.name.toLowerCase().includes(search.toLowerCase()) || (d.description || '').toLowerCase().includes(search.toLowerCase())
     const matchCategory = selectedCategory === 'all' || d.category === selectedCategory
@@ -121,12 +119,12 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
 
   return (
     <div className="fade-in" style={{ paddingBottom: '40px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <FileText size={28} color="var(--accent-primary)" />
+      <div className="page-header">
+        <h1 className="page-title">
+          <FileText size={28} className="page-title-icon" />
           Documents
         </h1>
-        <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 20px', borderRadius: '8px', border: 'none', background: 'var(--accent-primary)', color: '#fff', fontWeight: 600, cursor: 'pointer' }}
+        <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           onClick={openUploadModal}>
           <Upload size={16} /> Upload
         </button>
@@ -282,12 +280,10 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                   style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.95rem', resize: 'vertical' }} />
               </div>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
-                <button type="button" className="btn-outline" onClick={() => { setShowUploadModal(false); resetForm() }}
-                  style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowUploadModal(false); resetForm() }}>
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary"
-                  style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: 'var(--accent-primary)', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>
+                <button type="submit" className="btn btn-primary">
                   {editingDoc ? 'Update' : 'Upload'}
                 </button>
               </div>

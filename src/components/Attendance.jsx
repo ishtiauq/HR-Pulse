@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Calendar, Check, X, ClipboardList, Clock, CheckCircle2, AlertCircle, Plus, CalendarDays, BarChart3, ChevronLeft, ChevronRight, Cpu, Download, FileSpreadsheet, FileText, User, CheckSquare, Trash2, History, MessageSquare, Repeat } from 'lucide-react'
 import AdSlot from './AdSlot.jsx'
+import { formatDateShort } from '../services/date.js'
 
 export default function Attendance({ 
   employees, 
@@ -28,11 +29,11 @@ export default function Attendance({
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <h1 style={{ fontSize: '2.7rem', marginBottom: '4px', fontWeight: 900, letterSpacing: '-0.04em' }}>Roster & Attendance</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Schedule shifts, manage swaps, and track overtime.</p>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h1 className="page-title">
+          <Calendar size={28} className="page-title-icon" />
+          Roster & Attendance
+        </h1>
       </div>
 
       {/* Tabs */}
@@ -240,7 +241,7 @@ function RosterPlanner({ employees, roster, setRoster, shiftTemplates, addToast 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-secondary)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
             <button className="btn btn-secondary" style={{ padding: '6px' }} onClick={() => setWeekOffset(o => o - 1)}><ChevronLeft size={16} /></button>
             <span style={{ fontSize: '0.85rem', fontWeight: 600, padding: '0 8px' }}>
-              {weekDates[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDates[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              {formatDateShort(weekDates[0].toISOString().split('T')[0])} - {formatDateShort(weekDates[6].toISOString().split('T')[0])}
             </span>
             <button className="btn btn-secondary" style={{ padding: '6px' }} onClick={() => setWeekOffset(o => o + 1)}><ChevronRight size={16} /></button>
           </div>
@@ -248,14 +249,14 @@ function RosterPlanner({ employees, roster, setRoster, shiftTemplates, addToast 
       </div>
 
       <div className="table-container" style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-        <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse' }}>
+        <table className="table-responsive table-striped" style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: 'var(--bg-tertiary)' }}>
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid var(--border-color)', width: '200px' }}>Employee</th>
               {weekDates.map(date => (
                 <th key={date.toISOString()} style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
                   {date.toLocaleDateString('en-US', { weekday: 'short' })}<br/>
-                  <span style={{ color: 'var(--text-muted)' }}>{date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                  <span style={{ color: 'var(--text-muted)' }}>{formatDateShort(date.toISOString().split('T')[0])}</span>
                 </th>
               ))}
             </tr>
@@ -459,7 +460,7 @@ function LeaveRequests({ employees, attendance, setAttendance, addToast }) {
         <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '40px' }}>No pending leave requests.</div>
       ) : (
         <div className="table-container">
-          <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse' }}>
+          <table className="table-responsive table-striped" style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)' }}>
                 <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }}>Employee</th>
@@ -584,7 +585,7 @@ function DailyAttendance({ employees, attendance, setAttendance, addToast }) {
       </div>
 
       <div className="table-container" style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-        <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse' }}>
+        <table className="table-responsive table-striped" style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: 'var(--bg-tertiary)' }}>
               <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>Employee</th>

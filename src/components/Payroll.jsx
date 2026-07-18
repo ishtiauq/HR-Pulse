@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { CreditCard, Download, Search, X, PlusCircle, Calendar, Pencil, CheckSquare, Trash2 } from 'lucide-react'
 import AdSlot from './AdSlot.jsx'
+import { formatDate } from '../services/date.js'
 
 export default function Payroll({ employees, payroll, setPayroll, addLog, driveConnected, settings, simulatedRole, addAuditLog }) {
   const [selectedMonth, setSelectedMonth] = useState('2026-07')
@@ -190,7 +191,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
   const handleExecutePayment = (entry) => {
     setProcessingId(entry.employeeId)
     setTimeout(() => {
-      const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+      const today = formatDate(new Date().toISOString().split('T')[0])
       
       const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
       const nextRemaining = Math.max(0, entry.loan.remaining - loanDeduction)
@@ -246,7 +247,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
 
     setProcessingId('bulk-all')
     setTimeout(() => {
-      const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+      const today = formatDate(new Date().toISOString().split('T')[0])
       setPayroll(prev => {
         const monthData = prev[selectedMonth] || []
         const updatedMonthData = monthData.map(entry => {
@@ -281,7 +282,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
 
     setProcessingId('bulk-selected')
     setTimeout(() => {
-      const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+      const today = formatDate(new Date().toISOString().split('T')[0])
       setPayroll(prev => {
         const monthData = prev[selectedMonth] || []
         const updatedMonthData = monthData.map(entry => {
@@ -442,11 +443,11 @@ Thank you for your service!
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       
       {/* Header and Month Selector */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <h1 style={{ fontSize: '2.7rem', marginBottom: '4px', fontWeight: 900, letterSpacing: '-0.04em' }}>Payroll Administration</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Track salaries, execute payouts, and automatically sync payment history with Google Drive.</p>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h1 className="page-title">
+          <CreditCard size={28} className="page-title-icon" />
+          Payroll Administration
+        </h1>
 
         {/* Month Selector dropdown */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -652,7 +653,7 @@ Thank you for your service!
             onScroll={handleScroll}
           >
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1050px' }}>
+              <table className="table-responsive table-striped" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1050px' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
                     <th style={{ padding: '16px', width: '50px', background: 'var(--bg-secondary)', zIndex: 11 }}>

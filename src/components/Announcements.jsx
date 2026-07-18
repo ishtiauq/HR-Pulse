@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Megaphone, Plus, Image as ImageIcon, FileText, Send, Calendar, Clock, Edit, Trash2, Users, AlertTriangle, MessageSquare, Heart, ThumbsUp, PartyPopper } from 'lucide-react'
+import { formatDateTime } from '../services/date.js'
 
 export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser }) {
   const [activeTab, setActiveTab] = useState('feed') // 'feed', 'create'
@@ -76,9 +77,9 @@ export default function Announcements({ employees, announcements, setAnnouncemen
 
   return (
     <div className="fade-in" style={{ paddingBottom: '40px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <Megaphone size={28} color="var(--accent-primary)" />
+      <div className="page-header">
+        <h1 className="page-title">
+          <Megaphone size={28} className="page-title-icon" />
           Announcements
         </h1>
         <div style={{ display: 'flex', gap: '12px' }}>
@@ -93,7 +94,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
         <div className="glass-card" style={{ padding: '32px', maxWidth: '800px', margin: '0 auto' }}>
           <h2 style={{ marginTop: 0, marginBottom: '24px', fontSize: '1.4rem' }}>Create Announcement</h2>
           
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Title</label>
               <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '1.1rem' }} placeholder="e.g. Q3 Town Hall Meeting" />
@@ -169,7 +170,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
           ) : (
             announcements.map(post => {
               const author = post.authorId === 'system' ? { name: 'System Auto-Post', avatar: '' } : employees.find(e => e.id === post.authorId) || { name: 'Unknown User' }
-              const dateStr = new Date(post.date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+              const dateStr = formatDateTime(post.date)
               const isUrgent = post.priority === 'Urgent'
 
               return (

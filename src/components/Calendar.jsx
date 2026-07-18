@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useModal } from '../services/useModal.js'
 import { Calendar as CalendarIcon, Plus, Edit, Trash2, ChevronLeft, ChevronRight, FileText, Users, Gift, AlertTriangle, Clock, X } from 'lucide-react'
+import { formatDate } from '../services/date.js'
 
 const EVENT_TYPES = [
   { id: 'meeting', label: 'Meeting', icon: Users, color: '#3b82f6' },
@@ -26,6 +28,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
   const [formTime, setFormTime] = useState('')
   const [formType, setFormType] = useState('meeting')
   const [formDescription, setFormDescription] = useState('')
+  useModal(() => { setShowEventModal(false); resetForm() })
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay()
@@ -112,11 +115,6 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
 
   const getTypeInfo = (typeId) => EVENT_TYPES.find(t => t.id === typeId) || EVENT_TYPES[4]
 
-  const formatDate = (dateStr) => {
-    const d = new Date(dateStr + 'T00:00:00')
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  }
-
   const upcomingEvents = [...events]
     .filter(ev => ev.date >= `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`)
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -143,7 +141,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
             <ChevronRight size={18} />
           </button>
         </div>
-        <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', border: 'none', background: 'var(--accent-primary)', color: '#fff', fontWeight: 600, cursor: 'pointer' }}
+        <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           onClick={() => openCreateModal(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`)}>
           <Plus size={16} /> Add Event
         </button>
@@ -269,9 +267,9 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
 
   return (
     <div className="fade-in" style={{ paddingBottom: '40px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <CalendarIcon size={28} color="var(--accent-primary)" />
+      <div className="page-header">
+        <h1 className="page-title">
+          <CalendarIcon size={28} className="page-title-icon" />
           Calendar
         </h1>
       </div>
@@ -346,12 +344,10 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                   style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.95rem', resize: 'vertical' }} />
               </div>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
-                <button type="button" className="btn-outline" onClick={() => { setShowEventModal(false); resetForm() }}
-                  style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => { setShowEventModal(false); resetForm() }}>
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary"
-                  style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: 'var(--accent-primary)', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>
+                <button type="submit" className="btn btn-primary">
                   {editingEvent ? 'Update' : 'Create'}
                 </button>
               </div>

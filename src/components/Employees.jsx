@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react'
 import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Cpu } from 'lucide-react'
+import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
+import { formatDate } from '../services/date.js'
 
 export default function Employees({ employees, setEmployees, addLog, driveConnected, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast, selectedEmployeeId, setSelectedEmployeeId }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [deptFilter, setDeptFilter] = useState('All')
   const [showAddForm, setShowAddForm] = useState(false)
+  useModal(() => setViewingEmployee(null))
+  useModal(() => handleCloseForm())
   const [editingEmployee, setEditingEmployee] = useState(null)
   const [viewingEmployee, setViewingEmployee] = useState(null)
   const [imageErrors, setImageErrors] = useState({})
@@ -245,11 +249,11 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <h1 style={{ fontSize: '2.7rem', marginBottom: '4px', fontWeight: 900, letterSpacing: '-0.04em' }}>Employee Directory</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Manage records, contact logs, and sync status for personnel.</p>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h1 className="page-title">
+          <Users size={28} className="page-title-icon" />
+          Employees
+        </h1>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <button className="btn btn-secondary" onClick={() => document.getElementById('csv-file-input').click()}>
             <FileSpreadsheet size={16} />
@@ -548,10 +552,10 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                 <strong>Email:</strong> {emp.email}
               </span>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                <strong>DOB:</strong> {emp.dob ? new Date(emp.dob).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Not set'}
+                <strong>DOB:</strong> {emp.dob ? formatDate(emp.dob) : 'Not set'}
               </span>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                <strong>Joined:</strong> {emp.joiningDate ? new Date(emp.joiningDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Not set'}
+                <strong>Joined:</strong> {emp.joiningDate ? formatDate(emp.joiningDate) : 'Not set'}
               </span>
               
               {/* Document Badges */}
@@ -739,7 +743,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               <div><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Status</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.status}</span></div>
               <div><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Department</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.department}</span></div>
               <div style={{ wordBreak: 'break-all', gridColumn: '1 / -1' }}><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Email</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.email}</span></div>
-              <div><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Joined</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.joiningDate ? new Date(viewingEmployee.joiningDate).toLocaleDateString() : 'N/A'}</span></div>
+              <div><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Joined</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.joiningDate ? formatDate(viewingEmployee.joiningDate) : 'N/A'}</span></div>
             </div>
           </div>
         </div>
@@ -759,8 +763,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
           justifyContent: 'center',
           alignItems: 'center',
           zIndex: 1000
-        }}>
-          <div className="glass-card animate-fade-in" style={{
+        }} onClick={() => handleCloseForm()}>
+          <div className="glass-card animate-fade-in" onClick={e => e.stopPropagation()} style={{
             width: '100%',
             maxWidth: '500px',
             padding: '32px',

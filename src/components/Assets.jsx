@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature } from 'lucide-react'
+import { useModal } from '../services/useModal.js'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { formatDate } from '../services/date.js'
 
 export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, addLog, addToast, currentUser }) {
   const [activeTab, setActiveTab] = useState('inventory') // 'inventory', 'assignments', 'requests', 'maintenance'
@@ -29,6 +31,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
 
   // --- Add Asset State ---
   const [showAddModal, setShowAddModal] = useState(false)
+  useModal(() => setShowAddModal(false))
   const [newAsset, setNewAsset] = useState({ name: '', category: 'Laptop', serialNumber: '', purchaseDate: '', purchasePrice: '', warrantyExpiry: '', usefulLife: 36, condition: 'New' })
 
   const handleAddAsset = (e) => {
@@ -103,6 +106,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
 
   // --- Assignment Logic ---
   const [showAssignModal, setShowAssignModal] = useState(false)
+  useModal(() => setShowAssignModal(false))
   const [assignTarget, setAssignTarget] = useState(null) // asset object
   const [assignForm, setAssignForm] = useState({ employeeId: '', notes: 'Good condition' })
 
@@ -137,7 +141,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       doc.text('Asset Assignment Agreement', 20, 20)
       
       doc.setFontSize(12)
-      doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 30)
+      doc.text(`Date: ${formatDate(new Date().toISOString().split('T')[0])}`, 20, 30)
       doc.text(`Employee Name: ${employee.name} (${employee.department})`, 20, 40)
       doc.text('This document confirms the assignment of the following company property:', 20, 55)
       
@@ -229,9 +233,9 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
 
   return (
     <div className="fade-in" style={{ paddingBottom: '40px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <Monitor size={28} color="var(--accent-primary)" />
+      <div className="page-header">
+        <h1 className="page-title">
+          <Monitor size={28} className="page-title-icon" />
           Asset Management
         </h1>
         <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
@@ -288,7 +292,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
           </div>
 
           <div className="table-container">
-            <table className="w-full">
+            <table className="table-responsive w-full table-striped">
               <thead>
                 <tr>
                   <th>ID / Serial</th>
@@ -344,7 +348,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       {activeTab === 'assignments' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div className="table-container">
-            <table className="w-full">
+            <table className="w-full table-striped">
               <thead>
                 <tr>
                   <th>Asset</th>
@@ -524,8 +528,8 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
 
       {/* --- ADD ASSET MODAL --- */}
       {showAddModal && (
-        <div className="modal-overlay">
-          <div className="modal-content glass-card fade-in" style={{ maxWidth: '600px', width: '100%' }}>
+        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="modal-content glass-card fade-in" style={{ maxWidth: '600px', width: '100%' }} onClick={e => e.stopPropagation()}>
             <h2 style={{ marginTop: 0 }}>Add New Asset</h2>
             <form onSubmit={handleAddAsset} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -575,8 +579,8 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
 
       {/* --- ASSIGN ASSET MODAL --- */}
       {showAssignModal && (
-        <div className="modal-overlay">
-          <div className="modal-content glass-card fade-in" style={{ maxWidth: '500px', width: '100%' }}>
+        <div className="modal-overlay" onClick={() => setShowAssignModal(false)}>
+          <div className="modal-content glass-card fade-in" style={{ maxWidth: '500px', width: '100%' }} onClick={e => e.stopPropagation()}>
             <h2 style={{ marginTop: 0 }}>Assign Asset: {assignTarget?.name}</h2>
             <form onSubmit={handleAssignAsset} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div className="form-group">

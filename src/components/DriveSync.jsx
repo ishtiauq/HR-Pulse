@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
-import { HardDrive, CloudOff, CloudLightning, ArrowLeftRight, Download, UploadCloud, Info, FileJson, Check, AlertCircle, RefreshCw, Eye, X, Trash2, Shield, RotateCcw } from 'lucide-react'
+import { Database, HardDrive, CloudOff, CloudLightning, ArrowLeftRight, Download, UploadCloud, Info, FileJson, Check, AlertCircle, RefreshCw, Eye, X, Trash2, Shield, RotateCcw } from 'lucide-react'
+import { useModal } from '../services/useModal.js'
 import { getLocalCacheSizeMB, clearLocalCache } from '../services/db.js'
 import { createBackup, listBackups, restoreBackup } from '../services/googleDrive.js'
+import { formatDateTime } from '../services/date.js'
 
 const mockFiles = [
   { id: '1', name: 'employees.json', size: '42.5 KB', modified: '2026-07-18T04:30:00Z' },
@@ -10,7 +12,7 @@ const mockFiles = [
   { id: '4', name: 'settings.json', size: '2.1 KB', modified: '2026-07-17T10:00:00Z' }
 ]
 
-export default function DriveSync({ user, driveConnected, setDriveConnected, syncLogs, addLog, employees }) {
+export default function DriveSync({ user, driveConnected, setDriveConnected, syncLogs, addLog, addToast, employees }) {
   const [isBackupSimulating, setIsBackupSimulating] = useState(false)
   const [exportModalOpen, setExportModalOpen] = useState(false)
   const [importModalOpen, setImportModalOpen] = useState(false)
@@ -19,10 +21,11 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, syn
   const [importProgress, setImportProgress] = useState(0)
   const [dragActive, setDragActive] = useState(false)
   const [importError, setImportError] = useState('')
-  const [toastMessage, setToastMessage] = useState('')
   const [timeSinceSync, setTimeSinceSync] = useState(2)
   const [timeUntilSync, setTimeUntilSync] = useState(13)
   const [previewFile, setPreviewFile] = useState(null)
+  useModal(() => setSelectedRestoreBackup(null))
+  useModal(() => setPreviewFile(null))
   const [cacheSize, setCacheSize] = useState('0.00')
   const [isClearing, setIsClearing] = useState(false)
   const [backupsList, setBackupsList] = useState([])
@@ -68,40 +71,38 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, syn
   }
 
   const handleTestConnection = () => {
-    setToastMessage('Pinging Google Drive API...')
+    addToast('Pinging Google Drive API...', 'info')
     setTimeout(() => {
-      setToastMessage('✅ Success: Read/Write access verified in /HR-Pulse-DB/')
-      setTimeout(() => setToastMessage(''), 4000)
+      addToast('Success: Read/Write access verified in /HR-Pulse-DB/', 'success')
     }, 1000)
   }
 
   const handleCreateBackup = async () => {
     setIsBackingUp(true)
-    setToastMessage('Creating backup package...')
+    addToast('Creating backup package...', 'info')
     try {
       await createBackup(user.token, false)
       const bks = await listBackups(user.token)
       setBackupsList(bks)
-      setToastMessage('✅ Manual backup created successfully.')
+      addToast('Manual backup created successfully.', 'success')
       addLog('Backup Created', 'Manual snapshot saved to Drive', 'success')
     } catch(e) {
-      setToastMessage('❌ Failed to create backup')
+      addToast('Failed to create backup', 'error')
     }
     setIsBackingUp(false)
-    setTimeout(() => setToastMessage(''), 4000)
   }
 
   const handleExecuteRestore = async () => {
     if (!selectedRestoreBackup) return
     setIsRestoring(true)
-    setToastMessage('Restoring database from backup...')
+    addToast('Restoring database from backup...', 'info')
     try {
       await restoreBackup(user.token, selectedRestoreBackup.id)
-      setToastMessage('✅ Restore successful. Reloading...')
+      addToast('Restore successful. Reloading...', 'success')
       addLog('Backup Restored', `Restored from ${selectedRestoreBackup.name}`, 'warning')
       setTimeout(() => window.location.reload(), 1500)
     } catch (e) {
-      setToastMessage('❌ Restore failed.')
+      addToast('Restore failed.', 'error')
       setIsRestoring(false)
     }
   }
@@ -109,32 +110,12 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, syn
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px', position: 'relative' }}>
       
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div style={{
-          position: 'fixed',
-          top: '24px',
-          right: '24px',
-          background: 'var(--bg-secondary)',
-          border: '1px solid var(--border-color)',
-          boxShadow: '0 12px 32px rgba(0,0,0,0.1)',
-          padding: '16px 24px',
-          borderRadius: '12px',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          fontWeight: 600,
-          animation: 'modalFadeIn 0.3s ease-out'
-        }}>
-          {toastMessage}
-        </div>
-      )}
-
       {/* Header */}
-      <div>
-        <h1 style={{ fontSize: '2rem', marginBottom: '4px', fontWeight: 700 }}>Google Drive Sync Management</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Configure connection channels, download database states, or force folder sync audits.</p>
+      <div className="page-header">
+        <h1 className="page-title">
+          <Database size={28} className="page-title-icon" />
+          Google Drive Sync Management
+        </h1>
       </div>
 
       {/* Connection Controller Card */}
@@ -358,7 +339,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, syn
         </div>
         
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <table className="table-striped" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
                 <th style={{ padding: '12px' }}>Backup Name</th>
@@ -381,7 +362,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, syn
                     {f.size ? (parseInt(f.size) / 1024).toFixed(1) + ' KB' : 'Unknown'}
                   </td>
                   <td style={{ padding: '12px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {new Date(f.modifiedTime).toLocaleString()}
+                    {formatDateTime(f.modifiedTime)}
                   </td>
                   <td style={{ padding: '12px', textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                     <button 
@@ -410,8 +391,8 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, syn
 
       {/* Restore Confirmation Modal */}
       {selectedRestoreBackup && (
-        <div className="modal-overlay">
-          <div className="modal-container" style={{ maxWidth: '400px' }}>
+        <div className="modal-overlay" onClick={() => setSelectedRestoreBackup(null)}>
+          <div className="modal-container" style={{ maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2 style={{ color: 'var(--accent-warning)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <AlertCircle size={24} /> Confirm Restore
@@ -435,8 +416,8 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, syn
                   Cancel
                 </button>
                 <button 
-                  className="btn" 
-                  style={{ flex: 1, background: 'var(--accent-danger)', color: '#fff' }}
+                  className="btn btn-danger" 
+                  style={{ flex: 1 }}
                   onClick={handleExecuteRestore}
                   disabled={isRestoring}
                 >

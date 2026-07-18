@@ -154,11 +154,11 @@ export default function Reports({ employees, payroll, attendance, addLog, addToa
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <h1 style={{ fontSize: '2.7rem', marginBottom: '4px', fontWeight: 900, letterSpacing: '-0.04em' }}>Reports & Analytics</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Comprehensive insights into payroll, attendance, and leaves.</p>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h1 className="page-title">
+          <BarChart3 size={28} className="page-title-icon" />
+          Reports & Analytics
+        </h1>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button className="btn btn-outline" onClick={handleScheduleReport}>
             <Mail size={16} /> Schedule Report
@@ -284,7 +284,7 @@ export default function Reports({ employees, payroll, attendance, addLog, addToa
                 <button className="btn-outline" onClick={handleExportCSV} style={{ padding: '4px 10px', fontSize: '0.75rem' }}><Download size={14}/> CSV</button>
               </div>
               <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <table className="table-striped" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
                       <th style={{ padding: '12px' }}>Employee</th>
@@ -354,7 +354,7 @@ export default function Reports({ employees, payroll, attendance, addLog, addToa
                   </h3>
                   <button className="btn-outline" onClick={handleExportCSV} style={{ padding: '4px 10px', fontSize: '0.75rem' }}><Download size={14}/> CSV</button>
                 </div>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <table className="table-striped" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
                       <th style={{ padding: '12px' }}>Employee</th>
@@ -386,7 +386,7 @@ export default function Reports({ employees, payroll, attendance, addLog, addToa
                   </h3>
                   <button className="btn-outline" onClick={handleExportCSV} style={{ padding: '4px 10px', fontSize: '0.75rem' }}><Download size={14}/> CSV</button>
                 </div>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <table className="table-striped" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
                       <th style={{ padding: '12px' }}>Employee</th>
@@ -424,7 +424,7 @@ export default function Reports({ employees, payroll, attendance, addLog, addToa
                   <button className="btn-outline" onClick={handleExportCSV} style={{ padding: '4px 10px', fontSize: '0.75rem' }}><Download size={14}/> CSV</button>
                 </div>
                 <div style={{ overflowX: 'auto', maxHeight: '400px' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <table className="table-striped" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
                         <th style={{ padding: '12px' }}>Employee</th>

@@ -1244,3 +1244,80 @@ html.dark .toast-progress { background: rgba(255,255,255,0.2); }
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px var(--accent-primary-glow);
 }
+
+/* Unified Page Header */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-title-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--accent-primary);
+}
+
+/* Zebra striping for tables */
+.table-striped tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.table-striped tbody tr:hover {
+  background: var(--accent-primary-glow);
+}
+
+/* Fade-in animation for modals */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive card-style table for mobile */
+@media (max-width: 768px) {
+  .table-responsive {
+    border: 0;
+  }
+  .table-responsive thead {
+    display: none;
+  }
+  .table-responsive tbody tr {
+    display: block;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+  }
+  .table-responsive tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border: none;
+    gap: 8px;
+  }
+  .table-responsive tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+  }
+}
