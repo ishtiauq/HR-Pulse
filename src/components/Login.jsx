@@ -31,7 +31,7 @@ export default function Login({ onLogin }) {
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
       const client = window.google.accounts.oauth2.initTokenClient({
         client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/drive.appdata email profile openid',
+        scope: 'https://www.googleapis.com/auth/drive.file email profile openid',
         callback: async (tokenResponse) => {
           if (tokenResponse && tokenResponse.access_token) {
             try {

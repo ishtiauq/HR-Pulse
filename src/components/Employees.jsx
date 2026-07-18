@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle } from 'lucide-react'
 import AdSlot from './AdSlot.jsx'
 
-export default function Employees({ employees, setEmployees, addLog, driveConnected, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast }) {
+export default function Employees({ employees, setEmployees, addLog, driveConnected, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast, selectedEmployeeId, setSelectedEmployeeId }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [deptFilter, setDeptFilter] = useState('All')
@@ -23,6 +23,16 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
     if (viewingEmployee) window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [viewingEmployee])
+
+  useEffect(() => {
+    if (selectedEmployeeId) {
+      const emp = employees.find(e => e.id === selectedEmployeeId)
+      if (emp) {
+        setViewingEmployee(emp)
+      }
+      setSelectedEmployeeId(null)
+    }
+  }, [selectedEmployeeId, employees, setSelectedEmployeeId])
 
   const getAvatarFallback = (name) => {
     const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()

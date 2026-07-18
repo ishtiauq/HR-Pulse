@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { Save, DollarSign, Sliders, Info, Percent, Building2, Bell, Globe, Mail, Plus, Trash2, Upload, Activity, X, ShieldCheck, List, FileSpreadsheet, Download, Receipt, CalendarClock } from 'lucide-react'
 import AdSlot from './AdSlot.jsx'
 
-export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, simulatedRole }) {
+export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, simulatedRole, syncConflicts, setSyncConflicts }) {
   const [activeSubmenu, setActiveSubmenu] = useState('payroll')
 
   // Audit Logs filtering
@@ -789,6 +789,67 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           </div>
         )
       
+      case 'sync':
+        return (
+          <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div>
+              <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 4px 0' }}>
+                <Activity size={18} style={{ color: 'var(--accent-warning)' }} />
+                Sync Conflicts
+              </h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>Review and resolve data conflicts between local and remote databases.</p>
+            </div>
+
+            <div className="table-responsive">
+              <table className="table" style={{ width: '100%' }}>
+                <thead>
+                  <tr>
+                    <th>File</th>
+                    <th>Record ID</th>
+                    <th>Local Value</th>
+                    <th>Remote Value</th>
+                    <th>Resolution</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {!syncConflicts || syncConflicts.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>No sync conflicts detected.</td>
+                    </tr>
+                  ) : (
+                    syncConflicts.map((conflict, i) => (
+                      <tr key={i}>
+                        <td style={{ fontWeight: 600, fontSize: '0.85rem' }}>{conflict.file}</td>
+                        <td style={{ fontSize: '0.85rem' }}>{conflict.recordId}</td>
+                        <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={JSON.stringify(conflict.localValue)}>
+                          {JSON.stringify(conflict.localValue)}
+                        </td>
+                        <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={JSON.stringify(conflict.remoteValue)}>
+                          {JSON.stringify(conflict.remoteValue)}
+                        </td>
+                        <td style={{ fontSize: '0.8rem', color: 'var(--accent-warning)' }}>{conflict.resolution}</td>
+                        <td>
+                          <button 
+                            className="btn-outline" 
+                            style={{ padding: '4px 8px', fontSize: '0.75rem', borderRadius: '4px' }}
+                            onClick={() => {
+                              setSyncConflicts(prev => prev.filter((_, idx) => idx !== i))
+                              if (addToast) addToast("Conflict acknowledged", "success")
+                            }}
+                          >
+                            Acknowledge
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      
       case 'security':
         return (
           <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -1050,6 +1111,36 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           >
             <ShieldCheck size={16} style={{ color: activeSubmenu === 'security' ? 'var(--accent-primary)' : 'inherit' }} />
             Security
+          </button>
+
+          {/* Sync Conflicts Submenu */}
+          <button
+            onClick={() => setActiveSubmenu('sync')}
+            onMouseEnter={(e) => { if (activeSubmenu !== 'sync') e.currentTarget.style.color = '#2563eb' }}
+            onMouseLeave={(e) => { if (activeSubmenu !== 'sync') e.currentTarget.style.color = 'var(--text-secondary)' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '12px 14px',
+              borderRadius: '8px',
+              border: 'none',
+              fontSize: '0.9rem',
+              textAlign: 'left',
+              cursor: 'pointer',
+              background: activeSubmenu === 'sync' ? 'var(--bg-tertiary)' : 'transparent',
+              color: activeSubmenu === 'sync' ? '#ffffff' : 'var(--text-secondary)',
+              fontWeight: 700,
+              transition: 'all var(--transition-fast)'
+            }}
+          >
+            <Activity size={16} style={{ color: activeSubmenu === 'sync' ? 'var(--accent-warning)' : 'inherit' }} />
+            Sync Conflicts
+            {syncConflicts && syncConflicts.length > 0 && (
+              <span style={{ marginLeft: 'auto', background: 'var(--accent-danger)', color: '#fff', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '12px' }}>
+                {syncConflicts.length}
+              </span>
+            )}
           </button>
         </div>
 

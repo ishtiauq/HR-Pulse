@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      window.onerror = function(msg, url, line, col, error) {
+        fetch('http://localhost:9999/log', { method: 'POST', body: JSON.stringify({type: 'error', msg, url, line, col, stack: error ? error.stack : ''}) });
+      };
+      const oldConsoleError = console.error;
+      console.error = function(...args) {
+        fetch('http://localhost:9999/log', { method: 'POST', body: JSON.stringify({type: 'console.error', args}) });
+        oldConsoleError.apply(console, args);
+      };
+    </script>
     <title>HR Pulse - Free Google Drive HRM</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>

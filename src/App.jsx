@@ -12,8 +12,10 @@ import Expenses from './components/Expenses.jsx'
 import Announcements from './components/Announcements.jsx'
 import Assets from './components/Assets.jsx'
 import EmployeePortal from './components/EmployeePortal.jsx'
-import { loadOrInitializeDatabase, updateAppDataFile } from './services/googleDrive.js'
-import { Menu, Bell } from 'lucide-react'
+import { readMeta, writeMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBackup, createBackup } from './services/googleDrive.js'
+import { clearLocalCache } from './services/db.js'
+import { validateDatabase } from './services/validator.js'
+import { Menu, Bell, AlertTriangle, Search, Layout, User, History, Moon, Settings as SettingsIcon, HardDrive, FileText, Sparkles, Trash2 } from 'lucide-react'
 
 const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
 
@@ -64,6 +66,11 @@ export default function App() {
   const [settingsFileId, setSettingsFileId] = useState(null)
   const [attendanceFileId, setAttendanceFileId] = useState(null)
   const [isSyncing, setIsSyncing] = useState(false)
+  const [dbStatus, setDbStatus] = useState('healthy') // 'healthy', 'rebuilding', 'corruption'
+  const [dataIntegrityIssues, setDataIntegrityIssues] = useState([])
+  const [showCorruptionModal, setShowCorruptionModal] = useState(false)
+  const [syncConflicts, setSyncConflicts] = useState([])
+  const [metaManifest, setMetaManifest] = useState(null)
   const [isAppLoading, setIsAppLoading] = useState(true)
 
   // RBAC & Security States
@@ -155,31 +162,63 @@ export default function App() {
   // Global Keyboard Shortcuts & Command Palette
   const [showCommandPalette, setShowCommandPalette] = useState(false)
   const [commandSearch, setCommandSearch] = useState('')
+  const [paletteIndex, setPaletteIndex] = useState(0)
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState(null)
+  const [recentActions, setRecentActions] = useState(() => {
+    const saved = localStorage.getItem('hr_pulse_recent_actions')
+    return saved ? JSON.parse(saved) : [
+      { id: 'page-employees', type: 'page', label: 'Go to Employees', view: 'employees' },
+      { id: 'page-attendance', type: 'page', label: 'Go to Attendance & Leaves', view: 'attendance' }
+    ]
+  })
+
+  useEffect(() => {
+    localStorage.setItem('hr_pulse_recent_actions', JSON.stringify(recentActions))
+  }, [recentActions])
+
+  const trackRecentAction = (action) => {
+    setRecentActions(prev => {
+      const filtered = prev.filter(a => a.id !== action.id)
+      const next = [action, ...filtered].slice(0, 5)
+      return next
+    })
+  }
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ignore if typing in an input
+      // Toggle Command Palette with Ctrl+K or Cmd+K globally, even inside inputs
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        setShowCommandPalette(prev => !prev)
+        setCommandSearch('')
+        setPaletteIndex(0)
+        return
+      }
+
+      // Ignore standard shortcut key triggers if typing in an input
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable) {
         if (e.key === 'Escape') {
+          e.preventDefault()
+          setShowCommandPalette(false)
+          setCommandSearch('')
+          setPaletteIndex(0)
           e.target.blur()
         } else {
           return
         }
       }
 
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if (e.key === '/') {
         e.preventDefault()
         setShowCommandPalette(true)
-      } else if (e.key === '/') {
-        e.preventDefault()
-        setShowCommandPalette(true)
+        setCommandSearch('')
+        setPaletteIndex(0)
       } else if (e.key.toLowerCase() === 'e') {
         e.preventDefault()
         setCurrentView('employees')
       } else if (e.key.toLowerCase() === 's') {
         e.preventDefault()
         addToast('Save shortcut triggered', 'info')
-        // In a real app, this would trigger the specific page's save function
       } else if (e.key === 'Escape') {
         setShowCommandPalette(false)
         setMobileMenuOpen(false)
@@ -559,19 +598,59 @@ export default function App() {
 
   // Real Google Drive synchronization effect
   useEffect(() => {
-    if (!user || user.isSimulated) {
-      setDriveFileId(null)
-      setPayrollFileId(null)
-      setSettingsFileId(null)
-      setAttendanceFileId(null)
-      return
-    }
+    const handleOnline = () => {
+      if (user && !user.isSimulated && metaManifest) {
+        flushPendingWrites(user.token, metaManifest, (conflicts, data, tableName) => {
+          if (conflicts && conflicts.length > 0) {
+            setSyncConflicts(c => [...c, ...conflicts]);
+            addToast(`Offline changes synced. Conflicts detected in ${tableName}.`, 'warning');
+            if (tableName === 'employees') setEmployees(data);
+            if (tableName === 'payroll') setPayroll(data);
+            if (tableName === 'settings') setSettings(data);
+            if (tableName === 'attendance') setAttendance(data);
+          } else {
+            addToast(`Offline changes synced successfully for ${tableName}.`, 'success');
+          }
+        });
+      }
+    };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [user, metaManifest]);
 
+  useEffect(() => {
     const syncDatabase = async () => {
+      if (!user || user.isSimulated || !driveConnected) {
+        setIsAppLoading(false)
+        return
+      }
+
+      const bgSyncCallback = (tableName, data) => {
+        addToast(`Background sync updated ${tableName} with remote changes.`, 'info');
+        if (tableName === 'employees') setEmployees(data);
+        if (tableName === 'payroll') setPayroll(data);
+        if (tableName === 'settings') setSettings(data);
+        if (tableName === 'expenses') setExpenses(data);
+        if (tableName === 'attendance_logs') setAttendance(prev => ({ ...prev, dailyLogs: data }));
+        if (tableName === 'leave_requests') setAttendance(prev => ({ ...prev, leaves: data }));
+        if (tableName === 'leave_balances') setAttendance(prev => ({ ...prev, balances: data }));
+      };
+
       try {
         setIsSyncing(true)
-        addLog('Connecting to Drive', 'Initializing private workspace folder')
+        addLog('Connecting to Drive', 'Initializing strict DB workspace folder')
         
+        let meta = await readMeta(user.token)
+        
+        if (!meta) {
+          setDbStatus('rebuilding')
+          addLog('DB Status', 'No _meta.json found. Rebuilding from defaults.', 'warning')
+          meta = { schema_version: "1.0", last_sync: new Date().toISOString(), files: {} }
+        } else {
+          setDbStatus('healthy')
+          setMetaManifest(meta)
+        }
+
         const defaultContent = [
           { id: 'EMP-101', name: 'Ishtiauq Ahmed', role: 'HR Manager', department: 'Human Resources', status: 'Active', email: 'ishtiauq@gmail.com', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200' },
           { id: 'EMP-102', name: 'Sarah Rahman', role: 'Lead Frontend Developer', department: 'Engineering', status: 'Active', email: 'sarah.r@hrpulse.io', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200' },
@@ -579,9 +658,12 @@ export default function App() {
           { id: 'EMP-104', name: 'Tanvir Hasan', role: 'QA Automation Engineer', department: 'Engineering', status: 'On Leave', email: 'tanvir.h@hrpulse.io', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200' }
         ]
 
-        const empSync = await loadOrInitializeDatabase('employees.json', defaultContent, user.token)
-        setEmployees(empSync.data)
-        setDriveFileId(empSync.fileId)
+        let empData = await readTable('employees', user.token, bgSyncCallback)
+        if (!empData) {
+          empData = defaultContent
+          await writeTable('employees', defaultContent, meta, user.token)
+        }
+        setEmployees(empData)
 
         // Load or initialize payroll records
         const defaultPayroll = {
@@ -592,14 +674,13 @@ export default function App() {
             { employeeId: 'EMP-104', grossSalary: 5200, status: 'Pending', paymentDate: '', advance: 0, loan: { total: 0, installment: 0, remaining: 0 } }
           ]
         }
-        const payrollSync = await loadOrInitializeDatabase('payroll.json', defaultPayroll, user.token)
-        let payrollData = payrollSync.data
-        if (Array.isArray(payrollData)) {
-          // Legacy migration
-          payrollData = { '2026-07': payrollData }
+        let payrollData = await readTable('payroll', user.token, bgSyncCallback)
+        if (!payrollData) {
+          payrollData = defaultPayroll
+          await writeTable('payroll', defaultPayroll, meta, user.token)
         }
+        if (Array.isArray(payrollData)) payrollData = { '2026-07': payrollData }
         setPayroll(payrollData)
-        setPayrollFileId(payrollSync.fileId)
 
         // Load or initialize settings configurations
         const defaultSettings = {
@@ -614,39 +695,86 @@ export default function App() {
           company: { name: 'HR Pulse Ltd.', email: 'hr@hrpulse.io', website: 'www.hrpulse.io' },
           notifications: { syncAlerts: true, emailDigests: false }
         }
-        const settingsSync = await loadOrInitializeDatabase('settings.json', defaultSettings, user.token)
-        setSettings(settingsSync.data)
-        setSettingsFileId(settingsSync.fileId)
+        let settingsData = await readTable('settings', user.token, bgSyncCallback)
+        if (!settingsData) {
+          settingsData = defaultSettings
+          await writeTable('settings', defaultSettings, meta, user.token)
+        }
+        setSettings(settingsData)
 
         // Load or initialize attendance configurations
-        const defaultAttendance = {
-          leaves: [
-            { id: 'REQ-101', employeeId: 'EMP-102', leaveType: 'Sick Leave', startDate: '2026-07-10', endDate: '2026-07-12', days: 3, reason: 'Flu symptoms', status: 'Approved' },
-            { id: 'REQ-102', employeeId: 'EMP-104', leaveType: 'Annual Leave', startDate: '2026-07-20', endDate: '2026-07-25', days: 6, reason: 'Family vacation', status: 'Pending' }
-          ],
-          balances: {
-            'EMP-101': { sick: { used: 0, limit: 14 }, casual: { used: 0, limit: 10 }, annual: { used: 0, limit: 20 } },
-            'EMP-102': { sick: { used: 3, limit: 14 }, casual: { used: 0, limit: 10 }, annual: { used: 0, limit: 20 } },
-            'EMP-103': { sick: { used: 0, limit: 14 }, casual: { used: 0, limit: 10 }, annual: { used: 0, limit: 20 } },
-            'EMP-104': { sick: { used: 0, limit: 14 }, casual: { used: 0, limit: 10 }, annual: { used: 0, limit: 20 } }
-          },
-          dailyLogs: {
-            '2026-07-16': {
-              'EMP-101': { status: 'Present', checkIn: '09:00 AM', checkOut: '06:00 PM', hours: '9.0' },
-              'EMP-102': { status: 'Present', checkIn: '08:50 AM', checkOut: '06:10 PM', hours: '9.3' },
-              'EMP-103': { status: 'Late', checkIn: '09:30 AM', checkOut: '06:00 PM', hours: '8.5' },
-              'EMP-104': { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
-            }
+        const defaultLeaves = [
+          { id: 'REQ-101', employeeId: 'EMP-102', leaveType: 'Sick Leave', startDate: '2026-07-10', endDate: '2026-07-12', days: 3, reason: 'Flu symptoms', status: 'Approved' },
+          { id: 'REQ-102', employeeId: 'EMP-104', leaveType: 'Annual Leave', startDate: '2026-07-20', endDate: '2026-07-25', days: 6, reason: 'Family vacation', status: 'Pending' }
+        ]
+        const defaultBalances = {
+          'EMP-101': { sick: { used: 0, limit: 14 }, casual: { used: 0, limit: 10 }, annual: { used: 0, limit: 20 } },
+          'EMP-102': { sick: { used: 3, limit: 14 }, casual: { used: 0, limit: 10 }, annual: { used: 0, limit: 20 } },
+          'EMP-103': { sick: { used: 0, limit: 14 }, casual: { used: 0, limit: 10 }, annual: { used: 0, limit: 20 } },
+          'EMP-104': { sick: { used: 0, limit: 14 }, casual: { used: 0, limit: 10 }, annual: { used: 0, limit: 20 } }
+        }
+        const defaultLogs = {
+          '2026-07-16': {
+            'EMP-101': { status: 'Present', checkIn: '09:00 AM', checkOut: '06:00 PM', hours: '9.0' },
+            'EMP-102': { status: 'Present', checkIn: '08:50 AM', checkOut: '06:10 PM', hours: '9.3' },
+            'EMP-103': { status: 'Late', checkIn: '09:30 AM', checkOut: '06:00 PM', hours: '8.5' },
+            'EMP-104': { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
           }
         }
-        const attendanceSync = await loadOrInitializeDatabase('attendance.json', defaultAttendance, user.token)
-        setAttendance(attendanceSync.data)
-        setAttendanceFileId(attendanceSync.fileId)
+        
+        let leavesData = await readTable('leave_requests', user.token, bgSyncCallback)
+        let balancesData = await readTable('leave_balances', user.token, bgSyncCallback)
+        let logsData = await readTable('attendance_logs', user.token, bgSyncCallback)
+        
+        if (!leavesData || !balancesData || !logsData) {
+          // Check for legacy attendance.json to migrate
+          const legacyAtt = await readTable('attendance', user.token, bgSyncCallback)
+          if (legacyAtt) {
+            leavesData = leavesData || legacyAtt.leaves || defaultLeaves
+            balancesData = balancesData || legacyAtt.balances || defaultBalances
+            logsData = logsData || legacyAtt.dailyLogs || defaultLogs
+          } else {
+            leavesData = leavesData || defaultLeaves
+            balancesData = balancesData || defaultBalances
+            logsData = logsData || defaultLogs
+          }
+          await writeTable('leave_requests', leavesData, meta, user.token)
+          await writeTable('leave_balances', balancesData, meta, user.token)
+          await writeTable('attendance_logs', logsData, meta, user.token)
+        }
+        
+        setAttendance({ leaves: leavesData, balances: balancesData, dailyLogs: logsData })
+
+        // Load or initialize expenses
+        const defaultExpenses = []
+        let expensesData = await readTable('expenses', user.token, bgSyncCallback)
+        if (!expensesData) {
+          expensesData = defaultExpenses
+          await writeTable('expenses', defaultExpenses, meta, user.token)
+        }
+        setExpenses(expensesData)
+
+        // Save new meta if we generated anything
+        if (dbStatus === 'rebuilding') {
+          setMetaManifest(meta)
+          setDbStatus('healthy')
+        }
+
+        const issues = validateDatabase(empData, logsData, leavesData, payrollData, expensesData)
+        setDataIntegrityIssues(issues)
+        if (issues.length > 0) {
+          setDbStatus('corruption')
+          addLog('Data Integrity Warning', `${issues.length} corruption issues detected in the database.`, 'warning')
+        }
 
         setIsSyncing(false)
-        addLog('Database Synced', 'Successfully loaded database, settings, and attendance from Google Drive.', 'success')
+        addLog('Database Synced', 'Strict schema successfully loaded from Drive.', 'success')
+        
+        // Check for 24h auto-backup
+        checkAndRunAutoBackup(user.token)
       } catch (err) {
         setIsSyncing(false)
+        setDbStatus('corruption')
         addLog('Sync Failed', 'Could not sync database with Google Drive: ' + err.message, 'danger')
         console.error(err)
       }
@@ -659,13 +787,24 @@ export default function App() {
     setEmployees((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       
-      // Auto-save changes back to Google Drive
-      if (user && !user.isSimulated && driveFileId && driveConnected) {
-        updateAppDataFile(driveFileId, next, user.token)
-          .then(() => {
-            addLog('Database Saved', 'Changes successfully uploaded to Google Drive.', 'success')
+      if (user && !user.isSimulated && driveConnected && metaManifest) {
+        const meta = { ...metaManifest }
+        writeTable('employees', next, meta, user.token)
+          .then(({ updatedData, conflicts, offline }) => {
+            setMetaManifest(meta)
+            if (offline) {
+              addToast('Offline - saved locally. Will sync when connected.', 'warning')
+              setEmployees(updatedData)
+            } else if (conflicts && conflicts.length > 0) {
+              setSyncConflicts(c => [...c, ...conflicts])
+              addToast('Sync conflict auto-resolved. Review flagged items.', 'warning')
+              setEmployees(updatedData)
+            } else {
+              addLog('Database Saved', 'Changes successfully uploaded to Google Drive.', 'success')
+            }
           })
           .catch((err) => {
+            setDbStatus('corruption')
             addLog('Save Failed', 'Could not save changes to cloud: ' + err.message, 'danger')
           })
       }
@@ -677,13 +816,24 @@ export default function App() {
     setPayroll((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       
-      // Auto-save changes back to Google Drive
-      if (user && !user.isSimulated && payrollFileId && driveConnected) {
-        updateAppDataFile(payrollFileId, next, user.token)
-          .then(() => {
-            addLog('Payroll Saved', 'Salary updates synced to Google Drive.', 'success')
+      if (user && !user.isSimulated && driveConnected && metaManifest) {
+        const meta = { ...metaManifest }
+        writeTable('payroll', next, meta, user.token)
+          .then(({ updatedData, conflicts, offline }) => {
+            setMetaManifest(meta)
+            if (offline) {
+              addToast('Offline - saved locally. Will sync when connected.', 'warning')
+              setPayroll(updatedData)
+            } else if (conflicts && conflicts.length > 0) {
+              setSyncConflicts(c => [...c, ...conflicts])
+              addToast('Sync conflict auto-resolved. Review flagged items.', 'warning')
+              setPayroll(updatedData)
+            } else {
+              addLog('Payroll Saved', 'Salary updates synced to Google Drive.', 'success')
+            }
           })
           .catch((err) => {
+            setDbStatus('corruption')
             addLog('Save Failed', 'Could not save payroll data to cloud: ' + err.message, 'danger')
           })
       }
@@ -694,17 +844,26 @@ export default function App() {
   const handleSetSettings = async (updater) => {
     setSettings((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
-      
-      // LocalStorage persistence
       localStorage.setItem('hr_pulse_settings', JSON.stringify(next))
       
-      // Auto-save changes back to Google Drive
-      if (user && !user.isSimulated && settingsFileId && driveConnected) {
-        updateAppDataFile(settingsFileId, next, user.token)
-          .then(() => {
-            addLog('Settings Saved', 'System configurations synced to Google Drive.', 'success')
+      if (user && !user.isSimulated && driveConnected && metaManifest) {
+        const meta = { ...metaManifest }
+        writeTable('settings', next, meta, user.token)
+          .then(({ updatedData, conflicts, offline }) => {
+            setMetaManifest(meta)
+            if (offline) {
+              addToast('Offline - saved locally. Will sync when connected.', 'warning')
+              setSettings(updatedData)
+            } else if (conflicts && conflicts.length > 0) {
+              setSyncConflicts(c => [...c, ...conflicts])
+              addToast('Sync conflict auto-resolved. Review flagged items.', 'warning')
+              setSettings(updatedData)
+            } else {
+              addLog('Settings Saved', 'System configurations synced to Google Drive.', 'success')
+            }
           })
           .catch((err) => {
+            setDbStatus('corruption')
             addLog('Save Failed', 'Could not save settings configurations to cloud: ' + err.message, 'danger')
           })
       }
@@ -716,15 +875,20 @@ export default function App() {
     setAttendance((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       
-      // Auto-save changes back to Google Drive
-      if (user && !user.isSimulated && attendanceFileId && driveConnected) {
-        updateAppDataFile(attendanceFileId, next, user.token)
-          .then(() => {
-            addLog('Attendance Saved', 'Attendance logs synced to Google Drive.', 'success')
-          })
-          .catch((err) => {
-            addLog('Save Failed', 'Could not save attendance data to cloud: ' + err.message, 'danger')
-          })
+      if (user && !user.isSimulated && driveConnected && metaManifest) {
+        const meta = { ...metaManifest }
+        // We trigger all three writes asynchronously
+        Promise.all([
+          writeTable('leave_requests', next.leaves, meta, user.token),
+          writeTable('leave_balances', next.balances, meta, user.token),
+          writeTable('attendance_logs', next.dailyLogs, meta, user.token)
+        ]).then(() => {
+          setMetaManifest(meta)
+          addLog('Attendance Saved', 'Attendance logs synced to Google Drive.', 'success')
+        }).catch((err) => {
+          setDbStatus('corruption')
+          addLog('Save Failed', 'Could not save attendance data to cloud: ' + err.message, 'danger')
+        })
       }
       return next
     })
@@ -733,6 +897,27 @@ export default function App() {
   const handleSetExpenses = (updater) => {
     setExpenses((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
+      if (user && !user.isSimulated && driveConnected && metaManifest) {
+        const meta = { ...metaManifest }
+        writeTable('expenses', next, meta, user.token)
+          .then(({ updatedData, conflicts, offline }) => {
+            setMetaManifest(meta)
+            if (offline) {
+              addToast('Offline - saved locally. Will sync when connected.', 'warning')
+              setExpenses(updatedData)
+            } else if (conflicts && conflicts.length > 0) {
+              setSyncConflicts(c => [...c, ...conflicts])
+              addToast('Sync conflict auto-resolved. Review flagged items.', 'warning')
+              setExpenses(updatedData)
+            } else {
+              addLog('Expenses Saved', 'Expenses synced to Google Drive.', 'success')
+            }
+          })
+          .catch((err) => {
+            setDbStatus('corruption')
+            addLog('Save Failed', 'Could not save expenses data to cloud: ' + err.message, 'danger')
+          })
+      }
       return next
     })
   }
@@ -842,6 +1027,8 @@ export default function App() {
             pendingProfileEdits={pendingProfileEdits}
             setPendingProfileEdits={setPendingProfileEdits}
             addToast={addToast}
+            selectedEmployeeId={selectedEmployeeId}
+            setSelectedEmployeeId={setSelectedEmployeeId}
           />
         )
       case 'payroll':
@@ -936,10 +1123,13 @@ export default function App() {
           addToast={addToast}
           auditLogs={auditLogs}
           simulatedRole={simulatedRole}
+          syncConflicts={syncConflicts}
+          setSyncConflicts={setSyncConflicts}
         />
       case 'drive':
         return (
           <DriveSync 
+            user={user}
             driveConnected={driveConnected} 
             setDriveConnected={setDriveConnected} 
             syncLogs={syncLogs}
@@ -996,6 +1186,130 @@ export default function App() {
     )
   }
 
+  const getFilteredItems = () => {
+    const query = commandSearch.toLowerCase().trim()
+    const pages = [
+      { id: 'page-dashboard', category: 'Pages', label: 'Go to Dashboard', action: () => setCurrentView('dashboard'), keywords: 'dashboard home main' },
+      { id: 'page-employees', category: 'Pages', label: 'Go to Employees', action: () => setCurrentView('employees'), keywords: 'employees staff members directory profile' },
+      { id: 'page-payroll', category: 'Pages', label: 'Go to Payroll', action: () => setCurrentView('payroll'), keywords: 'payroll salary pay compensation' },
+      { id: 'page-attendance', category: 'Pages', label: 'Go to Attendance & Leaves', action: () => setCurrentView('attendance'), keywords: 'attendance leaves roster schedule timeoff vacation' },
+      { id: 'page-announcements', category: 'Pages', label: 'Go to Announcements', action: () => setCurrentView('announcements'), keywords: 'announcements news posts updates' },
+      { id: 'page-assets', category: 'Pages', label: 'Go to Assets', action: () => setCurrentView('assets'), keywords: 'assets inventory devices macbook laptop' },
+      { id: 'page-reports', category: 'Pages', label: 'Go to Reports', action: () => setCurrentView('reports'), keywords: 'reports analytics charts download' },
+      { id: 'page-expenses', category: 'Pages', label: 'Go to Expenses', action: () => setCurrentView('expenses'), keywords: 'expenses claims reimbursements money' },
+      { id: 'page-settings', category: 'Pages', label: 'Go to Settings', action: () => setCurrentView('settings'), keywords: 'settings admin config role audit' },
+      { id: 'page-drive', category: 'Pages', label: 'Go to Google Drive Sync', action: () => setCurrentView('drive'), keywords: 'drive sync backup restore cloud' }
+    ]
+
+    const recent = recentActions.map((act) => {
+      let actionFn = () => {}
+      if (act.type === 'page') {
+        actionFn = () => setCurrentView(act.view)
+      } else if (act.type === 'action') {
+        if (act.id === 'action-darkmode') actionFn = () => setIsDarkMode(prev => !prev)
+        if (act.id === 'action-clearcache') actionFn = () => {
+          if (window.confirm("Clear cache?")) {
+            clearLocalCache().then(() => window.location.reload())
+          }
+        }
+        if (act.id === 'action-backup') actionFn = () => {
+          if (user?.token) createBackup(user.token).then(() => addToast('Backup created', 'success'))
+        }
+      } else if (act.type === 'employee') {
+        actionFn = () => {
+          setSelectedEmployeeId(act.employeeId)
+          setCurrentView('employees')
+        }
+      }
+      return {
+        ...act,
+        category: 'Recent Actions',
+        action: actionFn
+      }
+    })
+
+    const quickActions = [
+      { id: 'action-darkmode', category: 'Actions', label: 'Toggle Dark Mode', action: () => setIsDarkMode(prev => !prev), keywords: 'dark light mode theme appearance toggle' },
+      { id: 'action-clearcache', category: 'Actions', label: 'Clear Local Cache & Resync', action: () => {
+        if (window.confirm("Clear cache?")) {
+          clearLocalCache().then(() => window.location.reload())
+        }
+      }, keywords: 'clear cache reset clean reload' },
+      { id: 'action-backup', category: 'Actions', label: 'Trigger Drive Backup', action: () => {
+        if (user?.token) {
+          addToast('Creating backup...', 'info')
+          createBackup(user.token).then(() => addToast('Backup created successfully', 'success'))
+        } else {
+          addToast('Drive connection required for backup', 'warning')
+        }
+      }, keywords: 'backup save snapshot archive drive' }
+    ]
+
+    const emps = (employees || []).map(emp => ({
+      id: `emp-${emp.id}`,
+      category: 'Employees',
+      label: `${emp.name} (${emp.role} - ${emp.department})`,
+      employeeId: emp.id,
+      action: () => {
+        setSelectedEmployeeId(emp.id)
+        setCurrentView('employees')
+      },
+      keywords: `${emp.name} ${emp.role} ${emp.department} ${emp.id}`
+    }))
+
+    if (!query) {
+      return [
+        ...pages,
+        ...recent,
+        ...emps.slice(0, 5)
+      ]
+    }
+
+    const allItems = [
+      ...pages,
+      ...quickActions,
+      ...emps
+    ]
+
+    return allItems.filter(item => {
+      const matchLabel = item.label.toLowerCase().includes(query)
+      const matchKeywords = item.keywords ? item.keywords.toLowerCase().includes(query) : false
+      return matchLabel || matchKeywords
+    })
+  }
+
+  const filteredItems = getFilteredItems()
+
+  const selectPaletteItem = (index) => {
+    const selectedItem = filteredItems[index]
+    if (selectedItem) {
+      selectedItem.action()
+      trackRecentAction({
+        id: selectedItem.id,
+        type: selectedItem.category === 'Pages' ? 'page' : (selectedItem.category === 'Employees' ? 'employee' : 'action'),
+        label: selectedItem.label,
+        view: selectedItem.id.replace('page-', ''),
+        employeeId: selectedItem.employeeId
+      })
+      setShowCommandPalette(false)
+      setCommandSearch('')
+      setPaletteIndex(0)
+    }
+  }
+
+  const getCategoryIcon = (category, id) => {
+    if (category === 'Employees') return <User size={16} />
+    if (category === 'Recent Actions') return <History size={16} />
+    if (id.includes('darkmode')) return <Moon size={16} />
+    if (id.includes('clearcache')) return <Trash2 size={16} />
+    if (id.includes('backup')) return <HardDrive size={16} />
+    if (id.includes('dashboard')) return <Layout size={16} />
+    if (id.includes('settings')) return <SettingsIcon size={16} />
+    if (id.includes('drive')) return <HardDrive size={16} />
+    if (id.includes('employees')) return <User size={16} />
+    return <FileText size={16} />
+  }
+
   return (
     <div className="app-container">
       {/* Mobile Header Bar */}
@@ -1043,13 +1357,81 @@ export default function App() {
         isDarkMode={isDarkMode}
         setIsDarkMode={setIsDarkMode}
         simulatedRole={simulatedRole}
+        dbStatus={dbStatus}
       />
       <main className="content-container">
+        {dataIntegrityIssues.length > 0 && (
+          <div style={{
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid var(--accent-danger)',
+            color: 'var(--accent-danger)',
+            padding: '16px 24px',
+            borderRadius: '12px',
+            marginBottom: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <AlertTriangle size={24} />
+              <div>
+                <h4 style={{ margin: 0, fontWeight: 700 }}>Data integrity issue detected.</h4>
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem' }}>{dataIntegrityIssues.length} logical conflict(s) found in the database.</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                onClick={() => setShowCorruptionModal(true)} 
+                className="btn btn-outline" 
+                style={{ borderColor: 'var(--accent-danger)', color: 'var(--accent-danger)' }}
+              >
+                View Details
+              </button>
+              <button 
+                onClick={() => setCurrentView('drive')} 
+                className="btn" 
+                style={{ background: 'var(--accent-danger)', color: '#fff', border: 'none' }}
+              >
+                Restore from Backup
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showCorruptionModal && (
+          <div className="modal-overlay">
+            <div className="modal-container" style={{ maxWidth: '600px' }}>
+              <div className="modal-header">
+                <h2 style={{ color: 'var(--accent-danger)' }}>Data Integrity Report</h2>
+                <button className="modal-close" onClick={() => setShowCorruptionModal(false)}>✕</button>
+              </div>
+              <div className="modal-body" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {dataIntegrityIssues.map((issue, idx) => (
+                    <li key={idx} style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{issue}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <div>{renderBreadcrumbs()}</div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative' }}>
             
+            {/* Sync Status Top Bar Indicator */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-secondary)', padding: '6px 12px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+              <div style={{ 
+                width: '8px', height: '8px', borderRadius: '50%', 
+                backgroundColor: !driveConnected ? 'var(--accent-warning)' : syncConflicts.length > 0 ? 'var(--accent-danger)' : isSyncing ? 'var(--accent-warning)' : 'var(--accent-success)' 
+              }} />
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                {!driveConnected ? 'Pending (Offline)' : syncConflicts.length > 0 ? 'Conflict' : isSyncing ? 'Syncing...' : 'Synced'}
+              </span>
+            </div>
+
             {/* Role Simulator */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-secondary)', padding: '6px 12px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>View As:</span>
@@ -1130,29 +1512,79 @@ export default function App() {
       {showCommandPalette && (
         <div className="command-palette-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowCommandPalette(false) }}>
           <div className="command-palette">
-            <input 
-              autoFocus
-              type="text" 
-              placeholder="Type a command or search..." 
-              value={commandSearch}
-              onChange={(e) => setCommandSearch(e.target.value)}
-            />
+            <div className="command-palette-search-wrapper">
+              <Search size={18} style={{ color: 'var(--text-muted)' }} />
+              <input 
+                autoFocus
+                className="command-palette-input"
+                type="text" 
+                placeholder="Type a command or search..." 
+                value={commandSearch}
+                onChange={(e) => {
+                  setCommandSearch(e.target.value)
+                  setPaletteIndex(0)
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setPaletteIndex(prev => (prev + 1) % filteredItems.length)
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setPaletteIndex(prev => (prev - 1 + filteredItems.length) % filteredItems.length)
+                  } else if (e.key === 'Enter') {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    selectPaletteItem(paletteIndex)
+                  } else if (e.key === 'Escape') {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setShowCommandPalette(false)
+                    setCommandSearch('')
+                    setPaletteIndex(0)
+                  }
+                }}
+              />
+            </div>
             <div className="command-palette-list">
-              <div className="command-palette-item" onClick={() => { setCurrentView('dashboard'); setShowCommandPalette(false) }}>
-                Go to Dashboard
-              </div>
-              <div className="command-palette-item" onClick={() => { setCurrentView('employees'); setShowCommandPalette(false) }}>
-                Go to Employees
-              </div>
-              <div className="command-palette-item" onClick={() => { setCurrentView('payroll'); setShowCommandPalette(false) }}>
-                Go to Payroll
-              </div>
-              <div className="command-palette-item" onClick={() => { setCurrentView('attendance'); setShowCommandPalette(false) }}>
-                Go to Attendance & Leaves
-              </div>
-              <div className="command-palette-item" onClick={() => { setIsDarkMode(!isDarkMode); setShowCommandPalette(false) }}>
-                Toggle Dark Mode
-              </div>
+              {filteredItems.length === 0 ? (
+                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                  No results found.
+                </div>
+              ) : (
+                (() => {
+                  let lastCategory = null
+                  return filteredItems.map((item, index) => {
+                    const showHeader = item.category !== lastCategory
+                    lastCategory = item.category
+                    return (
+                      <div key={item.id}>
+                        {showHeader && (
+                          <div className="command-palette-section-header">
+                            {item.category}
+                          </div>
+                        )}
+                        <div 
+                          className={`command-palette-item ${paletteIndex === index ? 'active' : ''}`}
+                          onClick={() => selectPaletteItem(index)}
+                          onMouseEnter={() => setPaletteIndex(index)}
+                        >
+                          <div className="command-palette-item-left">
+                            <span className="command-palette-item-icon">
+                              {getCategoryIcon(item.category, item.id)}
+                            </span>
+                            <span>{item.label}</span>
+                          </div>
+                          <span className="command-palette-item-shortcut">
+                            {item.category === 'Pages' ? '⏎' : (item.category === 'Employees' ? 'View' : 'Action')}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })
+                })()
+              )}
             </div>
           </div>
         </div>

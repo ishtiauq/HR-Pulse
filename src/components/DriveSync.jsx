@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
-import { HardDrive, CloudOff, CloudLightning, ArrowLeftRight, Download, UploadCloud, Info, FileJson, Check, AlertCircle, RefreshCw, Eye, X } from 'lucide-react'
+import { HardDrive, CloudOff, CloudLightning, ArrowLeftRight, Download, UploadCloud, Info, FileJson, Check, AlertCircle, RefreshCw, Eye, X, Trash2, Shield, RotateCcw } from 'lucide-react'
+import { getLocalCacheSizeMB, clearLocalCache } from '../services/db.js'
+import { createBackup, listBackups, restoreBackup } from '../services/googleDrive.js'
 
 const mockFiles = [
   { id: '1', name: 'employees.json', size: '42.5 KB', modified: '2026-07-18T04:30:00Z' },
@@ -8,7 +10,7 @@ const mockFiles = [
   { id: '4', name: 'settings.json', size: '2.1 KB', modified: '2026-07-17T10:00:00Z' }
 ]
 
-export default function DriveSync({ driveConnected, setDriveConnected, syncLogs, addLog, employees }) {
+export default function DriveSync({ user, driveConnected, setDriveConnected, syncLogs, addLog, employees }) {
   const [isBackupSimulating, setIsBackupSimulating] = useState(false)
   const [exportModalOpen, setExportModalOpen] = useState(false)
   const [importModalOpen, setImportModalOpen] = useState(false)
@@ -21,14 +23,39 @@ export default function DriveSync({ driveConnected, setDriveConnected, syncLogs,
   const [timeSinceSync, setTimeSinceSync] = useState(2)
   const [timeUntilSync, setTimeUntilSync] = useState(13)
   const [previewFile, setPreviewFile] = useState(null)
+  const [cacheSize, setCacheSize] = useState('0.00')
+  const [isClearing, setIsClearing] = useState(false)
+  const [backupsList, setBackupsList] = useState([])
+  const [isBackingUp, setIsBackingUp] = useState(false)
+  const [isRestoring, setIsRestoring] = useState(false)
+  const [selectedRestoreBackup, setSelectedRestoreBackup] = useState(null)
   
   useEffect(() => {
+    const fetchCacheSize = async () => {
+      const size = await getLocalCacheSizeMB()
+      setCacheSize(size)
+    }
+    fetchCacheSize()
+
+    const loadBackups = async () => {
+      if (driveConnected && user?.token) {
+        try {
+          const bks = await listBackups(user.token)
+          setBackupsList(bks)
+        } catch(e) {
+          console.warn("Failed to load backups", e)
+        }
+      }
+    }
+    loadBackups()
+
     const timer = setInterval(() => {
       setTimeSinceSync(prev => prev < 15 ? prev + 1 : 0)
       setTimeUntilSync(prev => prev > 0 ? prev - 1 : 15)
+      fetchCacheSize()
     }, 60000)
     return () => clearInterval(timer)
-  }, [])
+  }, [driveConnected, user])
   
   const handleToggleConnection = () => {
     const nextState = !driveConnected
@@ -48,72 +75,35 @@ export default function DriveSync({ driveConnected, setDriveConnected, syncLogs,
     }, 1000)
   }
 
-  const handleExecuteExport = () => {
-    setIsBackupSimulating(true)
-    setExportProgress(10)
-    const interval = setInterval(() => {
-      setExportProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          setTimeout(() => {
-            setIsBackupSimulating(false)
-            setExportModalOpen(false)
-            setExportProgress(0)
-            addLog('Manual Database Backup Created', 'Exported selected schemas to backup.json', 'success')
-            
-            const element = document.createElement("a")
-            const file = new Blob([JSON.stringify(employees || [], null, 2)], {type: 'application/json'})
-            element.href = URL.createObjectURL(file)
-            element.download = "hr_pulse_backup.json"
-            document.body.appendChild(element)
-            element.click()
-            document.body.removeChild(element)
-          }, 500)
-          return 100
-        }
-        return prev + 25
-      })
-    }, 400)
-  }
-
-  const handleFileDrop = (e) => {
-    e.preventDefault()
-    setDragActive(false)
-    const file = e.dataTransfer.files[0]
-    validateAndImport(file)
-  }
-
-  const handleFileInput = (e) => {
-    const file = e.target.files[0]
-    validateAndImport(file)
-  }
-
-  const validateAndImport = (file) => {
-    if (!file) return
-    if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
-      setImportError('Invalid file type. Please upload a JSON file.')
-      return
+  const handleCreateBackup = async () => {
+    setIsBackingUp(true)
+    setToastMessage('Creating backup package...')
+    try {
+      await createBackup(user.token, false)
+      const bks = await listBackups(user.token)
+      setBackupsList(bks)
+      setToastMessage('✅ Manual backup created successfully.')
+      addLog('Backup Created', 'Manual snapshot saved to Drive', 'success')
+    } catch(e) {
+      setToastMessage('❌ Failed to create backup')
     }
-    setImportError('')
-    setImportProgress(10)
-    
-    // Simulate parsing and validation
-    const interval = setInterval(() => {
-      setImportProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          setTimeout(() => {
-            setImportProgress(0)
-            setImportModalOpen(false)
-            setToastMessage('✅ Database successfully imported and synced.')
-            setTimeout(() => setToastMessage(''), 4000)
-            addLog('Database Restored', `Imported schema from ${file.name}`)
-          }, 600)
-          return 100
-        }
-        return prev + 30
-      })
-    }, 300)
+    setIsBackingUp(false)
+    setTimeout(() => setToastMessage(''), 4000)
+  }
+
+  const handleExecuteRestore = async () => {
+    if (!selectedRestoreBackup) return
+    setIsRestoring(true)
+    setToastMessage('Restoring database from backup...')
+    try {
+      await restoreBackup(user.token, selectedRestoreBackup.id)
+      setToastMessage('✅ Restore successful. Reloading...')
+      addLog('Backup Restored', `Restored from ${selectedRestoreBackup.name}`, 'warning')
+      setTimeout(() => window.location.reload(), 1500)
+    } catch (e) {
+      setToastMessage('❌ Restore failed.')
+      setIsRestoring(false)
+    }
   }
 
   return (
@@ -211,17 +201,46 @@ export default function DriveSync({ driveConnected, setDriveConnected, syncLogs,
           </div>
         </div>
 
-        <button 
-          onClick={handleToggleConnection}
-          className={`btn ${driveConnected ? 'btn-secondary' : 'btn-primary'}`}
-          style={{
-            borderColor: driveConnected ? 'var(--accent-danger)' : 'transparent',
-            color: driveConnected ? 'var(--accent-danger)' : '#fff',
-            fontWeight: 600
-          }}
-        >
-          {driveConnected ? 'Pause Cloud Connection' : 'Establish Cloud Connection'}
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button 
+            onClick={async () => {
+              if(window.confirm("Are you sure you want to clear the local cache? Unsynced offline changes will be lost, and the app will reload.")) {
+                setIsClearing(true)
+                try {
+                  await clearLocalCache()
+                  window.location.reload()
+                } catch(e) {
+                  addLog('Cache Error', 'Failed to clear local cache', 'error')
+                  setIsClearing(false)
+                }
+              }
+            }}
+            disabled={isClearing}
+            className="btn btn-outline"
+            style={{
+              borderColor: 'var(--accent-danger)',
+              color: 'var(--accent-danger)',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <Trash2 size={16} />
+            {isClearing ? 'Clearing...' : 'Clear Local Cache & Resync'}
+          </button>
+          <button 
+            onClick={handleToggleConnection}
+            className={`btn ${driveConnected ? 'btn-secondary' : 'btn-primary'}`}
+            style={{
+              borderColor: driveConnected ? 'var(--accent-warning)' : 'transparent',
+              color: driveConnected ? 'var(--accent-warning)' : '#fff',
+              fontWeight: 600
+            }}
+          >
+            {driveConnected ? 'Pause Cloud Connection' : 'Establish Cloud Connection'}
+          </button>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
@@ -234,7 +253,8 @@ export default function DriveSync({ driveConnected, setDriveConnected, syncLogs,
             <div style={{ flex: 1, padding: '16px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
               <HardDrive size={32} style={{ color: 'var(--accent-primary)', margin: '0 auto 8px' }} />
               <span style={{ fontSize: '0.8rem', display: 'block', fontWeight: 600 }}>Local Cache</span>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{driveConnected ? '0 pending uploads' : '4 records pending'}</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>{driveConnected ? '0 pending uploads' : 'Pending uploads queued'}</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', fontWeight: 600 }}>Local cache using {cacheSize} MB</span>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', width: '80px' }}>
@@ -258,9 +278,9 @@ export default function DriveSync({ driveConnected, setDriveConnected, syncLogs,
         {/* Database backup commands */}
         <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
           <div>
-            <h4 style={{ fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '8px' }}>Manual Backup & Schema Imports</h4>
+            <h4 style={{ fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '8px' }}>Manual Backup</h4>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              Export your employee records and configuration settings into a raw JSON package, or restore an offline JSON state.
+              Create an immediate snapshot of the current state, combining all tables into a single JSON package in the `_backups` folder.
             </p>
           </div>
 
@@ -268,29 +288,23 @@ export default function DriveSync({ driveConnected, setDriveConnected, syncLogs,
             <button 
               className="btn btn-primary" 
               style={{ flex: 1, justifyContent: 'center' }} 
-              onClick={() => setExportModalOpen(true)}
+              onClick={handleCreateBackup}
+              disabled={isBackingUp || !driveConnected}
             >
-              <Download size={16} /> Export DB
-            </button>
-            <button 
-              className="btn btn-secondary" 
-              style={{ flex: 1, justifyContent: 'center' }}
-              onClick={() => setImportModalOpen(true)}
-            >
-              <UploadCloud size={16} /> Import DB
+              <Download size={16} /> {isBackingUp ? 'Creating Backup...' : 'Create Backup Now'}
             </button>
           </div>
         </div>
       </div>
 
-      {/* File Browser Widget */}
+      {/* Backup Browser Widget */}
       <div className="glass-card" style={{ padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
             <h4 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FileJson size={20} style={{ color: 'var(--accent-primary)' }}/> Drive Files (/HR-Pulse-DB/)
+              <Shield size={20} style={{ color: 'var(--accent-primary)' }}/> Database Backups (/_backups/)
             </h4>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Using 1.2 MB of Google Drive storage</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Automated backups are retained for 7 days + 4 weeks</p>
           </div>
         </div>
         
@@ -298,37 +312,44 @@ export default function DriveSync({ driveConnected, setDriveConnected, syncLogs,
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                <th style={{ padding: '12px' }}>File Name</th>
+                <th style={{ padding: '12px' }}>Backup Name</th>
                 <th style={{ padding: '12px' }}>Size</th>
-                <th style={{ padding: '12px' }}>Last Modified</th>
+                <th style={{ padding: '12px' }}>Created Date</th>
                 <th style={{ padding: '12px', textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {mockFiles.map(f => (
+              {(!Array.isArray(backupsList) || backupsList.length === 0) ? (
+                <tr>
+                  <td colSpan="4" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>No backups found.</td>
+                </tr>
+              ) : backupsList.map(f => (
                 <tr key={f.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
                   <td style={{ padding: '12px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <FileJson size={16} style={{ color: 'var(--text-muted)' }} /> {f.name}
                   </td>
-                  <td style={{ padding: '12px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{f.size}</td>
                   <td style={{ padding: '12px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {new Date(f.modified).toLocaleString()}
+                    {f.size ? (parseInt(f.size) / 1024).toFixed(1) + ' KB' : 'Unknown'}
+                  </td>
+                  <td style={{ padding: '12px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    {new Date(f.modifiedTime).toLocaleString()}
                   </td>
                   <td style={{ padding: '12px', textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                     <button 
-                      onClick={() => setPreviewFile(f)}
+                      onClick={() => window.open(`https://drive.google.com/uc?export=download&id=${f.id}`, '_blank')}
                       className="btn btn-secondary" 
                       style={{ padding: '4px 8px', fontSize: '0.75rem', height: 'auto' }}
-                      title="Preview JSON"
-                    >
-                      <Eye size={14} />
-                    </button>
-                    <button 
-                      className="btn btn-secondary" 
-                      style={{ padding: '4px 8px', fontSize: '0.75rem', height: 'auto' }}
-                      title="Download"
+                      title="Download Backup"
                     >
                       <Download size={14} />
+                    </button>
+                    <button 
+                      onClick={() => setSelectedRestoreBackup(f)}
+                      className="btn" 
+                      style={{ padding: '4px 8px', fontSize: '0.75rem', height: 'auto', background: 'var(--accent-warning)', color: '#fff' }}
+                      title="Restore from this backup"
+                    >
+                      <RotateCcw size={14} />
                     </button>
                   </td>
                 </tr>
@@ -337,6 +358,46 @@ export default function DriveSync({ driveConnected, setDriveConnected, syncLogs,
           </table>
         </div>
       </div>
+
+      {/* Restore Confirmation Modal */}
+      {selectedRestoreBackup && (
+        <div className="modal-overlay">
+          <div className="modal-container" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h2 style={{ color: 'var(--accent-warning)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertCircle size={24} /> Confirm Restore
+              </h2>
+            </div>
+            <div className="modal-body">
+              <p>You are about to restore the database from:</p>
+              <div style={{ background: 'var(--bg-secondary)', padding: '12px', borderRadius: '8px', margin: '16px 0', fontFamily: 'monospace' }}>
+                {selectedRestoreBackup.name}
+              </div>
+              <p style={{ color: 'var(--accent-danger)', fontSize: '0.85rem' }}>
+                WARNING: This will completely overwrite your current active database tables and cannot be undone. Unsynced offline changes will be permanently lost.
+              </p>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                <button 
+                  className="btn btn-secondary" 
+                  style={{ flex: 1 }} 
+                  onClick={() => setSelectedRestoreBackup(null)}
+                  disabled={isRestoring}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="btn" 
+                  style={{ flex: 1, background: 'var(--accent-danger)', color: '#fff' }}
+                  onClick={handleExecuteRestore}
+                  disabled={isRestoring}
+                >
+                  {isRestoring ? 'Restoring...' : 'Yes, Overwrite Data'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Info Warning Alert */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.15)' }}>
@@ -355,90 +416,6 @@ export default function DriveSync({ driveConnected, setDriveConnected, syncLogs,
         </button>
       </div>
 
-      {/* Export Modal */}
-      {exportModalOpen && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div style={{ background: 'var(--bg-primary)', padding: '32px', borderRadius: '24px', width: '100%', maxWidth: '400px', animation: 'modalFadeIn 200ms ease-out' }}>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', fontWeight: 700 }}>Export Database</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '24px' }}>Select the schemas you want to include in the JSON backup.</p>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
-              {Object.keys(exportOptions).map(key => (
-                <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-                  <input 
-                    type="checkbox" 
-                    checked={exportOptions[key]} 
-                    onChange={() => setExportOptions(prev => ({ ...prev, [key]: !prev[key] }))}
-                    style={{ width: '18px', height: '18px', accentColor: 'var(--accent-primary)' }}
-                  />
-                  <span style={{ textTransform: 'capitalize', fontWeight: 500 }}>{key.replace('_', ' ')} Data</span>
-                </label>
-              ))}
-            </div>
-
-            {exportProgress > 0 && (
-              <div style={{ width: '100%', height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden', marginBottom: '24px' }}>
-                <div style={{ width: `${exportProgress}%`, height: '100%', background: 'var(--accent-primary)', transition: 'width 0.3s ease' }} />
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button onClick={() => setExportModalOpen(false)} className="btn btn-secondary" disabled={isBackupSimulating}>Cancel</button>
-              <button onClick={handleExecuteExport} className="btn btn-primary" disabled={isBackupSimulating}>
-                {isBackupSimulating ? 'Exporting...' : 'Start Export'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Import Modal */}
-      {importModalOpen && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div style={{ background: 'var(--bg-primary)', padding: '32px', borderRadius: '24px', width: '100%', maxWidth: '450px', animation: 'modalFadeIn 200ms ease-out' }}>
-            <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', fontWeight: 700 }}>Import Database</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '24px' }}>Upload a valid HR Pulse JSON backup file. This will overwrite local cache.</p>
-            
-            <div 
-              onDragOver={(e) => { e.preventDefault(); setDragActive(true) }}
-              onDragLeave={() => setDragActive(false)}
-              onDrop={handleFileDrop}
-              style={{
-                border: `2px dashed ${dragActive ? 'var(--accent-primary)' : 'var(--border-color)'}`,
-                background: dragActive ? 'rgba(59, 130, 246, 0.05)' : 'rgba(0,0,0,0.02)',
-                borderRadius: '16px',
-                padding: '48px 24px',
-                textAlign: 'center',
-                transition: 'all 0.2s',
-                marginBottom: '24px',
-                position: 'relative'
-              }}
-            >
-              <UploadCloud size={32} style={{ color: dragActive ? 'var(--accent-primary)' : 'var(--text-muted)', margin: '0 auto 12px' }} />
-              <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>Drag and drop JSON file here</p>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>or click to browse</p>
-              <input 
-                type="file" 
-                accept=".json,application/json" 
-                onChange={handleFileInput}
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
-              />
-            </div>
-
-            {importError && <div style={{ color: 'var(--accent-danger)', fontSize: '0.85rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}><AlertCircle size={14}/> {importError}</div>}
-
-            {importProgress > 0 && (
-              <div style={{ width: '100%', height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden', marginBottom: '24px' }}>
-                <div style={{ width: `${importProgress}%`, height: '100%', background: 'var(--accent-primary)', transition: 'width 0.3s ease' }} />
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button onClick={() => {setImportModalOpen(false); setImportError('')}} className="btn btn-secondary" disabled={importProgress > 0}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* JSON Preview Modal */}
       {previewFile && (

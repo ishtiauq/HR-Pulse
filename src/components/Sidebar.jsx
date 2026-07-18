@@ -1,7 +1,7 @@
 import { LayoutDashboard, Users, Database, Settings, Activity, LogOut, X, CreditCard, Calendar, Upload, Trash2, Moon, Sun, HelpCircle, BarChart3, Receipt, Megaphone, Monitor } from 'lucide-react'
 import { useState, useRef } from 'react'
 
-export default function Sidebar({ currentView, setCurrentView, driveConnected, user, onLogout, mobileOpen, setMobileOpen, settings, setSettings, isDarkMode, setIsDarkMode, simulatedRole }) {
+export default function Sidebar({ currentView, setCurrentView, driveConnected, user, onLogout, mobileOpen, setMobileOpen, settings, setSettings, isDarkMode, setIsDarkMode, simulatedRole, dbStatus }) {
   const [showLogoModal, setShowLogoModal] = useState(false)
   const [showCheatSheet, setShowCheatSheet] = useState(false)
   const fileInputRef = useRef(null)
@@ -278,16 +278,16 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
             width: '8px',
             height: '8px',
             borderRadius: '50%',
-            backgroundColor: driveConnected ? 'var(--accent-success)' : 'var(--accent-danger)',
-            boxShadow: driveConnected ? '0 0 8px var(--accent-success)' : '0 0 8px var(--accent-danger)',
+            backgroundColor: !driveConnected ? 'var(--accent-danger)' : (dbStatus === 'healthy' ? 'var(--accent-success)' : dbStatus === 'rebuilding' ? 'var(--accent-warning)' : 'var(--accent-danger)'),
+            boxShadow: !driveConnected ? '0 0 8px var(--accent-danger)' : (dbStatus === 'healthy' ? '0 0 8px var(--accent-success)' : dbStatus === 'rebuilding' ? '0 0 8px var(--accent-warning)' : '0 0 8px var(--accent-danger)'),
             animation: driveConnected ? 'pulseGlow 2.5s infinite' : 'none'
           }} />
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 600 }}>
-              {driveConnected ? 'Drive Connected' : 'Drive Offline'}
+              {!driveConnected ? 'Drive Offline' : (dbStatus === 'healthy' ? 'DB Healthy' : dbStatus === 'rebuilding' ? 'DB Rebuilding' : 'DB Corruption')}
             </span>
             <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
-              {driveConnected ? 'DB Synced' : 'Sync Paused'}
+              {!driveConnected ? 'Sync Paused' : (dbStatus === 'healthy' ? 'Strict Sync Active' : dbStatus === 'rebuilding' ? 'Generating _meta.json' : 'Data Integrity Error')}
             </span>
           </div>
         </div>
