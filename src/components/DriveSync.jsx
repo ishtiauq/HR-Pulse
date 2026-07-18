@@ -249,28 +249,28 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, syn
         <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <h4 style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>Data Synchronization Flow</h4>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px', width: '100%', justifyContent: 'center', padding: '20px 0' }}>
-            <div style={{ flex: 1, padding: '16px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
-              <HardDrive size={32} style={{ color: 'var(--accent-primary)', margin: '0 auto 8px' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%', justifyContent: 'space-between', padding: '20px 0' }}>
+            <div style={{ flex: 1, minWidth: '100px', padding: '12px 8px', borderRadius: '12px', background: 'rgba(0, 0, 0, 0.01)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+              <HardDrive size={24} style={{ color: 'var(--accent-primary)', margin: '0 auto 6px' }} />
               <span style={{ fontSize: '0.8rem', display: 'block', fontWeight: 600 }}>Local Cache</span>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>{driveConnected ? '0 pending uploads' : 'Pending uploads queued'}</span>
-              <span style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', fontWeight: 600 }}>Local cache using {cacheSize} MB</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>{driveConnected ? '0 pending' : 'Offline queue'}</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', fontWeight: 600 }}>{cacheSize} MB</span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', width: '80px' }}>
-              <ArrowLeftRight size={24} style={{ 
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', width: '60px', flexShrink: 0 }}>
+              <ArrowLeftRight size={20} style={{ 
                 color: driveConnected ? 'var(--accent-success)' : 'var(--text-muted)',
                 animation: driveConnected ? 'slideLoop 1.5s ease-in-out infinite alternate' : 'none'
               }} />
-              <span style={{ fontSize: '0.7rem', fontWeight: 500, color: driveConnected ? 'var(--accent-success)' : 'var(--text-muted)' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 600, color: driveConnected ? 'var(--accent-success)' : 'var(--text-muted)' }}>
                 {driveConnected ? 'Active' : 'Offline'}
               </span>
             </div>
 
-            <div style={{ flex: 1, padding: '16px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
-              <CloudLightning size={32} style={{ color: driveConnected ? 'var(--accent-success)' : 'var(--text-muted)', margin: '0 auto 8px' }} />
+            <div style={{ flex: 1, minWidth: '100px', padding: '12px 8px', borderRadius: '12px', background: 'rgba(0, 0, 0, 0.01)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+              <CloudLightning size={24} style={{ color: driveConnected ? 'var(--accent-success)' : 'var(--text-muted)', margin: '0 auto 6px' }} />
               <span style={{ fontSize: '0.8rem', display: 'block', fontWeight: 600 }}>Drive DB</span>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{driveConnected ? 'Up to date' : 'Waiting for sync'}</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{driveConnected ? 'Synced' : 'Waiting'}</span>
             </div>
           </div>
         </div>

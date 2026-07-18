@@ -895,6 +895,54 @@ export default function App() {
     })
   }
 
+  const handleAutoRepairDatabase = async () => {
+    if (!user) return
+    try {
+      setIsSyncing(true)
+      addLog('Repairing DB', 'Running deduplication and logical constraint repairs...')
+      const meta = { ...metaManifest }
+      
+      // 1. Read tables
+      let empData = await readTable('employees', user.token) || []
+      
+      // Deduplicate employees
+      const uniqueEmps = []
+      const seenIds = new Set()
+      empData.forEach(emp => {
+        if (!seenIds.has(emp.id)) {
+          seenIds.add(emp.id)
+          uniqueEmps.push(emp)
+        }
+      })
+      
+      // Write fixed employees back
+      await writeTable('employees', uniqueEmps, meta, user.token)
+      setEmployees(uniqueEmps)
+      
+      // Re-run validation
+      const leavesData = await readTable('leave_requests', user.token) || []
+      const balancesData = await readTable('leave_balances', user.token) || {}
+      const logsData = await readTable('attendance_logs', user.token) || {}
+      const payrollData = await readTable('payroll', user.token) || {}
+      const expensesData = await readTable('expenses', user.token) || []
+      
+      const fixedIssues = validateDatabase(uniqueEmps, logsData, leavesData, payrollData, expensesData)
+      setDataIntegrityIssues(fixedIssues)
+      if (fixedIssues.length === 0) {
+        setDbStatus('healthy')
+        addToast('Database successfully repaired!', 'success')
+        addLog('Repair Success', 'Removed duplicate employee IDs. Database is healthy.', 'success')
+        setShowCorruptionModal(false)
+      } else {
+        addToast('Database partially repaired, remaining issues exist.', 'warning')
+      }
+    } catch (e) {
+      addToast('Repair failed: ' + e.message, 'error')
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
   const handleSetAttendance = async (updater) => {
     setAttendance((prev) => {
       const rawNext = typeof updater === 'function' ? updater(prev) : updater
@@ -1006,16 +1054,56 @@ export default function App() {
 
   const renderContent = () => {
     if (isAppLoading) {
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div className="skeleton" style={{ height: '40px', width: '200px' }} />
-          <div className="skeleton" style={{ height: '120px', width: '100%', borderRadius: '16px' }} />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            <div className="skeleton" style={{ height: '200px', width: '100%', borderRadius: '16px' }} />
-            <div className="skeleton" style={{ height: '200px', width: '100%', borderRadius: '16px' }} />
+      const skeletonLayouts = {
+        dashboard: (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="skeleton skeleton-header" />
+            <div className="skeleton skeleton-subtitle" />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+              {[1,2,3,4].map(i => <div key={i} className="skeleton skeleton-stat-card" />)}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div className="skeleton skeleton-card" style={{ height: '240px' }} />
+              <div className="skeleton skeleton-card" style={{ height: '240px' }} />
+            </div>
           </div>
-        </div>
-      )
+        ),
+        employees: (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="skeleton skeleton-header" />
+            <div className="skeleton skeleton-subtitle" />
+            <div className="skeleton" style={{ height: '44px', borderRadius: '12px', marginBottom: '8px' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+              {[1,2,3,4,5,6].map(i => <div key={i} className="skeleton skeleton-card" />)}
+            </div>
+          </div>
+        ),
+        table: (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="skeleton skeleton-header" />
+            <div className="skeleton skeleton-subtitle" />
+            <div className="skeleton skeleton-tabs" />
+            {[1,2,3,4,5,6].map(i => <div key={i} className="skeleton skeleton-row" />)}
+          </div>
+        ),
+        settings: (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="skeleton skeleton-header" />
+            <div className="skeleton skeleton-subtitle" />
+            <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {[1,2,3,4,5].map(i => <div key={i} className="skeleton skeleton-row" />)}
+              </div>
+              <div className="skeleton skeleton-card" style={{ height: '400px' }} />
+            </div>
+          </div>
+        )
+      }
+      const layoutKey = currentView === 'dashboard' ? 'dashboard'
+        : currentView === 'employees' ? 'employees'
+        : (currentView === 'settings' || currentView === 'drive') ? 'settings'
+        : 'table'
+      return skeletonLayouts[layoutKey]
     }
 
     if (!hasPermission(currentView)) {
@@ -1387,7 +1475,7 @@ export default function App() {
         dbStatus={dbStatus}
       />
       <main className="content-container">
-        {dataIntegrityIssues.length > 0 && (
+        {dbStatus === 'corruption' && (
           <div style={{
             background: 'rgba(239, 68, 68, 0.1)',
             border: '1px solid var(--accent-danger)',
@@ -1397,16 +1485,31 @@ export default function App() {
             marginBottom: '24px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between'
+            justifyContent: 'space-between',
+            gap: '16px',
+            flexWrap: 'wrap'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <AlertTriangle size={24} />
               <div>
                 <h4 style={{ margin: 0, fontWeight: 700 }}>Data integrity issue detected.</h4>
-                <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem' }}>{dataIntegrityIssues.length} logical conflict(s) found in the database.</p>
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem' }}>
+                  {dataIntegrityIssues.length > 0 
+                    ? `${dataIntegrityIssues.length} logical conflict(s) found in the database.` 
+                    : 'A sync or data integrity constraint failed. Review logs or check structure.'}
+                </p>
               </div>
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
+              {dataIntegrityIssues.some(iss => iss.includes('Duplicate')) && (
+                <button 
+                  onClick={handleAutoRepairDatabase}
+                  className="btn"
+                  style={{ background: 'var(--accent-success)', color: '#fff', border: 'none', fontWeight: 600 }}
+                >
+                  Auto-Fix Duplicates
+                </button>
+              )}
               <button 
                 onClick={() => setShowCorruptionModal(true)} 
                 className="btn btn-outline" 
@@ -1415,11 +1518,15 @@ export default function App() {
                 View Details
               </button>
               <button 
-                onClick={() => setCurrentView('drive')} 
+                onClick={() => {
+                  if (window.confirm("Restore to default clean data? This will clear local cache and reload.")) {
+                    clearLocalCache().then(() => window.location.reload())
+                  }
+                }} 
                 className="btn" 
                 style={{ background: 'var(--accent-danger)', color: '#fff', border: 'none' }}
               >
-                Restore from Backup
+                Reset Database
               </button>
             </div>
           </div>
@@ -1434,10 +1541,28 @@ export default function App() {
               </div>
               <div className="modal-body" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                 <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {dataIntegrityIssues.map((issue, idx) => (
-                    <li key={idx} style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{issue}</li>
-                  ))}
+                  {dataIntegrityIssues.length > 0 ? (
+                    dataIntegrityIssues.map((issue, idx) => (
+                      <li key={idx} style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{issue}</li>
+                    ))
+                  ) : (
+                    <li style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                      No logical constraint conflicts found. A sync process or structure generation constraint has triggered a warning.
+                    </li>
+                  )}
                 </ul>
+              </div>
+              <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--border-color)' }}>
+                {dataIntegrityIssues.some(iss => iss.includes('Duplicate')) && (
+                  <button 
+                    onClick={handleAutoRepairDatabase}
+                    className="btn"
+                    style={{ background: 'var(--accent-success)', color: '#fff', border: 'none', fontWeight: 600 }}
+                  >
+                    Auto-Fix Duplicates
+                  </button>
+                )}
+                <button className="btn btn-secondary" onClick={() => setShowCorruptionModal(false)}>Close</button>
               </div>
             </div>
           </div>

@@ -65,7 +65,7 @@ export async function getOrCreateDbFolder(token) {
   if (isMockToken(token)) {
     return 'mock-folder-root-id';
   }
-  const query = encodeURIComponent(`name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+  const query = encodeURIComponent(`name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and 'appDataFolder' in parents and trashed=false`);
   const url = `${DRIVE_FILES_URL}?q=${query}&fields=files(id,name)`;
   
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
@@ -76,10 +76,11 @@ export async function getOrCreateDbFolder(token) {
     return data.files[0].id;
   }
 
-  // Create folder
+  // Create folder inside appDataFolder
   const metadata = {
     name: FOLDER_NAME,
-    mimeType: 'application/vnd.google-apps.folder'
+    mimeType: 'application/vnd.google-apps.folder',
+    parents: ['appDataFolder']
   };
   const createRes = await fetch(DRIVE_FILES_URL, {
     method: 'POST',
