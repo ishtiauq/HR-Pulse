@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import Sidebar from './components/Sidebar.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import Employees from './components/Employees.jsx'
@@ -1813,6 +1814,7 @@ export default function App() {
           </div>
         </div>
       )}
+      <SpeedInsights />
     </div>
   )
 }
