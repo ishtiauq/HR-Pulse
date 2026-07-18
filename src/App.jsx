@@ -19,6 +19,7 @@ import { clearLocalCache } from './services/db.js'
 import { validateDatabase } from './services/validator.js'
 import { Menu, Bell, AlertTriangle, Search, Layout, User, History, Moon, Settings as SettingsIcon, HardDrive, FileText, Sparkles, Trash2 } from 'lucide-react'
 import { useModal } from './services/useModal.js'
+import { Analytics } from '@vercel/analytics/react'
 
 const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
 
@@ -1813,6 +1814,7 @@ export default function App() {
           </div>
         </div>
       )}
+      <Analytics />
     </div>
   )
 }
