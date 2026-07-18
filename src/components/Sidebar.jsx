@@ -1,8 +1,9 @@
-import { LayoutDashboard, Users, Database, Settings, Activity, LogOut, X, CreditCard, Calendar, Upload, Trash2 } from 'lucide-react'
+import { LayoutDashboard, Users, Database, Settings, Activity, LogOut, X, CreditCard, Calendar, Upload, Trash2, Moon, Sun, HelpCircle, BarChart3, Receipt } from 'lucide-react'
 import { useState, useRef } from 'react'
 
-export default function Sidebar({ currentView, setCurrentView, driveConnected, user, onLogout, mobileOpen, setMobileOpen, settings, setSettings }) {
+export default function Sidebar({ currentView, setCurrentView, driveConnected, user, onLogout, mobileOpen, setMobileOpen, settings, setSettings, isDarkMode, setIsDarkMode, simulatedRole }) {
   const [showLogoModal, setShowLogoModal] = useState(false)
+  const [showCheatSheet, setShowCheatSheet] = useState(false)
   const fileInputRef = useRef(null)
 
   const [dragStart, setDragStart] = useState(null)
@@ -88,14 +89,30 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
     }))
   }
 
-  const menuItems = [
+  const allMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'employees', label: 'Employees', icon: Users },
     { id: 'payroll', label: 'Payroll', icon: CreditCard },
     { id: 'attendance', label: 'Leaves & Attendance', icon: Calendar },
+    { id: 'expenses', label: 'Expenses', icon: Receipt },
+    { id: 'reports', label: 'Reports', icon: BarChart3 },
     { id: 'settings', label: 'Settings', icon: Settings },
     { id: 'drive', label: 'Google Drive Sync', icon: Database },
   ]
+
+  const menuItems = allMenuItems.filter(item => {
+    if (simulatedRole === 'Admin') return true
+    if (simulatedRole === 'Employee') {
+      return ['dashboard', 'attendance', 'expenses'].includes(item.id)
+    }
+    if (simulatedRole === 'Payroll Manager') {
+      return ['dashboard', 'employees', 'payroll', 'reports', 'expenses'].includes(item.id)
+    }
+    if (simulatedRole === 'HR Manager') {
+      return ['dashboard', 'employees', 'attendance', 'payroll', 'reports', 'expenses'].includes(item.id)
+    }
+    return false
+  })
 
   const handleMenuClick = (viewId) => {
     setCurrentView(viewId)
@@ -319,35 +336,89 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
                 </span>
               </div>
             </div>
-            <button 
-              onClick={onLogout}
-              title="Sign Out"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--text-secondary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '6px',
-                borderRadius: '6px',
-                transition: 'all var(--transition-fast)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'var(--accent-danger)'
-                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.08)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--text-secondary)'
-                e.currentTarget.style.background = 'transparent'
-              }}
-            >
-              <LogOut size={16} />
-            </button>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <button 
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                title="Toggle Dark Mode"
+                style={{
+                  background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px', borderRadius: '6px',
+                  transition: 'all var(--transition-fast)'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-tertiary)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'transparent' }}
+              >
+                {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
+
+              <button 
+                onClick={() => setShowCheatSheet(true)}
+                title="Keyboard Shortcuts"
+                style={{
+                  background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px', borderRadius: '6px',
+                  transition: 'all var(--transition-fast)'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent-primary)'; e.currentTarget.style.background = 'var(--bg-tertiary)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'transparent' }}
+              >
+                <HelpCircle size={16} />
+              </button>
+
+              <button 
+                onClick={onLogout}
+                title="Sign Out"
+                style={{
+                  background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px', borderRadius: '6px',
+                  transition: 'all var(--transition-fast)'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent-danger)'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.08)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'transparent' }}
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
           </div>
         )}
       </div>
+
+      {/* Keyboard Shortcuts Cheat Sheet Modal */}
+      {showCheatSheet && (
+        <div className="modal-overlay">
+          <div className="modal-container" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h2>Keyboard Shortcuts</h2>
+              <button className="modal-close" onClick={() => setShowCheatSheet(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Command Palette</span>
+                <kbd style={{ background: 'var(--bg-tertiary)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>Ctrl + K</kbd>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Search / Quick Action</span>
+                <kbd style={{ background: 'var(--bg-tertiary)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>/</kbd>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Go to Employees</span>
+                <kbd style={{ background: 'var(--bg-tertiary)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>E</kbd>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Save current form</span>
+                <kbd style={{ background: 'var(--bg-tertiary)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>S</kbd>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Close Modals</span>
+                <kbd style={{ background: 'var(--bg-tertiary)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>Esc</kbd>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Embedded CSS for keyframes */}
       <style>{`

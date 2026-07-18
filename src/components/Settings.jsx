@@ -1,13 +1,26 @@
 import { useState, useRef } from 'react'
-import { Save, DollarSign, Sliders, Info, Percent, Building2, Bell, Globe, Mail, Plus, Trash2, Upload, Activity, X } from 'lucide-react'
+import { Save, DollarSign, Sliders, Info, Percent, Building2, Bell, Globe, Mail, Plus, Trash2, Upload, Activity, X, ShieldCheck, List, FileSpreadsheet, Download, Receipt, CalendarClock } from 'lucide-react'
 import AdSlot from './AdSlot.jsx'
 
-export default function Settings({ settings, setSettings, addLog }) {
+export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, simulatedRole }) {
   const [activeSubmenu, setActiveSubmenu] = useState('payroll')
+
+  // Audit Logs filtering
+  const [auditFilterDate, setAuditFilterDate] = useState('')
+  const [auditFilterAction, setAuditFilterAction] = useState('All')
+
+  // Security tab states
+  const [activeSessions, setActiveSessions] = useState([
+    { id: 'sess-1', device: 'Chrome / Windows', location: 'New York, US', current: true, ip: '192.168.1.1', time: 'Active now' },
+    { id: 'sess-2', device: 'Safari / iPhone 13', location: 'New York, US', current: false, ip: '192.168.1.5', time: 'Last active 2 hours ago' }
+  ])
 
   // Payroll general states
   const [currency, setCurrency] = useState(settings.currency || '$')
   const [salaryStructure, setSalaryStructure] = useState(settings.salaryStructure || [])
+  const [expensePolicies, setExpensePolicies] = useState(settings.expensePolicies || {
+    Travel: 500, Meals: 50, 'Office Supplies': 100, Medical: 200, Other: 50
+  })
 
   // Company profile states
   const [companyName, setCompanyName] = useState(settings.company?.name || 'HR Pulse Ltd.')
@@ -27,6 +40,10 @@ export default function Settings({ settings, setSettings, addLog }) {
   // Notification states
   const [syncAlerts, setSyncAlerts] = useState(settings.notifications?.syncAlerts ?? true)
   const [emailDigests, setEmailDigests] = useState(settings.notifications?.emailDigests ?? false)
+
+  // Roster & Shifts states
+  const [shiftTemplates, setShiftTemplates] = useState(settings.shiftTemplates || [])
+  const [overtimeRules, setOvertimeRules] = useState(settings.overtimeRules || { multiplierWeekday: 1.5, multiplierWeekend: 2.0 })
 
   const [isSaving, setIsSaving] = useState(false)
 
@@ -66,15 +83,30 @@ export default function Settings({ settings, setSettings, addLog }) {
           logoY,
           logoZoom
         },
+        expensePolicies,
+        shiftTemplates,
+        overtimeRules,
         notifications: { syncAlerts, emailDigests }
       }
       
       setSettings(updatedSettings)
       addLog('Settings Updated', 'Saved system settings and synced configurations with Google Drive', 'success')
       setIsSaving(false)
-      alert("Settings saved successfully and synced to Google Drive!")
+      if (addToast) {
+        addToast("Settings saved successfully and synced to Google Drive!", "success")
+      } else {
+        // Fallback if addToast isn't directly passed or available
+        addLog('Settings Saved', 'Settings saved successfully', 'success')
+      }
     }, 1000)
   }
+
+  const [showResetModal, setShowResetModal] = useState(false)
+  const [sampleGross, setSampleGross] = useState(5000)
+  const [hoveredComponentId, setHoveredComponentId] = useState(null)
+  
+  const totalComponents = earningsSum + deductionsSum
+  const isOver100 = totalComponents > 100
 
   const resetToDefaults = () => {
     if (activeSubmenu === 'payroll') {
@@ -197,12 +229,26 @@ export default function Settings({ settings, setSettings, addLog }) {
 
                 {/* Salary breakdown display */}
                 <div className="glass-card" style={{ padding: '24px' }}>
-                  <h4 style={{ fontSize: '1.05rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Percent size={16} style={{ color: 'var(--accent-success)' }} />
-                    Split Visualization
-                  </h4>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <h4 style={{ fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Percent size={16} style={{ color: 'var(--accent-success)' }} />
+                      Split Visualization
+                    </h4>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Sample Gross:</label>
+                      <input 
+                        type="number" 
+                        value={sampleGross} 
+                        onChange={(e) => setSampleGross(Number(e.target.value))}
+                        style={{
+                          width: '80px', padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--border-color)',
+                          background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.85rem', outline: 'none'
+                        }}
+                      />
+                    </div>
+                  </div>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                    Gross salary distribution preview.
+                    Gross salary distribution preview. Hover to see calculated amounts.
                   </p>
 
                   {salaryStructure.length === 0 ? (
@@ -221,19 +267,32 @@ export default function Settings({ settings, setSettings, addLog }) {
                         {salaryStructure.map((item, index) => (
                           <div 
                             key={item.id}
+                            onMouseEnter={() => setHoveredComponentId(item.id)}
+                            onMouseLeave={() => setHoveredComponentId(null)}
                             style={{ 
                               width: `${item.percentage}%`, 
                               background: getSegmentColor(item, index),
-                              height: '100%'
+                              height: '100%',
+                              transition: 'opacity var(--transition-fast)',
+                              opacity: hoveredComponentId && hoveredComponentId !== item.id ? 0.3 : 1,
+                              cursor: 'pointer'
                             }} 
-                            title={`${item.name}: ${item.percentage}%`}
+                            title={`${item.name}: ${item.percentage}% (${currency}${(sampleGross * (item.percentage / 100)).toLocaleString()})`}
                           />
                         ))}
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.75rem' }}>
                         {salaryStructure.map((item, index) => (
-                          <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div 
+                            key={item.id} 
+                            style={{ 
+                              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                              padding: '2px 6px', borderRadius: '4px',
+                              background: hoveredComponentId === item.id ? 'var(--bg-tertiary)' : 'transparent',
+                              transition: 'background var(--transition-fast)'
+                            }}
+                          >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getSegmentColor(item, index) }} />
                               <span style={{ color: 'var(--text-secondary)' }}>{item.name} ({item.type})</span>
@@ -268,6 +327,13 @@ export default function Settings({ settings, setSettings, addLog }) {
                     <Plus size={14} /> Add Item
                   </button>
                 </div>
+
+                {isOver100 && (
+                  <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--accent-danger)', color: 'var(--accent-danger)', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Info size={16} />
+                    Component total exceeds 100%. Please adjust before saving.
+                  </div>
+                )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '420px', overflowY: 'auto', paddingRight: '4px' }}>
                   {salaryStructure.map((item, index) => (
@@ -313,16 +379,21 @@ export default function Settings({ settings, setSettings, addLog }) {
                         </button>
                       </div>
 
-                      {/* Percentage slider */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {/* Percentage slider & input */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <input 
                           type="range" min="0" max="100" value={item.percentage} 
                           onChange={(e) => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
                           style={{ flex: 1, cursor: 'pointer', accentColor: getSegmentColor(item, index) }}
                         />
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600, width: '40px', textAlign: 'right' }}>
-                          {item.percentage}%
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--bg-secondary)', padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+                          <input 
+                            type="number" min="0" max="100" value={item.percentage} 
+                            onChange={(e) => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
+                            style={{ width: '40px', background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '0.85rem', outline: 'none', textAlign: 'right' }}
+                          />
+                          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>%</span>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -493,6 +564,293 @@ export default function Settings({ settings, setSettings, addLog }) {
             </div>
           </div>
         )
+
+      case 'expenses':
+        return (
+          <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Receipt size={18} style={{ color: 'var(--accent-primary)' }} />
+              Expense Policies
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Set maximum reimbursement limits per category. Expenses exceeding these limits will be flagged for review in the approval queue.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+              {Object.keys(expensePolicies).map(category => (
+                <div key={category} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{category} Limit ($)</label>
+                  <input 
+                    type="number"
+                    value={expensePolicies[category]}
+                    onChange={(e) => setExpensePolicies(prev => ({ ...prev, [category]: Number(e.target.value) }))}
+                    style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+
+      case 'rosters':
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                  <CalendarClock size={18} style={{ color: 'var(--accent-primary)' }} />
+                  Shift Templates
+                </h3>
+                <button className="btn btn-secondary" onClick={() => {
+                  const newTemplate = { id: `st-${Date.now()}`, name: 'New Shift', start: '09:00', end: '17:00', break: 60, color: '#3b82f6' }
+                  setShiftTemplates([...shiftTemplates, newTemplate])
+                }}>
+                  <Plus size={16} /> Add Shift
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {shiftTemplates.map((template) => (
+                  <div key={template.id} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1.5 }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Shift Name</label>
+                      <input type="text" value={template.name} onChange={(e) => {
+                        setShiftTemplates(prev => prev.map(t => t.id === template.id ? { ...t, name: e.target.value } : t))
+                      }} style={{ padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', outline: 'none' }} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Start Time</label>
+                      <input type="time" value={template.start} onChange={(e) => {
+                        setShiftTemplates(prev => prev.map(t => t.id === template.id ? { ...t, start: e.target.value } : t))
+                      }} style={{ padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', outline: 'none' }} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>End Time</label>
+                      <input type="time" value={template.end} onChange={(e) => {
+                        setShiftTemplates(prev => prev.map(t => t.id === template.id ? { ...t, end: e.target.value } : t))
+                      }} style={{ padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', outline: 'none' }} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Break (min)</label>
+                      <input type="number" value={template.break} onChange={(e) => {
+                        setShiftTemplates(prev => prev.map(t => t.id === template.id ? { ...t, break: parseInt(e.target.value) || 0 } : t))
+                      }} style={{ padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', outline: 'none' }} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '60px' }}>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Color</label>
+                      <input type="color" value={template.color} onChange={(e) => {
+                        setShiftTemplates(prev => prev.map(t => t.id === template.id ? { ...t, color: e.target.value } : t))
+                      }} style={{ padding: '4px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', width: '100%', height: '35px', cursor: 'pointer' }} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', justifyContent: 'flex-end', height: '100%' }}>
+                      <label style={{ fontSize: '0.75rem', color: 'transparent' }}>X</label>
+                      <button className="btn btn-secondary" style={{ padding: '8px', color: 'var(--accent-danger)' }} onClick={() => {
+                        setShiftTemplates(prev => prev.filter(t => t.id !== template.id))
+                      }}>
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <Activity size={18} style={{ color: 'var(--accent-warning)' }} />
+                Overtime Rules
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Weekday Multiplier (e.g., 1.5x)</label>
+                  <input type="number" step="0.1" value={overtimeRules.multiplierWeekday} onChange={(e) => setOvertimeRules(prev => ({ ...prev, multiplierWeekday: parseFloat(e.target.value) || 1 }))} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Weekend/Holiday Multiplier (e.g., 2.0x)</label>
+                  <input type="number" step="0.1" value={overtimeRules.multiplierWeekend} onChange={(e) => setOvertimeRules(prev => ({ ...prev, multiplierWeekend: parseFloat(e.target.value) || 1 }))} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+
+      case 'audit':
+        const filteredAudit = (auditLogs || []).filter(l => {
+          if (auditFilterAction !== 'All' && l.action !== auditFilterAction) return false
+          if (auditFilterDate && !l.timestamp.startsWith(auditFilterDate)) return false
+          return true
+        })
+
+        const handleExportCSV = () => {
+          if (!filteredAudit.length) return
+          const headers = ['Timestamp', 'User', 'Action', 'Entity', 'Details', 'IP Address']
+          const rows = filteredAudit.map(log => [
+            new Date(log.timestamp).toLocaleString(),
+            log.user,
+            log.action,
+            log.entity,
+            log.details,
+            log.ip
+          ].map(field => `"${field}"`).join(','))
+          const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows].join('\n')
+          const encodedUri = encodeURI(csvContent)
+          const link = document.createElement("a")
+          link.setAttribute("href", encodedUri)
+          link.setAttribute("download", `audit_logs_${new Date().toISOString().split('T')[0]}.csv`)
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          if (addToast) addToast("Audit logs exported to CSV", "success")
+        }
+
+        return (
+          <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 4px 0' }}>
+                  <List size={18} style={{ color: 'var(--accent-primary)' }} />
+                  Audit Logs
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>Review all system actions for compliance and security.</p>
+              </div>
+              <button onClick={handleExportCSV} className="btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', fontSize: '0.85rem' }}>
+                <Download size={14} /> Export CSV
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: '150px' }}>
+                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Date</label>
+                <input 
+                  type="date" 
+                  value={auditFilterDate} 
+                  onChange={(e) => setAuditFilterDate(e.target.value)}
+                  style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)', outline: 'none' }}
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: '150px' }}>
+                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Action Type</label>
+                <select 
+                  value={auditFilterAction} 
+                  onChange={(e) => setAuditFilterAction(e.target.value)}
+                  style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)', outline: 'none' }}
+                >
+                  <option value="All">All Actions</option>
+                  <option value="CREATE">CREATE</option>
+                  <option value="UPDATE">UPDATE</option>
+                  <option value="DELETE">DELETE</option>
+                </select>
+              </div>
+              <div style={{ alignSelf: 'flex-end', marginBottom: '2px' }}>
+                <button onClick={() => { setAuditFilterDate(''); setAuditFilterAction('All'); }} className="btn" style={{ padding: '6px 12px', fontSize: '0.8rem', background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <table className="table" style={{ minWidth: '800px' }}>
+                <thead style={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--bg-primary)' }}>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Entity</th>
+                    <th>Details</th>
+                    <th>IP Address</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAudit.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>No logs found for selected filters.</td>
+                    </tr>
+                  ) : (
+                    filteredAudit.map(log => (
+                      <tr key={log.id}>
+                        <td style={{ fontSize: '0.8rem' }}>{new Date(log.timestamp).toLocaleString()}</td>
+                        <td style={{ fontWeight: 600, fontSize: '0.85rem' }}>{log.user}</td>
+                        <td>
+                          <span style={{ 
+                            fontSize: '0.75rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px',
+                            background: log.action === 'CREATE' ? 'rgba(34,197,94,0.1)' : log.action === 'UPDATE' ? 'rgba(59,130,246,0.1)' : 'rgba(239,68,68,0.1)',
+                            color: log.action === 'CREATE' ? 'var(--accent-success)' : log.action === 'UPDATE' ? 'var(--accent-primary)' : 'var(--accent-danger)'
+                          }}>{log.action}</span>
+                        </td>
+                        <td style={{ fontSize: '0.85rem' }}>{log.entity}</td>
+                        <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{log.details}</td>
+                        <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{log.ip}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      
+      case 'security':
+        return (
+          <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div>
+              <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 4px 0' }}>
+                <ShieldCheck size={18} style={{ color: 'var(--accent-primary)' }} />
+                Session Management
+              </h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>Review devices currently logged into your account.</p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {activeSessions.map(sess => (
+                <div key={sess.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>{sess.device}</span>
+                      {sess.current && (
+                        <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', background: 'rgba(34,197,94,0.1)', color: 'var(--accent-success)' }}>This Device</span>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                      <span>{sess.location}</span>
+                      <span>•</span>
+                      <span>{sess.time}</span>
+                      <span>•</span>
+                      <span>{sess.ip}</span>
+                    </div>
+                  </div>
+                  {!sess.current && (
+                    <button 
+                      onClick={() => {
+                        setActiveSessions(prev => prev.filter(s => s.id !== sess.id))
+                        if (addToast) addToast("Session terminated", "success")
+                      }}
+                      className="btn-outline" 
+                      style={{ padding: '6px 12px', fontSize: '0.8rem', color: 'var(--accent-danger)', borderColor: 'rgba(239,68,68,0.3)' }}
+                    >
+                      Sign Out
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {activeSessions.length > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+                <button 
+                  className="btn" 
+                  style={{ background: 'var(--accent-danger)', color: '#fff', padding: '8px 16px', fontSize: '0.9rem', fontWeight: 600, border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                  onClick={() => {
+                    setActiveSessions(prev => prev.filter(s => s.current))
+                    if (addToast) addToast("All other devices signed out", "success")
+                  }}
+                >
+                  Sign out all other devices
+                </button>
+              </div>
+            )}
+          </div>
+        )
+
       default:
         return null
     }
@@ -508,9 +866,9 @@ export default function Settings({ settings, setSettings, addLog }) {
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>Configure structural settings, company profiles, and system behaviors.</p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn btn-secondary" onClick={resetToDefaults}>Reset Defaults</button>
-          <button className="btn btn-primary" onClick={handleSave} disabled={isSaving}>
-            <Save size={16} />
+          <button className="btn btn-secondary" onClick={() => setShowResetModal(true)}>Reset Defaults</button>
+          <button className="btn btn-primary" onClick={handleSave} disabled={isSaving || isOver100}>
+            {isSaving ? <div className="spinner" /> : <Save size={16} />}
             {isSaving ? 'Saving...' : 'Save Settings'}
           </button>
         </div>
@@ -547,6 +905,8 @@ export default function Settings({ settings, setSettings, addLog }) {
           {/* Company Profile Submenu */}
           <button
             onClick={() => setActiveSubmenu('company')}
+            onMouseEnter={(e) => { if (activeSubmenu !== 'company') e.currentTarget.style.color = '#2563eb' }}
+            onMouseLeave={(e) => { if (activeSubmenu !== 'company') e.currentTarget.style.color = 'var(--text-secondary)' }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -555,7 +915,6 @@ export default function Settings({ settings, setSettings, addLog }) {
               borderRadius: '8px',
               border: 'none',
               fontSize: '0.9rem',
-              fontWeight: 500,
               textAlign: 'left',
               cursor: 'pointer',
               background: activeSubmenu === 'company' ? 'var(--bg-tertiary)' : 'transparent',
@@ -568,9 +927,11 @@ export default function Settings({ settings, setSettings, addLog }) {
             Company Profile
           </button>
 
-          {/* Notifications Submenu */}
+          {/* Expense Policies Submenu */}
           <button
-            onClick={() => setActiveSubmenu('notifications')}
+            onClick={() => setActiveSubmenu('expenses')}
+            onMouseEnter={(e) => { if (activeSubmenu !== 'expenses') e.currentTarget.style.color = '#2563eb' }}
+            onMouseLeave={(e) => { if (activeSubmenu !== 'expenses') e.currentTarget.style.color = 'var(--text-secondary)' }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -579,7 +940,56 @@ export default function Settings({ settings, setSettings, addLog }) {
               borderRadius: '8px',
               border: 'none',
               fontSize: '0.9rem',
-              fontWeight: 500,
+              textAlign: 'left',
+              cursor: 'pointer',
+              background: activeSubmenu === 'expenses' ? 'var(--bg-tertiary)' : 'transparent',
+              color: activeSubmenu === 'expenses' ? '#ffffff' : 'var(--text-secondary)',
+              fontWeight: 700,
+              transition: 'all var(--transition-fast)'
+            }}
+          >
+            <Receipt size={16} style={{ color: activeSubmenu === 'expenses' ? 'var(--accent-primary)' : 'inherit' }} />
+            Expense Policies
+          </button>
+
+          {/* Rosters & Shifts Submenu */}
+          <button
+            onClick={() => setActiveSubmenu('rosters')}
+            onMouseEnter={(e) => { if (activeSubmenu !== 'rosters') e.currentTarget.style.color = '#2563eb' }}
+            onMouseLeave={(e) => { if (activeSubmenu !== 'rosters') e.currentTarget.style.color = 'var(--text-secondary)' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '12px 14px',
+              borderRadius: '8px',
+              border: 'none',
+              fontSize: '0.9rem',
+              textAlign: 'left',
+              cursor: 'pointer',
+              background: activeSubmenu === 'rosters' ? 'var(--bg-tertiary)' : 'transparent',
+              color: activeSubmenu === 'rosters' ? '#ffffff' : 'var(--text-secondary)',
+              fontWeight: 700,
+              transition: 'all var(--transition-fast)'
+            }}
+          >
+            <CalendarClock size={16} style={{ color: activeSubmenu === 'rosters' ? 'var(--accent-primary)' : 'inherit' }} />
+            Rosters & Shifts
+          </button>
+
+          {/* Notifications Submenu */}
+          <button
+            onClick={() => setActiveSubmenu('notifications')}
+            onMouseEnter={(e) => { if (activeSubmenu !== 'notifications') e.currentTarget.style.color = '#2563eb' }}
+            onMouseLeave={(e) => { if (activeSubmenu !== 'notifications') e.currentTarget.style.color = 'var(--text-secondary)' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '12px 14px',
+              borderRadius: '8px',
+              border: 'none',
+              fontSize: '0.9rem',
               textAlign: 'left',
               cursor: 'pointer',
               background: activeSubmenu === 'notifications' ? 'var(--bg-tertiary)' : 'transparent',
@@ -590,6 +1000,56 @@ export default function Settings({ settings, setSettings, addLog }) {
           >
             <Bell size={16} style={{ color: activeSubmenu === 'notifications' ? 'var(--accent-primary)' : 'inherit' }} />
             Notifications
+          </button>
+
+          {/* Audit Logs Submenu */}
+          <button
+            onClick={() => setActiveSubmenu('audit')}
+            onMouseEnter={(e) => { if (activeSubmenu !== 'audit') e.currentTarget.style.color = '#2563eb' }}
+            onMouseLeave={(e) => { if (activeSubmenu !== 'audit') e.currentTarget.style.color = 'var(--text-secondary)' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '12px 14px',
+              borderRadius: '8px',
+              border: 'none',
+              fontSize: '0.9rem',
+              textAlign: 'left',
+              cursor: 'pointer',
+              background: activeSubmenu === 'audit' ? 'var(--bg-tertiary)' : 'transparent',
+              color: activeSubmenu === 'audit' ? '#ffffff' : 'var(--text-secondary)',
+              fontWeight: 700,
+              transition: 'all var(--transition-fast)'
+            }}
+          >
+            <List size={16} style={{ color: activeSubmenu === 'audit' ? 'var(--accent-primary)' : 'inherit' }} />
+            Audit Logs
+          </button>
+
+          {/* Security Submenu */}
+          <button
+            onClick={() => setActiveSubmenu('security')}
+            onMouseEnter={(e) => { if (activeSubmenu !== 'security') e.currentTarget.style.color = '#2563eb' }}
+            onMouseLeave={(e) => { if (activeSubmenu !== 'security') e.currentTarget.style.color = 'var(--text-secondary)' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '12px 14px',
+              borderRadius: '8px',
+              border: 'none',
+              fontSize: '0.9rem',
+              textAlign: 'left',
+              cursor: 'pointer',
+              background: activeSubmenu === 'security' ? 'var(--bg-tertiary)' : 'transparent',
+              color: activeSubmenu === 'security' ? '#ffffff' : 'var(--text-secondary)',
+              fontWeight: 700,
+              transition: 'all var(--transition-fast)'
+            }}
+          >
+            <ShieldCheck size={16} style={{ color: activeSubmenu === 'security' ? 'var(--accent-primary)' : 'inherit' }} />
+            Security
           </button>
         </div>
 
@@ -698,6 +1158,43 @@ export default function Settings({ settings, setSettings, addLog }) {
               >
                 Done
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Confirmation Modal */}
+      {showResetModal && (
+        <div className="modal-overlay">
+          <div className="modal-container" style={{ maxWidth: '400px', zIndex: 1000 }}>
+            <div className="modal-header">
+              <h2>Confirm Reset</h2>
+              <button className="modal-close" onClick={() => setShowResetModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.5' }}>
+                Are you sure? This will reset all settings in the active tab to their default values.
+              </p>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <button className="btn-secondary" onClick={() => setShowResetModal(false)}>
+                  Cancel
+                </button>
+                <button 
+                  className="btn-primary" 
+                  style={{ background: 'var(--accent-danger)' }}
+                  onClick={() => {
+                    resetToDefaults()
+                    setShowResetModal(false)
+                    if (addToast) {
+                      addToast('Settings reset to defaults', 'info')
+                    }
+                  }}
+                >
+                  Reset Defaults
+                </button>
+              </div>
             </div>
           </div>
         </div>

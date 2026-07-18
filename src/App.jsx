@@ -7,8 +7,11 @@ import Login from './components/Login.jsx'
 import Payroll from './components/Payroll.jsx'
 import Settings from './components/Settings.jsx'
 import Attendance from './components/Attendance.jsx'
+import Reports from './components/Reports.jsx'
+import Expenses from './components/Expenses.jsx'
+import EmployeePortal from './components/EmployeePortal.jsx'
 import { loadOrInitializeDatabase, updateAppDataFile } from './services/googleDrive.js'
-import { Menu } from 'lucide-react'
+import { Menu, Bell } from 'lucide-react'
 
 const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
 
@@ -59,6 +62,131 @@ export default function App() {
   const [settingsFileId, setSettingsFileId] = useState(null)
   const [attendanceFileId, setAttendanceFileId] = useState(null)
   const [isSyncing, setIsSyncing] = useState(false)
+  const [isAppLoading, setIsAppLoading] = useState(true)
+
+  // RBAC & Security States
+  const [simulatedRole, setSimulatedRole] = useState('Admin')
+  const [pendingProfileEdits, setPendingProfileEdits] = useState([])
+  const [auditLogs, setAuditLogs] = useState([
+    { id: 'audit-1', timestamp: new Date(Date.now() - 86400000).toISOString(), user: 'System', action: 'CREATE', entity: 'System', details: 'Initialized audit logging.', ip: '192.168.1.1' }
+  ])
+
+  const addAuditLog = (action, entity, details) => {
+    const newLog = {
+      id: `audit-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      user: 'Admin', // In real app, from user state
+      action,
+      entity,
+      details,
+      ip: '192.168.1.1'
+    }
+    setAuditLogs(prev => [newLog, ...prev])
+  }
+
+  const hasPermission = (resource) => {
+    if (simulatedRole === 'Admin') return true
+    if (simulatedRole === 'Employee') {
+      return ['dashboard', 'attendance', 'expenses'].includes(resource)
+    }
+    if (simulatedRole === 'Payroll Manager') {
+      return ['dashboard', 'employees', 'payroll', 'reports', 'expenses'].includes(resource)
+    }
+    if (simulatedRole === 'HR Manager') {
+      return ['dashboard', 'employees', 'attendance', 'payroll', 'reports', 'expenses'].includes(resource)
+    }
+    return false
+  }
+
+  // Global Toasts
+  const [toasts, setToasts] = useState([])
+  const addToast = (message, type = 'success', action = null) => {
+    const id = Date.now()
+    setToasts(prev => [...prev, { id, message, type, action }])
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id))
+    }, 4000)
+  }
+
+  // Remove toast manually (useful if an action was taken)
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(t => t.id !== id))
+  }
+
+  // Notifications
+  const [notifications, setNotifications] = useState([
+    { id: 'notif-1', text: 'Your leave request was approved', read: false, time: '2 mins ago' },
+    { id: 'notif-2', text: 'New leave request from Sarah Rahman', read: false, time: '1 hour ago' }
+  ])
+  const [showNotifications, setShowNotifications] = useState(false)
+  
+  const addNotification = (text) => {
+    setNotifications(prev => [{ id: `notif-${Date.now()}`, text, read: false, time: 'Just now' }, ...prev])
+  }
+  
+  const markNotificationsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+  }
+
+  // Dark Mode Theme
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('hr_pulse_theme')
+    return saved === 'dark'
+  })
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark')
+      localStorage.setItem('hr_pulse_theme', 'dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+      localStorage.setItem('hr_pulse_theme', 'light')
+    }
+  }, [isDarkMode])
+
+  // Initial App Loader Simulator
+  useEffect(() => {
+    const timer = setTimeout(() => setIsAppLoading(false), 500)
+    return () => clearTimeout(timer)
+  }, [currentView])
+
+  // Global Keyboard Shortcuts & Command Palette
+  const [showCommandPalette, setShowCommandPalette] = useState(false)
+  const [commandSearch, setCommandSearch] = useState('')
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignore if typing in an input
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable) {
+        if (e.key === 'Escape') {
+          e.target.blur()
+        } else {
+          return
+        }
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        setShowCommandPalette(true)
+      } else if (e.key === '/') {
+        e.preventDefault()
+        setShowCommandPalette(true)
+      } else if (e.key.toLowerCase() === 'e') {
+        e.preventDefault()
+        setCurrentView('employees')
+      } else if (e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        addToast('Save shortcut triggered', 'info')
+        // In a real app, this would trigger the specific page's save function
+      } else if (e.key === 'Escape') {
+        setShowCommandPalette(false)
+        setMobileMenuOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const handleLogin = (userInfo) => {
     setUser(userInfo)
@@ -170,6 +298,36 @@ export default function App() {
     }
   })
 
+  const [expenses, setExpenses] = useState(() => {
+    const saved = localStorage.getItem('hr_pulse_expenses')
+    if (saved) {
+      try { return JSON.parse(saved) } catch (e) { console.error(e) }
+    }
+    return [
+      { id: 'EXP-101', employeeId: 'EMP-101', category: 'Medical', amount: 120, currency: '$', date: '2026-07-15', description: 'Annual checkup', status: 'Pending', receipt: null },
+      { id: 'EXP-102', employeeId: 'EMP-102', category: 'Office Supplies', amount: 45, currency: '$', date: '2026-07-16', description: 'Mechanical keyboard', status: 'Approved', receipt: null }
+    ]
+  })
+
+  // NEW ROSTER & SHIFT STATES
+  const [roster, setRoster] = useState(() => {
+    const saved = localStorage.getItem('hr_pulse_roster')
+    if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(e) } }
+    return []
+  })
+
+  const [shiftSwaps, setShiftSwaps] = useState(() => {
+    const saved = localStorage.getItem('hr_pulse_shift_swaps')
+    if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(e) } }
+    return []
+  })
+
+  const [overtimeClaims, setOvertimeClaims] = useState(() => {
+    const saved = localStorage.getItem('hr_pulse_overtime_claims')
+    if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(e) } }
+    return []
+  })
+
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('hr_pulse_settings')
     if (saved) {
@@ -197,6 +355,13 @@ export default function App() {
         logoY: 0,
         logoZoom: 1
       },
+      shiftTemplates: [
+        { id: 'st-1', name: 'Morning Shift', start: '09:00', end: '18:00', break: 60, color: '#3b82f6' },
+        { id: 'st-2', name: 'Evening Shift', start: '14:00', end: '23:00', break: 60, color: '#8b5cf6' },
+        { id: 'st-3', name: 'Night Shift', start: '22:00', end: '07:00', break: 60, color: '#1e293b' },
+        { id: 'st-4', name: 'Half-Day', start: '09:00', end: '13:00', break: 0, color: '#f59e0b' }
+      ],
+      overtimeRules: { multiplierWeekday: 1.5, multiplierWeekend: 2.0 },
       notifications: { syncAlerts: true, emailDigests: false }
     }
   })
@@ -257,6 +422,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('hr_pulse_attendance', JSON.stringify(attendance))
   }, [attendance])
+
+  useEffect(() => {
+    localStorage.setItem('hr_pulse_expenses', JSON.stringify(expenses))
+  }, [expenses])
 
   useEffect(() => {
     localStorage.setItem('hr_pulse_sync_logs', JSON.stringify(syncLogs))
@@ -435,6 +604,12 @@ export default function App() {
     })
   }
 
+  const handleSetExpenses = (updater) => {
+    setExpenses((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      return next
+    })
+  }
   // Function to simulate Google Drive activity log update
   const addLog = (action, details, status = 'success') => {
     const newLog = {
@@ -445,6 +620,13 @@ export default function App() {
       details
     }
     setSyncLogs(prev => [newLog, ...prev.slice(0, 4)])
+    
+    // Also trigger global toast for important actions
+    if (status === 'success') {
+      addToast(action, 'success')
+    } else if (status === 'danger') {
+      addToast(action, 'error')
+    }
   }
 
   // Effect to simulate periodic sync when connected
@@ -471,7 +653,47 @@ export default function App() {
     return () => clearInterval(interval)
   }, [driveConnected])
 
+  const renderBreadcrumbs = () => {
+    if (currentView === 'dashboard') return null;
+    return (
+      <div className="breadcrumb-container">
+        <span className="breadcrumb-item" onClick={() => setCurrentView('dashboard')}>Dashboard</span>
+        <span>/</span>
+        <span className="breadcrumb-current" style={{ textTransform: 'capitalize' }}>
+          {currentView === 'drive' ? 'Google Drive Sync' : currentView}
+        </span>
+      </div>
+    )
+  }
+
   const renderContent = () => {
+    if (isAppLoading) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="skeleton" style={{ height: '40px', width: '200px' }} />
+          <div className="skeleton" style={{ height: '120px', width: '100%', borderRadius: '16px' }} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div className="skeleton" style={{ height: '200px', width: '100%', borderRadius: '16px' }} />
+            <div className="skeleton" style={{ height: '200px', width: '100%', borderRadius: '16px' }} />
+          </div>
+        </div>
+      )
+    }
+
+    if (!hasPermission(currentView)) {
+      return (
+        <div className="animate-fade-in" style={{ padding: '64px 32px', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '16px', border: '1px solid var(--border-color)', marginTop: '24px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--accent-danger)', marginBottom: '16px' }}>
+            <span style={{ fontSize: '2rem', fontWeight: 700 }}>!</span>
+          </div>
+          <h2 style={{ fontSize: '1.8rem', color: 'var(--accent-danger)', marginBottom: '16px' }}>403 Forbidden</h2>
+          <p style={{ color: 'var(--text-secondary)', maxWidth: '400px', margin: '0 auto' }}>
+            Your current role (<strong>{simulatedRole}</strong>) does not have permission to access the <strong>{currentView}</strong> module.
+          </p>
+        </div>
+      )
+    }
+
     switch (currentView) {
       case 'dashboard':
         return (
@@ -489,6 +711,11 @@ export default function App() {
             setEmployees={handleSetEmployees} 
             addLog={addLog}
             driveConnected={driveConnected}
+            simulatedRole={simulatedRole}
+            addAuditLog={addAuditLog}
+            pendingProfileEdits={pendingProfileEdits}
+            setPendingProfileEdits={setPendingProfileEdits}
+            addToast={addToast}
           />
         )
       case 'payroll':
@@ -500,6 +727,8 @@ export default function App() {
             addLog={addLog}
             driveConnected={driveConnected}
             settings={settings}
+            simulatedRole={simulatedRole}
+            addAuditLog={addAuditLog}
           />
         )
       case 'attendance':
@@ -508,18 +737,54 @@ export default function App() {
             employees={employees}
             attendance={attendance}
             setAttendance={handleSetAttendance}
+            roster={roster}
+            setRoster={setRoster}
+            shiftSwaps={shiftSwaps}
+            setShiftSwaps={setShiftSwaps}
+            shiftTemplates={settings.shiftTemplates}
+            overtimeClaims={overtimeClaims}
+            setOvertimeClaims={setOvertimeClaims}
             addLog={addLog}
             driveConnected={driveConnected}
+            addToast={addToast}
+            addNotification={addNotification}
+            simulatedRole={simulatedRole}
+            addAuditLog={addAuditLog}
+          />
+        )
+      case 'reports':
+        return (
+          <Reports 
+            employees={employees}
+            payroll={payroll}
+            attendance={attendance}
+            addLog={addLog}
+            addToast={addToast}
+            simulatedRole={simulatedRole}
+          />
+        )
+      case 'expenses':
+        return (
+          <Expenses
+            employees={employees}
+            expenses={expenses}
+            setExpenses={handleSetExpenses}
+            settings={settings}
+            addLog={addLog}
+            addToast={addToast}
+            addAuditLog={addAuditLog}
+            simulatedRole={simulatedRole}
           />
         )
       case 'settings':
-        return (
-          <Settings 
-            settings={settings}
-            setSettings={handleSetSettings}
-            addLog={addLog}
-          />
-        )
+        return <Settings 
+          settings={settings} 
+          setSettings={handleSetSettings} 
+          addLog={addLog} 
+          addToast={addToast}
+          auditLogs={auditLogs}
+          simulatedRole={simulatedRole}
+        />
       case 'drive':
         return (
           <DriveSync 
@@ -538,6 +803,7 @@ export default function App() {
             driveConnected={driveConnected} 
             addLog={addLog}
             attendance={attendance}
+            setCurrentView={setCurrentView}
           />
         )
     }
@@ -545,6 +811,31 @@ export default function App() {
 
   if (!user) {
     return <Login onLogin={handleLogin} />
+  }
+
+  if (simulatedRole === 'Employee') {
+    return (
+      <EmployeePortal
+        currentUser={{...user, role: 'Employee', department: 'Engineering'}} // Mocked for now, normally found in employees array
+        employees={employees}
+        attendance={attendance}
+        payroll={payroll}
+        expenses={expenses}
+        addLog={addLog}
+        addToast={addToast}
+        setAttendance={handleSetAttendance}
+        pendingProfileEdits={pendingProfileEdits}
+        setPendingProfileEdits={setPendingProfileEdits}
+        setExpenses={handleSetExpenses}
+        roster={roster}
+        shiftSwaps={shiftSwaps}
+        setShiftSwaps={setShiftSwaps}
+        shiftTemplates={settings.shiftTemplates}
+        overtimeClaims={overtimeClaims}
+        setOvertimeClaims={setOvertimeClaims}
+        settings={settings}
+      />
+    )
   }
 
   return (
@@ -591,10 +882,123 @@ export default function App() {
         setMobileOpen={setMobileMenuOpen}
         settings={settings}
         setSettings={handleSetSettings}
+        isDarkMode={isDarkMode}
+        setIsDarkMode={setIsDarkMode}
+        simulatedRole={simulatedRole}
       />
       <main className="content-container">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <div>{renderBreadcrumbs()}</div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative' }}>
+            
+            {/* Role Simulator */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-secondary)', padding: '6px 12px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>View As:</span>
+              <select 
+                value={simulatedRole}
+                onChange={(e) => setSimulatedRole(e.target.value)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}
+              >
+                <option value="Admin">Admin</option>
+                <option value="HR Manager">HR Manager</option>
+                <option value="Payroll Manager">Payroll Manager</option>
+                <option value="Employee">Employee</option>
+              </select>
+            </div>
+
+            <button 
+              onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }}
+              style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}
+            >
+              <Bell size={20} style={{ color: 'var(--text-secondary)' }} />
+              {notifications.filter(n => !n.read).length > 0 && (
+                <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: 'var(--accent-danger)', color: '#fff', fontSize: '0.65rem', fontWeight: 800, width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
+                  {notifications.filter(n => !n.read).length}
+                </span>
+              )}
+            </button>
+
+            {showNotifications && (
+              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', width: '320px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '16px', boxShadow: '0 12px 32px rgba(0,0,0,0.1)', zIndex: 100, overflow: 'hidden', animation: 'modalFadeIn 0.2s ease-out' }}>
+                <div style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-secondary)' }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>Notifications</h3>
+                </div>
+                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                  {notifications.length === 0 ? (
+                    <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>No new notifications</div>
+                  ) : (
+                    notifications.map(n => (
+                      <div key={n.id} style={{ padding: '12px 16px', borderBottom: '1px solid rgba(0,0,0,0.03)', background: n.read ? 'transparent' : 'rgba(59, 130, 246, 0.05)' }}>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-primary)', margin: 0, fontWeight: n.read ? 500 : 600, lineHeight: 1.4 }}>{n.text}</p>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>{n.time}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
         {renderContent()}
       </main>
+
+      {/* Global Toast Container */}
+      <div className="global-toast-container">
+        {toasts.map(toast => (
+          <div key={toast.id} className={`global-toast ${toast.type}`}>
+            <div className="global-toast-content">
+              <span style={{ flex: 1 }}>{toast.message}</span>
+              {toast.action && (
+                <button 
+                  onClick={() => { toast.action.onClick(); removeToast(toast.id); }}
+                  style={{ 
+                    background: 'rgba(255,255,255,0.1)', color: 'currentColor', border: '1px solid currentColor', 
+                    padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 700 
+                  }}
+                >
+                  {toast.action.label}
+                </button>
+              )}
+            </div>
+            <div className="toast-progress">
+              <div className="toast-progress-bar" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Global Command Palette */}
+      {showCommandPalette && (
+        <div className="command-palette-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowCommandPalette(false) }}>
+          <div className="command-palette">
+            <input 
+              autoFocus
+              type="text" 
+              placeholder="Type a command or search..." 
+              value={commandSearch}
+              onChange={(e) => setCommandSearch(e.target.value)}
+            />
+            <div className="command-palette-list">
+              <div className="command-palette-item" onClick={() => { setCurrentView('dashboard'); setShowCommandPalette(false) }}>
+                Go to Dashboard
+              </div>
+              <div className="command-palette-item" onClick={() => { setCurrentView('employees'); setShowCommandPalette(false) }}>
+                Go to Employees
+              </div>
+              <div className="command-palette-item" onClick={() => { setCurrentView('payroll'); setShowCommandPalette(false) }}>
+                Go to Payroll
+              </div>
+              <div className="command-palette-item" onClick={() => { setCurrentView('attendance'); setShowCommandPalette(false) }}>
+                Go to Attendance & Leaves
+              </div>
+              <div className="command-palette-item" onClick={() => { setIsDarkMode(!isDarkMode); setShowCommandPalette(false) }}>
+                Toggle Dark Mode
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,20 +1,24 @@
 import { useState } from 'react'
-import { CreditCard, Download, Search, X, PlusCircle, Calendar } from 'lucide-react'
+import { CreditCard, Download, Search, X, PlusCircle, Calendar, Pencil, CheckSquare, Trash2 } from 'lucide-react'
 import AdSlot from './AdSlot.jsx'
 
-export default function Payroll({ employees, payroll, setPayroll, addLog, driveConnected, settings }) {
+export default function Payroll({ employees, payroll, setPayroll, addLog, driveConnected, settings, simulatedRole, addAuditLog }) {
   const [selectedMonth, setSelectedMonth] = useState('2026-07')
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [processingId, setProcessingId] = useState(null)
 
-  // Ledger and Compensation modal states
+  // Side Drawer and editing states
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [selectedEmpLog, setSelectedEmpLog] = useState(null)
   const [grossSalaryInput, setGrossSalaryInput] = useState(0)
   const [advanceInput, setAdvanceInput] = useState(0)
   const [loanTotalInput, setLoanTotalInput] = useState(0)
   const [loanInstallmentInput, setLoanInstallmentInput] = useState(0)
   const [loanRemainingInput, setLoanRemainingInput] = useState(0)
+
+  // Bulk Action State
+  const [selectedRows, setSelectedRows] = useState([])
 
   const currency = settings?.currency || '$'
   const structure = settings?.salaryStructure || [
@@ -139,6 +143,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
     }))
 
     addLog('Payroll Initialized', `Created new payroll record sheet for ${selectedMonth}`, 'success')
+    if (addAuditLog) addAuditLog('CREATE', 'Payroll', `Initialized payroll for ${selectedMonth}`)
   }
 
   // Calculations (Only if initialized)
@@ -208,11 +213,96 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
 
       const finalNet = entry.baseSalary + entry.allowance - entry.deductions - entry.advance - loanDeduction
       addLog('Salary Disbursed', `Processed salary payout of ${currency}${finalNet} to ${entry.employee.name}`, 'success')
+      if (addAuditLog) addAuditLog('UPDATE', 'Payroll', `Executed payment for ${entry.employee.name} in ${selectedMonth}`)
       setProcessingId(null)
 
       // Download Payslip text receipt
       generatePayslipReceipt(entry, today)
     }, 1200)
+  }
+
+  // Bulk Actions
+  const handlePayAllPending = () => {
+    const pendingEntries = entries ? entries.filter(e => e.status === 'Pending') : []
+    if (pendingEntries.length === 0) return
+
+    setProcessingId('bulk-all')
+    setTimeout(() => {
+      const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+      setPayroll(prev => {
+        const monthData = prev[selectedMonth] || []
+        const updatedMonthData = monthData.map(entry => {
+          if (entry.status === 'Pending') {
+            const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
+            return {
+              ...entry,
+              status: 'Paid',
+              paymentDate: today,
+              advance: 0,
+              loan: {
+                ...entry.loan,
+                remaining: Math.max(0, entry.loan.remaining - loanDeduction)
+              }
+            }
+          }
+          return entry
+        })
+        return { ...prev, [selectedMonth]: updatedMonthData }
+      })
+      addLog('Bulk Disbursed', `Processed salary payout for ${pendingEntries.length} employees`, 'success')
+      if (addAuditLog) addAuditLog('UPDATE', 'Payroll', `Bulk executed ${pendingEntries.length} payments in ${selectedMonth}`)
+      setProcessingId(null)
+    }, 1500)
+  }
+
+  const handleBulkExecute = () => {
+    if (simulatedRole === 'HR Manager') return;
+    if (selectedRows.length === 0) return
+    const entriesToPay = entries.filter(e => selectedRows.includes(e.employeeId) && e.status === 'Pending')
+    if (entriesToPay.length === 0) return
+
+    setProcessingId('bulk-selected')
+    setTimeout(() => {
+      const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+      setPayroll(prev => {
+        const monthData = prev[selectedMonth] || []
+        const updatedMonthData = monthData.map(entry => {
+          if (selectedRows.includes(entry.employeeId) && entry.status === 'Pending') {
+            const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
+            return {
+              ...entry,
+              status: 'Paid',
+              paymentDate: today,
+              advance: 0,
+              loan: {
+                ...entry.loan,
+                remaining: Math.max(0, entry.loan.remaining - loanDeduction)
+              }
+            }
+          }
+          return entry
+        })
+        return { ...prev, [selectedMonth]: updatedMonthData }
+      })
+      addLog('Bulk Disbursed', `Processed salary payout for ${entriesToPay.length} selected employees`, 'success')
+      if (addAuditLog) addAuditLog('UPDATE', 'Payroll', `Bulk executed ${entriesToPay.length} payments in ${selectedMonth}`)
+      setProcessingId(null)
+      setSelectedRows([])
+    }, 1500)
+  }
+
+  const toggleRowSelection = (empId) => {
+    setSelectedRows(prev => 
+      prev.includes(empId) ? prev.filter(id => id !== empId) : [...prev, empId]
+    )
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedRows.length === filteredEntries.length) {
+      setSelectedRows([])
+    } else {
+      setSelectedRows(filteredEntries.map(e => e.employeeId))
+    }
   }
 
   // Generate a beautiful text-based receipt download
@@ -284,6 +374,7 @@ Thank you for your service!
     setLoanTotalInput(entry.loan.total)
     setLoanInstallmentInput(entry.loan.installment)
     setLoanRemainingInput(entry.loan.remaining)
+    setIsDrawerOpen(true)
   }
 
   const handleSaveCompensationLedger = (e) => {
@@ -317,6 +408,9 @@ Thank you for your service!
         nextMonthData.push(updatedEntry)
       }
 
+      setIsDrawerOpen(false)
+      setTimeout(() => setSelectedEmpLog(null), 300)
+
       return {
         ...prev,
         [selectedMonth]: nextMonthData
@@ -324,7 +418,6 @@ Thank you for your service!
     })
 
     addLog('Ledger Updated', `Updated compensation settings for ${selectedEmpLog.employee.name}`, 'success')
-    setSelectedEmpLog(null)
   }
 
   return (
@@ -409,22 +502,47 @@ Thank you for your service!
             </div>
 
             {/* Progress Card (High-Contrast Lime Accent themed) */}
-            <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px', border: '1px solid var(--accent-primary)' }}>
+            <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', border: '1px solid var(--accent-primary)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>Disbursement Flow</span>
                 <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                   {paidCount} of {totalCount} Paid
                 </span>
               </div>
-              <div style={{ height: '8px', background: 'var(--bg-primary)', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{
-                  height: '100%',
-                  width: `${progressPercent}%`,
-                  background: 'var(--accent-primary)',
-                  transition: 'width 0.5s ease-in-out'
-                }} />
+              
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                {Array.from({ length: Math.min(totalCount, 20) }).map((_, i) => {
+                  const isFilled = i < Math.floor((paidCount / totalCount) * Math.min(totalCount, 20))
+                  return (
+                    <div 
+                      key={i} 
+                      style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        borderRadius: '50%', 
+                        background: isFilled ? 'var(--accent-primary)' : 'var(--bg-primary)',
+                        border: isFilled ? 'none' : '1px solid var(--border-color)',
+                        transition: 'background-color 0.3s ease'
+                      }} 
+                    />
+                  )
+                })}
+                {totalCount > 20 && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: '4px' }}>+{totalCount - 20}</span>}
               </div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{progressPercent}% monthly quota complete</span>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{progressPercent}% monthly quota complete</span>
+                {paidCount < totalCount && (
+                  <button 
+                    onClick={handlePayAllPending} 
+                    disabled={processingId === 'bulk-all' || simulatedRole === 'HR Manager'}
+                    className="btn btn-primary" 
+                    style={{ padding: '4px 10px', fontSize: '0.75rem', cursor: simulatedRole === 'HR Manager' ? 'not-allowed' : 'pointer' }}
+                  >
+                    {processingId === 'bulk-all' ? 'Processing...' : 'Pay All Pending'}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -480,23 +598,61 @@ Thank you for your service!
             </div>
           </div>
 
+          {/* Bulk Actions Sticky Bar */}
+          {selectedRows.length > 0 && (
+            <div style={{
+              position: 'sticky', top: '10px', zIndex: 50,
+              background: 'var(--accent-primary)', color: '#ffffff',
+              padding: '12px 24px', borderRadius: '12px',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              boxShadow: '0 12px 30px rgba(37, 99, 235, 0.3)',
+              marginBottom: '16px',
+              animation: 'slideDownFade 0.2s ease-out'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
+                <CheckSquare size={18} />
+                <span>{selectedRows.length} employee{selectedRows.length > 1 ? 's' : ''} selected</span>
+              </div>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  onClick={handleBulkExecute} 
+                  disabled={processingId === 'bulk-selected' || simulatedRole === 'HR Manager'}
+                  className="btn" 
+                  style={{ background: '#ffffff', color: 'var(--accent-primary)', padding: '6px 16px', fontSize: '0.85rem', opacity: simulatedRole === 'HR Manager' ? 0.5 : 1, cursor: simulatedRole === 'HR Manager' ? 'not-allowed' : 'pointer' }}
+                  title={simulatedRole === 'HR Manager' ? "HR Managers cannot execute payroll" : ""}
+                >
+                  {processingId === 'bulk-selected' ? 'Processing...' : 'Execute Selected'}
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Payroll Table */}
-          <div className="glass-card" style={{ overflowX: 'auto', padding: '12px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '950px' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Employee</th>
-                  <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Salary Details</th>
-                  <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Deductions (PF)</th>
-                  <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Advance Balance</th>
-                  <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Company Loan</th>
-                  <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Net Payout</th>
-                  <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Status</th>
-                  <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredEntries.map(entry => {
+          <div className="glass-card table-scroll-wrapper" style={{ padding: '0', overflow: 'hidden' }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1050px' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
+                    <th style={{ padding: '16px', width: '50px', background: 'var(--bg-secondary)', zIndex: 11 }}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedRows.length === filteredEntries.length && filteredEntries.length > 0}
+                        onChange={toggleSelectAll}
+                        style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
+                      />
+                    </th>
+                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, background: 'var(--bg-secondary)', zIndex: 11 }}>Employee</th>
+                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Salary Details</th>
+                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Deductions (PF)</th>
+                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Advance Balance</th>
+                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Company Loan</th>
+                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Net Payout</th>
+                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Status</th>
+                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredEntries.map(entry => {
                   const emp = entry.employee
                   const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
                   const netPay = entry.baseSalary + entry.allowance - entry.deductions - entry.advance - loanDeduction
@@ -504,8 +660,21 @@ Thank you for your service!
                   const isProcessing = processingId === entry.employeeId
 
                   return (
-                    <tr key={entry.employeeId} style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.03)', transition: 'background var(--transition-fast)' }}>
-                      <td style={{ padding: '16px' }}>
+                    <tr 
+                      key={entry.employeeId} 
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-tertiary)'; e.currentTarget.querySelectorAll('.sticky-col').forEach(el => el.style.background = 'var(--bg-tertiary)'); }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.querySelectorAll('.sticky-col').forEach(el => el.style.background = 'var(--bg-primary)'); }}
+                      style={{ borderBottom: '1px solid var(--border-color)', transition: 'background var(--transition-fast)' }}
+                    >
+                      <td className="sticky-col" style={{ padding: '16px', background: 'var(--bg-primary)', transition: 'background var(--transition-fast)' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedRows.includes(entry.employeeId)}
+                          onChange={() => toggleRowSelection(entry.employeeId)}
+                          style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
+                        />
+                      </td>
+                      <td className="sticky-col" style={{ padding: '16px', background: 'var(--bg-primary)', transition: 'background var(--transition-fast)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <img 
                             src={emp.avatar} 
@@ -522,17 +691,6 @@ Thank you for your service!
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Gross: {currency}{entry.grossSalary.toLocaleString()}</span>
-                            {!isPaid && (
-                              <button 
-                                onClick={() => openCompensationModal(entry)}
-                                style={{
-                                  background: 'transparent', border: 'none', color: 'var(--accent-primary)',
-                                  fontSize: '0.75rem', cursor: 'pointer', padding: 0, textDecoration: 'underline'
-                                }}
-                              >
-                                Edit
-                              </button>
-                            )}
                           </div>
                           <span>Base: {currency}{entry.baseSalary.toLocaleString()}</span>
                           <span>Allowances: +{currency}{entry.allowance.toLocaleString()}</span>
@@ -544,17 +702,6 @@ Thank you for your service!
                       <td style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span>{currency}{entry.advance}</span>
-                          {!isPaid && (
-                            <button 
-                              onClick={() => openCompensationModal(entry)}
-                              style={{
-                                background: 'transparent', border: 'none', color: 'var(--accent-primary)',
-                                fontSize: '0.75rem', cursor: 'pointer', padding: 0, textDecoration: 'underline'
-                              }}
-                            >
-                              Edit
-                            </button>
-                          )}
                         </div>
                       </td>
 
@@ -565,17 +712,6 @@ Thank you for your service!
                             <span>Remaining: {currency}{entry.loan.remaining}</span>
                             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Inst: {currency}{entry.loan.installment}/mo</span>
                           </div>
-                          {!isPaid && (
-                            <button 
-                              onClick={() => openCompensationModal(entry)}
-                              style={{
-                                background: 'transparent', border: 'none', color: 'var(--accent-primary)',
-                                fontSize: '0.75rem', cursor: 'pointer', padding: 0, textDecoration: 'underline'
-                              }}
-                            >
-                              Edit
-                            </button>
-                          )}
                         </div>
                       </td>
 
@@ -598,150 +734,234 @@ Thank you for your service!
                       </td>
 
                       <td style={{ padding: '16px', textAlign: 'right' }}>
-                        {isPaid ? (
-                          <button 
-                            onClick={() => generatePayslipReceipt(entry, entry.paymentDate || 'Just now')}
-                            title="Download Payslip"
-                            className="btn btn-secondary"
-                            style={{ padding: '6px 12px', fontSize: '0.8rem' }}
-                          >
-                            <Download size={14} /> Payslip
-                      </button>
-                        ) : (
-                          <button 
-                            onClick={() => handleExecutePayment(entry)}
-                            disabled={isProcessing}
-                            className="btn btn-success"
-                            style={{ padding: '6px 14px', fontSize: '0.8rem' }}
-                          >
-                            {isProcessing ? 'Paying...' : 'Execute'}
-                          </button>
-                        )}
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                          {!isPaid && (
+                            <>
+                              <button 
+                                onClick={() => openCompensationModal(entry)}
+                                title={simulatedRole === 'HR Manager' ? "HR Managers cannot edit compensation" : "Edit Compensation"}
+                                disabled={simulatedRole === 'HR Manager'}
+                                style={{
+                                  background: 'transparent',
+                                  border: 'none',
+                                  color: 'var(--text-muted)',
+                                  padding: '6px',
+                                  cursor: simulatedRole === 'HR Manager' ? 'not-allowed' : 'pointer',
+                                  borderRadius: '6px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  transition: 'all var(--transition-fast)',
+                                  opacity: simulatedRole === 'HR Manager' ? 0.5 : 1
+                                }}
+                                onMouseEnter={(e) => { if(simulatedRole !== 'HR Manager') { e.currentTarget.style.background = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--accent-primary)'; } }}
+                                onMouseLeave={(e) => { if(simulatedRole !== 'HR Manager') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; } }}
+                              >
+                                <Pencil size={18} />
+                              </button>
+                              
+                              <button
+                                onClick={() => handleExecutePayment(entry)}
+                                disabled={isProcessing || simulatedRole === 'HR Manager'}
+                                title={simulatedRole === 'HR Manager' ? "HR Managers cannot execute payroll" : "Execute Payment"}
+                                style={{
+                                  padding: '6px 12px',
+                                  fontSize: '0.8rem',
+                                  background: 'transparent',
+                                  color: 'var(--accent-success)',
+                                  border: '1px solid var(--accent-success)',
+                                  borderRadius: '6px',
+                                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                                  fontWeight: 600,
+                                  transition: 'all 0.2s',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px'
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (!isProcessing) {
+                                    e.currentTarget.style.background = 'var(--accent-success)';
+                                    e.currentTarget.style.color = '#ffffff';
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  if (!isProcessing) {
+                                    e.currentTarget.style.background = 'transparent';
+                                    e.currentTarget.style.color = 'var(--accent-success)';
+                                  }
+                                }}
+                              >
+                                {isProcessing ? <div className="spinner" style={{ width: '14px', height: '14px', borderTopColor: 'currentColor' }} /> : null}
+                                Execute
+                              </button>
+                            </>
+                          )}
+                          {isPaid && (
+                            <button
+                              onClick={() => generatePayslipReceipt(entry, entry.paymentDate)}
+                              style={{
+                                padding: '6px 12px',
+                                fontSize: '0.8rem',
+                                background: 'transparent',
+                                color: 'var(--text-secondary)',
+                                border: 'none',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                fontWeight: 500,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                            >
+                              <Download size={14} /> Payslip
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   )
                 })}
               </tbody>
             </table>
+            </div>
           </div>
         </>
       )}
 
-      {/* MANAGE COMPENSATION POPUP MODAL */}
+      {/* MANAGE COMPENSATION SIDE DRAWER */}
       {selectedEmpLog && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.65)', backdropFilter: 'blur(4px)',
-          display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-        }}>
-          <div className="glass-card animate-fade-in" style={{
-            width: '100%', maxWidth: '440px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px'
+        <>
+          {/* Overlay */}
+          <div 
+            onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }}
+            style={{
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', zIndex: 999,
+              opacity: isDrawerOpen ? 1 : 0, transition: 'opacity 0.3s', pointerEvents: isDrawerOpen ? 'auto' : 'none'
+            }} 
+          />
+          
+          {/* Drawer */}
+          <div style={{
+            position: 'fixed', top: 0, right: 0, bottom: 0, width: '400px', maxWidth: '100%',
+            backgroundColor: 'var(--bg-secondary)',
+            boxShadow: '-4px 0 24px rgba(0,0,0,0.1)',
+            zIndex: 1000,
+            transform: isDrawerOpen ? 'translateX(0)' : 'translateX(100%)',
+            transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            display: 'flex', flexDirection: 'column',
+            overflowY: 'auto'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Manage Employee Compensation</h3>
+            <div style={{ padding: '24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: 'var(--bg-secondary)', zIndex: 10 }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Manage Compensation</h3>
               <button 
-                onClick={() => setSelectedEmpLog(null)} 
+                onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }}
                 style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
               >
                 <X size={20} />
               </button>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
-              <img src={selectedEmpLog.employee.avatar} alt="Avatar" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>{selectedEmpLog.employee.name}</span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{selectedEmpLog.employee.role}</span>
-              </div>
-            </div>
-
-            <form onSubmit={handleSaveCompensationLedger} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* Gross Salary Input */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Gross Monthly Salary ({currency})</label>
-                <input 
-                  type="number" min="0" value={grossSalaryInput}
-                  onChange={(e) => setGrossSalaryInput(e.target.value)}
-                  style={{
-                    padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                    background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', fontWeight: 600
-                  }}
-                />
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Basic and allowances are dynamically split from this total gross.</span>
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
+                <img src={selectedEmpLog.employee.avatar} alt="Avatar" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>{selectedEmpLog.employee.name}</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{selectedEmpLog.employee.role}</span>
+                </div>
               </div>
 
-              {/* Advance Pay */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Salary Advance ({currency})</label>
-                <input 
-                  type="number" min="0" value={advanceInput}
-                  onChange={(e) => setAdvanceInput(e.target.value)}
-                  style={{
-                    padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                    background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none'
-                  }}
-                />
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Deducted in full from the next payout.</span>
-              </div>
-
-              {/* Company Loan configs */}
-              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Company Loan Settings</span>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  {/* Loan total */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Total Principal</label>
-                    <input 
-                      type="number" min="0" value={loanTotalInput}
-                      onChange={(e) => setLoanTotalInput(e.target.value)}
-                      style={{
-                        padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                        background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', fontSize: '0.85rem'
-                      }}
-                    />
-                  </div>
-                  {/* Loan remaining */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Remaining Balance</label>
-                    <input 
-                      type="number" min="0" value={loanRemainingInput}
-                      onChange={(e) => setLoanRemainingInput(e.target.value)}
-                      style={{
-                        padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                        background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', fontSize: '0.85rem'
-                      }}
-                    />
-                  </div>
+              <form onSubmit={handleSaveCompensationLedger} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* Gross Salary Input */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Gross Monthly Salary ({currency})</label>
+                  <input 
+                    type="number" min="0" value={grossSalaryInput}
+                    onChange={(e) => setGrossSalaryInput(e.target.value)}
+                    style={{
+                      padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)',
+                      background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', fontWeight: 600
+                    }}
+                  />
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Basic and allowances are dynamically split from this total gross.</span>
                 </div>
 
-                {/* Monthly installment */}
+                {/* Advance Pay */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Monthly Installment Deduction ({currency})</label>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Salary Advance ({currency})</label>
                   <input 
-                    type="number" min="0" value={loanInstallmentInput}
-                    onChange={(e) => setLoanInstallmentInput(e.target.value)}
+                    type="number" min="0" value={advanceInput}
+                    onChange={(e) => setAdvanceInput(e.target.value)}
                     style={{
                       padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)',
                       background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none'
                     }}
                   />
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Deducted monthly until the remaining balance reaches $0.</span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Deducted in full from the next payout.</span>
                 </div>
-              </div>
 
-              {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                <button type="button" className="btn btn-secondary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setSelectedEmpLog(null)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}>
-                  Apply Changes
-                </button>
-              </div>
-            </form>
+                {/* Company Loan configs */}
+                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Company Loan Settings</span>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    {/* Loan total */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Total Principal</label>
+                      <input 
+                        type="number" min="0" value={loanTotalInput}
+                        onChange={(e) => setLoanTotalInput(e.target.value)}
+                        style={{
+                          padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)',
+                          background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', fontSize: '0.85rem'
+                        }}
+                      />
+                    </div>
+                    {/* Loan remaining */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Remaining Balance</label>
+                      <input 
+                        type="number" min="0" value={loanRemainingInput}
+                        onChange={(e) => setLoanRemainingInput(e.target.value)}
+                        style={{
+                          padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)',
+                          background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', fontSize: '0.85rem'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Monthly installment */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Monthly Installment Deduction ({currency})</label>
+                    <input 
+                      type="number" min="0" value={loanInstallmentInput}
+                      onChange={(e) => setLoanInstallmentInput(e.target.value)}
+                      style={{
+                        padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)',
+                        background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none'
+                      }}
+                    />
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Deducted monthly until the remaining balance reaches $0.</span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                  <button type="button" className="btn btn-secondary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}>
+                    Apply Changes
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Embedded CSS for spin */}

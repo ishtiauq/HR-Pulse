@@ -1,12 +1,36 @@
-import { useState } from 'react'
-import { Plus, Search, Trash2, UserPlus, X, Edit } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle } from 'lucide-react'
 import AdSlot from './AdSlot.jsx'
 
-export default function Employees({ employees, setEmployees, addLog, driveConnected }) {
+export default function Employees({ employees, setEmployees, addLog, driveConnected, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast }) {
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [deptFilter, setDeptFilter] = useState('All')
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingEmployee, setEditingEmployee] = useState(null)
+  const [viewingEmployee, setViewingEmployee] = useState(null)
+  const [imageErrors, setImageErrors] = useState({})
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setViewingEmployee(null)
+    }
+    if (viewingEmployee) window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [viewingEmployee])
+
+  const getAvatarFallback = (name) => {
+    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+    const colors = ['#f87171', '#60a5fa', '#34d399', '#fbbf24', '#a78bfa']
+    const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    const color = colors[hash % colors.length]
+    return { initials, color }
+  }
 
   // Form states
   const [newEmpId, setNewEmpId] = useState('')
@@ -99,6 +123,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       } : emp))
       
       addLog('Updated employee profile', `Saved edits for ${newName} (${newEmpId}) to Google Drive`)
+      if (addAuditLog) addAuditLog('UPDATE', 'Employee', `Updated employee profile for ${newName} (${newEmpId})`)
       if (newCvFileName) {
         addLog('CV Synced', `Uploaded CV (${newCvFileName}) for ${newName} to Drive EMP folder`)
       }
@@ -125,6 +150,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       }
       setEmployees(prev => [...prev, newEmp])
       addLog('Added new employee', `Saved ${newName} (${newEmpId}) to Google Drive db folder`)
+      if (addAuditLog) addAuditLog('CREATE', 'Employee', `Created new employee profile for ${newName} (${newEmpId})`)
       if (newCvFileName) {
         addLog('CV Uploaded', `Synced CV (${newCvFileName}) to Google Drive employee directory`)
       }
@@ -162,16 +188,48 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
   const handleDeleteEmployee = (id, name) => {
     setEmployees(prev => prev.filter(emp => emp.id !== id))
     addLog('Deleted employee record', `Removed ${name} (${id}) from Google Drive db folder`)
+    if (addAuditLog) addAuditLog('DELETE', 'Employee', `Deleted employee profile for ${name} (${id})`)
   }
 
   // Filter list
   const filteredEmployees = employees.filter(emp => {
-    const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           emp.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           emp.email.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = emp.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || 
+                           emp.role.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                           emp.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     const matchesDept = deptFilter === 'All' || emp.department === deptFilter
     return matchesSearch && matchesDept
   })
+
+  const handleApproveProfileEdit = (editId) => {
+    const editReq = pendingProfileEdits.find(e => e.id === editId)
+    if (!editReq) return
+
+    setEmployees(prev => prev.map(emp => {
+      if (emp.id === editReq.employeeId) {
+        return {
+          ...emp,
+          personalEmail: editReq.changes.personalEmail || emp.personalEmail,
+          phone: editReq.changes.phone || emp.phone,
+          address: editReq.changes.address || emp.address,
+          emergencyContact: editReq.changes.emergencyContact || emp.emergencyContact
+        }
+      }
+      return emp
+    }))
+
+    setPendingProfileEdits(prev => prev.filter(e => e.id !== editId))
+    addLog('Profile Edit Approved', `Approved profile updates for ${editReq.employeeId}`, 'success')
+    addToast('Profile updates approved and applied.', 'success')
+  }
+
+  const handleRejectProfileEdit = (editId) => {
+    const editReq = pendingProfileEdits.find(e => e.id === editId)
+    if (!editReq) return
+
+    setPendingProfileEdits(prev => prev.filter(e => e.id !== editId))
+    addLog('Profile Edit Rejected', `Rejected profile updates for ${editReq.employeeId}`, 'warning')
+    addToast('Profile updates rejected.', 'info')
+  }
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -241,8 +299,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                 padding: '8px 18px',
                 borderRadius: '24px',
                 border: 'none',
-                background: deptFilter === dept ? 'var(--bg-active-tab)' : 'var(--bg-secondary)',
-                color: deptFilter === dept ? 'var(--text-active-tab)' : 'var(--text-secondary)',
+                background: deptFilter === dept ? '#2563eb' : '#f3f4f6',
+                color: deptFilter === dept ? '#ffffff' : '#4b5563',
                 boxShadow: deptFilter === dept ? '0 4px 12px rgba(59, 130, 246, 0.15)' : '0 4px 12px rgba(0,0,0,0.02)',
                 cursor: 'pointer',
                 fontWeight: 600,
@@ -251,11 +309,11 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               }}
               onMouseEnter={(e) => {
                 if (deptFilter !== dept) {
-                  e.currentTarget.style.background = 'var(--bg-tertiary)';
+                  e.currentTarget.style.background = '#e5e7eb';
                 }
               }}
               onMouseLeave={(e) => {
-                if (deptFilter !== dept) e.currentTarget.style.background = 'var(--bg-secondary)'
+                if (deptFilter !== dept) e.currentTarget.style.background = '#f3f4f6'
               }}
             >
               {dept}
@@ -264,15 +322,69 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
         </div>
       </div>
 
+      {/* Pending Profile Updates Queue */}
+      {pendingProfileEdits && pendingProfileEdits.length > 0 && (
+        <div className="glass-card" style={{ padding: '24px', borderLeft: '4px solid var(--accent-warning)', background: 'linear-gradient(to right, rgba(234, 179, 8, 0.05), transparent)' }}>
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px 0', fontSize: '1.2rem', color: 'var(--accent-warning)' }}>
+            <AlertCircle size={20} />
+            Pending Profile Update Requests ({pendingProfileEdits.length})
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {pendingProfileEdits.map(editReq => {
+              const emp = employees.find(e => e.id === editReq.employeeId)
+              return (
+                <div key={editReq.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', gap: '16px', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: '1.05rem', color: 'var(--text-primary)' }}>{emp?.name || 'Unknown Employee'} <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>({editReq.employeeId})</span></div>
+                    <div style={{ display: 'flex', gap: '16px', marginTop: '8px', fontSize: '0.85rem', flexWrap: 'wrap' }}>
+                      {Object.entries(editReq.changes).map(([key, val]) => (
+                        val ? (
+                          <span key={key} style={{ padding: '4px 8px', background: 'var(--bg-tertiary)', borderRadius: '4px' }}>
+                            <strong style={{ color: 'var(--text-secondary)' }}>{key}: </strong> 
+                            <span style={{ color: 'var(--text-primary)' }}>{val}</span>
+                          </span>
+                        ) : null
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button className="btn btn-primary" onClick={() => handleApproveProfileEdit(editReq.id)} style={{ padding: '6px 12px', fontSize: '0.85rem' }}>
+                      <Check size={14} style={{ display: 'inline', marginRight: '4px' }} /> Approve
+                    </button>
+                    <button className="btn btn-secondary" onClick={() => handleRejectProfileEdit(editReq.id)} style={{ padding: '6px 12px', fontSize: '0.85rem', color: 'var(--accent-danger)', background: 'rgba(239, 68, 68, 0.1)', border: 'none' }}>
+                      <X size={14} style={{ display: 'inline', marginRight: '4px' }} /> Reject
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Directory Grid */}
+      {filteredEmployees.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '64px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#9ca3af', marginBottom: '16px' }}>
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <path d="M11 8v6"></path>
+            <path d="M8 11h6"></path>
+          </svg>
+          <h3 style={{ fontSize: '1.2rem', color: '#374151', marginBottom: '16px', fontWeight: 600 }}>No employees found in this department</h3>
+          <button onClick={() => {setSearchTerm(''); setDeptFilter('All')}} className="btn btn-secondary">Clear Filters</button>
+        </div>
+      ) : (
       <div className="employee-grid">
         {filteredEmployees.map(emp => (
           <div key={emp.id} className="glass-card animate-fade-in" style={{
             padding: '16px',
             display: 'flex',
             flexDirection: 'column',
-            position: 'relative'
-          }}>
+            position: 'relative',
+            cursor: 'pointer'
+          }}
+          onClick={() => setViewingEmployee(emp)}>
             {/* Profile Row */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               {/* Squarcle Large Preview (72px) with Reposition offsets */}
@@ -284,27 +396,35 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                 position: 'relative',
                 border: '2px solid rgba(0, 0, 0, 0.05)',
                 flexShrink: 0,
-                background: '#f3f4f6'
+                background: (!emp.avatar || imageErrors[emp.id]) ? getAvatarFallback(emp.name).color : '#f3f4f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: '1.4rem'
               }}>
-                <img
-                  src={emp.avatar}
-                  alt={emp.name}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`,
-                    transformOrigin: 'center',
-                    userSelect: 'none',
-                    pointerEvents: 'none'
-                  }}
-                  onError={(e) => {
-                    e.target.style.display = 'none'
-                  }}
-                />
+                {(!emp.avatar || imageErrors[emp.id]) ? (
+                  <span>{getAvatarFallback(emp.name).initials}</span>
+                ) : (
+                  <img
+                    src={emp.avatar}
+                    alt={emp.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`,
+                      transformOrigin: 'center',
+                      userSelect: 'none',
+                      pointerEvents: 'none'
+                    }}
+                    onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))}
+                  />
+                )}
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
@@ -393,7 +513,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               {/* Action Buttons Row */}
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px', borderTop: '1px solid rgba(0, 0, 0, 0.04)', paddingTop: '10px' }}>
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation()
                     setEditingEmployee(emp)
                     setNewEmpId(emp.id)
                     setNewName(emp.name)
@@ -429,7 +550,10 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                   Edit
                 </button>
                 <button
-                  onClick={() => handleDeleteEmployee(emp.id, emp.name)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDeleteEmployee(emp.id, emp.name)
+                  }}
                   className="btn btn-secondary"
                   style={{ 
                     flex: 1, 
@@ -452,6 +576,86 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
           </div>
         ))}
       </div>
+      )}
+
+      {/* Employee Detail Modal */}
+      {viewingEmployee && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}
+        onClick={() => setViewingEmployee(null)}
+        >
+          <style>{`
+            @keyframes modalFadeIn {
+              from { transform: scale(0.95); opacity: 0; }
+              to { transform: scale(1); opacity: 1; }
+            }
+          `}</style>
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: '450px',
+              padding: '32px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '24px',
+              background: 'var(--bg-primary)',
+              borderRadius: '24px',
+              boxShadow: '0 24px 48px rgba(0,0,0,0.1)',
+              animation: 'modalFadeIn 200ms ease-out forwards'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+               <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                 <div style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    background: (!viewingEmployee.avatar || imageErrors[viewingEmployee.id]) ? getAvatarFallback(viewingEmployee.name).color : '#f3f4f6',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontWeight: 700,
+                    fontSize: '1.2rem',
+                    position: 'relative'
+                 }}>
+                   {(!viewingEmployee.avatar || imageErrors[viewingEmployee.id]) ? (
+                     <span>{getAvatarFallback(viewingEmployee.name).initials}</span>
+                   ) : (
+                     <img src={viewingEmployee.avatar} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
+                   )}
+                 </div>
+                 <div>
+                   <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{viewingEmployee.name}</h3>
+                   <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{viewingEmployee.role}</span>
+                 </div>
+               </div>
+               <button onClick={() => setViewingEmployee(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={20}/></button>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px' }}>
+              <div><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.id}</span></div>
+              <div><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Status</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.status}</span></div>
+              <div><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Department</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.department}</span></div>
+              <div style={{ wordBreak: 'break-all', gridColumn: '1 / -1' }}><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Email</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.email}</span></div>
+              <div><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Joined</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.joiningDate ? new Date(viewingEmployee.joiningDate).toLocaleDateString() : 'N/A'}</span></div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Form Modal/Overlay */}
       {showAddForm && (
@@ -461,7 +665,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          backgroundColor: 'rgba(0, 0, 0, 0.3)',
           backdropFilter: 'blur(4px)',
           display: 'flex',
           justifyContent: 'center',

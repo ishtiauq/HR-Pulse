@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { Users, Cloud, RefreshCw, Activity, FileText, Calendar, Gift, Award } from 'lucide-react'
 import AdSlot from './AdSlot'
 
-export default function Dashboard({ employees, driveConnected, onSync, attendance }) {
+export default function Dashboard({ employees, driveConnected, onSync, attendance, setCurrentView }) {
   const [totalEmployees, setTotalEmployees] = useState(0)
+  const [showAttendanceDrawer, setShowAttendanceDrawer] = useState(false)
   const [activeCount, setActiveCount] = useState(0)
   const [leaveCount, setLeaveCount] = useState(0)
   const [syncLogs, setSyncLogs] = useState([])
@@ -139,6 +140,24 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
     return milestones.sort((a, b) => a.daysRemaining - b.daysRemaining)
   }
 
+  const renderAvatarStack = (list) => {
+    const visible = list.slice(0, 3)
+    const remaining = list.length - 3
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '12px', minHeight: '28px' }}>
+        {visible.map((emp, i) => (
+          <img key={i} src={emp.avatar} alt={emp.name} style={{ width: '28px', height: '28px', borderRadius: '50%', border: '2px solid #fff', marginLeft: i > 0 ? '-10px' : '0', zIndex: 10 - i, backgroundColor: '#f3f4f6' }} />
+        ))}
+        {remaining > 0 && (
+          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--bg-tertiary)', border: '2px solid #fff', marginLeft: '-10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold', zIndex: 0, color: 'var(--text-secondary)' }}>
+            +{remaining}
+          </div>
+        )}
+        {list.length === 0 && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>None</span>}
+      </div>
+    )
+  }
+
   const getOrdinalSuffix = (i) => {
     const j = i % 10, k = i % 100
     if (j === 1 && k !== 11) return 'st'
@@ -152,8 +171,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
   }
 
   // Attendance rate calculations
-  const totalRoster = todayStats.present + todayStats.absent + todayStats.onLeave
-  const attendanceRate = totalRoster > 0 ? Math.round((todayStats.present / totalRoster) * 100) : 0
+  const attendanceRate = activeCount > 0 ? Math.round((todayStats.present / activeCount) * 100) : 0
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -162,7 +180,12 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '2.7rem', marginBottom: '4px', fontWeight: 900, letterSpacing: '-0.04em' }}>Welcome to HR Pulse</h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>Here is the real-time operational overview of your Google Drive HRM database.</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            Here is the real-time operational overview of your Google Drive HRM database.
+            <span style={{ fontSize: '0.8rem', padding: '2px 8px', background: 'var(--bg-tertiary)', borderRadius: '12px', fontWeight: 600 }}>
+              Last Synced: {syncLogs.length > 0 ? syncLogs[0].timestamp : 'Never'}
+            </span>
+          </p>
         </div>
         <button className="btn btn-primary" onClick={handleManualSync}>
           <RefreshCw size={16} />
@@ -173,7 +196,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       {/* Bento Grid layout */}
       <div className="bento-grid">
         {/* Total Directory */}
-        <div className="glass-card bento-item-stats" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div className="glass-card bento-item-stats stat-card-hover" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', borderTop: '4px solid var(--accent-primary)' }}>
           <div className="glossy-icon-container" style={{
             width: '48px',
             height: '48px',
@@ -183,12 +206,12 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           </div>
           <div>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Total Directory</span>
-            <h3 style={{ fontSize: '1.75rem', marginTop: '4px' }}>{totalEmployees}</h3>
+            <h3 className="tabular-nums" style={{ fontSize: '1.75rem', marginTop: '4px' }}>{totalEmployees}</h3>
           </div>
         </div>
 
         {/* Active Today */}
-        <div className="glass-card bento-item-stats" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div className="glass-card bento-item-stats stat-card-hover" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', borderTop: '4px solid var(--accent-success)' }}>
           <div className="glossy-icon-container" style={{
             width: '48px',
             height: '48px',
@@ -198,12 +221,12 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           </div>
           <div>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Active Today</span>
-            <h3 style={{ fontSize: '1.75rem', marginTop: '4px' }}>{activeCount}</h3>
+            <h3 className="tabular-nums" style={{ fontSize: '1.75rem', marginTop: '4px' }}>{activeCount}</h3>
           </div>
         </div>
 
         {/* On Leave */}
-        <div className="glass-card bento-item-stats" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div className="glass-card bento-item-stats stat-card-hover" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', borderTop: '4px solid var(--accent-warning)' }}>
           <div className="glossy-icon-container" style={{
             width: '48px',
             height: '48px',
@@ -213,12 +236,12 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           </div>
           <div>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>On Leave</span>
-            <h3 style={{ fontSize: '1.75rem', marginTop: '4px' }}>{leaveCount}</h3>
+            <h3 className="tabular-nums" style={{ fontSize: '1.75rem', marginTop: '4px' }}>{leaveCount}</h3>
           </div>
         </div>
 
         {/* Database Status */}
-        <div className="glass-card bento-item-stats" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div className="glass-card bento-item-stats stat-card-hover" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', borderTop: driveConnected ? '4px solid var(--accent-success)' : '4px solid var(--accent-danger)' }}>
           <div className="glossy-icon-container" style={{
             width: '48px',
             height: '48px',
@@ -235,7 +258,12 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         </div>
 
         {/* Compact Dynamic Attendance Bento Card with Hover Tooltip Popups */}
-        <div className="glass-card bento-item-chart" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div 
+          className="glass-card bento-item-chart stat-card-hover" 
+          onMouseEnter={() => setShowAttendanceDrawer(true)}
+          onMouseLeave={() => setShowAttendanceDrawer(false)}
+          style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '20px', cursor: 'pointer', position: 'relative' }}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Activity size={18} style={{ color: 'var(--accent-primary)' }} />
@@ -257,7 +285,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           }}>
             {/* Present Badge */}
             <div 
-              className="hover-badge"
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -269,34 +296,16 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 borderRadius: '20px',
                 background: 'rgba(34, 197, 94, 0.04)',
                 border: '1px solid rgba(34, 197, 94, 0.1)',
-                cursor: 'pointer',
                 transition: 'all var(--transition-fast)'
               }}
             >
-              <h4 style={{ fontSize: '2.2rem', color: 'var(--accent-success)', fontWeight: 800 }}>{todayStats.present}</h4>
+              <h4 className="tabular-nums" style={{ fontSize: '2.2rem', color: 'var(--accent-success)', fontWeight: 800 }}>{todayStats.present}</h4>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '4px' }}>Present</span>
-              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Hover for list</span>
-
-              {/* Hover Tooltip Popup (Rendered via CSS :hover selector) */}
-              <div className="hover-tooltip">
-                <h5 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '10px', borderBottom: '1px solid #f3f4f6', paddingBottom: '6px' }}>
-                  Present Personnel ({todayStats.present})
-                </h5>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {attendanceDetails.present.map((e, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <img src={e.avatar} alt={e.name} style={{ width: '22px', height: '22px', borderRadius: '50%' }} />
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)', flex: 1, textAlign: 'left' }}>{e.name}</span>
-                      <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>{e.time}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {renderAvatarStack(attendanceDetails.present)}
             </div>
 
             {/* Absent Badge */}
             <div 
-              className="hover-badge"
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -308,33 +317,16 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 borderRadius: '20px',
                 background: 'rgba(239, 68, 68, 0.04)',
                 border: '1px solid rgba(239, 68, 68, 0.1)',
-                cursor: 'pointer',
                 transition: 'all var(--transition-fast)'
               }}
             >
-              <h4 style={{ fontSize: '2.2rem', color: 'var(--accent-danger)', fontWeight: 800 }}>{todayStats.absent}</h4>
+              <h4 className="tabular-nums" style={{ fontSize: '2.2rem', color: 'var(--accent-danger)', fontWeight: 800 }}>{todayStats.absent}</h4>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '4px' }}>Absent</span>
-              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Hover for list</span>
-
-              {/* Hover Tooltip Popup (Rendered via CSS :hover selector) */}
-              <div className="hover-tooltip">
-                <h5 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '10px', borderBottom: '1px solid #f3f4f6', paddingBottom: '6px' }}>
-                  Absent Personnel ({todayStats.absent})
-                </h5>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {attendanceDetails.absent.map((e, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <img src={e.avatar} alt={e.name} style={{ width: '22px', height: '22px', borderRadius: '50%' }} />
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)', flex: 1, textAlign: 'left' }}>{e.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {renderAvatarStack(attendanceDetails.absent)}
             </div>
 
             {/* On Leave Badge */}
             <div 
-              className="hover-badge"
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -346,30 +338,105 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 borderRadius: '20px',
                 background: 'rgba(245, 158, 11, 0.04)',
                 border: '1px solid rgba(245, 158, 11, 0.1)',
-                cursor: 'pointer',
                 transition: 'all var(--transition-fast)'
               }}
             >
-              <h4 style={{ fontSize: '2.2rem', color: '#f59e0b', fontWeight: 800 }}>{todayStats.onLeave}</h4>
+              <h4 className="tabular-nums" style={{ fontSize: '2.2rem', color: '#f59e0b', fontWeight: 800 }}>{todayStats.onLeave}</h4>
               <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '4px' }}>On Leave</span>
-              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Hover for list</span>
+              {renderAvatarStack(attendanceDetails.onLeave)}
+            </div>
+          </div>
 
-              {/* Hover Tooltip Popup (Rendered via CSS :hover selector) */}
-              <div className="hover-tooltip">
-                <h5 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '10px', borderBottom: '1px solid #f3f4f6', paddingBottom: '6px' }}>
-                  On Leave ({todayStats.onLeave})
-                </h5>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {attendanceDetails.onLeave.map((e, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <img src={e.avatar} alt={e.name} style={{ width: '22px', height: '22px', borderRadius: '50%' }} />
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)', flex: 1, textAlign: 'left' }}>{e.name}</span>
+          {/* Centered Hover Modal for Attendance */}
+          {showAttendanceDrawer && (
+            <div 
+              style={{
+                position: 'fixed',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '400px',
+                maxWidth: '90vw',
+                maxHeight: '85vh',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+                borderRadius: 'var(--radius-xl)',
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '24px',
+                zIndex: 9999,
+                cursor: 'default',
+                animation: 'fadeIn var(--transition-fast) forwards'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h2 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Today's Attendance</h2>
+                <button onClick={() => setShowAttendanceDrawer(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+                  <Users size={20} />
+                </button>
+              </div>
+
+              <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {/* Present Section */}
+                <div>
+                  <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px', borderBottom: '1px solid #f3f4f6', paddingBottom: '4px' }}>Present ({todayStats.present})</h4>
+                  {attendanceDetails.present.map((e, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
+                      <div style={{ position: 'relative' }}>
+                        <img src={e.avatar} alt={e.name} style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
+                        <div style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', backgroundColor: '#22c55e', borderRadius: '50%', border: '2px solid #fff' }} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>{e.name}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Checked in at {e.time}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
+
+                {/* On Leave Section */}
+                {attendanceDetails.onLeave.length > 0 && (
+                  <div style={{ marginTop: '8px' }}>
+                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px', borderBottom: '1px solid #f3f4f6', paddingBottom: '4px' }}>On Leave ({todayStats.onLeave})</h4>
+                    {attendanceDetails.onLeave.map((e, idx) => (
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
+                        <div style={{ position: 'relative' }}>
+                          <img src={e.avatar} alt={e.name} style={{ width: '36px', height: '36px', borderRadius: '50%', filter: 'grayscale(100%)' }} />
+                          <div style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', backgroundColor: '#f59e0b', borderRadius: '50%', border: '2px solid #fff' }} />
+                        </div>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{e.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Absent Section */}
+                {attendanceDetails.absent.length > 0 && (
+                  <div style={{ marginTop: '8px' }}>
+                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px', borderBottom: '1px solid #f3f4f6', paddingBottom: '4px' }}>Absent ({todayStats.absent})</h4>
+                    {attendanceDetails.absent.map((e, idx) => (
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
+                        <div style={{ position: 'relative' }}>
+                          <img src={e.avatar} alt={e.name} style={{ width: '36px', height: '36px', borderRadius: '50%', filter: 'grayscale(100%) opacity(0.7)' }} />
+                          <div style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', backgroundColor: '#ef4444', borderRadius: '50%', border: '2px solid #fff' }} />
+                        </div>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{e.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
+              
+              <button 
+                className="btn btn-primary" 
+                onClick={() => setCurrentView && setCurrentView('attendance')}
+                style={{ marginTop: '24px', width: '100%', padding: '12px', borderRadius: '12px' }}
+              >
+                Manage Attendance
+              </button>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Upcoming Milestones Bento Card */}
@@ -468,12 +535,23 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 background: 'rgba(0, 0, 0, 0.02)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>{log.action}</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {log.action.toLowerCase().includes('error') || log.action.toLowerCase().includes('failed') ? '❌' : (log.action.toLowerCase().includes('warn') ? '⚠️' : '✅')} 
+                    {log.action}
+                  </span>
                   <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 500 }}>{log.timestamp}</span>
                 </div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{log.details}</span>
               </div>
             ))}
+            
+            <button 
+              className="btn btn-outline" 
+              onClick={() => setCurrentView && setCurrentView('drive')}
+              style={{ marginTop: 'auto', alignSelf: 'center', fontSize: '0.8rem', padding: '8px 16px', borderRadius: '20px' }}
+            >
+              View All Logs
+            </button>
           </div>
         </div>
 
