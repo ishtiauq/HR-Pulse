@@ -9,6 +9,8 @@ import Settings from './components/Settings.jsx'
 import Attendance from './components/Attendance.jsx'
 import Reports from './components/Reports.jsx'
 import Expenses from './components/Expenses.jsx'
+import Announcements from './components/Announcements.jsx'
+import Assets from './components/Assets.jsx'
 import EmployeePortal from './components/EmployeePortal.jsx'
 import { loadOrInitializeDatabase, updateAppDataFile } from './services/googleDrive.js'
 import { Menu, Bell } from 'lucide-react'
@@ -328,6 +330,45 @@ export default function App() {
     return []
   })
 
+  // NEW ANNOUNCEMENTS STATE
+  const [announcements, setAnnouncements] = useState(() => {
+    const saved = localStorage.getItem('hr_pulse_announcements')
+    if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(e) } }
+    return [
+      {
+        id: 'ann-1',
+        title: 'Welcome to HR Pulse!',
+        content: 'We are thrilled to roll out the new HR Pulse internal portal. Please take a moment to review your profile details and explore the new ESS features.',
+        authorId: 'EMP-101', // HR Admin
+        date: new Date().toISOString(),
+        category: 'General',
+        priority: 'Important',
+        audience: 'all',
+        attachments: [],
+        reactions: { '👍': 0, '❤️': 0, '🎉': 0 },
+        comments: [],
+        readBy: [],
+        poll: null
+      }
+    ]
+  })
+
+  // NEW ASSETS STATE
+  const [assets, setAssets] = useState(() => {
+    const saved = localStorage.getItem('hr_pulse_assets')
+    if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(e) } }
+    return [
+      { id: 'AST-001', serialNumber: 'C02ZG001MD6M', name: 'MacBook Pro M3', category: 'Laptop', purchaseDate: '2025-01-15', purchasePrice: 2499, warrantyExpiry: '2028-01-14', usefulLife: 36, status: 'Available', assignedTo: null, assignmentDate: null, condition: 'New', maintenanceLogs: [] },
+      { id: 'AST-002', serialNumber: 'S24ULTRA-992', name: 'Samsung Galaxy S24 Ultra', category: 'Phone', purchaseDate: '2024-03-10', purchasePrice: 1199, warrantyExpiry: '2025-03-09', usefulLife: 24, status: 'Assigned', assignedTo: 'EMP-102', assignmentDate: '2024-03-15', condition: 'Good', maintenanceLogs: [] }
+    ]
+  })
+
+  const [assetRequests, setAssetRequests] = useState(() => {
+    const saved = localStorage.getItem('hr_pulse_asset_requests')
+    if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(e) } }
+    return []
+  })
+
   const [settings, setSettings] = useState(() => {
     const saved = localStorage.getItem('hr_pulse_settings')
     if (saved) {
@@ -430,6 +471,91 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('hr_pulse_sync_logs', JSON.stringify(syncLogs))
   }, [syncLogs])
+
+  useEffect(() => {
+    localStorage.setItem('hr_pulse_announcements', JSON.stringify(announcements))
+  }, [announcements])
+
+  useEffect(() => {
+    localStorage.setItem('hr_pulse_assets', JSON.stringify(assets))
+  }, [assets])
+
+  useEffect(() => {
+    localStorage.setItem('hr_pulse_asset_requests', JSON.stringify(assetRequests))
+  }, [assetRequests])
+
+  // Auto-Post Birthdays & Anniversaries
+  useEffect(() => {
+    if (!employees || employees.length === 0) return
+
+    const today = new Date()
+    const currentMonthDay = `${today.getMonth() + 1}-${today.getDate()}`
+    const currentYear = today.getFullYear()
+
+    let newPosts = []
+
+    employees.forEach(emp => {
+      // Check Birthday
+      if (emp.dob) {
+        const dobDate = new Date(emp.dob)
+        const dobMonthDay = `${dobDate.getMonth() + 1}-${dobDate.getDate()}`
+        
+        if (dobMonthDay === currentMonthDay) {
+          // Check if we already posted for this year
+          const existing = announcements.find(a => a.category === 'Birthday' && a.content.includes(emp.name) && a.date.startsWith(currentYear.toString()))
+          if (!existing) {
+            newPosts.push({
+              id: `ann-bday-${emp.id}-${currentYear}`,
+              title: `🎉 Happy Birthday, ${emp.name}!`,
+              content: `Let's all wish a fantastic birthday to ${emp.name} from the ${emp.department} team! Have a great day! 🎂🎈`,
+              authorId: 'system',
+              date: new Date().toISOString(),
+              category: 'Achievement/Birthday/Work Anniversary',
+              priority: 'Normal',
+              audience: 'all',
+              attachments: [],
+              reactions: { '👍': 0, '❤️': 0, '🎉': 0 },
+              comments: [],
+              readBy: [],
+              poll: null
+            })
+          }
+        }
+      }
+
+      // Check Work Anniversary
+      if (emp.joiningDate) {
+        const joinDate = new Date(emp.joiningDate)
+        const joinMonthDay = `${joinDate.getMonth() + 1}-${joinDate.getDate()}`
+        const years = currentYear - joinDate.getFullYear()
+
+        if (joinMonthDay === currentMonthDay && years > 0) {
+          const existing = announcements.find(a => a.category === 'Anniversary' && a.content.includes(emp.name) && a.date.startsWith(currentYear.toString()))
+          if (!existing) {
+            newPosts.push({
+              id: `ann-work-${emp.id}-${currentYear}`,
+              title: `🌟 Happy Work Anniversary, ${emp.name}!`,
+              content: `Congratulations to ${emp.name} for completing ${years} year${years > 1 ? 's' : ''} with us! Thank you for your hard work and dedication! 🏆`,
+              authorId: 'system',
+              date: new Date().toISOString(),
+              category: 'Achievement/Birthday/Work Anniversary',
+              priority: 'Normal',
+              audience: 'all',
+              attachments: [],
+              reactions: { '👍': 0, '❤️': 0, '🎉': 0 },
+              comments: [],
+              readBy: [],
+              poll: null
+            })
+          }
+        }
+      }
+    })
+
+    if (newPosts.length > 0) {
+      setAnnouncements(prev => [...newPosts, ...prev])
+    }
+  }, [employees])
 
   // Real Google Drive synchronization effect
   useEffect(() => {
@@ -752,6 +878,32 @@ export default function App() {
             addAuditLog={addAuditLog}
           />
         )
+      case 'announcements':
+        return (
+          <Announcements
+            employees={employees}
+            announcements={announcements}
+            setAnnouncements={setAnnouncements}
+            addLog={addLog}
+            addToast={addToast}
+            currentUser={user}
+            simulatedRole={simulatedRole}
+          />
+        )
+      case 'assets':
+        return (
+          <Assets
+            employees={employees}
+            assets={assets}
+            setAssets={setAssets}
+            assetRequests={assetRequests}
+            setAssetRequests={setAssetRequests}
+            addLog={addLog}
+            addToast={addToast}
+            currentUser={user}
+            simulatedRole={simulatedRole}
+          />
+        )
       case 'reports':
         return (
           <Reports 
@@ -833,6 +985,12 @@ export default function App() {
         shiftTemplates={settings.shiftTemplates}
         overtimeClaims={overtimeClaims}
         setOvertimeClaims={setOvertimeClaims}
+        announcements={announcements}
+        setAnnouncements={setAnnouncements}
+        assets={assets}
+        setAssets={setAssets}
+        assetRequests={assetRequests}
+        setAssetRequests={setAssetRequests}
         settings={settings}
       />
     )

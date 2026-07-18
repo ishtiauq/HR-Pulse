@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-react'
+import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper } from 'lucide-react'
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -59,7 +59,7 @@ export default function EmployeePortal({
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardView currentUser={currentUser} attendance={attendance} expenses={expenses} setActiveTab={setActiveTab} />
+        return <DashboardView currentUser={currentUser} attendance={attendance} expenses={expenses} announcements={announcements} setActiveTab={setActiveTab} />
       case 'attendance':
         return <AttendanceView 
                  currentUser={currentUser} 
@@ -74,6 +74,14 @@ export default function EmployeePortal({
                  settings={settings}
                  addToast={addToast} 
                />
+      case 'announcements':
+        return <AnnouncementsFeedView 
+                 currentUser={currentUser} 
+                 employees={employees} 
+                 announcements={announcements} 
+                 setAnnouncements={setAnnouncements} 
+                 addToast={addToast} 
+               />
       case 'payslips':
         return <PayslipsView currentUser={currentUser} payroll={payroll} addToast={addToast} />
       case 'leave':
@@ -81,12 +89,13 @@ export default function EmployeePortal({
       case 'profile':
         return <ProfileView currentUser={currentUser} pendingProfileEdits={pendingProfileEdits} setPendingProfileEdits={setPendingProfileEdits} addToast={addToast} addLog={addLog} />
       default:
-        return <DashboardView currentUser={currentUser} attendance={attendance} expenses={expenses} setActiveTab={setActiveTab} />
+        return <DashboardView currentUser={currentUser} attendance={attendance} expenses={expenses} announcements={announcements} setActiveTab={setActiveTab} />
     }
   }
 
   const navItems = [
     { id: 'dashboard', icon: Home, label: 'Dashboard' },
+    { id: 'announcements', icon: Megaphone, label: 'Feed' },
     { id: 'attendance', icon: Clock, label: 'Attendance' },
     { id: 'payslips', icon: FileText, label: 'Payslips' },
     { id: 'leave', icon: CalendarIcon, label: 'Leave' },
@@ -171,7 +180,7 @@ export default function EmployeePortal({
 // SUB-VIEWS
 // ----------------------------------------------------
 
-function DashboardView({ currentUser, attendance, expenses, setActiveTab }) {
+function DashboardView({ currentUser, attendance, expenses, announcements, setActiveTab }) {
   const currentBalances = attendance?.balances?.[currentUser.id] || {
     annual: { limit: 20, used: 0 },
     sick: { limit: 14, used: 0 },
@@ -180,6 +189,11 @@ function DashboardView({ currentUser, attendance, expenses, setActiveTab }) {
 
   const myExpenses = expenses?.list?.filter(e => e.employeeId === currentUser.id && e.status === 'Pending') || []
   const totalPending = myExpenses.reduce((sum, e) => sum + e.amount, 0)
+  
+  const recentAnnouncements = (announcements || [])
+    .filter(a => a.audience === 'all' || a.audience === currentUser.department)
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 3)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1000px', margin: '0 auto' }}>
@@ -212,20 +226,47 @@ function DashboardView({ currentUser, attendance, expenses, setActiveTab }) {
         </div>
       </div>
 
-      <h3 style={{ fontSize: '1.1rem', marginTop: '16px', color: 'var(--text-primary)' }}>Quick Actions</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
-        <button className="btn btn-secondary" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }} onClick={() => setActiveTab('leave')}>
-          <CalendarIcon size={24} style={{ color: 'var(--accent-primary)' }} />
-          Request Leave
-        </button>
-        <button className="btn btn-secondary" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }} onClick={() => setActiveTab('payslips')}>
-          <Download size={24} style={{ color: 'var(--accent-success)' }} />
-          Download Payslip
-        </button>
-        <button className="btn btn-secondary" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }} onClick={() => alert('Biometric scan active or request manual punch.')}>
-          <Clock size={24} style={{ color: 'var(--accent-warning)' }} />
-          Mark Attendance
-        </button>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginTop: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-primary)' }}>Quick Actions</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
+            <button className="btn btn-secondary" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }} onClick={() => setActiveTab('leave')}>
+              <CalendarIcon size={24} style={{ color: 'var(--accent-primary)' }} />
+              Request Leave
+            </button>
+            <button className="btn btn-secondary" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }} onClick={() => setActiveTab('payslips')}>
+              <Download size={24} style={{ color: 'var(--accent-success)' }} />
+              Download Payslip
+            </button>
+            <button className="btn btn-secondary" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }} onClick={() => alert('Biometric scan active or request manual punch.')}>
+              <Clock size={24} style={{ color: 'var(--accent-warning)' }} />
+              Mark Attendance
+            </button>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-primary)' }}>Company Feed</h3>
+            <button style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }} onClick={() => setActiveTab('announcements')}>View All</button>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {recentAnnouncements.length === 0 ? (
+              <div className="glass-card" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}>No new announcements</div>
+            ) : (
+              recentAnnouncements.map(ann => (
+                <div key={ann.id} className="glass-card" style={{ padding: '16px', borderLeft: ann.priority === 'Urgent' ? '4px solid var(--accent-danger)' : 'none', cursor: 'pointer' }} onClick={() => setActiveTab('announcements')}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', fontWeight: 600 }}>{ann.category}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(ann.date).toLocaleDateString()}</span>
+                  </div>
+                  <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', color: 'var(--text-primary)' }}>{ann.title}</h4>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ann.content}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -657,6 +698,193 @@ function ProfileView({ currentUser, pendingProfileEdits, setPendingProfileEdits,
               <div style={{ fontWeight: 500 }}>{currentUser.emergencyContact || '-'}</div>
             </div>
           </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ----------------------------------------------------------------------
+// Announcements Feed View
+// ----------------------------------------------------------------------
+function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnouncements, addToast }) {
+  const [filter, setFilter] = useState('All')
+
+  const handleReaction = (postId, emoji) => {
+    setAnnouncements(prev => prev.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          reactions: {
+            ...post.reactions,
+            [emoji]: (post.reactions[emoji] || 0) + 1
+          }
+        }
+      }
+      return post
+    }))
+  }
+
+  const handleVote = (postId, optionIndex) => {
+    setAnnouncements(prev => prev.map(post => {
+      if (post.id === postId && post.poll) {
+        // Prevent double voting
+        const hasVoted = post.poll.options.some(o => o.votes.includes(currentUser.id))
+        if (hasVoted) {
+          addToast('You have already voted on this poll', 'warning')
+          return post
+        }
+        
+        const newOptions = [...post.poll.options]
+        newOptions[optionIndex] = {
+          ...newOptions[optionIndex],
+          votes: [...newOptions[optionIndex].votes, currentUser.id]
+        }
+        return { ...post, poll: { ...post.poll, options: newOptions } }
+      }
+      return post
+    }))
+  }
+
+  // Mark as read when rendering (simplistic approach for now)
+  useEffect(() => {
+    setAnnouncements(prev => prev.map(post => {
+      if (!post.readBy.includes(currentUser.id)) {
+        return { ...post, readBy: [...post.readBy, currentUser.id] }
+      }
+      return post
+    }))
+  }, [])
+
+  const visiblePosts = (announcements || [])
+    .filter(a => a.audience === 'all' || a.audience === currentUser.department)
+    .filter(a => filter === 'All' || a.category === filter)
+    .sort((a, b) => {
+      if (a.priority === 'Urgent' && b.priority !== 'Urgent') return -1
+      if (b.priority === 'Urgent' && a.priority !== 'Urgent') return 1
+      return new Date(b.date) - new Date(a.date)
+    })
+
+  const getPriorityColor = (p) => {
+    if (p === 'Urgent') return 'var(--accent-danger)'
+    if (p === 'Important') return 'var(--accent-warning)'
+    return 'var(--accent-primary)'
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '800px', margin: '0 auto', paddingBottom: '40px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Megaphone size={24} color="var(--accent-primary)" />
+          Company Feed
+        </h2>
+        <select value={filter} onChange={(e) => setFilter(e.target.value)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
+          <option value="All">All Categories</option>
+          <option value="General">General</option>
+          <option value="Policy Update">Policy Update</option>
+          <option value="Event">Event</option>
+          <option value="Achievement/Birthday/Work Anniversary">Celebrations</option>
+          <option value="Emergency">Emergency</option>
+        </select>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        {visiblePosts.length === 0 ? (
+          <div className="glass-card" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+            No announcements found in this category.
+          </div>
+        ) : (
+          visiblePosts.map(post => {
+            const author = post.authorId === 'system' ? { name: 'System Auto-Post', avatar: '' } : employees.find(e => e.id === post.authorId) || { name: 'Unknown User' }
+            const dateStr = new Date(post.date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+            const isUrgent = post.priority === 'Urgent'
+
+            return (
+              <div key={post.id} className="glass-card" style={{ padding: '24px', borderLeft: `4px solid ${getPriorityColor(post.priority)}`, position: 'relative' }}>
+                {isUrgent && (
+                  <div style={{ position: 'absolute', top: '12px', right: '12px', background: 'var(--accent-danger)', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '4px 8px', borderRadius: '12px', textTransform: 'uppercase' }}>
+                    Pinned
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {author.avatar ? (
+                      <img src={author.avatar} alt="" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+                        <Megaphone size={20} />
+                      </div>
+                    )}
+                    <div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{author.name}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{dateStr}</div>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '0.8rem', padding: '4px 8px', borderRadius: '4px', background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
+                    {post.category}
+                  </span>
+                </div>
+
+                <h3 style={{ margin: '0 0 12px 0', fontSize: '1.25rem', color: 'var(--text-primary)' }}>{post.title}</h3>
+                <div style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '0.95rem' }}>
+                  {post.content}
+                </div>
+
+                {post.poll && (
+                  <div style={{ marginTop: '20px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+                    <h4 style={{ margin: '0 0 16px 0', fontSize: '1rem', color: 'var(--text-primary)' }}>📊 {post.poll.question}</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {post.poll.options.map((opt, i) => {
+                        const hasVoted = post.poll.options.some(o => o.votes.includes(currentUser.id))
+                        const iVoted = opt.votes.includes(currentUser.id)
+                        const totalVotes = post.poll.options.reduce((sum, o) => sum + o.votes.length, 0)
+                        const pct = totalVotes === 0 ? 0 : Math.round((opt.votes.length / totalVotes) * 100)
+
+                        if (hasVoted) {
+                          return (
+                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div style={{ flex: 1, background: 'var(--bg-tertiary)', borderRadius: '4px', height: '32px', position: 'relative', overflow: 'hidden' }}>
+                                <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: `${pct}%`, background: iVoted ? 'var(--accent-success)' : 'var(--accent-primary)', opacity: 0.2 }}></div>
+                                <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', display: 'flex', alignItems: 'center', padding: '0 12px', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                                  {opt.text} {iVoted && ' (Your Vote)'}
+                                </div>
+                              </div>
+                              <div style={{ width: '40px', fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'right' }}>{pct}%</div>
+                            </div>
+                          )
+                        } else {
+                          return (
+                            <button key={i} className="btn btn-secondary" style={{ textAlign: 'left', padding: '12px 16px' }} onClick={() => handleVote(post.id, i)}>
+                              {opt.text}
+                            </button>
+                          )
+                        }
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-color)' }}>
+                  <button className="btn btn-secondary" style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }} onClick={() => handleReaction(post.id, '👍')}>
+                    <ThumbsUp size={16} /> {post.reactions['👍']}
+                  </button>
+                  <button className="btn btn-secondary" style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }} onClick={() => handleReaction(post.id, '❤️')}>
+                    <Heart size={16} /> {post.reactions['❤️']}
+                  </button>
+                  <button className="btn btn-secondary" style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }} onClick={() => handleReaction(post.id, '🎉')}>
+                    <PartyPopper size={16} /> {post.reactions['🎉']}
+                  </button>
+                  
+                  <div style={{ flex: 1 }}></div>
+                  
+                  <button className="btn btn-secondary" style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }} onClick={() => addToast('Comments coming soon', 'info')}>
+                    <MessageSquare size={16} /> Comment
+                  </button>
+                </div>
+              </div>
+            )
+          })
         )}
       </div>
     </div>

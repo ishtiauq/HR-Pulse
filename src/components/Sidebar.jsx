@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Database, Settings, Activity, LogOut, X, CreditCard, Calendar, Upload, Trash2, Moon, Sun, HelpCircle, BarChart3, Receipt } from 'lucide-react'
+import { LayoutDashboard, Users, Database, Settings, Activity, LogOut, X, CreditCard, Calendar, Upload, Trash2, Moon, Sun, HelpCircle, BarChart3, Receipt, Megaphone, Monitor } from 'lucide-react'
 import { useState, useRef } from 'react'
 
 export default function Sidebar({ currentView, setCurrentView, driveConnected, user, onLogout, mobileOpen, setMobileOpen, settings, setSettings, isDarkMode, setIsDarkMode, simulatedRole }) {
@@ -91,10 +91,12 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
 
   const allMenuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'announcements', label: 'Announcements', icon: Megaphone },
     { id: 'employees', label: 'Employees', icon: Users },
     { id: 'payroll', label: 'Payroll', icon: CreditCard },
     { id: 'attendance', label: 'Leaves & Attendance', icon: Calendar },
     { id: 'expenses', label: 'Expenses', icon: Receipt },
+    { id: 'assets', label: 'Assets', icon: Monitor },
     { id: 'reports', label: 'Reports', icon: BarChart3 },
     { id: 'settings', label: 'Settings', icon: Settings },
     { id: 'drive', label: 'Google Drive Sync', icon: Database },
