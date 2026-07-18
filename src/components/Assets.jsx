@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { Monitor, Plus, Search, Filter, AlertTriangle, FileText, Download, CheckCircle2, XCircle, PenTool, TrendingDown, Upload, FileSignature } from 'lucide-react'
+import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature } from 'lucide-react'
 import jsPDF from 'jspdf'
-import 'jspdf-autotable'
+import autoTable from 'jspdf-autotable'
 
 export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, addLog, addToast, currentUser }) {
   const [activeTab, setActiveTab] = useState('inventory') // 'inventory', 'assignments', 'requests', 'maintenance'
@@ -139,10 +139,9 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       doc.setFontSize(12)
       doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 30)
       doc.text(`Employee Name: ${employee.name} (${employee.department})`, 20, 40)
-      
       doc.text('This document confirms the assignment of the following company property:', 20, 55)
       
-      doc.autoTable({
+      const tableResult = autoTable(doc, {
         startY: 60,
         head: [['Asset ID', 'Name', 'Category', 'Serial Number', 'Condition']],
         body: [
@@ -150,7 +149,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
         ]
       })
       
-      const finalY = doc.lastAutoTable.finalY + 20
+      const finalY = (doc.lastAutoTable?.finalY ?? 90) + 20
       
       doc.text('Terms and Conditions:', 20, finalY)
       doc.setFontSize(10)

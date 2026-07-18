@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper } from 'lucide-react'
+import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, AlertTriangle } from 'lucide-react'
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -41,6 +41,12 @@ export default function EmployeePortal({
   shiftTemplates,
   overtimeClaims,
   setOvertimeClaims,
+  announcements,
+  setAnnouncements,
+  assets,
+  setAssets,
+  assetRequests,
+  setAssetRequests,
   settings
 }) {
   const [activeTab, setActiveTab] = useState('dashboard') // dashboard, attendance, payslips, leave, profile
@@ -88,6 +94,15 @@ export default function EmployeePortal({
         return <LeaveView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} addLog={addLog} />
       case 'profile':
         return <ProfileView currentUser={currentUser} pendingProfileEdits={pendingProfileEdits} setPendingProfileEdits={setPendingProfileEdits} addToast={addToast} addLog={addLog} />
+      case 'my-assets':
+        return <MyAssetsView
+                 currentUser={currentUser}
+                 assets={assets}
+                 setAssets={setAssets}
+                 assetRequests={assetRequests}
+                 setAssetRequests={setAssetRequests}
+                 addToast={addToast}
+               />
       default:
         return <DashboardView currentUser={currentUser} attendance={attendance} expenses={expenses} announcements={announcements} setActiveTab={setActiveTab} />
     }
@@ -96,6 +111,7 @@ export default function EmployeePortal({
   const navItems = [
     { id: 'dashboard', icon: Home, label: 'Dashboard' },
     { id: 'announcements', icon: Megaphone, label: 'Feed' },
+    { id: 'my-assets', icon: Monitor, label: 'My Assets' },
     { id: 'attendance', icon: Clock, label: 'Attendance' },
     { id: 'payslips', icon: FileText, label: 'Payslips' },
     { id: 'leave', icon: CalendarIcon, label: 'Leave' },
@@ -887,6 +903,189 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
           })
         )}
       </div>
+    </div>
+  )
+}
+
+// ----------------------------------------------------------------------
+// My Assets View (Employee)
+// ----------------------------------------------------------------------
+function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetRequests, addToast }) {
+  const [activeTab, setActiveTab] = useState('assigned') // 'assigned', 'request'
+  const [requestForm, setRequestForm] = useState({ category: 'Laptop', justification: '', urgency: 'Medium' })
+  const [showIssueModal, setShowIssueModal] = useState(false)
+  const [issueAsset, setIssueAsset] = useState(null)
+  const [issueText, setIssueText] = useState('')
+
+  const myAssets = (assets || []).filter(a => a.assignedTo === currentUser.id && a.status === 'Assigned')
+  const myRequests = (assetRequests || []).filter(r => r.employeeId === currentUser.id)
+
+  const handleReportIssue = (e) => {
+    e.preventDefault()
+    setAssets(prev => prev.map(a => {
+      if (a.id === issueAsset.id) {
+        return {
+          ...a,
+          status: 'Under Repair',
+          maintenanceLogs: [...(a.maintenanceLogs || []), {
+            id: `maint-${Date.now()}`,
+            date: new Date().toISOString().split('T')[0],
+            issue: issueText,
+            cost: 0,
+            vendor: 'Reported by Employee',
+            status: 'In Progress'
+          }]
+        }
+      }
+      return a
+    }))
+    setIssueText('')
+    setShowIssueModal(false)
+    addToast('Issue reported. IT will follow up shortly.', 'success')
+  }
+
+  const handleRequestReturn = (assetId) => {
+    setAssets(prev => prev.map(a => {
+      if (a.id === assetId) {
+        return { ...a, status: 'Available', assignedTo: null, assignmentDate: null }
+      }
+      return a
+    }))
+    addToast('Return request submitted. Please hand over the device to IT/HR.', 'info')
+  }
+
+  const handleSubmitRequest = (e) => {
+    e.preventDefault()
+    const newReq = {
+      id: `AREQ-${Date.now()}`,
+      employeeId: currentUser.id,
+      category: requestForm.category,
+      justification: requestForm.justification,
+      urgency: requestForm.urgency,
+      status: 'Pending',
+      date: new Date().toISOString()
+    }
+    setAssetRequests(prev => [newReq, ...prev])
+    setRequestForm({ category: 'Laptop', justification: '', urgency: 'Medium' })
+    addToast('Asset request submitted to IT/HR', 'success')
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Monitor size={24} color="var(--accent-primary)" />
+          My Assets
+        </h2>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'assigned' ? 'var(--bg-secondary)' : 'transparent', color: activeTab === 'assigned' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }} onClick={() => setActiveTab('assigned')}>
+            Assigned to Me
+          </button>
+          <button style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'request' ? 'var(--bg-secondary)' : 'transparent', color: activeTab === 'request' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }} onClick={() => setActiveTab('request')}>
+            Request Equipment
+          </button>
+        </div>
+      </div>
+
+      {activeTab === 'assigned' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {myAssets.length === 0 ? (
+            <div className="glass-card" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+              No assets are currently assigned to you.
+            </div>
+          ) : (
+            myAssets.map(asset => (
+              <div key={asset.id} className="glass-card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Monitor size={24} color="var(--accent-primary)" />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{asset.name}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{asset.category} · SN: {asset.serialNumber}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                      Assigned: {asset.assignmentDate} · Condition: {asset.condition}
+                    </div>
+                    {asset.warrantyExpiry && (
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Warranty until: {asset.warrantyExpiry}</div>
+                    )}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-warning)' }} onClick={() => { setIssueAsset(asset); setShowIssueModal(true) }}>
+                    <AlertTriangle size={14} /> Report Issue
+                  </button>
+                  <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '0.85rem' }} onClick={() => handleRequestReturn(asset.id)}>
+                    Request Return
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+
+          {myRequests.length > 0 && (
+            <div style={{ marginTop: '8px' }}>
+              <h4 style={{ margin: '0 0 12px 0', color: 'var(--text-secondary)' }}>My Past Requests</h4>
+              {myRequests.map(req => (
+                <div key={req.id} className="glass-card" style={{ padding: '16px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <span style={{ fontWeight: 600 }}>{req.category}</span>
+                    <span style={{ color: 'var(--text-secondary)', marginLeft: '8px', fontSize: '0.85rem' }}>"{req.justification}"</span>
+                  </div>
+                  <span className={`badge ${req.status === 'Approved' ? 'badge-success' : req.status === 'Rejected' ? 'badge-danger' : 'badge-warning'}`}>{req.status}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'request' && (
+        <div className="glass-card" style={{ padding: '24px' }}>
+          <h3 style={{ margin: '0 0 20px 0' }}>Request New Equipment</h3>
+          <form onSubmit={handleSubmitRequest} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="form-group">
+              <label>Equipment Category</label>
+              <select className="form-input" value={requestForm.category} onChange={e => setRequestForm(p => ({...p, category: e.target.value}))}>
+                <option>Laptop</option>
+                <option>Phone</option>
+                <option>Monitor</option>
+                <option>Peripherals</option>
+                <option>Access Card</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Urgency Level</label>
+              <select className="form-input" value={requestForm.urgency} onChange={e => setRequestForm(p => ({...p, urgency: e.target.value}))}>
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Justification</label>
+              <textarea required rows={4} className="form-input" placeholder="Explain why you need this equipment..." value={requestForm.justification} onChange={e => setRequestForm(p => ({...p, justification: e.target.value}))} />
+            </div>
+            <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>Submit Request</button>
+          </form>
+        </div>
+      )}
+
+      {/* Report Issue Modal */}
+      {showIssueModal && (
+        <div className="modal-overlay">
+          <div className="modal-content glass-card fade-in" style={{ maxWidth: '500px', width: '100%' }}>
+            <h3 style={{ marginTop: 0 }}>Report Issue: {issueAsset?.name}</h3>
+            <form onSubmit={handleReportIssue} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <textarea required rows={5} className="form-input" placeholder="Describe the issue in detail..." value={issueText} onChange={e => setIssueText(e.target.value)} />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowIssueModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary">Submit Report</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
