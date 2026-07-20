@@ -1500,8 +1500,8 @@ export default function App() {
   const unreadCount = notifications.filter(n => !n.read).length
 
   return (
-    <div className="app-shell" style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <aside className="sidebar" style={{ width: '240px', minWidth: '240px', flexShrink: 0, borderRight: '1px solid var(--md-bw-outline)', backgroundColor: 'var(--md-bw-surface)', display: 'flex', flexDirection: 'column' }}>
+    <div className="dashboard-root app-shell" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', background: 'var(--md-bw-background)', fontFamily: "'Roboto', sans-serif" }}>
+      <aside className="macos-sidebar sidebar" style={{ width: '260px', minWidth: '260px', flexShrink: 0, background: 'rgba(248, 249, 250, 0.65)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', borderRight: '1px solid rgba(0, 0, 0, 0.06)', display: 'flex', flexDirection: 'column', zIndex: 20 }}>
         <div style={{ padding: '16px 24px', fontWeight: 700, fontSize: '20px', color: 'var(--md-bw-on-surface)' }}>
           HR Pulse
         </div>
@@ -1618,55 +1618,56 @@ export default function App() {
       </aside>
 
       {/* Main Content */}
-      <main className="content" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <main className="content dashboard-content" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         
         {/* Global Top App Bar */}
-        <header style={{ height: '64px', minHeight: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', background: 'var(--md-bw-surface)', position: 'sticky', top: 0, zIndex: 10, borderBottom: '1px solid var(--md-bw-outline)' }}>
-          <div className="left" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button className="hamburger-mobile icon-btn" onClick={() => setMobileMenuOpen(true)} style={{ alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        <header className="macos-toolbar" style={{ height: '52px', minHeight: '52px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', background: 'rgba(255, 255, 255, 0.72)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', borderBottom: '1px solid rgba(0, 0, 0, 0.06)', position: 'sticky', top: 0, zIndex: 15, flexShrink: 0 }}>
+          <div className="left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button className="hamburger-mobile icon-btn" onClick={() => setMobileMenuOpen(true)} style={{ alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', borderRadius: '6px' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
             </button>
-            <h1 style={{ font: "700 24px/32px 'Roboto', sans-serif", color: 'var(--md-bw-on-surface)', margin: 0 }}>
+            <h1 style={{ font: "700 22px/28px 'Roboto', sans-serif", color: 'var(--md-bw-on-surface)', margin: 0, letterSpacing: '-0.02em' }}>
               {allNavItems.find(i => i.id === currentView)?.label || 'HR Pulse'}
             </h1>
           </div>
-          <div className="right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span className="sync-badge" style={{ font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>
+          <div className="right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="sync-badge" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '6px', font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>
+              <span style={{ width: '6px', height: '6px', background: !driveConnected ? 'var(--md-bw-error)' : syncConflicts.length > 0 ? 'var(--md-bw-error)' : isSyncing ? 'var(--md-bw-on-surface-variant)' : 'var(--md-bw-primary)', borderRadius: '50%', display: 'inline-block' }}></span>
               {!driveConnected ? 'Offline' : syncConflicts.length > 0 ? 'Conflict' : isSyncing ? 'Syncing...' : 'Synced'}
-            </span>
-            <div className="view-toggle" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
-              <span style={{ font: "400 13px/20px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>View:</span>
-              <select value={simulatedRole} onChange={(e) => setSimulatedRole(e.target.value)} style={{ font: "500 14px/20px 'Roboto'", border: 'none', background: 'transparent', color: 'var(--md-bw-on-surface)', cursor: 'pointer', outline: 'none' }}>
+            </div>
+            <div className="view-toggle" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '6px', font: "400 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>
+              <span>View:</span>
+              <select value={simulatedRole} onChange={(e) => setSimulatedRole(e.target.value)} style={{ font: "500 12px/16px 'Roboto'", border: 'none', background: 'transparent', color: 'var(--md-bw-on-surface)', cursor: 'pointer', outline: 'none' }}>
                 <option value="Admin">Admin</option>
                 <option value="HR Manager">HR Manager</option>
                 <option value="Payroll Manager">Payroll Manager</option>
                 <option value="Employee">Employee</option>
               </select>
             </div>
-            <button className="icon-btn" style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
-              <Search size={24} />
+            <button className="icon-btn" style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', borderRadius: '6px', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             </button>
             <div style={{ position: 'relative' }}>
-              <button className="icon-btn" onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }} style={{ position: 'relative', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
-                <Bell size={24} />
-                {unreadCount > 0 && <span className="badge" style={{ position: 'absolute', top: '12px', right: '12px', width: '8px', height: '8px', background: 'var(--md-bw-primary)', borderRadius: '50%' }}></span>}
+              <button className="icon-btn" onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }} style={{ position: 'relative', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', borderRadius: '6px', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                {unreadCount > 0 && <span className="badge" style={{ position: 'absolute', top: '6px', right: '6px', width: '5px', height: '5px', background: 'var(--md-bw-primary)', borderRadius: '50%', border: '1.5px solid rgba(255,255,255,0.72)' }}></span>}
               </button>
               
               {/* Notifications Dropdown */}
               {showNotifications && (
-                <div style={{
+                <div className="macos-card" style={{
                   position: 'absolute', top: '100%', right: 0, marginTop: '8px',
                   width: '320px',
-                  background: 'var(--md-bw-surface-container)',
-                  border: '1px solid var(--md-bw-outline)',
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  backdropFilter: 'blur(20px) saturate(180%)',
+                  border: '1px solid rgba(0,0,0,0.08)',
                   borderRadius: '16px',
                   boxShadow: '0 12px 32px rgba(0,0,0,0.1)',
                   zIndex: 100, overflow: 'hidden'
                 }}>
                   <div style={{
-                    padding: '16px', borderBottom: '1px solid var(--md-bw-outline)',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    background: 'var(--md-bw-surface)'
+                    padding: '16px', borderBottom: '1px solid rgba(0,0,0,0.06)',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                   }}>
                     <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'var(--md-bw-on-surface)' }}>Notifications</h3>
                   </div>
@@ -1676,8 +1677,8 @@ export default function App() {
                     ) : (
                       notifications.map(n => (
                         <div key={n.id} style={{
-                          padding: '12px 16px', borderBottom: '1px solid var(--md-bw-outline)',
-                          background: n.read ? 'transparent' : 'var(--md-bw-secondary-container)'
+                          padding: '12px 16px', borderBottom: '1px solid rgba(0,0,0,0.04)',
+                          background: n.read ? 'transparent' : 'rgba(0,0,0,0.03)'
                         }}>
                           <p style={{ fontSize: '14px', color: 'var(--md-bw-on-surface)', margin: 0, fontWeight: n.read ? 400 : 500, lineHeight: 1.4 }}>{n.text}</p>
                           <span style={{ fontSize: '12px', color: 'var(--md-bw-on-surface-variant)', marginTop: '4px', display: 'block' }}>{n.time}</span>
@@ -1689,31 +1690,31 @@ export default function App() {
               )}
             </div>
             
-            <div onClick={() => setIsDarkMode(prev => !prev)} style={{ marginLeft: '8px', cursor: 'pointer', width: '36px', height: '36px', borderRadius: '50%', border: '1px solid var(--md-bw-outline)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+            <div onClick={() => setIsDarkMode(prev => !prev)} style={{ marginLeft: '4px', cursor: 'pointer', width: '28px', height: '28px', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
               <img src={user?.avatar || "https://i.pravatar.cc/150?u=admin"} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Profile" />
             </div>
           </div>
         </header>
 
-          {/* Corruption Banner */}
-          {dbStatus === 'corruption' && (
-            <div style={{ background: 'var(--md-bw-surface-variant)', border: '1px solid var(--md-bw-outline)', borderLeft: '4px solid var(--md-bw-primary)', padding: '16px 24px', margin: '16px 24px', display: 'flex', alignItems: 'center', gap: '16px', borderRadius: 0 }}>
-              <AlertTriangle width="24" height="24" style={{ color: 'var(--md-bw-on-surface-variant)', flexShrink: 0 }} />
-              <div style={{ flex: 1 }}>
-                <p style={{ font: "500 14px/20px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>Data integrity issue detected.</p>
-                <p style={{ font: "400 13px/20px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '4px 0 0' }}>{dataIntegrityIssues.length > 0 ? `${dataIntegrityIssues.length} logical conflict(s) found in the database.` : 'A sync or data integrity constraint failed. Review logs or check structure.'}</p>
-              </div>
-              <button onClick={() => setShowCorruptionModal(true)} style={{ font: "500 13px/20px 'Roboto'", textTransform: 'uppercase', background: 'transparent', border: 'none', color: 'var(--md-bw-primary)', padding: '8px 12px', cursor: 'pointer' }}>View Details</button>
-              {dataIntegrityIssues.some(iss => iss.includes('Duplicate')) && (
-                <button onClick={handleAutoRepairDatabase} style={{ font: "500 13px/20px 'Roboto'", textTransform: 'uppercase', background: 'var(--md-bw-primary)', color: 'var(--md-bw-on-primary)', border: 'none', padding: '10px 20px', cursor: 'pointer' }}>Auto-Fix Duplicates</button>
-              )}
-              <button onClick={() => {
-                  if (window.confirm("Restore to default clean data? This will clear local cache and reload.")) {
-                    clearLocalCache().then(() => window.location.reload())
-                  }
-                }} style={{ font: "500 13px/20px 'Roboto'", textTransform: 'uppercase', background: 'var(--md-bw-primary)', color: 'var(--md-bw-on-primary)', border: 'none', padding: '10px 20px', cursor: 'pointer' }}>Reset Database</button>
+        {/* Corruption Banner */}
+        {dbStatus === 'corruption' && (
+          <div className="macos-banner" style={{ margin: '16px 24px', display: 'flex', alignItems: 'flex-start', gap: '16px', padding: '16px 20px', background: 'rgba(248, 249, 250, 0.8)', backdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.08)', borderRadius: '12px' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--md-bw-on-surface-variant)', flexShrink: 0, marginTop: '2px' }}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <div style={{ flex: 1 }}>
+              <p style={{ font: "500 14px/20px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>Data integrity issue detected</p>
+              <p style={{ font: "400 13px/20px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '4px 0 0' }}>{dataIntegrityIssues.length > 0 ? `${dataIntegrityIssues.length} logical conflict(s) found in the database.` : 'A sync or data integrity constraint failed. Review logs or check structure.'}</p>
             </div>
-          )}
+            <button onClick={() => setShowCorruptionModal(true)} style={{ font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', background: 'transparent', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}>View Details</button>
+            {dataIntegrityIssues.some(iss => iss.includes('Duplicate')) && (
+              <button onClick={handleAutoRepairDatabase} style={{ font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-primary)', background: 'var(--md-bw-primary)', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}>Auto-Fix Duplicates</button>
+            )}
+            <button onClick={() => {
+                if (window.confirm("Restore to default clean data? This will clear local cache and reload.")) {
+                  clearLocalCache().then(() => window.location.reload())
+                }
+              }} style={{ font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-primary)', background: 'var(--md-bw-primary)', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}>Reset Database</button>
+          </div>
+        )}
 
           {/* Corruption Modal - using actify Dialog */}
           {showCorruptionModal && (
