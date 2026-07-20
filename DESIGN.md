@@ -1,74 +1,80 @@
 # HR Pulse Design System (DESIGN.md)
 
-This file contains the structured design rules and styling tokens for the **HR Pulse** web application. It is formatted to be imported directly into **Google Stitch** (`stitch.withgoogle.com`) or other AI design systems to maintain visual consistency and support seamless UI iteration.
+This file contains the structured design rules and styling tokens for the **HR Pulse** web application, utilizing the **macOS 27 Liquid Glass** design language.
 
-## Visual Theme: Neon Key-Lime High-Contrast Minimalist Light Theme
-Inspired by avant-garde design aesthetics combining a clean light warm gray backdrop, solid black/charcoal highlights, pure white cards, and vibrant neon key-lime green accents.
+## Visual Theme: macOS 27 Liquid Glass (System Responsive)
+Inspired by macOS 27, this design leverages translucent backgrounds, vibrant gradients, and pronounced background blurs to create a sense of depth. It embraces smooth micro-animations and system-native typography.
 
 ### 1. Color Palette
 
 ```json
 {
-  "theme": "Light / High-Contrast",
+  "theme": "Liquid Glass (Light / System Responsive)",
   "colors": {
     "background": {
-      "primary": "#f0f2f1",       /* Warm light gray background */
-      "secondary": "#ffffff",     /* Pure white for layout cards */
-      "tertiary": "#0e0f11"       /* Contrast black for active tags/footers */
+      "app": "linear-gradient(135deg, #e0eafc, #cfdef3)", /* Vibrant ambient background */
+      "card": "rgba(255, 255, 255, 0.4)",            /* Translucent card base */
+      "cardHover": "rgba(255, 255, 255, 0.5)",
+      "sidebar": "rgba(240, 242, 245, 0.6)"          /* Translucent sidebar */
     },
     "text": {
-      "primary": "#0e0f11",       /* Charcoal black */
-      "secondary": "#4b5563",     /* Slate gray */
-      "muted": "#8c95a5"          /* Muted gray */
+      "primary": "rgba(0, 0, 0, 0.85)",              /* System Black */
+      "secondary": "rgba(0, 0, 0, 0.55)",            /* System Gray */
+      "muted": "rgba(0, 0, 0, 0.35)"
     },
     "accents": {
-      "primary": "#a8ff35",       /* Bright Neon Key-Lime */
-      "primaryGlow": "rgba(168, 255, 53, 0.18)",
-      "info": "#0284c7",          /* Sky blue */
-      "infoGlow": "rgba(2, 132, 199, 0.08)",
-      "success": "#16a34a",       /* Forest green */
-      "successGlow": "rgba(22, 163, 74, 0.08)",
-      "warning": "#e28a05",       /* Amber */
-      "warningGlow": "rgba(226, 138, 5, 0.08)",
-      "danger": "#e11d48",        /* Rose red */
-      "dangerGlow": "rgba(225, 29, 72, 0.08)"
+      "primary": "#007aff",                          /* macOS Blue */
+      "primaryHover": "#005bb5",
+      "info": "#32ade6",                             /* macOS Cyan */
+      "success": "#34c759",                          /* macOS Green */
+      "warning": "#ff9500",                          /* macOS Orange */
+      "danger": "#ff3b30"                            /* macOS Red */
     },
     "borders": {
-      "default": "rgba(0, 0, 0, 0.06)",
-      "glass": "rgba(0, 0, 0, 0.05)"
+      "glass": "rgba(255, 255, 255, 0.6)",
+      "innerHighlight": "rgba(255, 255, 255, 0.8)"
+    },
+    "shadows": {
+      "glass": "0 8px 32px 0 rgba(31, 38, 135, 0.07)"
     }
   }
 }
 ```
 
 ### 2. Typography
-- **Primary Font Family**: `Google Sans`, `Plus Jakarta Sans`, sans-serif (used for body, labels, and forms).
-- **Secondary/Display Font Family**: `Google Sans`, `Plus Jakarta Sans`, `Outfit`, sans-serif (used for headings, cards, and primary totals).
-- **Scale (Larger)**:
-  - Main Title: `2.2rem` (Bold, 700)
-  - Section Title: `1.6rem` (Semi-Bold, 600)
-  - Subheadings: `1.3rem` (Medium, 500)
+- **Primary Font Family**: `-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif`
+- **Scale (Standard macOS)**:
+  - Main Title: `2rem` (Bold, 700)
+  - Section Title: `1.5rem` (Semi-Bold, 600)
+  - Subheadings: `1.2rem` (Medium, 500)
   - Body Text: `1rem` (Regular, 400)
-  - Caption/Muted Details: `0.8rem` (Regular, 400)
+  - Caption/Muted Details: `0.85rem` (Regular, 400)
 
 ### 3. Component Styling
 
 #### Cards (.glass-card)
-- Background: `#ffffff`
-- Border: `1px solid rgba(0, 0, 0, 0.05)`
-- Border Radius: `18px`
-- Box Shadow: `0 10px 30px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.01)`
+- Background: `rgba(255, 255, 255, 0.4)`
+- Backdrop Filter: `blur(20px) saturate(150%)`
+- Border: `1px solid rgba(255, 255, 255, 0.6)`
+- Border Radius: `16px`
+- Box Shadow: `0 8px 32px 0 rgba(31, 38, 135, 0.07)`
+- Inner Highlight (pseudo-element for extra 3D effect): Top border `1px solid rgba(255, 255, 255, 0.9)`
 
-#### Buttons (.btn)
+#### Buttons (.mac-btn)
 - **Primary Buttons**:
-  - Background: `#a8ff35` (Neon Key-Lime)
-  - Color: `#0e0f11` (Charcoal black)
-  - Font Weight: `700`
-- **Secondary Buttons**:
-  - Background: `#0e0f11` (Charcoal black)
+  - Background: `#007aff`
   - Color: `#ffffff`
+  - Border Radius: `8px`
+  - Padding: `8px 16px`
+  - Font Weight: `500`
+  - Shadow: `0 2px 4px rgba(0, 122, 255, 0.3)`
+- **Secondary Buttons (.mac-btn-secondary)**:
+  - Background: `rgba(255, 255, 255, 0.5)`
+  - Backdrop Filter: `blur(10px)`
+  - Color: `rgba(0, 0, 0, 0.85)`
+  - Border: `1px solid rgba(255, 255, 255, 0.6)`
 
 ### 4. Layout & Spacing Scale
-- Page Padding: `48px`
-- Grid gaps: `24px`
-- Row height padding: `16px`
+- Page Padding: `32px` (slightly tighter for macOS feel)
+- Grid gaps: `20px`
+- Border Radius Scale: `8px` (controls), `12px` (modals), `16px` (main cards)
