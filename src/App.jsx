@@ -17,7 +17,7 @@ import EmployeePortal from './components/EmployeePortal.jsx'
 import { readMeta, writeMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBackup, createBackup } from './services/googleDrive.js'
 import { clearLocalCache } from './services/db.js'
 import { validateDatabase } from './services/validator.js'
-import { Bell, AlertTriangle, Search, LayoutDashboard, Users, CreditCard, Calendar as CalendarIcon, Receipt, BarChart3, Settings as SettingsIcon, HardDrive, FileText, Megaphone, CalendarDays, Monitor, Database, User, History, Moon, Sparkles, Trash2, LogOut, Sun, HelpCircle, X, Activity, ChevronUp, Menu } from 'lucide-react'
+import { Bell, AlertTriangle, Search, LayoutDashboard, Users, CreditCard, Calendar as CalendarIcon, Receipt, BarChart3, Settings as SettingsIcon, HardDrive, FileText, Megaphone, CalendarDays, Monitor, Database, User, History, Moon, Sparkles, Trash2, LogOut, Sun, HelpCircle, X, Activity, ChevronUp, Menu, PanelLeftClose, PanelLeft, Shield } from 'lucide-react'
 import { useModal } from './services/useModal.js'
 
 const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
@@ -140,6 +140,7 @@ export default function App() {
   const [isAppLoading, setIsAppLoading] = useState(true)
 
   const [simulatedRole, setSimulatedRole] = useState('Admin')
+  const [showRoleModal, setShowRoleModal] = useState(false)
   const [pendingProfileEdits, setPendingProfileEdits] = useState([])
   const [auditLogs, setAuditLogs] = useState([
     { id: 'audit-1', timestamp: new Date(Date.now() - 86400000).toISOString(), user: 'System', action: 'CREATE', entity: 'System', details: 'Initialized audit logging.', ip: '192.168.1.1' }
@@ -190,6 +191,7 @@ export default function App() {
     { id: 'notif-2', text: 'New leave request from Sarah Rahman', read: false, time: '1 hour ago' }
   ])
   const [showNotifications, setShowNotifications] = useState(false)
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false)
   
   const addNotification = (text) => {
     setNotifications(prev => [{ id: `notif-${Date.now()}`, text, read: false, time: 'Just now' }, ...prev])
@@ -1548,42 +1550,38 @@ export default function App() {
       {mobileMenuOpen && (
         <div className="sidebar-overlay open" onClick={() => setMobileMenuOpen(false)}></div>
       )}
-      <aside className={`macos-sidebar sidebar ${isCollapsed ? 'collapsed' : ''} ${mobileMenuOpen ? 'open' : ''}`} style={{ display: 'flex', flexDirection: 'column', width: '260px', minWidth: '260px', flexShrink: 0, zIndex: 50, overflow: 'hidden' }}>
+      <aside className={`macos-sidebar sidebar ${isCollapsed ? 'collapsed' : ''} ${mobileMenuOpen ? 'open' : ''}`} style={{ display: 'flex', flexDirection: 'column', width: '260px', minWidth: '260px', flexShrink: 0, zIndex: 50, overflow: 'hidden', position: 'relative' }}>
         
-        {/* STICKY HEADER */}
-        <div className="sidebar-header sidebar-glass-header" style={{
-          flexShrink: 0, padding: '20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          position: 'relative', zIndex: 2
-        }}>
-          
-          <div className="brand-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-            {/* Logo remains visible */}
-            <div style={{
-              width: '28px', height: '28px', background: 'var(--md-bw-primary)', borderRadius: '6px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+        {/* SIDEBAR TOGGLE (TOP) */}
+        <div className="sidebar-header-wrapper" style={{ flexShrink: 0, height: '76px', position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
+          <div className="sidebar-glass-header" style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, zIndex: 1 }}></div>
+          <div style={{ position: 'relative', zIndex: 2, padding: '16px 12px 12px 12px' }}>
+            <button className="sidebar-collapse-btn" onClick={toggleSidebar} style={{
+              display: 'flex', alignItems: 'center', gap: '12px', width: '100%', cursor: 'pointer',
+              padding: '10px 12px', background: 'transparent', border: 'none', borderRadius: '10px', 
+              color: 'var(--md-bw-on-surface-variant)', transition: 'background 0.2s ease', height: '44px'
             }}>
-              <span style={{ color: 'var(--md-bw-on-primary)', font: "700 12px 'Roboto'" }}>HP</span>
-            </div>
-            {/* Name collapses */}
-            <span className="brand-text" style={{ 
-              font: "700 16px/20px 'Roboto'", color: 'var(--md-bw-on-surface)', letterSpacing: '-0.01em', 
-              whiteSpace: 'nowrap', transition: 'opacity 0.2s ease, width 0.3s ease, max-width 0.3s ease',
-              opacity: isCollapsed ? 0 : 1, maxWidth: isCollapsed ? 0 : '200px'
-            }}>HR Pulse</span>
+              <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {isCollapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
+              </div>
+              {!isCollapsed && <span style={{ font: "500 13px/16px 'Roboto'", whiteSpace: 'nowrap' }}>Collapse Sidebar</span>}
+            </button>
           </div>
         </div>
 
         {/* SCROLLABLE NAV AREA */}
-        <nav className="sidebar-nav sidebar-nav-masked" style={{
-          flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '12px 12px', display: 'flex',
-          flexDirection: 'column', gap: '4px', minHeight: 0
+        <nav className="sidebar-nav" style={{
+          position: 'absolute', top: 0, bottom: 0, left: 0, right: 0,
+          overflowY: 'auto', overflowX: 'hidden', padding: '76px 12px 220px 12px', display: 'flex',
+          flexDirection: 'column', gap: '4px', zIndex: 1
         }}>
           {visibleNavItems.map(item => {
             const isActive = currentView === item.id;
             return (
-              <div key={item.id} className="nav-item" data-label={item.label} data-active={isActive} onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }} style={{
+              <div key={item.id} className="nav-item" data-label={item.label} data-active={isActive ? "true" : "false"} onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }} style={{
                 display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px',
-                cursor: 'pointer', transition: 'all 0.2s ease', position: 'relative', height: '44px', textDecoration: 'none'
+                cursor: 'pointer', position: 'relative', height: '44px', textDecoration: 'none',
+                '--nav-bg': item.bg || 'var(--md-bw-primary)'
               }}>
                 <div className="nav-icon" style={{
                   width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -1595,82 +1593,148 @@ export default function App() {
                 </div>
                 <span className="nav-label" style={{
                   font: "500 13px/20px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', whiteSpace: 'nowrap',
-                  transition: 'opacity 0.2s ease, max-width 0.3s ease', overflow: 'hidden', flex: 1
+                  transition: 'opacity 0.2s ease, max-width 0.3s ease, font-weight 0.2s ease', overflow: 'hidden', flex: 1
                 }}>{item.label}</span>
-                <div className="active-indicator" style={{
-                  position: 'absolute', left: 0, top: '8px', bottom: '8px', width: '3px',
-                  background: 'var(--md-bw-primary)', borderRadius: '0 2px 2px 0',
-                  opacity: isActive ? 1 : 0, transition: 'opacity 0.2s ease'
-                }}></div>
               </div>
             )
           })}
         </nav>
 
         {/* STICKY FOOTER */}
-        <div className="sidebar-footer sidebar-glass-footer" style={{
-          flexShrink: 0, padding: '16px 12px',
-          position: 'relative', zIndex: 2
+        <div className="sidebar-footer-wrapper" style={{
+          flexShrink: 0, position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10
         }}>
-          <div className="user-profile" data-label={user?.name || "User"} style={{
-            display: 'flex', alignItems: 'center', gap: '12px', padding: '8px', borderRadius: '10px',
-            cursor: 'pointer', transition: 'background 0.2s ease'
-          }}>
-            <img src={user?.avatar || "https://i.pravatar.cc/150?u=a042581f4e29026704d"} style={{
-              width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover',
-              border: '1px solid rgba(0,0,0,0.08)', flexShrink: 0
-            }} alt="Avatar" />
-            <div className="user-info" style={{
-              overflow: 'hidden', whiteSpace: 'nowrap', transition: 'opacity 0.2s ease, width 0.3s ease, max-width 0.3s ease',
-              flex: 1, minWidth: 0
+          <div className="sidebar-glass-footer" style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, zIndex: 1 }}></div>
+          <div className="sidebar-footer" style={{ position: 'relative', zIndex: 2, padding: '16px 12px' }}>
+            <div className="user-profile" data-label={user?.name || "User"} style={{
+              display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px',
+              transition: 'background 0.2s ease', height: '52px'
             }}>
-              <p style={{ font: "500 13px/16px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>{user?.name || "Ishtiaq Ahmed"}</p>
-              <p style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '2px 0 0' }}>{user?.role || "HR Manager"}</p>
+              <img src={user?.avatar || "https://i.pravatar.cc/150?u=a042581f4e29026704d"} style={{
+                width: '32px', height: '32px', borderRadius: '10px', objectFit: 'cover',
+                border: '1px solid rgba(0,0,0,0.08)', flexShrink: 0
+              }} alt="Avatar" />
+              <div className="user-info" style={{
+                overflow: 'hidden', whiteSpace: 'nowrap', transition: 'opacity 0.2s ease, width 0.3s ease, max-width 0.3s ease',
+                flex: 1, minWidth: 0, opacity: isCollapsed ? 0 : 1, maxWidth: isCollapsed ? 0 : '200px'
+              }}>
+                <p style={{ font: "500 13px/16px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>{user?.name || "Ishtiaq Ahmed"}</p>
+                <p style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '2px 0 0' }}>{user?.role || "HR Manager"}</p>
+              </div>
+            </div>
+
+            <div className="footer-actions" style={{
+              overflow: 'hidden', whiteSpace: 'nowrap', transition: 'opacity 0.2s ease, max-height 0.3s ease, max-width 0.3s ease',
+              opacity: isCollapsed ? 0 : 1, maxWidth: isCollapsed ? 0 : '200px', maxHeight: isCollapsed ? 0 : '150px',
+              display: 'flex', flexDirection: 'column', gap: '8px', marginTop: isCollapsed ? 0 : '12px', position: 'relative'
+            }}>
+              <button className="nav-item" onClick={() => setShowRoleModal(!showRoleModal)} style={{
+                display: 'flex', alignItems: 'center', gap: '12px', width: '100%', cursor: 'pointer',
+                padding: '10px 12px', borderRadius: '10px', background: 'rgba(0, 122, 255, 0.15)', 
+                border: 'none', boxShadow: 'inset 0 0 0 1px rgba(0, 122, 255, 0.2)',
+                color: '#007aff', textDecoration: 'none', transition: 'all 0.2s ease', '--nav-bg': '#007aff',
+                height: '44px'
+              }}>
+                <div className="nav-icon" style={{
+                  width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  borderRadius: '10px', flexShrink: 0, transition: 'all 0.2s ease',
+                  background: '#007aff', color: '#ffffff',
+                  boxShadow: '0 2px 6px rgba(0,122,255,0.3), inset 0 1px 2px rgba(255,255,255,0.4)',
+                }}>
+                  <Shield size={16} />
+                </div>
+                <span className="nav-label" style={{ font: "600 13px/20px 'Roboto'", whiteSpace: 'nowrap', textAlign: 'left', flex: 1, color: '#007aff' }}>Role: {simulatedRole}</span>
+              </button>
+
+              {/* Role Modal */}
+              {showRoleModal && (
+                <div className="macos-card" style={{
+                  position: 'absolute', bottom: 'calc(100% + 12px)', left: '0', width: '100%',
+                  background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(40px) saturate(200%)',
+                  border: '1px solid rgba(0,0,0,0.08)', borderRadius: '16px', boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
+                  zIndex: 100, overflow: 'hidden'
+                }}>
+                  <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 style={{ font: "600 13px/16px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>Select Role</h3>
+                  </div>
+                  <div style={{ padding: '8px' }}>
+                    {['Admin', 'HR Manager', 'Payroll Manager', 'Employee'].map(r => (
+                      <button key={r} onClick={() => { setSimulatedRole(r); setShowRoleModal(false); }} style={{
+                        display: 'block', width: '100%', textAlign: 'left', padding: '10px 12px',
+                        background: simulatedRole === r ? 'rgba(0,122,255,0.1)' : 'transparent', border: 'none',
+                        borderRadius: '8px', cursor: 'pointer', font: "500 13px/16px 'Roboto'",
+                        color: simulatedRole === r ? '#007aff' : 'var(--md-bw-on-surface-variant)', transition: 'background 0.2s ease'
+                      }}>
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <button className="nav-item" onClick={handleLogout} style={{
+                display: 'flex', alignItems: 'center', gap: '12px', width: '100%', cursor: 'pointer',
+                padding: '10px 12px', borderRadius: '10px', background: 'rgba(255, 59, 48, 0.15)', 
+                border: 'none', boxShadow: 'inset 0 0 0 1px rgba(255, 59, 48, 0.2)',
+                color: '#ff3b30', textDecoration: 'none', transition: 'all 0.2s ease', '--nav-bg': '#ff3b30',
+                height: '44px'
+              }}>
+                <div className="nav-icon" style={{
+                  width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  borderRadius: '10px', flexShrink: 0, transition: 'all 0.2s ease',
+                  background: '#ff3b30', color: '#ffffff',
+                  boxShadow: '0 2px 6px rgba(255,59,48,0.3), inset 0 1px 2px rgba(255,255,255,0.4)',
+                }}>
+                  <LogOut size={16} />
+                </div>
+                <span className="nav-label" style={{ font: "600 13px/20px 'Roboto'", whiteSpace: 'nowrap', textAlign: 'left', flex: 1, color: '#ff3b30' }}>Log Out</span>
+              </button>
             </div>
           </div>
-
-          <button className="mac-btn-danger" onClick={handleLogout} data-label="Log Out" style={{
-            display: 'flex', alignItems: 'center', gap: '10px', width: '100%', marginTop: '8px', cursor: 'pointer',
-            justifyContent: 'center'
-          }}>
-            <LogOut size={16} />
-            <span className="logout-text" style={{ whiteSpace: 'nowrap', transition: 'opacity 0.2s ease, width 0.3s ease' }}>Log Out</span>
-          </button>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="content dashboard-content" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         
-        <header className="macos-toolbar topbar" style={{ height: '52px', minHeight: '52px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', position: 'sticky', top: 0, zIndex: 15, flexShrink: 0 }}>
-          <div className="left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button className="desktop-menu-btn" onClick={toggleSidebar} style={{
-              width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        <header className="macos-toolbar topbar" style={{ 
+          height: '56px', minHeight: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
+          padding: '0 20px', position: 'sticky', top: '16px', zIndex: 15, flexShrink: 0,
+          margin: '16px auto', width: '100%', maxWidth: '700px', borderRadius: '100px',
+          background: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(30px) saturate(150%)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+          border: '1px solid rgba(0,0,0,0.05)'
+        }}>
+          <div className="left" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(true)} style={{
+              width: '32px', height: '32px', display: 'none', alignItems: 'center', justifyContent: 'center',
               background: 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer',
               color: 'var(--md-bw-on-surface-variant)'
             }}>
               <Menu size={18} />
             </button>
-            <h1 style={{ font: "700 22px/28px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>
-              {allNavItems.find(i => i.id === currentView)?.label || 'Dashboard'}
-            </h1>
+            
+            {/* BRAND LOGO IN TOPBAR */}
+            <div className="brand-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{
+                width: '28px', height: '28px', background: 'var(--md-bw-primary)', borderRadius: '6px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+              }}>
+                <span style={{ color: 'var(--md-bw-on-primary)', font: "700 12px 'Roboto'" }}>HP</span>
+              </div>
+              <span className="brand-text" style={{ font: "700 18px/24px 'Roboto'", color: 'var(--md-bw-on-surface)', letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
+                HR Pulse
+              </span>
+            </div>
           </div>
-          <div className="right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="right" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: '32px' }}>
             <div className="sync-badge" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '6px', font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>
               <span style={{ width: '6px', height: '6px', background: !driveConnected ? 'var(--md-bw-error)' : syncConflicts.length > 0 ? 'var(--md-bw-error)' : isSyncing ? 'var(--md-bw-on-surface-variant)' : 'var(--md-bw-primary)', borderRadius: '50%', display: 'inline-block' }}></span>
               {!driveConnected ? 'Offline' : syncConflicts.length > 0 ? 'Conflict' : isSyncing ? 'Syncing...' : 'Synced'}
             </div>
-            <div className="view-toggle" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '6px', font: "400 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>
-              <span>View:</span>
-              <select value={simulatedRole} onChange={(e) => setSimulatedRole(e.target.value)} style={{ font: "500 12px/16px 'Roboto'", border: 'none', background: 'transparent', color: 'var(--md-bw-on-surface)', cursor: 'pointer', outline: 'none' }}>
-                <option value="Admin">Admin</option>
-                <option value="HR Manager">HR Manager</option>
-                <option value="Payroll Manager">Payroll Manager</option>
-                <option value="Employee">Employee</option>
-              </select>
-            </div>
-            <button className="icon-btn" style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', borderRadius: '6px', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            
+            <button className="icon-btn" onClick={toggleTheme} title={`Theme: ${themeMode}`} style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', borderRadius: '6px', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
+              {themeMode === 'system' ? <Monitor size={18} /> : themeMode === 'light' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <div style={{ position: 'relative' }}>
               <button className="icon-btn" onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }} style={{ position: 'relative', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', borderRadius: '6px', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>

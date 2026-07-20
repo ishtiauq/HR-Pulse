@@ -2505,28 +2505,77 @@ svg.lucide {
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
-/* --- PROGRESSIVE GLASSMORPHISM --- */
+/* --- MACOS 27 GLASSMORPHISM --- */
 .sidebar-glass-header {
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.0) 100%);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
 }
 [data-theme="dark"] .sidebar-glass-header {
-  background: linear-gradient(to bottom, rgba(40, 40, 40, 0.6) 0%, rgba(40, 40, 40, 0.0) 100%);
+  background: rgba(30, 30, 30, 0.9) !important;
 }
 
 .sidebar-glass-footer {
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.0) 100%);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  mask-image: linear-gradient(to top, black 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, black 40%, transparent 100%);
 }
 [data-theme="dark"] .sidebar-glass-footer {
-  background: linear-gradient(to top, rgba(40, 40, 40, 0.6) 0%, rgba(40, 40, 40, 0.0) 100%);
+  background: rgba(30, 30, 30, 0.9) !important;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  display: none;
+}
+.sidebar-nav {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .sidebar-nav-masked {
-  mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 24px, black calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0px, black 16px, black calc(100% - 16px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 16px, black calc(100% - 16px), transparent 100%);
+}
+
+.nav-item {
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+.nav-item:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  background: rgba(0,0,0,0.02);
+}
+[data-theme="dark"] .nav-item:hover {
+  background: rgba(255,255,255,0.04);
+}
+.nav-item[data-active="true"],
+.nav-item:active {
+  background: var(--nav-bg) !important;
+  color: #fff !important;
+}
+.nav-item[data-active="true"] .nav-icon,
+.nav-item:active .nav-icon {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.nav-item[data-active="true"] .nav-label,
+.nav-item:active .nav-label {
+  color: #fff !important;
+  font-weight: 700 !important;
+}
+.nav-item:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.sidebar-collapse-btn:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+[data-theme="dark"] .sidebar-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .mac-btn-danger {
