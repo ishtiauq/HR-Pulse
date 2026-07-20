@@ -517,6 +517,7 @@ export default function App() {
         }
       } catch (e) {
         console.error('Failed to decrypt saved employees:', e)
+        localStorage.removeItem(EMPLOYEES_STORAGE_KEY)
       }
     }
 
