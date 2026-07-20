@@ -171,7 +171,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
             return (
               <div key={doc.id} className="glass-card" style={{
                 display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px',
-                transition: 'all var(--transition-fast)', cursor: 'default'
+                transition: 'border-color var(--transition-fast)', cursor: 'default'
               }}
                 onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent-primary)'}
                 onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}>
@@ -264,7 +264,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                       textAlign: 'center', cursor: 'pointer', color: 'var(--text-muted)',
                       background: formFile ? 'var(--accent-success-glow)' : 'var(--bg-tertiary)',
                       borderColor: formFile ? 'var(--accent-success)' : 'var(--border-color)',
-                      transition: 'all var(--transition-fast)'
+                      transition: 'border-color var(--transition-fast), background-color var(--transition-fast)'
                     }}
                     onMouseEnter={(e) => { if (!formFile) e.currentTarget.style.borderColor = 'var(--accent-primary)' }}
                     onMouseLeave={(e) => { if (!formFile) e.currentTarget.style.borderColor = 'var(--border-color)' }}>

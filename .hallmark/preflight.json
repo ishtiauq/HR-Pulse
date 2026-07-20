@@ -1,0 +1,9 @@
+{
+  "date": "2026-07-20",
+  "fontStack": "Geist + Geist Mono — Google Fonts, added via index.html <link>",
+  "palette": "CSS custom properties in src/index.css — replacing blue neumorphic with Coral OKLCH tokens",
+  "motion": "No motion libraries — framer-motion, gsap not installed. Motion-cut project.",
+  "spacing": "Custom property scale being introduced (4pt base, --space-* tokens)",
+  "framework": "React 19 + Vite 8, no router library (state-based views)",
+  "notes": "Coral theme (modern-minimal genre). Warm-grey paper, coral accent, Geist throughout."
+}

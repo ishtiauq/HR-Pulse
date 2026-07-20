@@ -234,7 +234,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                   flexDirection: 'column',
                   alignItems: 'center',
                   gap: '8px',
-                  transition: 'all 0.2s'
+                  transition: 'background-color 0.2s, border-color 0.2s'
                 }}
               >
                 {receiptBase64 ? (

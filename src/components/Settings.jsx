@@ -137,9 +137,13 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   }
 
   const getSegmentColor = (item, index) => {
-    if (item.type === 'deduction') return 'var(--accent-danger)'
-    const colors = ['var(--accent-primary)', 'var(--accent-success)', 'var(--accent-info)', 'var(--accent-warning)', '#ec4899', '#8b5cf6']
+    const colors = ['#121212', '#4A4A4A', '#7A7A7A', '#AAAAAA', '#DDDDDD']
     return colors[index % colors.length]
+  }
+
+  const getLineStyle = (index) => {
+    const styles = ['solid', 'dashed', 'dotted']
+    return styles[index % styles.length]
   }
 
   const handleLogoUpload = (e) => {
@@ -194,214 +198,233 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     switch (activeSubmenu) {
       case 'payroll':
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div className="responsive-inner-grid">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {/* Currency Config */}
-                <div className="glass-card" style={{ padding: '24px' }}>
-                  <h4 style={{ fontSize: '1.05rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <DollarSign size={16} style={{ color: 'var(--accent-primary)' }} />
-                    Currency Setup
-                  </h4>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: '1.4' }}>
-                    Select the currency symbol applied globally across dashboards and receipts.
-                  </p>
-                  
-                  <select 
-                    value={currency} 
-                    onChange={(e) => setCurrency(e.target.value)}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            <div className="m3-card m3-card-filled" style={{ padding: '24px' }}>
+              <h4 className="title-large" style={{ margin: '0 0 8px 0', color: 'var(--md-bw-on-surface)' }}>
+                Currency Setup
+              </h4>
+              <p className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)', margin: '0 0 24px 0' }}>
+                Select the currency symbol applied globally across dashboards and receipts.
+              </p>
+              
+              <div style={{ position: 'relative', width: '300px' }}>
+                <select 
+                  value={currency} 
+                  onChange={(e) => setCurrency(e.target.value)}
+                  className="m3-select"
+                  style={{
+                    width: '100%',
+                    padding: '16px 14px',
+                    borderRadius: '4px',
+                    border: '1px solid var(--md-bw-outline)',
+                    background: 'transparent',
+                    color: 'var(--md-bw-on-surface)',
+                    fontSize: '16px',
+                    outline: 'none',
+                    cursor: 'pointer',
+                    appearance: 'none'
+                  }}
+                >
+                  <option value="$">$ (USD)</option>
+                  <option value="৳">৳ (BDT)</option>
+                  <option value="€">€ (EUR)</option>
+                  <option value="£">£ (GBP)</option>
+                  <option value="₹">₹ (INR)</option>
+                  <option value="¥">¥ (JPY)</option>
+                </select>
+                <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }}>▼</span>
+              </div>
+            </div>
+
+            {/* Salary breakdown display */}
+            <div className="m3-card m3-card-filled" style={{ padding: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h4 className="title-large" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>
+                  Split Visualization
+                </h4>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <label className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Sample Gross:</label>
+                  <input 
+                    type="number" 
+                    value={sampleGross} 
+                    onChange={(e) => setSampleGross(Number(e.target.value))}
                     style={{
-                      padding: '10px 14px',
-                      borderRadius: '8px',
-                      border: '1px solid var(--border-color)',
-                      background: 'var(--bg-secondary)',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.9rem',
-                      outline: 'none',
-                      cursor: 'pointer',
-                      width: '100%'
+                      width: '100px', padding: '10px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)',
+                      background: 'transparent', color: 'var(--md-bw-on-surface)', fontSize: '14px', outline: 'none',
+                      fontVariantNumeric: 'tabular-nums'
                     }}
-                  >
-                    <option value="$">$ (USD)</option>
-                    <option value="৳">৳ (BDT)</option>
-                    <option value="€">€ (EUR)</option>
-                    <option value="£">£ (GBP)</option>
-                    <option value="₹">₹ (INR)</option>
-                    <option value="¥">¥ (JPY)</option>
-                  </select>
-                </div>
-
-                {/* Salary breakdown display */}
-                <div className="glass-card" style={{ padding: '24px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <h4 style={{ fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Percent size={16} style={{ color: 'var(--accent-success)' }} />
-                      Split Visualization
-                    </h4>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Sample Gross:</label>
-                      <input 
-                        type="number" 
-                        value={sampleGross} 
-                        onChange={(e) => setSampleGross(Number(e.target.value))}
-                        style={{
-                          width: '80px', padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--border-color)',
-                          background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.85rem', outline: 'none'
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                    Gross salary distribution preview. Hover to see calculated amounts.
-                  </p>
-
-                  {salaryStructure.length === 0 ? (
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>No salary components configured.</span>
-                  ) : (
-                    <>
-                      <div style={{
-                        height: '20px',
-                        width: '100%',
-                        background: 'rgba(255,255,255,0.05)',
-                        borderRadius: '6px',
-                        overflow: 'hidden',
-                        display: 'flex',
-                        marginBottom: '16px'
-                      }}>
-                        {salaryStructure.map((item, index) => (
-                          <div 
-                            key={item.id}
-                            onMouseEnter={() => setHoveredComponentId(item.id)}
-                            onMouseLeave={() => setHoveredComponentId(null)}
-                            style={{ 
-                              width: `${item.percentage}%`, 
-                              background: getSegmentColor(item, index),
-                              height: '100%',
-                              transition: 'opacity var(--transition-fast)',
-                              opacity: hoveredComponentId && hoveredComponentId !== item.id ? 0.3 : 1,
-                              cursor: 'pointer'
-                            }} 
-                            title={`${item.name}: ${item.percentage}% (${currency}${(sampleGross * (item.percentage / 100)).toLocaleString()})`}
-                          />
-                        ))}
-                      </div>
-
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.75rem' }}>
-                        {salaryStructure.map((item, index) => (
-                          <div 
-                            key={item.id} 
-                            style={{ 
-                              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                              padding: '2px 6px', borderRadius: '4px',
-                              background: hoveredComponentId === item.id ? 'var(--bg-tertiary)' : 'transparent',
-                              transition: 'background var(--transition-fast)'
-                            }}
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: getSegmentColor(item, index) }} />
-                              <span style={{ color: 'var(--text-secondary)' }}>{item.name} ({item.type})</span>
-                            </div>
-                            <span style={{ fontWeight: 600, color: item.type === 'deduction' ? 'var(--accent-danger)' : 'var(--text-primary)' }}>
-                              {item.type === 'deduction' ? '-' : ''}{item.percentage}%
-                            </span>
-                          </div>
-                        ))}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '6px', marginTop: '4px', fontWeight: 600, fontSize: '0.8rem' }}>
-                          <span style={{ color: 'var(--text-primary)' }}>Net Earning ratio:</span>
-                          <span style={{ color: 'var(--accent-success)' }}>{netPayPercent}%</span>
-                        </div>
-                      </div>
-                    </>
-                  )}
+                  />
                 </div>
               </div>
 
-              {/* Sliders Configuration */}
-              <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h4 style={{ fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Sliders size={16} style={{ color: 'var(--accent-primary)' }} />
-                    Components List
-                  </h4>
-                  <button 
-                    onClick={handleAddComponent} 
-                    className="btn btn-secondary" 
-                    style={{ padding: '4px 10px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}
-                  >
-                    <Plus size={14} /> Add Item
-                  </button>
-                </div>
-
-                {isOver100 && (
-                  <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--accent-danger)', color: 'var(--accent-danger)', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Info size={16} />
-                    Component total exceeds 100%. Please adjust before saving.
+              {salaryStructure.length === 0 ? (
+                <span className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)' }}>No salary components configured.</span>
+              ) : (
+                <>
+                  <div style={{
+                    height: '24px',
+                    width: '100%',
+                    background: 'var(--md-bw-surface-variant)',
+                    display: 'flex',
+                    marginBottom: '24px'
+                  }}>
+                    {salaryStructure.map((item, index) => (
+                      <div 
+                        key={item.id}
+                        onMouseEnter={() => setHoveredComponentId(item.id)}
+                        onMouseLeave={() => setHoveredComponentId(null)}
+                        style={{ 
+                          width: `${item.percentage}%`, 
+                          background: getSegmentColor(item, index),
+                          height: '100%',
+                          opacity: hoveredComponentId && hoveredComponentId !== item.id ? 0.4 : 1,
+                          cursor: 'pointer',
+                          transition: 'opacity 0ms'
+                        }} 
+                        title={`${item.name}: ${item.percentage}% (${currency}${(sampleGross * (item.percentage / 100)).toLocaleString()})`}
+                      />
+                    ))}
                   </div>
-                )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '420px', overflowY: 'auto', paddingRight: '4px' }}>
-                  {salaryStructure.map((item, index) => (
-                    <div key={item.id} style={{
-                      padding: '12px',
-                      borderRadius: '8px',
-                      background: 'rgba(255,255,255,0.01)',
-                      border: '1px solid var(--border-color)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '10px'
-                    }}>
-                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                        {/* Name Input */}
-                        <input 
-                          type="text" value={item.name} 
-                          onChange={(e) => handleComponentChange(item.id, 'name', e.target.value)}
-                          style={{
-                            flex: 1, padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border-color)',
-                            background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.8rem', outline: 'none'
-                          }}
-                        />
-                        {/* Earning/Deduction toggle */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {salaryStructure.map((item, index) => (
+                      <div 
+                        key={item.id} 
+                        style={{ 
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                          padding: '8px 12px',
+                          background: hoveredComponentId === item.id ? 'var(--md-bw-surface-variant)' : 'transparent',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ 
+                            width: '24px', 
+                            borderBottom: `2px ${getLineStyle(index)} var(--md-bw-on-surface)` 
+                          }} />
+                          <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{item.name} ({item.type})</span>
+                        </div>
+                        <span className="body-large" style={{ color: 'var(--md-bw-on-surface)', fontVariantNumeric: 'tabular-nums' }}>
+                          {item.type === 'deduction' ? '-' : ''}{item.percentage}%
+                        </span>
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--md-bw-outline)', paddingTop: '12px', marginTop: '12px' }}>
+                      <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)' }}>Net Earning ratio:</span>
+                      <span className="body-large" style={{ color: 'var(--md-bw-on-surface)', fontVariantNumeric: 'tabular-nums' }}>{netPayPercent}%</span>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Sliders Configuration */}
+            <div className="m3-card m3-card-filled" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4 className="title-large" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>
+                  Components List
+                </h4>
+                <button 
+                  onClick={handleAddComponent} 
+                  className="btn btn-outlined" 
+                  style={{ padding: '0 16px', height: '40px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <Plus size={18} /> Add Item
+                </button>
+              </div>
+
+              {isOver100 && (
+                <div style={{ padding: '16px', background: 'var(--md-bw-surface-variant)', border: '1px solid var(--md-bw-outline)', color: 'var(--md-bw-on-surface)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <Info size={20} />
+                  <span className="body-medium">Component total exceeds 100%. Please adjust before saving.</span>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {salaryStructure.map((item, index) => (
+                  <div key={item.id} className="m3-card m3-card-elevated" style={{
+                    padding: '24px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '24px'
+                  }}>
+                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                      {/* Name Input */}
+                      <div className="m3-text-field outlined" style={{ flex: 1 }}>
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                          <input 
+                            type="text" value={item.name} 
+                            onChange={(e) => handleComponentChange(item.id, 'name', e.target.value)}
+                            style={{
+                              width: '100%', padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)',
+                              background: 'transparent', color: 'var(--md-bw-on-surface)', fontSize: '16px', outline: 'none'
+                            }}
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Earning/Deduction toggle */}
+                      <div style={{ position: 'relative', width: '150px' }}>
                         <select 
                           value={item.type} 
                           onChange={(e) => handleComponentChange(item.id, 'type', e.target.value)}
+                          className="m3-select"
                           style={{
-                            padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--border-color)',
-                            background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.8rem', outline: 'none', cursor: 'pointer'
+                            width: '100%', padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)',
+                            background: 'transparent', color: 'var(--md-bw-on-surface)', fontSize: '16px', outline: 'none', cursor: 'pointer', appearance: 'none'
                           }}
                         >
-                          <option value="earning">Earning</option>
-                          <option value="deduction">Deduction</option>
+                          <option value="earning" style={{ background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)' }}>Earning</option>
+                          <option value="deduction" style={{ background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)' }}>Deduction</option>
                         </select>
-                        {/* Delete Button */}
-                        <button 
-                          onClick={() => handleRemoveComponent(item.id)}
-                          style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-                          onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent-danger)'}
-                          onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }}>▼</span>
                       </div>
+                      
+                      {/* Delete Button */}
+                      <button 
+                        onClick={() => handleRemoveComponent(item.id)}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', padding: '12px' }}
+                      >
+                        <Trash2 size={24} />
+                      </button>
+                    </div>
 
-                      {/* Percentage slider & input */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {/* Percentage slider & input */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                      <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', height: '24px' }}>
+                        {/* Custom M3 Slider background track */}
+                        <div style={{ position: 'absolute', width: '100%', height: '16px', background: 'var(--md-bw-surface-variant)', borderRadius: '8px' }} />
+                        {/* Custom M3 Slider fill */}
+                        <div style={{ position: 'absolute', width: `${item.percentage}%`, height: '16px', background: 'var(--md-bw-primary)', borderRadius: '8px 0 0 8px' }} />
                         <input 
                           type="range" min="0" max="100" value={item.percentage} 
                           onChange={(e) => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
-                          style={{ flex: 1, cursor: 'pointer', accentColor: getSegmentColor(item, index) }}
+                          style={{ 
+                            width: '100%', position: 'absolute', opacity: 0, cursor: 'pointer', height: '24px', zIndex: 10
+                          }}
                         />
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--bg-secondary)', padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+                        {/* Thumb indicator (purely visual over the invisible native range) */}
+                        <div style={{ 
+                          position: 'absolute', left: `calc(${item.percentage}% - 10px)`,
+                          width: '20px', height: '20px', borderRadius: '50%', background: 'var(--md-bw-primary)',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.3)', pointerEvents: 'none'
+                        }} />
+                      </div>
+                      <div className="m3-text-field outlined" style={{ width: '80px' }}>
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                           <input 
                             type="number" min="0" max="100" value={item.percentage} 
                             onChange={(e) => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
-                            style={{ width: '40px', background: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '0.85rem', outline: 'none', textAlign: 'right' }}
+                            style={{ 
+                              width: '100%', padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)', 
+                              background: 'transparent', color: 'var(--md-bw-on-surface)', fontSize: '16px', outline: 'none', 
+                              textAlign: 'center', fontVariantNumeric: 'tabular-nums' 
+                            }}
                           />
-                          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>%</span>
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -409,19 +432,19 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
       case 'company':
         return (
-          <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Building2 size={18} style={{ color: 'var(--accent-primary)' }} />
+          <div className="m3-card m3-card-filled" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <h3 className="title-large" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, color: 'var(--md-bw-on-surface)' }}>
+              <Building2 size={24} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
               Company Profile Settings
             </h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+            <p className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
               Manage public details regarding your enterprise. These details are used to brand generated documents like reports, receipts, and payslips.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '8px' }}>
               {/* Brand Logo */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Brand Logo</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)' }}>Brand Logo</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div 
                     onClick={() => {
@@ -436,11 +459,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                       width: '64px',
                       height: '64px',
                       borderRadius: '16px',
-                      background: 'var(--accent-primary)',
+                      background: 'var(--md-bw-surface-variant)',
+                      border: '1px solid var(--md-bw-outline)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      boxShadow: '0 4px 12px var(--accent-primary-glow)',
                       flexShrink: 0,
                       cursor: 'pointer',
                       overflow: 'hidden',
@@ -460,18 +483,18 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                         }} 
                       />
                     ) : (
-                      <Activity size={28} color="#ffffff" style={{ animation: 'pulse 2s infinite' }} />
+                      <Activity size={28} color="var(--md-bw-on-surface-variant)" />
                     )}
                   </div>
                   <div>
                     <button 
                       onClick={triggerFileInput}
-                      className="btn-outline" 
-                      style={{ padding: '6px 12px', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                      className="btn btn-outlined" 
+                      style={{ padding: '0 16px', height: '40px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                     >
-                      <Upload size={14} /> Upload New Logo
+                      <Upload size={18} /> Upload New Logo
                     </button>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
+                    <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', marginTop: '8px' }}>
                       Click on the logo to reposition or resize it.
                     </p>
                   </div>
@@ -486,44 +509,46 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               </div>
 
               {/* Name */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Legal Entity Name</label>
-                <input 
-                  type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)}
-                  style={{
-                    padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                    background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.9rem', outline: 'none'
-                  }}
-                />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)' }}>Legal Entity Name</span>
+                <div className="m3-text-field outlined">
+                  <input 
+                    type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)}
+                    style={{
+                      padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)',
+                      background: 'transparent', color: 'var(--md-bw-on-surface)', fontSize: '16px', outline: 'none', width: '100%'
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Email */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>HR Support Email</label>
-                <div style={{ position: 'relative' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)' }}>HR Support Email</span>
+                <div className="m3-text-field outlined" style={{ position: 'relative' }}>
                   <input 
                     type="email" value={companyEmail} onChange={(e) => setCompanyEmail(e.target.value)}
                     style={{
-                      padding: '10px 14px 10px 38px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                      background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.9rem', outline: 'none', width: '100%'
+                      padding: '16px 14px 16px 48px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)',
+                      background: 'transparent', color: 'var(--md-bw-on-surface)', fontSize: '16px', outline: 'none', width: '100%'
                     }}
                   />
-                  <Mail size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <Mail size={24} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--md-bw-on-surface-variant)' }} />
                 </div>
               </div>
 
               {/* Website */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Company Website URL</label>
-                <div style={{ position: 'relative' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)' }}>Company Website URL</span>
+                <div className="m3-text-field outlined" style={{ position: 'relative' }}>
                   <input 
                     type="text" value={companyWebsite} onChange={(e) => setCompanyWebsite(e.target.value)}
                     style={{
-                      padding: '10px 14px 10px 38px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                      background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.9rem', outline: 'none', width: '100%'
+                      padding: '16px 14px 16px 48px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)',
+                      background: 'transparent', color: 'var(--md-bw-on-surface)', fontSize: '16px', outline: 'none', width: '100%'
                     }}
                   />
-                  <Globe size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <Globe size={24} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--md-bw-on-surface-variant)' }} />
                 </div>
               </div>
             </div>
@@ -532,37 +557,37 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
       case 'notifications':
         return (
-          <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Bell size={18} style={{ color: 'var(--accent-primary)' }} />
+          <div className="m3-card m3-card-filled" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <h3 className="title-large" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, color: 'var(--md-bw-on-surface)' }}>
+              <Bell size={24} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
               Notification Preferences
             </h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+            <p className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
               Enable alerts, sync logs alerts, or background notification parameters.
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
               {/* Sync Toggles */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: '1px solid var(--md-bw-outline)' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Enable Real-time Sync Alerts</span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Displays popups when files successfully sync with Google Drive.</span>
+                  <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>Enable Real-time Sync Alerts</span>
+                  <span className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Displays popups when files successfully sync with Google Drive.</span>
                 </div>
                 <input 
                   type="checkbox" checked={syncAlerts} onChange={(e) => setSyncAlerts(e.target.checked)}
-                  style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
+                  style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--md-bw-primary)' }}
                 />
               </div>
 
               {/* Email Digests */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Email Monthly Payout Digest</span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Sends a copy of the payroll statements to the HR support inbox.</span>
+                  <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>Email Monthly Payout Digest</span>
+                  <span className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Sends a copy of the payroll statements to the HR support inbox.</span>
                 </div>
                 <input 
                   type="checkbox" checked={emailDigests} onChange={(e) => setEmailDigests(e.target.checked)}
-                  style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
+                  style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: 'var(--md-bw-primary)' }}
                 />
               </div>
             </div>
@@ -571,25 +596,27 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
       case 'expenses':
         return (
-          <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Receipt size={18} style={{ color: 'var(--accent-primary)' }} />
+          <div className="m3-card m3-card-filled" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <h3 className="title-large" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, color: 'var(--md-bw-on-surface)' }}>
+              <Receipt size={24} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
               Expense Policies
             </h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+            <p className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
               Set maximum reimbursement limits per category. Expenses exceeding these limits will be flagged for review in the approval queue.
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
               {Object.keys(expensePolicies).map(category => (
-                <div key={category} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{category} Limit ($)</label>
-                  <input 
-                    type="number"
-                    value={expensePolicies[category]}
-                    onChange={(e) => setExpensePolicies(prev => ({ ...prev, [category]: Number(e.target.value) }))}
-                    style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }}
-                  />
+                <div key={category} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)' }}>{category} Limit ($)</span>
+                  <div className="m3-text-field outlined">
+                    <input 
+                      type="number"
+                      value={expensePolicies[category]}
+                      onChange={(e) => setExpensePolicies(prev => ({ ...prev, [category]: Number(e.target.value) }))}
+                      style={{ width: '100%', padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)', background: 'transparent', color: 'var(--md-bw-on-surface)', fontSize: '16px', outline: 'none' }}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
@@ -599,59 +626,67 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
       case 'rosters':
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div className="m3-card m3-card-filled" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                  <CalendarClock size={18} style={{ color: 'var(--accent-primary)' }} />
+                <h3 className="title-large" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, color: 'var(--md-bw-on-surface)' }}>
+                  <CalendarClock size={24} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
                   Shift Templates
                 </h3>
-                <button className="btn btn-secondary" onClick={() => {
-                  const newTemplate = { id: `st-${Date.now()}`, name: 'New Shift', start: '09:00', end: '17:00', break: 60, color: '#3b82f6' }
+                <button className="btn btn-outlined" onClick={() => {
+                  const newTemplate = { id: `st-${Date.now()}`, name: 'New Shift', start: '09:00', end: '17:00', break: 60, color: '#333333' }
                   setShiftTemplates([...shiftTemplates, newTemplate])
                 }}>
-                  <Plus size={16} /> Add Shift
+                  <Plus size={18} /> Add Shift
                 </button>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {shiftTemplates.map((template) => (
-                  <div key={template.id} style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1.5 }}>
-                      <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Shift Name</label>
-                      <input type="text" value={template.name} onChange={(e) => {
-                        setShiftTemplates(prev => prev.map(t => t.id === template.id ? { ...t, name: e.target.value } : t))
-                      }} style={{ padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', outline: 'none' }} />
+                  <div key={template.id} className="m3-card m3-card-elevated" style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '16px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1.5 }}>
+                      <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)' }}>Shift Name</span>
+                      <div className="m3-text-field outlined">
+                        <input type="text" value={template.name} onChange={(e) => {
+                          setShiftTemplates(prev => prev.map(t => t.id === template.id ? { ...t, name: e.target.value } : t))
+                        }} style={{ width: '100%', padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)', background: 'transparent', color: 'var(--md-bw-on-surface)', fontSize: '16px', outline: 'none' }} />
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-                      <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Start Time</label>
-                      <input type="time" value={template.start} onChange={(e) => {
-                        setShiftTemplates(prev => prev.map(t => t.id === template.id ? { ...t, start: e.target.value } : t))
-                      }} style={{ padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', outline: 'none' }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                      <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)' }}>Start Time</span>
+                      <div className="m3-text-field outlined">
+                        <input type="time" value={template.start} onChange={(e) => {
+                          setShiftTemplates(prev => prev.map(t => t.id === template.id ? { ...t, start: e.target.value } : t))
+                        }} style={{ width: '100%', padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)', background: 'transparent', color: 'var(--md-bw-on-surface)', fontSize: '16px', outline: 'none' }} />
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-                      <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>End Time</label>
-                      <input type="time" value={template.end} onChange={(e) => {
-                        setShiftTemplates(prev => prev.map(t => t.id === template.id ? { ...t, end: e.target.value } : t))
-                      }} style={{ padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', outline: 'none' }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                      <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)' }}>End Time</span>
+                      <div className="m3-text-field outlined">
+                        <input type="time" value={template.end} onChange={(e) => {
+                          setShiftTemplates(prev => prev.map(t => t.id === template.id ? { ...t, end: e.target.value } : t))
+                        }} style={{ width: '100%', padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)', background: 'transparent', color: 'var(--md-bw-on-surface)', fontSize: '16px', outline: 'none' }} />
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-                      <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Break (min)</label>
-                      <input type="number" value={template.break} onChange={(e) => {
-                        setShiftTemplates(prev => prev.map(t => t.id === template.id ? { ...t, break: parseInt(e.target.value) || 0 } : t))
-                      }} style={{ padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', outline: 'none' }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                      <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)' }}>Break (min)</span>
+                      <div className="m3-text-field outlined">
+                        <input type="number" value={template.break} onChange={(e) => {
+                          setShiftTemplates(prev => prev.map(t => t.id === template.id ? { ...t, break: parseInt(e.target.value) || 0 } : t))
+                        }} style={{ width: '100%', padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)', background: 'transparent', color: 'var(--md-bw-on-surface)', fontSize: '16px', outline: 'none' }} />
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '60px' }}>
-                      <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Color</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '60px' }}>
+                      <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)' }}>Color</span>
                       <input type="color" value={template.color} onChange={(e) => {
                         setShiftTemplates(prev => prev.map(t => t.id === template.id ? { ...t, color: e.target.value } : t))
-                      }} style={{ padding: '4px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', width: '100%', height: '35px', cursor: 'pointer' }} />
+                      }} style={{ padding: '0', borderRadius: '4px', border: '1px solid var(--md-bw-outline)', background: 'transparent', width: '100%', height: '52px', cursor: 'pointer' }} />
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', justifyContent: 'flex-end', height: '100%' }}>
-                      <label style={{ fontSize: '0.75rem', color: 'transparent' }}>X</label>
-                      <button className="btn btn-secondary" style={{ padding: '8px', color: 'var(--accent-danger)' }} onClick={() => {
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', justifyContent: 'flex-end', height: '100%' }}>
+                      <span className="label-small" style={{ textTransform: 'uppercase', color: 'transparent' }}>X</span>
+                      <button className="btn btn-text" style={{ padding: '16px', color: 'var(--md-bw-on-surface-variant)' }} onClick={() => {
                         setShiftTemplates(prev => prev.filter(t => t.id !== template.id))
                       }}>
-                        <Trash2 size={16} />
+                        <Trash2 size={20} />
                       </button>
                     </div>
                   </div>
@@ -659,19 +694,23 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               </div>
             </div>
 
-            <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                <Activity size={18} style={{ color: 'var(--accent-warning)' }} />
+            <div className="m3-card m3-card-filled" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <h3 className="title-large" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, color: 'var(--md-bw-on-surface)' }}>
+                <Activity size={24} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
                 Overtime Rules
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Weekday Multiplier (e.g., 1.5x)</label>
-                  <input type="number" step="0.1" value={overtimeRules.multiplierWeekday} onChange={(e) => setOvertimeRules(prev => ({ ...prev, multiplierWeekday: parseFloat(e.target.value) || 1 }))} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)' }}>Weekday Multiplier (e.g., 1.5x)</span>
+                  <div className="m3-text-field outlined">
+                    <input type="number" step="0.1" value={overtimeRules.multiplierWeekday} onChange={(e) => setOvertimeRules(prev => ({ ...prev, multiplierWeekday: parseFloat(e.target.value) || 1 }))} style={{ width: '100%', padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)', background: 'transparent', color: 'var(--md-bw-on-surface)', outline: 'none' }} />
+                  </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Weekend/Holiday Multiplier (e.g., 2.0x)</label>
-                  <input type="number" step="0.1" value={overtimeRules.multiplierWeekend} onChange={(e) => setOvertimeRules(prev => ({ ...prev, multiplierWeekend: parseFloat(e.target.value) || 1 }))} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none' }} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)' }}>Weekend/Holiday Multiplier (e.g., 2.0x)</span>
+                  <div className="m3-text-field outlined">
+                    <input type="number" step="0.1" value={overtimeRules.multiplierWeekend} onChange={(e) => setOvertimeRules(prev => ({ ...prev, multiplierWeekend: parseFloat(e.target.value) || 1 }))} style={{ width: '100%', padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)', background: 'transparent', color: 'var(--md-bw-on-surface)', outline: 'none' }} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -708,53 +747,59 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         }
 
         return (
-          <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="m3-card m3-card-filled" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 4px 0' }}>
-                  <List size={18} style={{ color: 'var(--accent-primary)' }} />
+                <h3 className="title-large" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 4px 0', color: 'var(--md-bw-on-surface)' }}>
+                  <List size={24} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
                   Audit Logs
                 </h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>Review all system actions for compliance and security.</p>
+                <p className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Review all system actions for compliance and security.</p>
               </div>
-              <button onClick={handleExportCSV} className="btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', fontSize: '0.85rem' }}>
-                <Download size={14} /> Export CSV
+              <button onClick={handleExportCSV} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Download size={18} /> Export CSV
               </button>
             </div>
 
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: '150px' }}>
-                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Date</label>
-                <input 
-                  type="date" 
-                  value={auditFilterDate} 
-                  onChange={(e) => setAuditFilterDate(e.target.value)}
-                  style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)', outline: 'none' }}
-                />
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap', padding: '16px', background: 'var(--md-bw-surface-variant)', borderRadius: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '150px' }}>
+                <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)' }}>Date</span>
+                <div className="m3-text-field outlined">
+                  <input 
+                    type="date" 
+                    value={auditFilterDate} 
+                    onChange={(e) => setAuditFilterDate(e.target.value)}
+                    style={{ width: '100%', padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)', background: 'transparent', color: 'var(--md-bw-on-surface)', outline: 'none' }}
+                  />
+                </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, minWidth: '150px' }}>
-                <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Action Type</label>
-                <select 
-                  value={auditFilterAction} 
-                  onChange={(e) => setAuditFilterAction(e.target.value)}
-                  style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)', outline: 'none' }}
-                >
-                  <option value="All">All Actions</option>
-                  <option value="CREATE">CREATE</option>
-                  <option value="UPDATE">UPDATE</option>
-                  <option value="DELETE">DELETE</option>
-                </select>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, minWidth: '150px' }}>
+                <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)' }}>Action Type</span>
+                <div style={{ position: 'relative' }}>
+                  <select 
+                    value={auditFilterAction} 
+                    onChange={(e) => setAuditFilterAction(e.target.value)}
+                    className="m3-select"
+                    style={{ width: '100%', padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)', background: 'transparent', color: 'var(--md-bw-on-surface)', outline: 'none', cursor: 'pointer', appearance: 'none' }}
+                  >
+                    <option value="All">All Actions</option>
+                    <option value="CREATE">CREATE</option>
+                    <option value="UPDATE">UPDATE</option>
+                    <option value="DELETE">DELETE</option>
+                  </select>
+                  <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }}>▼</span>
+                </div>
               </div>
-              <div style={{ alignSelf: 'flex-end', marginBottom: '2px' }}>
-                <button onClick={() => { setAuditFilterDate(''); setAuditFilterAction('All'); }} className="btn" style={{ padding: '6px 12px', fontSize: '0.8rem', background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
+              <div style={{ alignSelf: 'flex-end' }}>
+                <button onClick={() => { setAuditFilterDate(''); setAuditFilterAction('All'); }} className="btn btn-text" style={{ height: '56px' }}>
                   Clear
                 </button>
               </div>
             </div>
 
-            <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-              <table className="table-responsive table table-striped" style={{ minWidth: '800px' }}>
-                <thead style={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--bg-primary)' }}>
+            <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--md-bw-outline)', borderRadius: '12px' }}>
+              <table className="m3-data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead style={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--md-bw-surface)' }}>
                   <tr>
                     <th>Timestamp</th>
                     <th>User</th>
@@ -767,23 +812,21 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 <tbody>
                   {filteredAudit.length === 0 ? (
                     <tr>
-                      <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>No logs found for selected filters.</td>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: 'var(--md-bw-on-surface-variant)' }}>No logs found for selected filters.</td>
                     </tr>
                   ) : (
                     filteredAudit.map(log => (
                       <tr key={log.id}>
-                        <td style={{ fontSize: '0.8rem' }}>{formatDateTime(log.timestamp)}</td>
-                        <td style={{ fontWeight: 600, fontSize: '0.85rem' }}>{log.user}</td>
+                        <td>{formatDateTime(log.timestamp)}</td>
+                        <td style={{ fontWeight: 500 }}>{log.user}</td>
                         <td>
-                          <span style={{ 
-                            fontSize: '0.75rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px',
-                            background: log.action === 'CREATE' ? 'rgba(34,197,94,0.1)' : log.action === 'UPDATE' ? 'rgba(59,130,246,0.1)' : 'rgba(239,68,68,0.1)',
-                            color: log.action === 'CREATE' ? 'var(--accent-success)' : log.action === 'UPDATE' ? 'var(--accent-primary)' : 'var(--accent-danger)'
-                          }}>{log.action}</span>
+                          <div className={`m3-chip ${log.action === 'CREATE' ? 'solid' : log.action === 'UPDATE' ? 'outlined' : 'dashed'}`} style={{ display: 'inline-flex', padding: '0 8px', height: '24px', alignItems: 'center', justifyContent: 'center' }}>
+                            {log.action}
+                          </div>
                         </td>
-                        <td style={{ fontSize: '0.85rem' }}>{log.entity}</td>
-                        <td style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{log.details}</td>
-                        <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{log.ip}</td>
+                        <td>{log.entity}</td>
+                        <td style={{ color: 'var(--md-bw-on-surface-variant)' }}>{log.details}</td>
+                        <td style={{ color: 'var(--md-bw-on-surface-variant)' }}>{log.ip}</td>
                       </tr>
                     ))
                   )}
@@ -795,17 +838,17 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
       
       case 'sync':
         return (
-          <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div className="m3-card m3-card-filled" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 4px 0' }}>
-                <Activity size={18} style={{ color: 'var(--accent-warning)' }} />
+              <h3 className="title-large" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 4px 0', color: 'var(--md-bw-on-surface)' }}>
+                <Activity size={24} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
                 Sync Conflicts
               </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>Review and resolve data conflicts between local and remote databases.</p>
+              <p className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Review and resolve data conflicts between local and remote databases.</p>
             </div>
 
-            <div className="table-responsive">
-              <table className="table table-striped" style={{ width: '100%' }}>
+            <div className="table-responsive" style={{ border: '1px solid var(--md-bw-outline)', borderRadius: '12px' }}>
+              <table className="m3-data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr>
                     <th>File</th>
@@ -819,24 +862,24 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 <tbody>
                   {!syncConflicts || syncConflicts.length === 0 ? (
                     <tr>
-                      <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>No sync conflicts detected.</td>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '32px', color: 'var(--md-bw-on-surface-variant)' }}>No sync conflicts detected.</td>
                     </tr>
                   ) : (
                     syncConflicts.map((conflict, i) => (
                       <tr key={i}>
-                        <td style={{ fontWeight: 600, fontSize: '0.85rem' }}>{conflict.file}</td>
-                        <td style={{ fontSize: '0.85rem' }}>{conflict.recordId}</td>
-                        <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={JSON.stringify(conflict.localValue)}>
+                        <td style={{ fontWeight: 500 }}>{conflict.file}</td>
+                        <td>{conflict.recordId}</td>
+                        <td style={{ color: 'var(--md-bw-on-surface-variant)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={JSON.stringify(conflict.localValue)}>
                           {JSON.stringify(conflict.localValue)}
                         </td>
-                        <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={JSON.stringify(conflict.remoteValue)}>
+                        <td style={{ color: 'var(--md-bw-on-surface-variant)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={JSON.stringify(conflict.remoteValue)}>
                           {JSON.stringify(conflict.remoteValue)}
                         </td>
-                        <td style={{ fontSize: '0.8rem', color: 'var(--accent-warning)' }}>{conflict.resolution}</td>
+                        <td style={{ color: 'var(--md-bw-on-surface-variant)' }}>{conflict.resolution}</td>
                         <td>
                           <button 
-                            className="btn-outline" 
-                            style={{ padding: '4px 8px', fontSize: '0.75rem', borderRadius: '4px' }}
+                            className="btn btn-outlined" 
+                            style={{ height: '32px', padding: '0 12px', fontSize: '14px' }}
                             onClick={() => {
                               setSyncConflicts(prev => prev.filter((_, idx) => idx !== i))
                               if (addToast) addToast("Conflict acknowledged", "success")
@@ -856,26 +899,26 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
       
       case 'security':
         return (
-          <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div className="m3-card m3-card-filled" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <h3 style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 4px 0' }}>
-                <ShieldCheck size={18} style={{ color: 'var(--accent-primary)' }} />
+              <h3 className="title-large" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 4px 0', color: 'var(--md-bw-on-surface)' }}>
+                <ShieldCheck size={24} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
                 Session Management
               </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>Review devices currently logged into your account.</p>
+              <p className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Review devices currently logged into your account.</p>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {activeSessions.map(sess => (
-                <div key={sess.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div key={sess.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: 'var(--md-bw-surface-variant)', borderRadius: '12px' }}>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>{sess.device}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                      <span className="body-large" style={{ fontWeight: 500, color: 'var(--md-bw-on-surface)' }}>{sess.device}</span>
                       {sess.current && (
-                        <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', background: 'rgba(34,197,94,0.1)', color: 'var(--accent-success)' }}>This Device</span>
+                        <div className="m3-chip solid" style={{ height: '24px', padding: '0 8px' }}>This Device</div>
                       )}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    <div className="body-medium" style={{ display: 'flex', alignItems: 'center', gap: '16px', color: 'var(--md-bw-on-surface-variant)' }}>
                       <span>{sess.location}</span>
                       <span>•</span>
                       <span>{sess.time}</span>
@@ -889,8 +932,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                         setActiveSessions(prev => prev.filter(s => s.id !== sess.id))
                         if (addToast) addToast("Session terminated", "success")
                       }}
-                      className="btn-outline" 
-                      style={{ padding: '6px 12px', fontSize: '0.8rem', color: 'var(--accent-danger)', borderColor: 'rgba(239,68,68,0.3)' }}
+                      className="btn btn-outlined" 
                     >
                       Sign Out
                     </button>
@@ -900,9 +942,9 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             </div>
 
             {activeSessions.length > 1 && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
                 <button 
-                  className="btn btn-danger"
+                  className="btn btn-filled"
                   onClick={() => {
                     setActiveSessions(prev => prev.filter(s => s.current))
                     if (addToast) addToast("All other devices signed out", "success")
@@ -925,230 +967,72 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
       
       {/* Title Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <h1 className="page-title">
-          <SettingsIcon size={28} className="page-title-icon" />
+        <h1 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>
           System Settings
         </h1>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn btn-secondary" onClick={() => setShowResetModal(true)}>Reset Defaults</button>
-          <button className="btn btn-primary" onClick={handleSave} disabled={isSaving || isOver100}>
-            {isSaving ? <div className="spinner" /> : <Save size={16} />}
+          <button className="btn btn-text" onClick={() => setShowResetModal(true)}>Reset Defaults</button>
+          <button className="btn btn-filled" onClick={handleSave} disabled={isSaving || isOver100}>
+            {isSaving ? <div className="skeleton" style={{width: 18, height: 18, borderRadius: '50%'}} /> : <Save size={18} />}
             {isSaving ? 'Saving...' : 'Save Settings'}
           </button>
         </div>
       </div>
 
-      {/* Main Grid: Left Navigation Submenu, Right Active Form */}
-      <div className="responsive-settings-grid">
-        {/* Left Submenu Navigation Panel */}
-        <div className="glass-card" style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {/* Payroll Configuration Submenu */}
-          <button
-            onClick={() => setActiveSubmenu('payroll')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '12px 14px',
-              borderRadius: '8px',
-              border: 'none',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-              textAlign: 'left',
-              cursor: 'pointer',
-              background: activeSubmenu === 'payroll' ? 'var(--bg-tertiary)' : 'transparent',
-              color: activeSubmenu === 'payroll' ? '#ffffff' : 'var(--text-secondary)',
-              fontWeight: 700,
-              transition: 'all var(--transition-fast)'
-            }}
-          >
-            <Sliders size={16} style={{ color: activeSubmenu === 'payroll' ? 'var(--accent-primary)' : 'inherit' }} />
-            Payroll Settings
-          </button>
-
-          {/* Company Profile Submenu */}
-          <button
-            onClick={() => setActiveSubmenu('company')}
-            onMouseEnter={(e) => { if (activeSubmenu !== 'company') e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { if (activeSubmenu !== 'company') e.currentTarget.style.color = 'var(--text-secondary)' }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '12px 14px',
-              borderRadius: '8px',
-              border: 'none',
-              fontSize: '0.9rem',
-              textAlign: 'left',
-              cursor: 'pointer',
-              background: activeSubmenu === 'company' ? 'var(--bg-tertiary)' : 'transparent',
-              color: activeSubmenu === 'company' ? '#ffffff' : 'var(--text-secondary)',
-              fontWeight: 700,
-              transition: 'all var(--transition-fast)'
-            }}
-          >
-            <Building2 size={16} style={{ color: activeSubmenu === 'company' ? 'var(--accent-primary)' : 'inherit' }} />
-            Company Profile
-          </button>
-
-          {/* Expense Policies Submenu */}
-          <button
-            onClick={() => setActiveSubmenu('expenses')}
-            onMouseEnter={(e) => { if (activeSubmenu !== 'expenses') e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { if (activeSubmenu !== 'expenses') e.currentTarget.style.color = 'var(--text-secondary)' }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '12px 14px',
-              borderRadius: '8px',
-              border: 'none',
-              fontSize: '0.9rem',
-              textAlign: 'left',
-              cursor: 'pointer',
-              background: activeSubmenu === 'expenses' ? 'var(--bg-tertiary)' : 'transparent',
-              color: activeSubmenu === 'expenses' ? '#ffffff' : 'var(--text-secondary)',
-              fontWeight: 700,
-              transition: 'all var(--transition-fast)'
-            }}
-          >
-            <Receipt size={16} style={{ color: activeSubmenu === 'expenses' ? 'var(--accent-primary)' : 'inherit' }} />
-            Expense Policies
-          </button>
-
-          {/* Rosters & Shifts Submenu */}
-          <button
-            onClick={() => setActiveSubmenu('rosters')}
-            onMouseEnter={(e) => { if (activeSubmenu !== 'rosters') e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { if (activeSubmenu !== 'rosters') e.currentTarget.style.color = 'var(--text-secondary)' }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '12px 14px',
-              borderRadius: '8px',
-              border: 'none',
-              fontSize: '0.9rem',
-              textAlign: 'left',
-              cursor: 'pointer',
-              background: activeSubmenu === 'rosters' ? 'var(--bg-tertiary)' : 'transparent',
-              color: activeSubmenu === 'rosters' ? '#ffffff' : 'var(--text-secondary)',
-              fontWeight: 700,
-              transition: 'all var(--transition-fast)'
-            }}
-          >
-            <CalendarClock size={16} style={{ color: activeSubmenu === 'rosters' ? 'var(--accent-primary)' : 'inherit' }} />
-            Rosters & Shifts
-          </button>
-
-          {/* Notifications Submenu */}
-          <button
-            onClick={() => setActiveSubmenu('notifications')}
-            onMouseEnter={(e) => { if (activeSubmenu !== 'notifications') e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { if (activeSubmenu !== 'notifications') e.currentTarget.style.color = 'var(--text-secondary)' }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '12px 14px',
-              borderRadius: '8px',
-              border: 'none',
-              fontSize: '0.9rem',
-              textAlign: 'left',
-              cursor: 'pointer',
-              background: activeSubmenu === 'notifications' ? 'var(--bg-tertiary)' : 'transparent',
-              color: activeSubmenu === 'notifications' ? '#ffffff' : 'var(--text-secondary)',
-              fontWeight: 700,
-              transition: 'all var(--transition-fast)'
-            }}
-          >
-            <Bell size={16} style={{ color: activeSubmenu === 'notifications' ? 'var(--accent-primary)' : 'inherit' }} />
-            Notifications
-          </button>
-
-          {/* Audit Logs Submenu */}
-          <button
-            onClick={() => setActiveSubmenu('audit')}
-            onMouseEnter={(e) => { if (activeSubmenu !== 'audit') e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { if (activeSubmenu !== 'audit') e.currentTarget.style.color = 'var(--text-secondary)' }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '12px 14px',
-              borderRadius: '8px',
-              border: 'none',
-              fontSize: '0.9rem',
-              textAlign: 'left',
-              cursor: 'pointer',
-              background: activeSubmenu === 'audit' ? 'var(--bg-tertiary)' : 'transparent',
-              color: activeSubmenu === 'audit' ? '#ffffff' : 'var(--text-secondary)',
-              fontWeight: 700,
-              transition: 'all var(--transition-fast)'
-            }}
-          >
-            <List size={16} style={{ color: activeSubmenu === 'audit' ? 'var(--accent-primary)' : 'inherit' }} />
-            Audit Logs
-          </button>
-
-          {/* Security Submenu */}
-          <button
-            onClick={() => setActiveSubmenu('security')}
-            onMouseEnter={(e) => { if (activeSubmenu !== 'security') e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { if (activeSubmenu !== 'security') e.currentTarget.style.color = 'var(--text-secondary)' }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '12px 14px',
-              borderRadius: '8px',
-              border: 'none',
-              fontSize: '0.9rem',
-              textAlign: 'left',
-              cursor: 'pointer',
-              background: activeSubmenu === 'security' ? 'var(--bg-tertiary)' : 'transparent',
-              color: activeSubmenu === 'security' ? '#ffffff' : 'var(--text-secondary)',
-              fontWeight: 700,
-              transition: 'all var(--transition-fast)'
-            }}
-          >
-            <ShieldCheck size={16} style={{ color: activeSubmenu === 'security' ? 'var(--accent-primary)' : 'inherit' }} />
-            Security
-          </button>
-
-          {/* Sync Conflicts Submenu */}
-          <button
-            onClick={() => setActiveSubmenu('sync')}
-            onMouseEnter={(e) => { if (activeSubmenu !== 'sync') e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { if (activeSubmenu !== 'sync') e.currentTarget.style.color = 'var(--text-secondary)' }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '12px 14px',
-              borderRadius: '8px',
-              border: 'none',
-              fontSize: '0.9rem',
-              textAlign: 'left',
-              cursor: 'pointer',
-              background: activeSubmenu === 'sync' ? 'var(--bg-tertiary)' : 'transparent',
-              color: activeSubmenu === 'sync' ? '#ffffff' : 'var(--text-secondary)',
-              fontWeight: 700,
-              transition: 'all var(--transition-fast)'
-            }}
-          >
-            <Activity size={16} style={{ color: activeSubmenu === 'sync' ? 'var(--accent-warning)' : 'inherit' }} />
-            Sync Conflicts
-            {syncConflicts && syncConflicts.length > 0 && (
-              <span style={{ marginLeft: 'auto', background: 'var(--accent-danger)', color: '#fff', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '12px' }}>
-                {syncConflicts.length}
-              </span>
-            )}
-          </button>
+      {/* Main Grid: Navigation Drawer Left, Content Right */}
+      <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        {/* Left Submenu Navigation Drawer */}
+        <div style={{ width: '280px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)', padding: '0 16px', marginBottom: '8px', display: 'block' }}>Categories</span>
+          
+          {[
+            { id: 'payroll', icon: Sliders, label: 'Payroll Settings' },
+            { id: 'company', icon: Building2, label: 'Company Profile' },
+            { id: 'expenses', icon: Receipt, label: 'Expense Policies' },
+            { id: 'rosters', icon: CalendarClock, label: 'Rosters & Shifts' },
+            { id: 'notifications', icon: Bell, label: 'Notifications' },
+            { id: 'audit', icon: List, label: 'Audit Logs' },
+            { id: 'security', icon: ShieldCheck, label: 'Security' },
+            { id: 'sync', icon: Activity, label: 'Sync Conflicts', badge: syncConflicts?.length }
+          ].map(navItem => {
+            const IconComponent = navItem.icon
+            const isActive = activeSubmenu === navItem.id
+            return (
+              <button
+                key={navItem.id}
+                onClick={() => setActiveSubmenu(navItem.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  height: '56px',
+                  padding: '0 16px',
+                  borderRadius: '28px',
+                  border: 'none',
+                  fontSize: '16px',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  background: isActive ? 'var(--md-bw-secondary-container)' : 'transparent',
+                  color: isActive ? 'var(--md-bw-on-secondary-container)' : 'var(--md-bw-on-surface-variant)',
+                  fontWeight: 500,
+                  outline: 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <IconComponent size={24} style={{ color: isActive ? 'var(--md-bw-on-secondary-container)' : 'var(--md-bw-on-surface-variant)' }} />
+                <span style={{ flex: 1 }}>{navItem.label}</span>
+                {navItem.badge > 0 && (
+                  <span style={{ background: 'var(--md-bw-on-surface)', color: 'var(--md-bw-surface)', fontSize: '12px', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                    {navItem.badge}
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </div>
 
         {/* Right Content View */}
-        <div style={{ minWidth: 0 }}>
+        <div style={{ flex: 1, minWidth: '300px' }}>
           {renderSubmenuContent()}
         </div>
       </div>
@@ -1182,35 +1066,35 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 8px 24px var(--accent-primary-glow)',
-                  overflow: 'hidden',
-                  position: 'relative',
-                  cursor: dragStart ? 'grabbing' : 'grab',
-                  touchAction: 'none'
-                }}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerUp}
-                onPointerLeave={handlePointerUp}
-              >
-                {logo ? (
-                  <img 
-                    src={logo} 
-                    alt="Logo Preview" 
-                    draggable="false"
-                    style={{ 
-                      width: '100%', 
-                      height: '100%', 
-                      objectFit: 'cover',
-                      transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`,
-                      transformOrigin: 'center',
-                      pointerEvents: 'none'
-                    }} 
-                  />
-                ) : (
-                  <Activity size={40} color="#ffffff" style={{ animation: 'pulse 2s infinite' }} />
-                )}
+              boxShadow: '0 4px 16px rgba(232, 93, 74, 0.25)',
+              overflow: 'hidden',
+              position: 'relative',
+              cursor: dragStart ? 'grabbing' : 'grab',
+              touchAction: 'none'
+            }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            onPointerLeave={handlePointerUp}
+          >
+            {logo ? (
+              <img 
+                src={logo} 
+                alt="Logo Preview" 
+                draggable="false"
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'cover',
+                  transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`,
+                  transformOrigin: 'center',
+                  pointerEvents: 'none'
+                }} 
+              />
+            ) : (
+              <Activity size={40} color="#ffffff" />
+            )}
               </div>
 
               {/* Zoom Slider */}
@@ -1259,36 +1143,26 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
       {/* Reset Confirmation Modal */}
       {showResetModal && (
-        <div className="modal-overlay" onClick={() => setShowResetModal(false)}>
-          <div className="modal-container" style={{ maxWidth: '400px', zIndex: 1000 }} onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Confirm Reset</h2>
-              <button className="modal-close" onClick={() => setShowResetModal(false)}>
-                <X size={20} />
+        <div className="modal-overlay" onClick={() => setShowResetModal(false)} style={{ background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', inset: 0 }}>
+          <div className="m3-dialog" style={{ width: '400px', background: 'var(--md-bw-surface)', borderRadius: '28px', padding: '24px' }} onClick={e => e.stopPropagation()}>
+            <h2 className="headline-small" style={{ margin: '0 0 16px 0', color: 'var(--md-bw-on-surface)' }}>Confirm Reset</h2>
+            <p className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)', marginBottom: '24px' }}>
+              Are you sure? This will reset all settings in the active tab to their default values.
+            </p>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <button className="btn btn-text" onClick={() => setShowResetModal(false)}>Cancel</button>
+              <button 
+                className="btn btn-filled" 
+                onClick={() => {
+                  resetToDefaults()
+                  setShowResetModal(false)
+                  if (addToast) {
+                    addToast('Settings reset to defaults', 'info')
+                  }
+                }}
+              >
+                Reset Defaults
               </button>
-            </div>
-            <div className="modal-body">
-              <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.5' }}>
-                Are you sure? This will reset all settings in the active tab to their default values.
-              </p>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                <button className="btn-secondary" onClick={() => setShowResetModal(false)}>
-                  Cancel
-                </button>
-                <button 
-                  className="btn-primary" 
-                  style={{ background: 'var(--accent-danger)' }}
-                  onClick={() => {
-                    resetToDefaults()
-                    setShowResetModal(false)
-                    if (addToast) {
-                      addToast('Settings reset to defaults', 'info')
-                    }
-                  }}
-                >
-                  Reset Defaults
-                </button>
-              </div>
             </div>
           </div>
         </div>

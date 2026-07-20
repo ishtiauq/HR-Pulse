@@ -179,7 +179,7 @@ export default function EmployeePortal({
                     display: 'flex', alignItems: 'center', gap: '12px', padding: '12px',
                     borderRadius: '8px', border: 'none', background: active ? 'var(--bg-tertiary)' : 'transparent',
                     color: active ? '#ffffff' : 'var(--text-secondary)', cursor: 'pointer',
-                    fontWeight: active ? 600 : 500, transition: 'all 0.2s', textAlign: 'left'
+                    fontWeight: active ? 600 : 500, transition: 'background-color 0.2s, color 0.2s', textAlign: 'left'
                   }}
                   onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = 'var(--text-primary)' }}
                   onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = 'var(--text-secondary)' }}

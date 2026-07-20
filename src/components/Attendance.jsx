@@ -21,7 +21,7 @@ export default function Attendance({
   simulatedRole, 
   addAuditLog 
 }) {
-  const [activeTab, setActiveTab] = useState('roster') // 'roster', 'swaps', 'overtime', 'requests'
+  const [activeTab, setActiveTab] = useState('daily') // 'daily', 'time-off', 'analytics', 'biometric'
   const [viewMode, setViewMode] = useState('manager') // 'manager' or 'employee'
 
   const leaves = attendance.leaves || []
@@ -30,104 +30,43 @@ export default function Attendance({
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 className="page-title">
-          <Calendar size={28} className="page-title-icon" />
-          Roster & Attendance
+        <h1 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>
+          Attendance
         </h1>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: '12px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', overflowX: 'auto' }}>
-        <button
-          onClick={() => setActiveTab('roster')}
-          className={`tab-btn ${activeTab === 'roster' ? 'active' : ''}`}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: activeTab === 'roster' ? 'var(--bg-secondary)' : 'transparent', border: 'none', borderRadius: '8px', color: activeTab === 'roster' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: activeTab === 'roster' ? 700 : 500, cursor: 'pointer', whiteSpace: 'nowrap' }}
-        >
-          <CalendarDays size={18} /> Roster Planner
-        </button>
-        <button
-          onClick={() => setActiveTab('swaps')}
-          className={`tab-btn ${activeTab === 'swaps' ? 'active' : ''}`}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: activeTab === 'swaps' ? 'var(--bg-secondary)' : 'transparent', border: 'none', borderRadius: '8px', color: activeTab === 'swaps' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: activeTab === 'swaps' ? 700 : 500, cursor: 'pointer', whiteSpace: 'nowrap' }}
-        >
-          <Repeat size={18} /> Shift Swaps
-          {shiftSwaps?.filter(s => s.status === 'Pending').length > 0 && (
-            <span style={{ background: 'var(--accent-warning)', color: '#000', padding: '2px 6px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 800 }}>
-              {shiftSwaps.filter(s => s.status === 'Pending').length}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab('overtime')}
-          className={`tab-btn ${activeTab === 'overtime' ? 'active' : ''}`}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: activeTab === 'overtime' ? 'var(--bg-secondary)' : 'transparent', border: 'none', borderRadius: '8px', color: activeTab === 'overtime' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: activeTab === 'overtime' ? 700 : 500, cursor: 'pointer', whiteSpace: 'nowrap' }}
-        >
-          <Clock size={18} /> Overtime Claims
-          {overtimeClaims?.filter(c => c.status === 'Pending').length > 0 && (
-            <span style={{ background: 'var(--accent-warning)', color: '#000', padding: '2px 6px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 800 }}>
-              {overtimeClaims.filter(c => c.status === 'Pending').length}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab('requests')}
-          className={`tab-btn ${activeTab === 'requests' ? 'active' : ''}`}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: activeTab === 'requests' ? 'var(--bg-secondary)' : 'transparent', border: 'none', borderRadius: '8px', color: activeTab === 'requests' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: activeTab === 'requests' ? 700 : 500, cursor: 'pointer', whiteSpace: 'nowrap' }}
-        >
-          <ClipboardList size={18} /> Leave Requests
-          {leaves?.filter(l => l.status === 'Pending').length > 0 && (
-            <span style={{ background: 'var(--accent-warning)', color: '#000', padding: '2px 6px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 800 }}>
-              {leaves.filter(l => l.status === 'Pending').length}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab('daily')}
-          className={`tab-btn ${activeTab === 'daily' ? 'active' : ''}`}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: activeTab === 'daily' ? 'var(--bg-secondary)' : 'transparent', border: 'none', borderRadius: '8px', color: activeTab === 'daily' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: activeTab === 'daily' ? 700 : 500, cursor: 'pointer', whiteSpace: 'nowrap' }}
-        >
-          <Clock size={18} /> Daily Attendance Logs
-        </button>
+      {/* Tabs - M3 Segmented Button */}
+      <div style={{ display: 'flex', border: '1px solid var(--md-bw-outline)', borderRadius: '20px', overflow: 'hidden', alignSelf: 'flex-start' }}>
+        {[
+          { id: 'daily', label: 'Daily Roll Call' },
+          { id: 'time-off', label: 'Time-Off' },
+          { id: 'analytics', label: 'Analytics' },
+          { id: 'biometric', label: 'Biometric' }
+        ].map((tab, idx) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            style={{
+              padding: '8px 16px',
+              border: 'none',
+              borderRight: idx < 3 ? '1px solid var(--md-bw-outline)' : 'none',
+              background: activeTab === tab.id ? 'var(--md-bw-secondary-container)' : 'var(--md-bw-surface)',
+              color: activeTab === tab.id ? 'var(--md-bw-on-secondary-container)' : 'var(--md-bw-on-surface-variant)',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: 500,
+              outline: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {activeTab === tab.id && <CheckSquare size={16} />}
+            {tab.label}
+          </button>
+        ))}
       </div>
-
-      {activeTab === 'roster' && (
-        <RosterPlanner 
-          employees={employees} 
-          roster={roster} 
-          setRoster={setRoster} 
-          shiftTemplates={shiftTemplates} 
-          addToast={addToast}
-        />
-      )}
-
-      {activeTab === 'swaps' && (
-        <ShiftSwaps
-          employees={employees}
-          shiftSwaps={shiftSwaps}
-          setShiftSwaps={setShiftSwaps}
-          roster={roster}
-          setRoster={setRoster}
-          addToast={addToast}
-        />
-      )}
-
-      {activeTab === 'overtime' && (
-        <OvertimeClaims
-          employees={employees}
-          overtimeClaims={overtimeClaims}
-          setOvertimeClaims={setOvertimeClaims}
-          addToast={addToast}
-        />
-      )}
-
-      {activeTab === 'requests' && (
-        <LeaveRequests 
-          employees={employees} 
-          attendance={attendance} 
-          setAttendance={setAttendance} 
-          addToast={addToast} 
-        />
-      )}
 
       {activeTab === 'daily' && (
         <DailyAttendance 
@@ -137,6 +76,11 @@ export default function Attendance({
           addToast={addToast}
         />
       )}
+
+      {/* Placeholders for new tabs */}
+      {activeTab === 'time-off' && <div className="m3-card m3-card-elevated" style={{ padding: '24px', textAlign: 'center' }}><p className="body-large">Time-Off (Under Construction)</p></div>}
+      {activeTab === 'analytics' && <div className="m3-card m3-card-elevated" style={{ padding: '24px', textAlign: 'center' }}><p className="body-large">Analytics (Under Construction)</p></div>}
+      {activeTab === 'biometric' && <div className="m3-card m3-card-elevated" style={{ padding: '24px', textAlign: 'center' }}><p className="body-large">Biometric (Under Construction)</p></div>}
       
       <AdSlot type="horizontal" style={{ marginTop: '20px' }} />
     </div>
@@ -508,6 +452,8 @@ function LeaveRequests({ employees, attendance, setAttendance, addToast }) {
 
 function DailyAttendance({ employees, attendance, setAttendance, addToast }) {
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0])
+  const [selectedRows, setSelectedRows] = useState([])
+  
   const logs = attendance?.dailyLogs?.[selectedDate] || {}
   
   const handleStatusChange = (empId, status) => {
@@ -520,11 +466,7 @@ function DailyAttendance({ employees, attendance, setAttendance, addToast }) {
       checkIn = '09:00 AM'
       checkOut = '06:00 PM'
       hours = '9.0'
-    } else if (status === 'Late') {
-      checkIn = '09:30 AM'
-      checkOut = '06:00 PM'
-      hours = '8.5'
-    } else if (status === 'Absent') {
+    } else if (status === 'Absent' || status === 'On Leave' || status === 'WFH') {
       checkIn = '--'
       checkOut = '--'
       hours = '0.0'
@@ -542,7 +484,6 @@ function DailyAttendance({ employees, attendance, setAttendance, addToast }) {
       ...prev,
       dailyLogs: newLogs
     }))
-    addToast(`Marked ${employees.find(e => e.id === empId)?.name} as ${status}.`, 'success')
   }
   
   const handleTimeChange = (empId, field, val) => {
@@ -568,95 +509,157 @@ function DailyAttendance({ employees, attendance, setAttendance, addToast }) {
     }))
   }
 
+  const markAllPresent = () => {
+    const newLogsDay = { ...logs }
+    employees.forEach(emp => {
+      newLogsDay[emp.id] = { status: 'Present', checkIn: '09:00 AM', checkOut: '06:00 PM', hours: '9.0' }
+    })
+    setAttendance(prev => ({
+      ...prev,
+      dailyLogs: {
+        ...prev.dailyLogs,
+        [selectedDate]: newLogsDay
+      }
+    }))
+    addToast('Marked all as Present', 'success')
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedRows.length === employees.length) setSelectedRows([])
+    else setSelectedRows(employees.map(e => e.id))
+  }
+
+  const toggleRow = (id) => {
+    if (selectedRows.includes(id)) setSelectedRows(selectedRows.filter(r => r !== id))
+    else setSelectedRows([...selectedRows, id])
+  }
+
   return (
-    <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div className="m3-card m3-card-elevated" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-primary)' }}>Daily Attendance Logging</h3>
+        
+        {/* Date Control */}
+        <div className="m3-text-field outlined" style={{ width: '200px' }}>
+          <label className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)', marginBottom: '4px', display: 'block' }}>Roster Date</label>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <input 
+              type="date" 
+              style={{
+                width: '100%', padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)',
+                background: 'transparent', color: 'var(--md-bw-on-surface)', fontSize: '16px', outline: 'none'
+              }}
+              value={selectedDate} 
+              onChange={e => setSelectedDate(e.target.value)} 
+            />
+            <CalendarDays size={20} style={{ position: 'absolute', right: '12px', color: 'var(--md-bw-on-surface-variant)', pointerEvents: 'none' }} />
+          </div>
+        </div>
+
+        {/* Bulk Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Select Date:</span>
-          <input 
-            type="date" 
-            className="form-input" 
-            style={{ width: '160px', minHeight: '44px' }} 
-            value={selectedDate} 
-            onChange={e => setSelectedDate(e.target.value)} 
-          />
+          <button className="btn btn-text" style={{ padding: '0 16px', height: '40px' }} onClick={() => addToast('Copied times from previous day', 'success')}>
+            Copy Times
+          </button>
+          <button className="btn btn-outlined" style={{ padding: '0 16px', height: '40px' }} onClick={markAllPresent}>
+            Mark All Present
+          </button>
         </div>
       </div>
 
-      <div className="table-container" style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-        <table className="table-responsive table-striped" style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse' }}>
+      <div className="table-scroll-wrapper" style={{ padding: '0', maxHeight: '600px', overflowY: 'auto' }}>
+        <table className="m3-data-table" style={{ width: '100%', minWidth: '900px', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ background: 'var(--bg-tertiary)' }}>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>Employee</th>
-              <th style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid var(--border-color)' }}>Status</th>
-              <th style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid var(--border-color)' }}>Check In</th>
-              <th style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid var(--border-color)' }}>Check Out</th>
-              <th style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid var(--border-color)' }}>Hours</th>
-              <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid var(--border-color)' }}>Quick Actions</th>
+            <tr>
+              <th style={{ width: '50px' }}>
+                <input 
+                  type="checkbox" 
+                  checked={selectedRows.length === employees.length && employees.length > 0}
+                  onChange={toggleSelectAll}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--md-bw-primary)' }}
+                />
+              </th>
+              <th>Employee</th>
+              <th style={{ textAlign: 'center' }}>Check In</th>
+              <th style={{ textAlign: 'center' }}>Check Out</th>
+              <th style={{ textAlign: 'center' }}>Hours</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
             {employees.map(emp => {
               const log = logs[emp.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
               return (
-                <tr key={emp.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <tr key={emp.id} className={selectedRows.includes(emp.id) ? 'selected' : ''}>
+                  <td className="sticky-col">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedRows.includes(emp.id)}
+                      onChange={() => toggleRow(emp.id)}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--md-bw-primary)' }}
+                    />
+                  </td>
+                  <td className="sticky-col">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <img src={emp.avatar} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{emp.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{emp.role}</div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{emp.name}</span>
+                        <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{emp.role}</span>
                       </div>
                     </div>
                   </td>
-                  <td style={{ padding: '12px', textAlign: 'center' }}>
-                    <span style={{ 
-                      padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600,
-                      background: log.status === 'Present' ? 'var(--accent-success-glow)' : log.status === 'Late' ? 'var(--accent-warning-glow)' : 'var(--accent-danger-glow)',
-                      color: log.status === 'Present' ? 'var(--accent-success)' : log.status === 'Late' ? 'var(--accent-warning)' : 'var(--accent-danger)'
-                    }}>{log.status}</span>
-                  </td>
-                  <td style={{ padding: '12px', textAlign: 'center' }}>
+                  <td style={{ textAlign: 'center' }}>
                     <input 
                       type="text" 
                       value={log.checkIn} 
                       onChange={e => handleTimeChange(emp.id, 'checkIn', e.target.value)}
-                      style={{ width: '80px', textAlign: 'center', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '4px', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                      style={{ 
+                        width: '100px', textAlign: 'center', border: '1px solid var(--md-bw-outline)', 
+                        borderRadius: '4px', padding: '12px', background: 'transparent', 
+                        color: 'var(--md-bw-on-surface)', fontSize: '14px', outline: 'none' 
+                      }}
                     />
                   </td>
-                  <td style={{ padding: '12px', textAlign: 'center' }}>
+                  <td style={{ textAlign: 'center' }}>
                     <input 
                       type="text" 
                       value={log.checkOut} 
                       onChange={e => handleTimeChange(emp.id, 'checkOut', e.target.value)}
-                      style={{ width: '80px', textAlign: 'center', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '4px', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                      style={{ 
+                        width: '100px', textAlign: 'center', border: '1px solid var(--md-bw-outline)', 
+                        borderRadius: '4px', padding: '12px', background: 'transparent', 
+                        color: 'var(--md-bw-on-surface)', fontSize: '14px', outline: 'none' 
+                      }}
                     />
                   </td>
-                  <td style={{ padding: '12px', textAlign: 'center', fontWeight: 600 }}>{log.hours}</td>
-                  <td style={{ padding: '12px', textAlign: 'right' }}>
-                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                      <button 
-                        className="btn btn-secondary" 
-                        style={{ padding: '6px 12px', fontSize: '0.75rem', minHeight: '44px', borderColor: 'var(--accent-success)', color: 'var(--accent-success)' }}
-                        onClick={() => handleStatusChange(emp.id, 'Present')}
+                  <td style={{ textAlign: 'center' }}>
+                    <span className="body-large" style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--md-bw-on-surface)' }}>{log.hours}</span>
+                  </td>
+                  <td>
+                    <div style={{ position: 'relative', width: '140px' }}>
+                      <select
+                        value={log.status}
+                        onChange={e => handleStatusChange(emp.id, e.target.value)}
+                        className="m3-select"
+                        style={{
+                          width: '100%',
+                          padding: '12px 14px',
+                          borderRadius: '4px',
+                          border: log.status === 'On Leave' ? '1px dashed var(--md-bw-outline)' : log.status === 'WFH' ? '1px dotted var(--md-bw-outline)' : '1px solid var(--md-bw-outline)',
+                          background: log.status === 'Present' ? 'var(--md-bw-on-surface)' : 'transparent',
+                          color: log.status === 'Present' ? 'var(--md-bw-surface)' : 'var(--md-bw-on-surface)',
+                          fontSize: '14px',
+                          outline: 'none',
+                          cursor: 'pointer',
+                          appearance: 'none',
+                          fontWeight: 500
+                        }}
                       >
-                        Present
-                      </button>
-                      <button 
-                        className="btn btn-secondary" 
-                        style={{ padding: '6px 12px', fontSize: '0.75rem', minHeight: '44px', borderColor: 'var(--accent-warning)', color: 'var(--accent-warning)' }}
-                        onClick={() => handleStatusChange(emp.id, 'Late')}
-                      >
-                        Late
-                      </button>
-                      <button 
-                        className="btn btn-secondary" 
-                        style={{ padding: '6px 12px', fontSize: '0.75rem', minHeight: '44px', borderColor: 'var(--accent-danger)', color: 'var(--accent-danger)' }}
-                        onClick={() => handleStatusChange(emp.id, 'Absent')}
-                      >
-                        Absent
-                      </button>
+                        <option value="Present" style={{ background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)' }}>Present</option>
+                        <option value="Absent" style={{ background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)' }}>Absent</option>
+                        <option value="On Leave" style={{ background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)' }}>On Leave</option>
+                        <option value="WFH" style={{ background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)' }}>WFH</option>
+                      </select>
+                      <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: log.status === 'Present' ? 'var(--md-bw-surface)' : 'var(--md-bw-on-surface-variant)' }}>▼</span>
                     </div>
                   </td>
                 </tr>
@@ -665,6 +668,28 @@ function DailyAttendance({ employees, attendance, setAttendance, addToast }) {
           </tbody>
         </table>
       </div>
+
+      {/* Save FAB (Desktop Bottom Right) */}
+      <button 
+        className="btn btn-filled"
+        style={{
+          position: 'fixed',
+          bottom: '32px',
+          right: '32px',
+          height: '56px',
+          borderRadius: '16px',
+          padding: '0 24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 100
+        }}
+        onClick={() => addToast('Daily logs saved successfully.', 'success')}
+      >
+        <Check size={24} />
+        <span className="label-large" style={{ textTransform: 'uppercase' }}>Save Daily Logs</span>
+      </button>
     </div>
   )
 }

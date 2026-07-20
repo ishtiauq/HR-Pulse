@@ -150,7 +150,7 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 12px var(--accent-primary-glow)',
+              boxShadow: '0 2px 8px rgba(232, 93, 74, 0.25)',
               flexShrink: 0,
               cursor: 'pointer',
               overflow: 'hidden',
@@ -170,7 +170,7 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
                 }} 
               />
             ) : (
-              <Activity size={18} color="#ffffff" style={{ animation: 'pulse 2s infinite' }} />
+              <Activity size={18} color="#ffffff" />
             )}
           </div>
           <input 
@@ -233,33 +233,32 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
                   fontWeight: 700,
                   textAlign: 'left',
                   cursor: 'pointer',
-                  transition: 'all var(--transition-fast)',
-                  boxShadow: isActive ? '0 6px 16px var(--accent-primary-glow)' : 'none',
+                  transition: 'background-color var(--transition-fast), color var(--transition-fast)',
+                  boxShadow: 'none',
                   outline: 'none'
                 }}
                 onMouseEnter={(e) => {
-                  if (!isActive) e.currentTarget.style.background = 'rgba(0, 0, 0, 0.03)'
+                  if (!isActive) e.currentTarget.style.background = 'var(--bg-tertiary)'
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) e.currentTarget.style.background = 'transparent'
                 }}
               >
                 <div 
-                  className="glossy-icon-container"
                   style={{
                     width: '32px',
                     height: '32px',
                     borderRadius: '8px',
-                    background: isActive ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.04)',
+                    background: isActive ? 'rgba(255, 255, 255, 0.15)' : 'var(--bg-tertiary)',
                     color: isActive ? '#ffffff' : 'var(--text-secondary)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    transition: 'all var(--transition-fast)',
+                    transition: 'background-color var(--transition-fast)',
                     flexShrink: 0
                   }}
                 >
-                  <Icon size={16} className="glossy-svg" />
+                  <Icon size={16} />
                 </div>
                 <span className="sidebar-label">{item.label}</span>
               </button>
@@ -271,8 +270,8 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
         <div style={{
           padding: '16px',
           borderRadius: 'var(--radius-md)',
-          background: 'rgba(255, 255, 255, 0.5)',
-          border: '1px solid rgba(0, 0, 0, 0.04)',
+          background: 'var(--bg-tertiary)',
+          border: '1px solid var(--border-color)',
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
@@ -302,8 +301,8 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
           <div style={{
             padding: '12px',
             borderRadius: 'var(--radius-md)',
-            background: 'rgba(255, 255, 255, 0.5)',
-            border: '1px solid rgba(0, 0, 0, 0.04)',
+            background: 'var(--bg-tertiary)',
+            border: '1px solid var(--border-color)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -351,9 +350,9 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
                 style={{
                   background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px', borderRadius: '6px',
-                  transition: 'all var(--transition-fast)'
+                  transition: 'color var(--transition-fast), background-color var(--transition-fast)'
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-tertiary)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'transparent' }}
               >
                 {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
@@ -365,9 +364,9 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
                 style={{
                   background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px', borderRadius: '6px',
-                  transition: 'all var(--transition-fast)'
+                  transition: 'color var(--transition-fast), background-color var(--transition-fast)'
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent-primary)'; e.currentTarget.style.background = 'var(--bg-tertiary)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent-primary)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'transparent' }}
               >
                 <HelpCircle size={16} />
@@ -379,9 +378,9 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
                 style={{
                   background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px', borderRadius: '6px',
-                  transition: 'all var(--transition-fast)'
+                  transition: 'color var(--transition-fast), background-color var(--transition-fast)'
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent-danger)'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.08)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent-danger)'; e.currentTarget.style.background = 'var(--bg-secondary)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'transparent' }}
               >
                 <LogOut size={16} />
@@ -467,7 +466,7 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 8px 24px var(--accent-primary-glow)',
+                  boxShadow: '0 4px 16px rgba(232, 93, 74, 0.25)',
                   overflow: 'hidden',
                   position: 'relative',
                   cursor: dragStart ? 'grabbing' : 'grab',
@@ -494,7 +493,7 @@ export default function Sidebar({ currentView, setCurrentView, driveConnected, u
                     }} 
                   />
                 ) : (
-                  <Activity size={40} color="#ffffff" style={{ animation: 'pulse 2s infinite' }} />
+                  <Activity size={40} color="#ffffff" />
                 )}
               </div>
 

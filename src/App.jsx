@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import Sidebar from './components/Sidebar.jsx'
+import { TopAppBar, NavigationRail, IconButton, Badge, Avatar, Button, Dialog, Divider } from 'actify'
 import Dashboard from './components/Dashboard.jsx'
 import Employees from './components/Employees.jsx'
 import DriveSync from './components/DriveSync.jsx'
@@ -17,7 +17,7 @@ import EmployeePortal from './components/EmployeePortal.jsx'
 import { readMeta, writeMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBackup, createBackup } from './services/googleDrive.js'
 import { clearLocalCache } from './services/db.js'
 import { validateDatabase } from './services/validator.js'
-import { Menu, Bell, AlertTriangle, Search, Layout, User, History, Moon, Settings as SettingsIcon, HardDrive, FileText, Sparkles, Trash2 } from 'lucide-react'
+import { Bell, AlertTriangle, Search, LayoutDashboard, Users, CreditCard, Calendar as CalendarIcon, Receipt, BarChart3, Settings as SettingsIcon, HardDrive, FileText, Megaphone, CalendarDays, Monitor, Database, User, History, Moon, Sparkles, Trash2, LogOut, Sun, HelpCircle, X, Activity } from 'lucide-react'
 import { useModal } from './services/useModal.js'
 
 const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
@@ -73,6 +73,21 @@ function timestampArrayChanges(prev, next) {
   });
 }
 
+const allNavItems = [
+  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+  { id: 'announcements', label: 'Announcements', icon: <Megaphone size={20} /> },
+  { id: 'calendar', label: 'Calendar', icon: <CalendarDays size={20} /> },
+  { id: 'documents', label: 'Documents', icon: <FileText size={20} /> },
+  { id: 'employees', label: 'Employees', icon: <Users size={20} /> },
+  { id: 'payroll', label: 'Payroll', icon: <CreditCard size={20} /> },
+  { id: 'attendance', label: 'Leaves & Attendance', icon: <CalendarIcon size={20} /> },
+  { id: 'expenses', label: 'Expenses', icon: <Receipt size={20} /> },
+  { id: 'assets', label: 'Assets', icon: <Monitor size={20} /> },
+  { id: 'reports', label: 'Reports', icon: <BarChart3 size={20} /> },
+  { id: 'settings', label: 'Settings', icon: <SettingsIcon size={20} /> },
+  { id: 'drive', label: 'Drive Sync', icon: <Database size={20} /> },
+]
+
 export default function App() {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('hr_pulse_user')
@@ -86,7 +101,7 @@ export default function App() {
   const [settingsFileId, setSettingsFileId] = useState(null)
   const [attendanceFileId, setAttendanceFileId] = useState(null)
   const [isSyncing, setIsSyncing] = useState(false)
-  const [dbStatus, setDbStatus] = useState('healthy') // 'healthy', 'rebuilding', 'corruption'
+  const [dbStatus, setDbStatus] = useState('healthy')
   const [dataIntegrityIssues, setDataIntegrityIssues] = useState([])
   const [showCorruptionModal, setShowCorruptionModal] = useState(false)
   useModal(() => setShowCorruptionModal(false))
@@ -94,7 +109,6 @@ export default function App() {
   const [metaManifest, setMetaManifest] = useState(null)
   const [isAppLoading, setIsAppLoading] = useState(true)
 
-  // RBAC & Security States
   const [simulatedRole, setSimulatedRole] = useState('Admin')
   const [pendingProfileEdits, setPendingProfileEdits] = useState([])
   const [auditLogs, setAuditLogs] = useState([
@@ -105,7 +119,7 @@ export default function App() {
     const newLog = {
       id: `audit-${Date.now()}`,
       timestamp: new Date().toISOString(),
-      user: 'Admin', // In real app, from user state
+      user: 'Admin',
       action,
       entity,
       details,
@@ -128,7 +142,6 @@ export default function App() {
     return false
   }
 
-  // Global Toasts
   const [toasts, setToasts] = useState([])
   const addToast = (message, type = 'success', action = null) => {
     const id = Date.now()
@@ -138,12 +151,10 @@ export default function App() {
     }, 4000)
   }
 
-  // Remove toast manually (useful if an action was taken)
   const removeToast = (id) => {
     setToasts(prev => prev.filter(t => t.id !== id))
   }
 
-  // Notifications
   const [notifications, setNotifications] = useState([
     { id: 'notif-1', text: 'Your leave request was approved', read: false, time: '2 mins ago' },
     { id: 'notif-2', text: 'New leave request from Sarah Rahman', read: false, time: '1 hour ago' }
@@ -158,10 +169,10 @@ export default function App() {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
   }
 
-  // Dark Mode Theme
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('hr_pulse_theme')
-    return saved === 'dark'
+    if (saved) return saved === 'dark'
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
   })
 
   useEffect(() => {
@@ -174,13 +185,11 @@ export default function App() {
     }
   }, [isDarkMode])
 
-  // Initial App Loader Simulator
   useEffect(() => {
     const timer = setTimeout(() => setIsAppLoading(false), 500)
     return () => clearTimeout(timer)
   }, [currentView])
 
-  // Global Keyboard Shortcuts & Command Palette
   const [showCommandPalette, setShowCommandPalette] = useState(false)
   const [commandSearch, setCommandSearch] = useState('')
   const [paletteIndex, setPaletteIndex] = useState(0)
@@ -207,7 +216,6 @@ export default function App() {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Toggle Command Palette with Ctrl+K or Cmd+K globally, even inside inputs
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault()
         setShowCommandPalette(prev => !prev)
@@ -216,7 +224,6 @@ export default function App() {
         return
       }
 
-      // Ignore standard shortcut key triggers if typing in an input
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) || e.target.isContentEditable) {
         if (e.key === 'Escape') {
           e.preventDefault()
@@ -371,18 +378,16 @@ export default function App() {
     ]
   })
 
-  // CALENDAR EVENTS STATE
   const [events, setEvents] = useState(() => {
     const saved = localStorage.getItem('hr_pulse_events')
     if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(e) } }
     return [
       { id: 'evt-1', title: 'Company Town Hall', date: '2026-07-20', time: '14:00', type: 'meeting', description: 'Quarterly all-hands meeting', createdBy: 'EMP-101', createdAt: new Date().toISOString() },
       { id: 'evt-2', title: 'Independence Day', date: '2026-08-15', time: '', type: 'holiday', description: 'National holiday', createdBy: 'EMP-101', createdAt: new Date().toISOString() },
-      { id: 'evt-3', title: 'Sarah\'s Birthday', date: '2026-07-30', time: '', type: 'birthday', description: '', createdBy: 'EMP-101', createdAt: new Date().toISOString() },
+      { id: 'evt-3', title: "Sarah's Birthday", date: '2026-07-30', time: '', type: 'birthday', description: '', createdBy: 'EMP-101', createdAt: new Date().toISOString() },
     ]
   })
 
-  // DOCUMENTS STATE
   const [documents, setDocuments] = useState(() => {
     const saved = localStorage.getItem('hr_pulse_documents')
     if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(e) } }
@@ -392,7 +397,6 @@ export default function App() {
     ]
   })
 
-  // NEW ROSTER & SHIFT STATES
   const [roster, setRoster] = useState(() => {
     const saved = localStorage.getItem('hr_pulse_roster')
     if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(e) } }
@@ -411,7 +415,6 @@ export default function App() {
     return []
   })
 
-  // NEW ANNOUNCEMENTS STATE
   const [announcements, setAnnouncements] = useState(() => {
     const saved = localStorage.getItem('hr_pulse_announcements')
     if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(e) } }
@@ -420,13 +423,13 @@ export default function App() {
         id: 'ann-1',
         title: 'Welcome to HR Pulse!',
         content: 'We are thrilled to roll out the new HR Pulse internal portal. Please take a moment to review your profile details and explore the new ESS features.',
-        authorId: 'EMP-101', // HR Admin
+        authorId: 'EMP-101',
         date: new Date().toISOString(),
         category: 'General',
         priority: 'Important',
         audience: 'all',
         attachments: [],
-        reactions: { '👍': 0, '❤️': 0, '🎉': 0 },
+        reactions: { '\u{1F44D}': 0, '\u2764\uFE0F': 0, '\u{1F389}': 0 },
         comments: [],
         readBy: [],
         poll: null
@@ -434,7 +437,6 @@ export default function App() {
     ]
   })
 
-  // NEW ASSETS STATE
   const [assets, setAssets] = useState(() => {
     const saved = localStorage.getItem('hr_pulse_assets')
     if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(e) } }
@@ -504,7 +506,6 @@ export default function App() {
     ]
   })
 
-  // LocalStorage persistence effects
   useEffect(() => {
     const loadEmployeesFromStorage = async () => {
       const saved = localStorage.getItem(EMPLOYEES_STORAGE_KEY)
@@ -517,6 +518,7 @@ export default function App() {
         }
       } catch (e) {
         console.error('Failed to decrypt saved employees:', e)
+        localStorage.removeItem(EMPLOYEES_STORAGE_KEY)
       }
     }
 
@@ -573,7 +575,6 @@ export default function App() {
     localStorage.setItem('hr_pulse_documents', JSON.stringify(documents))
   }, [documents])
 
-  // Auto-Post Birthdays & Anniversaries
   useEffect(() => {
     if (!employees || employees.length === 0) return
 
@@ -584,26 +585,24 @@ export default function App() {
     let newPosts = []
 
     employees.forEach(emp => {
-      // Check Birthday
       if (emp.dob) {
         const dobDate = new Date(emp.dob)
         const dobMonthDay = `${dobDate.getMonth() + 1}-${dobDate.getDate()}`
         
         if (dobMonthDay === currentMonthDay) {
-          // Check if we already posted for this year
           const existing = announcements.find(a => a.category === 'Birthday' && a.content.includes(emp.name) && a.date.startsWith(currentYear.toString()))
           if (!existing) {
             newPosts.push({
               id: `ann-bday-${emp.id}-${currentYear}`,
-              title: `🎉 Happy Birthday, ${emp.name}!`,
-              content: `Let's all wish a fantastic birthday to ${emp.name} from the ${emp.department} team! Have a great day! 🎂🎈`,
+              title: `\u{1F389} Happy Birthday, ${emp.name}!`,
+              content: `Let's all wish a fantastic birthday to ${emp.name} from the ${emp.department} team! Have a great day! \u{1F382}\u{1F388}`,
               authorId: 'system',
               date: new Date().toISOString(),
               category: 'Achievement/Birthday/Work Anniversary',
               priority: 'Normal',
               audience: 'all',
               attachments: [],
-              reactions: { '👍': 0, '❤️': 0, '🎉': 0 },
+              reactions: { '\u{1F44D}': 0, '\u2764\uFE0F': 0, '\u{1F389}': 0 },
               comments: [],
               readBy: [],
               poll: null
@@ -612,7 +611,6 @@ export default function App() {
         }
       }
 
-      // Check Work Anniversary
       if (emp.joiningDate) {
         const joinDate = new Date(emp.joiningDate)
         const joinMonthDay = `${joinDate.getMonth() + 1}-${joinDate.getDate()}`
@@ -623,15 +621,15 @@ export default function App() {
           if (!existing) {
             newPosts.push({
               id: `ann-work-${emp.id}-${currentYear}`,
-              title: `🌟 Happy Work Anniversary, ${emp.name}!`,
-              content: `Congratulations to ${emp.name} for completing ${years} year${years > 1 ? 's' : ''} with us! Thank you for your hard work and dedication! 🏆`,
+              title: `\u{1F31F} Happy Work Anniversary, ${emp.name}!`,
+              content: `Congratulations to ${emp.name} for completing ${years} year${years > 1 ? 's' : ''} with us! Thank you for your hard work and dedication! \u{1F3C6}`,
               authorId: 'system',
               date: new Date().toISOString(),
               category: 'Achievement/Birthday/Work Anniversary',
               priority: 'Normal',
               audience: 'all',
               attachments: [],
-              reactions: { '👍': 0, '❤️': 0, '🎉': 0 },
+              reactions: { '\u{1F44D}': 0, '\u2764\uFE0F': 0, '\u{1F389}': 0 },
               comments: [],
               readBy: [],
               poll: null
@@ -646,7 +644,6 @@ export default function App() {
     }
   }, [employees])
 
-  // Real Google Drive synchronization effect
   useEffect(() => {
     const handleOnline = () => {
       if (user && metaManifest) {
@@ -722,7 +719,6 @@ export default function App() {
         }
         setEmployees(empData)
 
-        // Load or initialize payroll records
         const defaultPayroll = {
           '2026-07': [
             { employeeId: 'EMP-101', grossSalary: 3200, status: 'Paid', paymentDate: 'July 15, 2026', advance: 0, loan: { total: 0, installment: 0, remaining: 0 } },
@@ -739,7 +735,6 @@ export default function App() {
         if (Array.isArray(payrollData)) payrollData = { '2026-07': payrollData }
         setPayroll(payrollData)
 
-        // Load or initialize settings configurations
         const defaultSettings = {
           currency: '$',
           salaryStructure: [
@@ -759,7 +754,6 @@ export default function App() {
         }
         setSettings(settingsData)
 
-        // Load or initialize attendance configurations
         const defaultLeaves = [
           { id: 'REQ-101', employeeId: 'EMP-102', leaveType: 'Sick Leave', startDate: '2026-07-10', endDate: '2026-07-12', days: 3, reason: 'Flu symptoms', status: 'Approved' },
           { id: 'REQ-102', employeeId: 'EMP-104', leaveType: 'Annual Leave', startDate: '2026-07-20', endDate: '2026-07-25', days: 6, reason: 'Family vacation', status: 'Pending' }
@@ -784,7 +778,6 @@ export default function App() {
         let logsData = await readTable('attendance_logs', user.token, bgSyncCallback)
         
         if (!leavesData || !balancesData || !logsData) {
-          // Check for legacy attendance.json to migrate
           const legacyAtt = await readTable('attendance', user.token, bgSyncCallback)
           if (legacyAtt) {
             leavesData = leavesData || legacyAtt.leaves || defaultLeaves
@@ -802,7 +795,6 @@ export default function App() {
         
         setAttendance({ leaves: leavesData, balances: balancesData, dailyLogs: logsData })
 
-        // Load or initialize expenses
         const defaultExpenses = []
         let expensesData = await readTable('expenses', user.token, bgSyncCallback)
         if (!expensesData) {
@@ -811,7 +803,6 @@ export default function App() {
         }
         setExpenses(expensesData)
 
-        // Save new meta if we generated anything
         if (dbStatus === 'rebuilding') {
           setMetaManifest(meta)
           setDbStatus('healthy')
@@ -827,7 +818,6 @@ export default function App() {
         setIsSyncing(false)
         addLog('Database Synced', 'Strict schema successfully loaded from Drive.', 'success')
         
-        // Check for 24h auto-backup
         checkAndRunAutoBackup(user.token)
       } catch (err) {
         setIsSyncing(false)
@@ -935,10 +925,8 @@ export default function App() {
       addLog('Repairing DB', 'Running deduplication and logical constraint repairs...')
       const meta = { ...metaManifest }
       
-      // 1. Read tables
       let empData = await readTable('employees', user.token) || []
       
-      // Deduplicate employees
       const uniqueEmps = []
       const seenIds = new Set()
       empData.forEach(emp => {
@@ -948,11 +936,9 @@ export default function App() {
         }
       })
       
-      // Write fixed employees back
       await writeTable('employees', uniqueEmps, meta, user.token)
       setEmployees(uniqueEmps)
       
-      // Re-run validation
       const leavesData = await readTable('leave_requests', user.token) || []
       const balancesData = await readTable('leave_balances', user.token) || {}
       const logsData = await readTable('attendance_logs', user.token) || {}
@@ -1043,7 +1029,6 @@ export default function App() {
     })
   }
 
-  // Function to simulate Google Drive activity log update
   const addLog = (action, details, status = 'success') => {
     const newLog = {
       id: `log-${Date.now()}`,
@@ -1054,7 +1039,6 @@ export default function App() {
     }
     setSyncLogs(prev => [newLog, ...prev.slice(0, 4)])
     
-    // Also trigger global toast for important actions
     if (status === 'success') {
       addToast(action, 'success')
     } else if (status === 'danger') {
@@ -1062,7 +1046,6 @@ export default function App() {
     }
   }
 
-  // Effect to simulate periodic sync when connected
   useEffect(() => {
     if (!driveConnected) return
     const interval = setInterval(() => {
@@ -1155,12 +1138,12 @@ export default function App() {
 
     if (!hasPermission(currentView)) {
       return (
-        <div className="animate-fade-in" style={{ padding: '64px 32px', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '16px', border: '1px solid var(--border-color)', marginTop: '24px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--accent-danger)', marginBottom: '16px' }}>
+        <div className="animate-fade-in" style={{ padding: '64px 32px', textAlign: 'center', background: 'var(--color-md-sys-surface-container)', borderRadius: '16px', border: '1px solid var(--color-md-sys-outline-variant)', marginTop: '24px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-md-sys-error)', marginBottom: '16px' }}>
             <span style={{ fontSize: '2rem', fontWeight: 700 }}>!</span>
           </div>
-          <h2 style={{ fontSize: '1.8rem', color: 'var(--accent-danger)', marginBottom: '16px' }}>403 Forbidden</h2>
-          <p style={{ color: 'var(--text-secondary)', maxWidth: '400px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '1.8rem', color: 'var(--color-md-sys-error)', marginBottom: '16px' }}>403 Forbidden</h2>
+          <p style={{ color: 'var(--color-md-sys-on-surface-variant)', maxWidth: '400px', margin: '0 auto' }}>
             Your current role (<strong>{simulatedRole}</strong>) does not have permission to access the <strong>{currentView}</strong> module.
           </p>
         </div>
@@ -1344,7 +1327,7 @@ export default function App() {
   if (simulatedRole === 'Employee') {
     return (
       <EmployeePortal
-        currentUser={{...user, role: 'Employee', department: 'Engineering'}} // Mocked for now, normally found in employees array
+        currentUser={{...user, role: 'Employee', department: 'Engineering'}}
         employees={employees}
         attendance={attendance}
         payroll={payroll}
@@ -1370,6 +1353,17 @@ export default function App() {
         settings={settings}
       />
     )
+  }
+
+  // Filter nav items by role permissions
+  const visibleNavItems = allNavItems.filter(item => hasPermission(item.id))
+
+  // Map currentView to NavigationRail index
+  const currentNavIndex = visibleNavItems.findIndex(item => item.id === currentView)
+  const safeNavIndex = currentNavIndex >= 0 ? currentNavIndex : 0
+
+  const handleNavChange = (index) => {
+    setCurrentView(visibleNavItems[index].id)
   }
 
   const getFilteredItems = () => {
@@ -1491,234 +1485,285 @@ export default function App() {
     if (id.includes('darkmode')) return <Moon size={16} />
     if (id.includes('clearcache')) return <Trash2 size={16} />
     if (id.includes('backup')) return <HardDrive size={16} />
-    if (id.includes('dashboard')) return <Layout size={16} />
+    if (id.includes('dashboard')) return <LayoutDashboard size={16} />
     if (id.includes('settings')) return <SettingsIcon size={16} />
     if (id.includes('drive')) return <HardDrive size={16} />
     if (id.includes('employees')) return <User size={16} />
     return <FileText size={16} />
   }
 
+  const navRailItems = visibleNavItems.map(item => ({
+    label: item.label,
+    icon: item.icon,
+  }))
+
+  const unreadCount = notifications.filter(n => !n.read).length
+
   return (
-    <div className="app-container">
-      {/* Mobile Header Bar */}
-      <header className="mobile-header">
-        <button 
-          onClick={() => setMobileMenuOpen(true)}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--text-primary)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <Menu size={24} />
-        </button>
-        <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>HR Pulse</h2>
-        <img 
-          src={user.avatar} 
-          alt={user.name} 
-          style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
-        />
-      </header>
+    <div className="dashboard-root app-shell" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', background: 'var(--md-bw-background)', fontFamily: "'Roboto', sans-serif" }}>
+      <aside className="macos-sidebar sidebar" style={{ width: '260px', minWidth: '260px', flexShrink: 0, background: 'rgba(248, 249, 250, 0.65)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', borderRight: '1px solid rgba(0, 0, 0, 0.06)', display: 'flex', flexDirection: 'column', zIndex: 20 }}>
+        <div style={{ padding: '16px 24px', fontWeight: 700, fontSize: '20px', color: 'var(--md-bw-on-surface)' }}>
+          HR Pulse
+        </div>
+        <nav style={{ flex: 1, overflowY: 'auto', padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '12px' }}>
+          {visibleNavItems.map(item => {
+            const isActive = currentView === item.id
+            return (
+              <button
+                key={item.id}
+                onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '16px',
+                  height: '56px', padding: '0 16px', borderRadius: '28px', border: 'none',
+                  background: isActive ? 'var(--md-bw-secondary-container)' : 'transparent',
+                  color: isActive ? 'var(--md-bw-on-secondary-container)' : 'var(--md-bw-on-surface-variant)',
+                  cursor: 'pointer', textAlign: 'left', font: "500 14px/20px 'Roboto', sans-serif"
+                }}
+              >
+                <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'inherit' }}>
+                  {item.icon}
+                </div>
+                <span style={{ flex: 1 }}>{item.label}</span>
+              </button>
+            )
+          })}
+        </nav>
 
-      {/* Dim overlay background when drawer is open */}
-      {mobileMenuOpen && (
-        <div 
-          className="sidebar-overlay"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
-
-      <Sidebar 
-        currentView={currentView} 
-        setCurrentView={setCurrentView} 
-        driveConnected={driveConnected}
-        user={user}
-        onLogout={handleLogout}
-        mobileOpen={mobileMenuOpen}
-        setMobileOpen={setMobileMenuOpen}
-        settings={settings}
-        setSettings={handleSetSettings}
-        isDarkMode={isDarkMode}
-        setIsDarkMode={setIsDarkMode}
-        simulatedRole={simulatedRole}
-        dbStatus={dbStatus}
-      />
-      <main className="content-container">
-        {dbStatus === 'corruption' && (
-          <div style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid var(--accent-danger)',
-            color: 'var(--accent-danger)',
-            padding: '16px 24px',
-            borderRadius: '12px',
-            marginBottom: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '16px',
-            flexWrap: 'wrap'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <AlertTriangle size={24} />
-              <div>
-                <h4 style={{ margin: 0, fontWeight: 700 }}>Data integrity issue detected.</h4>
-                <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem' }}>
-                  {dataIntegrityIssues.length > 0 
-                    ? `${dataIntegrityIssues.length} logical conflict(s) found in the database.` 
-                    : 'A sync or data integrity constraint failed. Review logs or check structure.'}
-                </p>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              {dataIntegrityIssues.some(iss => iss.includes('Duplicate')) && (
-                <button 
-                  onClick={handleAutoRepairDatabase}
-                  className="btn"
-                  style={{ background: 'var(--accent-success)', color: '#fff', border: 'none', fontWeight: 600 }}
+        {/* Mobile Drawer */}
+        {mobileMenuOpen && (
+          <div className="sidebar-overlay" onClick={() => setMobileMenuOpen(false)}>
+            <div className="mobile-drawer" onClick={e => e.stopPropagation()}>
+              {/* Drawer Header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', marginBottom: '16px' }}>
+                <div
+                  style={{
+                    width: '40px', height: '40px', borderRadius: '10px',
+                    background: 'var(--color-md-sys-primary)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                  }}
                 >
-                  Auto-Fix Duplicates
+                  <Activity size={20} color="var(--color-md-sys-on-primary)" />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, lineHeight: 1.2 }}>HR Pulse</h2>
+                  <span style={{ fontSize: '0.65rem', color: 'var(--color-md-sys-on-surface-variant)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Drive-based HRM</span>
+                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{ marginLeft: 'auto', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--color-md-sys-on-surface-variant)', padding: '4px' }}
+                >
+                  <X size={20} />
                 </button>
-              )}
-              <button 
-                onClick={() => setShowCorruptionModal(true)} 
-                className="btn btn-outline" 
-                style={{ borderColor: 'var(--accent-danger)', color: 'var(--accent-danger)' }}
-              >
-                View Details
-              </button>
-              <button 
-                onClick={() => {
-                  if (window.confirm("Restore to default clean data? This will clear local cache and reload.")) {
-                    clearLocalCache().then(() => window.location.reload())
-                  }
-                }} 
-                className="btn btn-danger"
-              >
-                Reset Database
-              </button>
-            </div>
-          </div>
-        )}
+              </div>
 
-        {showCorruptionModal && (
-          <div className="modal-overlay" onClick={() => setShowCorruptionModal(false)}>
-            <div className="modal-container" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()}>
-              <div className="modal-header">
-                <h2 style={{ color: 'var(--accent-danger)' }}>Data Integrity Report</h2>
-                <button className="modal-close" onClick={() => setShowCorruptionModal(false)}>✕</button>
-              </div>
-              <div className="modal-body" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {dataIntegrityIssues.length > 0 ? (
-                    dataIntegrityIssues.map((issue, idx) => (
-                      <li key={idx} style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{issue}</li>
-                    ))
-                  ) : (
-                    <li style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                      No logical constraint conflicts found. A sync process or structure generation constraint has triggered a warning.
-                    </li>
-                  )}
-                </ul>
-              </div>
-              <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--border-color)' }}>
-                {dataIntegrityIssues.some(iss => iss.includes('Duplicate')) && (
-                  <button 
-                    onClick={handleAutoRepairDatabase}
-                    className="btn"
-                    style={{ background: 'var(--accent-success)', color: '#fff', border: 'none', fontWeight: 600 }}
+              {/* Drawer Nav Items */}
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                {visibleNavItems.map((item, index) => {
+                  const isActive = currentView === item.id
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '12px',
+                        padding: '12px 16px', borderRadius: '12px', border: 'none',
+                        background: isActive ? 'var(--color-md-sys-primary)' : 'transparent',
+                        color: isActive ? 'var(--color-md-sys-on-primary)' : 'var(--color-md-sys-on-surface-variant)',
+                        fontSize: '0.95rem', fontWeight: 700, textAlign: 'left', cursor: 'pointer',
+                        transition: 'background-color 150ms, color 150ms'
+                      }}
+                    >
+                      <div style={{
+                        width: '32px', height: '32px', borderRadius: '8px',
+                        background: isActive ? 'rgba(255,255,255,0.15)' : 'var(--color-md-sys-surface-container-high)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                      }}>
+                        {item.icon}
+                      </div>
+                      <span>{item.label}</span>
+                    </button>
+                  )
+                })}
+              </nav>
+
+              {/* Drawer Footer - User info */}
+              <Divider style={{ margin: '12px 0' }} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Avatar src={user?.avatar} alt={user?.name || 'User'} size="small" />
+                  <div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{user?.name}</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--color-md-sys-on-surface-variant)' }}>{user?.role}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  <IconButton
+                    variant="standard"
+                    onClick={() => setIsDarkMode(prev => !prev)}
                   >
-                    Auto-Fix Duplicates
-                  </button>
-                )}
-                <button className="btn btn-secondary" onClick={() => setShowCorruptionModal(false)}>Close</button>
+                    {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                  </IconButton>
+                  <IconButton
+                    variant="standard"
+                    onClick={handleLogout}
+                    color="error"
+                  >
+                    <LogOut size={18} />
+                  </IconButton>
+                </div>
               </div>
             </div>
           </div>
         )}
+      </aside>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <div>{renderBreadcrumbs()}</div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative' }}>
-            
-            {/* Sync Status Top Bar Indicator */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-secondary)', padding: '6px 12px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-              <div style={{ 
-                width: '8px', height: '8px', borderRadius: '50%', 
-                backgroundColor: !driveConnected ? 'var(--accent-warning)' : syncConflicts.length > 0 ? 'var(--accent-danger)' : isSyncing ? 'var(--accent-warning)' : 'var(--accent-success)' 
-              }} />
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                {!driveConnected ? 'Pending (Offline)' : syncConflicts.length > 0 ? 'Conflict' : isSyncing ? 'Syncing...' : 'Synced'}
-              </span>
+      {/* Main Content */}
+      <main className="content dashboard-content" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        
+        {/* Global Top App Bar */}
+        <header className="macos-toolbar" style={{ height: '52px', minHeight: '52px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', background: 'rgba(255, 255, 255, 0.72)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', borderBottom: '1px solid rgba(0, 0, 0, 0.06)', position: 'sticky', top: 0, zIndex: 15, flexShrink: 0 }}>
+          <div className="left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button className="hamburger-mobile icon-btn" onClick={() => setMobileMenuOpen(true)} style={{ alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', borderRadius: '6px' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            </button>
+            <h1 style={{ font: "700 22px/28px 'Roboto', sans-serif", color: 'var(--md-bw-on-surface)', margin: 0, letterSpacing: '-0.02em' }}>
+              {allNavItems.find(i => i.id === currentView)?.label || 'HR Pulse'}
+            </h1>
+          </div>
+          <div className="right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="sync-badge" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '6px', font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>
+              <span style={{ width: '6px', height: '6px', background: !driveConnected ? 'var(--md-bw-error)' : syncConflicts.length > 0 ? 'var(--md-bw-error)' : isSyncing ? 'var(--md-bw-on-surface-variant)' : 'var(--md-bw-primary)', borderRadius: '50%', display: 'inline-block' }}></span>
+              {!driveConnected ? 'Offline' : syncConflicts.length > 0 ? 'Conflict' : isSyncing ? 'Syncing...' : 'Synced'}
             </div>
-
-            {/* Role Simulator */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-secondary)', padding: '6px 12px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>View As:</span>
-              <select 
-                value={simulatedRole}
-                onChange={(e) => setSimulatedRole(e.target.value)}
-                style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.85rem', outline: 'none', cursor: 'pointer' }}
-              >
+            <div className="view-toggle" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '6px', font: "400 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>
+              <span>View:</span>
+              <select value={simulatedRole} onChange={(e) => setSimulatedRole(e.target.value)} style={{ font: "500 12px/16px 'Roboto'", border: 'none', background: 'transparent', color: 'var(--md-bw-on-surface)', cursor: 'pointer', outline: 'none' }}>
                 <option value="Admin">Admin</option>
                 <option value="HR Manager">HR Manager</option>
                 <option value="Payroll Manager">Payroll Manager</option>
                 <option value="Employee">Employee</option>
               </select>
             </div>
-
-            <button 
-              onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }}
-              style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}
-            >
-              <Bell size={20} style={{ color: 'var(--text-secondary)' }} />
-              {notifications.filter(n => !n.read).length > 0 && (
-                <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: 'var(--accent-danger)', color: '#fff', fontSize: '0.65rem', fontWeight: 800, width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
-                  {notifications.filter(n => !n.read).length}
-                </span>
-              )}
+            <button className="icon-btn" style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', borderRadius: '6px', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             </button>
-
-            {showNotifications && (
-              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', width: '320px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '16px', boxShadow: '0 12px 32px rgba(0,0,0,0.1)', zIndex: 100, overflow: 'hidden', animation: 'modalFadeIn 0.2s ease-out' }}>
-                <div style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-secondary)' }}>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>Notifications</h3>
+            <div style={{ position: 'relative' }}>
+              <button className="icon-btn" onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }} style={{ position: 'relative', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', borderRadius: '6px', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                {unreadCount > 0 && <span className="badge" style={{ position: 'absolute', top: '6px', right: '6px', width: '5px', height: '5px', background: 'var(--md-bw-primary)', borderRadius: '50%', border: '1.5px solid rgba(255,255,255,0.72)' }}></span>}
+              </button>
+              
+              {/* Notifications Dropdown */}
+              {showNotifications && (
+                <div className="macos-card" style={{
+                  position: 'absolute', top: '100%', right: 0, marginTop: '8px',
+                  width: '320px',
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  backdropFilter: 'blur(20px) saturate(180%)',
+                  border: '1px solid rgba(0,0,0,0.08)',
+                  borderRadius: '16px',
+                  boxShadow: '0 12px 32px rgba(0,0,0,0.1)',
+                  zIndex: 100, overflow: 'hidden'
+                }}>
+                  <div style={{
+                    padding: '16px', borderBottom: '1px solid rgba(0,0,0,0.06)',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                  }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'var(--md-bw-on-surface)' }}>Notifications</h3>
+                  </div>
+                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    {notifications.length === 0 ? (
+                      <div style={{ padding: '24px', textAlign: 'center', color: 'var(--md-bw-on-surface-variant)', fontSize: '14px' }}>No new notifications</div>
+                    ) : (
+                      notifications.map(n => (
+                        <div key={n.id} style={{
+                          padding: '12px 16px', borderBottom: '1px solid rgba(0,0,0,0.04)',
+                          background: n.read ? 'transparent' : 'rgba(0,0,0,0.03)'
+                        }}>
+                          <p style={{ fontSize: '14px', color: 'var(--md-bw-on-surface)', margin: 0, fontWeight: n.read ? 400 : 500, lineHeight: 1.4 }}>{n.text}</p>
+                          <span style={{ fontSize: '12px', color: 'var(--md-bw-on-surface-variant)', marginTop: '4px', display: 'block' }}>{n.time}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                  {notifications.length === 0 ? (
-                    <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>No new notifications</div>
-                  ) : (
-                    notifications.map(n => (
-                      <div key={n.id} style={{ padding: '12px 16px', borderBottom: '1px solid rgba(0,0,0,0.03)', background: n.read ? 'transparent' : 'rgba(59, 130, 246, 0.05)' }}>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-primary)', margin: 0, fontWeight: n.read ? 500 : 600, lineHeight: 1.4 }}>{n.text}</p>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>{n.time}</span>
-                      </div>
-                    ))
+              )}
+            </div>
+            
+            <div onClick={() => setIsDarkMode(prev => !prev)} style={{ marginLeft: '4px', cursor: 'pointer', width: '28px', height: '28px', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              <img src={user?.avatar || "https://i.pravatar.cc/150?u=admin"} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Profile" />
+            </div>
+          </div>
+        </header>
+
+        {/* Corruption Banner */}
+        {dbStatus === 'corruption' && (
+          <div className="macos-banner" style={{ margin: '16px 24px', display: 'flex', alignItems: 'flex-start', gap: '16px', padding: '16px 20px', background: 'rgba(248, 249, 250, 0.8)', backdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.08)', borderRadius: '12px' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--md-bw-on-surface-variant)', flexShrink: 0, marginTop: '2px' }}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <div style={{ flex: 1 }}>
+              <p style={{ font: "500 14px/20px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>Data integrity issue detected</p>
+              <p style={{ font: "400 13px/20px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '4px 0 0' }}>{dataIntegrityIssues.length > 0 ? `${dataIntegrityIssues.length} logical conflict(s) found in the database.` : 'A sync or data integrity constraint failed. Review logs or check structure.'}</p>
+            </div>
+            <button onClick={() => setShowCorruptionModal(true)} style={{ font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', background: 'transparent', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}>View Details</button>
+            {dataIntegrityIssues.some(iss => iss.includes('Duplicate')) && (
+              <button onClick={handleAutoRepairDatabase} style={{ font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-primary)', background: 'var(--md-bw-primary)', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}>Auto-Fix Duplicates</button>
+            )}
+            <button onClick={() => {
+                if (window.confirm("Restore to default clean data? This will clear local cache and reload.")) {
+                  clearLocalCache().then(() => window.location.reload())
+                }
+              }} style={{ font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-primary)', background: 'var(--md-bw-primary)', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}>Reset Database</button>
+          </div>
+        )}
+
+          {/* Corruption Modal - using actify Dialog */}
+          {showCorruptionModal && (
+            <Dialog open={showCorruptionModal} onClose={() => setShowCorruptionModal(false)}>
+              <div style={{ padding: '24px', maxWidth: '600px' }}>
+                <h2 style={{ color: 'var(--color-md-sys-error)', marginBottom: '16px' }}>Data Integrity Report</h2>
+                <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                  <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {dataIntegrityIssues.length > 0 ? (
+                      dataIntegrityIssues.map((issue, idx) => (
+                        <li key={idx} style={{ color: 'var(--color-md-sys-on-surface-variant)', fontSize: '0.9rem' }}>{issue}</li>
+                      ))
+                    ) : (
+                      <li style={{ color: 'var(--color-md-sys-on-surface-variant)', fontSize: '0.9rem' }}>
+                        No logical constraint conflicts found. A sync process or structure generation constraint has triggered a warning.
+                      </li>
+                    )}
+                  </ul>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--color-md-sys-outline-variant)' }}>
+                  {dataIntegrityIssues.some(iss => iss.includes('Duplicate')) && (
+                    <Button variant="filled" color="primary" onClick={handleAutoRepairDatabase}>
+                      Auto-Fix Duplicates
+                    </Button>
                   )}
+                  <Button variant="outlined" onClick={() => setShowCorruptionModal(false)}>
+                    Close
+                  </Button>
                 </div>
               </div>
-            )}
-          </div>
-        </div>
-        {renderContent()}
-      </main>
+            </Dialog>
+          )}
+
+          {/* Page Content */}
+          {renderContent()}
+        </main>
 
       {/* Global Toast Container */}
-      <div className="global-toast-container">
+      <div className="global-toast-container" style={{ position: 'fixed', top: 'calc(4rem + 16px)', right: '24px', zIndex: 10000, display: 'flex', flexDirection: 'column', gap: '12px', pointerEvents: 'none' }}>
         {toasts.map(toast => (
           <div key={toast.id} className={`global-toast ${toast.type}`}>
             <div className="global-toast-content">
               <span style={{ flex: 1 }}>{toast.message}</span>
               {toast.action && (
-                <button 
+                <button
                   onClick={() => { toast.action.onClick(); removeToast(toast.id); }}
-                  style={{ 
-                    background: 'rgba(255,255,255,0.1)', color: 'currentColor', border: '1px solid currentColor', 
-                    padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 700 
+                  style={{
+                    background: 'rgba(255,255,255,0.1)', color: 'currentColor', border: '1px solid currentColor',
+                    padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 700
                   }}
                 >
                   {toast.action.label}
@@ -1737,12 +1782,12 @@ export default function App() {
         <div className="command-palette-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowCommandPalette(false) }}>
           <div className="command-palette">
             <div className="command-palette-search-wrapper">
-              <Search size={18} style={{ color: 'var(--text-muted)' }} />
-              <input 
+              <Search size={18} style={{ color: 'var(--color-md-sys-on-surface-variant)' }} />
+              <input
                 autoFocus
                 className="command-palette-input"
-                type="text" 
-                placeholder="Type a command or search..." 
+                type="text"
+                placeholder="Type a command or search..."
                 value={commandSearch}
                 onChange={(e) => {
                   setCommandSearch(e.target.value)
@@ -1773,7 +1818,7 @@ export default function App() {
             </div>
             <div className="command-palette-list">
               {filteredItems.length === 0 ? (
-                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--color-md-sys-on-surface-variant)', fontSize: '0.9rem' }}>
                   No results found.
                 </div>
               ) : (
@@ -1789,7 +1834,7 @@ export default function App() {
                             {item.category}
                           </div>
                         )}
-                        <div 
+                        <div
                           className={`command-palette-item ${paletteIndex === index ? 'active' : ''}`}
                           onClick={() => selectPaletteItem(index)}
                           onMouseEnter={() => setPaletteIndex(index)}
@@ -1801,7 +1846,7 @@ export default function App() {
                             <span>{item.label}</span>
                           </div>
                           <span className="command-palette-item-shortcut">
-                            {item.category === 'Pages' ? '⏎' : (item.category === 'Employees' ? 'View' : 'Action')}
+                            {item.category === 'Pages' ? '\u23CE' : (item.category === 'Employees' ? 'View' : 'Action')}
                           </span>
                         </div>
                       </div>

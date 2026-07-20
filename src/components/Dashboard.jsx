@@ -1,25 +1,20 @@
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, Users, Cloud, RefreshCw, Activity, FileText, Calendar, Gift, Award } from 'lucide-react'
-import AdSlot from './AdSlot'
+import { Search, Bell, Users, Cloud, RefreshCw, Calendar, Gift, Award, Activity } from 'lucide-react'
 import { formatDateShort } from '../services/date.js'
 
 export default function Dashboard({ employees, driveConnected, onSync, attendance, setCurrentView }) {
   const [totalEmployees, setTotalEmployees] = useState(0)
-  const [showAttendanceDrawer, setShowAttendanceDrawer] = useState(false)
   const [activeCount, setActiveCount] = useState(0)
   const [leaveCount, setLeaveCount] = useState(0)
   const [syncLogs, setSyncLogs] = useState([])
   const [upcomingMilestones, setUpcomingMilestones] = useState([])
   const [todayStats, setTodayStats] = useState({ present: 0, absent: 0, onLeave: 0 })
-  
-  // Hover and detail lists states
-  const [attendanceDetails, setAttendanceDetails] = useState({ present: [], absent: [], onLeave: [] })
 
   useEffect(() => {
     setTotalEmployees(employees.length)
     
     // Simulate active status
-    const active = employees.filter(emp => emp.status !== 'Terminated').length
+    const active = employees.filter(emp => emp.status?.toLowerCase() !== 'inactive').length
     setActiveCount(active)
     
     // Simulated leave records count
@@ -27,9 +22,9 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
 
     // Set mock sync logs
     setSyncLogs([
-      { id: 1, action: 'Directory Pulled', timestamp: 'Just now', details: 'Retrieved 8 personnel entries successfully.' },
-      { id: 2, action: 'Roster Synced', timestamp: '12 mins ago', details: 'Uploaded today\'s biometric clock-in logs.' },
-      { id: 3, action: 'Leave Ledgers Synced', timestamp: '1 hr ago', details: 'Re-calibrated annual sickness allowance quotas.' },
+      { id: 1, action: 'Directory Pulled', timestamp: 'Just now', details: 'Retrieved 8 personnel entries successfully.', status: 'success' },
+      { id: 2, action: 'Roster Synced', timestamp: '12 mins ago', details: 'Uploaded today\'s biometric clock-in logs.', status: 'warn' },
+      { id: 3, action: 'Leave Ledgers Failed', timestamp: '1 hr ago', details: 'Network timeout while updating sickness allowances.', status: 'error' },
     ])
 
     // Compute upcoming milestones (Birthdays & Workversaries) in the next 30 days
@@ -70,12 +65,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       absent: absentList.length,
       onLeave: onLeaveList.length
     })
-
-    setAttendanceDetails({
-      present: presentList,
-      absent: absentList,
-      onLeave: onLeaveList
-    })
   }, [employees, attendance])
 
   const calculateUpcomingMilestones = (employeesList) => {
@@ -89,10 +78,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         const birthMonth = dobDate.getMonth()
         const birthDay = dobDate.getDate()
 
-        // Birthday this year
         let bdayThisYear = new Date(today.getFullYear(), birthMonth, birthDay)
-        
-        // Calculate difference
         const diffTime = bdayThisYear - today
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
@@ -116,7 +102,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         const joinDay = joinDate.getDate()
 
         let workversaryThisYear = new Date(today.getFullYear(), joinMonth, joinDay)
-        
         const diffTime = workversaryThisYear - today
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
@@ -130,33 +115,14 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
               role: emp.role,
               date: workversaryThisYear,
               daysRemaining: diffDays,
-              label: `${years}${getOrdinalSuffix(years)} Anniversary (${formatDateShort(emp.joiningDate)})`
+              label: `${years}${getOrdinalSuffix(years)} Anniversary`
             })
           }
         }
       }
     })
 
-    // Sort milestones by closest days remaining
     return milestones.sort((a, b) => a.daysRemaining - b.daysRemaining)
-  }
-
-  const renderAvatarStack = (list) => {
-    const visible = list.slice(0, 3)
-    const remaining = list.length - 3
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '12px', minHeight: '28px' }}>
-        {visible.map((emp, i) => (
-          <img key={i} src={emp.avatar} alt={emp.name} style={{ width: '28px', height: '28px', borderRadius: '50%', border: '2px solid #fff', marginLeft: i > 0 ? '-10px' : '0', zIndex: 10 - i, backgroundColor: '#f3f4f6' }} />
-        ))}
-        {remaining > 0 && (
-          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--bg-tertiary)', border: '2px solid #fff', marginLeft: '-10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold', zIndex: 0, color: 'var(--text-secondary)' }}>
-            +{remaining}
-          </div>
-        )}
-        {list.length === 0 && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>None</span>}
-      </div>
-    )
   }
 
   const getOrdinalSuffix = (i) => {
@@ -171,420 +137,151 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
     if (onSync) onSync()
   }
 
-  // Attendance rate calculations
   const attendanceRate = activeCount > 0 ? Math.round((todayStats.present / activeCount) * 100) : 0
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+    <div style={{ flex: 1, padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
-      {/* Header */}
-      <div className="page-header">
-        <h1 className="page-title">
-          <LayoutDashboard size={28} className="page-title-icon" />
-          Dashboard
-        </h1>
-        <button className="btn btn-primary" onClick={handleManualSync}>
-          <RefreshCw size={16} />
-          Sync Database
-        </button>
-      </div>
-
-      {/* Bento Grid layout */}
-      <div className="bento-grid">
-        {/* Total Directory */}
-        <div className="glass-card bento-item-stats stat-card-hover" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', borderTop: '4px solid var(--accent-primary)' }}>
-          <div className="glossy-icon-container" style={{
-            width: '48px',
-            height: '48px',
-            color: 'var(--accent-primary)'
-          }}>
-            <Users size={22} className="glossy-svg" />
+      {/* Stats Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+        
+        {/* Total Personnel */}
+        <div className="macos-card" style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '16px', padding: '20px', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.06)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+            <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '8px' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <span style={{ font: "500 10px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--md-bw-on-surface-variant)' }}>Total Directory</span>
           </div>
-          <div>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Total Directory</span>
-            <h3 className="tabular-nums" style={{ fontSize: '1.75rem', marginTop: '4px' }}>{totalEmployees}</h3>
-          </div>
+          <p style={{ font: "700 32px/36px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>{totalEmployees}</p>
         </div>
 
         {/* Active Today */}
-        <div className="glass-card bento-item-stats stat-card-hover" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', borderTop: '4px solid var(--accent-success)' }}>
-          <div className="glossy-icon-container" style={{
-            width: '48px',
-            height: '48px',
-            color: 'var(--accent-success)'
-          }}>
-            <Users size={22} className="glossy-svg" />
+        <div className="macos-card" style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '16px', padding: '20px', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.06)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+            <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '8px' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+            </div>
+            <span style={{ font: "500 10px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--md-bw-on-surface-variant)' }}>Active Today</span>
           </div>
-          <div>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Active Today</span>
-            <h3 className="tabular-nums" style={{ fontSize: '1.75rem', marginTop: '4px' }}>{activeCount}</h3>
-          </div>
+          <p style={{ font: "700 32px/36px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>{activeCount}</p>
         </div>
 
         {/* On Leave */}
-        <div className="glass-card bento-item-stats stat-card-hover" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', borderTop: '4px solid var(--accent-warning)' }}>
-          <div className="glossy-icon-container" style={{
-            width: '48px',
-            height: '48px',
-            color: 'var(--accent-warning)'
-          }}>
-            <Calendar size={22} className="glossy-svg" />
+        <div className="macos-card" style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '16px', padding: '20px', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.06)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+            <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '8px' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </div>
+            <span style={{ font: "500 10px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--md-bw-on-surface-variant)' }}>On Leave</span>
           </div>
-          <div>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>On Leave</span>
-            <h3 className="tabular-nums" style={{ fontSize: '1.75rem', marginTop: '4px' }}>{leaveCount}</h3>
-          </div>
+          <p style={{ font: "700 32px/36px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>{leaveCount}</p>
         </div>
 
         {/* Database Status */}
-        <div className="glass-card bento-item-stats stat-card-hover" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', borderTop: driveConnected ? '4px solid var(--accent-success)' : '4px solid var(--accent-danger)' }}>
-          <div className="glossy-icon-container" style={{
-            width: '48px',
-            height: '48px',
-            color: driveConnected ? 'var(--accent-success)' : 'var(--accent-danger)'
-          }}>
-            <Cloud size={22} className="glossy-svg" />
+        <div className="macos-card" style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px) saturate(150%)', WebkitBackdropFilter: 'blur(16px) saturate(150%)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '16px', padding: '20px', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.06)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+            <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '8px' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
+                <path d="M17.5 19a4.5 4.5 0 0 0 0-9 4.4 4.4 0 0 0-.8.1 7 7 0 1 0-11 5.9"></path>
+              </svg>
+            </div>
+            <span style={{ font: "500 10px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--md-bw-on-surface-variant)' }}>Drive Connection</span>
           </div>
+          <p style={{ font: "500 18px/36px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>{driveConnected ? 'Healthy' : 'Disconnected'}</p>
+        </div>
+      </div>
+
+      {/* Attendance Section */}
+      <div style={{ marginTop: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <div>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Drive Connection</span>
-            <h3 style={{ fontSize: '1.25rem', marginTop: '8px', color: driveConnected ? 'var(--accent-success)' : 'var(--accent-danger)' }}>
-              {driveConnected ? 'Healthy' : 'Disconnected'}
-            </h3>
+            <h2 style={{ font: "700 20px/28px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, letterSpacing: '-0.01em' }}>Today's Attendance</h2>
+            <p style={{ font: "400 13px/20px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '4px 0 0' }}>Attendance Rate: {attendanceRate}%</p>
           </div>
+          <button onClick={() => setCurrentView && setCurrentView('attendance')} style={{ font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-primary)', background: 'transparent', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.04)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>View All</button>
         </div>
 
-        {/* Compact Dynamic Attendance Bento Card with Hover Tooltip Popups */}
-        <div 
-          className="glass-card bento-item-chart stat-card-hover" 
-          onMouseEnter={() => setShowAttendanceDrawer(true)}
-          onMouseLeave={() => setShowAttendanceDrawer(false)}
-          style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '20px', cursor: 'pointer', position: 'relative' }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Activity size={18} style={{ color: 'var(--accent-primary)' }} />
-              Today's Attendance Status
-            </h3>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 700 }}>
-              Attendance Rate: <span style={{ color: 'var(--accent-primary)' }}>{attendanceRate}%</span>
-            </span>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+          {/* Present */}
+          <div className="macos-card" style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '16px', padding: '20px', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', left: 0, top: '16px', bottom: '16px', width: '3px', background: 'var(--md-bw-primary)', borderRadius: '0 2px 2px 0' }}></div>
+            <p style={{ font: "700 28px/32px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, fontVariantNumeric: 'tabular-nums' }}>{todayStats.present}</p>
+            <p style={{ font: "500 10px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--md-bw-on-surface-variant)', margin: '8px 0 0' }}>Present</p>
           </div>
-
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-around',
-            flex: 1,
-            gap: '16px',
-            flexWrap: 'wrap',
-            padding: '10px 0'
-          }}>
-            {/* Present Badge */}
-            <div 
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flex: '1',
-                minWidth: '120px',
-                padding: '16px 20px',
-                borderRadius: '20px',
-                background: 'rgba(34, 197, 94, 0.04)',
-                border: '1px solid rgba(34, 197, 94, 0.1)',
-                transition: 'all var(--transition-fast)'
-              }}
-            >
-              <h4 className="tabular-nums" style={{ fontSize: '2.2rem', color: 'var(--accent-success)', fontWeight: 800 }}>{todayStats.present}</h4>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '4px' }}>Present</span>
-              {renderAvatarStack(attendanceDetails.present)}
-            </div>
-
-            {/* Absent Badge */}
-            <div 
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flex: '1',
-                minWidth: '120px',
-                padding: '16px 20px',
-                borderRadius: '20px',
-                background: 'rgba(239, 68, 68, 0.04)',
-                border: '1px solid rgba(239, 68, 68, 0.1)',
-                transition: 'all var(--transition-fast)'
-              }}
-            >
-              <h4 className="tabular-nums" style={{ fontSize: '2.2rem', color: 'var(--accent-danger)', fontWeight: 800 }}>{todayStats.absent}</h4>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '4px' }}>Absent</span>
-              {renderAvatarStack(attendanceDetails.absent)}
-            </div>
-
-            {/* On Leave Badge */}
-            <div 
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flex: '1',
-                minWidth: '120px',
-                padding: '16px 20px',
-                borderRadius: '20px',
-                background: 'rgba(245, 158, 11, 0.04)',
-                border: '1px solid rgba(245, 158, 11, 0.1)',
-                transition: 'all var(--transition-fast)'
-              }}
-            >
-              <h4 className="tabular-nums" style={{ fontSize: '2.2rem', color: 'var(--accent-warning)', fontWeight: 800 }}>{todayStats.onLeave}</h4>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 700, marginTop: '4px' }}>On Leave</span>
-              {renderAvatarStack(attendanceDetails.onLeave)}
-            </div>
+          {/* Absent */}
+          <div className="macos-card" style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '16px', padding: '20px', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', left: 0, top: '16px', bottom: '16px', width: '3px', background: 'transparent', borderLeft: '3px dashed var(--md-bw-on-surface-variant)', borderRadius: 0 }}></div>
+            <p style={{ font: "700 28px/32px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, fontVariantNumeric: 'tabular-nums' }}>{todayStats.absent}</p>
+            <p style={{ font: "500 10px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--md-bw-on-surface-variant)', margin: '8px 0 0' }}>Absent</p>
           </div>
-
-          {/* Centered Hover Modal for Attendance */}
-          {showAttendanceDrawer && (
-            <div 
-              style={{
-                position: 'fixed',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '400px',
-                maxWidth: '90vw',
-                maxHeight: '85vh',
-                backgroundColor: '#ffffff',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-                borderRadius: 'var(--radius-xl)',
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '24px',
-                zIndex: 9999,
-                cursor: 'default',
-                animation: 'fadeIn var(--transition-fast) forwards'
-              }}
-              onClick={e => e.stopPropagation()}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Today's Attendance</h2>
-                <button onClick={() => setShowAttendanceDrawer(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-                  <Users size={20} />
-                </button>
-              </div>
-
-              <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {/* Present Section */}
-                <div>
-                  <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px', borderBottom: '1px solid #f3f4f6', paddingBottom: '4px' }}>Present ({todayStats.present})</h4>
-                  {attendanceDetails.present.map((e, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
-                      <div style={{ position: 'relative' }}>
-                        <img src={e.avatar} alt={e.name} style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
-                        <div style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', backgroundColor: '#22c55e', borderRadius: '50%', border: '2px solid #fff' }} />
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>{e.name}</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Checked in at {e.time}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* On Leave Section */}
-                {attendanceDetails.onLeave.length > 0 && (
-                  <div style={{ marginTop: '8px' }}>
-                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px', borderBottom: '1px solid #f3f4f6', paddingBottom: '4px' }}>On Leave ({todayStats.onLeave})</h4>
-                    {attendanceDetails.onLeave.map((e, idx) => (
-                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
-                        <div style={{ position: 'relative' }}>
-                          <img src={e.avatar} alt={e.name} style={{ width: '36px', height: '36px', borderRadius: '50%', filter: 'grayscale(100%)' }} />
-                          <div style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', backgroundColor: 'var(--accent-warning)', borderRadius: '50%', border: '2px solid var(--bg-secondary)' }} />
-                        </div>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{e.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Absent Section */}
-                {attendanceDetails.absent.length > 0 && (
-                  <div style={{ marginTop: '8px' }}>
-                    <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px', borderBottom: '1px solid #f3f4f6', paddingBottom: '4px' }}>Absent ({todayStats.absent})</h4>
-                    {attendanceDetails.absent.map((e, idx) => (
-                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
-                        <div style={{ position: 'relative' }}>
-                          <img src={e.avatar} alt={e.name} style={{ width: '36px', height: '36px', borderRadius: '50%', filter: 'grayscale(100%) opacity(0.7)' }} />
-                          <div style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', backgroundColor: 'var(--accent-danger)', borderRadius: '50%', border: '2px solid var(--bg-secondary)' }} />
-                        </div>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{e.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              <button 
-                className="btn btn-primary" 
-                onClick={() => setCurrentView && setCurrentView('attendance')}
-                style={{ marginTop: '24px', width: '100%', padding: '12px', borderRadius: '12px' }}
-              >
-                Manage Attendance
-              </button>
-            </div>
-          )}
+          {/* On Leave */}
+          <div className="macos-card" style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '16px', padding: '20px', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', left: 0, top: '16px', bottom: '16px', width: '3px', background: 'transparent', borderLeft: '3px dotted var(--md-bw-outline)', borderRadius: 0 }}></div>
+            <p style={{ font: "700 28px/32px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, fontVariantNumeric: 'tabular-nums' }}>{todayStats.onLeave}</p>
+            <p style={{ font: "500 10px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--md-bw-on-surface-variant)', margin: '8px 0 0' }}>On Leave</p>
+          </div>
         </div>
+      </div>
 
-        {/* Upcoming Milestones Bento Card */}
-        <div className="glass-card bento-item-milestones" style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h3 style={{ fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Gift size={18} style={{ color: 'var(--accent-success)' }} />
-            Milestones
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, overflowY: 'auto' }}>
+      {/* Milestones & Drive Logs */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+        
+        {/* Milestones */}
+        <div>
+          <h2 style={{ font: "700 20px/28px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: '0 0 12px', letterSpacing: '-0.01em' }}>Milestones</h2>
+          <div className="macos-card" style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '16px', padding: '24px', minHeight: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {upcomingMilestones.length === 0 ? (
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'center', display: 'block', padding: '30px 0' }}>
-                No milestones in the next 30 days.
-              </span>
+              <p style={{ font: "400 14px/20px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>No milestones</p>
             ) : (
-              upcomingMilestones.map((milestone, idx) => (
-                <div key={idx} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '10px',
-                  borderRadius: '14px',
-                  background: 'rgba(0, 0, 0, 0.02)',
-                  border: '1px solid rgba(0,0,0,0.02)'
-                }}>
-                  {milestone.type === 'birthday' ? (
-                    <div style={{
-                      width: '30px',
-                      height: '30px',
-                      borderRadius: '50%',
-                      background: 'rgba(239, 68, 68, 0.08)',
-                      color: 'var(--accent-danger)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <Gift size={14} />
+              <div style={{ width: '100%' }}>
+                {upcomingMilestones.map((milestone, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: idx !== upcomingMilestones.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
+                    <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '8px', flexShrink: 0 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
+                        {milestone.type === 'birthday' ? (
+                          <><rect x="3" y="8" width="18" height="4" rx="1" ry="1"></rect><path d="M12 8v13"></path><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"></path></>
+                        ) : (
+                          <><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></>
+                        )}
+                      </svg>
                     </div>
-                  ) : (
-                    <div style={{
-                      width: '30px',
-                      height: '30px',
-                      borderRadius: '50%',
-                      background: 'rgba(245, 158, 11, 0.08)',
-                      color: 'var(--accent-warning)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <Award size={14} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ font: "500 13px/20px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{milestone.empName}</p>
+                      <p style={{ font: "400 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '2px 0 0' }}>{milestone.label}</p>
                     </div>
-                  )}
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                      {milestone.empName}
-                    </span>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 600, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                      {milestone.label}
-                    </span>
+                    <span style={{ font: "500 10px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--md-bw-on-surface-variant)', flexShrink: 0 }}>{milestone.daysRemaining === 0 ? 'Today' : `${milestone.daysRemaining}d`}</span>
                   </div>
-
-                  <span style={{
-                    fontSize: '0.65rem',
-                    padding: '2px 6px',
-                    borderRadius: '6px',
-                    background: milestone.daysRemaining === 0 ? 'var(--accent-primary-glow)' : 'rgba(0, 0, 0, 0.04)',
-                    color: milestone.daysRemaining === 0 ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                    fontWeight: 700,
-                    flexShrink: 0
-                  }}>
-                    {milestone.daysRemaining === 0 ? 'Today' : `${milestone.daysRemaining}d`}
-                  </span>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
         </div>
 
-        {/* Sync Logs */}
-        <div className="glass-card bento-item-logs" style={{ padding: '28px', display: 'flex', flexDirection: 'column' }}>
-          <h3 style={{ fontSize: '1.15rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Activity size={18} style={{ color: 'var(--accent-success)' }} />
-            Drive Logs
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, justifyContent: 'center' }}>
-            {syncLogs.map(log => (
-              <div key={log.id} style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '4px',
-                padding: '12px',
-                borderRadius: '14px',
-                borderLeft: '4px solid var(--accent-primary)',
-                background: 'rgba(0, 0, 0, 0.02)'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {log.action.toLowerCase().includes('error') || log.action.toLowerCase().includes('failed') ? '❌' : (log.action.toLowerCase().includes('warn') ? '⚠️' : '✅')} 
-                    {log.action}
-                  </span>
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 500 }}>{log.timestamp}</span>
+        {/* Drive Logs */}
+        <div>
+          <h2 style={{ font: "700 20px/28px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: '0 0 12px', letterSpacing: '-0.01em' }}>Drive Logs</h2>
+          <div className="macos-card" style={{ background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '16px', padding: '12px 16px' }}>
+            {syncLogs.map((log, idx) => (
+              <div key={log.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: idx !== syncLogs.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
+                <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '8px', flexShrink: 0 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
+                  </svg>
                 </div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{log.details}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ font: "500 13px/20px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{log.action}</p>
+                  <p style={{ font: "400 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '2px 0 0' }}>{log.details}</p>
+                </div>
+                <span style={{ font: "500 10px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--md-bw-on-surface-variant)', flexShrink: 0 }}>{log.status === 'success' ? 'Synced' : (log.status === 'error' ? 'Failed' : 'Pending')}</span>
               </div>
             ))}
-            
-            <button 
-              className="btn btn-outline" 
-              onClick={() => setCurrentView && setCurrentView('drive')}
-              style={{ marginTop: 'auto', alignSelf: 'center', fontSize: '0.8rem', padding: '8px 16px', borderRadius: '20px' }}
-            >
-              View All Logs
-            </button>
-          </div>
-        </div>
-
-        {/* Google Ads Placement */}
-        <div className="bento-item-ad">
-          <AdSlot type="horizontal" />
-        </div>
-      </div>
-
-      {/* Directory File Map */}
-      <div className="glass-card" style={{ padding: '28px' }}>
-        <h3 style={{ fontSize: '1.15rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FileText size={18} style={{ color: 'var(--accent-primary)' }} />
-          Google Drive Schema Mapping
-        </h3>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: '16px'
-        }}>
-          <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(0,0,0,0.01)', border: '1px solid rgba(0,0,0,0.04)' }}>
-            <h4 style={{ fontSize: '0.9rem', color: 'var(--accent-primary)', marginBottom: '8px', fontWeight: 700 }}>/HR-Pulse-DB/employees.json</h4>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              Contains master employee directory data, contact records, department structure, and employment states.
-            </p>
-          </div>
-          <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(0,0,0,0.01)', border: '1px solid rgba(0,0,0,0.04)' }}>
-            <h4 style={{ fontSize: '0.9rem', color: 'var(--accent-primary)', marginBottom: '8px', fontWeight: 700 }}>/HR-Pulse-DB/attendance.json</h4>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              Tracks daily check-in times, clock-out states, device keys, and status entries.
-            </p>
-          </div>
-          <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(0,0,0,0.01)', border: '1px solid rgba(0,0,0,0.04)' }}>
-            <h4 style={{ fontSize: '0.9rem', color: 'var(--accent-primary)', marginBottom: '8px', fontWeight: 700 }}>/HR-Pulse-DB/leave_requests.json</h4>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              Manages leave applications, approval history, supervisor signatures, and remaining balance.
-            </p>
           </div>
         </div>
       </div>

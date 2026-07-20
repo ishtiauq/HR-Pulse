@@ -167,7 +167,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
               style={{
                 padding: '8px 4px',
                 borderRadius: 'var(--radius-sm)',
-                background: isSelected ? 'var(--accent-primary)' : isToday ? 'var(--accent-primary-glow)' : 'transparent',
+                background: isSelected ? 'var(--accent-primary)' : isToday ? 'var(--accent-primary-dim)' : 'transparent',
                 color: isSelected ? '#fff' : 'var(--text-primary)',
                 cursor: 'pointer',
                 minHeight: '64px',
@@ -175,11 +175,11 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                 flexDirection: 'column',
                 alignItems: 'center',
                 gap: '4px',
-                transition: 'all var(--transition-fast)',
+                transition: 'background-color var(--transition-fast), color var(--transition-fast)',
                 border: isToday && !isSelected ? '1px solid var(--accent-primary)' : 'none',
               }}
               onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-tertiary)' }}
-              onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = isToday ? 'var(--accent-primary-glow)' : 'transparent' }}
+              onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = isToday ? 'var(--accent-primary-dim)' : 'transparent' }}
             >
               <span style={{ fontSize: '0.85rem', fontWeight: isToday ? 800 : 600 }}>{day}</span>
               {dayEvents.length > 0 && (
