@@ -444,26 +444,35 @@ Thank you for your service!
       
       {/* Header and Month Selector */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 className="page-title">
-          <CreditCard size={28} className="page-title-icon" />
-          Payroll Administration
+        <h1 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>
+          Payroll
         </h1>
 
-        {/* Month Selector dropdown */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Payroll Month:</span>
+        {/* M3 Outlined Dropdown */}
+        <div style={{ position: 'relative', width: '200px' }}>
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
+            className="m3-select"
             style={{
-              padding: '10px 16px', borderRadius: '8px', border: '1px solid var(--border-color)',
-              background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.9rem', outline: 'none', cursor: 'pointer'
+              width: '100%',
+              padding: '16px 14px',
+              borderRadius: '4px',
+              border: '1px solid var(--md-bw-outline)',
+              background: 'transparent',
+              color: 'var(--md-bw-on-surface)',
+              fontSize: '16px',
+              outline: 'none',
+              cursor: 'pointer',
+              appearance: 'none'
             }}
           >
             {monthOptions.map(m => (
               <option key={m.value} value={m.value}>{m.label}</option>
             ))}
           </select>
+          <span style={{ position: 'absolute', top: '8px', left: '12px', fontSize: '12px', color: 'var(--md-bw-on-surface-variant)', background: 'var(--md-bw-background)', padding: '0 4px', pointerEvents: 'none' }}>Month</span>
+          <span style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }}>▼</span>
         </div>
       </div>
 
@@ -488,91 +497,43 @@ Thank you for your service!
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: '24px'
+            gap: '16px'
           }}>
             {/* Total Cost Card */}
-            <div className="glass-card" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                background: 'var(--accent-primary)',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <CreditCard size={22} />
-              </div>
-              <div>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Total Payout Budget</span>
-                <h3 style={{ fontSize: '1.75rem', marginTop: '4px' }}>{currency}{totalCost.toLocaleString()}</h3>
-              </div>
+            <div className="m3-card m3-card-elevated" style={{ padding: '16px', display: 'flex', flexDirection: 'column' }}>
+              <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)', marginBottom: '8px' }}>Total Payout Budget</span>
+              <h3 className="display-small" style={{ margin: 0, fontVariantNumeric: 'tabular-nums', color: 'var(--md-bw-on-surface)' }}>{currency}{totalCost.toLocaleString()}</h3>
             </div>
 
             {/* Average Salary Card */}
-            <div className="glass-card" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                background: 'var(--accent-info)',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <CreditCard size={22} />
-              </div>
-              <div>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>Average Salary</span>
-                <h3 style={{ fontSize: '1.75rem', marginTop: '4px' }}>{currency}{averageSalary.toLocaleString()}</h3>
-              </div>
+            <div className="m3-card m3-card-elevated" style={{ padding: '16px', display: 'flex', flexDirection: 'column' }}>
+              <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)', marginBottom: '8px' }}>Average Salary</span>
+              <h3 className="display-small" style={{ margin: 0, fontVariantNumeric: 'tabular-nums', color: 'var(--md-bw-on-surface)' }}>{currency}{averageSalary.toLocaleString()}</h3>
             </div>
 
-            {/* Progress Card (High-Contrast Lime Accent themed) */}
-            <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', border: '1px solid var(--accent-primary)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>Disbursement Flow</span>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                  {paidCount} of {totalCount} Paid
-                </span>
-              </div>
-              
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                {Array.from({ length: Math.min(totalCount, 20) }).map((_, i) => {
-                  const isFilled = i < Math.floor((paidCount / totalCount) * Math.min(totalCount, 20))
-                  return (
-                    <div 
-                      key={i} 
-                      style={{ 
-                        width: '8px', 
-                        height: '8px', 
-                        borderRadius: '50%', 
-                        background: isFilled ? 'var(--accent-primary)' : 'var(--bg-primary)',
-                        border: isFilled ? 'none' : '1px solid var(--border-color)',
-                        transition: 'background-color 0.3s ease'
-                      }} 
-                    />
-                  )
-                })}
-                {totalCount > 20 && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: '4px' }}>+{totalCount - 20}</span>}
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{progressPercent}% monthly quota complete</span>
+            {/* Progress Card */}
+            <div className="m3-card m3-card-elevated" style={{ padding: '16px', display: 'flex', flexDirection: 'column' }}>
+              <span className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)', marginBottom: '8px' }}>Disbursement Flow</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{paidCount} of {totalCount} Paid</span>
                 {paidCount < totalCount && (
                   <button 
                     onClick={handlePayAllPending} 
                     disabled={processingId === 'bulk-all' || simulatedRole === 'HR Manager'}
-                    className="btn btn-primary" 
-                    style={{ padding: '4px 10px', fontSize: '0.75rem', cursor: simulatedRole === 'HR Manager' ? 'not-allowed' : 'pointer' }}
+                    className="btn btn-text" 
+                    style={{ padding: '0', height: 'auto', minHeight: '0', fontSize: '12px' }}
                   >
                     {processingId === 'bulk-all' ? 'Processing...' : 'Pay All Pending'}
                   </button>
                 )}
+              </div>
+              <div style={{ width: '100%', height: '4px', backgroundColor: 'var(--md-bw-outline)', borderRadius: '2px', overflow: 'hidden' }}>
+                <div style={{ 
+                  height: '100%', 
+                  backgroundColor: 'var(--md-bw-primary)', 
+                  width: `${progressPercent}%`,
+                  transition: 'width 0.3s ease'
+                }} />
               </div>
             </div>
           </div>
@@ -583,46 +544,44 @@ Thank you for your service!
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
-            gap: '16px'
+            gap: '16px',
+            marginTop: '16px'
           }}>
             {/* Search */}
-            <div style={{ position: 'relative', flex: '1', maxWidth: '350px' }}>
+            <div className="search-bar" style={{ flex: '1', maxWidth: '350px' }}>
+              <div className="tf-icon-leading">
+                <Search size={24} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+              </div>
               <input
                 type="text"
                 placeholder="Search employee or role..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 14px 10px 38px',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border-color)',
-                  background: 'var(--bg-secondary)',
-                  color: 'var(--text-primary)',
-                  fontSize: '0.9rem',
-                  outline: 'none'
-                }}
               />
-              <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             </div>
 
-            {/* Status Filters */}
-            <div style={{ display: 'flex', gap: '8px' }}>
+            {/* Segmented Buttons */}
+            <div style={{ display: 'flex', border: '1px solid var(--md-bw-outline)', borderRadius: '20px', overflow: 'hidden' }}>
               {['All', 'Paid', 'Pending'].map(status => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
                   style={{
                     padding: '8px 16px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid transparent',
-                    background: statusFilter === status ? 'var(--bg-tertiary)' : 'transparent',
-                    color: statusFilter === status ? 'var(--text-active-tab)' : 'var(--text-secondary)',
+                    border: 'none',
+                    borderRight: status !== 'Pending' ? '1px solid var(--md-bw-outline)' : 'none',
+                    background: statusFilter === status ? 'var(--md-bw-secondary-container)' : 'var(--md-bw-surface)',
+                    color: statusFilter === status ? 'var(--md-bw-on-secondary-container)' : 'var(--md-bw-on-surface)',
                     cursor: 'pointer',
-                    fontWeight: 700,
-                    fontSize: '0.85rem'
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    outline: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
                   }}
                 >
+                  {statusFilter === status && <CheckSquare size={16} />}
                   {status}
                 </button>
               ))}
@@ -633,10 +592,9 @@ Thank you for your service!
           {selectedRows.length > 0 && (
             <div style={{
               position: 'sticky', top: '10px', zIndex: 50,
-              background: 'var(--accent-primary)', color: '#ffffff',
+              background: 'var(--md-bw-surface-variant)', color: 'var(--md-bw-on-surface-variant)',
               padding: '12px 24px', borderRadius: '12px',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              boxShadow: '0 12px 30px rgba(37, 99, 235, 0.3)',
               marginBottom: '16px',
               animation: 'slideDownFade 0.2s ease-out'
             }}>
@@ -644,12 +602,17 @@ Thank you for your service!
                 <CheckSquare size={18} />
                 <span>{selectedRows.length} employee{selectedRows.length > 1 ? 's' : ''} selected</span>
               </div>
-              <div style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <button 
+                  onClick={() => setSelectedRows([])} 
+                  className="btn btn-text" 
+                >
+                  Cancel
+                </button>
                 <button 
                   onClick={handleBulkExecute} 
                   disabled={processingId === 'bulk-selected' || simulatedRole === 'HR Manager'}
-                  className="btn" 
-                  style={{ background: '#ffffff', color: 'var(--accent-primary)', padding: '6px 16px', fontSize: '0.85rem', opacity: simulatedRole === 'HR Manager' ? 0.5 : 1, cursor: simulatedRole === 'HR Manager' ? 'not-allowed' : 'pointer' }}
+                  className="btn btn-filled" 
                   title={simulatedRole === 'HR Manager' ? "HR Managers cannot execute payroll" : ""}
                 >
                   {processingId === 'bulk-selected' ? 'Processing...' : 'Execute Selected'}
@@ -660,34 +623,34 @@ Thank you for your service!
 
           {/* Payroll Table */}
           <div 
-            className="glass-card table-scroll-wrapper" 
+            className="table-scroll-wrapper" 
             style={{ padding: '0', maxHeight: '600px', overflowY: 'auto' }}
             onScroll={handleScroll}
           >
             <div style={{ overflowX: 'auto' }}>
-              <table className="table-responsive table-striped" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1050px' }}>
+              <table className="m3-data-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1050px' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg-secondary)' }}>
-                    <th style={{ padding: '16px', width: '50px', background: 'var(--bg-secondary)', zIndex: 11 }}>
+                  <tr>
+                    <th style={{ width: '50px', zIndex: 11 }}>
                       <input 
                         type="checkbox" 
                         checked={selectedRows.length === filteredEntries.length && filteredEntries.length > 0}
                         onChange={toggleSelectAll}
-                        style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
+                        style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--md-bw-primary)' }}
                       />
                     </th>
-                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, background: 'var(--bg-secondary)', zIndex: 11 }}>Employee</th>
-                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Salary Details</th>
-                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Deductions (PF)</th>
-                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Advance Balance</th>
-                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Company Loan</th>
-                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Net Payout</th>
-                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Status</th>
-                    <th style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, textAlign: 'right' }}>Actions</th>
+                    <th style={{ zIndex: 11 }}>Employee</th>
+                    <th>Salary Details</th>
+                    <th>Deductions (PF)</th>
+                    <th>Advance Balance</th>
+                    <th>Company Loan</th>
+                    <th>Net Payout</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {paddingTop > 0 && <tr style={{ height: `${paddingTop}px` }}><td colSpan="9" style={{ padding: 0 }} /></tr>}
+                  {paddingTop > 0 && <tr style={{ height: `${paddingTop}px` }}><td colSpan="9" style={{ padding: 0, border: 'none' }} /></tr>}
                   {visibleEntries.map(entry => {
                   const emp = entry.employee
                   const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
@@ -697,82 +660,75 @@ Thank you for your service!
 
                   return (
                     <tr 
-                      key={entry.employeeId} 
-                      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-tertiary)'; e.currentTarget.querySelectorAll('.sticky-col').forEach(el => el.style.background = 'var(--bg-tertiary)'); }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.querySelectorAll('.sticky-col').forEach(el => el.style.background = 'var(--bg-primary)'); }}
-                      style={{ borderBottom: '1px solid var(--border-color)', transition: 'background var(--transition-fast)' }}
+                      key={entry.employeeId}
+                      className={selectedRows.includes(entry.employeeId) ? 'selected' : ''}
                     >
-                      <td className="sticky-col" style={{ padding: '16px', background: 'var(--bg-primary)', transition: 'background var(--transition-fast)' }}>
+                      <td className="sticky-col">
                         <input 
                           type="checkbox" 
                           checked={selectedRows.includes(entry.employeeId)}
                           onChange={() => toggleRowSelection(entry.employeeId)}
-                          style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--accent-primary)' }}
+                          style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--md-bw-primary)' }}
                         />
                       </td>
-                      <td className="sticky-col" style={{ padding: '16px', background: 'var(--bg-primary)', transition: 'background var(--transition-fast)' }}>
+                      <td className="sticky-col">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <img 
                             src={emp.avatar} 
                             alt={emp.name} 
-                            style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
+                            style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
                           />
                           <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>{emp.name}</span>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{emp.role}</span>
+                            <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{emp.name}</span>
+                            <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{emp.role}</span>
                           </div>
                         </div>
                       </td>
-                      <td style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                      <td>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Gross: {currency}{entry.grossSalary.toLocaleString()}</span>
-                          </div>
-                          <span>Base: {currency}{entry.baseSalary.toLocaleString()}</span>
-                          <span>Allowances: +{currency}{entry.allowance.toLocaleString()}</span>
+                          <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>Gross: {currency}{entry.grossSalary.toLocaleString()}</span>
+                          <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Base: {currency}{entry.baseSalary.toLocaleString()}</span>
                         </div>
                       </td>
-                      <td style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>-{currency}{entry.deductions.toLocaleString()}</td>
+                      <td>
+                        <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>-{currency}{entry.deductions.toLocaleString()}</span>
+                      </td>
                       
                       {/* Advance */}
-                      <td style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span>{currency}{entry.advance}</span>
-                        </div>
+                      <td>
+                        <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{currency}{entry.advance}</span>
                       </td>
 
                       {/* Loan */}
-                      <td style={{ padding: '16px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          {entry.loan.total > 0 ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Inst: {currency}{loanDeduction}</span>
-                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Rem: {currency}{entry.loan.remaining}</span>
-                            </div>
-                          ) : (
-                            <span style={{ color: 'var(--text-muted)' }}>None</span>
-                          )}
-                        </div>
+                      <td>
+                        {entry.loan.total > 0 ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>Inst: {currency}{loanDeduction}</span>
+                            <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Rem: {currency}{entry.loan.remaining}</span>
+                          </div>
+                        ) : (
+                          <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>None</span>
+                        )}
                       </td>
 
                       {/* Net pay */}
-                      <td style={{ padding: '16px', fontSize: '0.9rem', fontWeight: 700, color: isPaid ? 'var(--accent-success)' : 'var(--text-primary)' }}>
-                        {currency}{netPay.toLocaleString()}
+                      <td>
+                        <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{currency}{netPay.toLocaleString()}</span>
                       </td>
 
                       {/* Status */}
-                      <td style={{ padding: '16px' }}>
-                        <span style={{
-                          fontSize: '0.75rem',
-                          fontWeight: 600,
-                          backgroundColor: isPaid ? 'var(--accent-success-glow)' : 'var(--accent-warning-glow)',
-                          color: isPaid ? 'var(--accent-success)' : 'var(--accent-warning)'
+                      <td>
+                        <span className={`m3-chip m3-chip-assist ${isPaid ? 'solid' : 'outlined'}`} style={{ 
+                          height: '24px', padding: '0 8px', fontSize: '11px',
+                          backgroundColor: isPaid ? 'var(--md-bw-on-surface)' : 'transparent',
+                          color: isPaid ? 'var(--md-bw-surface)' : 'var(--md-bw-on-surface-variant)',
+                          border: isPaid ? 'none' : '1px solid var(--md-bw-outline)'
                         }}>
                           {entry.status}
                         </span>
                       </td>
 
-                      <td style={{ padding: '16px', textAlign: 'right' }}>
+                      <td style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
                           {!isPaid && (
                             <>
@@ -780,82 +736,29 @@ Thank you for your service!
                                 onClick={() => openCompensationModal(entry)}
                                 title={simulatedRole === 'HR Manager' ? "HR Managers cannot edit compensation" : "Edit Compensation"}
                                 disabled={simulatedRole === 'HR Manager'}
-                                style={{
-                                  background: 'transparent',
-                                  border: 'none',
-                                  color: 'var(--text-muted)',
-                                  padding: '6px',
-                                  cursor: simulatedRole === 'HR Manager' ? 'not-allowed' : 'pointer',
-                                  borderRadius: '6px',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  transition: 'background-color var(--transition-fast), color var(--transition-fast)',
-                                  opacity: simulatedRole === 'HR Manager' ? 0.5 : 1
-                                }}
-                                onMouseEnter={(e) => { if(simulatedRole !== 'HR Manager') { e.currentTarget.style.background = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--accent-primary)'; } }}
-                                onMouseLeave={(e) => { if(simulatedRole !== 'HR Manager') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; } }}
+                                className="icon-btn"
                               >
-                                <Pencil size={18} />
+                                <Pencil size={18} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
                               </button>
                               
                               <button
                                 onClick={() => handleExecutePayment(entry)}
                                 disabled={isProcessing || simulatedRole === 'HR Manager'}
                                 title={simulatedRole === 'HR Manager' ? "HR Managers cannot execute payroll" : "Execute Payment"}
-                                style={{
-                                  padding: '6px 12px',
-                                  fontSize: '0.8rem',
-                                  background: 'transparent',
-                                  color: 'var(--accent-success)',
-                                  border: '1px solid var(--accent-success)',
-                                  borderRadius: '6px',
-                                  cursor: isProcessing ? 'not-allowed' : 'pointer',
-                                  fontWeight: 600,
-                                  transition: 'background-color 0.2s, color 0.2s',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '6px'
-                                }}
-                                onMouseEnter={(e) => {
-                                  if (!isProcessing) {
-                                    e.currentTarget.style.background = 'var(--accent-success)';
-                                    e.currentTarget.style.color = '#ffffff';
-                                  }
-                                }}
-                                onMouseLeave={(e) => {
-                                  if (!isProcessing) {
-                                    e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = 'var(--accent-success)';
-                                  }
-                                }}
+                                className="btn btn-tonal"
+                                style={{ padding: '0 16px', height: '32px', fontSize: '12px' }}
                               >
-                                {isProcessing ? <div className="spinner" style={{ width: '14px', height: '14px', borderTopColor: 'currentColor' }} /> : null}
-                                Execute
+                                {isProcessing ? '...' : 'Execute'}
                               </button>
                             </>
                           )}
                           {isPaid && (
                             <button
                               onClick={() => generatePayslipReceipt(entry, entry.paymentDate)}
-                              style={{
-                                padding: '6px 12px',
-                                fontSize: '0.8rem',
-                                background: 'transparent',
-                                color: 'var(--text-secondary)',
-                                border: 'none',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                fontWeight: 500,
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                transition: 'background-color 0.2s, color 0.2s'
-                              }}
-                              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
-                              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                              className="btn btn-text"
+                              style={{ padding: '0 16px', height: '32px', fontSize: '12px' }}
                             >
-                              <Download size={14} /> Payslip
+                              <Download size={14} style={{ marginRight: '4px' }} /> Payslip
                             </button>
                           )}
                         </div>
@@ -863,7 +766,7 @@ Thank you for your service!
                     </tr>
                   )
                 })}
-                {paddingBottom > 0 && <tr style={{ height: `${paddingBottom}px` }}><td colSpan="9" style={{ padding: 0 }} /></tr>}
+                {paddingBottom > 0 && <tr style={{ height: `${paddingBottom}px` }}><td colSpan="9" style={{ padding: 0, border: 'none' }} /></tr>}
               </tbody>
             </table>
             </div>

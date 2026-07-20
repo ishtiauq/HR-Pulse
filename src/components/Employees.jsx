@@ -256,13 +256,12 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 className="page-title">
-          <Users size={28} className="page-title-icon" />
+        <h1 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>
           Employees
         </h1>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" onClick={() => document.getElementById('csv-file-input').click()}>
-            <FileSpreadsheet size={16} />
+          <button className="btn btn-outlined" onClick={() => document.getElementById('csv-file-input').click()}>
+            <FileSpreadsheet size={18} className="btn-icon-start" style={{ marginRight: '8px' }} />
             Import CSV
           </button>
           <input 
@@ -311,7 +310,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               }
             }}
           />
-          <button className="btn btn-secondary" onClick={() => {
+          <button className="btn btn-outlined" onClick={() => {
             const mockEmps = [];
             for (let i = 1; i <= 100; i++) {
               const id = `emp-mock-${1000 + i}`;
@@ -334,12 +333,30 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
             });
             addToast('Successfully generated 100 mock employees.', 'success');
           }}>
-            <Cpu size={16} />
-            Generate 100 Mock Employees
+            <Cpu size={18} className="btn-icon-start" style={{ marginRight: '8px' }} />
+            Mock
           </button>
-          <button className="btn btn-primary" onClick={handleOpenAddForm}>
-            <Plus size={16} />
-            Add Employee
+          <button 
+            className="btn btn-filled" 
+            onClick={handleOpenAddForm}
+            style={{
+              position: 'fixed',
+              bottom: '24px',
+              right: '24px',
+              width: '56px',
+              height: '56px',
+              borderRadius: '16px',
+              backgroundColor: 'var(--md-bw-primary-container)',
+              color: 'var(--md-bw-on-primary-container)',
+              zIndex: 90,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: 'var(--md-shadow-level3)',
+              padding: 0
+            }}
+          >
+            <Plus size={24} />
           </button>
         </div>
       </div>
@@ -353,38 +370,16 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
         gap: '16px'
       }}>
         {/* Search */}
-        <div style={{
-          position: 'relative',
-          flex: '1',
-          maxWidth: '400px'
-        }}>
+        <div className="search-bar" style={{ flex: '1', maxWidth: '400px' }}>
+          <div className="tf-icon-leading">
+            <Search size={24} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+          </div>
           <input
             type="text"
             placeholder="Search by name, role, email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '14px 16px 14px 46px',
-              borderRadius: '30px',
-              border: 'none',
-              background: 'var(--bg-secondary)',
-              color: 'var(--text-primary)',
-              fontSize: '0.95rem',
-              outline: 'none',
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.03)',
-              transition: 'box-shadow var(--transition-fast)'
-            }}
-            onFocus={(e) => e.target.style.boxShadow = '0 8px 32px rgba(232, 93, 74, 0.12)'}
-            onBlur={(e) => e.target.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.03)'}
           />
-          <Search size={18} style={{
-            position: 'absolute',
-            left: '18px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            color: 'var(--text-muted)'
-          }} />
         </div>
 
         {/* Dept Filters */}
@@ -393,27 +388,9 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
             <button
               key={dept}
               onClick={() => setDeptFilter(dept)}
-              style={{
-                padding: '8px 18px',
-                borderRadius: '24px',
-                border: 'none',
-                background: deptFilter === dept ? 'var(--accent-primary)' : 'var(--bg-secondary)',
-                color: deptFilter === dept ? '#ffffff' : 'var(--text-secondary)',
-                boxShadow: deptFilter === dept ? '0 2px 8px rgba(232, 93, 74, 0.2)' : 'none',
-                cursor: 'pointer',
-                fontWeight: 600,
-                fontSize: '0.85rem',
-                transition: 'background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast)'
-              }}
-                onMouseEnter={(e) => {
-                  if (deptFilter !== dept) {
-                    e.currentTarget.style.background = 'var(--bg-tertiary)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (deptFilter !== dept) e.currentTarget.style.background = 'var(--bg-secondary)'
-              }}
+              className={`m3-chip m3-chip-filter ${deptFilter === dept ? 'selected' : ''}`}
             >
+              {deptFilter === dept && <Check size={18} style={{ marginRight: '8px' }} />}
               {dept}
             </button>
           ))}
@@ -422,8 +399,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
       {/* Pending Profile Updates Queue */}
       {pendingProfileEdits && pendingProfileEdits.length > 0 && (
-        <div className="glass-card" style={{ padding: '24px', borderLeft: '4px solid var(--accent-warning)', background: 'linear-gradient(to right, rgba(234, 179, 8, 0.05), transparent)' }}>
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px 0', fontSize: '1.2rem', color: 'var(--accent-warning)' }}>
+        <div className="m3-card m3-card-outlined" style={{ padding: '24px' }}>
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px 0', fontSize: '1.2rem' }}>
             <AlertCircle size={20} />
             Pending Profile Update Requests ({pendingProfileEdits.length})
           </h2>
@@ -462,214 +439,60 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
       {/* Directory Grid */}
       {filteredEmployees.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '64px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#9ca3af', marginBottom: '16px' }}>
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            <path d="M11 8v6"></path>
-            <path d="M8 11h6"></path>
-          </svg>
-          <h3 style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', marginBottom: '16px', fontWeight: 600 }}>No employees found in this department</h3>
-          <button onClick={() => {setSearchTerm(''); setDeptFilter('All')}} className="btn btn-secondary">Clear Filters</button>
+        <div style={{ textAlign: 'center', padding: '48px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Users size={120} style={{ color: 'var(--md-bw-on-surface-variant)', opacity: 0.5, marginBottom: '24px' }} />
+          <h3 className="headline-small" style={{ color: 'var(--md-bw-on-surface-variant)', marginBottom: '24px' }}>No employees found</h3>
+          <button onClick={() => {setSearchTerm(''); setDeptFilter('All')}} className="btn btn-filled">Clear Filters</button>
         </div>
       ) : (
-      <div className="employee-grid">
+      <div className="employee-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
         {filteredEmployees.map(emp => (
-          <div key={emp.id} className="glass-card animate-fade-in" style={{
-            padding: '16px',
-            display: 'flex',
-            flexDirection: 'column',
-            position: 'relative',
-            cursor: 'pointer'
-          }}
-          onClick={() => setViewingEmployee(emp)}>
-            {/* Profile Row */}
+          <div key={emp.id} className="m3-card m3-card-outlined" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px', cursor: 'pointer' }} onClick={() => setViewingEmployee(emp)}>
+            
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              {/* Squarcle Large Preview (72px) with Reposition offsets */}
               <div style={{
-                width: '72px',
-                height: '72px',
-                borderRadius: '18px', // Premium Squarcle shape
-                overflow: 'hidden',
-                position: 'relative',
-                border: '2px solid rgba(0, 0, 0, 0.05)',
-                flexShrink: 0,
-                background: (!emp.avatar || imageErrors[emp.id]) ? getAvatarFallback(emp.name).color : '#f3f4f6',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '1.4rem'
+                width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', position: 'relative',
+                border: '1px solid var(--md-bw-outline)', flexShrink: 0,
+                background: (!emp.avatar || imageErrors[emp.id]) ? 'var(--md-bw-surface-variant)' : '#f3f4f6',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'var(--md-bw-on-surface-variant)', fontWeight: 700, fontSize: '1.4rem'
               }}>
                 {(!emp.avatar || imageErrors[emp.id]) ? (
                   <span>{getAvatarFallback(emp.name).initials}</span>
                 ) : (
-                  <img
-                    src={emp.avatar}
-                    alt={emp.name}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
+                  <img src={emp.avatar} alt={emp.name} style={{
+                      width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0,
                       transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`,
-                      transformOrigin: 'center',
-                      userSelect: 'none',
-                      pointerEvents: 'none'
+                      transformOrigin: 'center', userSelect: 'none', pointerEvents: 'none'
                     }}
                     onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))}
                   />
                 )}
               </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <h4 style={{ fontSize: '1.05rem', fontWeight: 700, lineHeight: 1.2 }}>{emp.name}</h4>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>{emp.role}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>{emp.id}</span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>•</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <div style={{
-                      width: '6px',
-                      height: '6px',
-                      borderRadius: '50%',
-                      backgroundColor: emp.status === 'Active' ? 'var(--accent-success)' : 'var(--accent-warning)',
-                      boxShadow: emp.status === 'Active' ? '0 0 6px var(--accent-success)' : '0 0 6px var(--accent-warning)'
-                    }} />
-                    <span style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      color: emp.status === 'Active' ? 'var(--accent-success)' : 'var(--accent-warning)'
-                    }}>{emp.status}</span>
-                  </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>{emp.name}</h4>
+                <span className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{emp.role}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                  <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{emp.id}</span>
+                  <span className={`m3-chip m3-chip-assist ${emp.status === 'Active' ? 'solid' : 'outlined'}`} style={{ 
+                    height: '24px', padding: '0 8px', fontSize: '11px',
+                    backgroundColor: emp.status === 'Active' ? 'var(--md-bw-on-surface)' : 'transparent',
+                    color: emp.status === 'Active' ? 'var(--md-bw-surface)' : 'var(--md-bw-on-surface-variant)',
+                    border: emp.status === 'Active' ? 'none' : '1px solid var(--md-bw-outline)'
+                  }}>{emp.status}</span>
                 </div>
               </div>
             </div>
 
-            {/* Details (Toggled/Expanded on Hover via CSS Class) */}
-            <div className="employee-card-details">
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                <strong>Dept:</strong> {emp.department}
-              </span>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', wordBreak: 'break-all' }}>
-                <strong>Email:</strong> {emp.email}
-              </span>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                <strong>DOB:</strong> {emp.dob ? formatDate(emp.dob) : 'Not set'}
-              </span>
-              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                <strong>Joined:</strong> {emp.joiningDate ? formatDate(emp.joiningDate) : 'Not set'}
-              </span>
-              
-              {/* Document Badges */}
-              {(emp.cvFileName || emp.nidFileName) && (
-                <div style={{ display: 'flex', gap: '6px', marginTop: '4px', flexWrap: 'wrap' }}>
-                  {emp.cvFileName && (
-                    <span 
-                      title={emp.cvFileName}
-                      style={{ 
-                        fontSize: '0.7rem', 
-                        padding: '2px 8px', 
-                        borderRadius: '6px', 
-                        background: 'rgba(0, 0, 0, 0.03)', 
-                        border: '1px solid var(--border-color)',
-                        color: 'var(--text-secondary)',
-                        fontWeight: 700,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}
-                    >
-                      📄 CV
-                    </span>
-                  )}
-                  {emp.nidFileName && (
-                    <span 
-                      title={emp.nidFileName}
-                      style={{ 
-                        fontSize: '0.7rem', 
-                        padding: '2px 8px', 
-                        borderRadius: '6px', 
-                        background: 'rgba(0, 0, 0, 0.03)', 
-                        border: '1px solid var(--border-color)',
-                        color: 'var(--text-secondary)',
-                        fontWeight: 700,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}
-                    >
-                      🪪 NID/Pass
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Action Buttons Row */}
-              <div style={{ display: 'flex', gap: '8px', marginTop: '8px', borderTop: '1px solid rgba(0, 0, 0, 0.04)', paddingTop: '10px' }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setEditingEmployee(emp)
-                    setNewEmpId(emp.id)
-                    setNewName(emp.name)
-                    setNewRole(emp.role)
-                    setNewDept(emp.department)
-                    setNewEmail(emp.email)
-                    setNewStatus(emp.status)
-                    setNewDob(emp.dob || '')
-                    setNewJoiningDate(emp.joiningDate || '')
-                    setNewCvFileName(emp.cvFileName || '')
-                    setNewNidFileName(emp.nidFileName || '')
-                    setNewAvatar(emp.avatar || '')
-                    setPhotoX(emp.photoX || 0)
-                    setPhotoY(emp.photoY || 0)
-                    setPhotoZoom(emp.photoZoom || 1)
-                    setIsCustomDept(false)
-                    setCustomDept('')
-                    setShowAddForm(true)
-                  }}
-                  className="btn btn-secondary"
-                  style={{ 
-                    flex: 1, 
-                    padding: '6px 10px', 
-                    fontSize: '0.75rem', 
-                    justifyContent: 'center',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
-                    gap: '4px',
-                    height: '30px'
-                  }}
-                >
-                  <Edit size={12} />
-                  Edit
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleDeleteEmployee(emp.id, emp.name)
-                  }}
-                  className="btn btn-secondary"
-                  style={{ 
-                    flex: 1, 
-                    padding: '6px 10px', 
-                    fontSize: '0.75rem', 
-                    justifyContent: 'center',
-                    borderRadius: '8px',
-                    border: '1px solid rgba(239, 68, 68, 0.1)',
-                    background: 'rgba(239, 68, 68, 0.04)',
-                    color: 'var(--accent-danger)',
-                    gap: '4px',
-                    height: '30px'
-                  }}
-                >
-                  <Trash2 size={12} />
-                  Delete
-                </button>
-              </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid var(--md-bw-outline)' }}>
+              <button className="icon-btn" onClick={(e) => {
+                e.stopPropagation(); setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
+              }}>
+                <Edit size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+              </button>
+              <button className="icon-btn" onClick={(e) => { e.stopPropagation(); handleDeleteEmployee(emp.id, emp.name); }}>
+                <Trash2 size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+              </button>
             </div>
           </div>
         ))}
@@ -678,78 +501,82 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
       {/* Employee Detail Modal */}
       {viewingEmployee && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.3)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}
-        onClick={() => setViewingEmployee(null)}
-        >
-          <style>{`
-            @keyframes modalFadeIn {
-              from { transform: scale(0.95); opacity: 0; }
-              to { transform: scale(1); opacity: 1; }
-            }
-          `}</style>
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              maxWidth: '450px',
-              padding: '32px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '24px',
-              background: 'var(--bg-primary)',
-              borderRadius: '24px',
-              boxShadow: '0 24px 48px rgba(0,0,0,0.1)',
-              animation: 'modalFadeIn 200ms ease-out forwards'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-               <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                 <div style={{
-                    width: '64px',
-                    height: '64px',
-                    borderRadius: '16px',
-                    overflow: 'hidden',
-                    background: (!viewingEmployee.avatar || imageErrors[viewingEmployee.id]) ? getAvatarFallback(viewingEmployee.name).color : '#f3f4f6',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontWeight: 700,
-                    fontSize: '1.2rem',
-                    position: 'relative'
-                 }}>
-                   {(!viewingEmployee.avatar || imageErrors[viewingEmployee.id]) ? (
-                     <span>{getAvatarFallback(viewingEmployee.name).initials}</span>
-                   ) : (
-                     <img src={viewingEmployee.avatar} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
-                   )}
-                 </div>
-                 <div>
-                   <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{viewingEmployee.name}</h3>
-                   <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{viewingEmployee.role}</span>
-                 </div>
-               </div>
-               <button onClick={() => setViewingEmployee(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={20}/></button>
+        <div className="dialog-scrim" onClick={() => setViewingEmployee(null)}>
+          <div className="m3-dialog" onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '24px' }}>
+              <div style={{
+                width: '96px', height: '96px', borderRadius: '50%', overflow: 'hidden',
+                border: '2px solid var(--md-bw-primary)', marginBottom: '16px',
+                background: (!viewingEmployee.avatar || imageErrors[viewingEmployee.id]) ? 'var(--md-bw-surface-variant)' : '#f3f4f6',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'var(--md-bw-on-surface-variant)', fontWeight: 700, fontSize: '1.6rem', position: 'relative'
+              }}>
+                {(!viewingEmployee.avatar || imageErrors[viewingEmployee.id]) ? (
+                  <span>{getAvatarFallback(viewingEmployee.name).initials}</span>
+                ) : (
+                  <img src={viewingEmployee.avatar} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, transform: `translate(${viewingEmployee.photoX || 0}px, ${viewingEmployee.photoY || 0}px) scale(${viewingEmployee.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
+                )}
+              </div>
+              <h3 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)', textAlign: 'center' }}>{viewingEmployee.name}</h3>
+              <span className="body-large" style={{ color: 'var(--md-bw-on-surface-variant)', textAlign: 'center' }}>{viewingEmployee.role}</span>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px' }}>
-              <div><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.id}</span></div>
-              <div><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Status</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.status}</span></div>
-              <div><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Department</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.department}</span></div>
-              <div style={{ wordBreak: 'break-all', gridColumn: '1 / -1' }}><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Email</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.email}</span></div>
-              <div><strong style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Joined</strong><br/><span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{viewingEmployee.joiningDate ? formatDate(viewingEmployee.joiningDate) : 'N/A'}</span></div>
+            <ul className="m3-list" style={{ marginBottom: '24px' }}>
+              <li className="list-item two-line" style={{ padding: '0 16px' }}>
+                <div className="list-content">
+                  <span className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)', textTransform: 'uppercase' }}>ID</span>
+                  <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.id}</span>
+                </div>
+              </li>
+              <li className="list-item two-line" style={{ padding: '0 16px' }}>
+                <div className="list-content">
+                  <span className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)', textTransform: 'uppercase' }}>Status</span>
+                  <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.status}</span>
+                </div>
+              </li>
+              <li className="list-item two-line" style={{ padding: '0 16px' }}>
+                <div className="list-content">
+                  <span className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)', textTransform: 'uppercase' }}>Department</span>
+                  <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.department}</span>
+                </div>
+              </li>
+              <li className="list-item two-line" style={{ padding: '0 16px' }}>
+                <div className="list-content">
+                  <span className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)', textTransform: 'uppercase' }}>Email</span>
+                  <span className="body-large" style={{ color: 'var(--md-bw-on-surface)', wordBreak: 'break-all' }}>{viewingEmployee.email}</span>
+                </div>
+              </li>
+              <li className="list-item two-line" style={{ padding: '0 16px' }}>
+                <div className="list-content">
+                  <span className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)', textTransform: 'uppercase' }}>Joined</span>
+                  <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.joiningDate ? formatDate(viewingEmployee.joiningDate) : 'N/A'}</span>
+                </div>
+              </li>
+            </ul>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '16px' }}>
+              <button className="btn btn-text" onClick={() => setViewingEmployee(null)}>Close</button>
+              <button className="btn btn-tonal" onClick={() => {
+                setViewingEmployee(null);
+                setEditingEmployee(viewingEmployee);
+                setNewEmpId(viewingEmployee.id);
+                setNewName(viewingEmployee.name);
+                setNewRole(viewingEmployee.role);
+                setNewDept(viewingEmployee.department);
+                setNewEmail(viewingEmployee.email);
+                setNewStatus(viewingEmployee.status);
+                setNewDob(viewingEmployee.dob || '');
+                setNewJoiningDate(viewingEmployee.joiningDate || '');
+                setNewCvFileName(viewingEmployee.cvFileName || '');
+                setNewNidFileName(viewingEmployee.nidFileName || '');
+                setNewAvatar(viewingEmployee.avatar || '');
+                setPhotoX(viewingEmployee.photoX || 0);
+                setPhotoY(viewingEmployee.photoY || 0);
+                setPhotoZoom(viewingEmployee.photoZoom || 1);
+                setIsCustomDept(false);
+                setCustomDept('');
+                setShowAddForm(true);
+              }}>Edit Profile</button>
             </div>
           </div>
         </div>

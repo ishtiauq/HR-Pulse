@@ -1500,45 +1500,34 @@ export default function App() {
   const unreadCount = notifications.filter(n => !n.read).length
 
   return (
-    <div className="app-container">
-      {/* M3 TopAppBar from actify */}
-      <TopAppBar
-        title="HR Pulse"
-        size="default"
-        onClick={() => window.innerWidth < 769 && setMobileMenuOpen(prev => !prev)}
-      >
-        <IconButton
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsDarkMode(prev => !prev);
-          }}
-          aria-label="Toggle theme"
-        >
-          {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-        </IconButton>
-      </TopAppBar>
-
-      <div className="app-body">
-        {/* M3 NavigationRail from actify - Desktop sidebar */}
-        <NavigationRail
-          items={navRailItems}
-          value={safeNavIndex}
-          setValue={handleNavChange}
-          menu={
-            <div style={{ padding: '8px', display: 'flex', justifyContent: 'center' }}>
-              <div
-                onClick={() => setMobileMenuOpen(true)}
-                style={{ cursor: 'pointer' }}
+    <div className="app-shell" style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      <aside className="sidebar" style={{ width: '240px', minWidth: '240px', flexShrink: 0, borderRight: '1px solid var(--md-bw-outline)', backgroundColor: 'var(--md-bw-surface)', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '16px 24px', fontWeight: 700, fontSize: '20px', color: 'var(--md-bw-on-surface)' }}>
+          HR Pulse
+        </div>
+        <nav style={{ flex: 1, overflowY: 'auto', padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '12px' }}>
+          {visibleNavItems.map(item => {
+            const isActive = currentView === item.id
+            return (
+              <button
+                key={item.id}
+                onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '16px',
+                  height: '56px', padding: '0 16px', borderRadius: '28px', border: 'none',
+                  background: isActive ? 'var(--md-bw-secondary-container)' : 'transparent',
+                  color: isActive ? 'var(--md-bw-on-secondary-container)' : 'var(--md-bw-on-surface-variant)',
+                  cursor: 'pointer', textAlign: 'left', font: "500 14px/20px 'Roboto', sans-serif"
+                }}
               >
-                <Avatar
-                  src={user?.avatar}
-                  alt={user?.name || 'User'}
-                  size="small"
-                />
-              </div>
-            </div>
-          }
-        />
+                <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'inherit' }}>
+                  {item.icon}
+                </div>
+                <span style={{ flex: 1 }}>{item.label}</span>
+              </button>
+            )
+          })}
+        </nav>
 
         {/* Mobile Drawer */}
         {mobileMenuOpen && (
@@ -1626,108 +1615,72 @@ export default function App() {
             </div>
           </div>
         )}
+      </aside>
 
-        {/* Main Content */}
-        <main className="content-container">
-          {/* Toolbar: breadcrumbs + controls */}
-          <div className="content-toolbar">
-            <div>{renderBreadcrumbs()}</div>
-            <div className="toolbar-actions">
-              {/* Sync Status */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                background: 'var(--color-md-sys-surface-container)',
-                padding: '6px 12px', borderRadius: '12px',
-                border: '1px solid var(--color-md-sys-outline-variant)'
-              }}>
-                <div style={{
-                  width: '8px', height: '8px', borderRadius: '50%',
-                  backgroundColor: !driveConnected ? 'var(--color-md-sys-error)'
-                    : syncConflicts.length > 0 ? 'var(--color-md-sys-error)'
-                    : isSyncing ? 'var(--color-md-sys-tertiary)'
-                    : 'var(--color-md-sys-secondary)'
-                }} />
-                <span style={{ fontSize: '0.8rem', color: 'var(--color-md-sys-on-surface-variant)' }}>
-                  {!driveConnected ? 'Offline' : syncConflicts.length > 0 ? 'Conflict' : isSyncing ? 'Syncing...' : 'Synced'}
-                </span>
-              </div>
-
-              {/* Role Simulator */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                background: 'var(--color-md-sys-surface-container)',
-                padding: '6px 12px', borderRadius: '12px',
-                border: '1px solid var(--color-md-sys-outline-variant)'
-              }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--color-md-sys-on-surface-variant)' }}>View:</span>
-                <select
-                  value={simulatedRole}
-                  onChange={(e) => setSimulatedRole(e.target.value)}
-                  style={{
-                    background: 'transparent', border: 'none',
-                    color: 'var(--color-md-sys-on-surface)', fontWeight: 600,
-                    fontSize: '0.85rem', outline: 'none', cursor: 'pointer'
-                  }}
-                >
-                  <option value="Admin">Admin</option>
-                  <option value="HR Manager">HR Manager</option>
-                  <option value="Payroll Manager">Payroll Manager</option>
-                  <option value="Employee">Employee</option>
-                </select>
-              </div>
-
-              {/* Notifications Bell */}
-              <div style={{ position: 'relative' }}>
-                <IconButton
-                  variant="standard"
-                  onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }}
-                >
-                  <Bell size={20} />
-                </IconButton>
-                {unreadCount > 0 && (
-                  <span style={{
-                    position: 'absolute', top: '-2px', right: '-2px',
-                    background: 'var(--color-md-sys-error)', color: '#fff',
-                    fontSize: '0.65rem', fontWeight: 800,
-                    width: '18px', height: '18px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    borderRadius: '50%', pointerEvents: 'none'
-                  }}>
-                    {unreadCount}
-                  </span>
-                )}
-              </div>
-
+      {/* Main Content */}
+      <main className="content" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        
+        {/* Global Top App Bar */}
+        <header style={{ height: '64px', minHeight: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', background: 'var(--md-bw-surface)', position: 'sticky', top: 0, zIndex: 10, borderBottom: '1px solid var(--md-bw-outline)' }}>
+          <div className="left" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button className="hamburger-mobile icon-btn" onClick={() => setMobileMenuOpen(true)} style={{ alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            </button>
+            <h1 style={{ font: "700 24px/32px 'Roboto', sans-serif", color: 'var(--md-bw-on-surface)', margin: 0 }}>
+              {allNavItems.find(i => i.id === currentView)?.label || 'HR Pulse'}
+            </h1>
+          </div>
+          <div className="right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span className="sync-badge" style={{ font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>
+              {!driveConnected ? 'Offline' : syncConflicts.length > 0 ? 'Conflict' : isSyncing ? 'Syncing...' : 'Synced'}
+            </span>
+            <div className="view-toggle" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
+              <span style={{ font: "400 13px/20px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>View:</span>
+              <select value={simulatedRole} onChange={(e) => setSimulatedRole(e.target.value)} style={{ font: "500 14px/20px 'Roboto'", border: 'none', background: 'transparent', color: 'var(--md-bw-on-surface)', cursor: 'pointer', outline: 'none' }}>
+                <option value="Admin">Admin</option>
+                <option value="HR Manager">HR Manager</option>
+                <option value="Payroll Manager">Payroll Manager</option>
+                <option value="Employee">Employee</option>
+              </select>
+            </div>
+            <button className="icon-btn" style={{ width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
+              <Search size={24} />
+            </button>
+            <div style={{ position: 'relative' }}>
+              <button className="icon-btn" onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }} style={{ position: 'relative', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
+                <Bell size={24} />
+                {unreadCount > 0 && <span className="badge" style={{ position: 'absolute', top: '12px', right: '12px', width: '8px', height: '8px', background: 'var(--md-bw-primary)', borderRadius: '50%' }}></span>}
+              </button>
+              
               {/* Notifications Dropdown */}
               {showNotifications && (
                 <div style={{
                   position: 'absolute', top: '100%', right: 0, marginTop: '8px',
                   width: '320px',
-                  background: 'var(--color-md-sys-surface-container)',
-                  border: '1px solid var(--color-md-sys-outline-variant)',
+                  background: 'var(--md-bw-surface-container)',
+                  border: '1px solid var(--md-bw-outline)',
                   borderRadius: '16px',
                   boxShadow: '0 12px 32px rgba(0,0,0,0.1)',
-                  zIndex: 100, overflow: 'hidden',
-                  animation: 'modalFadeIn 0.2s ease-out'
+                  zIndex: 100, overflow: 'hidden'
                 }}>
                   <div style={{
-                    padding: '16px', borderBottom: '1px solid var(--color-md-sys-outline-variant)',
+                    padding: '16px', borderBottom: '1px solid var(--md-bw-outline)',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    background: 'var(--color-md-sys-surface-container-high)'
+                    background: 'var(--md-bw-surface)'
                   }}>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>Notifications</h3>
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0, color: 'var(--md-bw-on-surface)' }}>Notifications</h3>
                   </div>
                   <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                     {notifications.length === 0 ? (
-                      <div style={{ padding: '24px', textAlign: 'center', color: 'var(--color-md-sys-on-surface-variant)', fontSize: '0.85rem' }}>No new notifications</div>
+                      <div style={{ padding: '24px', textAlign: 'center', color: 'var(--md-bw-on-surface-variant)', fontSize: '14px' }}>No new notifications</div>
                     ) : (
                       notifications.map(n => (
                         <div key={n.id} style={{
-                          padding: '12px 16px', borderBottom: '1px solid var(--color-md-sys-outline-variant)',
-                          background: n.read ? 'transparent' : 'rgba(0,0,0,0.03)'
+                          padding: '12px 16px', borderBottom: '1px solid var(--md-bw-outline)',
+                          background: n.read ? 'transparent' : 'var(--md-bw-secondary-container)'
                         }}>
-                          <p style={{ fontSize: '0.85rem', color: 'var(--color-md-sys-on-surface)', margin: 0, fontWeight: n.read ? 500 : 600, lineHeight: 1.4 }}>{n.text}</p>
-                          <span style={{ fontSize: '0.7rem', color: 'var(--color-md-sys-on-surface-variant)', marginTop: '4px', display: 'block' }}>{n.time}</span>
+                          <p style={{ fontSize: '14px', color: 'var(--md-bw-on-surface)', margin: 0, fontWeight: n.read ? 400 : 500, lineHeight: 1.4 }}>{n.text}</p>
+                          <span style={{ fontSize: '12px', color: 'var(--md-bw-on-surface-variant)', marginTop: '4px', display: 'block' }}>{n.time}</span>
                         </div>
                       ))
                     )}
@@ -1735,51 +1688,30 @@ export default function App() {
                 </div>
               )}
             </div>
+            
+            <div onClick={() => setIsDarkMode(prev => !prev)} style={{ marginLeft: '8px', cursor: 'pointer', width: '36px', height: '36px', borderRadius: '50%', border: '1px solid var(--md-bw-outline)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              <img src={user?.avatar || "https://i.pravatar.cc/150?u=admin"} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Profile" />
+            </div>
           </div>
+        </header>
 
           {/* Corruption Banner */}
           {dbStatus === 'corruption' && (
-            <div style={{
-              background: 'rgba(220, 53, 69, 0.1)',
-              border: '1px solid var(--color-md-sys-error)',
-              color: 'var(--color-md-sys-error)',
-              padding: '16px 24px',
-              borderRadius: '12px',
-              marginBottom: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '16px',
-              flexWrap: 'wrap'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <AlertTriangle size={24} />
-                <div>
-                  <h4 style={{ margin: 0, fontWeight: 700, color: 'var(--color-md-sys-error)' }}>Data integrity issue detected.</h4>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--color-md-sys-on-surface-variant)' }}>
-                    {dataIntegrityIssues.length > 0 
-                      ? `${dataIntegrityIssues.length} logical conflict(s) found in the database.` 
-                      : 'A sync or data integrity constraint failed. Review logs or check structure.'}
-                  </p>
-                </div>
+            <div style={{ background: 'var(--md-bw-surface-variant)', border: '1px solid var(--md-bw-outline)', borderLeft: '4px solid var(--md-bw-primary)', padding: '16px 24px', margin: '16px 24px', display: 'flex', alignItems: 'center', gap: '16px', borderRadius: 0 }}>
+              <AlertTriangle width="24" height="24" style={{ color: 'var(--md-bw-on-surface-variant)', flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <p style={{ font: "500 14px/20px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>Data integrity issue detected.</p>
+                <p style={{ font: "400 13px/20px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '4px 0 0' }}>{dataIntegrityIssues.length > 0 ? `${dataIntegrityIssues.length} logical conflict(s) found in the database.` : 'A sync or data integrity constraint failed. Review logs or check structure.'}</p>
               </div>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                {dataIntegrityIssues.some(iss => iss.includes('Duplicate')) && (
-                  <Button variant="filled" color="primary" onClick={handleAutoRepairDatabase}>
-                    Auto-Fix Duplicates
-                  </Button>
-                )}
-                <Button variant="outlined" color="primary" onClick={() => setShowCorruptionModal(true)}>
-                  View Details
-                </Button>
-                <Button variant="filled" color="error" onClick={() => {
+              <button onClick={() => setShowCorruptionModal(true)} style={{ font: "500 13px/20px 'Roboto'", textTransform: 'uppercase', background: 'transparent', border: 'none', color: 'var(--md-bw-primary)', padding: '8px 12px', cursor: 'pointer' }}>View Details</button>
+              {dataIntegrityIssues.some(iss => iss.includes('Duplicate')) && (
+                <button onClick={handleAutoRepairDatabase} style={{ font: "500 13px/20px 'Roboto'", textTransform: 'uppercase', background: 'var(--md-bw-primary)', color: 'var(--md-bw-on-primary)', border: 'none', padding: '10px 20px', cursor: 'pointer' }}>Auto-Fix Duplicates</button>
+              )}
+              <button onClick={() => {
                   if (window.confirm("Restore to default clean data? This will clear local cache and reload.")) {
                     clearLocalCache().then(() => window.location.reload())
                   }
-                }}>
-                  Reset Database
-                </Button>
-              </div>
+                }} style={{ font: "500 13px/20px 'Roboto'", textTransform: 'uppercase', background: 'var(--md-bw-primary)', color: 'var(--md-bw-on-primary)', border: 'none', padding: '10px 20px', cursor: 'pointer' }}>Reset Database</button>
             </div>
           )}
 
@@ -1818,7 +1750,6 @@ export default function App() {
           {/* Page Content */}
           {renderContent()}
         </main>
-      </div>
 
       {/* Global Toast Container */}
       <div className="global-toast-container" style={{ position: 'fixed', top: 'calc(4rem + 16px)', right: '24px', zIndex: 10000, display: 'flex', flexDirection: 'column', gap: '12px', pointerEvents: 'none' }}>
