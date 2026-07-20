@@ -17,7 +17,7 @@ import EmployeePortal from './components/EmployeePortal.jsx'
 import { readMeta, writeMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBackup, createBackup } from './services/googleDrive.js'
 import { clearLocalCache } from './services/db.js'
 import { validateDatabase } from './services/validator.js'
-import { Bell, AlertTriangle, Search, LayoutDashboard, Users, CreditCard, Calendar as CalendarIcon, Receipt, BarChart3, Settings as SettingsIcon, HardDrive, FileText, Megaphone, CalendarDays, Monitor, Database, User, History, Moon, Sparkles, Trash2, LogOut, Sun, HelpCircle, X, Activity } from 'lucide-react'
+import { Bell, AlertTriangle, Search, LayoutDashboard, Users, CreditCard, Calendar as CalendarIcon, Receipt, BarChart3, Settings as SettingsIcon, HardDrive, FileText, Megaphone, CalendarDays, Monitor, Database, User, History, Moon, Sparkles, Trash2, LogOut, Sun, HelpCircle, X, Activity, ChevronUp, Menu } from 'lucide-react'
 import { useModal } from './services/useModal.js'
 
 const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
@@ -95,6 +95,36 @@ export default function App() {
   })
   const [currentView, setCurrentView] = useState('dashboard')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true')
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth
+      if (width >= 1024) {
+        setMobileMenuOpen(false)
+      } else if (width >= 768 && width < 1024) {
+        setMobileMenuOpen(false)
+        // Tablet always collapsed, but we don't strictly need to force state if CSS handles it via media queries,
+        // but just in case, we close mobile menu
+      } else {
+        // Mobile: CSS handles hiding, we just manage the open state
+      }
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  const toggleSidebar = () => {
+    const width = window.innerWidth
+    if (width >= 1024) {
+      const next = !isCollapsed
+      setIsCollapsed(next)
+      localStorage.setItem('sidebar_collapsed', next)
+    } else if (width < 768) {
+      setMobileMenuOpen(!mobileMenuOpen)
+    }
+  }
   const [driveConnected, setDriveConnected] = useState(true)
   const [driveFileId, setDriveFileId] = useState(null)
   const [payrollFileId, setPayrollFileId] = useState(null)
@@ -1515,141 +1545,125 @@ export default function App() {
 
   return (
     <div className="dashboard-root app-shell" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', padding: '16px', gap: '16px', boxSizing: 'border-box' }}>
-      <aside className="macos-sidebar sidebar" style={{ width: '260px', minWidth: '260px', flexShrink: 0, display: 'flex', flexDirection: 'column', zIndex: 20 }}>
-        <div style={{ padding: '16px 24px', fontWeight: 700, fontSize: '20px', color: 'var(--md-bw-on-surface)' }}>
-          HR Pulse
+      {mobileMenuOpen && (
+        <div className="sidebar-overlay open" onClick={() => setMobileMenuOpen(false)}></div>
+      )}
+      <aside className={`macos-sidebar sidebar ${isCollapsed ? 'collapsed' : ''} ${mobileMenuOpen ? 'open' : ''}`} style={{ display: 'flex', flexDirection: 'column', width: '260px', minWidth: '260px', flexShrink: 0, zIndex: 50, overflow: 'hidden' }}>
+        
+        {/* STICKY HEADER */}
+        <div className="sidebar-header sidebar-glass-header" style={{
+          flexShrink: 0, padding: isCollapsed ? '20px 4px' : '20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: isCollapsed ? '4px' : '12px',
+          position: 'relative', zIndex: 2
+        }}>
+          
+          <div className="brand-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+            {/* Logo remains visible */}
+            <div style={{
+              width: '28px', height: '28px', background: 'var(--md-bw-primary)', borderRadius: '6px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+            }}>
+              <span style={{ color: 'var(--md-bw-on-primary)', font: "700 12px 'Roboto'" }}>HP</span>
+            </div>
+            {/* Name collapses */}
+            <span className="brand-text" style={{ 
+              font: "700 16px/20px 'Roboto'", color: 'var(--md-bw-on-surface)', letterSpacing: '-0.01em', 
+              whiteSpace: 'nowrap', transition: 'opacity 0.2s ease, width 0.3s ease, max-width 0.3s ease',
+              opacity: isCollapsed ? 0 : 1, maxWidth: isCollapsed ? 0 : '200px'
+            }}>HR Pulse</span>
+          </div>
+
+          <button className="sidebar-toggle" onClick={toggleSidebar} style={{
+            width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer',
+            color: 'var(--md-bw-on-surface-variant)', flexShrink: 0, transition: 'background 0.2s ease'
+          }}>
+            <Menu size={18} style={{ display: isCollapsed ? 'none' : 'block' }} />
+            <X size={18} style={{ display: isCollapsed ? 'block' : 'none' }} />
+          </button>
         </div>
-        <nav style={{ flex: 1, overflowY: 'auto', padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '12px' }}>
+
+        {/* SCROLLABLE NAV AREA */}
+        <nav className="sidebar-nav" style={{
+          flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '12px 12px', display: 'flex',
+          flexDirection: 'column', gap: '4px', minHeight: 0
+        }}>
           {visibleNavItems.map(item => {
-            const isActive = currentView === item.id
+            const isActive = currentView === item.id;
             return (
-              <button
-                key={item.id}
-                onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '16px',
-                  height: '56px', padding: '0 16px', borderRadius: '28px', border: 'none',
-                  background: isActive ? 'var(--md-bw-secondary-container)' : 'transparent',
-                  color: isActive ? 'var(--md-bw-on-secondary-container)' : 'var(--md-bw-on-surface-variant)',
-                  cursor: 'pointer', textAlign: 'left', font: "500 14px/20px 'Roboto', sans-serif"
-                }}
-              >
-                <div style={{
-                  flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                  width: '32px', height: '32px', borderRadius: '10px',
+              <div key={item.id} className="nav-item" data-label={item.label} data-active={isActive} onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }} style={{
+                display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px',
+                cursor: 'pointer', transition: 'all 0.2s ease', position: 'relative', height: '44px', textDecoration: 'none'
+              }}>
+                <div className="nav-icon" style={{
+                  width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  borderRadius: '10px', flexShrink: 0, transition: 'all 0.2s ease',
                   background: item.bg || 'var(--md-bw-primary)', color: '#ffffff',
                   boxShadow: '0 2px 6px rgba(0,0,0,0.15), inset 0 1px 2px rgba(255,255,255,0.4)',
-                  transition: 'transform 0.2s ease'
                 }}>
                   {item.icon}
                 </div>
-                <span style={{ flex: 1 }}>{item.label}</span>
-              </button>
+                <span className="nav-label" style={{
+                  font: "500 13px/20px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', whiteSpace: 'nowrap',
+                  transition: 'opacity 0.2s ease, max-width 0.3s ease', overflow: 'hidden', flex: 1
+                }}>{item.label}</span>
+                <div className="active-indicator" style={{
+                  position: 'absolute', left: 0, top: '8px', bottom: '8px', width: '3px',
+                  background: 'var(--md-bw-primary)', borderRadius: '0 2px 2px 0',
+                  opacity: isActive ? 1 : 0, transition: 'opacity 0.2s ease'
+                }}></div>
+              </div>
             )
           })}
         </nav>
 
-        {/* Mobile Drawer */}
-        {mobileMenuOpen && (
-          <div className="sidebar-overlay" onClick={() => setMobileMenuOpen(false)}>
-            <div className="mobile-drawer" onClick={e => e.stopPropagation()}>
-              {/* Drawer Header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', marginBottom: '16px' }}>
-                <div
-                  style={{
-                    width: '40px', height: '40px', borderRadius: '10px',
-                    background: 'var(--color-md-sys-primary)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                  }}
-                >
-                  <Activity size={20} color="var(--color-md-sys-on-primary)" />
-                </div>
-                <div>
-                  <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, lineHeight: 1.2 }}>HR Pulse</h2>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--color-md-sys-on-surface-variant)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Drive-based HRM</span>
-                </div>
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  style={{ marginLeft: 'auto', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--color-md-sys-on-surface-variant)', padding: '4px' }}
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              {/* Drawer Nav Items */}
-              <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-                {visibleNavItems.map((item, index) => {
-                  const isActive = currentView === item.id
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: '12px',
-                        padding: '12px 16px', borderRadius: '12px', border: 'none',
-                        background: isActive ? 'var(--color-md-sys-primary)' : 'transparent',
-                        color: isActive ? 'var(--color-md-sys-on-primary)' : 'var(--color-md-sys-on-surface-variant)',
-                        fontSize: '0.95rem', fontWeight: 700, textAlign: 'left', cursor: 'pointer',
-                        transition: 'background-color 150ms, color 150ms'
-                      }}
-                    >
-                      <div style={{
-                        width: '32px', height: '32px', borderRadius: '10px',
-                        background: item.bg || 'var(--color-md-sys-primary)', color: '#ffffff',
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.15), inset 0 1px 2px rgba(255,255,255,0.4)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                      }}>
-                        {item.icon}
-                      </div>
-                      <span>{item.label}</span>
-                    </button>
-                  )
-                })}
-              </nav>
-
-              {/* Drawer Footer - User info */}
-              <Divider style={{ margin: '12px 0' }} />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Avatar src={user?.avatar} alt={user?.name || 'User'} size="small" />
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{user?.name}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--color-md-sys-on-surface-variant)' }}>{user?.role}</div>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: '4px' }}>
-                  <IconButton
-                    variant="standard"
-                    onClick={toggleTheme}
-                    title={`Theme: ${themeMode}`}
-                  >
-                    {themeMode === 'system' ? <Monitor size={18} /> : themeMode === 'light' ? <Sun size={18} /> : <Moon size={18} />}
-                  </IconButton>
-                  <IconButton
-                    variant="standard"
-                    onClick={handleLogout}
-                    color="error"
-                  >
-                    <LogOut size={18} />
-                  </IconButton>
-                </div>
-              </div>
+        {/* STICKY FOOTER */}
+        <div className="sidebar-footer sidebar-glass-footer" style={{
+          flexShrink: 0, padding: '16px 12px',
+          position: 'relative', zIndex: 2
+        }}>
+          <div className="user-profile" data-label={user?.name || "User"} style={{
+            display: 'flex', alignItems: 'center', gap: '12px', padding: '8px', borderRadius: '10px',
+            cursor: 'pointer', transition: 'background 0.2s ease'
+          }}>
+            <img src={user?.avatar || "https://i.pravatar.cc/150?u=a042581f4e29026704d"} style={{
+              width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover',
+              border: '1px solid rgba(0,0,0,0.08)', flexShrink: 0
+            }} alt="Avatar" />
+            <div className="user-info" style={{
+              overflow: 'hidden', whiteSpace: 'nowrap', transition: 'opacity 0.2s ease, width 0.3s ease, max-width 0.3s ease',
+              flex: 1, minWidth: 0
+            }}>
+              <p style={{ font: "500 13px/16px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>{user?.name || "Ishtiaq Ahmed"}</p>
+              <p style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '2px 0 0' }}>{user?.role || "HR Manager"}</p>
             </div>
           </div>
-        )}
+
+          <button className="logout-btn" onClick={handleLogout} data-label="Log Out" style={{
+            display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent',
+            border: 'none', borderRadius: '8px', cursor: 'pointer', color: 'var(--md-bw-on-surface-variant)',
+            font: "500 12px/16px 'Roboto'", transition: 'all 0.2s ease', width: '100%', marginTop: '8px'
+          }}>
+            <LogOut size={18} />
+            <span className="logout-text" style={{ whiteSpace: 'nowrap', transition: 'opacity 0.2s ease, width 0.3s ease' }}>Log Out</span>
+          </button>
+        </div>
       </aside>
 
       {/* Main Content */}
       <main className="content dashboard-content" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         
         {/* Global Top App Bar */}
-        <header className="macos-toolbar" style={{ height: '52px', minHeight: '52px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', position: 'sticky', top: 0, zIndex: 15, flexShrink: 0 }}>
+        <header className="macos-toolbar topbar" style={{ height: '52px', minHeight: '52px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', position: 'sticky', top: 0, zIndex: 15, flexShrink: 0 }}>
           <div className="left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button className="hamburger-mobile icon-btn" onClick={() => setMobileMenuOpen(true)} style={{ alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', borderRadius: '6px' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(true)} style={{
+              width: '32px', height: '32px', display: 'none', alignItems: 'center', justifyContent: 'center',
+              background: 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer',
+              color: 'var(--md-bw-on-surface-variant)'
+            }}>
+              <Menu size={18} />
             </button>
-            <h1 style={{ font: "700 22px/28px 'Roboto', sans-serif", color: 'var(--md-bw-on-surface)', margin: 0, letterSpacing: '-0.02em' }}>
-              {allNavItems.find(i => i.id === currentView)?.label || 'HR Pulse'}
+            <h1 style={{ font: "700 22px/28px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>
+              {allNavItems.find(i => i.id === currentView)?.label || 'Dashboard'}
             </h1>
           </div>
           <div className="right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1710,13 +1724,6 @@ export default function App() {
                   </div>
                 </div>
               )}
-            </div>
-            
-            <div onClick={toggleTheme} title={`Theme: ${themeMode}`} style={{ marginLeft: '4px', cursor: 'pointer', width: '28px', height: '28px', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-              {themeMode === 'system' ? <Monitor size={16} /> : themeMode === 'light' ? <Sun size={16} /> : <Moon size={16} />}
-            </div>
-            <div style={{ width: '28px', height: '28px', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-              <img src={user?.avatar || "https://i.pravatar.cc/150?u=admin"} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Profile" />
             </div>
           </div>
         </header>

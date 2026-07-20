@@ -2465,3 +2465,284 @@ svg.lucide {
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   background: rgba(255,255,255,0.2);
 }
+
+/* --- NEW RESPONSIVE SIDEBAR STYLES --- */
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+.sidebar-nav:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Firefox */
+.sidebar-nav {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.sidebar-nav:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+/* Dark mode scrollbar */
+[data-theme="dark"] .sidebar-nav:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+[data-theme="dark"] .sidebar-nav:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+[data-theme="dark"] .sidebar-nav:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* --- PROGRESSIVE GLASSMORPHISM --- */
+.sidebar-glass-header {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+[data-theme="dark"] .sidebar-glass-header {
+  background: linear-gradient(to bottom, rgba(40, 40, 40, 0.6) 0%, rgba(40, 40, 40, 0.1) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.sidebar-glass-footer {
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+[data-theme="dark"] .sidebar-glass-footer {
+  background: linear-gradient(to top, rgba(40, 40, 40, 0.6) 0%, rgba(40, 40, 40, 0.1) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* DESKTOP LARGE (>= 1280px) */
+@media (min-width: 1280px) {
+  .macos-sidebar.collapsed {
+    width: 72px !important;
+    min-width: 72px !important;
+  }
+  .macos-sidebar.collapsed .brand-text,
+  .macos-sidebar.collapsed .user-info,
+  .macos-sidebar.collapsed .nav-label,
+  .macos-sidebar.collapsed .logout-text,
+  .macos-sidebar.collapsed .expand-icon {
+    opacity: 0;
+    max-width: 0;
+    pointer-events: none;
+    display: none;
+  }
+  .macos-sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 10px 0;
+  }
+  .macos-sidebar.collapsed .nav-icon {
+    margin: 0;
+  }
+  .macos-sidebar.collapsed .user-profile {
+    justify-content: center;
+    padding: 8px 0;
+  }
+  .macos-sidebar.collapsed .logout-btn {
+    justify-content: center;
+    padding: 10px 0;
+  }
+  .macos-sidebar.collapsed .logout-btn svg {
+    margin: 0;
+  }
+}
+
+/* DESKTOP (1024px - 1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .macos-sidebar {
+    width: 240px !important;
+    min-width: 240px !important;
+  }
+  .macos-sidebar.collapsed {
+    width: 72px !important;
+    min-width: 72px !important;
+  }
+  .macos-sidebar.collapsed .brand-text,
+  .macos-sidebar.collapsed .user-info,
+  .macos-sidebar.collapsed .nav-label,
+  .macos-sidebar.collapsed .logout-text,
+  .macos-sidebar.collapsed .expand-icon {
+    opacity: 0;
+    max-width: 0;
+    pointer-events: none;
+    display: none;
+  }
+  .macos-sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 10px 0;
+  }
+  .macos-sidebar.collapsed .nav-icon {
+    margin: 0;
+  }
+  .macos-sidebar.collapsed .user-profile {
+    justify-content: center;
+    padding: 8px 0;
+  }
+  .macos-sidebar.collapsed .logout-btn {
+    justify-content: center;
+    padding: 10px 0;
+  }
+  .macos-sidebar.collapsed .logout-btn svg {
+    margin: 0;
+  }
+}
+
+/* TABLET (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .macos-sidebar {
+    width: 72px !important; 
+    min-width: 72px !important;
+    position: fixed !important;
+    left: 16px;
+    top: 16px;
+    bottom: 16px;
+    height: calc(100vh - 32px) !important;
+  }
+  .macos-sidebar .brand-text,
+  .macos-sidebar .user-info,
+  .macos-sidebar .nav-label,
+  .macos-sidebar .logout-text,
+  .macos-sidebar .expand-icon {
+    opacity: 0;
+    max-width: 0;
+    pointer-events: none;
+    display: none;
+  }
+  .macos-sidebar .nav-item {
+    justify-content: center;
+    padding: 10px 0;
+  }
+  .macos-sidebar .nav-icon {
+    margin: 0;
+  }
+  .macos-sidebar .user-profile {
+    justify-content: center;
+    padding: 8px 0;
+  }
+  .macos-sidebar .logout-btn {
+    justify-content: center;
+    padding: 10px 0;
+  }
+  .macos-sidebar .logout-btn svg {
+    margin: 0;
+  }
+  .content {
+    margin-left: 88px; /* 72px + 16px */
+  }
+  /* Tooltips */
+  .macos-sidebar .nav-item:hover::after,
+  .macos-sidebar .user-profile:hover::after,
+  .macos-sidebar .logout-btn:hover::after {
+    content: attr(data-label);
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--md-bw-inverse-surface);
+    color: var(--md-bw-inverse-on-surface);
+    font: 500 12px 'Roboto';
+    padding: 6px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
+  }
+}
+
+/* MOBILE (< 768px) */
+@media (max-width: 767px) {
+  .macos-sidebar {
+    width: 280px !important;
+    min-width: 280px !important;
+    position: fixed !important;
+    left: 16px;
+    top: 16px;
+    bottom: 16px;
+    transform: translateX(-120%) !important;
+    z-index: 50 !important;
+    height: calc(100vh - 32px) !important;
+  }
+  .macos-sidebar.open {
+    transform: translateX(0) !important;
+  }
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 40;
+  }
+  .sidebar-overlay.open {
+    display: block;
+  }
+  .content {
+    margin-left: 0;
+  }
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+}
+
+/* ACTIVE STATE FOR NAV ITEMS */
+.nav-item[data-active="true"] {
+  background: rgba(0, 0, 0, 0.06) !important;
+}
+.nav-item[data-active="true"] .nav-icon {
+  background: transparent !important;
+}
+.nav-item[data-active="true"] .nav-label {
+  color: var(--md-bw-on-surface);
+  font-weight: 500;
+}
+.nav-item[data-active="true"] .active-indicator {
+  opacity: 1;
+}
+
+[data-theme="dark"] .nav-item[data-active="true"] {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+[data-theme="dark"] .nav-item[data-active="true"] .nav-label {
+  color: #ffffff;
+}
+
+/* HOVER STATE */
+.nav-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+[data-theme="dark"] .nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Prevent body scroll when mobile sidebar is open */
+body.sidebar-open {
+  overflow: hidden;
+}
+
+/* Transitions */
+.macos-sidebar,
+.brand-text,
+.user-info,
+.nav-label,
+.logout-text,
+.expand-icon {
+  will-change: transform, width, opacity;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, max-width 0.3s ease;
+}
