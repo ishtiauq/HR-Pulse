@@ -169,21 +169,35 @@ export default function App() {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
   }
 
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('hr_pulse_theme')
-    if (saved) return saved === 'dark'
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+  const [themeMode, setThemeMode] = useState(() => {
+    return localStorage.getItem('hr_pulse_theme') || 'system'
   })
+
+  const isDarkMode = themeMode === 'system' 
+    ? window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    : themeMode === 'dark'
+
+  const toggleTheme = () => {
+    setThemeMode(prev => {
+      if (prev === 'system') return 'light'
+      if (prev === 'light') return 'dark'
+      return 'system'
+    })
+  }
 
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark')
-      localStorage.setItem('hr_pulse_theme', 'dark')
+      document.documentElement.setAttribute('data-theme', 'dark')
     } else {
       document.documentElement.classList.remove('dark')
-      localStorage.setItem('hr_pulse_theme', 'light')
+      document.documentElement.setAttribute('data-theme', 'light')
     }
   }, [isDarkMode])
+
+  useEffect(() => {
+    localStorage.setItem('hr_pulse_theme', themeMode)
+  }, [themeMode])
 
   useEffect(() => {
     const timer = setTimeout(() => setIsAppLoading(false), 500)
@@ -1388,7 +1402,7 @@ export default function App() {
       if (act.type === 'page') {
         actionFn = () => setCurrentView(act.view)
       } else if (act.type === 'action') {
-        if (act.id === 'action-darkmode') actionFn = () => setIsDarkMode(prev => !prev)
+        if (act.id === 'action-darkmode') actionFn = toggleTheme
         if (act.id === 'action-clearcache') actionFn = () => {
           if (window.confirm("Clear cache?")) {
             clearLocalCache().then(() => window.location.reload())
@@ -1410,8 +1424,20 @@ export default function App() {
       }
     })
 
+    const emps = (employees || []).map(emp => ({
+      id: `emp-${emp.id}`,
+      category: 'Employees',
+      label: `${emp.name} (${emp.role} - ${emp.department})`,
+      employeeId: emp.id,
+      action: () => {
+        setSelectedEmployeeId(emp.id)
+        setCurrentView('employees')
+      },
+      keywords: `${emp.name} ${emp.role} ${emp.department} ${emp.id}`
+    }))
+
     const quickActions = [
-      { id: 'action-darkmode', category: 'Actions', label: 'Toggle Dark Mode', action: () => setIsDarkMode(prev => !prev), keywords: 'dark light mode theme appearance toggle' },
+      { id: 'action-darkmode', category: 'Actions', label: 'Toggle Theme', action: toggleTheme, keywords: 'dark light mode theme appearance toggle system' },
       { id: 'action-clearcache', category: 'Actions', label: 'Clear Local Cache & Resync', action: () => {
         if (window.confirm("Clear cache?")) {
           clearLocalCache().then(() => window.location.reload())
@@ -1426,18 +1452,6 @@ export default function App() {
         }
       }, keywords: 'backup save snapshot archive drive' }
     ]
-
-    const emps = (employees || []).map(emp => ({
-      id: `emp-${emp.id}`,
-      category: 'Employees',
-      label: `${emp.name} (${emp.role} - ${emp.department})`,
-      employeeId: emp.id,
-      action: () => {
-        setSelectedEmployeeId(emp.id)
-        setCurrentView('employees')
-      },
-      keywords: `${emp.name} ${emp.role} ${emp.department} ${emp.id}`
-    }))
 
     if (!query) {
       return [
@@ -1482,7 +1496,7 @@ export default function App() {
   const getCategoryIcon = (category, id) => {
     if (category === 'Employees') return <User size={16} />
     if (category === 'Recent Actions') return <History size={16} />
-    if (id.includes('darkmode')) return <Moon size={16} />
+    if (id.includes('darkmode')) return themeMode === 'light' ? <Moon size={16} /> : <Sun size={16} />
     if (id.includes('clearcache')) return <Trash2 size={16} />
     if (id.includes('backup')) return <HardDrive size={16} />
     if (id.includes('dashboard')) return <LayoutDashboard size={16} />
@@ -1599,9 +1613,10 @@ export default function App() {
                 <div style={{ display: 'flex', gap: '4px' }}>
                   <IconButton
                     variant="standard"
-                    onClick={() => setIsDarkMode(prev => !prev)}
+                    onClick={toggleTheme}
+                    title={`Theme: ${themeMode}`}
                   >
-                    {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                    {themeMode === 'system' ? <Monitor size={18} /> : themeMode === 'light' ? <Sun size={18} /> : <Moon size={18} />}
                   </IconButton>
                   <IconButton
                     variant="standard"
@@ -1690,7 +1705,10 @@ export default function App() {
               )}
             </div>
             
-            <div onClick={() => setIsDarkMode(prev => !prev)} style={{ marginLeft: '4px', cursor: 'pointer', width: '28px', height: '28px', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+            <div onClick={toggleTheme} title={`Theme: ${themeMode}`} style={{ marginLeft: '4px', cursor: 'pointer', width: '28px', height: '28px', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              {themeMode === 'system' ? <Monitor size={16} /> : themeMode === 'light' ? <Sun size={16} /> : <Moon size={16} />}
+            </div>
+            <div style={{ width: '28px', height: '28px', borderRadius: '50%', border: '1px solid rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
               <img src={user?.avatar || "https://i.pravatar.cc/150?u=admin"} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Profile" />
             </div>
           </div>

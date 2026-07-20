@@ -1459,6 +1459,45 @@ a {
   transform: scaleX(0);
   transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
 }
+:root {
+  --radius-xl: 20px; 
+
+  /* Transitions */
+  --transition-fast: 0.15s ease-in-out;
+  --transition-normal: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.dark, [data-theme="dark"] {
+  /* Theme Colors (Liquid Glass / System Dark) */
+  --bg-primary: #121212;       
+  --bg-secondary: rgba(30, 30, 30, 0.5); 
+  --bg-tertiary: rgba(45, 45, 45, 0.6);  
+  --bg-sidebar: rgba(20, 20, 20, 0.7);   
+
+  /* Glass Styling Details */
+  --glass-bg: rgba(30, 30, 30, 0.5);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-highlight: rgba(255, 255, 255, 0.15);
+
+  --accent-primary: #0a84ff;   
+  --accent-primary-glow: rgba(10, 132, 255, 0.25);
+  
+  --accent-success: #30d158;   
+  --accent-warning: #ff9f0a;   
+  --accent-info: #64d2ff;      
+  --accent-danger: #ff453a;    
+
+  /* Text Colors */
+  --text-primary: rgba(255, 255, 255, 0.9);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-muted: rgba(255, 255, 255, 0.4);
+
+  /* Active Tab */
+  --bg-active-tab: rgba(10, 132, 255, 0.15);
+  --text-active-tab: #0a84ff;
+
+  --border-color: rgba(255, 255, 255, 0.15);
+}
 .tf-filled:focus-within::after {
   transform: scaleX(1);
 }
