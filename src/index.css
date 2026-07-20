@@ -2330,17 +2330,24 @@ a {
 }
 
 /* macOS 27 Liquid Glass Redesign - Layout & Buttons */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 :root {
-  --color-background-app: linear-gradient(135deg, #e0eafc, #cfdef3);
+  --color-background-app: linear-gradient(-45deg, #e0eafc, #cfdef3, #fdfbfb, #ebedee);
 }
 
 [data-theme="dark"] {
-  --color-background-app: linear-gradient(135deg, #1e1e24, #121212);
+  --color-background-app: linear-gradient(-45deg, #1e1e24, #121212, #2a2a35, #000000);
 }
 
 body {
   background: var(--color-background-app) !important;
-  background-attachment: fixed !important;
+  background-size: 400% 400% !important;
+  animation: gradientMove 5s ease infinite !important;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
   margin: 0;
   padding: 0;
