@@ -193,12 +193,18 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       <div className="bento-grid">
         {/* Total Directory */}
         <div className="glass-card bento-item-stats stat-card-hover" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', borderTop: '4px solid var(--accent-primary)' }}>
-          <div className="glossy-icon-container" style={{
+          <div style={{
             width: '48px',
             height: '48px',
-            color: 'var(--accent-primary)'
+            borderRadius: '12px',
+            background: 'var(--accent-primary)',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
           }}>
-            <Users size={22} className="glossy-svg" />
+            <Users size={22} />
           </div>
           <div>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Total Directory</span>
@@ -208,12 +214,18 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
 
         {/* Active Today */}
         <div className="glass-card bento-item-stats stat-card-hover" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', borderTop: '4px solid var(--accent-success)' }}>
-          <div className="glossy-icon-container" style={{
+          <div style={{
             width: '48px',
             height: '48px',
-            color: 'var(--accent-success)'
+            borderRadius: '12px',
+            background: 'var(--accent-success)',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
           }}>
-            <Users size={22} className="glossy-svg" />
+            <Users size={22} />
           </div>
           <div>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Active Today</span>
@@ -223,12 +235,18 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
 
         {/* On Leave */}
         <div className="glass-card bento-item-stats stat-card-hover" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', borderTop: '4px solid var(--accent-warning)' }}>
-          <div className="glossy-icon-container" style={{
+          <div style={{
             width: '48px',
             height: '48px',
-            color: 'var(--accent-warning)'
+            borderRadius: '12px',
+            background: 'var(--accent-warning)',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
           }}>
-            <Calendar size={22} className="glossy-svg" />
+            <Calendar size={22} />
           </div>
           <div>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>On Leave</span>
@@ -238,12 +256,18 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
 
         {/* Database Status */}
         <div className="glass-card bento-item-stats stat-card-hover" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px', borderTop: driveConnected ? '4px solid var(--accent-success)' : '4px solid var(--accent-danger)' }}>
-          <div className="glossy-icon-container" style={{
+          <div style={{
             width: '48px',
             height: '48px',
-            color: driveConnected ? 'var(--accent-success)' : 'var(--accent-danger)'
+            borderRadius: '12px',
+            background: driveConnected ? 'var(--accent-success)' : 'var(--accent-danger)',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
           }}>
-            <Cloud size={22} className="glossy-svg" />
+            <Cloud size={22} />
           </div>
           <div>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Drive Connection</span>
@@ -292,7 +316,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 borderRadius: '20px',
                 background: 'rgba(34, 197, 94, 0.04)',
                 border: '1px solid rgba(34, 197, 94, 0.1)',
-                transition: 'all var(--transition-fast)'
+                transition: 'background-color var(--transition-fast), border-color var(--transition-fast)'
               }}
             >
               <h4 className="tabular-nums" style={{ fontSize: '2.2rem', color: 'var(--accent-success)', fontWeight: 800 }}>{todayStats.present}</h4>
@@ -313,7 +337,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 borderRadius: '20px',
                 background: 'rgba(239, 68, 68, 0.04)',
                 border: '1px solid rgba(239, 68, 68, 0.1)',
-                transition: 'all var(--transition-fast)'
+                transition: 'background-color var(--transition-fast), border-color var(--transition-fast)'
               }}
             >
               <h4 className="tabular-nums" style={{ fontSize: '2.2rem', color: 'var(--accent-danger)', fontWeight: 800 }}>{todayStats.absent}</h4>
@@ -334,7 +358,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 borderRadius: '20px',
                 background: 'rgba(245, 158, 11, 0.04)',
                 border: '1px solid rgba(245, 158, 11, 0.1)',
-                transition: 'all var(--transition-fast)'
+                transition: 'background-color var(--transition-fast), border-color var(--transition-fast)'
               }}
             >
               <h4 className="tabular-nums" style={{ fontSize: '2.2rem', color: 'var(--accent-warning)', fontWeight: 800 }}>{todayStats.onLeave}</h4>
@@ -500,7 +524,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                     fontSize: '0.65rem',
                     padding: '2px 6px',
                     borderRadius: '6px',
-                    background: milestone.daysRemaining === 0 ? 'var(--accent-primary-glow)' : 'rgba(0, 0, 0, 0.04)',
+                    background: milestone.daysRemaining === 0 ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
                     color: milestone.daysRemaining === 0 ? 'var(--accent-primary)' : 'var(--text-secondary)',
                     fontWeight: 700,
                     flexShrink: 0

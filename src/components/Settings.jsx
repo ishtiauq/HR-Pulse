@@ -440,28 +440,28 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      boxShadow: '0 4px 12px var(--accent-primary-glow)',
-                      flexShrink: 0,
-                      cursor: 'pointer',
-                      overflow: 'hidden',
-                      position: 'relative'
-                    }}
-                  >
-                    {logo ? (
-                      <img 
-                        src={logo} 
-                        alt="Logo" 
-                        style={{ 
-                          width: '100%', 
-                          height: '100%', 
-                          objectFit: 'cover',
-                          transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`,
-                          transformOrigin: 'center'
-                        }} 
-                      />
-                    ) : (
-                      <Activity size={28} color="#ffffff" style={{ animation: 'pulse 2s infinite' }} />
-                    )}
+              boxShadow: '0 2px 8px rgba(232, 93, 74, 0.25)',
+              flexShrink: 0,
+              cursor: 'pointer',
+              overflow: 'hidden',
+              position: 'relative'
+            }}
+          >
+            {logo ? (
+              <img 
+                src={logo} 
+                alt="Logo" 
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'cover',
+                  transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`,
+                  transformOrigin: 'center'
+                }} 
+              />
+            ) : (
+              <Activity size={28} color="#ffffff" />
+            )}
                   </div>
                   <div>
                     <button 
@@ -959,7 +959,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               background: activeSubmenu === 'payroll' ? 'var(--bg-tertiary)' : 'transparent',
               color: activeSubmenu === 'payroll' ? '#ffffff' : 'var(--text-secondary)',
               fontWeight: 700,
-              transition: 'all var(--transition-fast)'
+              transition: 'background-color var(--transition-fast), color var(--transition-fast)'
             }}
           >
             <Sliders size={16} style={{ color: activeSubmenu === 'payroll' ? 'var(--accent-primary)' : 'inherit' }} />
@@ -969,8 +969,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           {/* Company Profile Submenu */}
           <button
             onClick={() => setActiveSubmenu('company')}
-            onMouseEnter={(e) => { if (activeSubmenu !== 'company') e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { if (activeSubmenu !== 'company') e.currentTarget.style.color = 'var(--text-secondary)' }}
+                onMouseEnter={(e) => { if (activeSubmenu !== 'company') e.currentTarget.style.color = 'var(--accent-primary)' }}
+                onMouseLeave={(e) => { if (activeSubmenu !== 'company') e.currentTarget.style.color = 'var(--text-secondary)' }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -984,7 +984,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               background: activeSubmenu === 'company' ? 'var(--bg-tertiary)' : 'transparent',
               color: activeSubmenu === 'company' ? '#ffffff' : 'var(--text-secondary)',
               fontWeight: 700,
-              transition: 'all var(--transition-fast)'
+              transition: 'background-color var(--transition-fast), color var(--transition-fast)'
             }}
           >
             <Building2 size={16} style={{ color: activeSubmenu === 'company' ? 'var(--accent-primary)' : 'inherit' }} />
@@ -994,8 +994,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           {/* Expense Policies Submenu */}
           <button
             onClick={() => setActiveSubmenu('expenses')}
-            onMouseEnter={(e) => { if (activeSubmenu !== 'expenses') e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { if (activeSubmenu !== 'expenses') e.currentTarget.style.color = 'var(--text-secondary)' }}
+                onMouseEnter={(e) => { if (activeSubmenu !== 'expenses') e.currentTarget.style.color = 'var(--accent-primary)' }}
+                onMouseLeave={(e) => { if (activeSubmenu !== 'expenses') e.currentTarget.style.color = 'var(--text-secondary)' }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -1009,7 +1009,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               background: activeSubmenu === 'expenses' ? 'var(--bg-tertiary)' : 'transparent',
               color: activeSubmenu === 'expenses' ? '#ffffff' : 'var(--text-secondary)',
               fontWeight: 700,
-              transition: 'all var(--transition-fast)'
+              transition: 'background-color var(--transition-fast), color var(--transition-fast)'
             }}
           >
             <Receipt size={16} style={{ color: activeSubmenu === 'expenses' ? 'var(--accent-primary)' : 'inherit' }} />
@@ -1019,8 +1019,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           {/* Rosters & Shifts Submenu */}
           <button
             onClick={() => setActiveSubmenu('rosters')}
-            onMouseEnter={(e) => { if (activeSubmenu !== 'rosters') e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { if (activeSubmenu !== 'rosters') e.currentTarget.style.color = 'var(--text-secondary)' }}
+                onMouseEnter={(e) => { if (activeSubmenu !== 'rosters') e.currentTarget.style.color = 'var(--accent-primary)' }}
+                onMouseLeave={(e) => { if (activeSubmenu !== 'rosters') e.currentTarget.style.color = 'var(--text-secondary)' }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -1034,7 +1034,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               background: activeSubmenu === 'rosters' ? 'var(--bg-tertiary)' : 'transparent',
               color: activeSubmenu === 'rosters' ? '#ffffff' : 'var(--text-secondary)',
               fontWeight: 700,
-              transition: 'all var(--transition-fast)'
+              transition: 'background-color var(--transition-fast), color var(--transition-fast)'
             }}
           >
             <CalendarClock size={16} style={{ color: activeSubmenu === 'rosters' ? 'var(--accent-primary)' : 'inherit' }} />
@@ -1044,8 +1044,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           {/* Notifications Submenu */}
           <button
             onClick={() => setActiveSubmenu('notifications')}
-            onMouseEnter={(e) => { if (activeSubmenu !== 'notifications') e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { if (activeSubmenu !== 'notifications') e.currentTarget.style.color = 'var(--text-secondary)' }}
+                onMouseEnter={(e) => { if (activeSubmenu !== 'notifications') e.currentTarget.style.color = 'var(--accent-primary)' }}
+                onMouseLeave={(e) => { if (activeSubmenu !== 'notifications') e.currentTarget.style.color = 'var(--text-secondary)' }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -1059,7 +1059,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               background: activeSubmenu === 'notifications' ? 'var(--bg-tertiary)' : 'transparent',
               color: activeSubmenu === 'notifications' ? '#ffffff' : 'var(--text-secondary)',
               fontWeight: 700,
-              transition: 'all var(--transition-fast)'
+              transition: 'background-color var(--transition-fast), color var(--transition-fast)'
             }}
           >
             <Bell size={16} style={{ color: activeSubmenu === 'notifications' ? 'var(--accent-primary)' : 'inherit' }} />
@@ -1069,8 +1069,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           {/* Audit Logs Submenu */}
           <button
             onClick={() => setActiveSubmenu('audit')}
-            onMouseEnter={(e) => { if (activeSubmenu !== 'audit') e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { if (activeSubmenu !== 'audit') e.currentTarget.style.color = 'var(--text-secondary)' }}
+                onMouseEnter={(e) => { if (activeSubmenu !== 'audit') e.currentTarget.style.color = 'var(--accent-primary)' }}
+                onMouseLeave={(e) => { if (activeSubmenu !== 'audit') e.currentTarget.style.color = 'var(--text-secondary)' }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -1084,7 +1084,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               background: activeSubmenu === 'audit' ? 'var(--bg-tertiary)' : 'transparent',
               color: activeSubmenu === 'audit' ? '#ffffff' : 'var(--text-secondary)',
               fontWeight: 700,
-              transition: 'all var(--transition-fast)'
+              transition: 'background-color var(--transition-fast), color var(--transition-fast)'
             }}
           >
             <List size={16} style={{ color: activeSubmenu === 'audit' ? 'var(--accent-primary)' : 'inherit' }} />
@@ -1094,8 +1094,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           {/* Security Submenu */}
           <button
             onClick={() => setActiveSubmenu('security')}
-            onMouseEnter={(e) => { if (activeSubmenu !== 'security') e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { if (activeSubmenu !== 'security') e.currentTarget.style.color = 'var(--text-secondary)' }}
+                onMouseEnter={(e) => { if (activeSubmenu !== 'security') e.currentTarget.style.color = 'var(--accent-primary)' }}
+                onMouseLeave={(e) => { if (activeSubmenu !== 'security') e.currentTarget.style.color = 'var(--text-secondary)' }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -1109,7 +1109,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               background: activeSubmenu === 'security' ? 'var(--bg-tertiary)' : 'transparent',
               color: activeSubmenu === 'security' ? '#ffffff' : 'var(--text-secondary)',
               fontWeight: 700,
-              transition: 'all var(--transition-fast)'
+              transition: 'background-color var(--transition-fast), color var(--transition-fast)'
             }}
           >
             <ShieldCheck size={16} style={{ color: activeSubmenu === 'security' ? 'var(--accent-primary)' : 'inherit' }} />
@@ -1119,8 +1119,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           {/* Sync Conflicts Submenu */}
           <button
             onClick={() => setActiveSubmenu('sync')}
-            onMouseEnter={(e) => { if (activeSubmenu !== 'sync') e.currentTarget.style.color = '#2563eb' }}
-            onMouseLeave={(e) => { if (activeSubmenu !== 'sync') e.currentTarget.style.color = 'var(--text-secondary)' }}
+                onMouseEnter={(e) => { if (activeSubmenu !== 'sync') e.currentTarget.style.color = 'var(--accent-primary)' }}
+                onMouseLeave={(e) => { if (activeSubmenu !== 'sync') e.currentTarget.style.color = 'var(--text-secondary)' }}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -1134,7 +1134,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               background: activeSubmenu === 'sync' ? 'var(--bg-tertiary)' : 'transparent',
               color: activeSubmenu === 'sync' ? '#ffffff' : 'var(--text-secondary)',
               fontWeight: 700,
-              transition: 'all var(--transition-fast)'
+              transition: 'background-color var(--transition-fast), color var(--transition-fast)'
             }}
           >
             <Activity size={16} style={{ color: activeSubmenu === 'sync' ? 'var(--accent-warning)' : 'inherit' }} />
@@ -1182,35 +1182,35 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 8px 24px var(--accent-primary-glow)',
-                  overflow: 'hidden',
-                  position: 'relative',
-                  cursor: dragStart ? 'grabbing' : 'grab',
-                  touchAction: 'none'
-                }}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerUp}
-                onPointerLeave={handlePointerUp}
-              >
-                {logo ? (
-                  <img 
-                    src={logo} 
-                    alt="Logo Preview" 
-                    draggable="false"
-                    style={{ 
-                      width: '100%', 
-                      height: '100%', 
-                      objectFit: 'cover',
-                      transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`,
-                      transformOrigin: 'center',
-                      pointerEvents: 'none'
-                    }} 
-                  />
-                ) : (
-                  <Activity size={40} color="#ffffff" style={{ animation: 'pulse 2s infinite' }} />
-                )}
+              boxShadow: '0 4px 16px rgba(232, 93, 74, 0.25)',
+              overflow: 'hidden',
+              position: 'relative',
+              cursor: dragStart ? 'grabbing' : 'grab',
+              touchAction: 'none'
+            }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            onPointerLeave={handlePointerUp}
+          >
+            {logo ? (
+              <img 
+                src={logo} 
+                alt="Logo Preview" 
+                draggable="false"
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'cover',
+                  transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`,
+                  transformOrigin: 'center',
+                  pointerEvents: 'none'
+                }} 
+              />
+            ) : (
+              <Activity size={40} color="#ffffff" />
+            )}
               </div>
 
               {/* Zoom Slider */}

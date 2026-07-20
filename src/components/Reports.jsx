@@ -210,19 +210,19 @@ export default function Reports({ employees, payroll, attendance, addLog, addToa
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', background: 'var(--bg-secondary)', padding: '6px', borderRadius: '12px', border: '1px solid var(--border-color)', alignSelf: 'flex-start' }}>
         <button
           onClick={() => setActiveTab('payroll')}
-          style={{ padding: '10px 18px', background: activeTab === 'payroll' ? 'var(--bg-tertiary)' : 'transparent', border: 'none', borderRadius: '10px', color: activeTab === 'payroll' ? '#ffffff' : 'var(--text-secondary)', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all var(--transition-fast)' }}
+          style={{ padding: '10px 18px', background: activeTab === 'payroll' ? 'var(--bg-tertiary)' : 'transparent', border: 'none', borderRadius: '10px', color: activeTab === 'payroll' ? '#ffffff' : 'var(--text-secondary)', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px', transition: 'background-color var(--transition-fast), color var(--transition-fast)' }}
         >
           <TrendingUp size={16} style={{ color: activeTab === 'payroll' ? 'var(--accent-primary)' : 'inherit' }} /> Payroll Reports
         </button>
         <button
           onClick={() => setActiveTab('attendance')}
-          style={{ padding: '10px 18px', background: activeTab === 'attendance' ? 'var(--bg-tertiary)' : 'transparent', border: 'none', borderRadius: '10px', color: activeTab === 'attendance' ? '#ffffff' : 'var(--text-secondary)', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all var(--transition-fast)' }}
+          style={{ padding: '10px 18px', background: activeTab === 'attendance' ? 'var(--bg-tertiary)' : 'transparent', border: 'none', borderRadius: '10px', color: activeTab === 'attendance' ? '#ffffff' : 'var(--text-secondary)', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px', transition: 'background-color var(--transition-fast), color var(--transition-fast)' }}
         >
           <Clock size={16} style={{ color: activeTab === 'attendance' ? 'var(--accent-primary)' : 'inherit' }} /> Attendance Reports
         </button>
         <button
           onClick={() => setActiveTab('leaves')}
-          style={{ padding: '10px 18px', background: activeTab === 'leaves' ? 'var(--bg-tertiary)' : 'transparent', border: 'none', borderRadius: '10px', color: activeTab === 'leaves' ? '#ffffff' : 'var(--text-secondary)', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all var(--transition-fast)' }}
+          style={{ padding: '10px 18px', background: activeTab === 'leaves' ? 'var(--bg-tertiary)' : 'transparent', border: 'none', borderRadius: '10px', color: activeTab === 'leaves' ? '#ffffff' : 'var(--text-secondary)', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px', transition: 'background-color var(--transition-fast), color var(--transition-fast)' }}
         >
           <Calendar size={16} style={{ color: activeTab === 'leaves' ? 'var(--accent-primary)' : 'inherit' }} /> Leave Reports
         </button>

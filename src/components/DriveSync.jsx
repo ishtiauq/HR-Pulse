@@ -127,7 +127,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, syn
         alignItems: 'center',
         flexWrap: 'wrap',
         gap: '24px',
-        background: driveConnected ? 'radial-gradient(at 100% 0%, var(--accent-success-glow) 0px, transparent 40%), var(--glass-bg)' : 'var(--glass-bg)'
+        background: driveConnected ? 'var(--color-success-bg)' : 'var(--glass-bg)'
       }}>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
           <div style={{

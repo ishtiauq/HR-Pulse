@@ -58,7 +58,7 @@ export default function AdSlot({ type = 'horizontal', style = {} }) {
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {/* AdSense Logo Emblem */}
           <span style={{
-            background: 'var(--accent-primary-glow)',
+            background: 'var(--bg-tertiary)',
             color: 'var(--accent-primary)',
             padding: '2px 6px',
             borderRadius: '4px',

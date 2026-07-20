@@ -373,9 +373,9 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               fontSize: '0.95rem',
               outline: 'none',
               boxShadow: '0 8px 24px rgba(0, 0, 0, 0.03)',
-              transition: 'all var(--transition-fast)'
+              transition: 'box-shadow var(--transition-fast)'
             }}
-            onFocus={(e) => e.target.style.boxShadow = '0 8px 32px rgba(59, 130, 246, 0.1)'}
+            onFocus={(e) => e.target.style.boxShadow = '0 8px 32px rgba(232, 93, 74, 0.12)'}
             onBlur={(e) => e.target.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.03)'}
           />
           <Search size={18} style={{
@@ -397,21 +397,21 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                 padding: '8px 18px',
                 borderRadius: '24px',
                 border: 'none',
-                background: deptFilter === dept ? '#2563eb' : '#f3f4f6',
-                color: deptFilter === dept ? '#ffffff' : '#4b5563',
-                boxShadow: deptFilter === dept ? '0 4px 12px rgba(59, 130, 246, 0.15)' : '0 4px 12px rgba(0,0,0,0.02)',
+                background: deptFilter === dept ? 'var(--accent-primary)' : 'var(--bg-secondary)',
+                color: deptFilter === dept ? '#ffffff' : 'var(--text-secondary)',
+                boxShadow: deptFilter === dept ? '0 2px 8px rgba(232, 93, 74, 0.2)' : 'none',
                 cursor: 'pointer',
                 fontWeight: 600,
                 fontSize: '0.85rem',
-                transition: 'all var(--transition-fast)'
+                transition: 'background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast)'
               }}
-              onMouseEnter={(e) => {
-                if (deptFilter !== dept) {
-                  e.currentTarget.style.background = '#e5e7eb';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (deptFilter !== dept) e.currentTarget.style.background = '#f3f4f6'
+                onMouseEnter={(e) => {
+                  if (deptFilter !== dept) {
+                    e.currentTarget.style.background = 'var(--bg-tertiary)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (deptFilter !== dept) e.currentTarget.style.background = 'var(--bg-secondary)'
               }}
             >
               {dept}

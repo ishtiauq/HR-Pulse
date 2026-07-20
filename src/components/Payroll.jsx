@@ -492,12 +492,18 @@ Thank you for your service!
           }}>
             {/* Total Cost Card */}
             <div className="glass-card" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <div className="glossy-icon-container" style={{
+              <div style={{
                 width: '48px',
                 height: '48px',
-                color: 'var(--accent-primary)'
+                borderRadius: '12px',
+                background: 'var(--accent-primary)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
               }}>
-                <CreditCard size={22} className="glossy-svg" />
+                <CreditCard size={22} />
               </div>
               <div>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Total Payout Budget</span>
@@ -507,12 +513,18 @@ Thank you for your service!
 
             {/* Average Salary Card */}
             <div className="glass-card" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <div className="glossy-icon-container" style={{
+              <div style={{
                 width: '48px',
                 height: '48px',
-                color: 'var(--accent-info)'
+                borderRadius: '12px',
+                background: 'var(--accent-info)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
               }}>
-                <CreditCard size={22} className="glossy-svg" />
+                <CreditCard size={22} />
               </div>
               <div>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>Average Salary</span>
@@ -778,7 +790,7 @@ Thank you for your service!
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
-                                  transition: 'all var(--transition-fast)',
+                                  transition: 'background-color var(--transition-fast), color var(--transition-fast)',
                                   opacity: simulatedRole === 'HR Manager' ? 0.5 : 1
                                 }}
                                 onMouseEnter={(e) => { if(simulatedRole !== 'HR Manager') { e.currentTarget.style.background = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--accent-primary)'; } }}
@@ -800,7 +812,7 @@ Thank you for your service!
                                   borderRadius: '6px',
                                   cursor: isProcessing ? 'not-allowed' : 'pointer',
                                   fontWeight: 600,
-                                  transition: 'all 0.2s',
+                                  transition: 'background-color 0.2s, color 0.2s',
                                   display: 'flex',
                                   alignItems: 'center',
                                   gap: '6px'
@@ -838,7 +850,7 @@ Thank you for your service!
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '6px',
-                                transition: 'all 0.2s'
+                                transition: 'background-color 0.2s, color 0.2s'
                               }}
                               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
                               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}

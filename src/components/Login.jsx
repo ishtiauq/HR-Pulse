@@ -97,9 +97,9 @@ export default function Login({ onLogin }) {
 
       {/* Main Center Content */}
       <div className="welcome-center-content">
-        <h1 className="welcome-heading">
-          Your HR Data Lives in <span className="gradient-text-blue">Your Google Drive</span>
-        </h1>
+          <h1 className="welcome-heading">
+            Your HR Data Lives in <span className="welcome-accent">Your Google Drive</span>
+          </h1>
         
         {/* Animated Value Proposition Cards Grid */}
         <div className="welcome-value-props">
@@ -274,7 +274,7 @@ export default function Login({ onLogin }) {
           flex-direction: column;
           justify-content: space-between;
           padding: 48px;
-          background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+          background: var(--bg-primary);
           font-family: var(--font-sans);
           position: relative;
           overflow: hidden;
@@ -290,12 +290,12 @@ export default function Login({ onLogin }) {
         .welcome-logo-box {
           width: 44px;
           height: 44px;
-          background: linear-gradient(135deg, var(--accent-primary), #2563eb);
+          background: var(--accent-primary);
           border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+          box-shadow: 0 4px 14px rgba(232, 93, 74, 0.35);
         }
 
         .welcome-title {
@@ -334,10 +334,8 @@ export default function Login({ onLogin }) {
           font-family: var(--font-display);
         }
 
-        .gradient-text-blue {
-          background: linear-gradient(135deg, #1e40af 0%, var(--accent-primary) 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+        .welcome-accent {
+          color: var(--color-accent);
         }
 
         /* Value Proposition Grid styling */
@@ -351,18 +349,16 @@ export default function Login({ onLogin }) {
         }
 
         .value-prop-card {
-          background: #ffffff;
+          background: var(--bg-secondary);
           border: 1px solid var(--border-color);
-          border-radius: 20px;
+          border-radius: var(--radius-lg);
           padding: 24px;
           text-align: left;
-          box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02), inset 0 1px 0 #ffffff;
-          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: transform var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
           position: relative;
-          overflow: hidden;
           opacity: 0;
           transform: translateY(24px);
-          animation: welcome-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation: welcome-fade-up 0.8s var(--ease-out) forwards;
         }
 
         .anim-delay-1 { animation-delay: 0.1s; }
@@ -376,7 +372,7 @@ export default function Login({ onLogin }) {
         }
 
         .card-highlighted {
-          background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+          background: var(--bg-primary);
           border-color: rgba(16, 185, 129, 0.3);
           box-shadow: 0 4px 20px rgba(16, 185, 129, 0.04);
         }
@@ -397,7 +393,7 @@ export default function Login({ onLogin }) {
           margin-bottom: 12px;
         }
 
-        .badge-free { background: rgba(59, 130, 246, 0.1); color: #1d4ed8; }
+        .badge-free { background: var(--accent-primary-dim); color: var(--accent-primary); }
         .badge-open { background: rgba(245, 158, 11, 0.1); color: #b45309; }
         .badge-secure { background: rgba(16, 185, 129, 0.1); color: #047857; }
 
@@ -447,7 +443,7 @@ export default function Login({ onLogin }) {
           justify-content: center;
         }
 
-        .pill-icon-shield { background: rgba(59, 130, 246, 0.1); color: var(--accent-primary); }
+        .pill-icon-shield { background: var(--accent-primary-dim); color: var(--accent-primary); }
         .pill-icon-cloud { background: rgba(16, 185, 129, 0.1); color: var(--accent-success); }
         .pill-icon-zap { background: rgba(245, 158, 11, 0.1); color: var(--accent-warning); }
 
@@ -461,21 +457,20 @@ export default function Login({ onLogin }) {
           display: flex;
           align-items: center;
           gap: 12px;
-          background: #2563eb;
+          background: var(--color-accent);
           color: #ffffff;
           border: none;
           padding: 16px 32px;
           border-radius: 14px;
           font-size: 1.05rem;
           cursor: pointer;
-          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+          transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+          box-shadow: 0 4px 12px var(--color-accent-glow);
         }
 
         .connect-btn:hover {
-          transform: scale(1.05);
-          background: #1d4ed8;
-          box-shadow: 0 12px 30px rgba(37, 99, 235, 0.45);
+          transform: translateY(-1px);
+          background: var(--color-accent-hover);
         }
 
         .connect-button-tooltip {
@@ -493,9 +488,9 @@ export default function Login({ onLogin }) {
           line-height: 1.4;
           width: 280px;
           text-align: center;
-          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
-          transition: all 0.2s ease-out;
-          z-index: 10;
+          box-shadow: 0 4px 12px oklch(0% 0 0 / 0.12);
+          transition: opacity var(--dur-short) var(--ease-out), visibility var(--dur-short) step-end, bottom var(--dur-short) var(--ease-out);
+          z-index: var(--z-tooltip);
           pointer-events: none;
         }
 
