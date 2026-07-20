@@ -1550,146 +1550,385 @@ export default function App() {
       {mobileMenuOpen && (
         <div className="sidebar-overlay open" onClick={() => setMobileMenuOpen(false)}></div>
       )}
-      <aside className={`macos-sidebar sidebar ${isCollapsed ? 'collapsed' : ''} ${mobileMenuOpen ? 'open' : ''}`} style={{ display: 'flex', flexDirection: 'column', width: '260px', minWidth: '260px', flexShrink: 0, zIndex: 50, overflow: 'hidden', position: 'relative' }}>
+      <aside className={`macos-sidebar sidebar ${isCollapsed ? 'collapsed' : ''} ${mobileMenuOpen ? 'open' : ''}`} style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        width: isCollapsed ? '72px' : '260px',
+        flexShrink: 0,
+        position: 'relative',
+        zIndex: 30,
+        background: isDarkMode ? 'rgba(18, 18, 18, 0.55)' : 'rgba(248, 249, 250, 0.55)',
+        backdropFilter: 'blur(12px) saturate(150%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(150%)',
+        borderRight: isDarkMode ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid rgba(0, 0, 0, 0.06)',
+        transition: 'width 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
+        overflow: 'visible'
+      }}>
         
-        {/* SIDEBAR TOGGLE (TOP) */}
-        <div className="sidebar-header-wrapper" style={{ flexShrink: 0, height: '76px', position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
-          <div className="sidebar-glass-header" style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, zIndex: 1 }}></div>
-          <div style={{ position: 'relative', zIndex: 2, padding: '16px 12px 12px 12px' }}>
-            <button className="sidebar-collapse-btn" onClick={toggleSidebar} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', width: '100%', cursor: 'pointer',
-              padding: '10px 12px', background: 'transparent', border: 'none', borderRadius: '10px', 
-              color: 'var(--md-bw-on-surface-variant)', transition: 'background 0.2s ease', height: '44px'
+        {/* PROGRESSIVE BLUR HEADER */}
+        <div className="sidebar-header-wrapper" style={{
+          flexShrink: 0,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <div className="sidebar-glass-header" style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 1,
+            background: isDarkMode ? 'rgba(18, 18, 18, 0.85)' : 'rgba(248, 249, 250, 0.85)',
+            backdropFilter: 'blur(32px) saturate(200%)',
+            WebkitBackdropFilter: 'blur(32px) saturate(200%)',
+            maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
+            borderBottom: '1px solid rgba(0, 0, 0, 0.04)'
+          }}></div>
+          
+          <div style={{
+            position: 'relative',
+            zIndex: 2,
+            width: '100%',
+            padding: isCollapsed ? '12px 8px' : '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            justifyContent: isCollapsed ? 'center' : 'flex-start'
+          }}>
+            {/* ANIMATED COLLAPSE TRIGGER BUTTON */}
+            <button id="sidebar-toggle" className="collapse-btn" onClick={toggleSidebar} style={{
+              width: isCollapsed ? '32px' : '100%',
+              height: isCollapsed ? '32px' : '44px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: isCollapsed ? 'center' : 'flex-start',
+              gap: isCollapsed ? '0' : '10px',
+              padding: isCollapsed ? '0' : '10px 12px',
+              background: isDarkMode ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.45)',
+              backdropFilter: 'blur(16px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(255, 255, 255, 0.5)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.4)',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              color: 'var(--md-bw-on-surface-variant)',
+              flexShrink: 0,
+              position: 'relative',
+              overflow: 'hidden',
+              transition: 'all 0.25s cubic-bezier(0.32, 0.72, 0, 1)'
             }}>
-              <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                {isCollapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
-              </div>
-              {!isCollapsed && <span style={{ font: "500 13px/16px 'Roboto'", whiteSpace: 'nowrap' }}>Collapse Sidebar</span>}
+              <span className="collapse-icon" style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                flexShrink: 0,
+                transition: 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
+                transform: isCollapsed ? 'rotate(180deg)' : 'none'
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+              </span>
+              {!isCollapsed && (
+                <span className="btn-label" style={{
+                  font: "500 13px/20px 'Roboto'",
+                  color: 'var(--md-bw-on-surface-variant)',
+                  whiteSpace: 'nowrap',
+                  opacity: 1,
+                  transition: 'opacity 0.2s ease'
+                }}>Collapse Sidebar</span>
+              )}
             </button>
           </div>
         </div>
 
         {/* SCROLLABLE NAV AREA */}
         <nav className="sidebar-nav" style={{
-          position: 'absolute', top: 0, bottom: 0, left: 0, right: 0,
-          overflowY: 'auto', overflowX: 'hidden', padding: '76px 12px 220px 12px', display: 'flex',
-          flexDirection: 'column', gap: '4px', zIndex: 1
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          padding: isCollapsed ? '76px 8px 250px 8px' : '76px 12px 250px 12px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+          zIndex: 1
         }}>
           {visibleNavItems.map(item => {
             const isActive = currentView === item.id;
             return (
-              <div key={item.id} className="nav-item" data-label={item.label} data-active={isActive ? "true" : "false"} onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }} style={{
-                display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px',
-                cursor: 'pointer', position: 'relative', height: '44px', textDecoration: 'none',
+              <div key={item.id} className={`nav-item ${isActive ? 'active' : ''}`} data-label={item.label} onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '10px 12px',
+                borderRadius: '10px',
+                cursor: 'pointer',
+                height: '52px',
+                boxSizing: 'border-box',
+                transition: 'all 0.2s ease',
+                position: 'relative',
+                textDecoration: 'none',
+                background: isActive ? (item.bg || 'rgba(0, 0, 0, 0.06)') : 'transparent',
+                color: isActive ? '#ffffff' : 'var(--md-bw-on-surface-variant)',
                 '--nav-bg': item.bg || 'var(--md-bw-primary)'
               }}>
-                <div className="nav-icon" style={{
-                  width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  borderRadius: '10px', flexShrink: 0, transition: 'all 0.2s ease',
-                  background: item.bg || 'var(--md-bw-primary)', color: '#ffffff',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.15), inset 0 1px 2px rgba(255,255,255,0.4)',
+                {/* Icon container */}
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '8px',
+                  flexShrink: 0,
+                  transition: 'all 0.2s ease',
+                  background: isActive ? 'rgba(255, 255, 255, 0.2)' : (item.bg || 'var(--md-bw-primary)'),
+                  color: '#ffffff',
+                  boxShadow: '0 3px 8px rgba(0,0,0,0.18), inset 0 1px 2px rgba(255,255,255,0.4)'
                 }}>
                   {item.icon}
                 </div>
+                
                 <span className="nav-label" style={{
-                  font: "500 13px/20px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', whiteSpace: 'nowrap',
-                  transition: 'opacity 0.2s ease, max-width 0.3s ease, font-weight 0.2s ease', overflow: 'hidden', flex: 1
+                  font: "500 13px/20px 'Roboto'",
+                  color: isActive ? '#ffffff' : 'var(--md-bw-on-surface-variant)',
+                  whiteSpace: 'nowrap',
+                  flex: 1,
+                  opacity: isCollapsed ? 0 : 1,
+                  transition: 'opacity 0.2s ease, width 0.3s ease',
+                  width: isCollapsed ? 0 : 'auto'
                 }}>{item.label}</span>
               </div>
             )
           })}
         </nav>
 
-        {/* STICKY FOOTER */}
+        {/* PROGRESSIVE BLUR FOOTER */}
         <div className="sidebar-footer-wrapper" style={{
-          flexShrink: 0, position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10
+          flexShrink: 0,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+          display: 'flex',
+          flexDirection: 'column'
         }}>
-          <div className="sidebar-glass-footer" style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, zIndex: 1 }}></div>
-          <div className="sidebar-footer" style={{ position: 'relative', zIndex: 2, padding: '16px 12px' }}>
-            <div className="user-profile" data-label={user?.name || "User"} style={{
-              display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '10px',
-              transition: 'background 0.2s ease', height: '52px'
+          <div className="sidebar-glass-footer" style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 1,
+            background: isDarkMode ? 'rgba(18, 18, 18, 0.85)' : 'rgba(248, 249, 250, 0.85)',
+            backdropFilter: 'blur(32px) saturate(200%)',
+            WebkitBackdropFilter: 'blur(32px) saturate(200%)',
+            maskImage: 'linear-gradient(to top, black 70%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to top, black 70%, transparent 100%)',
+            borderTop: '1px solid rgba(0, 0, 0, 0.04)'
+          }}></div>
+          
+          <div className="sidebar-footer" style={{
+            position: 'relative',
+            zIndex: 2,
+            padding: isCollapsed ? '12px 8px' : '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
+            {/* GLASSMORPHISM USER PROFILE BOX */}
+            <div className="user-profile-glass" data-label={user?.name || "Ishtiaq Rizve"} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '10px 12px',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              position: 'relative',
+              overflow: 'hidden',
+              transition: 'all 0.2s ease',
+              background: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.25)',
+              backdropFilter: 'blur(16px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+              border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(255, 255, 255, 0.3)',
+              boxShadow: isDarkMode 
+                ? '0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                : '0 1px 2px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.4)'
             }}>
+              <span style={{
+                position: 'absolute',
+                inset: 0,
+                background: isDarkMode 
+                  ? 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%)'
+                  : 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%)',
+                borderRadius: 'inherit',
+                pointerEvents: 'none'
+              }}></span>
+              
               <img src={user?.avatar || "https://i.pravatar.cc/150?u=a042581f4e29026704d"} style={{
-                width: '32px', height: '32px', borderRadius: '10px', objectFit: 'cover',
-                border: '1px solid rgba(0,0,0,0.08)', flexShrink: 0
+                width: '34px',
+                height: '34px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '1.5px solid rgba(255, 255, 255, 0.5)',
+                flexShrink: 0,
+                position: 'relative',
+                zIndex: 1,
+                margin: '0 auto'
               }} alt="Avatar" />
+              
               <div className="user-info" style={{
-                overflow: 'hidden', whiteSpace: 'nowrap', transition: 'opacity 0.2s ease, width 0.3s ease, max-width 0.3s ease',
-                flex: 1, minWidth: 0, opacity: isCollapsed ? 0 : 1, maxWidth: isCollapsed ? 0 : '200px'
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                flex: 1,
+                minWidth: 0,
+                position: 'relative',
+                zIndex: 1,
+                opacity: isCollapsed ? 0 : 1,
+                transition: 'opacity 0.2s ease, width 0.3s ease',
+                width: isCollapsed ? 0 : 'auto'
               }}>
-                <p style={{ font: "500 13px/16px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>{user?.name || "Ishtiaq Ahmed"}</p>
+                <p style={{ font: "500 13px/16px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>{user?.name || "Ishtiaq Rizve"}</p>
                 <p style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '2px 0 0' }}>{user?.role || "HR Manager"}</p>
               </div>
             </div>
 
-            <div className="footer-actions" style={{
-              overflow: 'hidden', whiteSpace: 'nowrap', transition: 'opacity 0.2s ease, max-height 0.3s ease, max-width 0.3s ease',
-              opacity: isCollapsed ? 0 : 1, maxWidth: isCollapsed ? 0 : '200px', maxHeight: isCollapsed ? 0 : '150px',
-              display: 'flex', flexDirection: 'column', gap: '8px', marginTop: isCollapsed ? 0 : '12px', position: 'relative'
+            {/* ROLE BUTTON */}
+            <button className="role-btn" data-active={showRoleModal ? "true" : "false"} data-label={`Role: ${simulatedRole}`} onClick={() => { if (isCollapsed) setIsCollapsed(false); setShowRoleModal(!showRoleModal); }} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '10px 12px',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              border: 'none',
+              background: showRoleModal ? 'linear-gradient(135deg, #0062E6 0%, #003A8C 100%)' : 'rgba(0, 98, 230, 0.12)',
+              width: '100%',
+              height: '52px',
+              boxSizing: 'border-box',
+              transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+              position: 'relative',
+              justifyContent: isCollapsed ? 'center' : 'flex-start'
             }}>
-              <button className="nav-item" onClick={() => setShowRoleModal(!showRoleModal)} style={{
-                display: 'flex', alignItems: 'center', gap: '12px', width: '100%', cursor: 'pointer',
-                padding: '10px 12px', borderRadius: '10px', background: 'rgba(0, 122, 255, 0.15)', 
-                border: 'none', boxShadow: 'inset 0 0 0 1px rgba(0, 122, 255, 0.2)',
-                color: '#007aff', textDecoration: 'none', transition: 'all 0.2s ease', '--nav-bg': '#007aff',
-                height: '44px'
+              <div style={{
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '8px',
+                flexShrink: 0,
+                transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                background: showRoleModal ? 'rgba(255, 255, 255, 0.2)' : 'linear-gradient(135deg, #0062E6 0%, #003A8C 100%)',
+                color: '#ffffff',
+                boxShadow: '0 3px 8px rgba(0,0,0,0.18), inset 0 1px 2px rgba(255,255,255,0.4)'
               }}>
-                <div className="nav-icon" style={{
-                  width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  borderRadius: '10px', flexShrink: 0, transition: 'all 0.2s ease',
-                  background: '#007aff', color: '#ffffff',
-                  boxShadow: '0 2px 6px rgba(0,122,255,0.3), inset 0 1px 2px rgba(255,255,255,0.4)',
-                }}>
-                  <Shield size={16} />
-                </div>
-                <span className="nav-label" style={{ font: "600 13px/20px 'Roboto'", whiteSpace: 'nowrap', textAlign: 'left', flex: 1, color: '#007aff' }}>Role: {simulatedRole}</span>
-              </button>
-
-              {/* Role Modal */}
-              {showRoleModal && (
-                <div className="macos-card" style={{
-                  position: 'absolute', bottom: 'calc(100% + 12px)', left: '0', width: '100%',
-                  background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(40px) saturate(200%)',
-                  border: '1px solid rgba(0,0,0,0.08)', borderRadius: '16px', boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
-                  zIndex: 100, overflow: 'hidden'
-                }}>
-                  <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ font: "600 13px/16px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>Select Role</h3>
-                  </div>
-                  <div style={{ padding: '8px' }}>
-                    {['Admin', 'HR Manager', 'Payroll Manager', 'Employee'].map(r => (
-                      <button key={r} onClick={() => { setSimulatedRole(r); setShowRoleModal(false); }} style={{
-                        display: 'block', width: '100%', textAlign: 'left', padding: '10px 12px',
-                        background: simulatedRole === r ? 'rgba(0,122,255,0.1)' : 'transparent', border: 'none',
-                        borderRadius: '8px', cursor: 'pointer', font: "500 13px/16px 'Roboto'",
-                        color: simulatedRole === r ? '#007aff' : 'var(--md-bw-on-surface-variant)', transition: 'background 0.2s ease'
-                      }}>
-                        {r}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </div>
+              <span className="btn-label" style={{
+                font: "500 13px/20px 'Roboto'",
+                color: showRoleModal ? '#ffffff' : '#0055D4',
+                whiteSpace: 'nowrap',
+                opacity: isCollapsed ? 0 : 1,
+                transition: 'opacity 0.2s ease, width 0.3s ease',
+                width: isCollapsed ? 0 : 'auto'
+              }}>Role: {simulatedRole}</span>
               
-              <button className="nav-item" onClick={handleLogout} style={{
-                display: 'flex', alignItems: 'center', gap: '12px', width: '100%', cursor: 'pointer',
-                padding: '10px 12px', borderRadius: '10px', background: 'rgba(255, 59, 48, 0.15)', 
-                border: 'none', boxShadow: 'inset 0 0 0 1px rgba(255, 59, 48, 0.2)',
-                color: '#ff3b30', textDecoration: 'none', transition: 'all 0.2s ease', '--nav-bg': '#ff3b30',
-                height: '44px'
-              }}>
-                <div className="nav-icon" style={{
-                  width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  borderRadius: '10px', flexShrink: 0, transition: 'all 0.2s ease',
-                  background: '#ff3b30', color: '#ffffff',
-                  boxShadow: '0 2px 6px rgba(255,59,48,0.3), inset 0 1px 2px rgba(255,255,255,0.4)',
+              {!isCollapsed && (
+                <svg className="expand-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={showRoleModal ? '#ffffff' : '#0055D4'} strokeWidth="1.5" style={{ 
+                  marginLeft: 'auto', flexShrink: 0, position: 'relative', zIndex: 1, 
+                  transform: showRoleModal ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s ease' 
                 }}>
-                  <LogOut size={16} />
-                </div>
-                <span className="nav-label" style={{ font: "600 13px/20px 'Roboto'", whiteSpace: 'nowrap', textAlign: 'left', flex: 1, color: '#ff3b30' }}>Log Out</span>
-              </button>
-            </div>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              )}
+            </button>
+
+            {/* Role Dropdown List Inline */}
+            {!isCollapsed && showRoleModal && (
+              <div className="macos-card" style={{
+                background: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(30px) saturate(200%)',
+                WebkitBackdropFilter: 'blur(30px) saturate(200%)',
+                border: '1px solid rgba(0,0,0,0.08)',
+                borderRadius: '12px',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '6px',
+                gap: '2px',
+                animation: 'slide-down 0.2s ease'
+              }}>
+                {['Admin', 'HR Manager', 'Payroll Manager', 'Employee'].map(r => (
+                  <button key={r} onClick={() => { setSimulatedRole(r); setShowRoleModal(false); }} style={{
+                    display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px',
+                    background: simulatedRole === r ? 'rgba(0,122,255,0.1)' : 'transparent', border: 'none',
+                    borderRadius: '6px', cursor: 'pointer', font: "500 12px 'Roboto'",
+                    color: simulatedRole === r ? '#007aff' : 'var(--md-bw-on-surface-variant)', transition: 'background 0.2s ease'
+                  }}>
+                    {r}
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            {/* LOGOUT BUTTON */}
+            <button className="logout-btn" data-label="Log Out" onClick={handleLogout} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '10px 12px',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              border: 'none',
+              background: 'rgba(224, 32, 20, 0.08)',
+              width: '100%',
+              height: '52px',
+              boxSizing: 'border-box',
+              transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+              position: 'relative',
+              justifyContent: isCollapsed ? 'center' : 'flex-start'
+            }}>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '8px',
+                flexShrink: 0,
+                transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                background: 'linear-gradient(135deg, #E02014 0%, #9C140C 100%)',
+                color: '#ffffff',
+                boxShadow: '0 3px 8px rgba(0,0,0,0.18), inset 0 1px 2px rgba(255,255,255,0.4)'
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+              </div>
+              <span className="btn-label" style={{
+                font: "500 13px/20px 'Roboto'",
+                color: '#E02014',
+                whiteSpace: 'nowrap',
+                opacity: isCollapsed ? 0 : 1,
+                transition: 'opacity 0.2s ease, width 0.3s ease',
+                width: isCollapsed ? 0 : 'auto'
+              }}>Log Out</span>
+            </button>
           </div>
         </div>
       </aside>

@@ -166,7 +166,10 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
               </svg>
             </div>
-            <span style={{ font: "500 10px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--md-bw-on-surface-variant)' }}>Active Today</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', font: "500 10px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--md-bw-on-surface-variant)' }}>
+              <span className="pulse-dot pulse-dot-green" style={{ margin: 0 }}></span>
+              Active Today
+            </span>
           </div>
           <p style={{ font: "700 32px/36px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>{activeCount}</p>
         </div>
@@ -179,7 +182,10 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
               </svg>
             </div>
-            <span style={{ font: "500 10px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--md-bw-on-surface-variant)' }}>On Leave</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', font: "500 10px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--md-bw-on-surface-variant)' }}>
+              <span className="pulse-dot pulse-dot-orange" style={{ margin: 0 }}></span>
+              On Leave
+            </span>
           </div>
           <p style={{ font: "700 32px/36px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>{leaveCount}</p>
         </div>
@@ -194,7 +200,10 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
             </div>
             <span style={{ font: "500 10px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--md-bw-on-surface-variant)' }}>Drive Connection</span>
           </div>
-          <p style={{ font: "500 18px/36px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>{driveConnected ? 'Healthy' : 'Disconnected'}</p>
+          <p style={{ display: 'flex', alignItems: 'center', gap: '8px', font: "500 18px/36px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>
+            <span className={`pulse-dot ${driveConnected ? 'pulse-dot-green' : 'pulse-dot-red'}`} style={{ margin: 0 }}></span>
+            {driveConnected ? 'Healthy' : 'Disconnected'}
+          </p>
         </div>
       </div>
 

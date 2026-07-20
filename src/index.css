@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+* {
+  font-family: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
 @theme {
   /* M3 Monochrome Light Palette */
   --color-md-sys-primary: #000000;
@@ -1877,36 +1881,55 @@ a {
 }
 
 /* --- Data Tables M3 (B&W) --- */
+table,
+.m3-data-table,
 .m3-table {
   width: 100%;
-  border-collapse: collapse;
-  background-color: var(--md-bw-surface);
+  border-collapse: collapse !important;
+  background: transparent !important;
   text-align: left;
 }
+table th,
+.m3-data-table th,
 .m3-table th {
-  height: 52px;
-  padding: 0 16px;
-  background-color: var(--md-bw-surface);
-  font-family: 'Roboto', sans-serif !important;
-  font-weight: 500; font-size: 14px; line-height: 20px; letter-spacing: 0.01em; 
-  color: var(--md-bw-on-surface-variant);
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--md-bw-outline);
+  height: 48px !important;
+  padding: 0 16px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  font-weight: 600 !important; font-size: 13px !important; line-height: 18px !important; letter-spacing: 0.01em !important; 
+  color: var(--md-bw-on-surface) !important;
+  text-transform: uppercase !important;
+  border-bottom: 1.5px solid var(--glass-border) !important;
 }
+[data-theme="dark"] table th,
+[data-theme="dark"] .m3-data-table th,
+[data-theme="dark"] .m3-table th {
+  background: rgba(0, 0, 0, 0.25) !important;
+}
+table td,
+.m3-data-table td,
 .m3-table td {
-  height: 52px;
-  padding: 0 16px;
-  font-family: 'Roboto', sans-serif !important;
-  font-weight: 400; font-size: 14px; line-height: 20px; letter-spacing: 0.025em;
-  color: var(--md-bw-on-surface);
-  border-bottom: 1px solid var(--md-bw-outline);
-  transition: background-color 0.2s;
+  height: 48px !important;
+  padding: 0 16px !important;
+  font-weight: 400 !important; font-size: 13.5px !important; line-height: 18px !important; letter-spacing: 0.025em !important;
+  color: var(--md-bw-on-surface) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  background: transparent !important;
+  transition: background-color 0.2s !important;
 }
+table tr:hover td,
+.m3-data-table tr:hover td,
 .m3-table tr:hover td {
-  background-color: var(--md-bw-surface-variant);
+  background-color: rgba(0, 0, 0, 0.04) !important;
 }
+[data-theme="dark"] table tr:hover td,
+[data-theme="dark"] .m3-data-table tr:hover td,
+[data-theme="dark"] .m3-table tr:hover td {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+table tr.selected td,
+.m3-data-table tr.selected td,
 .m3-table tr.selected td {
-  background-color: color-mix(in srgb, var(--md-bw-primary-container) 30%, transparent);
+  background-color: color-mix(in srgb, var(--md-bw-primary-container) 15%, transparent) !important;
 }
 .m3-table .tabular {
   font-variant-numeric: tabular-nums;
@@ -1916,23 +1939,30 @@ a {
 .dialog-scrim {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.32);
+  background-color: rgba(0, 0, 0, 0.35) !important;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.3s ease, backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease;
   pointer-events: none;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
 }
 .dialog-scrim.visible {
   opacity: 1;
   pointer-events: auto;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
 }
 .m3-dialog {
-  background: var(--md-elevation-level3);
-  border-radius: 28px; 
-  box-shadow: var(--md-shadow-level3);
+  background: rgba(255, 255, 255, 0.92) !important; /* Near white, extremely low transparency */
+  backdrop-filter: blur(40px) saturate(220%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(220%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.75) !important; /* Premium border highlight */
+  border-radius: 20px !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22) !important;
   max-width: 560px;
   width: 100%;
   padding: 24px;
@@ -1948,6 +1978,11 @@ a {
   opacity: 1;
   transition: transform var(--md-duration-medium4) var(--md-easing-emphasized-decelerate),
               opacity var(--md-duration-medium4) var(--md-easing-emphasized-decelerate);
+}
+[data-theme="dark"] .m3-dialog {
+  background: rgba(22, 22, 24, 0.94) !important; /* Near black in dark mode */
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45) !important;
 }
 .dialog-icon {
   display: flex;
@@ -2308,10 +2343,22 @@ a {
   background: rgba(255, 255, 255, 0.25);
 }
 
-/* Dark mode translucency adjustments */
-[data-theme="dark"] .macos-card {
-  background: rgba(30, 30, 30, 0.6) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+/* macOS 27 Liquid Glass Card Styles - Global Redesign */
+.glass-card,
+.macos-card {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--glass-radius) !important;
+  box-shadow: var(--glass-shadow) !important;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.glass-card:hover,
+.macos-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: var(--glass-shadow-hover) !important;
 }
 
 [data-theme="dark"] .macos-toolbar {
@@ -2338,10 +2385,38 @@ a {
 
 :root {
   --color-background-app: linear-gradient(-45deg, #e0eafc, #cfdef3, #fdfbfb, #ebedee);
+  
+  /* macOS 27 Liquid Glassmorphism Design System Tokens */
+  --glass-blur: blur(24px) saturate(180%);
+  --glass-radius: 16px;
+  
+  /* Light Mode */
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --glass-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.04), 
+    0 1px 2px rgba(0, 0, 0, 0.02), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --glass-shadow-hover:
+    0 16px 40px rgba(0, 0, 0, 0.08), 
+    0 1px 2px rgba(0, 0, 0, 0.02), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 [data-theme="dark"] {
   --color-background-app: linear-gradient(-45deg, #1e1e24, #121212, #2a2a35, #000000);
+
+  /* Dark Mode */
+  --glass-bg: rgba(28, 28, 30, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.25), 
+    0 1px 2px rgba(0, 0, 0, 0.15), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --glass-shadow-hover:
+    0 16px 40px rgba(0, 0, 0, 0.35), 
+    0 1px 2px rgba(0, 0, 0, 0.15), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 body {
@@ -2371,29 +2446,33 @@ svg.lucide {
   border-radius: 20px !important;
   height: calc(100vh - 32px) !important;
   margin: 0 !important;
-  background: rgba(255, 255, 255, 0.4) !important;
-  backdrop-filter: blur(20px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07) !important;
+  background: rgba(255, 255, 255, 0.55) !important; /* frosted white base */
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
 }
 
 .macos-toolbar {
   border-radius: 16px !important;
   margin-bottom: 16px !important;
-  background: rgba(255, 255, 255, 0.4) !important;
-  backdrop-filter: blur(20px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07) !important;
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
 }
 
 /* Dark mode floating elements */
-[data-theme="dark"] .macos-sidebar,
+[data-theme="dark"] .macos-sidebar {
+  background: rgba(0, 0, 0, 0.65) !important; /* frosted black base */
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
+}
 [data-theme="dark"] .macos-toolbar {
-  background: rgba(30, 30, 30, 0.5) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
 }
 
 /* Buttons */
@@ -2507,34 +2586,34 @@ svg.lucide {
 
 /* --- MACOS 27 GLASSMORPHISM --- */
 .sidebar-glass-header {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
   mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
+  border-bottom: 1px solid var(--glass-border) !important;
 }
 [data-theme="dark"] .sidebar-glass-header {
-  background: rgba(30, 30, 30, 0.9) !important;
+  background: var(--glass-bg) !important;
 }
 
 .sidebar-glass-footer {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
   mask-image: linear-gradient(to top, black 40%, transparent 100%);
   -webkit-mask-image: linear-gradient(to top, black 40%, transparent 100%);
+  border-bottom-left-radius: 20px !important;
+  border-bottom-right-radius: 20px !important;
+  border-top: 1px solid var(--glass-border) !important;
 }
 [data-theme="dark"] .sidebar-glass-footer {
-  background: rgba(30, 30, 30, 0.9) !important;
+  background: var(--glass-bg) !important;
 }
 
-.sidebar-nav::-webkit-scrollbar {
-  display: none;
-}
-.sidebar-nav {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+/* Scrollbars are visible on hover as defined in scrollbar styling block */
 
 .sidebar-nav-masked {
   mask-image: linear-gradient(to bottom, transparent 0px, black 16px, black calc(100% - 16px), transparent 100%);
@@ -2595,221 +2674,818 @@ svg.lucide {
   box-shadow: 0 6px 16px rgba(255, 59, 48, 0.4), inset 0 1px 1px rgba(255,255,255,0.4) !important;
 }
 
-/* DESKTOP LARGE (>= 1280px) */
-@media (min-width: 1280px) {
-  .macos-sidebar.collapsed {
-    width: 72px !important;
-    min-width: 72px !important;
-  }
-  .macos-sidebar.collapsed .brand-text,
-  .macos-sidebar.collapsed .user-info,
-  .macos-sidebar.collapsed .nav-label,
-  .macos-sidebar.collapsed .logout-text,
-  .macos-sidebar.collapsed .expand-icon {
+/* --- SIDEBAR REDESIGN & COLLAPSE STYLES --- */
+
+/* Sidebar Base Smooth Transition */
+.macos-sidebar {
+  transition: width 0.35s cubic-bezier(0.32, 0.72, 0, 1), transform 0.35s cubic-bezier(0.32, 0.72, 0, 1) !important;
+}
+
+/* Collapsed State (Rail Mode) */
+.sidebar.collapsed {
+  width: 72px !important;
+  min-width: 72px !important;
+}
+
+.sidebar.collapsed .brand-text,
+.sidebar.collapsed .user-info,
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .btn-label,
+.sidebar.collapsed .expand-icon {
+  opacity: 0 !important;
+  width: 0 !important;
+  pointer-events: none !important;
+  display: none !important; /* Force hide in DOM flow */
+}
+
+.sidebar.collapsed .nav-item,
+.sidebar.collapsed .role-btn,
+.sidebar.collapsed .logout-btn {
+  justify-content: center !important;
+  padding: 10px 12px !important;
+}
+
+.sidebar.collapsed .nav-item div:first-child,
+.sidebar.collapsed .role-btn div:first-child,
+.sidebar.collapsed .logout-btn div:first-child {
+  margin: 0 !important;
+}
+
+/* Center the toggle button when collapsed */
+.sidebar.collapsed .collapse-btn {
+  margin: 0 auto !important;
+}
+
+/* Hide glassmorphism inner elements when collapsed */
+.sidebar.collapsed .user-profile-glass {
+  justify-content: center !important;
+  padding: 10px 0 !important;
+}
+.sidebar.collapsed .user-profile-glass img {
+  margin: 0 !important;
+}
+
+/* --- macOS-STYLE HOVER TOOLTIPS (Collapsed state only) --- */
+
+.nav-item,
+.role-btn,
+.logout-btn,
+.user-profile-glass {
+  position: relative;
+}
+
+/* Tooltip pseudo-element - macOS 27 Liquid Glass Style */
+.sidebar.collapsed .nav-item:hover::after,
+.sidebar.collapsed .role-btn:hover::after,
+.sidebar.collapsed .logout-btn:hover::after,
+.sidebar.collapsed .user-profile-glass:hover::after {
+  content: attr(data-label);
+  position: fixed !important;
+  left: 88px !important;
+  top: auto !important;
+  transform: translateY(-50%) !important;
+  z-index: 1000 !important;
+  
+  /* macOS 27 Liquid Glassmorphism */
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: blur(40px) saturate(250%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(250%) !important;
+  color: #1d1d1f;
+  font: 500 13px/18px 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.01em;
+  padding: 8px 14px;
+  border-radius: 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  animation: tooltip-in 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) 0.05s forwards;
+  
+  /* macOS 27 Drop Shadow */
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Tooltip arrow - macOS 27 Glass Arrow */
+.sidebar.collapsed .nav-item:hover::before,
+.sidebar.collapsed .role-btn:hover::before,
+.sidebar.collapsed .logout-btn:hover::before,
+.sidebar.collapsed .user-profile-glass:hover::before {
+  content: '';
+  position: fixed !important;
+  left: 82px !important;
+  top: auto !important;
+  transform: translateY(-50%) !important;
+  z-index: 1000 !important;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 6px solid rgba(255, 255, 255, 0.94) !important;
+  pointer-events: none;
+  opacity: 0;
+  animation: tooltip-in 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) 0.05s forwards;
+}
+
+@keyframes tooltip-in {
+  from {
     opacity: 0;
-    max-width: 0;
-    pointer-events: none;
-    display: none;
+    transform: translateY(-50%) translateX(-4px);
   }
-  .macos-sidebar.collapsed .nav-item {
-    justify-content: center;
-    padding: 10px 0;
-  }
-  .macos-sidebar.collapsed .nav-icon {
-    margin: 0;
-  }
-  .macos-sidebar.collapsed .user-profile {
-    justify-content: center;
-    padding: 8px 0;
-  }
-  .macos-sidebar.collapsed .logout-btn {
-    justify-content: center;
-    padding: 10px 0;
-  }
-  .macos-sidebar.collapsed .logout-btn svg {
-    margin: 0;
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
   }
 }
 
-/* DESKTOP (1024px - 1279px) */
-@media (min-width: 1024px) and (max-width: 1279px) {
-  .macos-sidebar {
-    width: 240px !important;
-    min-width: 240px !important;
-  }
-  .macos-sidebar.collapsed {
-    width: 72px !important;
-    min-width: 72px !important;
-  }
-  .macos-sidebar.collapsed .brand-text,
-  .macos-sidebar.collapsed .user-info,
-  .macos-sidebar.collapsed .nav-label,
-  .macos-sidebar.collapsed .logout-text,
-  .macos-sidebar.collapsed .expand-icon {
-    opacity: 0;
-    max-width: 0;
-    pointer-events: none;
-    display: none;
-  }
-  .macos-sidebar.collapsed .nav-item {
-    justify-content: center;
-    padding: 10px 0;
-  }
-  .macos-sidebar.collapsed .nav-icon {
-    margin: 0;
-  }
-  .macos-sidebar.collapsed .user-profile {
-    justify-content: center;
-    padding: 8px 0;
-  }
-  .macos-sidebar.collapsed .logout-btn {
-    justify-content: center;
-    padding: 10px 0;
-  }
-  .macos-sidebar.collapsed .logout-btn svg {
-    margin: 0;
-  }
+/* For user profile, use different tooltip content */
+.sidebar.collapsed .user-profile-glass:hover::after {
+  content: attr(data-label);
 }
 
-/* TABLET (768px - 1023px) */
+/* --- DARK MODE ADAPTATION --- */
+[data-theme="dark"] .sidebar {
+  background: rgba(18, 18, 18, 0.55) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] .sidebar-glass-header,
+[data-theme="dark"] .sidebar-glass-footer {
+  background: rgba(18, 18, 18, 0.85) !important;
+}
+
+[data-theme="dark"] .user-profile-glass {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .user-profile-glass > span:first-of-type {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%) !important;
+}
+
+[data-theme="dark"] .collapse-btn {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .nav-item:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+
+/* Dark mode tooltip */
+[data-theme="dark"] .sidebar.collapsed .nav-item:hover::after,
+[data-theme="dark"] .sidebar.collapsed .role-btn:hover::after,
+[data-theme="dark"] .sidebar.collapsed .logout-btn:hover::after,
+[data-theme="dark"] .sidebar.collapsed .user-profile-glass:hover::after {
+  background: rgba(20, 20, 22, 0.96) !important;
+  color: #f5f5f7 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(40px) !important;
+  -webkit-backdrop-filter: blur(40px) !important;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    0 1px 2px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .sidebar.collapsed .nav-item:hover::before,
+[data-theme="dark"] .sidebar.collapsed .role-btn:hover::before,
+[data-theme="dark"] .sidebar.collapsed .logout-btn:hover::before,
+[data-theme="dark"] .sidebar.collapsed .user-profile-glass:hover::before {
+  border-right-color: rgba(20, 20, 22, 0.96) !important;
+}
+
+/* --- RESPONSIVE BEHAVIOR --- */
+
+/* Tablet: always rail */
 @media (min-width: 768px) and (max-width: 1023px) {
   .macos-sidebar {
-    width: 72px !important; 
+    width: 72px !important;
     min-width: 72px !important;
-    position: fixed !important;
-    left: 16px;
-    top: 16px;
-    bottom: 16px;
-    height: calc(100vh - 32px) !important;
   }
   .macos-sidebar .brand-text,
   .macos-sidebar .user-info,
   .macos-sidebar .nav-label,
-  .macos-sidebar .logout-text,
+  .macos-sidebar .btn-label,
   .macos-sidebar .expand-icon {
-    opacity: 0;
-    max-width: 0;
-    pointer-events: none;
-    display: none;
+    opacity: 0 !important;
+    width: 0 !important;
+    pointer-events: none !important;
+    display: none !important;
   }
-  .macos-sidebar .nav-item {
-    justify-content: center;
-    padding: 10px 0;
-  }
-  .macos-sidebar .nav-icon {
-    margin: 0;
-  }
-  .macos-sidebar .user-profile {
-    justify-content: center;
-    padding: 8px 0;
-  }
+  .macos-sidebar .nav-item,
+  .macos-sidebar .role-btn,
   .macos-sidebar .logout-btn {
-    justify-content: center;
-    padding: 10px 0;
+    justify-content: center !important;
+    padding: 0 !important;
   }
-  .macos-sidebar .logout-btn svg {
-    margin: 0;
+  .macos-sidebar .nav-item div:first-child,
+  .macos-sidebar .role-btn div:first-child,
+  .macos-sidebar .logout-btn div:first-child {
+    margin: 0 !important;
   }
-  .content {
-    margin-left: 88px; /* 72px + 16px */
+  .macos-sidebar .collapse-btn {
+    margin: 0 auto !important;
   }
-  /* Tooltips */
-  .macos-sidebar .nav-item:hover::after,
-  .macos-sidebar .user-profile:hover::after,
-  .macos-sidebar .logout-btn:hover::after {
-    content: attr(data-label);
-    position: absolute;
-    left: calc(100% + 8px);
-    top: 50%;
-    transform: translateY(-50%);
-    background: var(--md-bw-inverse-surface);
-    color: var(--md-bw-inverse-on-surface);
-    font: 500 12px 'Roboto';
-    padding: 6px 12px;
-    border-radius: 6px;
-    white-space: nowrap;
-    z-index: 100;
-    pointer-events: none;
+  .macos-sidebar .user-profile-glass {
+    justify-content: center !important;
+    padding: 10px 0 !important;
+  }
+  .macos-sidebar .user-profile-glass img {
+    margin: 0 !important;
   }
 }
 
-/* MOBILE (< 768px) */
+/* Mobile: hidden overlay */
 @media (max-width: 767px) {
   .macos-sidebar {
+    position: fixed !important;
+    left: 16px !important;
+    top: 16px !important;
+    bottom: 16px !important;
     width: 280px !important;
     min-width: 280px !important;
-    position: fixed !important;
-    left: 16px;
-    top: 16px;
-    bottom: 16px;
-    transform: translateX(-120%) !important;
-    z-index: 50 !important;
+    transform: translateX(-320px) !important; /* Slide out completely with left margins */
+    z-index: 2000 !important;
     height: calc(100vh - 32px) !important;
+    border-radius: 20px !important; /* Keep exact rounded corners */
+    border: 1px solid var(--glass-border) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.2) !important;
   }
+  
   .macos-sidebar.open {
     transform: translateX(0) !important;
   }
+  
+  /* Force expand labels on mobile when open */
+  .macos-sidebar.sidebar.collapsed .brand-text,
+  .macos-sidebar.sidebar.collapsed .user-info,
+  .macos-sidebar.sidebar.collapsed .nav-label,
+  .macos-sidebar.sidebar.collapsed .btn-label,
+  .macos-sidebar.sidebar.collapsed .expand-icon,
+  .macos-sidebar .brand-text,
+  .macos-sidebar .user-info,
+  .macos-sidebar .nav-label,
+  .macos-sidebar .btn-label,
+  .macos-sidebar .expand-icon {
+    opacity: 1 !important;
+    width: auto !important;
+    pointer-events: auto !important;
+    display: block !important;
+  }
+
+  .macos-sidebar.sidebar.collapsed .user-info,
+  .macos-sidebar .user-info {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .macos-sidebar.sidebar.collapsed .nav-item,
+  .macos-sidebar.sidebar.collapsed .role-btn,
+  .macos-sidebar.sidebar.collapsed .logout-btn,
+  .macos-sidebar .nav-item,
+  .macos-sidebar .role-btn,
+  .macos-sidebar .logout-btn {
+    justify-content: flex-start !important;
+    padding: 10px 12px !important;
+  }
+
+  .macos-sidebar.sidebar.collapsed .nav-item div:first-child,
+  .macos-sidebar.sidebar.collapsed .role-btn div:first-child,
+  .macos-sidebar.sidebar.collapsed .logout-btn div:first-child,
+  .macos-sidebar .nav-item div:first-child,
+  .macos-sidebar .role-btn div:first-child,
+  .macos-sidebar .logout-btn div:first-child {
+    margin-right: 10px !important;
+    margin-left: 0 !important;
+  }
+
+  .macos-sidebar.sidebar.collapsed .collapse-btn,
+  .macos-sidebar .collapse-btn {
+    display: none !important; /* Hide collapse toggle button on mobile */
+  }
+
+  .macos-sidebar.sidebar.collapsed .user-profile-glass,
+  .macos-sidebar .user-profile-glass {
+    padding: 10px 12px !important;
+    justify-content: flex-start !important;
+  }
+  
+  .macos-sidebar.sidebar.collapsed .user-profile-glass img,
+  .macos-sidebar .user-profile-glass img {
+    margin: 0 12px 0 0 !important;
+  }
+
   .sidebar-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    z-index: 40;
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    z-index: 1900 !important;
   }
+  
   .sidebar-overlay.open {
-    display: block;
+    display: block !important;
   }
+  
   .content {
-    margin-left: 0;
+    margin-left: 0 !important;
+    width: 100% !important;
   }
+  
+  .topbar {
+    width: calc(100% - 32px) !important;
+    max-width: none !important;
+    margin: 16px !important;
+  }
+
   .mobile-menu-btn {
     display: flex !important;
   }
 }
 
-/* ACTIVE STATE FOR NAV ITEMS */
-.nav-item[data-active="true"] {
-  background: rgba(0, 0, 0, 0.06) !important;
-}
-.nav-item[data-active="true"] .nav-icon {
-  background: transparent !important;
-}
-.nav-item[data-active="true"] .nav-label {
-  color: var(--md-bw-on-surface);
-  font-weight: 500;
-}
-.nav-item[data-active="true"] .active-indicator {
-  opacity: 1;
+/* --- ROLE AND LOGOUT BUTTON HOVER/ACTIVE EFFECTS --- */
+.role-btn,
+.logout-btn {
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
 }
 
-[data-theme="dark"] .nav-item[data-active="true"] {
+.role-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+.role-btn:not([data-active="true"]):hover {
+  box-shadow: 0 8px 24px rgba(0, 85, 212, 0.15);
+  background: rgba(0, 98, 230, 0.18) !important;
+}
+.role-btn[data-active="true"]:hover {
+  box-shadow: 0 8px 24px rgba(0, 85, 212, 0.25);
+}
+.role-btn:active {
+  transform: translateY(0);
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(224, 32, 20, 0.18);
+  background: rgba(224, 32, 20, 0.14) !important;
+}
+.logout-btn:active {
+  transform: translateY(0);
+  background: linear-gradient(135deg, #E02014 0%, #9C140C 100%) !important;
+  color: #ffffff !important;
+}
+.logout-btn:active div:first-child {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+.logout-btn:active .btn-label {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .role-btn:not([data-active="true"]):hover {
+  background: rgba(0, 98, 230, 0.22) !important;
+}
+[data-theme="dark"] .logout-btn:hover {
+  background: rgba(224, 32, 20, 0.18) !important;
+}
+
+/* --- macOS 27 GLOBAL REDESIGN SWEEP --- */
+
+/* 1. BUTTONS */
+.btn {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 16px !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  box-sizing: border-box !important;
+}
+
+.btn-filled {
+  background: linear-gradient(135deg, #0062E6 0%, #003A8C 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 
+    0 4px 12px rgba(0, 98, 230, 0.2), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+.btn-filled:hover {
+  transform: translateY(-1.5px) scale(1.02) !important;
+  box-shadow: 
+    0 6px 16px rgba(0, 98, 230, 0.35), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+.btn-filled:active {
+  transform: translateY(0) scale(0.98) !important;
+  box-shadow: 
+    0 2px 6px rgba(0, 98, 230, 0.2), 
+    inset 0 1px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn-tonal,
+.btn-outlined {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: var(--md-bw-on-surface) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+}
+[data-theme="dark"] .btn-tonal,
+[data-theme="dark"] .btn-outlined {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid var(--glass-border) !important;
+}
+.btn-tonal:hover,
+.btn-outlined:hover {
+  background: rgba(0, 0, 0, 0.08) !important;
+  transform: translateY(-1.5px) scale(1.02) !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+[data-theme="dark"] .btn-tonal:hover,
+[data-theme="dark"] .btn-outlined:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+.btn-tonal:active,
+.btn-outlined:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
+.btn-text {
+  background: transparent !important;
+  color: #0062E6 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+[data-theme="dark"] .btn-text {
+  color: #58a6ff !important;
+}
+.btn-text:hover {
+  background: rgba(0, 98, 230, 0.08) !important;
+  transform: translateY(-1px) !important;
+}
+[data-theme="dark"] .btn-text:hover {
+  background: rgba(88, 166, 255, 0.08) !important;
+}
+.btn-text:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
+/* 2. FORM INPUTS & SEARCH BARS */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+select,
+textarea,
+.tf-filled,
+.tf-outlined,
+.search-bar {
+  background-color: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 8px !important;
+  height: 40px !important;
+  padding: 0 12px !important;
+  color: var(--md-bw-on-surface) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  font-size: 13px !important;
+  box-sizing: border-box !important;
+}
+
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] [type="password"],
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] input[type="search"],
+[data-theme="dark"] input[type="tel"],
+[data-theme="dark"] input[type="url"],
+[data-theme="dark"] input[type="date"],
+[data-theme="dark"] select,
+[data-theme="dark"] textarea,
+[data-theme="dark"] .tf-filled,
+[data-theme="dark"] .tf-outlined,
+[data-theme="dark"] .search-bar {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus,
+.tf-filled:focus-within,
+.tf-outlined:focus-within,
+.search-bar:focus-within {
+  border-color: #007aff !important;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2) !important;
+  background-color: rgba(255, 255, 255, 0.65) !important;
+  outline: none !important;
+}
+
+[data-theme="dark"] input[type="text"]:focus,
+[data-theme="dark"] input[type="email"]:focus,
+[data-theme="dark"] input[type="password"]:focus,
+[data-theme="dark"] input[type="number"]:focus,
+[data-theme="dark"] input[type="search"]:focus,
+[data-theme="dark"] input[type="tel"]:focus,
+[data-theme="dark"] input[type="url"]:focus,
+[data-theme="dark"] input[type="date"]:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] .tf-filled:focus-within,
+[data-theme="dark"] .tf-outlined:focus-within,
+[data-theme="dark"] .search-bar:focus-within {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Adjust nested elements in search bar and input wrappers */
+.search-bar input[type="text"],
+.search-bar input[type="search"],
+.search-bar input,
+.tf-filled input[type="text"],
+.tf-filled input,
+.tf-filled-input,
+.tf-outlined input[type="text"],
+.tf-outlined input,
+.tf-outlined-input {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  height: 100% !important;
+  outline: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.search-bar .tf-icon-leading,
+.tf-filled .tf-icon-leading,
+.tf-outlined .tf-icon-leading {
+  margin-right: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: static !important;
+  transform: none !important;
+}
+
+.tf-filled::after,
+.tf-outlined::after,
+.tf-filled-label,
+.tf-outlined-label {
+  display: none !important;
+}
+
+/* 3. GIANT SCREEN RESPONSIVE LAYOUT */
+@media (min-width: 1600px) {
+  .dashboard-root {
+    max-width: 1600px !important;
+    margin: 0 auto !important;
+    border-left: 1px solid var(--glass-border) !important;
+    border-right: 1px solid var(--glass-border) !important;
+    box-shadow: 0 0 64px rgba(0, 0, 0, 0.15) !important;
+    position: relative !important;
+  }
+}
+
+/* 4. GLASS FILTER CHIPS */
+.m3-chip,
+.m3-chip-filter {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 32px !important;
+  padding: 0 14px !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: var(--md-bw-on-surface) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 100px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+[data-theme="dark"] .m3-chip,
+[data-theme="dark"] .m3-chip-filter {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.m3-chip:hover,
+.m3-chip-filter:hover {
+  background: rgba(0, 0, 0, 0.08) !important;
+  transform: translateY(-1px) !important;
+}
+
+[data-theme="dark"] .m3-chip:hover,
+[data-theme="dark"] .m3-chip-filter:hover {
   background: rgba(255, 255, 255, 0.1) !important;
 }
-[data-theme="dark"] .nav-item[data-active="true"] .nav-label {
-  color: #ffffff;
+
+.m3-chip.selected,
+.m3-chip-filter.selected {
+  background: linear-gradient(135deg, #0062E6 0%, #003A8C 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 10px rgba(0, 98, 230, 0.2) !important;
 }
 
-/* HOVER STATE */
-.nav-item:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-[data-theme="dark"] .nav-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+.m3-chip.selected:hover,
+.m3-chip-filter.selected:hover {
+  transform: translateY(-1.5px) scale(1.02) !important;
+  box-shadow: 0 6px 14px rgba(0, 98, 230, 0.3) !important;
 }
 
-/* Prevent body scroll when mobile sidebar is open */
-body.sidebar-open {
-  overflow: hidden;
+/* 5. MAC-STYLE CUSTOM ACTION BUTTONS */
+.btn-mac-blue {
+  background: rgba(0, 98, 230, 0.07) !important;
+  color: #0062E6 !important;
+  border: 1px solid rgba(0, 98, 230, 0.16) !important;
+}
+[data-theme="dark"] .btn-mac-blue {
+  background: rgba(0, 98, 230, 0.14) !important;
+  color: #58a6ff !important;
+  border: 1px solid rgba(0, 98, 230, 0.22) !important;
+}
+.btn-mac-blue:hover {
+  background: rgba(0, 98, 230, 0.14) !important;
+  transform: translateY(-1.5px) scale(1.02) !important;
+}
+[data-theme="dark"] .btn-mac-blue:hover {
+  background: rgba(0, 98, 230, 0.22) !important;
+  transform: translateY(-1.5px) scale(1.02) !important;
 }
 
-/* Transitions */
-.macos-sidebar,
-.brand-text,
-.user-info,
-.nav-label,
-.logout-text,
-.expand-icon {
-  will-change: transform, width, opacity;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, max-width 0.3s ease;
+.btn-mac-red {
+  background: rgba(224, 32, 20, 0.07) !important;
+  color: #E02014 !important;
+  border: 1px solid rgba(224, 32, 20, 0.16) !important;
+}
+[data-theme="dark"] .btn-mac-red {
+  background: rgba(224, 32, 20, 0.14) !important;
+  color: #ff6b6b !important;
+  border: 1px solid rgba(224, 32, 20, 0.22) !important;
+}
+.btn-mac-red:hover {
+  background: rgba(224, 32, 20, 0.14) !important;
+  transform: translateY(-1.5px) scale(1.02) !important;
+}
+[data-theme="dark"] .btn-mac-red:hover {
+  background: rgba(224, 32, 20, 0.22) !important;
+  transform: translateY(-1.5px) scale(1.02) !important;
+}
+
+.btn-mac-green {
+  background: rgba(40, 167, 69, 0.07) !important;
+  color: #28a745 !important;
+  border: 1px solid rgba(40, 167, 69, 0.16) !important;
+}
+[data-theme="dark"] .btn-mac-green {
+  background: rgba(40, 167, 69, 0.14) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(40, 167, 69, 0.22) !important;
+}
+.btn-mac-green:hover {
+  background: rgba(40, 167, 69, 0.14) !important;
+  transform: translateY(-1.5px) scale(1.02) !important;
+}
+[data-theme="dark"] .btn-mac-green:hover {
+  background: rgba(40, 167, 69, 0.22) !important;
+  transform: translateY(-1.5px) scale(1.02) !important;
+}
+
+select option {
+  background-color: #ffffff !important;
+  color: #1c1c1e !important;
+}
+[data-theme="dark"] select option {
+  background-color: #1c1c1e !important;
+  color: #ffffff !important;
+}
+
+/* 6. PULSING STATUS DOT INDICATORS */
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 6px;
+  display: inline-block;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.pulse-dot-green {
+  background-color: #28a745;
+}
+.pulse-dot-green::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid #28a745;
+  animation: pulse-ring 1.6s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;
+}
+
+.pulse-dot-orange {
+  background-color: #f0ad4e;
+}
+.pulse-dot-orange::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid #f0ad4e;
+  animation: pulse-ring 1.6s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;
+}
+
+.pulse-dot-red {
+  background-color: #dc3545;
+}
+.pulse-dot-red::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid #dc3545;
+  animation: pulse-ring 1.6s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  80%, 100% {
+    transform: scale(2.0);
+    opacity: 0;
+  }
+}
+
+/* 7. COLLAPSIBLE EMPLOYEE CARD */
+.employee-card-wrapper {
+  height: 98px !important;
+  position: relative !important;
+}
+
+.macos-card.employee-card {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-height: 98px !important;
+  overflow: hidden !important;
+  z-index: 5;
+  transition: 
+    max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), 
+    box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.macos-card.employee-card:hover {
+  max-height: 280px !important; /* expanded height to fit DOB and Joining Date */
+  z-index: 100 !important;
+}
+
+/* Desktop Blur & Pop on Hover */
+@media (min-width: 768px) {
+  .employee-grid:hover .employee-card {
+    filter: blur(4px) saturate(80%);
+    opacity: 0.5;
+    transform: scale(0.97);
+  }
+
+  .employee-grid:hover .employee-card-wrapper:hover .employee-card {
+    filter: none;
+    opacity: 1;
+    transform: translateY(-8px) scale(1.04) !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2) !important;
+    z-index: 105 !important;
+  }
 }

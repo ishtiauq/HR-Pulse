@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Cpu, Users } from 'lucide-react'
+import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Cpu, Users, Mail, Eye } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
@@ -12,6 +12,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
   const [editingEmployee, setEditingEmployee] = useState(null)
   const [viewingEmployee, setViewingEmployee] = useState(null)
   const [imageErrors, setImageErrors] = useState({})
+  const [expandedCardId, setExpandedCardId] = useState(null)
   useModal(() => setViewingEmployee(null))
 
   useEffect(() => {
@@ -399,35 +400,38 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
       {/* Pending Profile Updates Queue */}
       {pendingProfileEdits && pendingProfileEdits.length > 0 && (
-        <div className="m3-card m3-card-outlined" style={{ padding: '24px' }}>
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px 0', fontSize: '1.2rem' }}>
-            <AlertCircle size={20} />
+        <div className="macos-card" style={{ padding: '18px', marginBottom: '24px' }}>
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px 0', fontSize: '15px', fontWeight: 600, color: 'var(--md-bw-on-surface)' }}>
+            <AlertCircle size={18} style={{ color: '#007aff' }} />
             Pending Profile Update Requests ({pendingProfileEdits.length})
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {pendingProfileEdits.map(editReq => {
               const emp = employees.find(e => e.id === editReq.employeeId)
               return (
-                <div key={editReq.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', gap: '16px', flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, fontSize: '1.05rem', color: 'var(--text-primary)' }}>{emp?.name || 'Unknown Employee'} <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>({editReq.employeeId})</span></div>
-                    <div style={{ display: 'flex', gap: '16px', marginTop: '8px', fontSize: '0.85rem', flexWrap: 'wrap' }}>
+                <div key={editReq.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(0,0,0,0.02)', borderRadius: '8px', border: '1px solid var(--glass-border)', flexWrap: 'wrap', gap: '12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', minWidth: 0, flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <strong style={{ color: 'var(--md-bw-on-surface)', fontSize: '13.5px' }}>{emp ? emp.name : 'Unknown Employee'}</strong>
+                      <span style={{ fontSize: '11px', color: 'var(--md-bw-on-surface-variant)', opacity: 0.8 }}>ID: {editReq.employeeId}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', fontSize: '11.5px' }}>
                       {Object.entries(editReq.changes).map(([key, val]) => (
                         val ? (
-                          <span key={key} style={{ padding: '4px 8px', background: 'var(--bg-tertiary)', borderRadius: '4px' }}>
-                            <strong style={{ color: 'var(--text-secondary)' }}>{key}: </strong> 
-                            <span style={{ color: 'var(--text-primary)' }}>{val}</span>
+                          <span key={key} style={{ padding: '3px 6px', background: 'rgba(0,0,0,0.03)', borderRadius: '4px', border: '1px solid var(--glass-border)', display: 'inline-flex', gap: '4px' }}>
+                            <strong style={{ color: 'var(--md-bw-on-surface-variant)' }}>{key}: </strong> 
+                            <span style={{ color: 'var(--md-bw-on-surface)' }}>{val}</span>
                           </span>
                         ) : null
                       ))}
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button className="btn btn-primary" onClick={() => handleApproveProfileEdit(editReq.id)} style={{ padding: '6px 12px', fontSize: '0.85rem' }}>
-                      <Check size={14} style={{ display: 'inline', marginRight: '4px' }} /> Approve
+                  <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                    <button className="btn btn-filled" onClick={() => handleApproveProfileEdit(editReq.id)} style={{ height: '30px', minHeight: '30px', padding: '0 12px', fontSize: '11.5px', borderRadius: '6px !important' }}>
+                      <Check size={12} style={{ marginRight: '4px' }} /> Approve
                     </button>
-                    <button className="btn btn-secondary" onClick={() => handleRejectProfileEdit(editReq.id)} style={{ padding: '6px 12px', fontSize: '0.85rem', color: 'var(--accent-danger)', background: 'rgba(239, 68, 68, 0.1)', border: 'none' }}>
-                      <X size={14} style={{ display: 'inline', marginRight: '4px' }} /> Reject
+                    <button className="btn btn-tonal" onClick={() => handleRejectProfileEdit(editReq.id)} style={{ height: '30px', minHeight: '30px', padding: '0 12px', fontSize: '11.5px', borderRadius: '6px !important', color: '#dc3545', border: '1px solid rgba(220, 53, 69, 0.15)' }}>
+                      <X size={12} style={{ marginRight: '4px' }} /> Reject
                     </button>
                   </div>
                 </div>
@@ -445,54 +449,78 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
           <button onClick={() => {setSearchTerm(''); setDeptFilter('All')}} className="btn btn-filled">Clear Filters</button>
         </div>
       ) : (
-      <div className="employee-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+      <div className="employee-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
         {filteredEmployees.map(emp => (
-          <div key={emp.id} className="m3-card m3-card-outlined" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px', cursor: 'pointer' }} onClick={() => setViewingEmployee(emp)}>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{
-                width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', position: 'relative',
-                border: '1px solid var(--md-bw-outline)', flexShrink: 0,
-                background: (!emp.avatar || imageErrors[emp.id]) ? 'var(--md-bw-surface-variant)' : '#f3f4f6',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--md-bw-on-surface-variant)', fontWeight: 700, fontSize: '1.4rem'
-              }}>
-                {(!emp.avatar || imageErrors[emp.id]) ? (
-                  <span>{getAvatarFallback(emp.name).initials}</span>
-                ) : (
-                  <img src={emp.avatar} alt={emp.name} style={{
-                      width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0,
-                      transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`,
-                      transformOrigin: 'center', userSelect: 'none', pointerEvents: 'none'
-                    }}
-                    onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))}
-                  />
-                )}
+          <div key={emp.id} className="employee-card-wrapper">
+            <div className="macos-card employee-card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px', cursor: 'pointer' }} onClick={() => setViewingEmployee(emp)}>
+              
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0, flex: 1 }}>
+                  <div style={{
+                    width: '64px', height: '64px', borderRadius: '16px', overflow: 'hidden', position: 'relative',
+                    border: '1px solid var(--glass-border)', flexShrink: 0,
+                    background: (!emp.avatar || imageErrors[emp.id]) ? 'rgba(0,0,0,0.04)' : '#f3f4f6',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'var(--md-bw-on-surface-variant)', fontWeight: 700, fontSize: '1.2rem',
+                    boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)'
+                  }}>
+                    {(!emp.avatar || imageErrors[emp.id]) ? (
+                      <span>{getAvatarFallback(emp.name).initials}</span>
+                    ) : (
+                      <img src={emp.avatar} alt={emp.name} style={{
+                          width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0,
+                          transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`,
+                          transformOrigin: 'center', userSelect: 'none', pointerEvents: 'none'
+                        }}
+                        onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))}
+                      />
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, flex: 1 }}>
+                    <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: 'var(--md-bw-on-surface)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.name}</h4>
+                    <span style={{ fontSize: '12px', color: 'var(--md-bw-on-surface-variant)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>{emp.role}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--md-bw-on-surface-variant)', opacity: 0.75, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.department}</span>
+                  </div>
+                </div>
+                
+                <span style={{ 
+                  height: '20px', padding: '0 8px', fontSize: '10px', fontWeight: 600, borderRadius: '10px',
+                  display: 'inline-flex', alignItems: 'center', flexShrink: 0, marginTop: '2px',
+                  background: emp.status === 'Active' ? 'rgba(40, 167, 69, 0.1)' : (emp.status === 'On Leave' ? 'rgba(240, 173, 78, 0.1)' : 'rgba(220, 53, 69, 0.1)'),
+                  color: emp.status === 'Active' ? '#28a745' : (emp.status === 'On Leave' ? '#f0ad4e' : '#dc3545'),
+                  border: emp.status === 'Active' ? '1px solid rgba(40, 167, 69, 0.15)' : (emp.status === 'On Leave' ? '1px solid rgba(240, 173, 78, 0.15)' : '1px solid rgba(220, 53, 69, 0.15)')
+                }}>
+                  <span className={`pulse-dot ${emp.status === 'Active' ? 'pulse-dot-green' : (emp.status === 'On Leave' ? 'pulse-dot-orange' : 'pulse-dot-red')}`}></span>
+                  {emp.status}
+                </span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>{emp.name}</h4>
-                <span className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{emp.role}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                  <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{emp.id}</span>
-                  <span className={`m3-chip m3-chip-assist ${emp.status === 'Active' ? 'solid' : 'outlined'}`} style={{ 
-                    height: '24px', padding: '0 8px', fontSize: '11px',
-                    backgroundColor: emp.status === 'Active' ? 'var(--md-bw-on-surface)' : 'transparent',
-                    color: emp.status === 'Active' ? 'var(--md-bw-surface)' : 'var(--md-bw-on-surface-variant)',
-                    border: emp.status === 'Active' ? 'none' : '1px solid var(--md-bw-outline)'
-                  }}>{emp.status}</span>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--glass-border)', paddingTop: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', color: 'var(--md-bw-on-surface-variant)', minWidth: 0 }}>
+                  <Mail size={12} style={{ flexShrink: 0, opacity: 0.7 }} />
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{emp.email}</span>
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', fontSize: '10.5px', color: 'var(--md-bw-on-surface-variant)', opacity: 0.85 }}>
+                  <span>Born: {emp.dob ? formatDate(emp.dob) : 'N/A'}</span>
+                  <span>Joined: {emp.joiningDate ? formatDate(emp.joiningDate) : 'N/A'}</span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '2px' }}>
+                  <span style={{ fontSize: '10.5px', color: 'var(--md-bw-on-surface-variant)', fontVariantNumeric: 'tabular-nums', opacity: 0.7 }}>ID: {emp.id}</span>
                 </div>
               </div>
-            </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid var(--md-bw-outline)' }}>
-              <button className="icon-btn" onClick={(e) => {
-                e.stopPropagation(); setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
-              }}>
-                <Edit size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-              </button>
-              <button className="icon-btn" onClick={(e) => { e.stopPropagation(); handleDeleteEmployee(emp.id, emp.name); }}>
-                <Trash2 size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-              </button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', borderTop: '1px solid var(--glass-border)', paddingTop: '12px', marginTop: 'auto' }}>
+                <button className="btn btn-mac-blue" style={{ height: '30px', minHeight: '30px', padding: '0 10px', fontSize: '11px', borderRadius: '6px !important' }} onClick={(e) => {
+                  e.stopPropagation(); setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
+                }}>
+                  <Edit size={12} style={{ marginRight: '4px' }} /> Edit
+                </button>
+                <button className="btn btn-mac-red" style={{ height: '30px', minHeight: '30px', padding: '0 10px', fontSize: '11px', borderRadius: '6px !important' }} onClick={(e) => { e.stopPropagation(); handleDeleteEmployee(emp.id, emp.name); }}>
+                  <Trash2 size={12} style={{ marginRight: '4px' }} /> Delete
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -584,20 +612,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
       {/* Form Modal/Overlay */}
       {showAddForm && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.3)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }} onClick={() => handleCloseForm()}>
-          <div className="glass-card animate-fade-in" onClick={e => e.stopPropagation()} style={{
+        <div className="dialog-scrim visible" onClick={() => handleCloseForm()}>
+          <div className="m3-dialog" onClick={e => e.stopPropagation()} style={{
             width: '100%',
             maxWidth: '500px',
             padding: '32px',
@@ -608,13 +624,15 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
             overflowY: 'auto'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {editingEmployee ? <Edit size={20} style={{ color: 'var(--text-primary)' }} /> : <UserPlus size={20} style={{ color: 'var(--text-primary)' }} />}
+              <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px', margin: 0, color: 'var(--md-bw-on-surface)' }}>
+                {editingEmployee ? <Edit size={20} style={{ color: 'var(--md-bw-on-surface)' }} /> : <UserPlus size={20} style={{ color: 'var(--md-bw-on-surface)' }} />}
                 {editingEmployee ? 'Edit Employee Profile' : 'New Employee Record'}
               </h3>
               <button
                 onClick={handleCloseForm}
-                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px', borderRadius: '50%', transition: 'background-color 0.2s' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
                 <X size={20} />
               </button>
@@ -627,12 +645,12 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                 display: 'flex', 
                 flexDirection: 'column', 
                 gap: '8px', 
-                border: '1px dashed var(--border-color)', 
+                border: '1px dashed var(--glass-border)', 
                 padding: '16px', 
                 borderRadius: '16px', 
                 background: 'rgba(0,0,0,0.01)' 
               }}>
-                <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 700 }}>Profile Photo & Repositioner</label>
+                <label style={{ fontSize: '0.85rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 700 }}>Profile Photo & Repositioner</label>
                 
                 <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                   {/* Panning Preview Frame */}
@@ -646,7 +664,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                       borderRadius: '20px',
                       overflow: 'hidden',
                       position: 'relative',
-                      border: '2px solid var(--border-color)',
+                      border: '1.5px solid var(--glass-border)',
                       background: '#f3f4f6',
                       cursor: dragStart ? 'grabbing' : 'grab',
                       touchAction: 'none',
@@ -678,11 +696,12 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                         display: 'flex', 
                         alignItems: 'center', 
                         justifyContent: 'center', 
-                        color: 'var(--text-muted)', 
+                        color: 'var(--md-bw-on-surface-variant)', 
                         fontSize: '0.75rem', 
                         textAlign: 'center', 
                         padding: '8px',
-                        userSelect: 'none'
+                        userSelect: 'none',
+                        opacity: 0.7
                       }}>
                         No Image
                       </div>
@@ -693,7 +712,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                     <button
                       type="button"
                       className="btn btn-secondary"
-                      style={{ padding: '8px 12px', fontSize: '0.8rem', justifyContent: 'center' }}
+                      style={{ padding: '8px 12px', fontSize: '0.8rem', justifyContent: 'center', height: '34px', minHeight: '34px' }}
                       onClick={() => document.getElementById('photo-file-input').click()}
                     >
                       {newAvatar ? 'Change Photo' : 'Upload HD Photo'}
@@ -717,7 +736,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                         }
                       }}
                     />
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--md-bw-on-surface-variant)', opacity: 0.65 }}>
                       *Drag image inside the frame to adjust framing.
                     </span>
                   </div>
@@ -725,7 +744,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
                 {newAvatar && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--md-bw-on-surface-variant)' }}>
                       <span>Zoom Scale:</span>
                       <span>{Math.round(photoZoom * 100)}%</span>
                     </div>
@@ -744,71 +763,44 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
               {/* Employee ID */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Employee ID (Auto-generated, editable)</label>
+                <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Employee ID (Auto-generated, editable)</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. EMP-101"
                   value={newEmpId}
                   onChange={(e) => setNewEmpId(e.target.value.trim().toUpperCase())}
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border-color)',
-                    background: '#ffffff',
-                    color: 'var(--text-primary)',
-                    outline: 'none',
-                    fontSize: '0.9rem',
-                    fontWeight: 700
-                  }}
+                  style={{ fontWeight: 700 }}
                 />
               </div>
 
               {/* Name */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Full Name</label>
+                <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Full Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. John Doe"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border-color)',
-                    background: '#ffffff',
-                    color: 'var(--text-primary)',
-                    outline: 'none',
-                    fontSize: '0.9rem'
-                  }}
                 />
               </div>
 
               {/* Role */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Job Title</label>
+                <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Job Title</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. HR Associate"
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value)}
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border-color)',
-                    background: '#ffffff',
-                    color: 'var(--text-primary)',
-                    outline: 'none',
-                    fontSize: '0.9rem'
-                  }}
                 />
               </div>
 
               {/* Department Selection */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Department</label>
+                <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Department</label>
                 <select
                   value={isCustomDept ? 'NEW' : newDept}
                   onChange={(e) => {
@@ -818,16 +810,6 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                       setIsCustomDept(false)
                       setNewDept(e.target.value)
                     }
-                  }}
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border-color)',
-                    background: '#ffffff',
-                    color: 'var(--text-primary)',
-                    outline: 'none',
-                    cursor: 'pointer',
-                    fontSize: '0.9rem'
                   }}
                 >
                   {activeDepts.map(d => (
@@ -860,62 +842,35 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
               {/* Email */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Email Address</label>
+                <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Email Address</label>
                 <input
                   type="email"
                   required
                   placeholder="e.g. john@hrpulse.io"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border-color)',
-                    background: '#ffffff',
-                    color: 'var(--text-primary)',
-                    outline: 'none',
-                    fontSize: '0.9rem'
-                  }}
                 />
               </div>
 
               {/* DOB & Joining Date */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Date of Birth</label>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Date of Birth</label>
                   <input
                     type="date"
                     value={newDob}
                     onChange={(e) => setNewDob(e.target.value)}
-                    style={{
-                      padding: '10px 14px',
-                      borderRadius: '10px',
-                      border: '1px solid var(--border-color)',
-                      background: '#ffffff',
-                      color: 'var(--text-primary)',
-                      outline: 'none',
-                      fontSize: '0.9rem',
-                      cursor: 'pointer'
-                    }}
+                    style={{ cursor: 'pointer' }}
                   />
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Joining Date</label>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Joining Date</label>
                   <input
                     type="date"
                     value={newJoiningDate}
                     onChange={(e) => setNewJoiningDate(e.target.value)}
-                    style={{
-                      padding: '10px 14px',
-                      borderRadius: '10px',
-                      border: '1px solid var(--border-color)',
-                      background: '#ffffff',
-                      color: 'var(--text-primary)',
-                      outline: 'none',
-                      fontSize: '0.9rem',
-                      cursor: 'pointer'
-                    }}
+                    style={{ cursor: 'pointer' }}
                   />
                 </div>
               </div>
@@ -923,18 +878,19 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               {/* Custom CV and Passport/NID upload fields */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Upload CV</label>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Upload CV</label>
                   <div style={{ position: 'relative' }}>
                     <button 
                       type="button" 
-                      className="btn btn-secondary" 
+                      className="btn btn-mac-green" 
                       style={{ 
                         width: '100%', 
                         padding: '10px 14px', 
                         fontSize: '0.8rem', 
                         borderRadius: '10px', 
-                        border: '1px solid var(--border-color)', 
-                        justifyContent: 'center' 
+                        justifyContent: 'center',
+                        height: '38px',
+                        minHeight: '38px'
                       }} 
                       onClick={() => document.getElementById('cv-file-input').click()}
                     >
@@ -955,18 +911,19 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Passport/NID</label>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Passport/NID</label>
                   <div style={{ position: 'relative' }}>
                     <button 
                       type="button" 
-                      className="btn btn-secondary" 
+                      className="btn btn-mac-green" 
                       style={{ 
                         width: '100%', 
                         padding: '10px 14px', 
                         fontSize: '0.8rem', 
                         borderRadius: '10px', 
-                        border: '1px solid var(--border-color)', 
-                        justifyContent: 'center' 
+                        justifyContent: 'center',
+                        height: '38px',
+                        minHeight: '38px'
                       }} 
                       onClick={() => document.getElementById('nid-file-input').click()}
                     >
@@ -989,20 +946,11 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
               {/* Status */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Employment Status</label>
+                <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Employment Status</label>
                 <select
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value)}
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: '1px solid var(--border-color)',
-                    background: '#ffffff',
-                    color: 'var(--text-primary)',
-                    outline: 'none',
-                    fontSize: '0.9rem',
-                    cursor: 'pointer'
-                  }}
+                  style={{ cursor: 'pointer' }}
                 >
                   <option value="Active">Active</option>
                   <option value="On Leave">On Leave</option>
@@ -1010,21 +958,21 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               </div>
 
               {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '16px', justifyContent: 'flex-end' }}>
                 <button
                   type="button"
-                  className="btn btn-secondary"
-                  style={{ flex: 1, justifyContent: 'center' }}
+                  className="btn btn-mac-red"
+                  style={{ flex: 1, height: '38px', minHeight: '38px', padding: '0 16px', fontSize: '12px', borderRadius: '8px !important', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                   onClick={handleCloseForm}
                 >
-                  Cancel
+                  <X size={14} /> Cancel
                 </button>
                 <button
                   type="submit"
-                  className="btn btn-primary"
-                  style={{ flex: 1, justifyContent: 'center' }}
+                  className="btn btn-mac-blue"
+                  style={{ flex: 1, height: '38px', minHeight: '38px', padding: '0 16px', fontSize: '12px', borderRadius: '8px !important', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                 >
-                  {editingEmployee ? 'Save Changes' : 'Save Record'}
+                  <Check size={14} /> {editingEmployee ? 'Save Changes' : 'Save Record'}
                 </button>
               </div>
             </form>
