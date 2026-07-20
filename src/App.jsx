@@ -1552,7 +1552,7 @@ export default function App() {
         
         {/* STICKY HEADER */}
         <div className="sidebar-header sidebar-glass-header" style={{
-          flexShrink: 0, padding: isCollapsed ? '20px 4px' : '20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: isCollapsed ? '4px' : '12px',
+          flexShrink: 0, padding: '20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
           position: 'relative', zIndex: 2
         }}>
           
@@ -1571,19 +1571,10 @@ export default function App() {
               opacity: isCollapsed ? 0 : 1, maxWidth: isCollapsed ? 0 : '200px'
             }}>HR Pulse</span>
           </div>
-
-          <button className="sidebar-toggle" onClick={toggleSidebar} style={{
-            width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer',
-            color: 'var(--md-bw-on-surface-variant)', flexShrink: 0, transition: 'background 0.2s ease'
-          }}>
-            <Menu size={18} style={{ display: isCollapsed ? 'none' : 'block' }} />
-            <X size={18} style={{ display: isCollapsed ? 'block' : 'none' }} />
-          </button>
         </div>
 
         {/* SCROLLABLE NAV AREA */}
-        <nav className="sidebar-nav" style={{
+        <nav className="sidebar-nav sidebar-nav-masked" style={{
           flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '12px 12px', display: 'flex',
           flexDirection: 'column', gap: '4px', minHeight: 0
         }}>
@@ -1638,12 +1629,11 @@ export default function App() {
             </div>
           </div>
 
-          <button className="logout-btn" onClick={handleLogout} data-label="Log Out" style={{
-            display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'transparent',
-            border: 'none', borderRadius: '8px', cursor: 'pointer', color: 'var(--md-bw-on-surface-variant)',
-            font: "500 12px/16px 'Roboto'", transition: 'all 0.2s ease', width: '100%', marginTop: '8px'
+          <button className="mac-btn-danger" onClick={handleLogout} data-label="Log Out" style={{
+            display: 'flex', alignItems: 'center', gap: '10px', width: '100%', marginTop: '8px', cursor: 'pointer',
+            justifyContent: 'center'
           }}>
-            <LogOut size={18} />
+            <LogOut size={16} />
             <span className="logout-text" style={{ whiteSpace: 'nowrap', transition: 'opacity 0.2s ease, width 0.3s ease' }}>Log Out</span>
           </button>
         </div>
@@ -1652,11 +1642,10 @@ export default function App() {
       {/* Main Content */}
       <main className="content dashboard-content" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         
-        {/* Global Top App Bar */}
         <header className="macos-toolbar topbar" style={{ height: '52px', minHeight: '52px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', position: 'sticky', top: 0, zIndex: 15, flexShrink: 0 }}>
           <div className="left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(true)} style={{
-              width: '32px', height: '32px', display: 'none', alignItems: 'center', justifyContent: 'center',
+            <button className="desktop-menu-btn" onClick={toggleSidebar} style={{
+              width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
               background: 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer',
               color: 'var(--md-bw-on-surface-variant)'
             }}>
