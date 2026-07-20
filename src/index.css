@@ -2328,3 +2328,133 @@ a {
   background: rgba(30, 30, 30, 0.8) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
+
+/* macOS 27 Liquid Glass Redesign - Layout & Buttons */
+:root {
+  --color-background-app: linear-gradient(135deg, #e0eafc, #cfdef3);
+}
+
+[data-theme="dark"] {
+  --color-background-app: linear-gradient(135deg, #1e1e24, #121212);
+}
+
+body {
+  background: var(--color-background-app) !important;
+  background-attachment: fixed !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Floating Layout Containers */
+.dashboard-root {
+  background: transparent !important; /* override the previous bg */
+  padding: 16px;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+/* Make all Lucide icons slightly thinner for macOS aesthetics */
+svg.lucide {
+  stroke-width: 1.5 !important;
+}
+
+.macos-sidebar {
+  border-radius: 20px !important;
+  height: calc(100vh - 32px) !important;
+  margin: 0 !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(20px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07) !important;
+}
+
+.macos-toolbar {
+  border-radius: 16px !important;
+  margin-bottom: 16px !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(20px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07) !important;
+}
+
+/* Dark mode floating elements */
+[data-theme="dark"] .macos-sidebar,
+[data-theme="dark"] .macos-toolbar {
+  background: rgba(30, 30, 30, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Buttons */
+.mac-btn {
+  background: #007aff !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  font-weight: 500 !important;
+  border: none !important;
+  box-shadow: 0 2px 4px rgba(0, 122, 255, 0.3) !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mac-btn:hover {
+  background: #005bb5 !important;
+  transform: translateY(-1px);
+}
+
+.mac-btn:active {
+  transform: translateY(1px);
+}
+
+.mac-btn-secondary {
+  background: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(10px) !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .mac-btn-secondary {
+  background: rgba(40, 40, 40, 0.5) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.mac-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+
+[data-theme="dark"] .mac-btn-secondary:hover {
+  background: rgba(60, 60, 60, 0.7) !important;
+}
+
+/* Minimal Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.2);
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}

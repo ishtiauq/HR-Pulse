@@ -74,18 +74,18 @@ function timestampArrayChanges(prev, next) {
 }
 
 const allNavItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-  { id: 'announcements', label: 'Announcements', icon: <Megaphone size={20} /> },
-  { id: 'calendar', label: 'Calendar', icon: <CalendarDays size={20} /> },
-  { id: 'documents', label: 'Documents', icon: <FileText size={20} /> },
-  { id: 'employees', label: 'Employees', icon: <Users size={20} /> },
-  { id: 'payroll', label: 'Payroll', icon: <CreditCard size={20} /> },
-  { id: 'attendance', label: 'Leaves & Attendance', icon: <CalendarIcon size={20} /> },
-  { id: 'expenses', label: 'Expenses', icon: <Receipt size={20} /> },
-  { id: 'assets', label: 'Assets', icon: <Monitor size={20} /> },
-  { id: 'reports', label: 'Reports', icon: <BarChart3 size={20} /> },
-  { id: 'settings', label: 'Settings', icon: <SettingsIcon size={20} /> },
-  { id: 'drive', label: 'Drive Sync', icon: <Database size={20} /> },
+  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} />, bg: 'linear-gradient(135deg, #007aff, #005bb5)' },
+  { id: 'announcements', label: 'Announcements', icon: <Megaphone size={18} />, bg: 'linear-gradient(135deg, #ff9500, #e68600)' },
+  { id: 'calendar', label: 'Calendar', icon: <CalendarDays size={18} />, bg: 'linear-gradient(135deg, #ff3b30, #d63328)' },
+  { id: 'documents', label: 'Documents', icon: <FileText size={18} />, bg: 'linear-gradient(135deg, #5856d6, #4e4cb8)' },
+  { id: 'employees', label: 'Employees', icon: <Users size={18} />, bg: 'linear-gradient(135deg, #34c759, #2eb350)' },
+  { id: 'payroll', label: 'Payroll', icon: <CreditCard size={18} />, bg: 'linear-gradient(135deg, #32ade6, #2c97c9)' },
+  { id: 'attendance', label: 'Leaves & Attendance', icon: <CalendarIcon size={18} />, bg: 'linear-gradient(135deg, #ff2d55, #e6284c)' },
+  { id: 'expenses', label: 'Expenses', icon: <Receipt size={18} />, bg: 'linear-gradient(135deg, #ffcc00, #e6b800)' },
+  { id: 'assets', label: 'Assets', icon: <Monitor size={18} />, bg: 'linear-gradient(135deg, #8e8e93, #7a7a7d)' },
+  { id: 'reports', label: 'Reports', icon: <BarChart3 size={18} />, bg: 'linear-gradient(135deg, #af52de, #9948c2)' },
+  { id: 'settings', label: 'Settings', icon: <SettingsIcon size={18} />, bg: 'linear-gradient(135deg, #8e8e93, #7a7a7d)' },
+  { id: 'drive', label: 'Drive Sync', icon: <Database size={18} />, bg: 'linear-gradient(135deg, #34c759, #2eb350)' },
 ]
 
 export default function App() {
@@ -1514,8 +1514,8 @@ export default function App() {
   const unreadCount = notifications.filter(n => !n.read).length
 
   return (
-    <div className="dashboard-root app-shell" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', background: 'var(--md-bw-background)', fontFamily: "'Roboto', sans-serif" }}>
-      <aside className="macos-sidebar sidebar" style={{ width: '260px', minWidth: '260px', flexShrink: 0, background: 'rgba(248, 249, 250, 0.65)', backdropFilter: 'blur(24px) saturate(180%)', WebkitBackdropFilter: 'blur(24px) saturate(180%)', borderRight: '1px solid rgba(0, 0, 0, 0.06)', display: 'flex', flexDirection: 'column', zIndex: 20 }}>
+    <div className="dashboard-root app-shell" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', padding: '16px', gap: '16px', boxSizing: 'border-box' }}>
+      <aside className="macos-sidebar sidebar" style={{ width: '260px', minWidth: '260px', flexShrink: 0, display: 'flex', flexDirection: 'column', zIndex: 20 }}>
         <div style={{ padding: '16px 24px', fontWeight: 700, fontSize: '20px', color: 'var(--md-bw-on-surface)' }}>
           HR Pulse
         </div>
@@ -1534,7 +1534,13 @@ export default function App() {
                   cursor: 'pointer', textAlign: 'left', font: "500 14px/20px 'Roboto', sans-serif"
                 }}
               >
-                <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'inherit' }}>
+                <div style={{
+                  flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                  width: '32px', height: '32px', borderRadius: '10px',
+                  background: item.bg || 'var(--md-bw-primary)', color: '#ffffff',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.15), inset 0 1px 2px rgba(255,255,255,0.4)',
+                  transition: 'transform 0.2s ease'
+                }}>
                   {item.icon}
                 </div>
                 <span style={{ flex: 1 }}>{item.label}</span>
@@ -1588,8 +1594,9 @@ export default function App() {
                       }}
                     >
                       <div style={{
-                        width: '32px', height: '32px', borderRadius: '8px',
-                        background: isActive ? 'rgba(255,255,255,0.15)' : 'var(--color-md-sys-surface-container-high)',
+                        width: '32px', height: '32px', borderRadius: '10px',
+                        background: item.bg || 'var(--color-md-sys-primary)', color: '#ffffff',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.15), inset 0 1px 2px rgba(255,255,255,0.4)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                       }}>
                         {item.icon}
@@ -1636,7 +1643,7 @@ export default function App() {
       <main className="content dashboard-content" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
         
         {/* Global Top App Bar */}
-        <header className="macos-toolbar" style={{ height: '52px', minHeight: '52px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', background: 'rgba(255, 255, 255, 0.72)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', borderBottom: '1px solid rgba(0, 0, 0, 0.06)', position: 'sticky', top: 0, zIndex: 15, flexShrink: 0 }}>
+        <header className="macos-toolbar" style={{ height: '52px', minHeight: '52px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', position: 'sticky', top: 0, zIndex: 15, flexShrink: 0 }}>
           <div className="left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button className="hamburger-mobile icon-btn" onClick={() => setMobileMenuOpen(true)} style={{ alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', borderRadius: '6px' }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
@@ -1722,15 +1729,15 @@ export default function App() {
               <p style={{ font: "500 14px/20px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>Data integrity issue detected</p>
               <p style={{ font: "400 13px/20px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '4px 0 0' }}>{dataIntegrityIssues.length > 0 ? `${dataIntegrityIssues.length} logical conflict(s) found in the database.` : 'A sync or data integrity constraint failed. Review logs or check structure.'}</p>
             </div>
-            <button onClick={() => setShowCorruptionModal(true)} style={{ font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', background: 'transparent', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}>View Details</button>
+            <button className="mac-btn mac-btn-secondary" onClick={() => setShowCorruptionModal(true)} style={{ font: "500 12px/16px 'Roboto'", padding: '8px 12px' }}>View Details</button>
             {dataIntegrityIssues.some(iss => iss.includes('Duplicate')) && (
-              <button onClick={handleAutoRepairDatabase} style={{ font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-primary)', background: 'var(--md-bw-primary)', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}>Auto-Fix Duplicates</button>
+              <button className="mac-btn" onClick={handleAutoRepairDatabase} style={{ font: "500 12px/16px 'Roboto'", padding: '8px 16px' }}>Auto-Fix Duplicates</button>
             )}
-            <button onClick={() => {
+            <button className="mac-btn" onClick={() => {
                 if (window.confirm("Restore to default clean data? This will clear local cache and reload.")) {
                   clearLocalCache().then(() => window.location.reload())
                 }
-              }} style={{ font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-primary)', background: 'var(--md-bw-primary)', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}>Reset Database</button>
+              }} style={{ font: "500 12px/16px 'Roboto'", padding: '8px 16px' }}>Reset Database</button>
           </div>
         )}
 
