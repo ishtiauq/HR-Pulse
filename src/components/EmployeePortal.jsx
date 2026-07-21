@@ -49,7 +49,9 @@ export default function EmployeePortal({
   setAssets,
   assetRequests,
   setAssetRequests,
-  settings
+  settings,
+  simulatedRole,
+  setSimulatedRole
 }) {
   const [activeTab, setActiveTab] = useState('dashboard') // dashboard, attendance, payslips, leave, profile
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
@@ -190,6 +192,19 @@ export default function EmployeePortal({
               )
             })}
           </nav>
+          {!currentUser.isEmployee && (
+            <button onClick={() => setSimulatedRole('Admin')}
+              style={{
+                marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px',
+                borderRadius: '8px', border: '1px solid var(--border-color)', background: 'transparent',
+                color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500,
+                transition: 'all 0.15s', width: '100%', textAlign: 'left'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.color = 'var(--accent-primary)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.color = 'var(--text-secondary)' }}>
+              ← Back to Admin
+            </button>
+          )}
         </div>
       )}
 
@@ -228,6 +243,22 @@ export default function EmployeePortal({
             )
           })}
         </div>
+      )}
+
+      {isMobile && !currentUser.isEmployee && (
+        <button onClick={() => setSimulatedRole('Admin')}
+          style={{
+            position: 'fixed', top: '12px', right: '12px', zIndex: 101,
+            padding: '8px 14px', borderRadius: '100px', border: '1px solid var(--border-color)',
+            background: 'var(--bg-secondary)', color: 'var(--text-secondary)',
+            cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600,
+            backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+            transition: 'all 0.15s', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.color = 'var(--accent-primary)' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.color = 'var(--text-secondary)' }}>
+          ← Admin
+        </button>
       )}
 
       {showPunchModal && (

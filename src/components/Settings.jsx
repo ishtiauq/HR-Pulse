@@ -278,12 +278,12 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                         </button>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div style={{ flex: 1, position: 'relative', height: '32px', display: 'flex', alignItems: 'center' }}>
-                          <div style={{ position: 'absolute', width: '100%', height: '6px', background: 'var(--glass-bg)', borderRadius: '3px' }} />
-                          <div style={{ position: 'absolute', width: `${Math.max(item.percentage, 0)}%`, height: '6px', background: 'linear-gradient(90deg, #0062E6, #003A8C)', borderRadius: '3px' }} />
+                        <div style={{ flex: 1, position: 'relative', height: '32px' }}>
+                          <div style={{ position: 'absolute', top: '13px', left: '0', width: '100%', height: '6px', background: 'rgba(128,128,128,0.15)', borderRadius: '3px' }} />
+                          <div style={{ position: 'absolute', top: '13px', left: '0', width: `${Math.max(item.percentage, 0)}%`, height: '6px', background: 'linear-gradient(90deg, #0062E6, #003A8C)', borderRadius: '3px' }} />
                           <input type="range" min="0" max="100" value={item.percentage} onChange={e => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
-                            style={{ width: '100%', position: 'absolute', opacity: 0, cursor: 'pointer', height: '32px', zIndex: 10, margin: 0, WebkitAppearance: 'none', appearance: 'none' }} />
-                          <div style={{ position: 'absolute', left: `calc(${item.percentage}% - 10px)`, width: '20px', height: '20px', borderRadius: '50%', background: '#0062E6', boxShadow: '0 2px 6px rgba(0,98,230,0.3)', pointerEvents: 'none', transition: 'left 0.05s' }} />
+                            style={{ width: '100%', height: '32px', margin: 0, padding: 0, opacity: 0, cursor: 'pointer', position: 'relative', zIndex: 10, WebkitAppearance: 'none', appearance: 'none' }} />
+                          <div style={{ position: 'absolute', top: '6px', left: `calc(${item.percentage}% - 10px)`, width: '20px', height: '20px', borderRadius: '50%', background: '#0062E6', boxShadow: '0 2px 6px rgba(0,98,230,0.3)', pointerEvents: 'none', transition: 'left 0.05s' }} />
                         </div>
                         <input type="number" min="0" max="100" value={item.percentage} onChange={e => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
                           style={{ width: '65px', ...pInp, padding: '6px 10px', fontSize: '13px', textAlign: 'center' }} />

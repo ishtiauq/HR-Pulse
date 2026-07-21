@@ -1462,6 +1462,8 @@ export default function App() {
         assetRequests={assetRequests}
         setAssetRequests={setAssetRequests}
         settings={settings}
+        simulatedRole={simulatedRole}
+        setSimulatedRole={setSimulatedRole}
       />
     )
   }
