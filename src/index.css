@@ -2737,6 +2737,12 @@ svg.lucide {
   }
 }
 
+/* --- Expand animation for employee cards --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* --- DARK MODE ADAPTATION --- */
 [data-theme="dark"] .sidebar {
   background: rgba(18, 18, 18, 0.55) !important;
@@ -3378,46 +3384,18 @@ select option {
   }
 }
 
-/* 7. COLLAPSIBLE EMPLOYEE CARD */
+/* 7. EMPLOYEE CARDS - React controlled */
 .employee-card-wrapper {
-  height: 98px !important;
-  position: relative !important;
+  position: relative;
 }
 
 .macos-card.employee-card {
-  position: absolute !important;
-  top: 0;
-  left: 0;
-  right: 0;
-  max-height: 98px !important;
-  overflow: hidden !important;
-  z-index: 5;
-  transition: 
-    max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
-    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), 
-    box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
-    filter 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
-    opacity 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  position: static !important;
+  max-height: none !important;
+  overflow: visible !important;
+  transform: none !important;
 }
 
 .macos-card.employee-card:hover {
-  max-height: 280px !important; /* expanded height to fit DOB and Joining Date */
-  z-index: 100 !important;
-}
-
-/* Desktop Blur & Pop on Hover */
-@media (min-width: 768px) {
-  .employee-grid:hover .employee-card {
-    filter: blur(4px) saturate(80%);
-    opacity: 0.5;
-    transform: scale(0.97);
-  }
-
-  .employee-grid:hover .employee-card-wrapper:hover .employee-card {
-    filter: none;
-    opacity: 1;
-    transform: translateY(-8px) scale(1.04) !important;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2) !important;
-    z-index: 105 !important;
-  }
+  transform: none !important;
 }
