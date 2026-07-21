@@ -2359,6 +2359,13 @@ table tr.selected td,
   .dashboard-content { overflow-y: auto !important; }
 }
 
+/* Topbar mobile fixes */
+@media (max-width: 767px) {
+  .topbar { padding: 0 16px 0 8px !important; }
+  .topbar .sync-btn { display: none !important; }
+  .topbar .right { gap: 10px !important; margin-left: auto !important; }
+}
+
 [data-theme="dark"] .dashboard-content::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
 }
