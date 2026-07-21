@@ -1,13 +1,45 @@
-import { useState } from 'react'
-import { CreditCard, Download, Search, X, PlusCircle, Calendar, Pencil, CheckSquare, Trash2 } from 'lucide-react'
+import { useState, useRef, useMemo, useEffect } from 'react'
+import jsPDF from 'jspdf'
+import { CreditCard, Download, Search, X, PlusCircle, Calendar, Pencil, CheckSquare, Trash2, ChevronDown } from 'lucide-react'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
 
 export default function Payroll({ employees, payroll, setPayroll, addLog, driveConnected, settings, simulatedRole, addAuditLog }) {
-  const [selectedMonth, setSelectedMonth] = useState('2026-07')
+  const now = new Date()
+  const [selectedMonth, setSelectedMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [processingId, setProcessingId] = useState(null)
+
+  // Month/Year dropdown states
+  const [monthOpen, setMonthOpen] = useState(false)
+  const [yearOpen, setYearOpen] = useState(false)
+  const pickerRef = useRef(null)
+
+  const currentMonth = parseInt(selectedMonth.split('-')[1])
+  const currentYear = parseInt(selectedMonth.split('-')[0])
+
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+  const yearOptions = useMemo(() => {
+    const years = []
+    for (let y = 2050; y >= 2000; y--) years.push(y)
+    return years
+  }, [])
+
+  // Close pickers on outside click
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target)) { setMonthOpen(false); setYearOpen(false) }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  // Global salary overrides (keyed by employeeId)
+  const [salaryOverrides, setSalaryOverrides] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('hrp_salary_overrides') || '{}') } catch { return {} }
+  })
 
   // Side Drawer and editing states
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -17,6 +49,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
   const [loanTotalInput, setLoanTotalInput] = useState(0)
   const [loanInstallmentInput, setLoanInstallmentInput] = useState(0)
   const [loanRemainingInput, setLoanRemainingInput] = useState(0)
+  const [applyGlobally, setApplyGlobally] = useState(true)
 
   // Bulk Action State
   const [selectedRows, setSelectedRows] = useState([])
@@ -31,14 +64,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
     { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }
   ]
 
-  const monthOptions = [
-    { value: '2026-05', label: 'May 2026' },
-    { value: '2026-06', label: 'June 2026' },
-    { value: '2026-07', label: 'July 2026' },
-    { value: '2026-08', label: 'August 2026' },
-    { value: '2026-09', label: 'September 2026' },
-    { value: '2026-10', label: 'October 2026' }
-  ]
+  const monthLabel = `${monthNames[currentMonth - 1]} ${currentYear}`
 
   // Map/Sync payroll items with current employees list for the selected month
   const getPayrollEntries = () => {
@@ -115,8 +141,8 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
         nextRemaining = Math.max(0, prevRemaining - Math.min(prevRemaining, prevInstallment))
       }
 
-      let gross = prevRecord?.grossSalary || 3200
-      if (!prevRecord) {
+      let gross = salaryOverrides[emp.id] || prevRecord?.grossSalary || 3200
+      if (!prevRecord && !salaryOverrides[emp.id]) {
         if (emp.role.includes('Manager')) gross = 4500
         else if (emp.role.includes('Lead') || emp.role.includes('Senior')) gross = 5200
         else if (emp.role.includes('Engineer')) gross = 4000
@@ -324,65 +350,133 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
     }
   }
 
-  // Generate a beautiful text-based receipt download
+  // Generate PDF payslip
   const generatePayslipReceipt = (entry, payDate) => {
     const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
     const net = entry.baseSalary + entry.allowance - entry.deductions - entry.advance - loanDeduction
     const grossVal = entry.grossSalary
 
-    const earningsLines = structure
-      .filter(s => s.type === 'earning')
-      .map(s => `- ${s.name} (${s.percentage}%):      ${currency}${(grossVal * (s.percentage / 100)).toFixed(2)}`)
-      .join('\n')
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+    const pageW = doc.internal.pageSize.getWidth()
+    const margin = 20
+    const contentW = pageW - margin * 2
+    let y = margin
 
-    const deductionsLines = structure
-      .filter(s => s.type === 'deduction')
-      .map(s => `- ${s.name} (${s.percentage}%):    - ${currency}${(grossVal * (s.percentage / 100)).toFixed(2)}`)
-      .join('\n')
+    // Header bar
+    doc.setFillColor(0, 0, 0)
+    doc.rect(margin, y, contentW, 14, 'F')
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(11)
+    doc.setFont('helvetica', 'bold')
+    doc.text('HR PULSE — PAYSLIP RECEIPT', pageW / 2, y + 9, { align: 'center' })
+    y += 22
 
-    // Advance and Loan lines
-    const advanceSection = entry.advance > 0 ? `\n- Salary Advance Settlement:       - ${currency}${entry.advance.toFixed(2)}` : ''
-    const loanSection = loanDeduction > 0 ? `\n- Company Loan Installment:        - ${currency}${loanDeduction.toFixed(2)} (Remaining: ${currency}${(entry.loan.remaining - loanDeduction).toFixed(2)})` : ''
+    // Employee info
+    doc.setTextColor(30, 30, 30)
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'normal')
+    const infoLeft = [
+      `Employee: ${entry.employee.name}`,
+      `Role: ${entry.employee.role}`,
+      `Department: ${entry.employee.department || '-'}`
+    ]
+    const infoRight = [
+      `Pay Period: ${selectedMonth}`,
+      `Issue Date: ${payDate}`,
+      `ID: ${entry.employeeId}`
+    ]
+    infoLeft.forEach((line, i) => doc.text(line, margin, y + i * 5))
+    infoRight.forEach((line, i) => doc.text(line, pageW - margin, y + i * 5, { align: 'right' }))
+    y += infoLeft.length * 5 + 6
 
-    const receiptText = `
-================================================
-             HR PULSE PAYSLIP RECEIPT
-================================================
-Month Cycle: ${selectedMonth}
-Receipt Date: ${payDate}
-Employee Name: ${entry.employee.name}
-Employee ID: ${entry.employeeId}
-Role: ${entry.employee.role}
-Department: ${entry.employee.department}
-Email: ${entry.employee.email}
+    // Separator
+    doc.setDrawColor(200, 200, 200)
+    doc.line(margin, y, pageW - margin, y)
+    y += 6
 
-------------------------------------------------
-SALARY STRUCTURE SPLIT:
-------------------------------------------------
-Gross Salary Reference:  ${currency}${grossVal.toFixed(2)}
+    // Earnings table
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(9)
+    doc.text('EARNINGS', margin, y); y += 5
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8.5)
+    let earningsTotal = 0
+    structure.filter(s => s.type === 'earning').forEach(s => {
+      const amt = grossVal * (s.percentage / 100)
+      earningsTotal += amt
+      doc.text(s.name, margin + 4, y)
+      doc.text(`${currency}${amt.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+      y += 4.5
+    })
+    doc.setFont('helvetica', 'bold')
+    doc.text('Total Earnings', margin + 4, y)
+    doc.text(`${currency}${earningsTotal.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+    y += 7
 
-EARNINGS:
-${earningsLines || 'No earning components configured.'}
+    // Deductions table
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(9)
+    doc.text('DEDUCTIONS', margin, y); y += 5
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8.5)
+    let deductionsTotal = 0
+    structure.filter(s => s.type === 'deduction').forEach(s => {
+      const amt = grossVal * (s.percentage / 100)
+      deductionsTotal += amt
+      doc.text(s.name, margin + 4, y)
+      doc.text(`-${currency}${amt.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+      y += 4.5
+    })
+    if (entry.advance > 0) {
+      deductionsTotal += entry.advance
+      doc.text('Salary Advance Settlement', margin + 4, y)
+      doc.text(`-${currency}${entry.advance.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+      y += 4.5
+    }
+    if (loanDeduction > 0) {
+      deductionsTotal += loanDeduction
+      doc.text('Company Loan Installment', margin + 4, y)
+      doc.text(`-${currency}${loanDeduction.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+      y += 4.5
+    }
+    doc.setFont('helvetica', 'bold')
+    doc.text('Total Deductions', margin + 4, y)
+    doc.text(`-${currency}${deductionsTotal.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+    y += 8
 
-DEDUCTIONS:
-${deductionsLines || 'No deduction components configured.'}${advanceSection}${loanSection}
+    // Separator
+    doc.setDrawColor(200, 200, 200)
+    doc.line(margin, y, pageW - margin, y)
+    y += 6
 
-------------------------------------------------
-NET PAYOUT AMOUNT:       ${currency}${net.toFixed(2)}
-------------------------------------------------
-Payment Method:          Direct Deposit (Google Drive Ledger)
-Status:                  PAID / SUCCESSFUL
+    // Net payout
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.text('NET PAYOUT', margin, y)
+    doc.text(`${currency}${net.toFixed(2)}`, pageW - margin, y, { align: 'right' })
+    y += 7
 
-Thank you for your service!
-================================================
-    `
-    const element = document.createElement("a")
-    const file = new Blob([receiptText], { type: 'text/plain' })
-    element.href = URL.createObjectURL(file)
-    element.download = `payslip_${entry.employeeId}_${selectedMonth}_${entry.employee.name.replace(/\s+/g, '_')}.txt`
-    document.body.appendChild(element)
-    element.click()
-    document.body.removeChild(element)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+    doc.setTextColor(100, 100, 100)
+    doc.text('Payment Method: Direct Deposit (Google Drive Ledger)', margin, y); y += 4
+    doc.text('Status: PAID / SUCCESSFUL', margin, y); y += 8
+
+    // Footer
+    doc.setDrawColor(200, 200, 200)
+    doc.line(margin, y, pageW - margin, y)
+    y += 5
+    doc.setFontSize(7.5)
+    doc.setTextColor(150, 150, 150)
+    doc.text('This is a computer-generated document. No signature is required.', pageW / 2, y, { align: 'center' })
+
+    // Loan remaining note
+    if (loanDeduction > 0) {
+      y += 4
+      doc.text(`Loan remaining balance: ${currency}${(entry.loan.remaining - loanDeduction).toFixed(2)}`, margin, y)
+    }
+
+    doc.save(`payslip_${entry.employeeId}_${selectedMonth}_${entry.employee.name.replace(/\s+/g, '_')}.pdf`)
   }
 
   // Manage Compensation & Loan/Advance helper
@@ -393,6 +487,7 @@ Thank you for your service!
     setLoanTotalInput(entry.loan.total)
     setLoanInstallmentInput(entry.loan.installment)
     setLoanRemainingInput(entry.loan.remaining)
+    setApplyGlobally(true)
     setIsDrawerOpen(true)
   }
 
@@ -400,16 +495,18 @@ Thank you for your service!
     e.preventDefault()
     if (!selectedEmpLog) return
 
+    const newGross = Number(grossSalaryInput) || 3200
+
     setPayroll(prev => {
       const monthData = prev[selectedMonth] || []
       const index = monthData.findIndex(p => p.employeeId === selectedEmpLog.employeeId)
-      
+
       const updatedEntry = {
         employeeId: selectedEmpLog.employeeId,
-        grossSalary: Number(grossSalaryInput) || 3200,
-        baseSalary: selectedEmpLog.baseSalary, // dynamic
-        allowance: selectedEmpLog.allowance,   // dynamic
-        deductions: selectedEmpLog.deductions, // dynamic
+        grossSalary: newGross,
+        baseSalary: selectedEmpLog.baseSalary,
+        allowance: selectedEmpLog.allowance,
+        deductions: selectedEmpLog.deductions,
         status: selectedEmpLog.status,
         paymentDate: selectedEmpLog.paymentDate,
         advance: Number(advanceInput) || 0,
@@ -427,52 +524,120 @@ Thank you for your service!
         nextMonthData.push(updatedEntry)
       }
 
-      setIsDrawerOpen(false)
-      setTimeout(() => setSelectedEmpLog(null), 300)
-
-      return {
-        ...prev,
-        [selectedMonth]: nextMonthData
+      if (applyGlobally) {
+        setSalaryOverrides(prevOverrides => {
+          const next = { ...prevOverrides, [selectedEmpLog.employeeId]: newGross }
+          localStorage.setItem('hrp_salary_overrides', JSON.stringify(next))
+          return next
+        })
+        // Also update all existing months' entries for this employee
+        const updatedPayroll = {}
+        Object.keys(prev).forEach(monthKey => {
+          const monthEntries = prev[monthKey].map(entry =>
+            entry.employeeId === selectedEmpLog.employeeId
+              ? { ...entry, grossSalary: newGross }
+              : entry
+          )
+          updatedPayroll[monthKey] = monthEntries
+        })
+        return { ...updatedPayroll, [selectedMonth]: nextMonthData }
       }
+
+      return { ...prev, [selectedMonth]: nextMonthData }
     })
 
-    addLog('Ledger Updated', `Updated compensation settings for ${selectedEmpLog.employee.name}`, 'success')
+    setIsDrawerOpen(false)
+    setTimeout(() => setSelectedEmpLog(null), 300)
+
+    addLog('Ledger Updated', `${applyGlobally ? 'Globally updated' : 'Updated'} compensation for ${selectedEmpLog.employee.name}`, 'success')
   }
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       
       {/* Header and Month Selector */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>
+      <div className="page-header">
+        <h1 className="page-title">
+          <CreditCard size={28} className="page-title-icon" />
           Payroll
         </h1>
 
-        {/* M3 Outlined Dropdown */}
-        <div style={{ position: 'relative', width: '200px' }}>
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="m3-select"
-            style={{
-              width: '100%',
-              padding: '16px 14px',
-              borderRadius: '4px',
-              border: '1px solid var(--md-bw-outline)',
-              background: 'transparent',
-              color: 'var(--md-bw-on-surface)',
-              fontSize: '16px',
-              outline: 'none',
-              cursor: 'pointer',
-              appearance: 'none'
-            }}
-          >
-            {monthOptions.map(m => (
-              <option key={m.value} value={m.value}>{m.label}</option>
-            ))}
-          </select>
-          <span style={{ position: 'absolute', top: '8px', left: '12px', fontSize: '12px', color: 'var(--md-bw-on-surface-variant)', background: 'var(--md-bw-background)', padding: '0 4px', pointerEvents: 'none' }}>Month</span>
-          <span style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }}>▼</span>
+        <div ref={pickerRef} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {/* Month dropdown */}
+          <div style={{ position: 'relative', width: '140px', height: '40px' }}>
+            <button onClick={() => { setMonthOpen(!monthOpen); setYearOpen(false) }} style={{
+              width: '100%', height: '40px', padding: '0 30px 0 12px', borderRadius: '8px',
+              border: `1px solid ${monthOpen ? '#007aff' : 'var(--glass-border)'}`,
+              background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
+              color: 'var(--md-bw-on-surface)', fontSize: '13px', fontWeight: 500, outline: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '6px',
+              boxShadow: monthOpen ? '0 0 0 3px rgba(0,122,255,0.2)' : 'none',
+              transition: 'border-color 0.2s, box-shadow 0.2s'
+            }}>
+              <Calendar size={14} style={{ flexShrink: 0, color: 'var(--md-bw-on-surface-variant)' }} />
+              <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left' }}>{monthNames[currentMonth - 1]}</span>
+              <ChevronDown size={12} style={{ flexShrink: 0, color: 'var(--md-bw-on-surface-variant)', transition: 'transform 0.2s', transform: monthOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
+            </button>
+            {monthOpen && (
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px',
+                maxHeight: '240px', overflowY: 'auto',
+                background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
+                border: '1px solid var(--glass-border)', borderRadius: '10px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.1)', zIndex: 100, padding: '6px'
+              }}>
+                {monthNames.map((name, i) => (
+                  <button key={name} onClick={() => { setSelectedMonth(`${currentYear}-${String(i + 1).padStart(2, '0')}`); setMonthOpen(false) }} style={{
+                    display: 'block', width: '100%', padding: '8px 10px', border: 'none', borderRadius: '6px',
+                    background: i + 1 === currentMonth ? 'rgba(0,122,255,0.1)' : 'transparent',
+                    color: i + 1 === currentMonth ? '#007aff' : 'var(--md-bw-on-surface)', fontSize: '13px',
+                    fontWeight: i + 1 === currentMonth ? 600 : 400, textAlign: 'left', cursor: 'pointer'
+                  }}
+                    onMouseEnter={(e) => { if (i + 1 !== currentMonth) e.target.style.background = 'rgba(0,0,0,0.04)' }}
+                    onMouseLeave={(e) => { if (i + 1 !== currentMonth) e.target.style.background = 'transparent' }}>
+                    {name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Year dropdown */}
+          <div style={{ position: 'relative', width: '96px', height: '40px' }}>
+            <button onClick={() => { setYearOpen(!yearOpen); setMonthOpen(false) }} style={{
+              width: '100%', height: '40px', padding: '0 28px 0 12px', borderRadius: '8px',
+              border: `1px solid ${yearOpen ? '#007aff' : 'var(--glass-border)'}`,
+              background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
+              color: 'var(--md-bw-on-surface)', fontSize: '13px', fontWeight: 500, outline: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '6px',
+              boxShadow: yearOpen ? '0 0 0 3px rgba(0,122,255,0.2)' : 'none',
+              transition: 'border-color 0.2s, box-shadow 0.2s'
+            }}>
+              <span style={{ flex: 1, textAlign: 'left' }}>{currentYear}</span>
+              <ChevronDown size={12} style={{ flexShrink: 0, color: 'var(--md-bw-on-surface-variant)', transition: 'transform 0.2s', transform: yearOpen ? 'rotate(180deg)' : 'rotate(0)' }} />
+            </button>
+            {yearOpen && (
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px',
+                maxHeight: '240px', overflowY: 'auto',
+                background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
+                border: '1px solid var(--glass-border)', borderRadius: '10px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.1)', zIndex: 100, padding: '6px'
+              }}>
+                {yearOptions.map(y => (
+                  <button key={y} onClick={() => { setSelectedMonth(`${y}-${String(currentMonth).padStart(2, '0')}`); setYearOpen(false) }} style={{
+                    display: 'block', width: '100%', padding: '8px 10px', border: 'none', borderRadius: '6px',
+                    background: y === currentYear ? 'rgba(0,122,255,0.1)' : 'transparent',
+                    color: y === currentYear ? '#007aff' : 'var(--md-bw-on-surface)', fontSize: '13px',
+                    fontWeight: y === currentYear ? 600 : 400, textAlign: 'left', cursor: 'pointer'
+                  }}
+                    onMouseEnter={(e) => { if (y !== currentYear) e.target.style.background = 'rgba(0,0,0,0.04)' }}
+                    onMouseLeave={(e) => { if (y !== currentYear) e.target.style.background = 'transparent' }}>
+                    {y}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -483,7 +648,7 @@ Thank you for your service!
           <div>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '8px' }}>Payroll Not Initialized</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '440px', margin: '0 auto', lineHeight: '1.5' }}>
-              The payroll sheet for {monthOptions.find(o => o.value === selectedMonth)?.label || selectedMonth} has not been created yet. 
+              The payroll sheet for {monthLabel} has not been created yet. 
               Initialize it to pull the active roster and carry over compensation parameters.
             </p>
           </div>
@@ -622,35 +787,63 @@ Thank you for your service!
           )}
 
           {/* Payroll Table */}
-          <div 
-            className="table-scroll-wrapper" 
-            style={{ padding: '0', maxHeight: '600px', overflowY: 'auto' }}
-            onScroll={handleScroll}
-          >
-            <div style={{ overflowX: 'auto' }}>
-              <table className="m3-data-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1050px' }}>
+          <div className="payroll-table-container">
+            {/* Fixed Header */}
+            <div className="payroll-table-header-wrap">
+              <table className="payroll-table">
+                <colgroup>
+                  <col style={{ width: '50px' }} />
+                  <col style={{ width: '180px' }} />
+                  <col style={{ width: '140px' }} />
+                  <col style={{ width: '120px' }} />
+                  <col style={{ width: '100px' }} />
+                  <col style={{ width: '140px' }} />
+                  <col style={{ width: '120px' }} />
+                  <col style={{ width: '100px' }} />
+                  <col style={{ width: '44px' }} />
+                  <col style={{ width: '130px' }} />
+                </colgroup>
                 <thead>
                   <tr>
-                    <th style={{ width: '50px', zIndex: 11 }}>
+                    <th>
                       <input 
                         type="checkbox" 
+                        className="round-checkbox"
                         checked={selectedRows.length === filteredEntries.length && filteredEntries.length > 0}
                         onChange={toggleSelectAll}
-                        style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--md-bw-primary)' }}
                       />
                     </th>
-                    <th style={{ zIndex: 11 }}>Employee</th>
+                    <th>Employee</th>
                     <th>Salary Details</th>
                     <th>Deductions (PF)</th>
-                    <th>Advance Balance</th>
+                    <th>Advanced</th>
                     <th>Company Loan</th>
                     <th>Net Payout</th>
                     <th>Status</th>
-                    <th style={{ textAlign: 'right' }}>Actions</th>
+                    <th style={{ textAlign: 'center' }}>Edit</th>
+                    <th style={{ textAlign: 'right' }}>Execute</th>
                   </tr>
                 </thead>
+              </table>
+            </div>
+
+            {/* Scrollable Body */}
+            <div className="payroll-table-body-scroll" onScroll={handleScroll}>
+              <table className="payroll-table">
+                <colgroup>
+                  <col style={{ width: '50px' }} />
+                  <col style={{ width: '180px' }} />
+                  <col style={{ width: '140px' }} />
+                  <col style={{ width: '120px' }} />
+                  <col style={{ width: '100px' }} />
+                  <col style={{ width: '140px' }} />
+                  <col style={{ width: '120px' }} />
+                  <col style={{ width: '100px' }} />
+                  <col style={{ width: '44px' }} />
+                  <col style={{ width: '130px' }} />
+                </colgroup>
                 <tbody>
-                  {paddingTop > 0 && <tr style={{ height: `${paddingTop}px` }}><td colSpan="9" style={{ padding: 0, border: 'none' }} /></tr>}
+                  {paddingTop > 0 && <tr style={{ height: `${paddingTop}px` }}><td colSpan="10" style={{ padding: 0, border: 'none' }} /></tr>}
                   {visibleEntries.map(entry => {
                   const emp = entry.employee
                   const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
@@ -663,248 +856,205 @@ Thank you for your service!
                       key={entry.employeeId}
                       className={selectedRows.includes(entry.employeeId) ? 'selected' : ''}
                     >
-                      <td className="sticky-col">
+                      <td>
                         <input 
                           type="checkbox" 
+                          className="round-checkbox"
                           checked={selectedRows.includes(entry.employeeId)}
                           onChange={() => toggleRowSelection(entry.employeeId)}
-                          style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--md-bw-primary)' }}
                         />
                       </td>
-                      <td className="sticky-col">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <img 
-                            src={emp.avatar} 
-                            alt={emp.name} 
-                            style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
-                          />
-                          <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{emp.name}</span>
-                            <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{emp.role}</span>
-                          </div>
-                        </div>
-                      </td>
                       <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <img 
+                          src={emp.avatar} 
+                          alt={emp.name} 
+                          style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{emp.name}</span>
+                          <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{emp.role}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>Gross: {currency}{entry.grossSalary.toLocaleString()}</span>
+                        <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Base: {currency}{entry.baseSalary.toLocaleString()}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>-{currency}{entry.deductions.toLocaleString()}</span>
+                    </td>
+                    
+                    {/* Advance */}
+                    <td>
+                      <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{currency}{entry.advance}</span>
+                    </td>
+
+                    {/* Loan */}
+                    <td>
+                      {entry.loan.total > 0 ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                          <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>Gross: {currency}{entry.grossSalary.toLocaleString()}</span>
-                          <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Base: {currency}{entry.baseSalary.toLocaleString()}</span>
+                          <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>Inst: {currency}{loanDeduction}</span>
+                          <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Rem: {currency}{entry.loan.remaining}</span>
                         </div>
-                      </td>
-                      <td>
-                        <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>-{currency}{entry.deductions.toLocaleString()}</span>
-                      </td>
-                      
-                      {/* Advance */}
-                      <td>
-                        <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{currency}{entry.advance}</span>
-                      </td>
+                      ) : (
+                        <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>None</span>
+                      )}
+                    </td>
 
-                      {/* Loan */}
-                      <td>
-                        {entry.loan.total > 0 ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>Inst: {currency}{loanDeduction}</span>
-                            <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Rem: {currency}{entry.loan.remaining}</span>
-                          </div>
-                        ) : (
-                          <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>None</span>
-                        )}
-                      </td>
+                    {/* Net pay */}
+                    <td>
+                      <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{currency}{netPay.toLocaleString()}</span>
+                    </td>
 
-                      {/* Net pay */}
-                      <td>
-                        <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{currency}{netPay.toLocaleString()}</span>
-                      </td>
+                    {/* Status */}
+                    <td>
+                      <span style={{ 
+                        height: '24px', padding: '0 10px', fontSize: '11px', fontWeight: 600,
+                        display: 'inline-flex', alignItems: 'center',
+                        borderRadius: '20px',
+                        backgroundColor: isPaid ? '#28a745' : '#dc3545',
+                        color: '#fff',
+                        letterSpacing: '0.03em'
+                      }}>
+                        {entry.status}
+                      </span>
+                    </td>
 
-                      {/* Status */}
-                      <td>
-                        <span className={`m3-chip m3-chip-assist ${isPaid ? 'solid' : 'outlined'}`} style={{ 
-                          height: '24px', padding: '0 8px', fontSize: '11px',
-                          backgroundColor: isPaid ? 'var(--md-bw-on-surface)' : 'transparent',
-                          color: isPaid ? 'var(--md-bw-surface)' : 'var(--md-bw-on-surface-variant)',
-                          border: isPaid ? 'none' : '1px solid var(--md-bw-outline)'
-                        }}>
-                          {entry.status}
-                        </span>
-                      </td>
-
-                      <td style={{ textAlign: 'right' }}>
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
-                          {!isPaid && (
-                            <>
-                              <button 
-                                onClick={() => openCompensationModal(entry)}
-                                title={simulatedRole === 'HR Manager' ? "HR Managers cannot edit compensation" : "Edit Compensation"}
-                                disabled={simulatedRole === 'HR Manager'}
-                                className="icon-btn"
-                              >
-                                <Pencil size={18} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-                              </button>
-                              
-                              <button
-                                onClick={() => handleExecutePayment(entry)}
-                                disabled={isProcessing || simulatedRole === 'HR Manager'}
-                                title={simulatedRole === 'HR Manager' ? "HR Managers cannot execute payroll" : "Execute Payment"}
-                                className="btn btn-tonal"
-                                style={{ padding: '0 16px', height: '32px', fontSize: '12px' }}
-                              >
-                                {isProcessing ? '...' : 'Execute'}
-                              </button>
-                            </>
-                          )}
-                          {isPaid && (
-                            <button
-                              onClick={() => generatePayslipReceipt(entry, entry.paymentDate)}
-                              className="btn btn-text"
-                              style={{ padding: '0 16px', height: '32px', fontSize: '12px' }}
-                            >
-                              <Download size={14} style={{ marginRight: '4px' }} /> Payslip
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-                {paddingBottom > 0 && <tr style={{ height: `${paddingBottom}px` }}><td colSpan="9" style={{ padding: 0, border: 'none' }} /></tr>}
-              </tbody>
-            </table>
-            </div>
+                    <td className="payroll-edit-cell" style={{ textAlign: 'center' }}>
+                      <button 
+                        type="button"
+                        onClick={() => openCompensationModal(entry)}
+                        title="Edit Compensation"
+                        className="payroll-edit-btn"
+                      >
+                        <Pencil size={16} style={{ color: '#007aff' }} />
+                      </button>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      {!isPaid ? (
+                        <button
+                          onClick={() => handleExecutePayment(entry)}
+                          disabled={isProcessing || simulatedRole === 'HR Manager'}
+                          title={simulatedRole === 'HR Manager' ? "HR Managers cannot execute payroll" : "Execute Payment"}
+                          className="btn btn-tonal"
+                          style={{ padding: '0 16px', height: '32px', fontSize: '12px' }}
+                        >
+                          {isProcessing ? '...' : 'Execute'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => generatePayslipReceipt(entry, entry.paymentDate)}
+                          className="btn btn-text"
+                          style={{ padding: '0 12px', height: '32px', fontSize: '12px' }}
+                        >
+                          <Download size={14} style={{ marginRight: '4px' }} /> Payslip
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+              {paddingBottom > 0 && <tr style={{ height: `${paddingBottom}px` }}><td colSpan="10" style={{ padding: 0, border: 'none' }} /></tr>}
+            </tbody>
+          </table>
+          </div>
           </div>
         </>
       )}
 
-      {/* MANAGE COMPENSATION SIDE DRAWER */}
+      {/* MANAGE COMPENSATION MODAL */}
       {selectedEmpLog && (
-        <>
-          {/* Overlay */}
-          <div 
-            onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }}
-            style={{
-              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', zIndex: 999,
-              opacity: isDrawerOpen ? 1 : 0, transition: 'opacity 0.3s', pointerEvents: isDrawerOpen ? 'auto' : 'none'
-            }} 
-          />
-          
-          {/* Drawer */}
-          <div style={{
-            position: 'fixed', top: 0, right: 0, bottom: 0, width: '400px', maxWidth: '100%',
-            backgroundColor: 'var(--bg-secondary)',
-            boxShadow: '-4px 0 24px rgba(0,0,0,0.1)',
-            zIndex: 1000,
-            transform: isDrawerOpen ? 'translateX(0)' : 'translateX(100%)',
-            transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-            display: 'flex', flexDirection: 'column',
-            overflowY: 'auto'
-          }}>
-            <div style={{ padding: '24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: 'var(--bg-secondary)', zIndex: 10 }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Manage Compensation</h3>
-              <button 
-                onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }}
-                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-              >
-                <X size={20} />
+        <div className={`dialog-scrim${isDrawerOpen ? ' visible' : ''}`} onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }} style={{ zIndex: 999 }}>
+          <div className="m3-dialog" onClick={(e) => e.stopPropagation()} style={{ padding: '24px', maxWidth: '460px', maxHeight: '90vh', overflowY: 'auto', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)' }}>
+            
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--md-bw-on-surface)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Pencil size={18} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+                Manage Compensation
+              </h3>
+              <button onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }} style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', padding: '4px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <X size={18} />
               </button>
             </div>
 
-            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}>
-                <img src={selectedEmpLog.employee.avatar} alt="Avatar" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>{selectedEmpLog.employee.name}</span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{selectedEmpLog.employee.role}</span>
+            {/* Employee Info */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: 'var(--md-bw-surface-variant)', borderRadius: '10px', marginBottom: '16px' }}>
+              <img src={selectedEmpLog.employee.avatar} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              <div>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--md-bw-on-surface)', display: 'block' }}>{selectedEmpLog.employee.name}</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--md-bw-on-surface-variant)' }}>{selectedEmpLog.employee.role}</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveCompensationLedger} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {/* Gross Salary */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '0.75rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Gross Monthly Salary ({currency})</label>
+                <input type="number" min="0" value={grossSalaryInput} onChange={(e) => setGrossSalaryInput(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none', fontWeight: 600, fontSize: '0.85rem' }} />
+                <span style={{ fontSize: '0.65rem', color: 'var(--md-bw-on-surface-variant)' }}>Basic and allowances dynamically split from gross.</span>
+              </div>
+
+              {/* Advance Pay */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '0.75rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Salary Advance ({currency})</label>
+                <input type="number" min="0" value={advanceInput} onChange={(e) => setAdvanceInput(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none', fontSize: '0.85rem' }} />
+                <span style={{ fontSize: '0.65rem', color: 'var(--md-bw-on-surface-variant)' }}>Deducted in full from the next payout.</span>
+              </div>
+
+              {/* Company Loan */}
+              <div style={{ borderTop: '1px solid var(--md-bw-outline)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--md-bw-on-surface)' }}>Company Loan Settings</span>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label style={{ fontSize: '0.7rem', color: 'var(--md-bw-on-surface-variant)' }}>Total Principal</label>
+                    <input type="number" min="0" value={loanTotalInput} onChange={(e) => setLoanTotalInput(e.target.value)} style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none', fontSize: '0.8rem' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label style={{ fontSize: '0.7rem', color: 'var(--md-bw-on-surface-variant)' }}>Remaining Balance</label>
+                    <input type="number" min="0" value={loanRemainingInput} onChange={(e) => setLoanRemainingInput(e.target.value)} style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none', fontSize: '0.8rem' }} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <label style={{ fontSize: '0.7rem', color: 'var(--md-bw-on-surface-variant)' }}>Monthly Installment Deduction ({currency})</label>
+                  <input type="number" min="0" value={loanInstallmentInput} onChange={(e) => setLoanInstallmentInput(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none', fontSize: '0.85rem' }} />
+                  <span style={{ fontSize: '0.65rem', color: 'var(--md-bw-on-surface-variant)' }}>Deducted monthly until balance reaches $0.</span>
                 </div>
               </div>
 
-              <form onSubmit={handleSaveCompensationLedger} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {/* Gross Salary Input */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Gross Monthly Salary ({currency})</label>
-                  <input 
-                    type="number" min="0" value={grossSalaryInput}
-                    onChange={(e) => setGrossSalaryInput(e.target.value)}
-                    style={{
-                      padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                      background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', fontWeight: 600
-                    }}
-                  />
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Basic and allowances are dynamically split from this total gross.</span>
+              {/* Apply Scope */}
+              <div style={{ borderTop: '1px solid var(--md-bw-outline)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Apply Changes To</span>
+                <div style={{ display: 'flex', border: '1px solid var(--md-bw-outline)', borderRadius: '8px', overflow: 'hidden' }}>
+                  <button type="button" onClick={() => setApplyGlobally(false)} style={{
+                    flex: 1, padding: '8px 12px', border: 'none', fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer',
+                    background: !applyGlobally ? 'var(--md-bw-primary)' : 'transparent',
+                    color: !applyGlobally ? 'var(--md-bw-on-primary)' : 'var(--md-bw-on-surface-variant)',
+                    transition: 'all 0.15s'
+                  }}>This Month Only</button>
+                  <button type="button" onClick={() => setApplyGlobally(true)} style={{
+                    flex: 1, padding: '8px 12px', border: 'none', fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer',
+                    background: applyGlobally ? 'var(--md-bw-primary)' : 'transparent',
+                    color: applyGlobally ? 'var(--md-bw-on-primary)' : 'var(--md-bw-on-surface-variant)',
+                    transition: 'all 0.15s'
+                  }}>All Future Months</button>
                 </div>
+                <span style={{ fontSize: '0.65rem', color: 'var(--md-bw-on-surface-variant)' }}>
+                  {applyGlobally ? 'Salary is saved centrally and affects all months.' : 'Change applies only to the current selected month.'}
+                </span>
+              </div>
 
-                {/* Advance Pay */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Salary Advance ({currency})</label>
-                  <input 
-                    type="number" min="0" value={advanceInput}
-                    onChange={(e) => setAdvanceInput(e.target.value)}
-                    style={{
-                      padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                      background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none'
-                    }}
-                  />
-                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Deducted in full from the next payout.</span>
-                </div>
-
-                {/* Company Loan configs */}
-                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Company Loan Settings</span>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    {/* Loan total */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Total Principal</label>
-                      <input 
-                        type="number" min="0" value={loanTotalInput}
-                        onChange={(e) => setLoanTotalInput(e.target.value)}
-                        style={{
-                          padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                          background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', fontSize: '0.85rem'
-                        }}
-                      />
-                    </div>
-                    {/* Loan remaining */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Remaining Balance</label>
-                      <input 
-                        type="number" min="0" value={loanRemainingInput}
-                        onChange={(e) => setLoanRemainingInput(e.target.value)}
-                        style={{
-                          padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                          background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', fontSize: '0.85rem'
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Monthly installment */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Monthly Installment Deduction ({currency})</label>
-                    <input 
-                      type="number" min="0" value={loanInstallmentInput}
-                      onChange={(e) => setLoanInstallmentInput(e.target.value)}
-                      style={{
-                        padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)',
-                        background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none'
-                      }}
-                    />
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Deducted monthly until the remaining balance reaches $0.</span>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                  <button type="button" className="btn btn-secondary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }}>
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}>
-                    Apply Changes
-                  </button>
-                </div>
-              </form>
-            </div>
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                <button type="button" className="btn btn-text" onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }} style={{ padding: '8px 16px', fontSize: '0.8rem' }}>Cancel</button>
+                <button type="submit" className="btn btn-filled" style={{ padding: '8px 16px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}><CheckSquare size={14} /> Apply Changes</button>
+              </div>
+            </form>
           </div>
-        </>
+        </div>
       )}
 
       {/* Embedded CSS for spin */}

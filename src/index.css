@@ -1935,6 +1935,142 @@ table tr.selected td,
   font-variant-numeric: tabular-nums;
 }
 
+/* --- Payroll Table (Glass Card / Dashboard Style) --- */
+.payroll-table-container {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--glass-radius) !important;
+  box-shadow: var(--glass-shadow) !important;
+}
+
+.payroll-table-header-wrap {
+  overflow: hidden;
+  border-radius: var(--glass-radius) var(--glass-radius) 0 0;
+}
+
+.payroll-table-body-scroll {
+  max-height: 520px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.payroll-table {
+  width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  background: transparent !important;
+}
+
+.payroll-table thead th {
+  height: 48px !important;
+  padding: 0 16px !important;
+  text-align: left;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  line-height: 18px !important;
+  letter-spacing: 0.01em !important;
+  color: var(--md-bw-on-surface) !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  border-bottom: 1.5px solid rgba(0, 0, 0, 0.08) !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(40px) saturate(240%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(240%) !important;
+}
+
+[data-theme="dark"] .payroll-table thead th {
+  background: rgba(28, 28, 30, 0.55) !important;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.payroll-table tbody td {
+  padding: 10px 16px;
+  font-weight: 400 !important;
+  font-size: 13.5px !important;
+  line-height: 18px !important;
+  letter-spacing: 0.025em !important;
+  color: var(--md-bw-on-surface) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  background: transparent !important;
+  transition: background-color 0.2s !important;
+  white-space: nowrap !important;
+}
+
+.payroll-table tbody td.payroll-edit-cell {
+  padding: 0 !important;
+}
+
+[data-theme="dark"] .payroll-table tbody td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.payroll-table tbody tr:hover td {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-theme="dark"] .payroll-table tbody tr:hover td {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.payroll-table tbody tr.selected td {
+  background-color: color-mix(in srgb, var(--md-bw-primary-container) 15%, transparent) !important;
+}
+
+.payroll-edit-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px 4px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.payroll-edit-btn:hover {
+  background: rgba(0,122,255,0.1);
+}
+.payroll-edit-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Round Checkbox */
+.round-checkbox {
+  appearance: none !important;
+  width: 18px !important;
+  height: 18px !important;
+  border: 2px solid var(--md-bw-on-surface-variant) !important;
+  border-radius: 50% !important;
+  outline: none !important;
+  cursor: pointer !important;
+  position: relative !important;
+  transition: all 0.2s ease !important;
+  background: transparent !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.round-checkbox:checked {
+  background-color: var(--md-bw-primary) !important;
+  border-color: var(--md-bw-primary) !important;
+}
+
+.round-checkbox:checked::after {
+  content: '' !important;
+  position: absolute !important;
+  left: 5px !important;
+  top: 2px !important;
+  width: 4px !important;
+  height: 8px !important;
+  border: solid var(--md-bw-on-primary) !important;
+  border-width: 0 2px 2px 0 !important;
+  transform: rotate(45deg) !important;
+}
+
 /* --- Dialogs M3 (B&W) --- */
 .dialog-scrim {
   position: fixed;
