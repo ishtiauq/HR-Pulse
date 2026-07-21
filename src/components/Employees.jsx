@@ -535,11 +535,10 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
                   {/* Expanded section - slides down smoothly via maxHeight */}
                   <div style={{
-                    maxHeight: isExpanded ? '260px' : '0px',
+                    maxHeight: isExpanded ? '280px' : '0px',
                     opacity: isExpanded ? 1 : 0,
                     overflow: 'hidden',
                     transition: 'max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease',
-                    pointerEvents: 'none',
                   }}>
                     <div style={{
                       borderTop: '1px solid var(--glass-border)',
@@ -1009,6 +1008,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                 >
                   <option value="Active">Active</option>
                   <option value="On Leave">On Leave</option>
+                  <option value="Inactive">Inactive</option>
                 </select>
               </div>
 

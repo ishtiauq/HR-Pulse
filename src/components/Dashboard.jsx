@@ -174,7 +174,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       </h1>
 
       {/* Stats Row — 3-col */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+      <div className="dash-grid-3">
         
         {/* Employee Directory */}
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -224,7 +224,14 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px', paddingLeft: '12px' }}>
               <span style={{ font: "400 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>Rate: {attendanceRate}%</span>
-              <span style={{ font: "500 11px/16px 'Roboto'", color: '#007AFF' }}>{showAttDropdown ? 'Hide' : 'View Details'}</span>
+              <button onClick={(e) => { e.stopPropagation(); setShowAttDropdown(!showAttDropdown) }} style={{
+                padding: '5px 12px', font: "500 11px/16px 'Roboto'",
+                background: 'rgba(0, 122, 255, 0.1)', color: '#007AFF', border: 'none',
+                borderRadius: '20px', cursor: 'pointer', transition: 'background 0.15s ease'
+              }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.18)'}
+                 onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.1)'}>
+                {showAttDropdown ? 'Hide' : 'View Details'}
+              </button>
             </div>
           </div>
         </div>
@@ -300,7 +307,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       )}
 
       {/* Info Cards Row 1 — Announcements + Payroll Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+      <div className="dash-grid-2">
         
         {/* Announcements Card */}
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -377,7 +384,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       </div>
 
       {/* Info Cards Row 2 — Events + Drive Logs + Milestones */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+      <div className="dash-grid-3">
         
         {/* Events Card */}
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
