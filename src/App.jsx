@@ -99,18 +99,7 @@ export default function App() {
   const [isCollapsed, setIsCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true')
 
   useEffect(() => {
-    const handleResize = () => {
-      const width = window.innerWidth
-      if (width >= 1024) {
-        setMobileMenuOpen(false)
-      } else if (width >= 768 && width < 1024) {
-        setMobileMenuOpen(false)
-        // Tablet always collapsed, but we don't strictly need to force state if CSS handles it via media queries,
-        // but just in case, we close mobile menu
-      } else {
-        // Mobile: CSS handles hiding, we just manage the open state
-      }
-    }
+    const handleResize = () => setMobileMenuOpen(false)
     handleResize()
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
@@ -118,11 +107,12 @@ export default function App() {
 
   const toggleSidebar = () => {
     const width = window.innerWidth
-    if (width >= 1024) {
+    if (width >= 768) {
       const next = !isCollapsed
       setIsCollapsed(next)
       localStorage.setItem('sidebar_collapsed', next)
-    } else if (width < 768) {
+    } else {
+      setIsCollapsed(false)
       setMobileMenuOpen(!mobileMenuOpen)
     }
   }
@@ -1954,7 +1944,7 @@ export default function App() {
           border: '1px solid rgba(0,0,0,0.05)'
         }}>
           <div className="left" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(true)} style={{
+            <button className="mobile-menu-btn" onClick={toggleSidebar} style={{
               width: '32px', height: '32px', display: 'none', alignItems: 'center', justifyContent: 'center',
               background: 'transparent', border: 'none', borderRadius: '6px', cursor: 'pointer',
               color: 'var(--md-bw-on-surface-variant)'

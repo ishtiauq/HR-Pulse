@@ -2312,8 +2312,10 @@ table tr.selected td,
 }
 
 /* App Shell Responsiveness */
-@media (max-width: 1024px) {
+@media (max-width: 767px) {
   .sidebar { display: none !important; }
+}
+@media (max-width: 1024px) {
   .view-toggle { display: none !important; }
   .sync-badge { display: none !important; }
 }
@@ -2802,44 +2804,6 @@ svg.lucide {
 /* --- RESPONSIVE BEHAVIOR --- */
 
 /* Tablet: always rail */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .macos-sidebar {
-    width: 72px !important;
-    min-width: 72px !important;
-  }
-  .macos-sidebar .brand-text,
-  .macos-sidebar .user-info,
-  .macos-sidebar .nav-label,
-  .macos-sidebar .btn-label,
-  .macos-sidebar .expand-icon {
-    opacity: 0 !important;
-    width: 0 !important;
-    pointer-events: none !important;
-    display: none !important;
-  }
-  .macos-sidebar .nav-item,
-  .macos-sidebar .role-btn,
-  .macos-sidebar .logout-btn {
-    justify-content: center !important;
-    padding: 0 !important;
-  }
-  .macos-sidebar .nav-item div:first-child,
-  .macos-sidebar .role-btn div:first-child,
-  .macos-sidebar .logout-btn div:first-child {
-    margin: 0 !important;
-  }
-  .macos-sidebar .collapse-btn {
-    margin: 0 auto !important;
-  }
-  .macos-sidebar .user-profile-glass {
-    justify-content: center !important;
-    padding: 10px 0 !important;
-  }
-  .macos-sidebar .user-profile-glass img {
-    margin: 0 !important;
-  }
-}
-
 /* Mobile: hidden overlay */
 @media (max-width: 767px) {
   .macos-sidebar {
@@ -2863,62 +2827,47 @@ svg.lucide {
     transform: translateX(0) !important;
   }
   
-  /* Force expand labels on mobile when open */
-  .macos-sidebar.sidebar.collapsed .brand-text,
-  .macos-sidebar.sidebar.collapsed .user-info,
-  .macos-sidebar.sidebar.collapsed .nav-label,
-  .macos-sidebar.sidebar.collapsed .btn-label,
-  .macos-sidebar.sidebar.collapsed .expand-icon,
-  .macos-sidebar .brand-text,
-  .macos-sidebar .user-info,
-  .macos-sidebar .nav-label,
-  .macos-sidebar .btn-label,
-  .macos-sidebar .expand-icon {
+  /* Force expand labels when open on mobile */
+  .macos-sidebar.open .brand-text,
+  .macos-sidebar.open .user-info,
+  .macos-sidebar.open .nav-label,
+  .macos-sidebar.open .btn-label,
+  .macos-sidebar.open .expand-icon {
     opacity: 1 !important;
     width: auto !important;
     pointer-events: auto !important;
     display: block !important;
   }
 
-  .macos-sidebar.sidebar.collapsed .user-info,
-  .macos-sidebar .user-info {
+  .macos-sidebar.open .user-info {
     display: flex !important;
     flex-direction: column !important;
   }
 
-  .macos-sidebar.sidebar.collapsed .nav-item,
-  .macos-sidebar.sidebar.collapsed .role-btn,
-  .macos-sidebar.sidebar.collapsed .logout-btn,
-  .macos-sidebar .nav-item,
-  .macos-sidebar .role-btn,
-  .macos-sidebar .logout-btn {
+  .macos-sidebar.open .nav-item,
+  .macos-sidebar.open .role-btn,
+  .macos-sidebar.open .logout-btn {
     justify-content: flex-start !important;
     padding: 10px 12px !important;
   }
 
-  .macos-sidebar.sidebar.collapsed .nav-item div:first-child,
-  .macos-sidebar.sidebar.collapsed .role-btn div:first-child,
-  .macos-sidebar.sidebar.collapsed .logout-btn div:first-child,
-  .macos-sidebar .nav-item div:first-child,
-  .macos-sidebar .role-btn div:first-child,
-  .macos-sidebar .logout-btn div:first-child {
+  .macos-sidebar.open .nav-item div:first-child,
+  .macos-sidebar.open .role-btn div:first-child,
+  .macos-sidebar.open .logout-btn div:first-child {
     margin-right: 10px !important;
     margin-left: 0 !important;
   }
 
-  .macos-sidebar.sidebar.collapsed .collapse-btn,
   .macos-sidebar .collapse-btn {
-    display: none !important; /* Hide collapse toggle button on mobile */
+    display: none !important;
   }
 
-  .macos-sidebar.sidebar.collapsed .user-profile-glass,
-  .macos-sidebar .user-profile-glass {
+  .macos-sidebar.open .user-profile-glass {
     padding: 10px 12px !important;
     justify-content: flex-start !important;
   }
   
-  .macos-sidebar.sidebar.collapsed .user-profile-glass img,
-  .macos-sidebar .user-profile-glass img {
+  .macos-sidebar.open .user-profile-glass img {
     margin: 0 12px 0 0 !important;
   }
 
