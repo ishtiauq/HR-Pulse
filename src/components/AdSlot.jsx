@@ -15,8 +15,8 @@ export default function AdSlot({ type = 'horizontal', style = {} }) {
   const isCard = type === 'card'
 
   const containerStyle = {
-    background: 'rgba(255, 255, 255, 0.01)',
-    border: '1px dashed rgba(255, 255, 255, 0.08)',
+    background: 'var(--bg-secondary)',
+    border: '1px dashed var(--border-color)',
     borderRadius: '12px',
     padding: '12px',
     display: 'flex',
@@ -53,7 +53,7 @@ export default function AdSlot({ type = 'horizontal', style = {} }) {
         flexDirection: 'column',
         alignItems: 'center',
         gap: '4px',
-        color: 'rgba(255, 255, 255, 0.25)'
+        color: 'var(--text-muted)'
       }}>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {/* AdSense Logo Emblem */}
