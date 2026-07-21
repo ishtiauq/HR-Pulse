@@ -1199,6 +1199,10 @@ export default function App() {
             driveConnected={driveConnected} 
             addLog={addLog}
             onSync={handleSync}
+            setCurrentView={setCurrentView}
+            announcements={announcements}
+            events={events}
+            payroll={payroll}
           />
         )
       case 'employees':
@@ -1357,6 +1361,9 @@ export default function App() {
             attendance={attendance}
             setCurrentView={setCurrentView}
             onSync={handleSync}
+            announcements={announcements}
+            events={events}
+            payroll={payroll}
           />
         )
     }
@@ -1989,8 +1996,8 @@ export default function App() {
             </button>
             <div style={{ position: 'relative' }}>
               <button className="icon-btn" onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }} style={{ position: 'relative', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', borderRadius: '6px', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-                {unreadCount > 0 && <span className="badge" style={{ position: 'absolute', top: '6px', right: '6px', width: '5px', height: '5px', background: 'var(--md-bw-primary)', borderRadius: '50%', border: '1.5px solid rgba(255,255,255,0.72)' }}></span>}
+                <svg className={unreadCount > 0 ? 'bell-ring' : ''} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
               </button>
               
               {/* Notifications Dropdown */}
@@ -2032,59 +2039,7 @@ export default function App() {
           </div>
         </header>
 
-        {/* Corruption Banner */}
-        {dbStatus === 'corruption' && (
-          <div className="macos-banner" style={{ margin: '16px 24px', display: 'flex', alignItems: 'flex-start', gap: '16px', padding: '16px 20px', background: 'rgba(248, 249, 250, 0.8)', backdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.08)', borderRadius: '12px' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--md-bw-on-surface-variant)', flexShrink: 0, marginTop: '2px' }}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-            <div style={{ flex: 1 }}>
-              <p style={{ font: "500 14px/20px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>Data integrity issue detected</p>
-              <p style={{ font: "400 13px/20px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '4px 0 0' }}>{dataIntegrityIssues.length > 0 ? `${dataIntegrityIssues.length} logical conflict(s) found in the database.` : 'A sync or data integrity constraint failed. Review logs or check structure.'}</p>
-            </div>
-            <button className="mac-btn mac-btn-secondary" onClick={() => setShowCorruptionModal(true)} style={{ font: "500 12px/16px 'Roboto'", padding: '8px 12px' }}>View Details</button>
-            {dataIntegrityIssues.some(iss => iss.includes('Duplicate')) && (
-              <button className="mac-btn" onClick={handleAutoRepairDatabase} style={{ font: "500 12px/16px 'Roboto'", padding: '8px 16px' }}>Auto-Fix Duplicates</button>
-            )}
-            <button className="mac-btn" onClick={() => {
-                if (window.confirm("Restore to default clean data? This will clear local cache and reload.")) {
-                  clearLocalCache().then(() => window.location.reload())
-                }
-              }} style={{ font: "500 12px/16px 'Roboto'", padding: '8px 16px' }}>Reset Database</button>
-          </div>
-        )}
-
-          {/* Corruption Modal - using actify Dialog */}
-          {showCorruptionModal && (
-            <Dialog open={showCorruptionModal} onClose={() => setShowCorruptionModal(false)}>
-              <div style={{ padding: '24px', maxWidth: '600px' }}>
-                <h2 style={{ color: 'var(--color-md-sys-error)', marginBottom: '16px' }}>Data Integrity Report</h2>
-                <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                  <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {dataIntegrityIssues.length > 0 ? (
-                      dataIntegrityIssues.map((issue, idx) => (
-                        <li key={idx} style={{ color: 'var(--color-md-sys-on-surface-variant)', fontSize: '0.9rem' }}>{issue}</li>
-                      ))
-                    ) : (
-                      <li style={{ color: 'var(--color-md-sys-on-surface-variant)', fontSize: '0.9rem' }}>
-                        No logical constraint conflicts found. A sync process or structure generation constraint has triggered a warning.
-                      </li>
-                    )}
-                  </ul>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--color-md-sys-outline-variant)' }}>
-                  {dataIntegrityIssues.some(iss => iss.includes('Duplicate')) && (
-                    <Button variant="filled" color="primary" onClick={handleAutoRepairDatabase}>
-                      Auto-Fix Duplicates
-                    </Button>
-                  )}
-                  <Button variant="outlined" onClick={() => setShowCorruptionModal(false)}>
-                    Close
-                  </Button>
-                </div>
-              </div>
-            </Dialog>
-          )}
-
-          {/* Page Content */}
+        {/* Page Content */}
           {renderContent()}
         </main>
 
