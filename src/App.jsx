@@ -308,6 +308,13 @@ export default function App() {
   }
 
   const [employees, setEmployees] = useState(() => {
+    const plain = localStorage.getItem(EMPLOYEES_STORAGE_KEY + '_plain')
+    if (plain) {
+      try {
+        const parsed = JSON.parse(plain)
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed
+      } catch (e) {}
+    }
     return [
       { 
         id: 'EMP-101', 
@@ -546,6 +553,7 @@ export default function App() {
   })
 
   useEffect(() => {
+    if (!user) return
     const loadEmployeesFromStorage = async () => {
       const saved = localStorage.getItem(EMPLOYEES_STORAGE_KEY)
       if (!saved) return
@@ -554,22 +562,29 @@ export default function App() {
         const parsed = await decryptJson(saved, keyMaterial)
         if (Array.isArray(parsed)) {
           setEmployees(parsed)
+          localStorage.setItem(EMPLOYEES_STORAGE_KEY + '_plain', JSON.stringify(parsed))
         }
       } catch (e) {
         console.error('Failed to decrypt saved employees:', e)
-        localStorage.removeItem(EMPLOYEES_STORAGE_KEY)
       }
     }
 
     loadEmployeesFromStorage()
-  }, [user?.token])
+  }, [user?.token, user])
+
+  const didPersistEmployees = useRef(false)
 
   useEffect(() => {
+    if (!didPersistEmployees.current) {
+      didPersistEmployees.current = true
+      return
+    }
     const persistEmployees = async () => {
       try {
         const keyMaterial = user?.token || 'hr-pulse-local-fallback-key'
         const encrypted = await encryptJson(employees, keyMaterial)
         localStorage.setItem(EMPLOYEES_STORAGE_KEY, encrypted)
+        localStorage.setItem(EMPLOYEES_STORAGE_KEY + '_plain', JSON.stringify(employees))
       } catch (e) {
         console.error('Failed to encrypt employees for storage:', e)
       }
@@ -753,8 +768,26 @@ export default function App() {
 
         let empData = await readTable('employees', user.token, bgSyncCallback)
         if (!empData) {
-          empData = defaultContent
-          await writeTable('employees', defaultContent, meta, user.token)
+          const plain = localStorage.getItem(EMPLOYEES_STORAGE_KEY + '_plain')
+          if (plain) {
+            try {
+              const parsed = JSON.parse(plain)
+              if (Array.isArray(parsed) && parsed.length > 0) empData = parsed
+            } catch (e) {}
+          }
+          if (!empData) {
+            const saved = localStorage.getItem(EMPLOYEES_STORAGE_KEY)
+            if (saved) {
+              try {
+                const keyMaterial = user?.token || 'hr-pulse-local-fallback-key'
+                empData = await decryptJson(saved, keyMaterial)
+              } catch (e) {
+                console.error('Failed to decrypt saved employees for Drive init:', e)
+              }
+            }
+          }
+          if (!empData) empData = defaultContent
+          await writeTable('employees', empData, meta, user.token)
         }
         setEmployees(empData)
 
@@ -768,8 +801,10 @@ export default function App() {
         }
         let payrollData = await readTable('payroll', user.token, bgSyncCallback)
         if (!payrollData) {
-          payrollData = defaultPayroll
-          await writeTable('payroll', defaultPayroll, meta, user.token)
+          const saved = localStorage.getItem('hr_pulse_payroll')
+          if (saved) { try { payrollData = JSON.parse(saved) } catch (e) {} }
+          if (!payrollData) payrollData = defaultPayroll
+          await writeTable('payroll', payrollData, meta, user.token)
         }
         if (Array.isArray(payrollData)) payrollData = { '2026-07': payrollData }
         setPayroll(payrollData)
@@ -788,8 +823,10 @@ export default function App() {
         }
         let settingsData = await readTable('settings', user.token, bgSyncCallback)
         if (!settingsData) {
-          settingsData = defaultSettings
-          await writeTable('settings', defaultSettings, meta, user.token)
+          const saved = localStorage.getItem('hr_pulse_settings')
+          if (saved) { try { settingsData = JSON.parse(saved) } catch (e) {} }
+          if (!settingsData) settingsData = defaultSettings
+          await writeTable('settings', settingsData, meta, user.token)
         }
         setSettings(settingsData)
 
@@ -817,15 +854,26 @@ export default function App() {
         let logsData = await readTable('attendance_logs', user.token, bgSyncCallback)
         
         if (!leavesData || !balancesData || !logsData) {
-          const legacyAtt = await readTable('attendance', user.token, bgSyncCallback)
-          if (legacyAtt) {
-            leavesData = leavesData || legacyAtt.leaves || defaultLeaves
-            balancesData = balancesData || legacyAtt.balances || defaultBalances
-            logsData = logsData || legacyAtt.dailyLogs || defaultLogs
-          } else {
-            leavesData = leavesData || defaultLeaves
-            balancesData = balancesData || defaultBalances
-            logsData = logsData || defaultLogs
+          const savedAtt = localStorage.getItem('hr_pulse_attendance')
+          if (savedAtt) {
+            try {
+              const parsed = JSON.parse(savedAtt)
+              leavesData = leavesData || parsed.leaves || defaultLeaves
+              balancesData = balancesData || parsed.balances || defaultBalances
+              logsData = logsData || parsed.dailyLogs || defaultLogs
+            } catch (e) {}
+          }
+          if (!leavesData || !balancesData || !logsData) {
+            const legacyAtt = await readTable('attendance', user.token, bgSyncCallback)
+            if (legacyAtt) {
+              leavesData = leavesData || legacyAtt.leaves || defaultLeaves
+              balancesData = balancesData || legacyAtt.balances || defaultBalances
+              logsData = logsData || legacyAtt.dailyLogs || defaultLogs
+            } else {
+              leavesData = leavesData || defaultLeaves
+              balancesData = balancesData || defaultBalances
+              logsData = logsData || defaultLogs
+            }
           }
           await writeTable('leave_requests', leavesData, meta, user.token)
           await writeTable('leave_balances', balancesData, meta, user.token)
@@ -837,8 +885,10 @@ export default function App() {
         const defaultExpenses = []
         let expensesData = await readTable('expenses', user.token, bgSyncCallback)
         if (!expensesData) {
-          expensesData = defaultExpenses
-          await writeTable('expenses', defaultExpenses, meta, user.token)
+          const saved = localStorage.getItem('hr_pulse_expenses')
+          if (saved) { try { expensesData = JSON.parse(saved) } catch (e) {} }
+          if (!expensesData) expensesData = defaultExpenses
+          await writeTable('expenses', expensesData, meta, user.token)
         }
         setExpenses(expensesData)
 
