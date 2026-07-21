@@ -95,7 +95,7 @@ export default function App() {
     const saved = localStorage.getItem('hr_pulse_user')
     return saved ? JSON.parse(saved) : null
   })
-  const [currentView, setCurrentView] = useState('dashboard')
+  const [currentView, setCurrentView] = useState(() => localStorage.getItem('hr_pulse_current_view') || 'dashboard')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true')
 
@@ -227,6 +227,7 @@ export default function App() {
   }, [themeMode])
 
   useEffect(() => {
+    localStorage.setItem('hr_pulse_current_view', currentView)
     const timer = setTimeout(() => setIsAppLoading(false), 500)
     return () => clearTimeout(timer)
   }, [currentView])
@@ -818,7 +819,7 @@ export default function App() {
         setPayroll(payrollData)
 
         const defaultSettings = {
-          currency: '$',
+      currency: '৳',
           salaryStructure: [
             { id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' },
             { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' },
@@ -2105,19 +2106,15 @@ export default function App() {
         </main>
 
       {/* Global Toast Container */}
-      <div className="global-toast-container" style={{ position: 'fixed', top: 'calc(4rem + 16px)', right: '24px', zIndex: 10000, display: 'flex', flexDirection: 'column', gap: '12px', pointerEvents: 'none' }}>
+      <div className="global-toast-container">
         {toasts.map(toast => (
           <div key={toast.id} className={`global-toast ${toast.type}`}>
             <div className="global-toast-content">
+              <span className="global-toast-type-dot" />
               <span style={{ flex: 1 }}>{toast.message}</span>
               {toast.action && (
-                <button
-                  onClick={() => { toast.action.onClick(); removeToast(toast.id); }}
-                  style={{
-                    background: 'rgba(255,255,255,0.1)', color: 'currentColor', border: '1px solid currentColor',
-                    padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 700
-                  }}
-                >
+                <button className="global-toast-action"
+                  onClick={() => { toast.action.onClick(); removeToast(toast.id); }}>
                   {toast.action.label}
                 </button>
               )}

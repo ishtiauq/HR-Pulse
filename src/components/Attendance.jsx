@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Check, X, Clock, Plus, CalendarDays, ChevronLeft, ChevronRight, Cpu, ArrowUpDown, Repeat } from 'lucide-react'
 import { formatDateShort } from '../services/date.js'
 
@@ -99,6 +99,19 @@ export default function Attendance({ employees, attendance, setAttendance, roste
 
 function DailyAttendance({ employees, attendance, setAttendance, addToast }) {
   const [selectedDate, setSelectedDate] = useState(() => toLocal(new Date()))
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [openStatusEmp, setOpenStatusEmp] = useState(null)
+  const [calYear, setCalYear] = useState(() => new Date().getFullYear())
+  const [calMonth, setCalMonth] = useState(() => new Date().getMonth())
+
+  const closeAll = useCallback(() => { setShowDatePicker(false); setOpenStatusEmp(null) }, [])
+
+  useEffect(() => {
+    if (!showDatePicker && openStatusEmp === null) return
+    document.addEventListener('click', closeAll)
+    return () => document.removeEventListener('click', closeAll)
+  }, [showDatePicker, openStatusEmp, closeAll])
+
   const logs = attendance?.dailyLogs?.[selectedDate] || {}
 
   const setLog = (empId, upd) => {
@@ -122,98 +135,183 @@ function DailyAttendance({ employees, attendance, setAttendance, addToast }) {
     addToast('Marked all as Present', 'success')
   }
 
+  const calDaysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
+  const calFirstDow = new Date(calYear, calMonth, 1).getDay()
+  const calGrid = []
+  for (let i = 0; i < calFirstDow; i++) calGrid.push(null)
+  for (let d = 1; d <= calDaysInMonth; d++) calGrid.push(d)
+  while (calGrid.length % 7 !== 0) calGrid.push(null)
+
+  const selNum = parseInt(selectedDate.split('-')[2], 10)
+  const selMonth = parseInt(selectedDate.split('-')[1], 10) - 1
+  const selYear = parseInt(selectedDate.split('-')[0], 10)
+
   return (
-    <div className="payroll-table-container">
-      <div className="payroll-table-header-wrap">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '20px 24px 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ position: 'relative' }}>
-              <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)}
-                style={{
-                  padding: '10px 38px 10px 14px', borderRadius: '100px',
-                  border: '1px solid var(--glass-border)',
-                  background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)',
-                  font: "500 14px 'Roboto'", outline: 'none',
-                  cursor: 'pointer', minHeight: '40px'
-                }}
-              />
-              <CalendarDays size={16} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--md-bw-on-surface-variant)', pointerEvents: 'none' }} />
+    <>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '0 0 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative' }}>
+          <button onClick={(e) => { e.stopPropagation(); setShowDatePicker(v => !v); setCalYear(selYear); setCalMonth(selMonth) }}
+            style={{
+              padding: '10px 38px 10px 14px', borderRadius: '100px', minHeight: '40px',
+              border: '1px solid var(--glass-border)', background: 'var(--glass-bg)',
+              color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
+            }}>
+            {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            <CalendarDays size={16} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+          </button>
+          <span className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
+            {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' })}
+          </span>
+          {showDatePicker && (
+            <div onClick={e => e.stopPropagation()}
+              style={{ position: 'absolute', top: 'calc(100% + 6px)', left: '0', zIndex: 50, width: '280px', padding: '16px',
+                background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
+                border: '1px solid var(--glass-border)', borderRadius: 'var(--glass-radius)', boxShadow: 'var(--glass-shadow)',
+                color: 'var(--md-bw-on-surface)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <button onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1) } else setCalMonth(m => m - 1) }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--md-bw-on-surface)', display: 'flex' }}>
+                  <ChevronLeft size={16} />
+                </button>
+                <span style={{ font: "600 14px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>
+                  {new Date(calYear, calMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </span>
+                <button onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1) } else setCalMonth(m => m + 1) }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--md-bw-on-surface)', display: 'flex' }}>
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '2px', textAlign: 'center' }}>
+                {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
+                  <span key={d} style={{ font: "500 11px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', padding: '4px 0' }}>{d}</span>
+                ))}
+                {calGrid.map((d, i) => (
+                  d === null ? <div key={i} /> : (
+                    <button key={i} onClick={() => { setSelectedDate(`${calYear}-${z(calMonth+1)}-${z(d)}`); setShowDatePicker(false) }}
+                      style={{
+                        width: '32px', height: '32px', borderRadius: '50%', border: 'none', cursor: 'pointer',
+                        font: "400 13px 'Roboto'", margin: '0 auto',
+                        background: d === selNum && calMonth === selMonth && calYear === selYear
+                          ? 'linear-gradient(135deg, #0062E6 0%, #003A8C 100%)' : 'transparent',
+                        color: d === selNum && calMonth === selMonth && calYear === selYear ? '#fff' : 'var(--md-bw-on-surface)',
+                        transition: 'background 0.15s',
+                      }}
+                      onMouseEnter={e => { if (!(d === selNum && calMonth === selMonth && calYear === selYear)) e.target.style.background = 'rgba(128,128,128,0.12)' }}
+                      onMouseLeave={e => { if (!(d === selNum && calMonth === selMonth && calYear === selYear)) e.target.style.background = 'transparent' }}>
+                      {d}
+                    </button>
+                  )
+                ))}
+              </div>
             </div>
-            <span className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
-              {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' })}
-            </span>
-          </div>
-          <button className="btn btn-text" onClick={markAll} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Plus size={15} /> Mark All Present
+          )}
+        </div>
+        <button className="btn btn-text" onClick={markAll} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Plus size={15} /> Mark All Present
+        </button>
+      </div>
+      <div className="payroll-table-container">
+        <div className="payroll-table-header-wrap">
+          <table className="payroll-table">
+            <colgroup>
+              <col style={{ width: '200px' }} />
+              <col style={{ width: '140px' }} />
+              <col style={{ width: '140px' }} />
+              <col style={{ width: '80px' }} />
+              <col style={{ width: '160px' }} />
+            </colgroup>
+            <thead>
+              <tr>
+                <th style={thStyle}>Employee</th>
+                <th style={{ ...thStyle, textAlign: 'center' }}>Check In</th>
+                <th style={{ ...thStyle, textAlign: 'center' }}>Check Out</th>
+                <th style={{ ...thStyle, textAlign: 'center' }}>Hours</th>
+                <th style={thStyle}>Status</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+        <div className="payroll-table-body-scroll" style={{ maxHeight: '520px' }}>
+          <table className="payroll-table">
+            <colgroup>
+              <col style={{ width: '200px' }} />
+              <col style={{ width: '140px' }} />
+              <col style={{ width: '140px' }} />
+              <col style={{ width: '80px' }} />
+              <col style={{ width: '160px' }} />
+            </colgroup>
+            <tbody>
+              {employees.map(emp => {
+                const log = logs[emp.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
+                const ps = PILL_STYLES[log.status] || PILL_STYLES.Absent
+                return (
+                  <tr key={emp.id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                    <td style={cell}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <img src={emp.avatar} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
+                        <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{emp.name}</span>
+                      </div>
+                    </td>
+                    <td style={{ ...cell, textAlign: 'center' }}>
+                      <input type="text" value={log.checkIn} onChange={e => setLog(emp.id, { [e.target.name]: e.target.value })} name="checkIn"
+                        style={{ width: '90px', textAlign: 'center', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "400 13px 'Roboto'", outline: 'none' }}
+                        placeholder="09:00 AM"
+                      />
+                    </td>
+                    <td style={{ ...cell, textAlign: 'center' }}>
+                      <input type="text" value={log.checkOut} onChange={e => setLog(emp.id, { [e.target.name]: e.target.value })} name="checkOut"
+                        style={{ width: '90px', textAlign: 'center', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "400 13px 'Roboto'", outline: 'none' }}
+                        placeholder="06:00 PM"
+                      />
+                    </td>
+                    <td style={{ ...cell, textAlign: 'center' }}>
+                      <span className="body-large" style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--md-bw-on-surface)', fontWeight: 600 }}>{log.hours}</span>
+                    </td>
+                    <td style={cell}>
+                      <div style={{ position: 'relative' }}>
+                        <button onClick={(e) => { e.stopPropagation(); setOpenStatusEmp(v => v === emp.id ? null : emp.id) }}
+                          style={{ ...selStyle, background: ps.bg, color: ps.color, border: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {log.status}
+                          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ opacity: 0.7 }}><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </button>
+                        {openStatusEmp === emp.id && (
+                          <div onClick={e => e.stopPropagation()}
+                            style={{ position: 'absolute', top: 'calc(100% + 4px)', left: '0', zIndex: 50, minWidth: '140px', padding: '6px',
+                              background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
+                              border: '1px solid var(--glass-border)', borderRadius: 'var(--glass-radius)', boxShadow: 'var(--glass-shadow)',
+                              color: 'var(--md-bw-on-surface)' }}>
+                            {Object.entries(PILL_STYLES).map(([k, v]) => (
+                              <button key={k} onClick={() => { setLog(emp.id, { status: k }); setOpenStatusEmp(null) }}
+                                style={{
+                                  display: 'block', width: '100%', padding: '8px 12px', borderRadius: '100px', border: 'none',
+                                  cursor: 'pointer', font: "600 12px 'Roboto'", textAlign: 'left',
+                                  background: k === log.status ? v.bg : 'transparent',
+                                  color: k === log.status ? v.color : 'var(--md-bw-on-surface)',
+                                  transition: 'all 0.15s',
+                                }}
+                                onMouseEnter={e => { if (k !== log.status) e.target.style.background = 'var(--glass-bg)' }}
+                                onMouseLeave={e => { if (k !== log.status) e.target.style.background = 'transparent' }}>
+                                {k}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 24px' }}>
+          <button className="btn btn-filled" onClick={() => addToast('Daily logs saved.', 'success')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Check size={16} /> Save Daily Logs
           </button>
         </div>
       </div>
-      <div className="payroll-table-body-scroll" style={{ maxHeight: '520px' }}>
-        <table className="payroll-table" style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-          <colgroup>
-            <col style={{ width: '200px' }} />
-            <col style={{ width: '140px' }} />
-            <col style={{ width: '140px' }} />
-            <col style={{ width: '80px' }} />
-            <col style={{ width: '160px' }} />
-          </colgroup>
-          <thead>
-            <tr>
-              <th style={thStyle}>Employee</th>
-              <th style={{ ...thStyle, textAlign: 'center' }}>Check In</th>
-              <th style={{ ...thStyle, textAlign: 'center' }}>Check Out</th>
-              <th style={{ ...thStyle, textAlign: 'center' }}>Hours</th>
-              <th style={thStyle}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {employees.map(emp => {
-              const log = logs[emp.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
-              const ps = PILL_STYLES[log.status] || PILL_STYLES.Absent
-              return (
-                <tr key={emp.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                  <td style={cell}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <img src={emp.avatar} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
-                      <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{emp.name}</span>
-                    </div>
-                  </td>
-                  <td style={{ ...cell, textAlign: 'center' }}>
-                    <input type="text" value={log.checkIn} onChange={e => setLog(emp.id, { [e.target.name]: e.target.value })} name="checkIn"
-                      style={{ width: '90px', textAlign: 'center', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "400 13px 'Roboto'", outline: 'none' }}
-                      placeholder="09:00 AM"
-                    />
-                  </td>
-                  <td style={{ ...cell, textAlign: 'center' }}>
-                    <input type="text" value={log.checkOut} onChange={e => setLog(emp.id, { [e.target.name]: e.target.value })} name="checkOut"
-                      style={{ width: '90px', textAlign: 'center', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "400 13px 'Roboto'", outline: 'none' }}
-                      placeholder="06:00 PM"
-                    />
-                  </td>
-                  <td style={{ ...cell, textAlign: 'center' }}>
-                    <span className="body-large" style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--md-bw-on-surface)', fontWeight: 600 }}>{log.hours}</span>
-                  </td>
-                  <td style={cell}>
-                    <select value={log.status} onChange={e => setLog(emp.id, { status: e.target.value })}
-                      style={{ ...selStyle, background: ps.bg, color: ps.color, border: 'none' }}
-                    >
-                      {Object.entries(PILL_STYLES).map(([k, v]) => (
-                        <option key={k} value={k} style={{ background: '#fff', color: '#121212' }}>{v.label || k}</option>
-                      ))}
-                    </select>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 24px' }}>
-        <button className="btn btn-filled" onClick={() => addToast('Daily logs saved.', 'success')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Check size={16} /> Save Daily Logs
-        </button>
-      </div>
-    </div>
+    </>
   )
 }
 
@@ -327,6 +425,16 @@ function LeaveRequests({ employees, attendance, setAttendance, addToast }) {
 
 function RosterPlanner({ employees, roster, setRoster, shiftTemplates, addToast }) {
   const [weekStart, setWeekStart] = useState(() => getMon(0))
+  const [openRosterEmp, setOpenRosterEmp] = useState(null)
+  const [openRosterDate, setOpenRosterDate] = useState(null)
+
+  const closeAll = useCallback(() => { setOpenRosterEmp(null); setOpenRosterDate(null) }, [])
+
+  useEffect(() => {
+    if (openRosterEmp === null) return
+    document.addEventListener('click', closeAll)
+    return () => document.removeEventListener('click', closeAll)
+  }, [openRosterEmp, closeAll])
 
   const goBack = () => setWeekStart(addDays(weekStart, -7))
   const goNext = () => setWeekStart(addDays(weekStart, 7))
@@ -369,85 +477,124 @@ function RosterPlanner({ employees, roster, setRoster, shiftTemplates, addToast 
   }
 
   return (
-    <div className="payroll-table-container">
-      <div className="payroll-table-header-wrap">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '20px 24px 0' }}>
-          <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Weekly Roster Planner</h3>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button className="btn btn-outlined" onClick={copyPrev} style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '36px', fontSize: '12px' }}>
-              <CalendarDays size={14} /> Copy Prev Week
+    <>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '0 0 16px' }}>
+        <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Weekly Roster Planner</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button className="btn btn-outlined" onClick={copyPrev} style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '36px', fontSize: '12px' }}>
+            <CalendarDays size={14} /> Copy Prev Week
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--glass-bg)', padding: '3px', borderRadius: '100px', border: '1px solid var(--glass-border)' }}>
+            <button className="btn btn-text" style={{ padding: '4px 8px', minHeight: '30px' }} onClick={goBack}>
+              <ChevronLeft size={15} />
             </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--glass-bg)', padding: '3px', borderRadius: '100px', border: '1px solid var(--glass-border)' }}>
-              <button className="btn btn-text" style={{ padding: '4px 8px', minHeight: '30px' }} onClick={goBack}>
-                <ChevronLeft size={15} />
-              </button>
-              <span style={{ fontSize: '0.82rem', fontWeight: 600, padding: '0 8px', color: 'var(--md-bw-on-surface)', whiteSpace: 'nowrap' }}>
-                {formatDateShort(weekDates[0])} — {formatDateShort(weekDates[6])}
-              </span>
-              <button className="btn btn-text" style={{ padding: '4px 8px', minHeight: '30px' }} onClick={goNext}>
-                <ChevronRight size={15} />
-              </button>
-            </div>
+            <span style={{ fontSize: '0.82rem', fontWeight: 600, padding: '0 8px', color: 'var(--md-bw-on-surface)', whiteSpace: 'nowrap' }}>
+              {formatDateShort(weekDates[0])} — {formatDateShort(weekDates[6])}
+            </span>
+            <button className="btn btn-text" style={{ padding: '4px 8px', minHeight: '30px' }} onClick={goNext}>
+              <ChevronRight size={15} />
+            </button>
           </div>
         </div>
       </div>
-
-      <div className="payroll-table-body-scroll" style={{ maxHeight: '520px' }}>
-        <table className="payroll-table" style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-          <colgroup>
-            <col style={{ width: '160px' }} />
-            {weekDates.map(d => <col key={d} style={{ width: '120px' }} />)}
-          </colgroup>
-          <thead>
-            <tr>
-              <th style={thStyle}>Employee</th>
-              {weekDates.map((d, i) => (
-                <th key={d} style={{ ...thStyle, textAlign: 'center', fontSize: '12px' }}>
-                  {labels[i]}<br /><span style={{ fontWeight: 400, color: 'var(--md-bw-on-surface-variant)' }}>{formatDateShort(d)}</span>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {employees.map(emp => (
-              <tr key={emp.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                <td style={cell}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--md-bw-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700 }}>
-                      {emp.name.split(' ').map(n => n[0]).join('')}
-                    </div>
-                    <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 500 }}>{emp.name}</span>
-                  </div>
-                </td>
-                {weekDates.map(d => {
-                  const entry = (roster || []).find(r => r.employeeId === emp.id && r.date === d)
-                  const tid = entry?.templateId || 'Off'
-                  const tmpl = (shiftTemplates || []).find(t => t.id === tid)
-                  return (
-                    <td key={d} style={{ ...cell, textAlign: 'center', padding: '8px' }}>
-                      <select value={tid} onChange={e => assign(emp.id, d, e.target.value)}
-                        style={{
-                          width: '100%', padding: '6px 4px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600,
-                          border: '1px solid var(--glass-border)',
-                          background: tmpl ? `${tmpl.color}18` : 'var(--glass-bg)',
-                          color: tmpl ? tmpl.color : 'var(--md-bw-on-surface-variant)',
-                          outline: 'none', cursor: 'pointer', appearance: 'none', textAlign: 'center', minHeight: '32px'
-                        }}
-                      >
-                        <option value="Off">Off</option>
-                        {(shiftTemplates || []).map(t => (
-                          <option key={t.id} value={t.id}>{t.name}</option>
-                        ))}
-                      </select>
-                    </td>
-                  )
-                })}
+      <div className="payroll-table-container">
+        <div className="payroll-table-header-wrap">
+          <table className="payroll-table">
+            <colgroup>
+              <col style={{ width: '160px' }} />
+              {weekDates.map(d => <col key={d} style={{ width: '120px' }} />)}
+            </colgroup>
+            <thead>
+              <tr>
+                <th style={thStyle}>Employee</th>
+                {weekDates.map((d, i) => (
+                  <th key={d} style={{ ...thStyle, textAlign: 'center', fontSize: '12px' }}>
+                    {labels[i]}<br /><span style={{ fontWeight: 400, color: 'var(--md-bw-on-surface-variant)' }}>{formatDateShort(d)}</span>
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+          </table>
+        </div>
+        <div className="payroll-table-body-scroll" style={{ maxHeight: '520px' }}>
+          <table className="payroll-table">
+            <colgroup>
+              <col style={{ width: '160px' }} />
+              {weekDates.map(d => <col key={d} style={{ width: '120px' }} />)}
+            </colgroup>
+            <tbody>
+              {employees.map(emp => (
+                <tr key={emp.id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                  <td style={cell}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--md-bw-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700 }}>
+                        {emp.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 500 }}>{emp.name}</span>
+                    </div>
+                  </td>
+                  {weekDates.map(d => {
+                    const entry = (roster || []).find(r => r.employeeId === emp.id && r.date === d)
+                    const tid = entry?.templateId || 'Off'
+                    const tmpl = (shiftTemplates || []).find(t => t.id === tid)
+                    const isOpen = openRosterEmp === emp.id && openRosterDate === d
+                    return (
+                      <td key={d} style={{ ...cell, textAlign: 'center', padding: '8px', position: 'relative' }}>
+                        <button onClick={(e) => { e.stopPropagation(); setOpenRosterEmp(v => v === emp.id && openRosterDate === d ? null : emp.id); setOpenRosterDate(d) }}
+                          style={{
+                            width: '100%', padding: '6px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600, minHeight: '32px',
+                            border: '1px solid var(--glass-border)', outline: 'none', cursor: 'pointer',
+                            background: tmpl ? `${tmpl.color}18` : 'var(--glass-bg)',
+                            color: tmpl ? tmpl.color : 'var(--md-bw-on-surface-variant)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px'
+                          }}>
+                          {tmpl ? tmpl.name : 'Off'}
+                          <svg width="8" height="5" viewBox="0 0 10 6" fill="none" style={{ opacity: 0.5 }}><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </button>
+                        {isOpen && (
+                          <div onClick={e => e.stopPropagation()}
+                            style={{ position: 'absolute', top: 'calc(100% + 4px)', left: '50%', transform: 'translateX(-50%)', zIndex: 50, minWidth: '120px', padding: '6px',
+                              background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
+                              border: '1px solid var(--glass-border)', borderRadius: 'var(--glass-radius)', boxShadow: 'var(--glass-shadow)',
+                              color: 'var(--md-bw-on-surface)' }}>
+                            <button key="Off" onClick={() => { assign(emp.id, d, 'Off'); setOpenRosterEmp(null) }}
+                              style={{
+                                display: 'block', width: '100%', padding: '6px 10px', borderRadius: '100px', border: 'none',
+                                cursor: 'pointer', font: "600 11px 'Roboto'", textAlign: 'center',
+                                background: tid === 'Off' ? '#6c757d' : 'transparent',
+                                color: tid === 'Off' ? '#fff' : 'var(--md-bw-on-surface)',
+                                transition: 'all 0.15s',
+                              }}
+                              onMouseEnter={e => { if (tid !== 'Off') e.target.style.background = 'var(--glass-bg)' }}
+                              onMouseLeave={e => { if (tid !== 'Off') e.target.style.background = 'transparent' }}>
+                              Off
+                            </button>
+                            {(shiftTemplates || []).map(t => (
+                              <button key={t.id} onClick={() => { assign(emp.id, d, t.id); setOpenRosterEmp(null) }}
+                                style={{
+                                  display: 'block', width: '100%', padding: '6px 10px', borderRadius: '100px', border: 'none',
+                                  cursor: 'pointer', font: "600 11px 'Roboto'", textAlign: 'center',
+                                  background: tid === t.id ? t.color : 'transparent',
+                                  color: tid === t.id ? '#fff' : 'var(--md-bw-on-surface)',
+                                  transition: 'all 0.15s',
+                                }}
+                                onMouseEnter={e => { if (tid !== t.id) e.target.style.background = 'var(--glass-bg)' }}
+                                onMouseLeave={e => { if (tid !== t.id) e.target.style.background = 'transparent' }}>
+                                {t.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 
