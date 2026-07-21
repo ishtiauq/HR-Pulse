@@ -2725,71 +2725,8 @@ svg.lucide {
   margin: 0 !important;
 }
 
-/* --- macOS-STYLE HOVER TOOLTIPS (Collapsed state only) --- */
-
-.nav-item,
-.role-btn,
-.logout-btn,
-.user-profile-glass {
-  position: relative;
-}
-
-/* Tooltip pseudo-element - macOS 27 Liquid Glass Style */
-.sidebar.collapsed .nav-item:hover::after,
-.sidebar.collapsed .role-btn:hover::after,
-.sidebar.collapsed .logout-btn:hover::after,
-.sidebar.collapsed .user-profile-glass:hover::after {
-  content: attr(data-label);
-  position: fixed !important;
-  left: 88px !important;
-  top: auto !important;
-  transform: translateY(-50%) !important;
-  z-index: 1000 !important;
-  
-  /* macOS 27 Liquid Glassmorphism */
-  background: rgba(255, 255, 255, 0.94) !important;
-  backdrop-filter: blur(40px) saturate(250%) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(250%) !important;
-  color: #1d1d1f;
-  font: 500 13px/18px 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
-  letter-spacing: -0.01em;
-  padding: 8px 14px;
-  border-radius: 10px;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  border: 1px solid rgba(255, 255, 255, 0.8) !important;
-  animation: tooltip-in 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) 0.05s forwards;
-  
-  /* macOS 27 Drop Shadow */
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-/* Tooltip arrow - macOS 27 Glass Arrow */
-.sidebar.collapsed .nav-item:hover::before,
-.sidebar.collapsed .role-btn:hover::before,
-.sidebar.collapsed .logout-btn:hover::before,
-.sidebar.collapsed .user-profile-glass:hover::before {
-  content: '';
-  position: fixed !important;
-  left: 82px !important;
-  top: auto !important;
-  transform: translateY(-50%) !important;
-  z-index: 1000 !important;
-  width: 0;
-  height: 0;
-  border-top: 6px solid transparent;
-  border-bottom: 6px solid transparent;
-  border-right: 6px solid rgba(255, 255, 255, 0.94) !important;
-  pointer-events: none;
-  opacity: 0;
-  animation: tooltip-in 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) 0.05s forwards;
-}
-
-@keyframes tooltip-in {
+/* --- Hover TooltipPopover Animation (React portal-based) --- */
+@keyframes hrp-tooltip-in {
   from {
     opacity: 0;
     transform: translateY(-50%) translateX(-4px);
@@ -2798,11 +2735,6 @@ svg.lucide {
     opacity: 1;
     transform: translateY(-50%) translateX(0);
   }
-}
-
-/* For user profile, use different tooltip content */
-.sidebar.collapsed .user-profile-glass:hover::after {
-  content: attr(data-label);
 }
 
 /* --- DARK MODE ADAPTATION --- */

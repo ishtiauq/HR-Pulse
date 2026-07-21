@@ -14,6 +14,7 @@ import Assets from './components/Assets.jsx'
 import Calendar from './components/Calendar.jsx'
 import Documents from './components/Documents.jsx'
 import EmployeePortal from './components/EmployeePortal.jsx'
+import TooltipPopover from './components/TooltipPopover.jsx'
 import { readMeta, writeMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBackup, createBackup } from './services/googleDrive.js'
 import { clearLocalCache } from './services/db.js'
 import { validateDatabase } from './services/validator.js'
@@ -1600,6 +1601,7 @@ export default function App() {
             justifyContent: isCollapsed ? 'center' : 'flex-start'
           }}>
             {/* ANIMATED COLLAPSE TRIGGER BUTTON */}
+            <TooltipPopover label="Expand Sidebar" isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
             <button id="sidebar-toggle" className="collapse-btn" onClick={toggleSidebar} style={{
               width: isCollapsed ? '32px' : '100%',
               height: isCollapsed ? '32px' : '44px',
@@ -1645,6 +1647,7 @@ export default function App() {
                 }}>Collapse Sidebar</span>
               )}
             </button>
+            </TooltipPopover>
           </div>
         </div>
 
@@ -1666,7 +1669,8 @@ export default function App() {
           {visibleNavItems.map(item => {
             const isActive = currentView === item.id;
             return (
-              <div key={item.id} className={`nav-item ${isActive ? 'active' : ''}`} data-label={item.label} onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }} style={{
+              <TooltipPopover key={item.id} label={item.label} isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
+              <div className={`nav-item ${isActive ? 'active' : ''}`} data-label={item.label} onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }} style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
@@ -1709,6 +1713,7 @@ export default function App() {
                   width: isCollapsed ? 0 : 'auto'
                 }}>{item.label}</span>
               </div>
+              </TooltipPopover>
             )
           })}
         </nav>
@@ -1802,6 +1807,7 @@ export default function App() {
             </div>
 
             {/* ROLE BUTTON */}
+            <TooltipPopover label={`Role: ${simulatedRole}`} isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
             <button className="role-btn" data-active={showRoleModal ? "true" : "false"} data-label={`Role: ${simulatedRole}`} onClick={() => { if (isCollapsed) setIsCollapsed(false); setShowRoleModal(!showRoleModal); }} style={{
               display: 'flex',
               alignItems: 'center',
@@ -1854,6 +1860,7 @@ export default function App() {
                 </svg>
               )}
             </button>
+            </TooltipPopover>
 
             {/* Role Dropdown List Inline */}
             {!isCollapsed && showRoleModal && (
@@ -1885,6 +1892,7 @@ export default function App() {
             )}
             
             {/* LOGOUT BUTTON */}
+            <TooltipPopover label="Log Out" isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
             <button className="logout-btn" data-label="Log Out" onClick={handleLogout} style={{
               display: 'flex',
               alignItems: 'center',
@@ -1929,6 +1937,7 @@ export default function App() {
                 width: isCollapsed ? 0 : 'auto'
               }}>Log Out</span>
             </button>
+            </TooltipPopover>
           </div>
         </div>
       </aside>
