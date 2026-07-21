@@ -78,6 +78,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
   const [newStatus, setNewStatus] = useState('Active')
   const [newDob, setNewDob] = useState('')
   const [newJoiningDate, setNewJoiningDate] = useState('')
+  const [newPassword, setNewPassword] = useState('')
   const [newCvFileName, setNewCvFileName] = useState('')
   const [newNidFileName, setNewNidFileName] = useState('')
   const [newAvatar, setNewAvatar] = useState('')
@@ -119,6 +120,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
   const handleOpenAddForm = () => {
     const generatedId = `EMP-${Math.floor(100 + Math.random() * 900)}`
     setNewEmpId(generatedId)
+    setNewPassword('')
     setNewAvatar('')
     setPhotoX(0)
     setPhotoY(0)
@@ -149,6 +151,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
         department: finalDept,
         status: newStatus,
         email: newEmail,
+        password: newPassword || emp.password,
         dob: newDob,
         joiningDate: newJoiningDate,
         cvFileName: newCvFileName,
@@ -176,6 +179,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
         department: finalDept,
         status: newStatus,
         email: newEmail,
+        password: newPassword,
         avatar: newAvatar || `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 1000000)}?auto=format&fit=crop&q=80&w=200`,
         dob: newDob,
         joiningDate: newJoiningDate,
@@ -903,6 +907,20 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                   placeholder="e.g. john@hrpulse.io"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
+                />
+              </div>
+
+              {/* Password */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>
+                  Login Password {editingEmployee ? '(leave blank to keep current)' : ''}
+                </label>
+                <input
+                  type="text"
+                  placeholder={editingEmployee ? 'Leave blank to keep current' : 'Set employee login password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  style={{ fontFamily: 'monospace' }}
                 />
               </div>
 

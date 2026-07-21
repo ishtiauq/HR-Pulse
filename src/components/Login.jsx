@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Shield, Cloud, Zap, Activity, Lock, ArrowRight, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { Shield, Cloud, Zap, Activity, Lock, ArrowRight, HelpCircle, ChevronDown, ChevronUp, LogIn } from 'lucide-react'
 import { fetchUserProfile } from '../services/googleDrive.js'
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, onEmployeeLogin }) {
   const [isLoading, setIsLoading] = useState(false)
   const [showIntermediateModal, setShowIntermediateModal] = useState(false)
   const [showAccordion, setShowAccordion] = useState(false)
@@ -167,6 +167,25 @@ export default function Login({ onLogin }) {
               </svg>
             )}
             <span style={{ fontWeight: 600 }}>{isLoading ? 'Connecting Drive...' : 'Connect Google Drive'}</span>
+          </button>
+        </div>
+
+        <div style={{ marginTop: '16px', textAlign: 'center' }}>
+          <button
+            onClick={onEmployeeLogin}
+            className="btn btn-outline"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '8px',
+              padding: '10px 20px', borderRadius: '10px',
+              border: '1px solid var(--color-md-sys-outline-variant)',
+              background: 'transparent', cursor: 'pointer',
+              color: 'var(--text-secondary)',
+              font: "500 13px 'Roboto'",
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <LogIn size={16} />
+            Employee Login
           </button>
         </div>
 

@@ -4,6 +4,7 @@ import Dashboard from './components/Dashboard.jsx'
 import Employees from './components/Employees.jsx'
 import DriveSync from './components/DriveSync.jsx'
 import Login from './components/Login.jsx'
+import EmployeeLogin from './components/EmployeeLogin.jsx'
 import Payroll from './components/Payroll.jsx'
 import Settings from './components/Settings.jsx'
 import Attendance from './components/Attendance.jsx'
@@ -132,6 +133,7 @@ export default function App() {
   const [isAppLoading, setIsAppLoading] = useState(true)
   const syncRef = useRef(null)
 
+  const [showEmployeeLogin, setShowEmployeeLogin] = useState(false)
   const [simulatedRole, setSimulatedRole] = useState('Admin')
   const [showRoleModal, setShowRoleModal] = useState(false)
   const [pendingProfileEdits, setPendingProfileEdits] = useState([])
@@ -299,11 +301,17 @@ export default function App() {
   const handleLogin = (userInfo) => {
     setUser(userInfo)
     localStorage.setItem('hr_pulse_user', JSON.stringify(userInfo))
+    if (!userInfo.isEmployee && userInfo.token) {
+      localStorage.setItem('hr_pulse_hr_token', userInfo.token)
+    }
   }
 
   const handleLogout = () => {
     setUser(null)
     localStorage.removeItem('hr_pulse_user')
+    if (!user?.isEmployee) {
+      localStorage.removeItem('hr_pulse_hr_token')
+    }
     setCurrentView('dashboard')
   }
 
@@ -1420,13 +1428,16 @@ export default function App() {
   }
 
   if (!user) {
-    return <Login onLogin={handleLogin} />
+    if (showEmployeeLogin) {
+      return <EmployeeLogin onLogin={handleLogin} onBack={() => setShowEmployeeLogin(false)} />
+    }
+    return <Login onLogin={handleLogin} onEmployeeLogin={() => setShowEmployeeLogin(true)} />
   }
 
-  if (simulatedRole === 'Employee') {
+  if (simulatedRole === 'Employee' || user.isEmployee) {
     return (
       <EmployeePortal
-        currentUser={{...user, role: 'Employee', department: 'Engineering'}}
+        currentUser={{...user, role: user.role || 'Employee', department: user.department || 'Engineering'}}
         employees={employees}
         attendance={attendance}
         payroll={payroll}
