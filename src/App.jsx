@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { TopAppBar, NavigationRail, IconButton, Badge, Avatar, Button, Dialog, Divider } from 'actify'
+
 import Dashboard from './components/Dashboard.jsx'
 import Employees from './components/Employees.jsx'
 import DriveSync from './components/DriveSync.jsx'
@@ -19,7 +19,7 @@ import TooltipPopover from './components/TooltipPopover.jsx'
 import { readMeta, writeMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBackup, createBackup } from './services/googleDrive.js'
 import { clearLocalCache } from './services/db.js'
 import { validateDatabase } from './services/validator.js'
-import { Bell, AlertTriangle, Search, LayoutDashboard, Users, CreditCard, Calendar as CalendarIcon, Receipt, BarChart3, Settings as SettingsIcon, HardDrive, FileText, Megaphone, CalendarDays, Monitor, Database, User, History, Moon, Sparkles, Trash2, LogOut, Sun, HelpCircle, X, Activity, ChevronUp, Menu, PanelLeftClose, PanelLeft, Shield } from 'lucide-react'
+import { Search, LayoutDashboard, Users, CreditCard, Calendar as CalendarIcon, Receipt, BarChart3, Settings as SettingsIcon, HardDrive, FileText, Megaphone, CalendarDays, Monitor, Database, User, History, Moon, Trash2, Sun, Menu } from 'lucide-react'
 import { useModal } from './services/useModal.js'
 
 const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
@@ -1405,9 +1405,7 @@ export default function App() {
             user={user}
             driveConnected={driveConnected} 
             setDriveConnected={setDriveConnected} 
-            syncLogs={syncLogs}
             addLog={addLog}
-            employees={employees}
           />
         )
       default:

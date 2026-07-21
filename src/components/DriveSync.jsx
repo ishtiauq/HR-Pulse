@@ -1,27 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Database, HardDrive, CloudOff, CloudLightning, ArrowLeftRight, Download, UploadCloud, Info, FileJson, Check, AlertCircle, RefreshCw, Eye, X, Trash2, Shield, RotateCcw } from 'lucide-react'
+import { Database, HardDrive, CloudOff, CloudLightning, ArrowLeftRight, Download, Info, FileJson, AlertCircle, RefreshCw, X, Trash2, Shield, RotateCcw } from 'lucide-react'
 import AdSlot from './AdSlot'
 import { useModal } from '../services/useModal.js'
 import { getLocalCacheSizeMB, clearLocalCache } from '../services/db.js'
 import { createBackup, listBackups, restoreBackup } from '../services/googleDrive.js'
 import { formatDateTime } from '../services/date.js'
 
-const mockFiles = [
-  { id: '1', name: 'employees.json', size: '42.5 KB', modified: '2026-07-18T04:30:00Z' },
-  { id: '2', name: 'attendance.json', size: '128.1 KB', modified: '2026-07-18T04:45:00Z' },
-  { id: '3', name: 'payroll_history.json', size: '56.2 KB', modified: '2026-07-18T04:15:00Z' },
-  { id: '4', name: 'settings.json', size: '2.1 KB', modified: '2026-07-17T10:00:00Z' }
-]
-
-export default function DriveSync({ user, driveConnected, setDriveConnected, syncLogs, addLog, addToast, employees }) {
-  const [isBackupSimulating, setIsBackupSimulating] = useState(false)
-  const [exportModalOpen, setExportModalOpen] = useState(false)
-  const [importModalOpen, setImportModalOpen] = useState(false)
-  const [exportOptions, setExportOptions] = useState({ employees: true, attendance: true, settings: true, payroll: true })
-  const [exportProgress, setExportProgress] = useState(0)
-  const [importProgress, setImportProgress] = useState(0)
-  const [dragActive, setDragActive] = useState(false)
-  const [importError, setImportError] = useState('')
+export default function DriveSync({ user, driveConnected, setDriveConnected, addLog, addToast }) {
   const [timeSinceSync, setTimeSinceSync] = useState(2)
   const [timeUntilSync, setTimeUntilSync] = useState(13)
   const [previewFile, setPreviewFile] = useState(null)
