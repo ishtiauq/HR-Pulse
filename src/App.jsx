@@ -2005,7 +2005,7 @@ export default function App() {
       </aside>
 
       {/* Main Content */}
-      <main className="content dashboard-content" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+      <main className="content dashboard-content" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', scrollbarGutter: 'stable' }}>
         
         <header className="macos-toolbar topbar" style={{ 
           height: '56px', minHeight: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', 

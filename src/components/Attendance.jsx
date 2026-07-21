@@ -1,243 +1,437 @@
 import { useState } from 'react'
-import { Calendar, Check, X, ClipboardList, Clock, CheckCircle2, AlertCircle, Plus, CalendarDays, BarChart3, ChevronLeft, ChevronRight, Cpu, Download, FileSpreadsheet, FileText, User, CheckSquare, Trash2, History, MessageSquare, Repeat } from 'lucide-react'
-import AdSlot from './AdSlot.jsx'
+import { Check, X, Clock, Plus, CalendarDays, ChevronLeft, ChevronRight, Cpu, ArrowUpDown, Repeat } from 'lucide-react'
 import { formatDateShort } from '../services/date.js'
 
-export default function Attendance({ 
-  employees, 
-  attendance, 
-  setAttendance,
-  roster,
-  setRoster,
-  shiftSwaps,
-  setShiftSwaps,
-  shiftTemplates,
-  overtimeClaims,
-  setOvertimeClaims,
-  addLog, 
-  driveConnected, 
-  addToast, 
-  addNotification, 
-  simulatedRole, 
-  addAuditLog 
-}) {
-  const [activeTab, setActiveTab] = useState('daily') // 'daily', 'time-off', 'analytics', 'biometric'
-  const [viewMode, setViewMode] = useState('manager') // 'manager' or 'employee'
+const z = (v) => v < 10 ? `0${v}` : `${v}`
+const toLocal = (d) => `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`
+const getMon = (offset) => {
+  const n = new Date()
+  const d = n.getDay()
+  const mon = new Date(n.getFullYear(), n.getMonth(), n.getDate() - d + (d === 0 ? -6 : 1) + offset * 7)
+  return toLocal(mon)
+}
+const addDays = (s, n) => {
+  const d = new Date(s + 'T12:00:00')
+  d.setDate(d.getDate() + n)
+  return toLocal(d)
+}
+const parseMin = (t) => {
+  if (!t || t === '--') return null
+  const s = t.trim().toUpperCase()
+  const pm = s.includes('PM')
+  const am = s.includes('AM')
+  const p = s.replace(/\s*(AM|PM)\s*/, '').split(':')
+  const h = parseInt(p[0], 10)
+  const m = parseInt(p[1], 10) || 0
+  if (isNaN(h)) return null
+  let h24 = h
+  if (pm && h !== 12) h24 = h + 12
+  if (am && h === 12) h24 = 0
+  return h24 * 60 + m
+}
+const fmtH = (m) => m === null ? '0.0' : (m / 60).toFixed(1)
 
-  const leaves = attendance.leaves || []
+const tabChip = (isActive) => ({
+  display: 'flex', alignItems: 'center', gap: '6px',
+  padding: '8px 16px', borderRadius: '100px',
+  border: isActive ? 'none' : '1px solid var(--glass-border)',
+  background: isActive ? 'linear-gradient(135deg, #0062E6 0%, #003A8C 100%)' : 'rgba(0,0,0,0.05)',
+  color: isActive ? '#fff' : 'var(--md-bw-on-surface-variant)',
+  cursor: 'pointer', font: "500 13px 'Roboto'",
+  transition: 'all 0.2s ease', outline: 'none', minHeight: '32px'
+})
 
+const pill = (bg, color) => ({
+  height: '24px', padding: '0 10px', fontSize: '11px', fontWeight: 600,
+  display: 'inline-flex', alignItems: 'center', borderRadius: '20px',
+  backgroundColor: bg, color, letterSpacing: '0.03em', whiteSpace: 'nowrap'
+})
+
+const PILL_STYLES = {
+  Present: { bg: '#28a745', color: '#fff' },
+  Absent: { bg: '#dc3545', color: '#fff' },
+  'On Leave': { bg: '#ffc107', color: '#121212' },
+  WFH: { bg: '#007aff', color: '#fff' },
+}
+
+const selStyle = {
+  padding: '0 28px 0 12px', height: '32px', borderRadius: '100px', fontSize: '12px', fontWeight: 600,
+  border: '1px solid var(--glass-border)', outline: 'none', cursor: 'pointer',
+  appearance: 'none', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)',
+}
+
+const cell = { padding: '0 16px' }
+const thStyle = { padding: '0 16px', height: '48px', textAlign: 'left', borderBottom: '1.5px solid var(--glass-border)', textTransform: 'uppercase', fontSize: '13px', fontWeight: 600, letterSpacing: '0.01em', color: 'var(--md-bw-on-surface)', whiteSpace: 'nowrap' }
+
+export default function Attendance({ employees, attendance, setAttendance, roster, setRoster, shiftSwaps, setShiftSwaps, shiftTemplates, overtimeClaims, setOvertimeClaims, addLog, addToast, addNotification, simulatedRole, addAuditLog }) {
+  const [tab, setTab] = useState('daily')
+  const tabs = [
+    { id: 'daily', label: 'Daily Logs', icon: Clock },
+    { id: 'leave', label: 'Leave Requests', icon: CalendarDays },
+    { id: 'roster', label: 'Roster', icon: ArrowUpDown },
+    { id: 'overtime', label: 'Overtime', icon: Cpu },
+  ]
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>
-          Attendance
-        </h1>
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <h1 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Attendance & Leaves</h1>
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        {tabs.map(t => {
+          const Icon = t.icon
+          return (
+            <button key={t.id} onClick={() => setTab(t.id)} style={tabChip(tab === t.id)}>
+              <Icon size={15} /> {t.label}
+            </button>
+          )
+        })}
       </div>
-
-      {/* Tabs - M3 Segmented Button */}
-      <div style={{ display: 'flex', border: '1px solid var(--md-bw-outline)', borderRadius: '20px', overflow: 'hidden', alignSelf: 'flex-start' }}>
-        {[
-          { id: 'daily', label: 'Daily Roll Call' },
-          { id: 'time-off', label: 'Time-Off' },
-          { id: 'analytics', label: 'Analytics' },
-          { id: 'biometric', label: 'Biometric' }
-        ].map((tab, idx) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            style={{
-              padding: '8px 16px',
-              border: 'none',
-              borderRight: idx < 3 ? '1px solid var(--md-bw-outline)' : 'none',
-              background: activeTab === tab.id ? 'var(--md-bw-secondary-container)' : 'var(--md-bw-surface)',
-              color: activeTab === tab.id ? 'var(--md-bw-on-secondary-container)' : 'var(--md-bw-on-surface-variant)',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: 500,
-              outline: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {activeTab === tab.id && <CheckSquare size={16} />}
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {activeTab === 'daily' && (
-        <DailyAttendance 
-          employees={employees} 
-          attendance={attendance} 
-          setAttendance={setAttendance} 
-          addToast={addToast}
-        />
+      {tab === 'daily' && <DailyAttendance employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />}
+      {tab === 'leave' && <LeaveRequests employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />}
+      {tab === 'roster' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <RosterPlanner employees={employees} roster={roster} setRoster={setRoster} shiftTemplates={shiftTemplates} addToast={addToast} />
+          <ShiftSwaps employees={employees} shiftSwaps={shiftSwaps} setShiftSwaps={setShiftSwaps} roster={roster} setRoster={setRoster} addToast={addToast} />
+        </div>
       )}
-
-      {/* Placeholders for new tabs */}
-      {activeTab === 'time-off' && <div className="m3-card m3-card-elevated" style={{ padding: '24px', textAlign: 'center' }}><p className="body-large">Time-Off (Under Construction)</p></div>}
-      {activeTab === 'analytics' && <div className="m3-card m3-card-elevated" style={{ padding: '24px', textAlign: 'center' }}><p className="body-large">Analytics (Under Construction)</p></div>}
-      {activeTab === 'biometric' && <div className="m3-card m3-card-elevated" style={{ padding: '24px', textAlign: 'center' }}><p className="body-large">Biometric (Under Construction)</p></div>}
-      
-      <AdSlot type="horizontal" style={{ marginTop: '20px' }} />
+      {tab === 'overtime' && <OvertimeClaims employees={employees} overtimeClaims={overtimeClaims} setOvertimeClaims={setOvertimeClaims} addToast={addToast} />}
     </div>
   )
 }
 
-// ----------------------------------------------------------------------
-// Roster Planner Component
-// ----------------------------------------------------------------------
+function DailyAttendance({ employees, attendance, setAttendance, addToast }) {
+  const [selectedDate, setSelectedDate] = useState(() => toLocal(new Date()))
+  const logs = attendance?.dailyLogs?.[selectedDate] || {}
+
+  const setLog = (empId, upd) => {
+    const cur = logs[empId] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
+    const next = { ...cur, ...upd }
+    if (next.checkIn !== '--' && next.checkOut !== '--') {
+      const a = parseMin(next.checkIn), b = parseMin(next.checkOut)
+      if (a !== null && b !== null) {
+        let d = b - a; if (d < 0) d += 1440
+        next.hours = fmtH(d)
+        if (cur.status === 'Absent' || cur.status === '--') next.status = 'Present'
+      }
+    }
+    setAttendance(prev => ({ ...prev, dailyLogs: { ...prev.dailyLogs, [selectedDate]: { ...logs, [empId]: next } } }))
+  }
+
+  const markAll = () => {
+    const o = {}
+    employees.forEach(e => { o[e.id] = { status: 'Present', checkIn: '09:00 AM', checkOut: '06:00 PM', hours: '9.0' } })
+    setAttendance(prev => ({ ...prev, dailyLogs: { ...prev.dailyLogs, [selectedDate]: o } }))
+    addToast('Marked all as Present', 'success')
+  }
+
+  return (
+    <div className="payroll-table-container">
+      <div className="payroll-table-header-wrap">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '20px 24px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ position: 'relative' }}>
+              <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)}
+                style={{
+                  padding: '10px 38px 10px 14px', borderRadius: '100px',
+                  border: '1px solid var(--glass-border)',
+                  background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)',
+                  font: "500 14px 'Roboto'", outline: 'none',
+                  cursor: 'pointer', minHeight: '40px'
+                }}
+              />
+              <CalendarDays size={16} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--md-bw-on-surface-variant)', pointerEvents: 'none' }} />
+            </div>
+            <span className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
+              {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' })}
+            </span>
+          </div>
+          <button className="btn btn-text" onClick={markAll} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Plus size={15} /> Mark All Present
+          </button>
+        </div>
+      </div>
+      <div className="payroll-table-body-scroll" style={{ maxHeight: '520px' }}>
+        <table className="payroll-table" style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: '200px' }} />
+            <col style={{ width: '140px' }} />
+            <col style={{ width: '140px' }} />
+            <col style={{ width: '80px' }} />
+            <col style={{ width: '160px' }} />
+          </colgroup>
+          <thead>
+            <tr>
+              <th style={thStyle}>Employee</th>
+              <th style={{ ...thStyle, textAlign: 'center' }}>Check In</th>
+              <th style={{ ...thStyle, textAlign: 'center' }}>Check Out</th>
+              <th style={{ ...thStyle, textAlign: 'center' }}>Hours</th>
+              <th style={thStyle}>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employees.map(emp => {
+              const log = logs[emp.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
+              const ps = PILL_STYLES[log.status] || PILL_STYLES.Absent
+              return (
+                <tr key={emp.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                  <td style={cell}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <img src={emp.avatar} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
+                      <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{emp.name}</span>
+                    </div>
+                  </td>
+                  <td style={{ ...cell, textAlign: 'center' }}>
+                    <input type="text" value={log.checkIn} onChange={e => setLog(emp.id, { [e.target.name]: e.target.value })} name="checkIn"
+                      style={{ width: '90px', textAlign: 'center', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "400 13px 'Roboto'", outline: 'none' }}
+                      placeholder="09:00 AM"
+                    />
+                  </td>
+                  <td style={{ ...cell, textAlign: 'center' }}>
+                    <input type="text" value={log.checkOut} onChange={e => setLog(emp.id, { [e.target.name]: e.target.value })} name="checkOut"
+                      style={{ width: '90px', textAlign: 'center', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "400 13px 'Roboto'", outline: 'none' }}
+                      placeholder="06:00 PM"
+                    />
+                  </td>
+                  <td style={{ ...cell, textAlign: 'center' }}>
+                    <span className="body-large" style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--md-bw-on-surface)', fontWeight: 600 }}>{log.hours}</span>
+                  </td>
+                  <td style={cell}>
+                    <select value={log.status} onChange={e => setLog(emp.id, { status: e.target.value })}
+                      style={{ ...selStyle, background: ps.bg, color: ps.color, border: 'none' }}
+                    >
+                      {Object.entries(PILL_STYLES).map(([k, v]) => (
+                        <option key={k} value={k} style={{ background: '#fff', color: '#121212' }}>{v.label || k}</option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 24px' }}>
+        <button className="btn btn-filled" onClick={() => addToast('Daily logs saved.', 'success')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Check size={16} /> Save Daily Logs
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function LeaveRequests({ employees, attendance, setAttendance, addToast }) {
+  const leaves = attendance.leaves || []
+  const pending = leaves.filter(l => l.status === 'Pending')
+  const history = leaves.filter(l => l.status !== 'Pending')
+
+  const act = (id, status) => {
+    setAttendance(prev => ({ ...prev, leaves: (prev.leaves || []).map(l => l.id === id ? { ...l, status } : l) }))
+    addToast(`Leave request ${status.toLowerCase()}.`, status === 'Approved' ? 'success' : 'info')
+  }
+
+  const STATUS = {
+    Approved: { bg: '#28a745', color: '#fff' },
+    Rejected: { bg: '#dc3545', color: '#fff' },
+    Pending: { bg: '#ffc107', color: '#121212' },
+  }
+
+  return (
+    <div className="payroll-table-container" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>
+        Pending Requests {pending.length > 0 && <span style={{ fontWeight: 400, color: 'var(--md-bw-on-surface-variant)' }}>({pending.length})</span>}
+      </h3>
+      {pending.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '48px', color: 'var(--md-bw-on-surface-variant)' }}>
+          <CalendarDays size={32} style={{ opacity: 0.3, marginBottom: '12px' }} />
+          <p className="body-medium" style={{ margin: 0 }}>No pending leave requests.</p>
+        </div>
+      ) : (
+        <div className="payroll-table-header-wrap">
+          <table className="payroll-table" style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+            <colgroup>
+              <col style={{ width: '160px' }} /><col style={{ width: '120px' }} /><col style={{ width: '180px' }} /><col style={{ width: '60px' }} /><col /><col style={{ width: '200px' }} />
+            </colgroup>
+            <thead>
+              <tr>
+                <th style={thStyle}>Employee</th>
+                <th style={thStyle}>Type</th>
+                <th style={thStyle}>Dates</th>
+                <th style={{ ...thStyle, textAlign: 'center' }}>Days</th>
+                <th style={thStyle}>Reason</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pending.map(l => {
+                const emp = employees.find(e => e.id === l.employeeId)
+                return (
+                  <tr key={l.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                    <td style={cell}><span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{emp?.name || l.employeeId}</span></td>
+                    <td style={cell}><span style={{ color: 'var(--md-bw-on-surface)' }}>{l.leaveType}</span></td>
+                    <td style={cell}><span style={{ color: 'var(--md-bw-on-surface-variant)', fontSize: '0.85rem' }}>{formatDateShort(l.startDate)} — {formatDateShort(l.endDate)}</span></td>
+                    <td style={{ ...cell, textAlign: 'center' }}><span className="body-large" style={{ fontWeight: 600, color: 'var(--md-bw-on-surface)' }}>{l.days || '—'}</span></td>
+                    <td style={cell}><span style={{ color: 'var(--md-bw-on-surface-variant)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: '200px' }}>{l.reason || '—'}</span></td>
+                    <td style={{ ...cell, textAlign: 'right' }}>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                        <button className="btn btn-tonal" style={{ padding: '0 14px', height: '32px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => act(l.id, 'Approved')}>
+                          <Check size={13} /> Approve
+                        </button>
+                        <button className="btn btn-outlined" style={{ padding: '0 14px', height: '32px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--md-bw-error)' }} onClick={() => act(l.id, 'Rejected')}>
+                          <X size={13} /> Reject
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {history.length > 0 && (
+        <>
+          <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>History</h3>
+          <div className="payroll-table-header-wrap">
+            <table className="payroll-table" style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+              <colgroup>
+                <col style={{ width: '180px' }} /><col style={{ width: '120px' }} /><col style={{ width: '200px' }} /><col style={{ width: '100px' }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th style={{ ...thStyle, fontSize: '11px', height: '40px' }}>Employee</th>
+                  <th style={{ ...thStyle, fontSize: '11px', height: '40px' }}>Type</th>
+                  <th style={{ ...thStyle, fontSize: '11px', height: '40px' }}>Dates</th>
+                  <th style={{ ...thStyle, fontSize: '11px', height: '40px' }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.slice().reverse().map(l => {
+                  const emp = employees.find(e => e.id === l.employeeId)
+                  const s = STATUS[l.status] || STATUS.Pending
+                  return (
+                    <tr key={l.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                      <td style={cell}><span style={{ color: 'var(--md-bw-on-surface)', fontSize: '0.85rem' }}>{emp?.name || l.employeeId}</span></td>
+                      <td style={cell}><span style={{ color: 'var(--md-bw-on-surface-variant)', fontSize: '0.85rem' }}>{l.leaveType}</span></td>
+                      <td style={cell}><span style={{ color: 'var(--md-bw-on-surface-variant)', fontSize: '0.85rem' }}>{formatDateShort(l.startDate)} — {formatDateShort(l.endDate)}</span></td>
+                      <td style={cell}><span style={pill(s.bg, s.color)}>{l.status}</span></td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 function RosterPlanner({ employees, roster, setRoster, shiftTemplates, addToast }) {
-  const [weekOffset, setWeekOffset] = useState(0)
+  const [weekStart, setWeekStart] = useState(() => getMon(0))
 
-  // Generate current week dates (Mon-Sun)
-  const getWeekDates = (offset) => {
-    const today = new Date()
-    const currentDay = today.getDay()
-    const diff = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1) // Adjust for Sunday (0)
-    const monday = new Date(today.setDate(diff + (offset * 7)))
-    
-    const dates = []
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(monday)
-      d.setDate(monday.getDate() + i)
-      dates.push(d)
-    }
-    return dates
-  }
+  const goBack = () => setWeekStart(addDays(weekStart, -7))
+  const goNext = () => setWeekStart(addDays(weekStart, 7))
 
-  const weekDates = getWeekDates(weekOffset)
+  const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
+  const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-  // Handlers
-  const handleAssignShift = (empId, dateStr, templateId) => {
-    const newEntry = { employeeId: empId, date: dateStr, templateId }
-    
-    // Conflict Detection (< 8 hours rest)
+  const assign = (empId, dateStr, templateId) => {
     if (templateId !== 'Off') {
-      const prevDate = new Date(dateStr)
-      prevDate.setDate(prevDate.getDate() - 1)
-      const prevDateStr = prevDate.toISOString().split('T')[0]
-      const prevShiftEntry = (roster || []).find(r => r.employeeId === empId && r.date === prevDateStr)
-      
-      if (prevShiftEntry && prevShiftEntry.templateId !== 'Off') {
-        const prevTemp = (shiftTemplates || []).find(t => t.id === prevShiftEntry.templateId)
-        const currTemp = (shiftTemplates || []).find(t => t.id === templateId)
-        
-        if (prevTemp && currTemp) {
-          // Simplistic rest check logic (assuming same-day shifts for start times)
-          const prevEndHour = parseInt(prevTemp.end.split(':')[0])
-          const currStartHour = parseInt(currTemp.start.split(':')[0])
-          
-          let restHours = currStartHour - prevEndHour
-          if (restHours < 0) restHours += 24 // crossing midnight roughly
-
-          if (restHours < 8) {
-            addToast(`Conflict warning: Less than 8 hours rest for ${employees.find(e=>e.id===empId)?.name}`, 'warning')
-          }
+      const prev = addDays(dateStr, -1)
+      const pe = (roster || []).find(r => r.employeeId === empId && r.date === prev)
+      if (pe && pe.templateId !== 'Off') {
+        const pt = (shiftTemplates || []).find(t => t.id === pe.templateId)
+        const ct = (shiftTemplates || []).find(t => t.id === templateId)
+        if (pt && ct) {
+          const peh = parseInt(pt.end.split(':')[0])
+          const csh = parseInt(ct.start.split(':')[0])
+          let rest = csh - peh; if (rest < 0) rest += 24
+          if (rest < 8) addToast(`Less than 8h rest for ${employees.find(e=>e.id===empId)?.name}`, 'warning')
         }
       }
     }
-
-    setRoster(prev => {
-      const filtered = prev.filter(r => !(r.employeeId === empId && r.date === dateStr))
-      return [...filtered, newEntry]
-    })
+    setRoster(prev => [...prev.filter(r => !(r.employeeId === empId && r.date === dateStr)), { employeeId: empId, date: dateStr, templateId }])
   }
 
-  const handleCopyPreviousWeek = () => {
-    const prevWeekDates = getWeekDates(weekOffset - 1).map(d => d.toISOString().split('T')[0])
-    const currWeekDates = weekDates.map(d => d.toISOString().split('T')[0])
-    
-    let newEntries = []
+  const copyPrev = () => {
+    const prevStart = addDays(weekStart, -7)
+    const prevDates = Array.from({ length: 7 }, (_, i) => addDays(prevStart, i))
+    const curSet = new Set(weekDates)
+    const entries = []
     employees.forEach(emp => {
-      for(let i=0; i<7; i++) {
-        const prevEntry = (roster || []).find(r => r.employeeId === emp.id && r.date === prevWeekDates[i])
-        if (prevEntry) {
-          newEntries.push({ employeeId: emp.id, date: currWeekDates[i], templateId: prevEntry.templateId })
-        }
+      for (let i = 0; i < 7; i++) {
+        const p = (roster || []).find(r => r.employeeId === emp.id && r.date === prevDates[i])
+        if (p) entries.push({ employeeId: emp.id, date: weekDates[i], templateId: p.templateId })
       }
     })
-
-    if (newEntries.length === 0) return addToast('No shifts found in the previous week to copy.', 'warning')
-    
-    setRoster(prev => {
-      // Remove any existing entries for this week to overwrite
-      const currWeekSet = new Set(currWeekDates)
-      const filtered = prev.filter(r => !currWeekSet.has(r.date))
-      return [...filtered, ...newEntries]
-    })
+    if (entries.length === 0) return addToast('No shifts found in the previous week to copy.', 'warning')
+    setRoster(prev => [...prev.filter(r => !curSet.has(r.date)), ...entries])
     addToast('Copied previous week roster.', 'success')
   }
 
   return (
-    <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-primary)' }}>Weekly Roster Planner</h3>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button className="btn btn-secondary" onClick={handleCopyPreviousWeek}>
-            <CalendarDays size={16} /> Copy Prev Week
-          </button>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-secondary)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-            <button className="btn btn-secondary" style={{ padding: '6px' }} onClick={() => setWeekOffset(o => o - 1)}><ChevronLeft size={16} /></button>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, padding: '0 8px' }}>
-              {formatDateShort(weekDates[0].toISOString().split('T')[0])} - {formatDateShort(weekDates[6].toISOString().split('T')[0])}
-            </span>
-            <button className="btn btn-secondary" style={{ padding: '6px' }} onClick={() => setWeekOffset(o => o + 1)}><ChevronRight size={16} /></button>
+    <div className="payroll-table-container">
+      <div className="payroll-table-header-wrap">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '20px 24px 0' }}>
+          <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Weekly Roster Planner</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button className="btn btn-outlined" onClick={copyPrev} style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '36px', fontSize: '12px' }}>
+              <CalendarDays size={14} /> Copy Prev Week
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--glass-bg)', padding: '3px', borderRadius: '100px', border: '1px solid var(--glass-border)' }}>
+              <button className="btn btn-text" style={{ padding: '4px 8px', minHeight: '30px' }} onClick={goBack}>
+                <ChevronLeft size={15} />
+              </button>
+              <span style={{ fontSize: '0.82rem', fontWeight: 600, padding: '0 8px', color: 'var(--md-bw-on-surface)', whiteSpace: 'nowrap' }}>
+                {formatDateShort(weekDates[0])} — {formatDateShort(weekDates[6])}
+              </span>
+              <button className="btn btn-text" style={{ padding: '4px 8px', minHeight: '30px' }} onClick={goNext}>
+                <ChevronRight size={15} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="table-container" style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-        <table className="table-responsive table-striped" style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse' }}>
+      <div className="payroll-table-body-scroll" style={{ maxHeight: '520px' }}>
+        <table className="payroll-table" style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: '160px' }} />
+            {weekDates.map(d => <col key={d} style={{ width: '120px' }} />)}
+          </colgroup>
           <thead>
-            <tr style={{ background: 'var(--bg-tertiary)' }}>
-              <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid var(--border-color)', width: '200px' }}>Employee</th>
-              {weekDates.map(date => (
-                <th key={date.toISOString()} style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
-                  {date.toLocaleDateString('en-US', { weekday: 'short' })}<br/>
-                  <span style={{ color: 'var(--text-muted)' }}>{formatDateShort(date.toISOString().split('T')[0])}</span>
+            <tr>
+              <th style={thStyle}>Employee</th>
+              {weekDates.map((d, i) => (
+                <th key={d} style={{ ...thStyle, textAlign: 'center', fontSize: '12px' }}>
+                  {labels[i]}<br /><span style={{ fontWeight: 400, color: 'var(--md-bw-on-surface-variant)' }}>{formatDateShort(d)}</span>
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {employees.map(emp => (
-              <tr key={emp.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <td style={{ padding: '12px', fontSize: '0.85rem', fontWeight: 600 }}>
+              <tr key={emp.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                <td style={cell}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--accent-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem' }}>
+                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--md-bw-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700 }}>
                       {emp.name.split(' ').map(n => n[0]).join('')}
                     </div>
-                    {emp.name}
+                    <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 500 }}>{emp.name}</span>
                   </div>
                 </td>
-                {weekDates.map(date => {
-                  const dateStr = date.toISOString().split('T')[0]
-                  const shiftEntry = (roster || []).find(r => r.employeeId === emp.id && r.date === dateStr)
-                  const currentTemplateId = shiftEntry?.templateId || 'Off'
-                  const currentTemplate = (shiftTemplates || []).find(t => t.id === currentTemplateId)
-                  
+                {weekDates.map(d => {
+                  const entry = (roster || []).find(r => r.employeeId === emp.id && r.date === d)
+                  const tid = entry?.templateId || 'Off'
+                  const tmpl = (shiftTemplates || []).find(t => t.id === tid)
                   return (
-                    <td key={dateStr} style={{ padding: '8px', textAlign: 'center' }}>
-                      <select 
-                        value={currentTemplateId}
-                        onChange={(e) => handleAssignShift(emp.id, dateStr, e.target.value)}
+                    <td key={d} style={{ ...cell, textAlign: 'center', padding: '8px' }}>
+                      <select value={tid} onChange={e => assign(emp.id, d, e.target.value)}
                         style={{
-                          width: '100%',
-                          padding: '6px',
-                          borderRadius: '4px',
-                          border: '1px solid var(--border-color)',
-                          background: currentTemplate ? `${currentTemplate.color}15` : 'var(--bg-secondary)',
-                          color: currentTemplate ? currentTemplate.color : 'var(--text-secondary)',
-                          fontSize: '0.75rem',
-                          fontWeight: currentTemplate ? 700 : 500,
-                          outline: 'none',
-                          cursor: 'pointer'
+                          width: '100%', padding: '6px 4px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600,
+                          border: '1px solid var(--glass-border)',
+                          background: tmpl ? `${tmpl.color}18` : 'var(--glass-bg)',
+                          color: tmpl ? tmpl.color : 'var(--md-bw-on-surface-variant)',
+                          outline: 'none', cursor: 'pointer', appearance: 'none', textAlign: 'center', minHeight: '32px'
                         }}
                       >
                         <option value="Off">Off</option>
@@ -257,439 +451,153 @@ function RosterPlanner({ employees, roster, setRoster, shiftTemplates, addToast 
   )
 }
 
-// ----------------------------------------------------------------------
-// Shift Swaps Component
-// ----------------------------------------------------------------------
 function ShiftSwaps({ employees, shiftSwaps, setShiftSwaps, roster, setRoster, addToast }) {
-  const pendingSwaps = (shiftSwaps || []).filter(s => s.status === 'Pending')
-  
-  const handleApprove = (swapId) => {
-    const swap = (shiftSwaps || []).find(s => s.id === swapId)
+  const pending = (shiftSwaps || []).filter(s => s.status === 'Pending')
+
+  const approve = (id) => {
+    const swap = (shiftSwaps || []).find(s => s.id === id)
     if (!swap) return
-
-    // Perform the swap in the roster
     setRoster(prev => {
-      const newRoster = [...prev]
-      const requesterShiftIdx = newRoster.findIndex(r => r.employeeId === swap.requesterId && r.date === swap.date)
-      const targetShiftIdx = newRoster.findIndex(r => r.employeeId === swap.targetId && r.date === swap.date)
-
-      const reqShift = requesterShiftIdx >= 0 ? newRoster[requesterShiftIdx].templateId : 'Off'
-      const tgtShift = targetShiftIdx >= 0 ? newRoster[targetShiftIdx].templateId : 'Off'
-
-      // Apply swaps
-      if (requesterShiftIdx >= 0) newRoster[requesterShiftIdx].templateId = tgtShift
-      else newRoster.push({ employeeId: swap.requesterId, date: swap.date, templateId: tgtShift })
-
-      if (targetShiftIdx >= 0) newRoster[targetShiftIdx].templateId = reqShift
-      else newRoster.push({ employeeId: swap.targetId, date: swap.date, templateId: reqShift })
-
-      return newRoster
+      const nr = [...prev]
+      const ri = nr.findIndex(r => r.employeeId === swap.requesterId && r.date === swap.date)
+      const ti = nr.findIndex(r => r.employeeId === swap.targetId && r.date === swap.date)
+      const rs = ri >= 0 ? nr[ri].templateId : 'Off'
+      const ts = ti >= 0 ? nr[ti].templateId : 'Off'
+      if (ri >= 0) nr[ri].templateId = ts; else nr.push({ employeeId: swap.requesterId, date: swap.date, templateId: ts })
+      if (ti >= 0) nr[ti].templateId = rs; else nr.push({ employeeId: swap.targetId, date: swap.date, templateId: rs })
+      return nr
     })
-
-    setShiftSwaps(prev => prev.map(s => s.id === swapId ? { ...s, status: 'Approved' } : s))
-    addToast('Shift swap approved and applied to roster.', 'success')
+    setShiftSwaps(prev => prev.map(s => s.id === id ? { ...s, status: 'Approved' } : s))
+    addToast('Shift swap approved and applied.', 'success')
   }
 
-  const handleReject = (swapId) => {
-    setShiftSwaps(prev => prev.map(s => s.id === swapId ? { ...s, status: 'Rejected' } : s))
+  const reject = (id) => {
+    setShiftSwaps(prev => prev.map(s => s.id === id ? { ...s, status: 'Rejected' } : s))
     addToast('Shift swap rejected.', 'info')
   }
 
+  if (pending.length === 0) return null
+
   return (
-    <div className="glass-card" style={{ padding: '24px' }}>
-      <h3 style={{ margin: '0 0 20px 0' }}>Pending Shift Swaps</h3>
-      {pendingSwaps.length === 0 ? (
-        <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '40px' }}>No pending shift swap requests.</div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {pendingSwaps.map(swap => {
-            const reqEmp = employees.find(e => e.id === swap.requesterId)
-            const tgtEmp = employees.find(e => e.id === swap.targetId)
-            
-            return (
-              <div key={swap.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                <div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>{swap.date}</div>
-                  <div style={{ fontSize: '1rem', fontWeight: 600 }}>
-                    <span style={{ color: 'var(--text-primary)' }}>{reqEmp?.name}</span>
-                    <Repeat size={14} style={{ margin: '0 8px', color: 'var(--text-muted)' }} />
-                    <span style={{ color: 'var(--text-primary)' }}>{tgtEmp?.name}</span>
-                  </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Reason: {swap.reason}</div>
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button className="btn btn-primary" onClick={() => handleApprove(swap.id)}><Check size={16} /> Approve</button>
-                  <button className="btn btn-secondary" style={{ color: 'var(--accent-danger)' }} onClick={() => handleReject(swap.id)}><X size={16} /> Reject</button>
-                </div>
+    <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Pending Shift Swaps ({pending.length})</h3>
+      {pending.map(swap => {
+        const r = employees.find(e => e.id === swap.requesterId)
+        const t = employees.find(e => e.id === swap.targetId)
+        return (
+          <div key={swap.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', background: 'var(--glass-bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+            <div style={{ flex: 1, minWidth: '200px' }}>
+              <div className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)', marginBottom: '4px' }}>{formatDateShort(swap.date)}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span className="body-large" style={{ fontWeight: 600, color: 'var(--md-bw-on-surface)' }}>{r?.name}</span>
+                <Repeat size={14} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+                <span className="body-large" style={{ fontWeight: 600, color: 'var(--md-bw-on-surface)' }}>{t?.name}</span>
               </div>
-            )
-          })}
-        </div>
-      )}
+              {swap.reason && <div className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', marginTop: '4px' }}>Reason: {swap.reason}</div>}
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button className="btn btn-tonal" style={{ height: '32px', padding: '0 14px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => approve(swap.id)}>
+                <Check size={13} /> Approve
+              </button>
+              <button className="btn btn-outlined" style={{ height: '32px', padding: '0 14px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--md-bw-error)' }} onClick={() => reject(swap.id)}>
+                <X size={13} /> Reject
+              </button>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
 
-// ----------------------------------------------------------------------
-// Overtime Claims Component
-// ----------------------------------------------------------------------
 function OvertimeClaims({ employees, overtimeClaims, setOvertimeClaims, addToast }) {
-  const pendingClaims = (overtimeClaims || []).filter(c => c.status === 'Pending')
+  const pending = (overtimeClaims || []).filter(c => c.status === 'Pending')
+  const history = (overtimeClaims || []).filter(c => c.status !== 'Pending')
 
-  const handleAction = (claimId, status) => {
-    setOvertimeClaims(prev => prev.map(c => c.id === claimId ? { ...c, status } : c))
+  const act = (id, status) => {
+    setOvertimeClaims(prev => prev.map(c => c.id === id ? { ...c, status } : c))
     addToast(`Overtime claim ${status.toLowerCase()}.`, status === 'Approved' ? 'success' : 'info')
   }
 
+  const STATUS = {
+    Approved: { bg: '#28a745', color: '#fff' },
+    Rejected: { bg: '#dc3545', color: '#fff' },
+    Pending: { bg: '#ffc107', color: '#121212' },
+  }
+
   return (
-    <div className="glass-card" style={{ padding: '24px' }}>
-      <h3 style={{ margin: '0 0 20px 0' }}>Overtime Approvals</h3>
-      {pendingClaims.length === 0 ? (
-        <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '40px' }}>No pending overtime claims.</div>
+    <div className="payroll-table-container" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>
+        Overtime Approvals {pending.length > 0 && <span style={{ fontWeight: 400, color: 'var(--md-bw-on-surface-variant)' }}>({pending.length})</span>}
+      </h3>
+
+      {pending.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '48px', color: 'var(--md-bw-on-surface-variant)' }}>
+          <Clock size={32} style={{ opacity: 0.3, marginBottom: '12px' }} />
+          <p className="body-medium" style={{ margin: 0 }}>No pending overtime claims.</p>
+        </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {pendingClaims.map(claim => {
-            const emp = employees.find(e => e.id === claim.employeeId)
-            
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {pending.map(c => {
+            const emp = employees.find(e => e.id === c.employeeId)
             return (
-              <div key={claim.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                <div>
-                  <div style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}>{emp?.name}</div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                    {claim.date} • <span style={{ color: 'var(--accent-warning)', fontWeight: 700 }}>{claim.hours} hours</span> OT
+              <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', background: 'var(--glass-bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                <div style={{ flex: 1, minWidth: '200px' }}>
+                  <div className="body-large" style={{ fontWeight: 600, color: 'var(--md-bw-on-surface)' }}>{emp?.name}</div>
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '4px', flexWrap: 'wrap' }}>
+                    <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{formatDateShort(c.date)}</span>
+                    <span className="body-small" style={{ color: '#b8860b', fontWeight: 700 }}>{c.hours}h OT</span>
                   </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Reason: {claim.reason}</div>
+                  {c.reason && <div className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', marginTop: '2px' }}>{c.reason}</div>}
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button className="btn btn-primary" onClick={() => handleAction(claim.id, 'Approved')}><Check size={16} /> Approve</button>
-                  <button className="btn btn-secondary" style={{ color: 'var(--accent-danger)' }} onClick={() => handleAction(claim.id, 'Rejected')}><X size={16} /> Reject</button>
+                  <button className="btn btn-tonal" style={{ height: '32px', padding: '0 14px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => act(c.id, 'Approved')}>
+                    <Check size={13} /> Approve
+                  </button>
+                  <button className="btn btn-outlined" style={{ height: '32px', padding: '0 14px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--md-bw-error)' }} onClick={() => act(c.id, 'Rejected')}>
+                    <X size={13} /> Reject
+                  </button>
                 </div>
               </div>
             )
           })}
         </div>
       )}
-    </div>
-  )
-}
 
-// ----------------------------------------------------------------------
-// Leave Requests Component
-// ----------------------------------------------------------------------
-function LeaveRequests({ employees, attendance, setAttendance, addToast }) {
-  const leaves = attendance.leaves || []
-  
-  const handleApproveLeave = (leaveId) => {
-    setAttendance(prev => {
-      const updatedLeaves = (prev.leaves || []).map(l => l.id === leaveId ? { ...l, status: 'Approved' } : l)
-      return { ...prev, leaves: updatedLeaves }
-    })
-    addToast('Leave request approved.', 'success')
-  }
-
-  const handleRejectLeave = (leaveId) => {
-    setAttendance(prev => {
-      const updatedLeaves = (prev.leaves || []).map(l => l.id === leaveId ? { ...l, status: 'Rejected' } : l)
-      return { ...prev, leaves: updatedLeaves }
-    })
-    addToast('Leave request rejected.', 'info')
-  }
-
-  const pendingLeaves = leaves.filter(l => l.status === 'Pending')
-
-  return (
-    <div className="glass-card" style={{ padding: '24px' }}>
-      <h3 style={{ margin: '0 0 20px 0' }}>Pending Leave Requests</h3>
-      {pendingLeaves.length === 0 ? (
-        <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '40px' }}>No pending leave requests.</div>
-      ) : (
-        <div className="table-container">
-          <table className="table-responsive table-striped" style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }}>Employee</th>
-                <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }}>Type</th>
-                <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }}>Dates</th>
-                <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }}>Reason</th>
-                <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }}>Receipt</th>
-                <th style={{ padding: '12px', textAlign: 'left', color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.85rem' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pendingLeaves.map(leave => {
-                const emp = employees.find(e => e.id === leave.employeeId)
-                return (
-                  <tr key={leave.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <td style={{ padding: '12px', fontWeight: 500 }}>{emp?.name || leave.employeeId}</td>
-                    <td style={{ padding: '12px', fontSize: '0.9rem' }}>{leave.leaveType}</td>
-                    <td style={{ padding: '12px', fontSize: '0.85rem' }}>{leave.startDate} to {leave.endDate}</td>
-                    <td style={{ padding: '12px', fontSize: '0.85rem' }}>{leave.reason || '--'}</td>
-                    <td style={{ padding: '12px', fontSize: '0.85rem' }}>
-                      {leave.receipt ? (
-                        <a href={leave.receipt} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'underline', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', minHeight: '44px' }}>
-                          <FileText size={14} /> View
-                        </a>
-                      ) : (
-                        <span style={{ color: 'var(--text-muted)' }}>None</span>
-                      )}
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="btn btn-primary" style={{ padding: '4px 10px', fontSize: '0.8rem', minHeight: '44px' }} onClick={() => handleApproveLeave(leave.id)}>Approve</button>
-                        <button className="btn btn-secondary" style={{ padding: '4px 10px', fontSize: '0.8rem', color: 'var(--accent-danger)', minHeight: '44px' }} onClick={() => handleRejectLeave(leave.id)}>Reject</button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function DailyAttendance({ employees, attendance, setAttendance, addToast }) {
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0])
-  const [selectedRows, setSelectedRows] = useState([])
-  
-  const logs = attendance?.dailyLogs?.[selectedDate] || {}
-  
-  const handleStatusChange = (empId, status) => {
-    const currentLog = logs[empId] || { checkIn: '--', checkOut: '--', hours: '0.0' }
-    let checkIn = currentLog.checkIn
-    let checkOut = currentLog.checkOut
-    let hours = currentLog.hours
-    
-    if (status === 'Present') {
-      checkIn = '09:00 AM'
-      checkOut = '06:00 PM'
-      hours = '9.0'
-    } else if (status === 'Absent' || status === 'On Leave' || status === 'WFH') {
-      checkIn = '--'
-      checkOut = '--'
-      hours = '0.0'
-    }
-    
-    const newLogs = {
-      ...attendance.dailyLogs,
-      [selectedDate]: {
-        ...logs,
-        [empId]: { status, checkIn, checkOut, hours }
-      }
-    }
-    
-    setAttendance(prev => ({
-      ...prev,
-      dailyLogs: newLogs
-    }))
-  }
-  
-  const handleTimeChange = (empId, field, val) => {
-    const currentLog = logs[empId] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
-    const updatedLog = { ...currentLog, [field]: val }
-    
-    if (updatedLog.checkIn !== '--' && updatedLog.checkOut !== '--') {
-      updatedLog.status = updatedLog.status === 'Absent' ? 'Present' : updatedLog.status
-      updatedLog.hours = '9.0'
-    }
-    
-    const newLogs = {
-      ...attendance.dailyLogs,
-      [selectedDate]: {
-        ...logs,
-        [empId]: updatedLog
-      }
-    }
-    
-    setAttendance(prev => ({
-      ...prev,
-      dailyLogs: newLogs
-    }))
-  }
-
-  const markAllPresent = () => {
-    const newLogsDay = { ...logs }
-    employees.forEach(emp => {
-      newLogsDay[emp.id] = { status: 'Present', checkIn: '09:00 AM', checkOut: '06:00 PM', hours: '9.0' }
-    })
-    setAttendance(prev => ({
-      ...prev,
-      dailyLogs: {
-        ...prev.dailyLogs,
-        [selectedDate]: newLogsDay
-      }
-    }))
-    addToast('Marked all as Present', 'success')
-  }
-
-  const toggleSelectAll = () => {
-    if (selectedRows.length === employees.length) setSelectedRows([])
-    else setSelectedRows(employees.map(e => e.id))
-  }
-
-  const toggleRow = (id) => {
-    if (selectedRows.includes(id)) setSelectedRows(selectedRows.filter(r => r !== id))
-    else setSelectedRows([...selectedRows, id])
-  }
-
-  return (
-    <div className="m3-card m3-card-elevated" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-        
-        {/* Date Control */}
-        <div className="m3-text-field outlined" style={{ width: '200px' }}>
-          <label className="label-small" style={{ textTransform: 'uppercase', color: 'var(--md-bw-on-surface-variant)', marginBottom: '4px', display: 'block' }}>Roster Date</label>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <input 
-              type="date" 
-              style={{
-                width: '100%', padding: '16px 14px', borderRadius: '4px', border: '1px solid var(--md-bw-outline)',
-                background: 'transparent', color: 'var(--md-bw-on-surface)', fontSize: '16px', outline: 'none'
-              }}
-              value={selectedDate} 
-              onChange={e => setSelectedDate(e.target.value)} 
-            />
-            <CalendarDays size={20} style={{ position: 'absolute', right: '12px', color: 'var(--md-bw-on-surface-variant)', pointerEvents: 'none' }} />
-          </div>
-        </div>
-
-        {/* Bulk Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button className="btn btn-text" style={{ padding: '0 16px', height: '40px' }} onClick={() => addToast('Copied times from previous day', 'success')}>
-            Copy Times
-          </button>
-          <button className="btn btn-outlined" style={{ padding: '0 16px', height: '40px' }} onClick={markAllPresent}>
-            Mark All Present
-          </button>
-        </div>
-      </div>
-
-      <div className="table-scroll-wrapper" style={{ padding: '0', maxHeight: '600px', overflowY: 'auto' }}>
-        <table className="m3-data-table" style={{ width: '100%', minWidth: '900px', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr>
-              <th style={{ width: '50px' }}>
-                <input 
-                  type="checkbox" 
-                  checked={selectedRows.length === employees.length && employees.length > 0}
-                  onChange={toggleSelectAll}
-                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--md-bw-primary)' }}
-                />
-              </th>
-              <th>Employee</th>
-              <th style={{ textAlign: 'center' }}>Check In</th>
-              <th style={{ textAlign: 'center' }}>Check Out</th>
-              <th style={{ textAlign: 'center' }}>Hours</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {employees.map(emp => {
-              const log = logs[emp.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
-              return (
-                <tr key={emp.id} className={selectedRows.includes(emp.id) ? 'selected' : ''}>
-                  <td className="sticky-col">
-                    <input 
-                      type="checkbox" 
-                      checked={selectedRows.includes(emp.id)}
-                      onChange={() => toggleRow(emp.id)}
-                      style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--md-bw-primary)' }}
-                    />
-                  </td>
-                  <td className="sticky-col">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <img src={emp.avatar} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{emp.name}</span>
-                        <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{emp.role}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{ textAlign: 'center' }}>
-                    <input 
-                      type="text" 
-                      value={log.checkIn} 
-                      onChange={e => handleTimeChange(emp.id, 'checkIn', e.target.value)}
-                      style={{ 
-                        width: '100px', textAlign: 'center', border: '1px solid var(--md-bw-outline)', 
-                        borderRadius: '4px', padding: '12px', background: 'transparent', 
-                        color: 'var(--md-bw-on-surface)', fontSize: '14px', outline: 'none' 
-                      }}
-                    />
-                  </td>
-                  <td style={{ textAlign: 'center' }}>
-                    <input 
-                      type="text" 
-                      value={log.checkOut} 
-                      onChange={e => handleTimeChange(emp.id, 'checkOut', e.target.value)}
-                      style={{ 
-                        width: '100px', textAlign: 'center', border: '1px solid var(--md-bw-outline)', 
-                        borderRadius: '4px', padding: '12px', background: 'transparent', 
-                        color: 'var(--md-bw-on-surface)', fontSize: '14px', outline: 'none' 
-                      }}
-                    />
-                  </td>
-                  <td style={{ textAlign: 'center' }}>
-                    <span className="body-large" style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--md-bw-on-surface)' }}>{log.hours}</span>
-                  </td>
-                  <td>
-                    <div style={{ position: 'relative', width: '140px' }}>
-                      <select
-                        value={log.status}
-                        onChange={e => handleStatusChange(emp.id, e.target.value)}
-                        className="m3-select"
-                        style={{
-                          width: '100%',
-                          padding: '12px 14px',
-                          borderRadius: '4px',
-                          border: log.status === 'On Leave' ? '1px dashed var(--md-bw-outline)' : log.status === 'WFH' ? '1px dotted var(--md-bw-outline)' : '1px solid var(--md-bw-outline)',
-                          background: log.status === 'Present' ? 'var(--md-bw-on-surface)' : 'transparent',
-                          color: log.status === 'Present' ? 'var(--md-bw-surface)' : 'var(--md-bw-on-surface)',
-                          fontSize: '14px',
-                          outline: 'none',
-                          cursor: 'pointer',
-                          appearance: 'none',
-                          fontWeight: 500
-                        }}
-                      >
-                        <option value="Present" style={{ background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)' }}>Present</option>
-                        <option value="Absent" style={{ background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)' }}>Absent</option>
-                        <option value="On Leave" style={{ background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)' }}>On Leave</option>
-                        <option value="WFH" style={{ background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)' }}>WFH</option>
-                      </select>
-                      <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: log.status === 'Present' ? 'var(--md-bw-surface)' : 'var(--md-bw-on-surface-variant)' }}>▼</span>
-                    </div>
-                  </td>
+      {history.length > 0 && (
+        <>
+          <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>History</h3>
+          <div className="payroll-table-header-wrap">
+            <table className="payroll-table" style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+              <colgroup>
+                <col style={{ width: '180px' }} /><col style={{ width: '140px' }} /><col style={{ width: '80px' }} /><col style={{ width: '100px' }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th style={{ ...thStyle, fontSize: '11px', height: '40px' }}>Employee</th>
+                  <th style={{ ...thStyle, fontSize: '11px', height: '40px' }}>Date</th>
+                  <th style={{ ...thStyle, fontSize: '11px', height: '40px' }}>Hours</th>
+                  <th style={{ ...thStyle, fontSize: '11px', height: '40px' }}>Status</th>
                 </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Save FAB (Desktop Bottom Right) */}
-      <button 
-        className="btn btn-filled"
-        style={{
-          position: 'fixed',
-          bottom: '32px',
-          right: '32px',
-          height: '56px',
-          borderRadius: '16px',
-          padding: '0 24px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          zIndex: 100
-        }}
-        onClick={() => addToast('Daily logs saved successfully.', 'success')}
-      >
-        <Check size={24} />
-        <span className="label-large" style={{ textTransform: 'uppercase' }}>Save Daily Logs</span>
-      </button>
+              </thead>
+              <tbody>
+                {history.slice().reverse().map(c => {
+                  const emp = employees.find(e => e.id === c.employeeId)
+                  const s = STATUS[c.status] || STATUS.Pending
+                  return (
+                    <tr key={c.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                      <td style={cell}><span style={{ color: 'var(--md-bw-on-surface)', fontSize: '0.85rem' }}>{emp?.name}</span></td>
+                      <td style={cell}><span style={{ color: 'var(--md-bw-on-surface-variant)', fontSize: '0.85rem' }}>{formatDateShort(c.date)}</span></td>
+                      <td style={cell}><span style={{ color: 'var(--md-bw-on-surface)', fontSize: '0.85rem' }}>{c.hours}h</span></td>
+                      <td style={cell}><span style={pill(s.bg, s.color)}>{c.status}</span></td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </div>
   )
 }
