@@ -2802,6 +2802,126 @@ svg.lucide {
 
 /* --- RESPONSIVE BEHAVIOR --- */
 
+/* --- 3D ICON STYLES --- */
+.icon-3d {
+  background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(0,0,0,0.04));
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.8),
+    inset 0 -1px 0 rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+/* --- DRIVE CONNECTION CARD ANIMATIONS --- */
+.drive-card {
+  position: relative;
+  overflow: hidden;
+}
+.drive-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 15px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 0;
+}
+.drive-card--healthy {
+  border-color: rgba(52, 199, 89, 0.3) !important;
+}
+.drive-card--healthy::before {
+  opacity: 1;
+  animation: driveGlazeGreen 2.5s ease-in-out infinite;
+}
+.drive-card--error {
+  border-color: rgba(224, 32, 20, 0.35) !important;
+}
+.drive-card--error::before {
+  opacity: 1;
+  animation: driveGlazeRed 1.5s ease-in-out infinite;
+}
+.drive-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes driveGlazeGreen {
+  0%, 100% { box-shadow: inset 0 0 0 0 rgba(52, 199, 89, 0); }
+  50% { box-shadow: inset 0 0 24px 4px rgba(52, 199, 89, 0.15); }
+}
+
+@keyframes driveGlazeRed {
+  0%, 100% { box-shadow: inset 0 0 0 0 rgba(224, 32, 20, 0); }
+  50% { box-shadow: inset 0 0 24px 4px rgba(224, 32, 20, 0.18); }
+}
+
+.drive-status-dot {
+  animation: none !important;
+}
+.drive-status-dot::after {
+  display: none !important;
+}
+.drive-card--healthy .drive-status-dot {
+  animation: driveDotBlink 2.5s ease-in-out infinite !important;
+  box-shadow: 0 0 0 0 #28a745;
+}
+.drive-card--error .drive-status-dot {
+  animation: driveDotBlink 1.5s ease-in-out infinite !important;
+  box-shadow: 0 0 0 0 #dc3545;
+}
+
+@keyframes driveDotBlink {
+  0%, 100% { box-shadow: 0 0 0 0 currentColor; }
+  50% { box-shadow: 0 0 8px 3px currentColor; }
+}
+
+/* --- SYNC BUTTON ANIMATIONS --- */
+.sync-btn {
+  transition: all 0.25s ease !important;
+}
+.sync-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.sync-btn:active {
+  transform: translateY(0);
+}
+.sync-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.sync-dot {
+  animation: none;
+}
+.sync-dot.sync-spin {
+  animation: syncPulse 1s ease-in-out infinite !important;
+}
+
+/* Synced state — green dot blinks */
+.sync-dot.sync-blink {
+  animation: syncBlink 2s ease-in-out infinite !important;
+}
+
+@keyframes syncPulse {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 159, 10, 0.4); }
+  50% { opacity: 0.7; transform: scale(1.4); box-shadow: 0 0 8px 3px rgba(255, 159, 10, 0.3); }
+}
+
+@keyframes syncBlink {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.5); }
+  50% { box-shadow: 0 0 8px 3px rgba(52, 199, 89, 0.3); }
+}
+
+/* --- COMPACT DASHBOARD CARDS --- */
+.dash-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+.dash-card:hover {
+  transform: translateY(-1px) !important;
+}
+
 /* Tablet: always rail */
 /* Mobile: hidden overlay */
 @media (max-width: 767px) {

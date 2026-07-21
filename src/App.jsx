@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { TopAppBar, NavigationRail, IconButton, Badge, Avatar, Button, Dialog, Divider } from 'actify'
 import Dashboard from './components/Dashboard.jsx'
 import Employees from './components/Employees.jsx'
@@ -116,6 +116,7 @@ export default function App() {
       setMobileMenuOpen(!mobileMenuOpen)
     }
   }
+  const handleSync = () => { if (syncRef.current && !isSyncing) syncRef.current() }
   const [driveConnected, setDriveConnected] = useState(true)
   const [driveFileId, setDriveFileId] = useState(null)
   const [payrollFileId, setPayrollFileId] = useState(null)
@@ -129,6 +130,7 @@ export default function App() {
   const [syncConflicts, setSyncConflicts] = useState([])
   const [metaManifest, setMetaManifest] = useState(null)
   const [isAppLoading, setIsAppLoading] = useState(true)
+  const syncRef = useRef(null)
 
   const [simulatedRole, setSimulatedRole] = useState('Admin')
   const [showRoleModal, setShowRoleModal] = useState(false)
@@ -864,6 +866,7 @@ export default function App() {
       }
     }
 
+    syncRef.current = syncDatabase
     syncDatabase()
   }, [user])
 
@@ -1195,6 +1198,7 @@ export default function App() {
             syncLogs={syncLogs} 
             driveConnected={driveConnected} 
             addLog={addLog}
+            onSync={handleSync}
           />
         )
       case 'employees':
@@ -1352,6 +1356,7 @@ export default function App() {
             addLog={addLog}
             attendance={attendance}
             setCurrentView={setCurrentView}
+            onSync={handleSync}
           />
         )
     }
@@ -1965,10 +1970,19 @@ export default function App() {
             </div>
           </div>
           <div className="right" style={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: '32px' }}>
-            <div className="sync-badge" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '6px', font: "500 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>
-              <span style={{ width: '6px', height: '6px', background: !driveConnected ? 'var(--md-bw-error)' : syncConflicts.length > 0 ? 'var(--md-bw-error)' : isSyncing ? 'var(--md-bw-on-surface-variant)' : 'var(--md-bw-primary)', borderRadius: '50%', display: 'inline-block' }}></span>
-              {!driveConnected ? 'Offline' : syncConflicts.length > 0 ? 'Conflict' : isSyncing ? 'Syncing...' : 'Synced'}
-            </div>
+            <button className="sync-btn" onClick={handleSync} disabled={isSyncing} style={{
+              display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px',
+              background: isSyncing ? 'rgba(255, 159, 10, 0.12)' : (!driveConnected || syncConflicts.length > 0) ? 'rgba(224, 32, 20, 0.1)' : 'rgba(52, 199, 89, 0.1)',
+              border: isSyncing ? '1px solid rgba(255, 159, 10, 0.3)' : (!driveConnected || syncConflicts.length > 0) ? '1px solid rgba(224, 32, 20, 0.25)' : '1px solid rgba(52, 199, 89, 0.3)',
+              borderRadius: '8px', cursor: 'pointer', font: "500 11px/14px 'Roboto'",
+              color: isSyncing ? '#b8860b' : (!driveConnected || syncConflicts.length > 0) ? 'var(--md-bw-error)' : '#1a7d3a',
+            }}>
+              <span className={`sync-dot ${isSyncing ? 'sync-spin' : (!driveConnected || syncConflicts.length > 0) ? '' : 'sync-blink'}`} style={{
+                width: '6px', height: '6px', borderRadius: '50%', display: 'inline-block',
+                background: isSyncing ? '#ff9f0a' : (!driveConnected || syncConflicts.length > 0) ? '#dc3545' : '#34c759'
+              }}></span>
+              {isSyncing ? 'Syncing...' : (!driveConnected || syncConflicts.length > 0) ? 'Not Synced' : 'Synced'}
+            </button>
             
             <button className="icon-btn" onClick={toggleTheme} title={`Theme: ${themeMode}`} style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', borderRadius: '6px', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
               {themeMode === 'system' ? <Monitor size={18} /> : themeMode === 'light' ? <Sun size={18} /> : <Moon size={18} />}
