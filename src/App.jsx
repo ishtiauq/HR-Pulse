@@ -1544,7 +1544,6 @@ export default function App() {
       <aside className={`macos-sidebar sidebar ${isCollapsed ? 'collapsed' : ''} ${mobileMenuOpen ? 'open' : ''}`} style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
         width: isCollapsed ? '72px' : '260px',
         flexShrink: 0,
         position: 'relative',
@@ -1937,8 +1936,8 @@ export default function App() {
         
         <header className="macos-toolbar topbar" style={{ 
           height: '56px', minHeight: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-          padding: '0 20px', position: 'sticky', top: '16px', zIndex: 15, flexShrink: 0,
-          margin: '16px auto', width: '100%', maxWidth: '700px', borderRadius: '100px',
+          padding: '0 20px', position: 'sticky', top: '0', zIndex: 15, flexShrink: 0,
+          margin: '0 auto', width: '100%', maxWidth: '700px', borderRadius: '100px',
           background: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(30px) saturate(150%)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
           border: '1px solid rgba(0,0,0,0.05)'

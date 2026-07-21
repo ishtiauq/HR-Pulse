@@ -2446,7 +2446,6 @@ svg.lucide {
 
 .macos-sidebar {
   border-radius: 20px !important;
-  height: calc(100vh - 32px) !important;
   margin: 0 !important;
   background: rgba(255, 255, 255, 0.55) !important; /* frosted white base */
   backdrop-filter: var(--glass-blur) !important;
