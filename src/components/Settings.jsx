@@ -193,11 +193,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
         <div style={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {activeSubmenu === 'payroll' && (
-            <>
+            <div className="payroll-settings-grid">
               <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Currency Setup</h4>
                 <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Select the currency symbol applied globally across dashboards and receipts.</p>
-                <div style={{ position: 'relative', width: '260px' }}>
+                <div style={{ position: 'relative', width: '100%', maxWidth: '260px' }}>
                   <select value={currency} onChange={e => setCurrency(e.target.value)} style={{ ...pSel }}>
                     <option value="$">$ (USD)</option>
                     <option value="৳">৳ (BDT)</option>
@@ -292,7 +292,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                   ))}
                 </div>
               </div>
-            </>
+            </div>
           )}
 
           {activeSubmenu === 'company' && (
