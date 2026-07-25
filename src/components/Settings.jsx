@@ -163,7 +163,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   }
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <><style>{`
+  @media (max-width: 900px) {
+    .settings-cat-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+`}</style><div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <h1 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>System Settings</h1>
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -175,7 +179,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+      <div className="settings-cat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
         {menuItems.map(item => {
           const Icon = item.icon
           const isActive = activeSubmenu === item.id && panelOpen
@@ -712,7 +716,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           </div>
         </div>
       )}
-    </div>
+    </div></>
   )
 }
 
