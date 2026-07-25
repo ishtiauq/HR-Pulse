@@ -266,6 +266,42 @@ export default function Login({ onLogin }) {
         </div>
       </div>
 
+      <footer className="login-footer">
+        <div className="login-footer-inner">
+          <div className="login-footer-col brand-col">
+            <div className="login-footer-logo">
+              <span className="login-footer-logo-icon">HP</span>
+              <span className="login-footer-logo-text">HR Pulse</span>
+            </div>
+            <p className="login-footer-desc">Private, offline-first HR management. Your data stays in your Drive.</p>
+          </div>
+          <div className="login-footer-col">
+            <h4 className="login-footer-heading">Product</h4>
+            <a href="#">Features</a>
+            <a href="#">Pricing</a>
+            <a href="#">Integrations</a>
+            <a href="#">Changelog</a>
+          </div>
+          <div className="login-footer-col">
+            <h4 className="login-footer-heading">Resources</h4>
+            <a href="#">Documentation</a>
+            <a href="#">Guides</a>
+            <a href="#">API Reference</a>
+            <a href="#">Support</a>
+          </div>
+          <div className="login-footer-col">
+            <h4 className="login-footer-heading">Company</h4>
+            <a href="#">About</a>
+            <a href="#">Blog</a>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+          </div>
+        </div>
+        <div className="login-footer-bottom">
+          <span>&copy; {new Date().getFullYear()} HR Pulse. All rights reserved.</span>
+        </div>
+      </footer>
+
       <style>{`
         .login-page {
           min-height: 100vh; display: flex; flex-direction: column;
@@ -448,7 +484,8 @@ export default function Login({ onLogin }) {
         }
 
         .login-faq {
-          max-width: 860px; margin: 0 auto; padding: 64px 24px 80px;
+          width: 100%; max-width: 960px; margin: 0 auto; padding: 64px 24px 80px;
+          box-sizing: border-box;
         }
         .login-faq-title {
           font-size: 1.6rem; font-weight: 800; text-align: center;
@@ -476,12 +513,60 @@ export default function Login({ onLogin }) {
           line-height: 1.6; animation: loginExpandDown 0.25s ease-out forwards;
         }
 
+        .login-footer {
+          background: linear-gradient(180deg, #14141e 0%, #0d0d15 100%);
+          border-top: 1px solid rgba(255,255,255,0.06);
+          padding: 60px 24px 0; margin-top: 40px;
+        }
+        .login-footer-inner {
+          max-width: 960px; margin: 0 auto;
+          display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr;
+          gap: 40px;
+        }
+        .login-footer-logo {
+          display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+        }
+        .login-footer-logo-icon {
+          width: 30px; height: 30px;
+          background: linear-gradient(135deg, #f59e0b, #d97706);
+          border-radius: 8px; display: flex; align-items: center; justify-content: center;
+          color: #fff; font: 700 13px/1 'Roboto', sans-serif;
+        }
+        .login-footer-logo-text {
+          font: 700 18px/24px 'Roboto', sans-serif; color: #fff;
+        }
+        .login-footer-desc {
+          font-size: 0.85rem; color: rgba(255,255,255,0.45);
+          line-height: 1.6; margin: 0;
+        }
+        .login-footer-col h4 {
+          font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.3);
+          text-transform: uppercase; letter-spacing: 0.06em;
+          margin: 0 0 16px;
+        }
+        .login-footer-col a {
+          display: block; font-size: 0.88rem; color: rgba(255,255,255,0.55);
+          text-decoration: none; padding: 4px 0;
+          transition: color 0.15s;
+        }
+        .login-footer-col a:hover { color: #fbbf24; }
+        .login-footer-bottom {
+          max-width: 960px; margin: 0 auto;
+          padding: 24px 0; margin-top: 48px;
+          border-top: 1px solid rgba(255,255,255,0.06);
+          font-size: 0.78rem; color: rgba(255,255,255,0.3);
+          text-align: center;
+        }
+
         @media (max-width: 768px) {
           .login-topbar { top: 12px; margin-top: 12px; width: calc(100% - 24px); }
           .login-auth { padding: 32px 16px; }
           .login-auth-card { padding: 24px; }
           .login-faq { padding: 40px 16px 60px; }
           .login-faq-title { font-size: 1.3rem; }
+          .login-footer { padding: 40px 16px 0; }
+          .login-footer-inner { grid-template-columns: 1fr; gap: 32px; }
+          .login-footer-bottom { margin-top: 32px; }
         }
       `}</style>
     </div>
