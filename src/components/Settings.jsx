@@ -3,6 +3,7 @@ import { Save, Settings as SettingsIcon, DollarSign, Sliders, Info, Percent, Bui
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDateTime } from '../services/date.js'
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 
 const pInp = { width: '100%', padding: '10px 14px', borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', transition: 'border 0.15s' }
 const pSel = { width: '100%', padding: '10px 14px', borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', cursor: 'pointer', appearance: 'none' }
@@ -193,6 +194,21 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             {isOver100 && (
               <div style={{ padding: '12px 16px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '100px', color: 'var(--md-bw-on-surface)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                 <Info size={16} /> Component total exceeds 100%. Please adjust before saving.
+              </div>
+            )}
+
+            {salaryStructure.length > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie data={salaryStructure.map(item => ({ ...item, value: item.percentage }))}
+                      cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={2}>
+                      {salaryStructure.map((item, index) => (
+                        <Cell key={item.id} fill={getSegmentColor(item, index)} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
             )}
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Shield, Cloud, ArrowRight, HelpCircle, ChevronDown, ChevronUp, LogIn, Eye, EyeOff, Users } from 'lucide-react'
+import { Shield, Cloud, ArrowRight, HelpCircle, ChevronDown, ChevronUp, LogIn, Eye, EyeOff, Users, Zap } from 'lucide-react'
 import { fetchUserProfile } from '../services/googleDrive.js'
 
 export default function Login({ onLogin }) {
@@ -135,6 +135,10 @@ export default function Login({ onLogin }) {
           </div>
           <span className="login-topbar-brand">HR Pulse</span>
         </div>
+        <div className="login-topbar-badge">
+          <Zap size={12} />
+          Free for limited time
+        </div>
       </header>
 
       {/* Auth Panel */}
@@ -160,10 +164,6 @@ export default function Login({ onLogin }) {
                 )}
               </button>
 
-              <p className="login-trust-line">
-                <Shield size={14} />
-                We only create a private <strong>HR-Pulse-DB</strong> folder in your Drive. We never access your personal files.
-              </p>
             </div>
           </div>
           <div style={{ display: authTab === 'employee' ? 'block' : 'none' }}>
@@ -203,7 +203,7 @@ export default function Login({ onLogin }) {
             </form>
           </div>
 
-          <p className="login-footer-free">Free forever. No credit card required.</p>
+          <p className="login-footer-free">🔥 Free for limited time &bull; No credit card required</p>
         </div>
       </div>
 
@@ -276,27 +276,39 @@ export default function Login({ onLogin }) {
           height: 56px; min-height: 56px; display: flex; align-items: center;
           justify-content: space-between; padding: 0 20px; position: sticky;
           top: 16px; z-index: 15; flex-shrink: 0; margin: 16px auto 0;
-          width: calc(100% - 40px); max-width: 700px; border-radius: 100px;
-          background: rgba(255,255,255,0.75); backdrop-filter: blur(30px) saturate(150%);
+          width: calc(100% - 40px); max-width: 700px; border-radius: 100px; box-sizing: border-box;
+          background: linear-gradient(135deg, rgba(30,30,40,0.92), rgba(20,20,30,0.92));
+          backdrop-filter: blur(30px) saturate(150%);
           -webkit-backdrop-filter: blur(30px) saturate(150%);
-          box-shadow: 0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
-          border: 1px solid rgba(0,0,0,0.05); box-sizing: border-box;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.08);
         }
         .login-topbar-left {
           display: flex; align-items: center; gap: 10px;
         }
         .login-topbar-logo {
-          width: 28px; height: 28px; background: var(--md-bw-primary, #222);
-          border-radius: 6px; display: flex; align-items: center; justify-content: center;
+          width: 30px; height: 30px;
+          background: linear-gradient(135deg, #f59e0b, #d97706);
+          border-radius: 8px; display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 2px 8px rgba(245,158,11,0.3);
         }
         .login-topbar-logo-icon {
-          color: var(--md-bw-on-primary, #fff);
-          font: 700 12px/1 'Roboto', sans-serif;
+          color: #fff;
+          font: 700 13px/1 'Roboto', sans-serif;
         }
         .login-topbar-brand {
           font: 700 18px/24px 'Roboto', sans-serif;
-          color: var(--md-bw-on-surface, #222);
+          color: #fff;
           letter-spacing: -0.01em; white-space: nowrap;
+        }
+        .login-topbar-badge {
+          display: flex; align-items: center; gap: 5px;
+          padding: 5px 12px; border-radius: 100px;
+          background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(217,119,6,0.15));
+          border: 1px solid rgba(245,158,11,0.3);
+          color: #fbbf24; font-size: 0.7rem; font-weight: 700;
+          white-space: nowrap; letter-spacing: 0.02em;
+          text-transform: uppercase;
         }
 
         .login-auth {
@@ -427,14 +439,16 @@ export default function Login({ onLogin }) {
         }
 
         .login-auth-card .login-footer-free {
-          margin: 28px 0 0; padding-top: 20px;
-          border-top: 1px solid var(--glass-border, rgba(255,255,255,0.55));
-          font-size: 0.75rem; color: var(--md-bw-on-surface-variant, #999);
-          text-align: center;
+          margin: 24px -24px -24px; padding: 14px 24px;
+          font-size: 0.78rem; font-weight: 600;
+          color: #fbbf24; text-align: center;
+          background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(217,119,6,0.06));
+          border-top: 1px solid rgba(245,158,11,0.15);
+          border-radius: 0 0 var(--glass-radius, 20px) var(--glass-radius, 20px);
         }
 
         .login-faq {
-          max-width: 720px; margin: 0 auto; padding: 64px 24px 80px;
+          max-width: 860px; margin: 0 auto; padding: 64px 24px 80px;
         }
         .login-faq-title {
           font-size: 1.6rem; font-weight: 800; text-align: center;
