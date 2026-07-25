@@ -3,7 +3,7 @@ import { Save, Settings as SettingsIcon, DollarSign, Sliders, Info, Percent, Bui
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDateTime } from '../services/date.js'
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 
 const pInp = { width: '100%', padding: '10px 14px', borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', transition: 'border 0.15s' }
 const pSel = { width: '100%', padding: '10px 14px', borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', cursor: 'pointer', appearance: 'none' }
@@ -52,8 +52,6 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const [isSaving, setIsSaving] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
   useModal(() => setShowResetModal(false))
-  const [sampleGross, setSampleGross] = useState(5000)
-  const [hoveredComponentId, setHoveredComponentId] = useState(null)
 
   useEffect(() => {
     if (settings.currency && settings.currency !== currency) setCurrency(settings.currency)
@@ -110,6 +108,13 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
   const SEG_COLORS = ['#0062E6', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14', '#20c997', '#e83e8c', '#17a2b8', '#6610f2']
   const getSegmentColor = (_, index) => SEG_COLORS[index % SEG_COLORS.length]
+  const darkenColor = (hex, amount = 35) => {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const r = Math.max(0, (num >> 16) - amount);
+    const g = Math.max(0, ((num >> 8) & 0xff) - amount);
+    const b = Math.max(0, (num & 0xff) - amount);
+    return `rgb(${r},${g},${b})`;
+  }
 
   const handleLogoUpload = (e) => {
     const file = e.target.files[0]
@@ -166,22 +171,26 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
       case 'payroll': return (
         <div className="payroll-settings-grid">
           <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Currency Setup</h4>
-            <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Select the currency symbol applied globally across dashboards and receipts.</p>
-            <div style={{ position: 'relative', width: '100%', maxWidth: '260px' }}>
-              <select value={currency} onChange={e => setCurrency(e.target.value)} style={{ ...pSel }}>
-                <option value="$">$ (USD)</option>
-                <option value="৳">৳ (BDT)</option>
-                <option value="€">€ (EUR)</option>
-                <option value="£">£ (GBP)</option>
-                <option value="₹">₹ (INR)</option>
-                <option value="¥">¥ (JPY)</option>
-              </select>
-              <ChevronDown size={14} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Currency & Salary</h4>
+                <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: '4px 0 0' }}>Currency symbol and salary component configuration.</p>
+              </div>
+              <div style={{ position: 'relative', width: '180px', flexShrink: 0 }}>
+                <select value={currency} onChange={e => setCurrency(e.target.value)} style={{ ...pSel }}>
+                  <option value="$">$ (USD)</option>
+                  <option value="৳">৳ (BDT)</option>
+                  <option value="€">€ (EUR)</option>
+                  <option value="£">£ (GBP)</option>
+                  <option value="₹">₹ (INR)</option>
+                  <option value="¥">¥ (JPY)</option>
+                </select>
+                <ChevronDown size={14} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }} />
+              </div>
             </div>
-          </div>
 
-          <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <hr style={{ margin: 0, border: 'none', borderTop: '1px solid var(--glass-border)' }} />
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Salary Structure</h4>
               <button onClick={handleAddComponent} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
@@ -196,15 +205,25 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             )}
 
             {salaryStructure.length > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
-                <ResponsiveContainer width="100%" height={200}>
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0' }}>
+                <ResponsiveContainer width="100%" height={240}>
                   <PieChart>
                     <Pie data={salaryStructure.map(item => ({ ...item, value: item.percentage }))}
-                      cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={2}>
+                      cx="50%" cy="54%" innerRadius={55} outerRadius={85} dataKey="value" paddingAngle={2}
+                      isAnimationActive={false}>
                       {salaryStructure.map((item, index) => (
-                        <Cell key={item.id} fill={getSegmentColor(item, index)} stroke="none" />
+                        <Cell key={item.id} fill={darkenColor(getSegmentColor(item, index), 50)} stroke="none" />
                       ))}
                     </Pie>
+                    <Pie data={salaryStructure.map(item => ({ ...item, value: item.percentage }))}
+                      cx="50%" cy="50%" innerRadius={55} outerRadius={85} dataKey="value" paddingAngle={2}>
+                      {salaryStructure.map((item, index) => (
+                        <Cell key={item.id} fill={getSegmentColor(item, index)} stroke="rgba(255,255,255,0.25)" />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => [`${value}%`, 'Percentage']} labelFormatter={() => ''}
+                      contentStyle={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '8px', backdropFilter: 'blur(12px)', fontSize: '13px' }}
+                      itemStyle={{ color: 'var(--md-bw-on-surface)' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -232,7 +251,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                           fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
                           background: item.type === 'earning' ? '#0062E6' : 'transparent',
                           color: item.type === 'earning' ? '#fff' : 'var(--md-bw-on-surface-variant)',
-                          borderColor: item.type === 'earning' ? '#0062E6' : 'var(--glass-border)',
+                          borderColor: item.type === 'earning' ? '#0062E6' : 'rgba(128,128,128,0.35)',
                         }}>Earning</button>
                       <button onClick={() => handleComponentChange(item.id, 'type', 'deduction')}
                         style={{
@@ -240,7 +259,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                           fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
                           background: item.type === 'deduction' ? '#dc3545' : 'transparent',
                           color: item.type === 'deduction' ? '#fff' : 'var(--md-bw-on-surface-variant)',
-                          borderColor: item.type === 'deduction' ? '#dc3545' : 'var(--glass-border)',
+                          borderColor: item.type === 'deduction' ? '#dc3545' : 'rgba(128,128,128,0.35)',
                         }}>Deduction</button>
                     </div>
 
