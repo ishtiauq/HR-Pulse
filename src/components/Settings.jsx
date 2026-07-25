@@ -715,7 +715,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           </div>
         </div>
       )}
-    </div></>
+    </div>
   )
 }
 
