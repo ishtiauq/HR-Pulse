@@ -2516,10 +2516,15 @@ table tr.selected td,
 
 /* Hide scrollbar on mobile (sidebar + main) */
 @media (max-width: 767px) {
-  * { -ms-overflow-style: none; scrollbar-width: none; }
-  *::-webkit-scrollbar { display: none; }
-  .sidebar-nav { overflow-y: auto !important; }
-  .dashboard-content { overflow-y: auto !important; }
+  * { -ms-overflow-style: none; scrollbar-width: none !important; }
+  *::-webkit-scrollbar { display: none !important; }
+  *::-webkit-scrollbar-track { display: none !important; }
+  *::-webkit-scrollbar-thumb { display: none !important; }
+  .sidebar-nav { overflow-y: auto !important; scrollbar-width: none !important; -ms-overflow-style: none !important; }
+  .sidebar-nav::-webkit-scrollbar { display: none !important; }
+  .macos-sidebar { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+  .macos-sidebar::-webkit-scrollbar { display: none !important; }
+  .dashboard-content { overflow-y: auto !important; scrollbar-width: none !important; }
 }
 
 /* Topbar mobile fixes */
@@ -3134,19 +3139,20 @@ svg.lucide {
 @media (max-width: 767px) {
   .macos-sidebar {
     position: fixed !important;
-    left: 16px !important;
-    top: 16px !important;
-    bottom: 16px !important;
-    width: 280px !important;
-    min-width: 280px !important;
-    transform: translateX(-320px) !important; /* Slide out completely with left margins */
+    left: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    min-width: 100vw !important;
+    height: 100vh !important;
+    transform: translateX(-100vw) !important;
     z-index: 2000 !important;
-    height: calc(100vh - 32px) !important;
-    border-radius: 20px !important; /* Keep exact rounded corners */
-    border: 1px solid var(--glass-border) !important;
+    border-radius: 0 !important;
+    border: none !important;
     display: flex !important;
     flex-direction: column !important;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.2) !important;
+    box-shadow: none !important;
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1) !important;
   }
   
   .macos-sidebar.open {

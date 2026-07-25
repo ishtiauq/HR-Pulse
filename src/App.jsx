@@ -105,6 +105,15 @@ export default function App() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      window.history.pushState({ mobileMenu: true }, '')
+      const handlePop = () => setMobileMenuOpen(false)
+      window.addEventListener('popstate', handlePop)
+      return () => window.removeEventListener('popstate', handlePop)
+    }
+  }, [mobileMenuOpen])
+
   const toggleSidebar = () => {
     const width = window.innerWidth
     if (width >= 768) {
