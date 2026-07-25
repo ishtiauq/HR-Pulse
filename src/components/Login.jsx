@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Activity, Shield, Cloud, Lock, ArrowRight, HelpCircle, ChevronDown, ChevronUp, LogIn, Eye, EyeOff, Users } from 'lucide-react'
+import { Shield, Cloud, ArrowRight, HelpCircle, ChevronDown, ChevronUp, LogIn, Eye, EyeOff, Users } from 'lucide-react'
 import { fetchUserProfile } from '../services/googleDrive.js'
 
 export default function Login({ onLogin }) {
@@ -126,28 +126,16 @@ export default function Login({ onLogin }) {
 
   // --- Render ---
   return (
-    <div className="login-split">
-      {/* Brand Panel */}
-      <div className="login-brand">
-        <div className="login-brand-header">
-          <div className="login-logo-box">
-            <Activity size={22} color="#fff" />
+    <div className="login-page">
+      {/* Topbar */}
+      <header className="login-topbar">
+        <div className="login-topbar-left">
+          <div className="login-topbar-logo">
+            <span className="login-topbar-logo-icon">HP</span>
           </div>
-          <div>
-            <span className="login-brand-title">HR Pulse</span>
-            <span className="login-brand-tagline">DRIVE-BASED HRM</span>
-          </div>
+          <span className="login-topbar-brand">HR Pulse</span>
         </div>
-        <div className="login-brand-center">
-          <h1 className="login-hero">Your HR Data,<br />Your Drive</h1>
-          <p className="login-hero-sub">Private, offline-first HR management — powered by your Google Drive.</p>
-        </div>
-        <div className="login-brand-graphic">
-          <div className="brand-shape brand-shape-1" />
-          <div className="brand-shape brand-shape-2" />
-          <div className="brand-shape brand-shape-3" />
-        </div>
-      </div>
+      </header>
 
       {/* Auth Panel */}
       <div className="login-auth">
@@ -215,21 +203,7 @@ export default function Login({ onLogin }) {
             </form>
           </div>
 
-          <div className="login-card-footer">
-            <button className="login-footer-learn" onClick={() => setShowAccordion(prev => !prev)}>
-              <HelpCircle size={14} />
-              What is HR Pulse?
-              {showAccordion ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-            </button>
-
-            {showAccordion && (
-              <div className="login-footer-accordion">
-                HR Pulse is a private, offline-first HR management system. Your employee data, payroll, and attendance records are stored exclusively in a hidden folder inside <strong>your own Google Drive</strong> — we have zero access to your data.
-              </div>
-            )}
-
-            <p className="login-footer-free">Free forever. No credit card required.</p>
-          </div>
+          <p className="login-footer-free">Free forever. No credit card required.</p>
         </div>
       </div>
 
@@ -293,60 +267,41 @@ export default function Login({ onLogin }) {
       </div>
 
       <style>{`
-        .login-split {
-          display: flex; height: 100vh; width: 100%; font-family: var(--font-sans, 'Roboto', sans-serif);
-          background: var(--bg-primary);
+        .login-page {
+          min-height: 100vh; display: flex; flex-direction: column;
+          font-family: var(--font-sans, 'Roboto', sans-serif);
+          background: var(--bg-primary, #f5f5f7);
         }
-        .login-brand {
-          flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
-          padding: 48px; position: relative; overflow: hidden;
-          background: linear-gradient(-45deg, #0f0f1a, #1a1a2e, #16213e, #0f3460);
+        .login-topbar {
+          height: 56px; min-height: 56px; display: flex; align-items: center;
+          justify-content: space-between; padding: 0 20px; position: sticky;
+          top: 16px; z-index: 15; flex-shrink: 0; margin: 16px auto 0;
+          width: calc(100% - 40px); max-width: 700px; border-radius: 100px;
+          background: rgba(255,255,255,0.75); backdrop-filter: blur(30px) saturate(150%);
+          -webkit-backdrop-filter: blur(30px) saturate(150%);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+          border: 1px solid rgba(0,0,0,0.05); box-sizing: border-box;
         }
-        .login-brand-header {
-          position: absolute; top: 32px; left: 48px; display: flex; align-items: center; gap: 10px; z-index: 2;
+        .login-topbar-left {
+          display: flex; align-items: center; gap: 10px;
         }
-        .login-logo-box {
-          width: 40px; height: 40px; background: #2a2a2a;
-          border-radius: 10px; display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+        .login-topbar-logo {
+          width: 28px; height: 28px; background: var(--md-bw-primary, #222);
+          border-radius: 6px; display: flex; align-items: center; justify-content: center;
         }
-        .login-brand-title {
-          font-size: 1.15rem; font-weight: 800; color: #fff; display: block; line-height: 1.1;
+        .login-topbar-logo-icon {
+          color: var(--md-bw-on-primary, #fff);
+          font: 700 12px/1 'Roboto', sans-serif;
         }
-        .login-brand-tagline {
-          font-size: 0.6rem; font-weight: 700; color: #888;
-          letter-spacing: 0.1em; display: block;
-        }
-        .login-brand-center {
-          text-align: center; z-index: 2; position: relative;
-        }
-        .login-hero {
-          font-size: 2.8rem; font-weight: 800; color: #fff; line-height: 1.15;
-          letter-spacing: -0.02em; margin: 0 0 16px;
-          font-family: var(--font-display, 'Roboto', sans-serif);
-        }
-        .login-hero-sub {
-          font-size: 1rem; color: rgba(255,255,255,0.6); margin: 0; max-width: 320px; line-height: 1.5;
-        }
-        .login-brand-graphic {
-          position: absolute; inset: 0; pointer-events: none; z-index: 1;
-        }
-        .brand-shape {
-          position: absolute; border-radius: 50%; opacity: 0.07;
-        }
-        .brand-shape-1 {
-          width: 400px; height: 400px; background: #4a9eff; top: -100px; right: -100px;
-        }
-        .brand-shape-2 {
-          width: 300px; height: 300px; background: #7c3aed; bottom: -80px; left: -80px;
-        }
-        .brand-shape-3 {
-          width: 200px; height: 200px; background: #06b6d4; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        .login-topbar-brand {
+          font: 700 18px/24px 'Roboto', sans-serif;
+          color: var(--md-bw-on-surface, #222);
+          letter-spacing: -0.01em; white-space: nowrap;
         }
 
         .login-auth {
-          flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px;
-          background: var(--bg-primary, #f5f5f7); position: relative;
+          flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 24px;
+          background: transparent; position: relative;
         }
         .login-auth-card {
           width: 100%; max-width: 420px;
@@ -471,28 +426,10 @@ export default function Login({ onLogin }) {
           color: #E02014; font-size: 0.88rem;
         }
 
-        .login-card-footer {
-          margin-top: 28px; padding-top: 20px;
+        .login-auth-card .login-footer-free {
+          margin: 28px 0 0; padding-top: 20px;
           border-top: 1px solid var(--glass-border, rgba(255,255,255,0.55));
-          display: flex; flex-direction: column; gap: 12px; align-items: center;
-        }
-        .login-footer-learn {
-          display: flex; align-items: center; gap: 6px;
-          background: none; border: none; cursor: pointer;
-          font: 500 0.82rem var(--font-sans, 'Roboto', sans-serif);
-          color: var(--md-bw-on-surface-variant, #888); padding: 4px 8px;
-          transition: color 0.2s;
-        }
-        .login-footer-learn:hover { color: var(--md-bw-on-surface, #222); }
-        .login-footer-accordion {
-          padding: 14px 16px; background: var(--glass-bg, rgba(0,0,0,0.02));
-          border: 1px solid var(--glass-border, rgba(255,255,255,0.55)); border-radius: 12px;
-          font-size: 0.8rem; color: var(--md-bw-on-surface-variant, #666); line-height: 1.5;
-          text-align: center;
-          animation: loginExpandDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .login-footer-free {
-          margin: 0; font-size: 0.75rem; color: var(--md-bw-on-surface-variant, #999);
+          font-size: 0.75rem; color: var(--md-bw-on-surface-variant, #999);
           text-align: center;
         }
 
@@ -526,13 +463,11 @@ export default function Login({ onLogin }) {
         }
 
         @media (max-width: 768px) {
-          .login-split { flex-direction: column; }
-          .login-brand { padding: 20px; min-height: auto; justify-content: flex-start; }
-          .login-brand-header { position: static; margin-bottom: 16px; }
-          .login-brand-center { display: none; }
-          .login-brand-graphic { display: none; }
-          .login-auth { padding: 24px; align-items: flex-start; }
+          .login-topbar { top: 12px; margin-top: 12px; width: calc(100% - 24px); }
+          .login-auth { padding: 32px 16px; }
           .login-auth-card { padding: 24px; }
+          .login-faq { padding: 40px 16px 60px; }
+          .login-faq-title { font-size: 1.3rem; }
         }
       `}</style>
     </div>
