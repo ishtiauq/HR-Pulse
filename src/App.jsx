@@ -133,7 +133,6 @@ export default function App() {
   const [isAppLoading, setIsAppLoading] = useState(true)
   const syncRef = useRef(null)
 
-  const [showEmployeeLogin, setShowEmployeeLogin] = useState(false)
   const [simulatedRole, setSimulatedRole] = useState('Admin')
   const [showRoleModal, setShowRoleModal] = useState(false)
   const [pendingProfileEdits, setPendingProfileEdits] = useState([])
@@ -1427,10 +1426,7 @@ export default function App() {
   }
 
   if (!user) {
-    if (showEmployeeLogin) {
-      return <EmployeeLogin onLogin={handleLogin} onBack={() => setShowEmployeeLogin(false)} />
-    }
-    return <Login onLogin={handleLogin} onEmployeeLogin={() => setShowEmployeeLogin(true)} />
+    return <Login onLogin={handleLogin} />
   }
 
   if (simulatedRole === 'Employee' || user.isEmployee) {
