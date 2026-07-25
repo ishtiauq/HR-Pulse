@@ -10,9 +10,18 @@ const lbl = { font: "500 11px 'Roboto'", textTransform: 'uppercase', letterSpaci
 const card = { background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid var(--glass-border)', borderRadius: 'var(--glass-radius)', boxShadow: 'var(--glass-shadow)' }
 
 export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, simulatedRole, syncConflicts, setSyncConflicts }) {
-  const [activeSubmenu, setActiveSubmenu] = useState(() => localStorage.getItem('hr_pulse_settings_tab') || 'payroll')
+  const [activeSubmenu, setActiveSubmenu] = useState(() => localStorage.getItem('hr_pulse_settings_tab') || null)
+  const [panelOpen, setPanelOpen] = useState(false)
 
-  const setTab = (id) => { setActiveSubmenu(id); localStorage.setItem('hr_pulse_settings_tab', id) }
+  const setTab = (id) => {
+    if (activeSubmenu === id && panelOpen) {
+      setPanelOpen(false)
+    } else {
+      setActiveSubmenu(id)
+      setPanelOpen(true)
+      localStorage.setItem('hr_pulse_settings_tab', id)
+    }
+  }
 
   const [auditFilterDate, setAuditFilterDate] = useState('')
   const [auditFilterAction, setAuditFilterAction] = useState('All')
@@ -166,31 +175,39 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-        <div style={{ width: '220px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <span style={{ ...lbl, padding: '0 12px', marginBottom: '8px' }}>Categories</span>
-          {menuItems.map(item => {
-            const Icon = item.icon
-            const isActive = activeSubmenu === item.id
-            return (
-              <button key={item.id} onClick={() => setTab(item.id)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '10px', width: '100%', padding: '10px 14px',
-                  borderRadius: '100px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 500,
-                  textAlign: 'left', outline: 'none', transition: 'all 0.15s',
-                  background: isActive ? 'linear-gradient(135deg, #0062E6 0%, #003A8C 100%)' : 'transparent',
-                  color: isActive ? '#fff' : 'var(--md-bw-on-surface-variant)',
-                }}>
-                <Icon size={18} />
-                <span style={{ flex: 1 }}>{item.label}</span>
-                {item.badge > 0 && (
-                  <span style={{ background: isActive ? 'rgba(255,255,255,0.25)' : 'var(--md-bw-on-surface)', color: isActive ? '#fff' : 'var(--md-bw-surface)', fontSize: '11px', padding: '1px 7px', borderRadius: '12px', fontWeight: 600 }}>{item.badge}</span>
-                )}
-              </button>
-            )
-          })}
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+        {menuItems.map(item => {
+          const Icon = item.icon
+          const isActive = activeSubmenu === item.id && panelOpen
+          return (
+            <button key={item.id} onClick={() => setTab(item.id)}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
+                padding: '20px 12px', borderRadius: '16px', border: '1px solid',
+                borderColor: isActive ? 'var(--accent-primary, #0062E6)' : 'var(--glass-border)',
+                background: isActive ? 'linear-gradient(135deg, rgba(0,98,230,0.08), rgba(0,58,140,0.04))' : 'var(--glass-bg)',
+                backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
+                cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none',
+                color: isActive ? 'var(--accent-primary, #0062E6)' : 'var(--md-bw-on-surface-variant)',
+                boxShadow: isActive ? '0 0 0 1px rgba(0,98,230,0.3), var(--glass-shadow)' : 'var(--glass-shadow)',
+              }}>
+              <Icon size={24} />
+              <span style={{ fontSize: '12px', fontWeight: 600, textAlign: 'center', lineHeight: '1.3' }}>{item.label}</span>
+              {item.badge > 0 && (
+                <span style={{ background: isActive ? 'var(--accent-primary, #0062E6)' : 'var(--md-bw-on-surface)', color: '#fff', fontSize: '10px', padding: '1px 6px', borderRadius: '12px', fontWeight: 600, marginTop: '-4px' }}>{item.badge}</span>
+              )}
+            </button>
+          )
+        })}
+      </div>
 
+      <div style={{
+        overflow: 'hidden',
+        transition: 'max-height 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease, margin 0.35s ease',
+        maxHeight: panelOpen ? '2000px' : '0px',
+        opacity: panelOpen ? 1 : 0,
+        marginTop: panelOpen ? '24px' : '0px',
+      }}>
         <div style={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {activeSubmenu === 'payroll' && (
             <div className="payroll-settings-grid">
