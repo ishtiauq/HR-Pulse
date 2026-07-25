@@ -7,6 +7,7 @@ export default function Login({ onLogin }) {
   const [isLoading, setIsLoading] = useState(false)
   const [showIntermediateModal, setShowIntermediateModal] = useState(false)
   const [showAccordion, setShowAccordion] = useState(false)
+  const [faqOpenIndex, setFaqOpenIndex] = useState(null)
 
   // --- Employee state ---
   const [email, setEmail] = useState('')
@@ -165,7 +166,7 @@ export default function Login({ onLogin }) {
                   <span>Connecting Drive...</span>
                 ) : (
                   <>
-                    <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.927h6.6c-.29 1.5-.143 2.5-.97 3.514v2.923h6.39c3.74-3.437 5.725-8.508 5.725-14.294z"/><path fill="currentColor" d="M12 24c3.24 0 5.97-1.08 7.96-2.92l-6.39-2.923c-1.78 1.19-4.06 1.9-6.57 1.9-5.053 0-9.336-3.415-10.865-8.01H1.61v3.023C3.606 20.015 7.55 24 12 24z"/><path fill="currentColor" d="M1.135 12.077a14.364 14.364 0 0 1 0-4.154V4.9H1.61A23.953 23.953 0 0 0 0 12c0 2.502.39 4.903 1.135 7.177l6.388-3.023c-.382-1.144-.388-2.933 0-4.077z"/><path fill="currentColor" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.43-3.43C17.96 1.19 15.23 0 12 0 7.55 0 3.606 3.985 1.61 7.9H8.025C9.554 3.305 13.837 4.75 12 4.75z"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#fff"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#fff"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.5l-12.85 22.2z" fill="#fff"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#fff"/><path d="m59.8 53h-27.5l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h24.5c1.6 0 3.15-.45 4.5-1.2z" fill="#fff"/><path d="m73.4 26.5-12.2-21.1c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.4 28.4 11.6-19.6 1.35-2.35c.8-1.35 1.2-2.85 1.2-4.4 0-1.55-.4-3.05-1.2-4.45z" fill="#fff"/></svg>
                     <span style={{ fontWeight: 600 }}>Connect Google Drive</span>
                   </>
                 )}
@@ -239,7 +240,7 @@ export default function Login({ onLogin }) {
             <p className="login-modal-desc">HR Pulse needs permission to create a private app folder in your Google Drive.</p>
 
             <div className="login-modal-illustration">
-              <Cloud size={38} style={{ color: 'var(--accent-primary, #e85d4a)' }} />
+              <Cloud size={38} style={{ color: '#444' }} />
             </div>
 
             <ul className="login-modal-perms">
@@ -269,6 +270,28 @@ export default function Login({ onLogin }) {
         </div>
       )}
 
+      <div className="login-faq">
+        <h2 className="login-faq-title">Frequently Asked Questions</h2>
+        <div className="login-faq-list">
+          {[
+            { q: 'What is HR Pulse?', a: 'HR Pulse is a private, offline-first HR management system. Your employee data, payroll, and attendance records are stored exclusively in a hidden folder inside your own Google Drive.' },
+            { q: 'How does Google Drive integration work?', a: 'When you connect your Google Drive, HR Pulse creates a private app folder (drive.appdata) that is hidden from your main Drive view. Only HR Pulse can read and write to this folder.' },
+            { q: 'Is my data secure?', a: 'Yes. Your data never leaves your Google Drive storage. We have zero access to your files. The app runs entirely offline-first in your browser.' },
+            { q: 'Is HR Pulse really free?', a: 'Yes. HR Pulse is free forever with no credit card required. All features are included at no cost.' },
+          ].map((faq, i) => (
+            <div key={i} className="login-faq-item">
+              <button className="login-faq-question" onClick={() => setFaqOpenIndex(faqOpenIndex === i ? null : i)}>
+                {faq.q}
+                {faqOpenIndex === i ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </button>
+              {faqOpenIndex === i && (
+                <div className="login-faq-answer">{faq.a}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
       <style>{`
         .login-split {
           display: flex; height: 100vh; width: 100%; font-family: var(--font-sans, 'Roboto', sans-serif);
@@ -283,15 +306,15 @@ export default function Login({ onLogin }) {
           position: absolute; top: 32px; left: 48px; display: flex; align-items: center; gap: 10px; z-index: 2;
         }
         .login-logo-box {
-          width: 40px; height: 40px; background: var(--accent-primary, #e85d4a);
+          width: 40px; height: 40px; background: #2a2a2a;
           border-radius: 10px; display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 4px 14px rgba(232, 93, 74, 0.35);
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
         }
         .login-brand-title {
           font-size: 1.15rem; font-weight: 800; color: #fff; display: block; line-height: 1.1;
         }
         .login-brand-tagline {
-          font-size: 0.6rem; font-weight: 700; color: var(--accent-primary, #e85d4a);
+          font-size: 0.6rem; font-weight: 700; color: #888;
           letter-spacing: 0.1em; display: block;
         }
         .login-brand-center {
@@ -343,18 +366,18 @@ export default function Login({ onLogin }) {
           background: transparent; color: var(--md-bw-on-surface-variant, #666);
         }
         .login-tab.active {
-          background: var(--color-accent, #e85d4a); color: #fff;
-          box-shadow: 0 2px 8px rgba(232, 93, 74, 0.3);
+          background: #1a1a1a; color: #fff;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
         .login-drive-btn {
           display: flex; align-items: center; justify-content: center; gap: 12px;
           width: 100%; padding: 16px; border: none; border-radius: 14px;
-          background: var(--color-accent, #e85d4a); color: #fff;
+          background: #1a1a1a; color: #fff;
           font: 600 1rem var(--font-sans, 'Roboto', sans-serif); cursor: pointer;
           transition: background 0.2s, transform 0.15s;
-          box-shadow: 0 4px 12px var(--color-accent-glow, rgba(232,93,74,0.25));
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
-        .login-drive-btn:hover { transform: translateY(-1px); background: var(--color-accent-hover, #d04a3a); }
+        .login-drive-btn:hover { transform: translateY(-1px); background: #333; }
         .login-drive-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
         .login-trust-line {
@@ -377,7 +400,7 @@ export default function Login({ onLogin }) {
           font: 400 14px var(--font-sans, 'Roboto', sans-serif); outline: none;
           transition: border-color 0.2s;
         }
-        .login-input:focus { border-color: var(--color-accent, #e85d4a); }
+        .login-input:focus { border-color: #555; }
         .login-eye-btn {
           position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
           background: none; border: none; cursor: pointer;
@@ -471,6 +494,35 @@ export default function Login({ onLogin }) {
         .login-footer-free {
           margin: 0; font-size: 0.75rem; color: var(--md-bw-on-surface-variant, #999);
           text-align: center;
+        }
+
+        .login-faq {
+          max-width: 720px; margin: 0 auto; padding: 64px 24px 80px;
+        }
+        .login-faq-title {
+          font-size: 1.6rem; font-weight: 800; text-align: center;
+          margin: 0 0 32px; color: var(--md-bw-on-surface, #222);
+        }
+        .login-faq-list {
+          display: flex; flex-direction: column; gap: 12px;
+        }
+        .login-faq-item {
+          border: 1px solid var(--glass-border, rgba(0,0,0,0.08));
+          border-radius: 14px; overflow: hidden;
+          background: var(--glass-bg, rgba(255,255,255,0.4));
+        }
+        .login-faq-question {
+          display: flex; justify-content: space-between; align-items: center;
+          width: 100%; padding: 16px 20px; border: none; cursor: pointer;
+          font: 600 0.95rem var(--font-sans, 'Roboto', sans-serif);
+          color: var(--md-bw-on-surface, #222);
+          background: transparent; transition: background 0.2s;
+        }
+        .login-faq-question:hover { background: rgba(0,0,0,0.02); }
+        .login-faq-answer {
+          padding: 0 20px 16px;
+          font-size: 0.88rem; color: var(--md-bw-on-surface-variant, #666);
+          line-height: 1.6; animation: loginExpandDown 0.25s ease-out forwards;
         }
 
         @media (max-width: 768px) {
