@@ -3,6 +3,7 @@ import { Save, Settings as SettingsIcon, DollarSign, Sliders, Info, Percent, Bui
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDateTime } from '../services/date.js'
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 
 const pInp = { width: '100%', padding: '10px 14px', borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', transition: 'border 0.15s' }
 const pSel = { width: '100%', padding: '10px 14px', borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', cursor: 'pointer', appearance: 'none' }
@@ -181,86 +182,93 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           </div>
 
           <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-              <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Split Visualization</h4>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Sample:</span>
-                <input type="number" value={sampleGross} onChange={e => setSampleGross(Number(e.target.value))}
-                  style={{ width: '90px', ...pInp, padding: '6px 10px', fontSize: '13px', textAlign: 'center' }} />
-              </div>
-            </div>
-            {salaryStructure.length === 0 ? (
-              <span className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)' }}>No salary components configured.</span>
-            ) : (
-              <>
-                <div style={{ height: '24px', width: '100%', background: 'var(--glass-bg)', display: 'flex', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                  {salaryStructure.map((item, index) => (
-                    <div key={item.id} onMouseEnter={() => setHoveredComponentId(item.id)} onMouseLeave={() => setHoveredComponentId(null)}
-                      style={{ width: `${item.percentage}%`, background: getSegmentColor(item, index), height: '100%', opacity: hoveredComponentId && hoveredComponentId !== item.id ? 0.4 : 1, cursor: 'pointer', transition: 'opacity 0ms' }}
-                      title={`${item.name}: ${item.percentage}% (${currency}${(sampleGross * (item.percentage / 100)).toLocaleString()})`} />
-                  ))}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {salaryStructure.map((item, index) => (
-                    <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderRadius: '8px', background: hoveredComponentId === item.id ? 'var(--glass-bg)' : 'transparent' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ width: '20px', borderBottom: `2px ${['solid','dashed','dotted'][index%3]} var(--md-bw-on-surface)` }} />
-                        <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{item.name} ({item.type})</span>
-                      </div>
-                      <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{item.type === 'deduction' ? '-' : ''}{item.percentage}%</span>
-                    </div>
-                  ))}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--glass-border)', paddingTop: '12px', marginTop: '4px' }}>
-                    <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 600 }}>Net Earning Ratio:</span>
-                    <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>{netPayPercent}%</span>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-
-          <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Components List</h4>
+              <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Salary Structure</h4>
               <button onClick={handleAddComponent} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
-                <Plus size={14} /> Add Item
+                <Plus size={14} /> Add Component
               </button>
             </div>
+
             {isOver100 && (
               <div style={{ padding: '12px 16px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '100px', color: 'var(--md-bw-on-surface)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                 <Info size={16} /> Component total exceeds 100%. Please adjust before saving.
               </div>
             )}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {salaryStructure.map(item => (
-                <div key={item.id} style={{ ...card, padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <input type="text" value={item.name} onChange={e => handleComponentChange(item.id, 'name', e.target.value)} style={{ flex: 1, ...pInp, fontSize: '13px' }} />
-                    <div style={{ position: 'relative', width: '120px', flexShrink: 0 }}>
-                      <select value={item.type} onChange={e => handleComponentChange(item.id, 'type', e.target.value)} style={{ ...pSel, fontSize: '13px' }}>
-                        <option value="earning">Earning</option>
-                        <option value="deduction">Deduction</option>
-                      </select>
-                      <ChevronDown size={14} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }} />
+
+            {salaryStructure.length > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie data={salaryStructure.map(item => ({ ...item, value: item.percentage }))}
+                      cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={2}>
+                      {salaryStructure.map((item, index) => (
+                        <Cell key={item.id} fill={getSegmentColor(item, index)} stroke="none" />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {salaryStructure.length === 0 ? (
+                <span className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)', textAlign: 'center', padding: '20px 0' }}>
+                  No salary components configured. Click "Add Component" to get started.
+                </span>
+              ) : (
+                salaryStructure.map(item => (
+                  <div key={item.id} style={{
+                    display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px',
+                    background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)',
+                  }}>
+                    <input type="text" value={item.name} onChange={e => handleComponentChange(item.id, 'name', e.target.value)}
+                      placeholder="Component name"
+                      style={{ flex: 1, minWidth: '120px', ...pInp, padding: '8px 12px', fontSize: '13px' }} />
+
+                    <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                      <button onClick={() => handleComponentChange(item.id, 'type', 'earning')}
+                        style={{
+                          padding: '6px 12px', borderRadius: '100px', border: '1px solid',
+                          fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
+                          background: item.type === 'earning' ? '#0062E6' : 'transparent',
+                          color: item.type === 'earning' ? '#fff' : 'var(--md-bw-on-surface-variant)',
+                          borderColor: item.type === 'earning' ? '#0062E6' : 'var(--glass-border)',
+                        }}>Earning</button>
+                      <button onClick={() => handleComponentChange(item.id, 'type', 'deduction')}
+                        style={{
+                          padding: '6px 12px', borderRadius: '100px', border: '1px solid',
+                          fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
+                          background: item.type === 'deduction' ? '#dc3545' : 'transparent',
+                          color: item.type === 'deduction' ? '#fff' : 'var(--md-bw-on-surface-variant)',
+                          borderColor: item.type === 'deduction' ? '#dc3545' : 'var(--glass-border)',
+                        }}>Deduction</button>
                     </div>
-                    <button onClick={() => handleRemoveComponent(item.id)} style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', padding: '8px', display: 'flex', flexShrink: 0 }}>
-                      <Trash2 size={16} />
+
+                    <div style={{ position: 'relative', width: '70px', flexShrink: 0 }}>
+                      <input type="number" min="0" max="100" value={item.percentage}
+                        onChange={e => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
+                        style={{ ...pInp, padding: '8px 10px', fontSize: '13px', textAlign: 'center', paddingRight: '20px' }} />
+                      <span style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', fontSize: '12px', color: 'var(--md-bw-on-surface-variant)', pointerEvents: 'none' }}>%</span>
+                    </div>
+
+                    <button onClick={() => handleRemoveComponent(item.id)}
+                      style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', padding: '6px', display: 'flex', flexShrink: 0 }}>
+                      <Trash2 size={15} />
                     </button>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ flex: 1, position: 'relative', height: '32px' }}>
-                      <div style={{ position: 'absolute', top: '13px', left: '0', width: '100%', height: '6px', background: 'rgba(128,128,128,0.15)', borderRadius: '3px' }} />
-                      <div style={{ position: 'absolute', top: '13px', left: '0', width: `${Math.max(item.percentage, 0)}%`, height: '6px', background: 'linear-gradient(90deg, #0062E6, #003A8C)', borderRadius: '3px' }} />
-                      <input type="range" min="0" max="100" value={item.percentage} onChange={e => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
-                        style={{ width: '100%', height: '32px', margin: 0, padding: 0, opacity: 0, cursor: 'pointer', position: 'relative', zIndex: 10, WebkitAppearance: 'none', appearance: 'none' }} />
-                      <div style={{ position: 'absolute', top: '6px', left: `calc(${item.percentage}% - 10px)`, width: '20px', height: '20px', borderRadius: '50%', background: '#0062E6', boxShadow: '0 2px 6px rgba(0,98,230,0.3)', pointerEvents: 'none', transition: 'left 0.05s' }} />
-                    </div>
-                    <input type="number" min="0" max="100" value={item.percentage} onChange={e => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
-                      style={{ width: '65px', ...pInp, padding: '6px 10px', fontSize: '13px', textAlign: 'center' }} />
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
+
+            {salaryStructure.length > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 600 }}>Net Earning Ratio</span>
+                <span className="body-medium" style={{
+                  color: netPayPercent >= 0 ? 'var(--md-bw-on-surface)' : '#dc3545',
+                  fontVariantNumeric: 'tabular-nums', fontWeight: 700,
+                }}>{netPayPercent}%</span>
+              </div>
+            )}
           </div>
         </div>
       )
