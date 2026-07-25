@@ -2514,11 +2514,11 @@ table tr.selected td,
   background: rgba(0, 0, 0, 0.25);
 }
 
-/* Sidebar scrollbar always visible on mobile */
+/* Hide scrollbar on mobile (sidebar + main) */
 @media (max-width: 767px) {
+  * { -ms-overflow-style: none; scrollbar-width: none; }
+  *::-webkit-scrollbar { display: none; }
   .sidebar-nav { overflow-y: auto !important; }
-  .sidebar-nav::-webkit-scrollbar { width: 6px; }
-  .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); border-radius: 3px; }
   .dashboard-content { overflow-y: auto !important; }
 }
 
