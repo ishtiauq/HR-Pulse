@@ -1425,7 +1425,7 @@ export default function App() {
   }
 
   if (!user) {
-    return <Login onLogin={handleLogin} />
+    return <Login onLogin={handleLogin} themeMode={themeMode} toggleTheme={toggleTheme} />
   }
 
   if (simulatedRole === 'Employee' || user.isEmployee) {

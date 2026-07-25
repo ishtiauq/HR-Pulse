@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Shield, Cloud, ArrowRight, HelpCircle, ChevronDown, ChevronUp, LogIn, Eye, EyeOff, Users, Zap } from 'lucide-react'
+import { Shield, Cloud, ArrowRight, HelpCircle, ChevronDown, ChevronUp, LogIn, Eye, EyeOff, Users, Zap, Sun, Moon, Monitor } from 'lucide-react'
 import { fetchUserProfile } from '../services/googleDrive.js'
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, themeMode, toggleTheme }) {
   const [authTab, setAuthTab] = useState('manager') // 'manager' | 'employee'
   const [isLoading, setIsLoading] = useState(false)
   const [showIntermediateModal, setShowIntermediateModal] = useState(false)
@@ -135,9 +135,18 @@ export default function Login({ onLogin }) {
           </div>
           <span className="login-topbar-brand">HR Pulse</span>
         </div>
-        <div className="login-topbar-badge">
-          <Zap size={12} />
-          Free for limited time
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button onClick={toggleTheme} title={`Theme: ${themeMode}`} style={{
+            width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'transparent', border: 'none', borderRadius: '6px',
+            color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer',
+          }}>
+            {themeMode === 'system' ? <Monitor size={16} /> : themeMode === 'light' ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+          <div className="login-topbar-badge">
+            <Zap size={12} />
+            Free for limited time
+          </div>
         </div>
       </header>
 
@@ -268,33 +277,14 @@ export default function Login({ onLogin }) {
 
       <footer className="login-footer">
         <div className="login-footer-inner">
-          <div className="login-footer-col brand-col">
-            <div className="login-footer-logo">
-              <span className="login-footer-logo-icon">HP</span>
-              <span className="login-footer-logo-text">HR Pulse</span>
-            </div>
-            <p className="login-footer-desc">Private, offline-first HR management. Your data stays in your Drive.</p>
+          <div className="login-footer-logo">
+            <span className="login-footer-logo-icon">HP</span>
+            <span className="login-footer-logo-text">HR Pulse</span>
           </div>
-          <div className="login-footer-col">
-            <h4 className="login-footer-heading">Product</h4>
-            <a href="#">Features</a>
-            <a href="#">Pricing</a>
-            <a href="#">Integrations</a>
-            <a href="#">Changelog</a>
-          </div>
-          <div className="login-footer-col">
-            <h4 className="login-footer-heading">Resources</h4>
-            <a href="#">Documentation</a>
-            <a href="#">Guides</a>
-            <a href="#">API Reference</a>
-            <a href="#">Support</a>
-          </div>
-          <div className="login-footer-col">
-            <h4 className="login-footer-heading">Company</h4>
-            <a href="#">About</a>
-            <a href="#">Blog</a>
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
+          <p className="login-footer-desc">Private, offline-first HR management. Your data stays in your Drive.</p>
+          <div className="login-footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
           </div>
         </div>
         <div className="login-footer-bottom">
@@ -310,31 +300,60 @@ export default function Login({ onLogin }) {
         }
         .login-topbar {
           height: 56px; min-height: 56px; display: flex; align-items: center;
-          justify-content: space-between; padding: 0 20px; position: sticky;
-          top: 16px; z-index: 15; flex-shrink: 0; margin: 16px auto 0;
+          justify-content: space-between; padding: 0 20px; position: fixed;
+          top: 16px; left: 50%; transform: translateX(-50%);
+          z-index: 100; margin: 0; overflow: hidden;
           width: calc(100% - 40px); max-width: 700px; border-radius: 100px; box-sizing: border-box;
-          background: linear-gradient(135deg, rgba(30,30,40,0.92), rgba(20,20,30,0.92));
-          backdrop-filter: blur(30px) saturate(150%);
-          -webkit-backdrop-filter: blur(30px) saturate(150%);
-          box-shadow: 0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
-          border: 1px solid rgba(255,255,255,0.08);
+          backdrop-filter: blur(40px) saturate(180%);
+          -webkit-backdrop-filter: blur(40px) saturate(180%);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.5);
+          border: 1px solid rgba(255,255,255,0.3);
+          background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.15), rgba(255,255,255,0.4));
+          background-size: 200% 200%;
+          animation: liquidTopbar 8s ease-in-out infinite;
+        }
+        .login-topbar::before {
+          content: ''; position: absolute; inset: 0;
+          border-radius: 100px; pointer-events: none;
+          background: radial-gradient(ellipse at 30% 120%, rgba(255,255,255,0.35) 0%, transparent 60%),
+                      radial-gradient(ellipse at 70% -20%, rgba(255,255,255,0.2) 0%, transparent 50%);
+        }
+        @keyframes liquidTopbar {
+          0% { background-position: 0% 50%; }
+          25% { background-position: 100% 0%; }
+          50% { background-position: 100% 100%; }
+          75% { background-position: 0% 100%; }
+          100% { background-position: 0% 50%; }
+        }
+        [data-theme="dark"] .login-topbar, .dark .login-topbar {
+          background: linear-gradient(135deg, rgba(40,40,50,0.6), rgba(25,25,35,0.4), rgba(35,35,45,0.55));
+          background-size: 200% 200%;
+          animation: liquidTopbar 8s ease-in-out infinite;
+          border-color: rgba(255,255,255,0.08);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+        [data-theme="dark"] .login-topbar::before, .dark .login-topbar::before {
+          background: radial-gradient(ellipse at 30% 120%, rgba(255,255,255,0.08) 0%, transparent 60%),
+                      radial-gradient(ellipse at 70% -20%, rgba(255,255,255,0.05) 0%, transparent 50%);
+        }
+        [data-theme="dark"] .login-topbar-brand, .dark .login-topbar-brand {
+          color: rgba(255,255,255,0.9);
         }
         .login-topbar-left {
           display: flex; align-items: center; gap: 10px;
         }
         .login-topbar-logo {
-          width: 30px; height: 30px;
-          background: linear-gradient(135deg, #f59e0b, #d97706);
-          border-radius: 8px; display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 2px 8px rgba(245,158,11,0.3);
+          width: 28px; height: 28px;
+          background: var(--md-bw-primary, #222);
+          border-radius: 6px; display: flex; align-items: center; justify-content: center;
         }
         .login-topbar-logo-icon {
-          color: #fff;
-          font: 700 13px/1 'Roboto', sans-serif;
+          color: var(--md-bw-on-primary, #fff);
+          font: 700 12px/1 'Roboto', sans-serif;
         }
         .login-topbar-brand {
           font: 700 18px/24px 'Roboto', sans-serif;
-          color: #fff;
+          color: var(--md-bw-on-surface, #222);
           letter-spacing: -0.01em; white-space: nowrap;
         }
         .login-topbar-badge {
@@ -348,7 +367,7 @@ export default function Login({ onLogin }) {
         }
 
         .login-auth {
-          flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 24px;
+          flex: 1; display: flex; align-items: center; justify-content: center; padding: 100px 24px 48px;
           background: transparent; position: relative;
         }
         .login-auth-card {
@@ -514,59 +533,75 @@ export default function Login({ onLogin }) {
         }
 
         .login-footer {
-          background: linear-gradient(180deg, #14141e 0%, #0d0d15 100%);
-          border-top: 1px solid rgba(255,255,255,0.06);
-          padding: 60px 24px 0; margin-top: 40px;
+          background: var(--glass-bg, rgba(255,255,255,0.4));
+          backdrop-filter: var(--glass-blur, blur(20px));
+          border-top: 1px solid var(--glass-border, rgba(0,0,0,0.06));
+          padding: 48px 24px 0; margin-top: 40px;
+        }
+        [data-theme="dark"] .login-footer, .dark .login-footer {
+          border-top-color: rgba(255,255,255,0.06);
+        }
+        [data-theme="dark"] .login-footer-links a, .dark .login-footer-links a {
+          color: rgba(255,255,255,0.4);
+        }
+        [data-theme="dark"] .login-footer-links a:hover, .dark .login-footer-links a:hover {
+          color: rgba(255,255,255,0.8);
+        }
+        [data-theme="dark"] .login-footer-bottom, .dark .login-footer-bottom {
+          border-top-color: rgba(255,255,255,0.06);
         }
         .login-footer-inner {
           max-width: 960px; margin: 0 auto;
-          display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr;
-          gap: 40px;
+          display: flex; flex-direction: column; align-items: center; gap: 16px;
+          text-align: center;
         }
         .login-footer-logo {
-          display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+          display: flex; align-items: center; gap: 10px;
         }
         .login-footer-logo-icon {
-          width: 30px; height: 30px;
-          background: linear-gradient(135deg, #f59e0b, #d97706);
-          border-radius: 8px; display: flex; align-items: center; justify-content: center;
-          color: #fff; font: 700 13px/1 'Roboto', sans-serif;
+          width: 28px; height: 28px;
+          background: var(--md-bw-primary, #222);
+          border-radius: 6px; display: flex; align-items: center; justify-content: center;
+          color: var(--md-bw-on-primary, #fff);
+          font: 700 12px/1 'Roboto', sans-serif;
         }
         .login-footer-logo-text {
-          font: 700 18px/24px 'Roboto', sans-serif; color: #fff;
+          font: 700 18px/24px 'Roboto', sans-serif;
+          color: var(--md-bw-on-surface, #222);
         }
         .login-footer-desc {
-          font-size: 0.85rem; color: rgba(255,255,255,0.45);
-          line-height: 1.6; margin: 0;
+          font-size: 0.85rem; color: var(--md-bw-on-surface-variant, #999);
+          line-height: 1.6; margin: 0; max-width: 360px;
         }
-        .login-footer-col h4 {
-          font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.3);
-          text-transform: uppercase; letter-spacing: 0.06em;
-          margin: 0 0 16px;
+        .login-footer-links {
+          display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
         }
-        .login-footer-col a {
-          display: block; font-size: 0.88rem; color: rgba(255,255,255,0.55);
-          text-decoration: none; padding: 4px 0;
-          transition: color 0.15s;
+        .login-footer-links a {
+          font-size: 0.82rem; color: var(--md-bw-on-surface-variant, #999);
+          text-decoration: none; transition: color 0.15s;
         }
-        .login-footer-col a:hover { color: #fbbf24; }
+        .login-footer-links a:hover { color: var(--md-bw-primary, #222); }
         .login-footer-bottom {
           max-width: 960px; margin: 0 auto;
-          padding: 24px 0; margin-top: 48px;
-          border-top: 1px solid rgba(255,255,255,0.06);
-          font-size: 0.78rem; color: rgba(255,255,255,0.3);
+          padding: 20px 0; margin-top: 36px;
+          border-top: 1px solid var(--glass-border, rgba(0,0,0,0.06));
+          font-size: 0.75rem; color: var(--md-bw-on-surface-variant, #999);
           text-align: center;
         }
 
         @media (max-width: 768px) {
-          .login-topbar { top: 12px; margin-top: 12px; width: calc(100% - 24px); }
-          .login-auth { padding: 32px 16px; }
-          .login-auth-card { padding: 24px; }
-          .login-faq { padding: 40px 16px 60px; }
-          .login-faq-title { font-size: 1.3rem; }
-          .login-footer { padding: 40px 16px 0; }
-          .login-footer-inner { grid-template-columns: 1fr; gap: 32px; }
-          .login-footer-bottom { margin-top: 32px; }
+          .login-topbar { top: 8px; width: calc(100% - 16px); border-radius: 14px; height: 48px; min-height: 48px; padding: 0 14px; }
+          .login-topbar-badge { font-size: 0.6rem; padding: 4px 10px; }
+          .login-auth { padding: 80px 12px 24px; }
+          .login-auth-card { padding: 20px; border-radius: 16px; }
+          .login-tabs { gap: 4px; }
+          .login-tab { font-size: 0.78rem; padding: 8px 14px; }
+          .login-faq { padding: 32px 12px 48px; }
+          .login-faq-title { font-size: 1.2rem; margin-bottom: 20px; }
+          .login-faq-question { padding: 14px 16px; font-size: 0.88rem; }
+          .login-faq-answer { padding: 0 16px 14px; font-size: 0.82rem; }
+          .login-footer { padding: 32px 12px 0; margin-top: 24px; }
+          .login-footer-bottom { margin-top: 24px; padding: 16px 0; }
         }
       `}</style>
     </div>
