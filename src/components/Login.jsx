@@ -211,8 +211,6 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
               </p>
             </form>
           </div>
-
-          <p className="login-footer-free">🔥 Free for limited time &bull; No credit card required</p>
         </div>
       </div>
 
@@ -260,7 +258,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
             { q: 'What is HR Pulse?', a: 'HR Pulse is a private, offline-first HR management system. Your employee data, payroll, and attendance records are stored exclusively in a hidden folder inside your own Google Drive.' },
             { q: 'How does Google Drive integration work?', a: 'When you connect your Google Drive, HR Pulse creates a private app folder (drive.appdata) that is hidden from your main Drive view. Only HR Pulse can read and write to this folder.' },
             { q: 'Is my data secure?', a: 'Yes. Your data never leaves your Google Drive storage. We have zero access to your files. The app runs entirely offline-first in your browser.' },
-            { q: 'Is HR Pulse really free?', a: 'Yes. HR Pulse is free forever with no credit card required. All features are included at no cost.' },
+            { q: 'Is HR Pulse really free?', a: 'Yes. HR Pulse is free for a limited time with no credit card required. All features are included at no cost.' },
           ].map((faq, i) => (
             <div key={i} className="login-faq-item">
               <button className="login-faq-question" onClick={() => setFaqOpenIndex(faqOpenIndex === i ? null : i)}>
@@ -359,15 +357,15 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         .login-topbar-badge {
           display: flex; align-items: center; gap: 5px;
           padding: 5px 12px; border-radius: 100px;
-          background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(217,119,6,0.15));
-          border: 1px solid rgba(245,158,11,0.3);
-          color: #fbbf24; font-size: 0.7rem; font-weight: 700;
+          background: #e02014;
+          border: 1px solid rgba(224,32,20,0.3);
+          color: #fff; font-size: 0.7rem; font-weight: 700;
           white-space: nowrap; letter-spacing: 0.02em;
           text-transform: uppercase;
         }
 
         .login-auth {
-          flex: 1; display: flex; align-items: center; justify-content: center; padding: 100px 24px 48px;
+          flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 24px 48px;
           background: transparent; position: relative;
         }
         .login-auth-card {
@@ -397,21 +395,33 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         .login-drive-btn {
           display: flex; align-items: center; justify-content: center; gap: 12px;
           width: 100%; padding: 16px; border: none; border-radius: 14px;
-          background: #1a1a1a; color: #fff;
+          background: #0062E6; color: #fff; position: relative; overflow: hidden;
           font: 600 1rem var(--font-sans, 'Roboto', sans-serif); cursor: pointer;
           transition: background 0.2s, transform 0.15s;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 4px 16px rgba(0,98,230,0.3);
         }
-        .login-drive-btn:hover { transform: translateY(-1px); background: #333; }
+        .login-drive-btn::after {
+          content: ''; position: absolute; inset: 0;
+          background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+          background-size: 200% 100%;
+          animation: btnShine 3s ease-in-out infinite;
+          pointer-events: none;
+        }
+        @keyframes btnShine {
+          0% { background-position: 200% 0; }
+          60% { background-position: -200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        .login-drive-btn:hover { transform: translateY(-1px); background: #0055cc; }
         .login-drive-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         [data-theme="dark"] .login-tab.active, .dark .login-tab.active {
           background: #fff; color: #111;
         }
         [data-theme="dark"] .login-drive-btn, .dark .login-drive-btn {
-          background: #fff; color: #111;
+          background: #0062E6; color: #fff;
         }
         [data-theme="dark"] .login-drive-btn:hover, .dark .login-drive-btn:hover {
-          background: #e6e6e6;
+          background: #0055cc;
         }
 
         .login-trust-line {
@@ -505,13 +515,13 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           color: #E02014; font-size: 0.88rem;
         }
 
-        .login-auth-card .login-footer-free {
-          margin: 24px -24px -24px; padding: 14px 24px;
-          font-size: 0.78rem; font-weight: 600;
-          color: #fbbf24; text-align: center;
-          background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(217,119,6,0.06));
-          border-top: 1px solid rgba(245,158,11,0.15);
-          border-radius: 0 0 var(--glass-radius, 20px) var(--glass-radius, 20px);
+                .login-footer-free {
+          margin-top: 16px; padding: 16px;
+          font-size: 0.88rem; font-weight: 700;
+          color: #fff; text-align: center;
+          background: #e02014;
+          border-radius: 10px;
+          width: 100%; max-width: 420px; box-sizing: border-box;
         }
 
         .login-faq {
@@ -606,6 +616,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           .login-topbar-badge { font-size: 0.6rem; padding: 4px 10px; }
           .login-auth { padding: 80px 12px 24px; }
           .login-auth-card { padding: 20px; border-radius: 16px; }
+          .login-footer-free { font-size: 0.82rem; padding: 14px; }
           .login-tabs { gap: 4px; }
           .login-tab { font-size: 0.88rem; padding: 14px; }
           .login-faq { padding: 32px 12px 48px; }
