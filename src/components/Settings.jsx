@@ -11,14 +11,12 @@ const card = { background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)
 
 export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, simulatedRole, syncConflicts, setSyncConflicts }) {
   const [activeSubmenu, setActiveSubmenu] = useState(() => localStorage.getItem('hr_pulse_settings_tab') || null)
-  const [panelOpen, setPanelOpen] = useState(false)
 
   const setTab = (id) => {
-    if (activeSubmenu === id && panelOpen) {
-      setPanelOpen(false)
+    if (activeSubmenu === id) {
+      setActiveSubmenu(null)
     } else {
       setActiveSubmenu(id)
-      setPanelOpen(true)
       localStorage.setItem('hr_pulse_settings_tab', id)
     }
   }
@@ -162,12 +160,461 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     if (addToast) addToast("Audit logs exported to CSV", "success")
   }
 
-  return (
-    <><style>{`
-  @media (max-width: 900px) {
-    .settings-cat-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  const renderSettingsContent = (id) => {
+    switch (id) {
+      case 'payroll': return (
+        <div className="payroll-settings-grid">
+          <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Currency Setup</h4>
+            <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Select the currency symbol applied globally across dashboards and receipts.</p>
+            <div style={{ position: 'relative', width: '100%', maxWidth: '260px' }}>
+              <select value={currency} onChange={e => setCurrency(e.target.value)} style={{ ...pSel }}>
+                <option value="$">$ (USD)</option>
+                <option value="৳">৳ (BDT)</option>
+                <option value="€">€ (EUR)</option>
+                <option value="£">£ (GBP)</option>
+                <option value="₹">₹ (INR)</option>
+                <option value="¥">¥ (JPY)</option>
+              </select>
+              <ChevronDown size={14} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }} />
+            </div>
+          </div>
+
+          <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+              <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Split Visualization</h4>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Sample:</span>
+                <input type="number" value={sampleGross} onChange={e => setSampleGross(Number(e.target.value))}
+                  style={{ width: '90px', ...pInp, padding: '6px 10px', fontSize: '13px', textAlign: 'center' }} />
+              </div>
+            </div>
+            {salaryStructure.length === 0 ? (
+              <span className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)' }}>No salary components configured.</span>
+            ) : (
+              <>
+                <div style={{ height: '24px', width: '100%', background: 'var(--glass-bg)', display: 'flex', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                  {salaryStructure.map((item, index) => (
+                    <div key={item.id} onMouseEnter={() => setHoveredComponentId(item.id)} onMouseLeave={() => setHoveredComponentId(null)}
+                      style={{ width: `${item.percentage}%`, background: getSegmentColor(item, index), height: '100%', opacity: hoveredComponentId && hoveredComponentId !== item.id ? 0.4 : 1, cursor: 'pointer', transition: 'opacity 0ms' }}
+                      title={`${item.name}: ${item.percentage}% (${currency}${(sampleGross * (item.percentage / 100)).toLocaleString()})`} />
+                  ))}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {salaryStructure.map((item, index) => (
+                    <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderRadius: '8px', background: hoveredComponentId === item.id ? 'var(--glass-bg)' : 'transparent' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '20px', borderBottom: `2px ${['solid','dashed','dotted'][index%3]} var(--md-bw-on-surface)` }} />
+                        <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{item.name} ({item.type})</span>
+                      </div>
+                      <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{item.type === 'deduction' ? '-' : ''}{item.percentage}%</span>
+                    </div>
+                  ))}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--glass-border)', paddingTop: '12px', marginTop: '4px' }}>
+                    <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 600 }}>Net Earning Ratio:</span>
+                    <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>{netPayPercent}%</span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Components List</h4>
+              <button onClick={handleAddComponent} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
+                <Plus size={14} /> Add Item
+              </button>
+            </div>
+            {isOver100 && (
+              <div style={{ padding: '12px 16px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '100px', color: 'var(--md-bw-on-surface)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
+                <Info size={16} /> Component total exceeds 100%. Please adjust before saving.
+              </div>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {salaryStructure.map(item => (
+                <div key={item.id} style={{ ...card, padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input type="text" value={item.name} onChange={e => handleComponentChange(item.id, 'name', e.target.value)} style={{ flex: 1, ...pInp, fontSize: '13px' }} />
+                    <div style={{ position: 'relative', width: '120px', flexShrink: 0 }}>
+                      <select value={item.type} onChange={e => handleComponentChange(item.id, 'type', e.target.value)} style={{ ...pSel, fontSize: '13px' }}>
+                        <option value="earning">Earning</option>
+                        <option value="deduction">Deduction</option>
+                      </select>
+                      <ChevronDown size={14} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }} />
+                    </div>
+                    <button onClick={() => handleRemoveComponent(item.id)} style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', padding: '8px', display: 'flex', flexShrink: 0 }}>
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ flex: 1, position: 'relative', height: '32px' }}>
+                      <div style={{ position: 'absolute', top: '13px', left: '0', width: '100%', height: '6px', background: 'rgba(128,128,128,0.15)', borderRadius: '3px' }} />
+                      <div style={{ position: 'absolute', top: '13px', left: '0', width: `${Math.max(item.percentage, 0)}%`, height: '6px', background: 'linear-gradient(90deg, #0062E6, #003A8C)', borderRadius: '3px' }} />
+                      <input type="range" min="0" max="100" value={item.percentage} onChange={e => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
+                        style={{ width: '100%', height: '32px', margin: 0, padding: 0, opacity: 0, cursor: 'pointer', position: 'relative', zIndex: 10, WebkitAppearance: 'none', appearance: 'none' }} />
+                      <div style={{ position: 'absolute', top: '6px', left: `calc(${item.percentage}% - 10px)`, width: '20px', height: '20px', borderRadius: '50%', background: '#0062E6', boxShadow: '0 2px 6px rgba(0,98,230,0.3)', pointerEvents: 'none', transition: 'left 0.05s' }} />
+                    </div>
+                    <input type="number" min="0" max="100" value={item.percentage} onChange={e => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
+                      style={{ width: '65px', ...pInp, padding: '6px 10px', fontSize: '13px', textAlign: 'center' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )
+      case 'company': return (
+        <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Building2 size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+            <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Company Profile Settings</h4>
+          </div>
+          <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Manage public details regarding your enterprise. These details are used to brand generated documents like reports, receipts, and payslips.</p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={lbl}>Brand Logo</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div onClick={() => { if (logo) setShowLogoModal(true); else triggerFileInput() }}
+                  style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: 'pointer', overflow: 'hidden', position: 'relative' }}>
+                  {logo ? <img src={logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`, transformOrigin: 'center' }} />
+                    : <Activity size={24} color="var(--md-bw-on-surface-variant)" />}
+                </div>
+                <button onClick={triggerFileInput} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
+                  <Upload size={14} /> Upload New Logo
+                </button>
+                <input type="file" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" style={{ display: 'none' }} />
+              </div>
+            </div>
+
+            {['Name', 'Email', 'Website'].map(field => {
+              const val = field === 'Name' ? companyName : field === 'Email' ? companyEmail : companyWebsite
+              const set = field === 'Name' ? setCompanyName : field === 'Email' ? setCompanyEmail : setCompanyWebsite
+              const Icon = field === 'Name' ? Building2 : field === 'Email' ? Mail : Globe
+              const ph = field === 'Name' ? 'HR Pulse Ltd.' : field === 'Email' ? 'hr@hrpulse.io' : 'www.hrpulse.io'
+              const type = field === 'Email' ? 'email' : 'text'
+              return (
+                <div key={field} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <span style={lbl}>{field === 'Name' ? 'Legal Entity Name' : field === 'Email' ? 'HR Support Email' : 'Company Website URL'}</span>
+                  <div style={{ position: 'relative' }}>
+                    <Icon size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--md-bw-on-surface-variant)' }} />
+                    <input type={type} value={val} onChange={e => set(e.target.value)} placeholder={ph}
+                      style={{ ...pInp, paddingLeft: '38px', fontSize: '13px' }} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )
+      case 'notifications': return (
+        <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Bell size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+            <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Notification Preferences</h4>
+          </div>
+          <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Enable alerts, sync logs alerts, or background notification parameters.</p>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {[
+              { label: 'Enable Real-time Sync Alerts', desc: 'Displays popups when files successfully sync with Google Drive.', val: syncAlerts, set: setSyncAlerts },
+              { label: 'Email Monthly Payout Digest', desc: 'Sends a copy of the payroll statements to the HR support inbox.', val: emailDigests, set: setEmailDigests },
+            ].map((item, i) => (
+              <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: i === 0 ? '1px solid var(--glass-border)' : 'none' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 500 }}>{item.label}</span>
+                  <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{item.desc}</span>
+                </div>
+                <input type="checkbox" checked={item.val} onChange={e => item.set(e.target.checked)}
+                  style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#0062E6', borderRadius: '4px', flexShrink: 0 }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+      case 'expenses': return (
+        <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Receipt size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+            <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Expense Policies</h4>
+          </div>
+          <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Set maximum reimbursement limits per category. Expenses exceeding these limits will be flagged for review in the approval queue.</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
+            {Object.keys(expensePolicies).map(cat => (
+              <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={lbl}>{cat}</span>
+                <input type="number" value={expensePolicies[cat]} onChange={e => setExpensePolicies(prev => ({ ...prev, [cat]: Number(e.target.value) }))}
+                  style={{ ...pInp, fontSize: '13px' }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+      case 'rosters': return (
+        <>
+          <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CalendarClock size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+                <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Shift Templates</h4>
+              </div>
+              <button className="btn btn-outlined" onClick={() => setShiftTemplates(prev => [...prev, { id: `st-${Date.now()}`, name: 'New Shift', start: '09:00', end: '17:00', break: 60, color: '#333333' }])}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
+                <Plus size={14} /> Add Shift
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {shiftTemplates.map(t => (
+                <div key={t.id} style={{ ...card, padding: '16px', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div style={{ flex: '1.5', minWidth: '140px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={lbl}>Shift Name</span>
+                    <input type="text" value={t.name} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, name: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
+                  </div>
+                  <div style={{ flex: '1', minWidth: '100px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={lbl}>Start</span>
+                    <input type="time" value={t.start} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, start: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
+                  </div>
+                  <div style={{ flex: '1', minWidth: '100px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={lbl}>End</span>
+                    <input type="time" value={t.end} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, end: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
+                  </div>
+                  <div style={{ flex: '0.8', minWidth: '80px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={lbl}>Break (min)</span>
+                    <input type="number" value={t.break} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, break: parseInt(e.target.value) || 0 } : x))} style={{ ...pInp, fontSize: '13px' }} />
+                  </div>
+                  <div style={{ width: '50px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={{ ...lbl, color: 'transparent' }}>C</span>
+                    <input type="color" value={t.color} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, color: e.target.value } : x))}
+                      style={{ padding: 0, borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'transparent', width: '100%', height: '38px', cursor: 'pointer' }} />
+                  </div>
+                  <button className="btn btn-text" style={{ padding: '10px', color: 'var(--md-bw-on-surface-variant)', flexShrink: 0, alignSelf: 'flex-end' }}
+                    onClick={() => setShiftTemplates(prev => prev.filter(x => x.id !== t.id))}>
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Activity size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+              <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Overtime Rules</h4>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={lbl}>Weekday Multiplier</span>
+                <input type="number" step="0.1" value={overtimeRules.multiplierWeekday} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekday: parseFloat(e.target.value) || 1 }))} style={{ ...pInp, fontSize: '13px' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <span style={lbl}>Weekend/Holiday Multiplier</span>
+                <input type="number" step="0.1" value={overtimeRules.multiplierWeekend} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekend: parseFloat(e.target.value) || 1 }))} style={{ ...pInp, fontSize: '13px' }} />
+              </div>
+            </div>
+          </div>
+        </>
+      )
+      case 'audit': return (
+        <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <List size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+                <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Audit Logs</h4>
+              </div>
+              <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Review all system actions for compliance and security.</p>
+            </div>
+            <button onClick={handleExportCSV} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
+              <Download size={14} /> Export CSV
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', padding: '16px', background: 'var(--glass-bg)', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
+            <div style={{ minWidth: '140px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <span style={lbl}>Date</span>
+              <input type="date" value={auditFilterDate} onChange={e => setAuditFilterDate(e.target.value)} style={{ ...pInp, fontSize: '13px' }} />
+            </div>
+            <div style={{ minWidth: '140px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <span style={lbl}>Action Type</span>
+              <div style={{ position: 'relative' }}>
+                <select value={auditFilterAction} onChange={e => setAuditFilterAction(e.target.value)} style={{ ...pSel, fontSize: '13px' }}>
+                  <option value="All">All Actions</option>
+                  <option value="CREATE">CREATE</option>
+                  <option value="UPDATE">UPDATE</option>
+                  <option value="DELETE">DELETE</option>
+                </select>
+                <ChevronDown size={14} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }} />
+              </div>
+            </div>
+            <button onClick={() => { setAuditFilterDate(''); setAuditFilterAction('All') }} className="btn btn-text" style={{ height: '36px', fontSize: '13px', alignSelf: 'flex-end' }}>Clear</button>
+          </div>
+
+          <div className="payroll-table-container">
+            <div className="payroll-table-header-wrap">
+              <table className="payroll-table">
+                <colgroup>
+                  <col style={{ width: '160px' }} /><col style={{ width: '120px' }} />
+                  <col style={{ width: '90px' }} /><col style={{ width: '100px' }} />
+                  <col /><col style={{ width: '130px' }} />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th style={{ ...thStyle }}>Timestamp</th>
+                    <th style={{ ...thStyle }}>User</th>
+                    <th style={{ ...thStyle }}>Action</th>
+                    <th style={{ ...thStyle }}>Entity</th>
+                    <th style={{ ...thStyle }}>Details</th>
+                    <th style={{ ...thStyle }}>IP Address</th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+            <div className="payroll-table-body-scroll" style={{ maxHeight: '400px' }}>
+              <table className="payroll-table">
+                <colgroup>
+                  <col style={{ width: '160px' }} /><col style={{ width: '120px' }} />
+                  <col style={{ width: '90px' }} /><col style={{ width: '100px' }} />
+                  <col /><col style={{ width: '130px' }} />
+                </colgroup>
+                <tbody>
+                  {(auditLogs || []).filter(l => {
+                    if (auditFilterAction !== 'All' && l.action !== auditFilterAction) return false
+                    if (auditFilterDate && !l.timestamp.startsWith(auditFilterDate)) return false
+                    return true
+                  }).length === 0 ? (
+                    <tr><td colSpan="6" style={{ padding: '32px', textAlign: 'center', color: 'var(--md-bw-on-surface-variant)', fontSize: '13px' }}>No logs found for selected filters.</td></tr>
+                  ) : (
+                    (auditLogs || []).filter(l => {
+                      if (auditFilterAction !== 'All' && l.action !== auditFilterAction) return false
+                      if (auditFilterDate && !l.timestamp.startsWith(auditFilterDate)) return false
+                      return true
+                    }).map(log => (
+                      <tr key={log.id}>
+                        <td style={{ ...cellStyle, fontSize: '12px', fontVariantNumeric: 'tabular-nums' }}>{formatDateTime(log.timestamp)}</td>
+                        <td style={{ ...cellStyle, fontWeight: 500, fontSize: '13px' }}>{log.user}</td>
+                        <td style={cellStyle}>
+                          <span style={{
+                            display: 'inline-flex', height: '22px', padding: '0 8px', fontSize: '11px', fontWeight: 600, alignItems: 'center', borderRadius: '20px',
+                            background: log.action === 'CREATE' ? '#28a745' : log.action === 'UPDATE' ? '#007aff' : log.action === 'DELETE' ? '#dc3545' : 'var(--glass-bg)',
+                            color: '#fff'
+                          }}>{log.action}</span>
+                        </td>
+                        <td style={cellStyle}>{log.entity}</td>
+                        <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', fontSize: '12px' }}>{log.details}</td>
+                        <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', fontSize: '12px', fontVariantNumeric: 'tabular-nums' }}>{log.ip}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )
+      case 'security': return (
+        <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ShieldCheck size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+            <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Session Management</h4>
+          </div>
+          <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Review devices currently logged into your account.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {activeSessions.map(sess => (
+              <div key={sess.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                    <span className="body-medium" style={{ fontWeight: 500, color: 'var(--md-bw-on-surface)' }}>{sess.device}</span>
+                    {sess.current && <span style={{ height: '22px', padding: '0 8px', fontSize: '11px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', borderRadius: '20px', background: '#28a745', color: '#fff' }}>This Device</span>}
+                  </div>
+                  <div className="body-small" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--md-bw-on-surface-variant)' }}>
+                    <span>{sess.location}</span><span>•</span><span>{sess.time}</span><span>•</span><span>{sess.ip}</span>
+                  </div>
+                </div>
+                {!sess.current && (
+                  <button className="btn btn-outlined" style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}
+                    onClick={() => {
+                      if (addToast) addToast("Session terminated", "success")
+                    }}>Sign Out</button>
+                )}
+              </div>
+            ))}
+          </div>
+          {activeSessions.length > 1 && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button className="btn btn-filled" style={{ height: '36px', fontSize: '13px' }}
+                onClick={() => { if (addToast) addToast("All other devices signed out", "success") }}>
+                Sign out all other devices
+              </button>
+            </div>
+          )}
+        </div>
+      )
+      case 'sync': return (
+        <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Activity size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+            <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Sync Conflicts</h4>
+          </div>
+          <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Review and resolve data conflicts between local and remote databases.</p>
+
+          <div className="payroll-table-container">
+            <div className="payroll-table-header-wrap">
+              <table className="payroll-table">
+                <colgroup>
+                  <col style={{ width: '120px' }} /><col style={{ width: '100px' }} />
+                  <col /><col /><col style={{ width: '100px' }} /><col style={{ width: '100px' }} />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th style={thStyle}>File</th>
+                    <th style={thStyle}>Record ID</th>
+                    <th style={thStyle}>Local Value</th>
+                    <th style={thStyle}>Remote Value</th>
+                    <th style={thStyle}>Resolution</th>
+                    <th style={{ ...thStyle, textAlign: 'center' }}>Actions</th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+            <div className="payroll-table-body-scroll">
+              <table className="payroll-table">
+                <colgroup>
+                  <col style={{ width: '120px' }} /><col style={{ width: '100px' }} />
+                  <col /><col /><col style={{ width: '100px' }} /><col style={{ width: '100px' }} />
+                </colgroup>
+                <tbody>
+                  {!syncConflicts || syncConflicts.length === 0 ? (
+                    <tr><td colSpan="6" style={{ padding: '32px', textAlign: 'center', color: 'var(--md-bw-on-surface-variant)', fontSize: '13px' }}>No sync conflicts detected.</td></tr>
+                  ) : (
+                    syncConflicts.map((conflict, i) => (
+                      <tr key={i}>
+                        <td style={{ ...cellStyle, fontWeight: 500 }}>{conflict.file}</td>
+                        <td style={cellStyle}>{conflict.recordId}</td>
+                        <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }} title={JSON.stringify(conflict.localValue)}>{JSON.stringify(conflict.localValue)}</td>
+                        <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }} title={JSON.stringify(conflict.remoteValue)}>{JSON.stringify(conflict.remoteValue)}</td>
+                        <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', fontSize: '12px' }}>{conflict.resolution}</td>
+                        <td style={{ ...cellStyle, textAlign: 'center' }}>
+                          <button className="btn btn-outlined" style={{ height: '30px', padding: '0 12px', fontSize: '12px' }}
+                            onClick={() => { setSyncConflicts(prev => prev.filter((_, idx) => idx !== i)); if (addToast) addToast("Conflict acknowledged", "success") }}>
+                            Acknowledge
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )
+      default: return null
+    }
   }
-`}</style><div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+  return (
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <h1 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>System Settings</h1>
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -179,495 +626,47 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         </div>
       </div>
 
-      <div className="settings-cat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {menuItems.map(item => {
           const Icon = item.icon
-          const isActive = activeSubmenu === item.id && panelOpen
+          const isOpen = activeSubmenu === item.id
           return (
-            <button key={item.id} onClick={() => setTab(item.id)}
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
-                padding: '20px 12px', borderRadius: '16px', border: '1px solid',
-                borderColor: isActive ? 'var(--accent-primary, #0062E6)' : 'var(--glass-border)',
-                background: isActive ? 'linear-gradient(135deg, rgba(0,98,230,0.08), rgba(0,58,140,0.04))' : 'var(--glass-bg)',
-                backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
-                cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none',
-                color: isActive ? 'var(--accent-primary, #0062E6)' : 'var(--md-bw-on-surface-variant)',
-                boxShadow: isActive ? '0 0 0 1px rgba(0,98,230,0.3), var(--glass-shadow)' : 'var(--glass-shadow)',
+            <div key={item.id} style={{ display: 'flex', flexDirection: 'column' }}>
+              <button onClick={() => setTab(item.id)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '14px 18px',
+                  borderRadius: '14px', border: '1px solid', cursor: 'pointer', fontSize: '14px', fontWeight: 500,
+                  textAlign: 'left', outline: 'none', transition: 'all 0.2s ease',
+                  borderColor: isOpen ? 'var(--accent-primary, #0062E6)' : 'var(--glass-border)',
+                  background: isOpen ? 'linear-gradient(135deg, rgba(0,98,230,0.08), rgba(0,58,140,0.04))' : 'var(--glass-bg)',
+                  backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
+                  color: isOpen ? 'var(--accent-primary, #0062E6)' : 'var(--md-bw-on-surface)',
+                  boxShadow: isOpen ? '0 0 0 1px rgba(0,98,230,0.3), var(--glass-shadow)' : 'var(--glass-shadow)',
+                }}>
+                <Icon size={18} />
+                <span style={{ flex: 1 }}>{item.label}</span>
+                {item.badge > 0 && (
+                  <span style={{ background: isOpen ? 'var(--accent-primary, #0062E6)' : 'var(--md-bw-on-surface)', color: '#fff', fontSize: '11px', padding: '1px 7px', borderRadius: '12px', fontWeight: 600 }}>{item.badge}</span>
+                )}
+                <ChevronDown size={16} style={{
+                  transition: 'transform 0.3s ease',
+                  transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  color: 'var(--md-bw-on-surface-variant)',
+                }} />
+              </button>
+              <div style={{
+                overflow: 'hidden',
+                transition: 'max-height 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease',
+                maxHeight: isOpen ? '2000px' : '0px',
+                opacity: isOpen ? 1 : 0,
               }}>
-              <Icon size={24} />
-              <span style={{ fontSize: '12px', fontWeight: 600, textAlign: 'center', lineHeight: '1.3' }}>{item.label}</span>
-              {item.badge > 0 && (
-                <span style={{ background: isActive ? 'var(--accent-primary, #0062E6)' : 'var(--md-bw-on-surface)', color: '#fff', fontSize: '10px', padding: '1px 6px', borderRadius: '12px', fontWeight: 600, marginTop: '-4px' }}>{item.badge}</span>
-              )}
-            </button>
+                <div style={{ padding: '12px 0 4px 0' }}>
+                  {renderSettingsContent(item.id)}
+                </div>
+              </div>
+            </div>
           )
         })}
-      </div>
-
-      <div style={{
-        overflow: 'hidden',
-        transition: 'max-height 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease, margin 0.35s ease',
-        maxHeight: panelOpen ? '2000px' : '0px',
-        opacity: panelOpen ? 1 : 0,
-        marginTop: panelOpen ? '24px' : '0px',
-      }}>
-        <div style={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {activeSubmenu === 'payroll' && (
-            <div className="payroll-settings-grid">
-              <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Currency Setup</h4>
-                <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Select the currency symbol applied globally across dashboards and receipts.</p>
-                <div style={{ position: 'relative', width: '100%', maxWidth: '260px' }}>
-                  <select value={currency} onChange={e => setCurrency(e.target.value)} style={{ ...pSel }}>
-                    <option value="$">$ (USD)</option>
-                    <option value="৳">৳ (BDT)</option>
-                    <option value="€">€ (EUR)</option>
-                    <option value="£">£ (GBP)</option>
-                    <option value="₹">₹ (INR)</option>
-                    <option value="¥">¥ (JPY)</option>
-                  </select>
-                  <ChevronDown size={14} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }} />
-                </div>
-              </div>
-
-              <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                  <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Split Visualization</h4>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Sample:</span>
-                    <input type="number" value={sampleGross} onChange={e => setSampleGross(Number(e.target.value))}
-                      style={{ width: '90px', ...pInp, padding: '6px 10px', fontSize: '13px', textAlign: 'center' }} />
-                  </div>
-                </div>
-                {salaryStructure.length === 0 ? (
-                  <span className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)' }}>No salary components configured.</span>
-                ) : (
-                  <>
-                    <div style={{ height: '24px', width: '100%', background: 'var(--glass-bg)', display: 'flex', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
-                      {salaryStructure.map((item, index) => (
-                        <div key={item.id} onMouseEnter={() => setHoveredComponentId(item.id)} onMouseLeave={() => setHoveredComponentId(null)}
-                          style={{ width: `${item.percentage}%`, background: getSegmentColor(item, index), height: '100%', opacity: hoveredComponentId && hoveredComponentId !== item.id ? 0.4 : 1, cursor: 'pointer', transition: 'opacity 0ms' }}
-                          title={`${item.name}: ${item.percentage}% (${currency}${(sampleGross * (item.percentage / 100)).toLocaleString()})`} />
-                      ))}
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {salaryStructure.map((item, index) => (
-                        <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderRadius: '8px', background: hoveredComponentId === item.id ? 'var(--glass-bg)' : 'transparent' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ width: '20px', borderBottom: `2px ${['solid','dashed','dotted'][index%3]} var(--md-bw-on-surface)` }} />
-                            <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{item.name} ({item.type})</span>
-                          </div>
-                          <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{item.type === 'deduction' ? '-' : ''}{item.percentage}%</span>
-                        </div>
-                      ))}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--glass-border)', paddingTop: '12px', marginTop: '4px' }}>
-                        <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 600 }}>Net Earning Ratio:</span>
-                        <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>{netPayPercent}%</span>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Components List</h4>
-                  <button onClick={handleAddComponent} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
-                    <Plus size={14} /> Add Item
-                  </button>
-                </div>
-                {isOver100 && (
-                  <div style={{ padding: '12px 16px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '100px', color: 'var(--md-bw-on-surface)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
-                    <Info size={16} /> Component total exceeds 100%. Please adjust before saving.
-                  </div>
-                )}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {salaryStructure.map(item => (
-                    <div key={item.id} style={{ ...card, padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                        <input type="text" value={item.name} onChange={e => handleComponentChange(item.id, 'name', e.target.value)} style={{ flex: 1, ...pInp, fontSize: '13px' }} />
-                        <div style={{ position: 'relative', width: '120px', flexShrink: 0 }}>
-                          <select value={item.type} onChange={e => handleComponentChange(item.id, 'type', e.target.value)} style={{ ...pSel, fontSize: '13px' }}>
-                            <option value="earning">Earning</option>
-                            <option value="deduction">Deduction</option>
-                          </select>
-                          <ChevronDown size={14} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }} />
-                        </div>
-                        <button onClick={() => handleRemoveComponent(item.id)} style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', padding: '8px', display: 'flex', flexShrink: 0 }}>
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div style={{ flex: 1, position: 'relative', height: '32px' }}>
-                          <div style={{ position: 'absolute', top: '13px', left: '0', width: '100%', height: '6px', background: 'rgba(128,128,128,0.15)', borderRadius: '3px' }} />
-                          <div style={{ position: 'absolute', top: '13px', left: '0', width: `${Math.max(item.percentage, 0)}%`, height: '6px', background: 'linear-gradient(90deg, #0062E6, #003A8C)', borderRadius: '3px' }} />
-                          <input type="range" min="0" max="100" value={item.percentage} onChange={e => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
-                            style={{ width: '100%', height: '32px', margin: 0, padding: 0, opacity: 0, cursor: 'pointer', position: 'relative', zIndex: 10, WebkitAppearance: 'none', appearance: 'none' }} />
-                          <div style={{ position: 'absolute', top: '6px', left: `calc(${item.percentage}% - 10px)`, width: '20px', height: '20px', borderRadius: '50%', background: '#0062E6', boxShadow: '0 2px 6px rgba(0,98,230,0.3)', pointerEvents: 'none', transition: 'left 0.05s' }} />
-                        </div>
-                        <input type="number" min="0" max="100" value={item.percentage} onChange={e => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
-                          style={{ width: '65px', ...pInp, padding: '6px 10px', fontSize: '13px', textAlign: 'center' }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeSubmenu === 'company' && (
-            <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Building2 size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-                <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Company Profile Settings</h4>
-              </div>
-              <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Manage public details regarding your enterprise. These details are used to brand generated documents like reports, receipts, and payslips.</p>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <span style={lbl}>Brand Logo</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div onClick={() => { if (logo) setShowLogoModal(true); else triggerFileInput() }}
-                      style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: 'pointer', overflow: 'hidden', position: 'relative' }}>
-                      {logo ? <img src={logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`, transformOrigin: 'center' }} />
-                        : <Activity size={24} color="var(--md-bw-on-surface-variant)" />}
-                    </div>
-                    <button onClick={triggerFileInput} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
-                      <Upload size={14} /> Upload New Logo
-                    </button>
-                    <input type="file" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" style={{ display: 'none' }} />
-                  </div>
-                </div>
-
-                {['Name', 'Email', 'Website'].map(field => {
-                  const val = field === 'Name' ? companyName : field === 'Email' ? companyEmail : companyWebsite
-                  const set = field === 'Name' ? setCompanyName : field === 'Email' ? setCompanyEmail : setCompanyWebsite
-                  const Icon = field === 'Name' ? Building2 : field === 'Email' ? Mail : Globe
-                  const ph = field === 'Name' ? 'HR Pulse Ltd.' : field === 'Email' ? 'hr@hrpulse.io' : 'www.hrpulse.io'
-                  const type = field === 'Email' ? 'email' : 'text'
-                  return (
-                    <div key={field} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <span style={lbl}>{field === 'Name' ? 'Legal Entity Name' : field === 'Email' ? 'HR Support Email' : 'Company Website URL'}</span>
-                      <div style={{ position: 'relative' }}>
-                        <Icon size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--md-bw-on-surface-variant)' }} />
-                        <input type={type} value={val} onChange={e => set(e.target.value)} placeholder={ph}
-                          style={{ ...pInp, paddingLeft: '38px', fontSize: '13px' }} />
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {activeSubmenu === 'notifications' && (
-            <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Bell size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-                <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Notification Preferences</h4>
-              </div>
-              <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Enable alerts, sync logs alerts, or background notification parameters.</p>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {[
-                  { label: 'Enable Real-time Sync Alerts', desc: 'Displays popups when files successfully sync with Google Drive.', val: syncAlerts, set: setSyncAlerts },
-                  { label: 'Email Monthly Payout Digest', desc: 'Sends a copy of the payroll statements to the HR support inbox.', val: emailDigests, set: setEmailDigests },
-                ].map((item, i) => (
-                  <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: i === 0 ? '1px solid var(--glass-border)' : 'none' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 500 }}>{item.label}</span>
-                      <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{item.desc}</span>
-                    </div>
-                    <input type="checkbox" checked={item.val} onChange={e => item.set(e.target.checked)}
-                      style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#0062E6', borderRadius: '4px', flexShrink: 0 }} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeSubmenu === 'expenses' && (
-            <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Receipt size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-                <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Expense Policies</h4>
-              </div>
-              <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Set maximum reimbursement limits per category. Expenses exceeding these limits will be flagged for review in the approval queue.</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
-                {Object.keys(expensePolicies).map(cat => (
-                  <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <span style={lbl}>{cat}</span>
-                    <input type="number" value={expensePolicies[cat]} onChange={e => setExpensePolicies(prev => ({ ...prev, [cat]: Number(e.target.value) }))}
-                      style={{ ...pInp, fontSize: '13px' }} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeSubmenu === 'rosters' && (
-            <>
-              <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <CalendarClock size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-                    <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Shift Templates</h4>
-                  </div>
-                  <button className="btn btn-outlined" onClick={() => setShiftTemplates(prev => [...prev, { id: `st-${Date.now()}`, name: 'New Shift', start: '09:00', end: '17:00', break: 60, color: '#333333' }])}
-                    style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
-                    <Plus size={14} /> Add Shift
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {shiftTemplates.map(t => (
-                    <div key={t.id} style={{ ...card, padding: '16px', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                      <div style={{ flex: '1.5', minWidth: '140px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={lbl}>Shift Name</span>
-                        <input type="text" value={t.name} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, name: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
-                      </div>
-                      <div style={{ flex: '1', minWidth: '100px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={lbl}>Start</span>
-                        <input type="time" value={t.start} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, start: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
-                      </div>
-                      <div style={{ flex: '1', minWidth: '100px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={lbl}>End</span>
-                        <input type="time" value={t.end} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, end: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
-                      </div>
-                      <div style={{ flex: '0.8', minWidth: '80px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={lbl}>Break (min)</span>
-                        <input type="number" value={t.break} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, break: parseInt(e.target.value) || 0 } : x))} style={{ ...pInp, fontSize: '13px' }} />
-                      </div>
-                      <div style={{ width: '50px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={{ ...lbl, color: 'transparent' }}>C</span>
-                        <input type="color" value={t.color} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, color: e.target.value } : x))}
-                          style={{ padding: 0, borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'transparent', width: '100%', height: '38px', cursor: 'pointer' }} />
-                      </div>
-                      <button className="btn btn-text" style={{ padding: '10px', color: 'var(--md-bw-on-surface-variant)', flexShrink: 0, alignSelf: 'flex-end' }}
-                        onClick={() => setShiftTemplates(prev => prev.filter(x => x.id !== t.id))}>
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Activity size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-                  <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Overtime Rules</h4>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <span style={lbl}>Weekday Multiplier</span>
-                    <input type="number" step="0.1" value={overtimeRules.multiplierWeekday} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekday: parseFloat(e.target.value) || 1 }))} style={{ ...pInp, fontSize: '13px' }} />
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <span style={lbl}>Weekend/Holiday Multiplier</span>
-                    <input type="number" step="0.1" value={overtimeRules.multiplierWeekend} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekend: parseFloat(e.target.value) || 1 }))} style={{ ...pInp, fontSize: '13px' }} />
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
-          {activeSubmenu === 'audit' && (
-            <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                    <List size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-                    <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Audit Logs</h4>
-                  </div>
-                  <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Review all system actions for compliance and security.</p>
-                </div>
-                <button onClick={handleExportCSV} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
-                  <Download size={14} /> Export CSV
-                </button>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', padding: '16px', background: 'var(--glass-bg)', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
-                <div style={{ minWidth: '140px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <span style={lbl}>Date</span>
-                  <input type="date" value={auditFilterDate} onChange={e => setAuditFilterDate(e.target.value)} style={{ ...pInp, fontSize: '13px' }} />
-                </div>
-                <div style={{ minWidth: '140px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <span style={lbl}>Action Type</span>
-                  <div style={{ position: 'relative' }}>
-                    <select value={auditFilterAction} onChange={e => setAuditFilterAction(e.target.value)} style={{ ...pSel, fontSize: '13px' }}>
-                      <option value="All">All Actions</option>
-                      <option value="CREATE">CREATE</option>
-                      <option value="UPDATE">UPDATE</option>
-                      <option value="DELETE">DELETE</option>
-                    </select>
-                    <ChevronDown size={14} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }} />
-                  </div>
-                </div>
-                <button onClick={() => { setAuditFilterDate(''); setAuditFilterAction('All') }} className="btn btn-text" style={{ height: '36px', fontSize: '13px', alignSelf: 'flex-end' }}>Clear</button>
-              </div>
-
-              <div className="payroll-table-container">
-                <div className="payroll-table-header-wrap">
-                  <table className="payroll-table">
-                    <colgroup>
-                      <col style={{ width: '160px' }} /><col style={{ width: '120px' }} />
-                      <col style={{ width: '90px' }} /><col style={{ width: '100px' }} />
-                      <col /><col style={{ width: '130px' }} />
-                    </colgroup>
-                    <thead>
-                      <tr>
-                        <th style={{ ...thStyle }}>Timestamp</th>
-                        <th style={{ ...thStyle }}>User</th>
-                        <th style={{ ...thStyle }}>Action</th>
-                        <th style={{ ...thStyle }}>Entity</th>
-                        <th style={{ ...thStyle }}>Details</th>
-                        <th style={{ ...thStyle }}>IP Address</th>
-                      </tr>
-                    </thead>
-                  </table>
-                </div>
-                <div className="payroll-table-body-scroll" style={{ maxHeight: '400px' }}>
-                  <table className="payroll-table">
-                    <colgroup>
-                      <col style={{ width: '160px' }} /><col style={{ width: '120px' }} />
-                      <col style={{ width: '90px' }} /><col style={{ width: '100px' }} />
-                      <col /><col style={{ width: '130px' }} />
-                    </colgroup>
-                    <tbody>
-                      {(auditLogs || []).filter(l => {
-                        if (auditFilterAction !== 'All' && l.action !== auditFilterAction) return false
-                        if (auditFilterDate && !l.timestamp.startsWith(auditFilterDate)) return false
-                        return true
-                      }).length === 0 ? (
-                        <tr><td colSpan="6" style={{ padding: '32px', textAlign: 'center', color: 'var(--md-bw-on-surface-variant)', fontSize: '13px' }}>No logs found for selected filters.</td></tr>
-                      ) : (
-                        (auditLogs || []).filter(l => {
-                          if (auditFilterAction !== 'All' && l.action !== auditFilterAction) return false
-                          if (auditFilterDate && !l.timestamp.startsWith(auditFilterDate)) return false
-                          return true
-                        }).map(log => (
-                          <tr key={log.id}>
-                            <td style={{ ...cellStyle, fontSize: '12px', fontVariantNumeric: 'tabular-nums' }}>{formatDateTime(log.timestamp)}</td>
-                            <td style={{ ...cellStyle, fontWeight: 500, fontSize: '13px' }}>{log.user}</td>
-                            <td style={cellStyle}>
-                              <span style={{
-                                display: 'inline-flex', height: '22px', padding: '0 8px', fontSize: '11px', fontWeight: 600, alignItems: 'center', borderRadius: '20px',
-                                background: log.action === 'CREATE' ? '#28a745' : log.action === 'UPDATE' ? '#007aff' : log.action === 'DELETE' ? '#dc3545' : 'var(--glass-bg)',
-                                color: '#fff'
-                              }}>{log.action}</span>
-                            </td>
-                            <td style={cellStyle}>{log.entity}</td>
-                            <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', fontSize: '12px' }}>{log.details}</td>
-                            <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', fontSize: '12px', fontVariantNumeric: 'tabular-nums' }}>{log.ip}</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeSubmenu === 'security' && (
-            <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShieldCheck size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-                <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Session Management</h4>
-              </div>
-              <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Review devices currently logged into your account.</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {activeSessions.map(sess => (
-                  <div key={sess.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                        <span className="body-medium" style={{ fontWeight: 500, color: 'var(--md-bw-on-surface)' }}>{sess.device}</span>
-                        {sess.current && <span style={{ height: '22px', padding: '0 8px', fontSize: '11px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', borderRadius: '20px', background: '#28a745', color: '#fff' }}>This Device</span>}
-                      </div>
-                      <div className="body-small" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--md-bw-on-surface-variant)' }}>
-                        <span>{sess.location}</span><span>•</span><span>{sess.time}</span><span>•</span><span>{sess.ip}</span>
-                      </div>
-                    </div>
-                    {!sess.current && (
-                      <button className="btn btn-outlined" style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}
-                        onClick={() => {
-                          if (addToast) addToast("Session terminated", "success")
-                        }}>Sign Out</button>
-                    )}
-                  </div>
-                ))}
-              </div>
-              {activeSessions.length > 1 && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <button className="btn btn-filled" style={{ height: '36px', fontSize: '13px' }}
-                    onClick={() => { if (addToast) addToast("All other devices signed out", "success") }}>
-                    Sign out all other devices
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeSubmenu === 'sync' && (
-            <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Activity size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-                <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Sync Conflicts</h4>
-              </div>
-              <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Review and resolve data conflicts between local and remote databases.</p>
-
-              <div className="payroll-table-container">
-                <div className="payroll-table-header-wrap">
-                  <table className="payroll-table">
-                    <colgroup>
-                      <col style={{ width: '120px' }} /><col style={{ width: '100px' }} />
-                      <col /><col /><col style={{ width: '100px' }} /><col style={{ width: '100px' }} />
-                    </colgroup>
-                    <thead>
-                      <tr>
-                        <th style={thStyle}>File</th>
-                        <th style={thStyle}>Record ID</th>
-                        <th style={thStyle}>Local Value</th>
-                        <th style={thStyle}>Remote Value</th>
-                        <th style={thStyle}>Resolution</th>
-                        <th style={{ ...thStyle, textAlign: 'center' }}>Actions</th>
-                      </tr>
-                    </thead>
-                  </table>
-                </div>
-                <div className="payroll-table-body-scroll">
-                  <table className="payroll-table">
-                    <colgroup>
-                      <col style={{ width: '120px' }} /><col style={{ width: '100px' }} />
-                      <col /><col /><col style={{ width: '100px' }} /><col style={{ width: '100px' }} />
-                    </colgroup>
-                    <tbody>
-                      {!syncConflicts || syncConflicts.length === 0 ? (
-                        <tr><td colSpan="6" style={{ padding: '32px', textAlign: 'center', color: 'var(--md-bw-on-surface-variant)', fontSize: '13px' }}>No sync conflicts detected.</td></tr>
-                      ) : (
-                        syncConflicts.map((conflict, i) => (
-                          <tr key={i}>
-                            <td style={{ ...cellStyle, fontWeight: 500 }}>{conflict.file}</td>
-                            <td style={cellStyle}>{conflict.recordId}</td>
-                            <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }} title={JSON.stringify(conflict.localValue)}>{JSON.stringify(conflict.localValue)}</td>
-                            <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }} title={JSON.stringify(conflict.remoteValue)}>{JSON.stringify(conflict.remoteValue)}</td>
-                            <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', fontSize: '12px' }}>{conflict.resolution}</td>
-                            <td style={{ ...cellStyle, textAlign: 'center' }}>
-                              <button className="btn btn-outlined" style={{ height: '30px', padding: '0 12px', fontSize: '12px' }}
-                                onClick={() => { setSyncConflicts(prev => prev.filter((_, idx) => idx !== i)); if (addToast) addToast("Conflict acknowledged", "success") }}>
-                                Acknowledge
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
 
       <AdSlot type="horizontal" style={{ marginTop: '4px' }} />
