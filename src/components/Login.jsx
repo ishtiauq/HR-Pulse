@@ -167,7 +167,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                   <span>Connecting Drive...</span>
                 ) : (
                   <>
-                    <svg width="20" height="20" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#fff"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#fff"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.5l-12.85 22.2z" fill="#fff"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#fff"/><path d="m59.8 53h-27.5l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h24.5c1.6 0 3.15-.45 4.5-1.2z" fill="#fff"/><path d="m73.4 26.5-12.2-21.1c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.4 28.4 11.6-19.6 1.35-2.35c.8-1.35 1.2-2.85 1.2-4.4 0-1.55-.4-3.05-1.2-4.45z" fill="#fff"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="currentColor"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="currentColor"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.5l-12.85 22.2z" fill="currentColor"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="currentColor"/><path d="m59.8 53h-27.5l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h24.5c1.6 0 3.15-.45 4.5-1.2z" fill="currentColor"/><path d="m73.4 26.5-12.2-21.1c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.4 28.4 11.6-19.6 1.35-2.35c.8-1.35 1.2-2.85 1.2-4.4 0-1.55-.4-3.05-1.2-4.45z" fill="currentColor"/></svg>
                     <span style={{ fontWeight: 600 }}>Connect Google Drive</span>
                   </>
                 )}
@@ -379,12 +379,15 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           border-radius: 20px; padding: 32px;
           box-shadow: var(--glass-shadow, 0 8px 32px rgba(0,0,0,0.04));
         }
+        .login-page :where(.login-auth-card, .login-input, .login-modal, .login-modal-illustration, .login-modal-accordion, .login-learn-btn, .login-faq-item) {
+          border-color: rgba(0,0,0,0.08);
+        }
         .login-tabs {
           display: flex; background: var(--glass-bg, rgba(0,0,0,0.04)); border-radius: 12px; padding: 4px; margin-bottom: 28px;
         }
         .login-tab {
-          flex: 1; padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer;
-          font: 600 14px var(--font-sans, 'Roboto', sans-serif); transition: all 0.2s;
+          flex: 1; padding: 16px; border: none; border-radius: 14px; cursor: pointer;
+          font: 600 1rem var(--font-sans, 'Roboto', sans-serif); transition: all 0.2s;
           background: transparent; color: var(--md-bw-on-surface-variant, #666);
         }
         .login-tab.active {
@@ -401,6 +404,15 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         }
         .login-drive-btn:hover { transform: translateY(-1px); background: #333; }
         .login-drive-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        [data-theme="dark"] .login-tab.active, .dark .login-tab.active {
+          background: #fff; color: #111;
+        }
+        [data-theme="dark"] .login-drive-btn, .dark .login-drive-btn {
+          background: #fff; color: #111;
+        }
+        [data-theme="dark"] .login-drive-btn:hover, .dark .login-drive-btn:hover {
+          background: #e6e6e6;
+        }
 
         .login-trust-line {
           display: flex; align-items: center; gap: 8px; justify-content: center;
@@ -595,7 +607,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           .login-auth { padding: 80px 12px 24px; }
           .login-auth-card { padding: 20px; border-radius: 16px; }
           .login-tabs { gap: 4px; }
-          .login-tab { font-size: 0.78rem; padding: 8px 14px; }
+          .login-tab { font-size: 0.88rem; padding: 14px; }
           .login-faq { padding: 32px 12px 48px; }
           .login-faq-title { font-size: 1.2rem; margin-bottom: 20px; }
           .login-faq-question { padding: 14px 16px; font-size: 0.88rem; }
