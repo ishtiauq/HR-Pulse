@@ -3,7 +3,6 @@ import { Save, Settings as SettingsIcon, DollarSign, Sliders, Info, Percent, Bui
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDateTime } from '../services/date.js'
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 
 const pInp = { width: '100%', padding: '10px 14px', borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', transition: 'border 0.15s' }
 const pSel = { width: '100%', padding: '10px 14px', borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', cursor: 'pointer', appearance: 'none' }
@@ -108,13 +107,6 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
   const SEG_COLORS = ['#0062E6', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14', '#20c997', '#e83e8c', '#17a2b8', '#6610f2']
   const getSegmentColor = (_, index) => SEG_COLORS[index % SEG_COLORS.length]
-  const darkenColor = (hex, amount = 35) => {
-    const num = parseInt(hex.replace('#', ''), 16);
-    const r = Math.max(0, (num >> 16) - amount);
-    const g = Math.max(0, ((num >> 8) & 0xff) - amount);
-    const b = Math.max(0, (num & 0xff) - amount);
-    return `rgb(${r},${g},${b})`;
-  }
 
   const handleLogoUpload = (e) => {
     const file = e.target.files[0]
@@ -201,31 +193,6 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             {isOver100 && (
               <div style={{ padding: '12px 16px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '100px', color: 'var(--md-bw-on-surface)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                 <Info size={16} /> Component total exceeds 100%. Please adjust before saving.
-              </div>
-            )}
-
-            {salaryStructure.length > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0' }}>
-                <ResponsiveContainer width="100%" height={240}>
-                  <PieChart>
-                    <Pie data={salaryStructure.map(item => ({ ...item, value: item.percentage }))}
-                      cx="50%" cy="54%" innerRadius={55} outerRadius={85} dataKey="value" paddingAngle={2}
-                      isAnimationActive={false}>
-                      {salaryStructure.map((item, index) => (
-                        <Cell key={item.id} fill={darkenColor(getSegmentColor(item, index), 50)} stroke="none" />
-                      ))}
-                    </Pie>
-                    <Pie data={salaryStructure.map(item => ({ ...item, value: item.percentage }))}
-                      cx="50%" cy="50%" innerRadius={55} outerRadius={85} dataKey="value" paddingAngle={2}>
-                      {salaryStructure.map((item, index) => (
-                        <Cell key={item.id} fill={getSegmentColor(item, index)} stroke="rgba(255,255,255,0.25)" />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => [`${value}%`, 'Percentage']} labelFormatter={() => ''}
-                      contentStyle={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '8px', backdropFilter: 'blur(12px)', fontSize: '13px' }}
-                      itemStyle={{ color: 'var(--md-bw-on-surface)' }} />
-                  </PieChart>
-                </ResponsiveContainer>
               </div>
             )}
 
