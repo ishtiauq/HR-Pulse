@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predev": "powershell -Command \"Get-NetTCPConnection -LocalPort 5173,5174,5175,5176 -ErrorAction SilentlyContinue | Where-Object State -eq Listen | ForEach-Object { taskkill /F /PID $_.OwningProcess } 2>$null\"",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"

@@ -193,7 +193,26 @@
   --md-sys-color-inverse-on-surface: var(--md-bw-inverse-on-surface);
   --md-sys-color-inverse-primary: var(--md-bw-inverse-primary);
   --md-sys-color-shadow: #000000;
-  
+
+  /* ── Fluid Typography Scale ── */
+  /* Mobile-first: clamp(MIN, PREFERRED, MAX) — scales smoothly 320px→1440px */
+  --fs-display-large: clamp(2.5rem, 2.1429rem + 1.7857vw, 3.563rem);
+  --fs-display-medium: clamp(2rem, 1.7143rem + 1.4286vw, 2.813rem);
+  --fs-display-small: clamp(1.75rem, 1.5179rem + 1.1607vw, 2.25rem);
+  --fs-headline-large: clamp(1.5rem, 1.3214rem + 0.8929vw, 2rem);
+  --fs-headline-medium: clamp(1.375rem, 1.2321rem + 0.7143vw, 1.75rem);
+  --fs-headline-small: clamp(1.25rem, 1.1429rem + 0.5357vw, 1.5rem);
+  --fs-title-large: clamp(1.125rem, 1.0536rem + 0.3571vw, 1.375rem);
+  --fs-title-medium: 1rem;
+  --fs-title-small: 0.875rem;
+  --fs-body-large: 1rem;
+  --fs-body-medium: 0.875rem;
+  --fs-body-small: 0.813rem;
+  --fs-label-large: 0.875rem;
+  --fs-label-medium: 0.813rem;
+  --fs-label-small: 0.75rem;
+  --fs-badge: 0.688rem;
+
   --color-md-sys-primary: var(--md-sys-color-primary);
   --color-md-sys-on-primary: var(--md-sys-color-on-primary);
   --color-md-sys-primary-container: var(--md-sys-color-primary-container);
@@ -307,64 +326,64 @@ h1, h2, h3, h4, h5, h6 {
 .display-large {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 700;
-  font-size: 57px;
-  line-height: 64px;
+  font-size: var(--fs-display-large);
+  line-height: 1.12;
   color: var(--md-bw-on-surface);
 }
 
 .display-medium {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 700;
-  font-size: 45px;
-  line-height: 52px;
+  font-size: var(--fs-display-medium);
+  line-height: 1.16;
   color: var(--md-bw-on-surface);
 }
 
 .display-small {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 700;
-  font-size: 36px;
-  line-height: 44px;
+  font-size: var(--fs-display-small);
+  line-height: 1.22;
   color: var(--md-bw-on-surface);
 }
 
 .headline-large {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 700;
-  font-size: 32px;
-  line-height: 40px;
+  font-size: var(--fs-headline-large);
+  line-height: 1.25;
   color: var(--md-bw-on-surface);
 }
 
 .headline-medium {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 700;
-  font-size: 28px;
-  line-height: 36px;
+  font-size: var(--fs-headline-medium);
+  line-height: 1.29;
   color: var(--md-bw-on-surface);
 }
 
 .headline-small {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 700;
-  font-size: 24px;
-  line-height: 32px;
+  font-size: var(--fs-headline-small);
+  line-height: 1.33;
   color: var(--md-bw-on-surface);
 }
 
 .title-large {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 500;
-  font-size: 22px;
-  line-height: 28px;
+  font-size: var(--fs-title-large);
+  line-height: 1.27;
   color: var(--md-bw-on-surface);
 }
 
 .title-medium {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 500;
-  font-size: 16px;
-  line-height: 24px;
+  font-size: var(--fs-title-medium);
+  line-height: 1.5;
   letter-spacing: 0.015em;
   color: var(--md-bw-on-surface);
 }
@@ -372,8 +391,8 @@ h1, h2, h3, h4, h5, h6 {
 .title-small {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 500;
-  font-size: 14px;
-  line-height: 20px;
+  font-size: var(--fs-title-small);
+  line-height: 1.43;
   letter-spacing: 0.01em;
   color: var(--md-bw-on-surface);
 }
@@ -381,8 +400,8 @@ h1, h2, h3, h4, h5, h6 {
 .body-large {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 400;
-  font-size: 16px;
-  line-height: 24px;
+  font-size: var(--fs-body-large);
+  line-height: 1.5;
   letter-spacing: 0.031em;
   color: var(--md-bw-on-surface);
 }
@@ -390,8 +409,8 @@ h1, h2, h3, h4, h5, h6 {
 .body-medium {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 400;
-  font-size: 14px;
-  line-height: 20px;
+  font-size: var(--fs-body-medium);
+  line-height: 1.43;
   letter-spacing: 0.025em;
   color: var(--md-bw-on-surface);
 }
@@ -399,8 +418,8 @@ h1, h2, h3, h4, h5, h6 {
 .body-small {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 400;
-  font-size: 12px;
-  line-height: 16px;
+  font-size: var(--fs-body-small);
+  line-height: 1.38;
   letter-spacing: 0.04em;
   color: var(--md-bw-on-surface);
 }
@@ -408,8 +427,8 @@ h1, h2, h3, h4, h5, h6 {
 .label-large {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 500;
-  font-size: 14px;
-  line-height: 20px;
+  font-size: var(--fs-label-large);
+  line-height: 1.43;
   letter-spacing: 0.007em;
   color: var(--md-bw-on-surface-variant);
 }
@@ -417,8 +436,8 @@ h1, h2, h3, h4, h5, h6 {
 .label-medium {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 500;
-  font-size: 12px;
-  line-height: 16px;
+  font-size: var(--fs-label-medium);
+  line-height: 1.38;
   letter-spacing: 0.05em;
   color: var(--md-bw-on-surface-variant);
 }
@@ -426,8 +445,8 @@ h1, h2, h3, h4, h5, h6 {
 .label-small {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 500;
-  font-size: 11px;
-  line-height: 16px;
+  font-size: var(--fs-label-small);
+  line-height: 1.33;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--md-bw-on-surface-variant);
