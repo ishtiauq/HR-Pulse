@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature, Wrench } from 'lucide-react'
+import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature, Wrench, ChevronDown } from 'lucide-react'
 import AdSlot from './AdSlot'
 import { useModal } from '../services/useModal.js'
 import jsPDF from 'jspdf'
@@ -20,14 +20,17 @@ function AssetInventory({ filteredAssets, search, setSearch, filterCategory, set
             </div>
             <input type="text" placeholder="Search by name or serial..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-          <select className="form-input" value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={{ width: 'auto', minWidth: 140 }}>
-            <option value="All">All Categories</option>
-            <option value="Laptop">Laptops</option>
-            <option value="Phone">Phones</option>
-            <option value="Monitor">Monitors</option>
-            <option value="Peripherals">Peripherals</option>
-            <option value="Access Card">Access Cards</option>
-          </select>
+          <div className="select-wrapper">
+            <select className="form-input" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
+              <option value="All">All Categories</option>
+              <option value="Laptop">Laptops</option>
+              <option value="Phone">Phones</option>
+              <option value="Monitor">Monitors</option>
+              <option value="Peripherals">Peripherals</option>
+              <option value="Access Card">Access Cards</option>
+            </select>
+            <ChevronDown size={16} className="select-arrow" />
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button className="btn btn-tonal" onClick={triggerFileInput}><Upload size={16} className="btn-icon-start" /> Import CSV</button>
