@@ -1,123 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
-import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature, ArrowLeft, Package, MessageSquare, Wrench, CheckCircle, BadgeCheck } from 'lucide-react'
+import { Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature, Wrench } from 'lucide-react'
 import AdSlot from './AdSlot'
 import { useModal } from '../services/useModal.js'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { formatDate } from '../services/date.js'
-
-function AssetDashboard({ stats, alerts, setActiveView, assets, employees, syncLogs }) {
-  const quickActions = [
-    { id: 'inventory', label: 'View Inventory', icon: <Package size={24} />, desc: 'Browse all assets' },
-    { id: 'assignments', label: 'Assign Assets', icon: <FileSignature size={24} />, desc: 'Manage assignments' },
-    { id: 'requests', label: 'Pending Requests', icon: <MessageSquare size={24} />, desc: 'Approve or reject' },
-    { id: 'maintenance', label: 'Maintenance', icon: <Wrench size={24} />, desc: 'Log repairs & depreciation' },
-  ]
-
-  const categories = [
-    { label: 'Laptops', key: 'Laptop' },
-    { label: 'Phones', key: 'Phone' },
-    { label: 'Monitors', key: 'Monitor' },
-    { label: 'Peripherals', key: 'Peripherals' },
-    { label: 'Access Cards', key: 'Access Card' },
-  ]
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {/* Stat Cards */}
-      <div className="stats-grid">
-        <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: 48, height: 48, borderRadius: '12px', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Monitor size={24} />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stats.total}</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Total Assets</div>
-          </div>
-        </div>
-        <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: 48, height: 48, borderRadius: '12px', background: 'rgba(52,199,89,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <CheckCircle size={24} color="#34c759" />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stats.available}</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Available</div>
-          </div>
-        </div>
-        <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: 48, height: 48, borderRadius: '12px', background: 'rgba(0,122,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <BadgeCheck size={24} color="#007aff" />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stats.assigned}</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Assigned</div>
-          </div>
-        </div>
-        <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: 48, height: 48, borderRadius: '12px', background: 'rgba(255,149,0,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Wrench size={24} color="#ff9500" />
-          </div>
-          <div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stats.underRepair}</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Under Repair</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="actions-grid">
-        {quickActions.map(action => (
-          <button key={action.id} className="btn-tonal" onClick={() => setActiveView(action.id)}
-            style={{ padding: '24px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer', textAlign: 'center', height: 'auto', borderRadius: '14px' }}>
-            {action.icon}
-            <div style={{ fontWeight: 600 }}>{action.label}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{action.desc}</div>
-          </button>
-        ))}
-      </div>
-
-      {/* Category Breakdown */}
-      <div className="glass-card" style={{ padding: '20px' }}>
-        <h3 style={{ margin: '0 0 16px 0', fontSize: '0.95rem' }}>Category Breakdown</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {categories.map(cat => {
-            const count = assets.filter(a => a.category === cat.key).length
-            const max = Math.max(assets.length, 1)
-            const pct = (count / max) * 100
-            return (
-              <div key={cat.key} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ width: 100, fontSize: '0.85rem' }}>{cat.label}</span>
-                <div style={{ flex: 1, height: 8, borderRadius: '4px', background: 'var(--bg-secondary)', overflow: 'hidden' }}>
-                  <div style={{ width: `${pct}%`, height: '100%', borderRadius: '4px', background: 'var(--accent-primary)', opacity: 0.7 }} />
-                </div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600, minWidth: 24, textAlign: 'right' }}>{count}</span>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="glass-card" style={{ padding: '20px' }}>
-        <h3 style={{ margin: '0 0 16px 0', fontSize: '0.95rem' }}>Recent Activity</h3>
-        {(!syncLogs || syncLogs.length === 0) ? (
-          <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-            No recent activity logged.
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {syncLogs.slice(-5).reverse().map((log, i) => (
-              <div key={i} style={{ padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>{log.action || log.message || log.details}</span>
-                <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{log.timestamp || ''}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
 
 function AssetInventory({ filteredAssets, search, setSearch, filterCategory, setFilterCategory, alerts, showAddModal, setShowAddModal, newAsset, setNewAsset, handleAddAsset, triggerFileInput, fileInputRef, handleImportCSV, addToast }) {
   const [detailAsset, setDetailAsset] = useState(null)
@@ -527,8 +414,8 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
   )
 }
 
-export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, addLog, addToast, currentUser, simulatedRole, syncLogs }) {
-  const [activeView, setActiveView] = useState('dashboard')
+export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, addLog, addToast, currentUser, simulatedRole }) {
+  const [activeView, setActiveView] = useState('inventory')
 
   // Search & Filter
   const [search, setSearch] = useState('')
@@ -756,13 +643,6 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     return matchesSearch && matchesCat
   })
 
-  const stats = {
-    total: (assets || []).length,
-    available: (assets || []).filter(a => a.status === 'Available').length,
-    assigned: (assets || []).filter(a => a.status === 'Assigned').length,
-    underRepair: (assets || []).filter(a => a.status === 'Under Repair').length
-  }
-
   const renderView = () => {
     switch (activeView) {
       case 'inventory':
@@ -773,9 +653,8 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
         return <AssetRequests assetRequests={assetRequests} employees={employees} handleRequestAction={handleRequestAction} />
       case 'maintenance':
         return <AssetMaintenance assets={assets} selectedAssetForMaint={selectedAssetForMaint} setSelectedAssetForMaint={setSelectedAssetForMaint} maintForm={maintForm} setMaintForm={setMaintForm} handleAddMaintenance={handleAddMaintenance} calculateBookValue={calculateBookValue} />
-      case 'dashboard':
       default:
-        return <AssetDashboard stats={stats} alerts={alerts} setActiveView={setActiveView} assets={assets} employees={employees} syncLogs={syncLogs} />
+        return <AssetInventory filteredAssets={filteredAssets} search={search} setSearch={setSearch} filterCategory={filterCategory} setFilterCategory={setFilterCategory} alerts={alerts} showAddModal={showAddModal} setShowAddModal={setShowAddModal} newAsset={newAsset} setNewAsset={setNewAsset} handleAddAsset={handleAddAsset} triggerFileInput={triggerFileInput} fileInputRef={fileInputRef} handleImportCSV={handleImportCSV} addToast={addToast} />
     }
   }
 
@@ -787,7 +666,6 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
           Asset Management
         </h1>
         <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
-          <button className={`tab-btn ${activeView === 'dashboard' ? 'active' : ''}`} style={{ background: activeView === 'dashboard' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'dashboard' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveView('dashboard')}>Dashboard</button>
           <button className={`tab-btn ${activeView === 'inventory' ? 'active' : ''}`} style={{ background: activeView === 'inventory' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'inventory' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveView('inventory')}>Inventory</button>
           <button className={`tab-btn ${activeView === 'assignments' ? 'active' : ''}`} style={{ background: activeView === 'assignments' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'assignments' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveView('assignments')}>Assignments</button>
           <button className={`tab-btn ${activeView === 'requests' ? 'active' : ''}`} style={{ background: activeView === 'requests' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'requests' ? 'var(--text-primary)' : 'var(--text-secondary)', position: 'relative' }} onClick={() => setActiveView('requests')}>
@@ -799,25 +677,6 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
           <button className={`tab-btn ${activeView === 'maintenance' ? 'active' : ''}`} style={{ background: activeView === 'maintenance' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'maintenance' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveView('maintenance')}>Maintenance</button>
         </div>
       </div>
-
-      {/* Back to Dashboard breadcrumb */}
-      {activeView !== 'dashboard' && (
-        <div style={{ marginBottom: '16px' }}>
-          <button className="btn-text" onClick={() => setActiveView('dashboard')} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', background: 'none', border: 'none', color: 'var(--accent-primary)', padding: '6px 0', height: 'auto' }}>
-            <ArrowLeft size={16} /> Back to Dashboard
-          </button>
-        </div>
-      )}
-
-      {/* Warranty alert banner - only on dashboard */}
-      {activeView === 'dashboard' && alerts.length > 0 && (
-        <div style={{ background: 'var(--accent-warning)', color: '#fff', padding: '12px 16px', borderRadius: '8px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <AlertTriangle size={20} />
-          <div>
-            <strong>Alert:</strong> {alerts.length} asset(s) have warranties expiring within the next 30 days!
-          </div>
-        </div>
-      )}
 
       {renderView()}
 

@@ -1366,7 +1366,6 @@ export default function App() {
             addToast={addToast}
             currentUser={user}
             simulatedRole={simulatedRole}
-            syncLogs={syncLogs}
           />
         )
       case 'expenses':
