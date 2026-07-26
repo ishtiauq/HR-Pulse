@@ -73,10 +73,10 @@ export default function EmployeeLogin({ onLogin, onBack }) {
           Back to HR Manager Login
         </button>
 
-        <h1 className="welcome-heading" style={{ fontSize: '1.8rem', marginBottom: '8px' }}>
+        <h1 className="welcome-heading" style={{ fontSize: 'var(--fs-headline-large)', marginBottom: '8px' }}>
           Employee <span className="welcome-accent">Login</span>
         </h1>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', fontSize: '0.92rem' }}>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', fontSize: 'var(--fs-body-medium)' }}>
           Sign in with your company credentials
         </p>
 
@@ -85,7 +85,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
             <div style={{
               padding: '12px 16px', borderRadius: '8px', marginBottom: '16px',
               background: 'rgba(224, 32, 20, 0.08)', border: '1px solid rgba(224, 32, 20, 0.2)',
-              color: '#E02014', fontSize: '0.88rem'
+              color: '#E02014', fontSize: 'var(--fs-label-small)'
             }}>
               {error}
             </div>

@@ -347,10 +347,10 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         }
         .login-topbar-logo-icon {
           color: var(--md-bw-on-primary, #fff);
-          font: 700 12px/1 'Roboto', sans-serif;
+          font: 700 var(--fs-label-small)/1 'Roboto', sans-serif;
         }
         .login-topbar-brand {
-          font: 700 18px/24px 'Roboto', sans-serif;
+          font: 700 var(--fs-title-large)/1.33 'Roboto', sans-serif;
           color: var(--md-bw-on-surface, #222);
           letter-spacing: -0.01em; white-space: nowrap;
         }
@@ -359,7 +359,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           padding: 5px 12px; border-radius: 100px;
           background: #e02014;
           border: 1px solid rgba(224,32,20,0.3);
-          color: #fff; font-size: 0.7rem; font-weight: 700;
+          color: #fff; font-size: var(--fs-label-small); font-weight: 700;
           white-space: nowrap; letter-spacing: 0.02em;
           text-transform: uppercase;
         }
@@ -385,7 +385,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         }
         .login-tab {
           flex: 1; padding: 16px; border: none; border-radius: 14px; cursor: pointer;
-          font: 600 1rem var(--font-sans, 'Roboto', sans-serif); transition: all 0.2s;
+          font: 600 var(--fs-body-large) var(--font-sans, 'Roboto', sans-serif); transition: all 0.2s;
           background: transparent; color: var(--md-bw-on-surface-variant, #666);
         }
         .login-tab.active {
@@ -396,7 +396,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           display: flex; align-items: center; justify-content: center; gap: 12px;
           width: 100%; padding: 16px; border: none; border-radius: 14px;
           background: #0062E6; color: #fff; position: relative; overflow: hidden;
-          font: 600 1rem var(--font-sans, 'Roboto', sans-serif); cursor: pointer;
+          font: 600 var(--fs-body-large) var(--font-sans, 'Roboto', sans-serif); cursor: pointer;
           transition: background 0.2s, transform 0.15s;
           box-shadow: 0 4px 16px rgba(0,98,230,0.3);
         }
@@ -426,14 +426,14 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
 
         .login-trust-line {
           display: flex; align-items: center; gap: 8px; justify-content: center;
-          font-size: 0.78rem; color: var(--md-bw-on-surface-variant, #888); margin: 0; text-align: center;
+          font-size: var(--fs-label-small); color: var(--md-bw-on-surface-variant, #888); margin: 0; text-align: center;
           line-height: 1.4;
         }
         .login-trust-line strong { color: var(--md-bw-on-surface, #222); }
 
         .login-label {
           display: block; margin-bottom: 6px;
-          font: 500 13px var(--font-sans, 'Roboto', sans-serif);
+          font: 500 var(--fs-label-medium) var(--font-sans, 'Roboto', sans-serif);
           color: var(--md-bw-on-surface-variant, #666);
         }
         .login-input {
@@ -441,7 +441,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           border: 1px solid var(--glass-border, rgba(255,255,255,0.55));
           background: var(--color-md-sys-surface, #fff);
           color: var(--md-bw-on-surface, #222);
-          font: 400 14px var(--font-sans, 'Roboto', sans-serif); outline: none;
+          font: 400 var(--fs-body-medium) var(--font-sans, 'Roboto', sans-serif); outline: none;
           transition: border-color 0.2s;
         }
         .login-input:focus { border-color: #555; }
@@ -466,10 +466,10 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           display: flex; flex-direction: column; gap: 20px;
         }
         .login-modal-title {
-          font-size: 1.4rem; font-weight: 800; color: var(--md-bw-on-surface, #222); margin: 0;
+          font-size: var(--fs-headline-small); font-weight: 800; color: var(--md-bw-on-surface, #222); margin: 0;
         }
         .login-modal-desc {
-          font-size: 0.92rem; color: var(--md-bw-on-surface-variant, #666); margin: 0; line-height: 1.5;
+          font-size: var(--fs-body-medium); color: var(--md-bw-on-surface-variant, #666); margin: 0; line-height: 1.5;
         }
         .login-modal-illustration {
           display: flex; justify-content: center; align-items: center;
@@ -481,7 +481,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         }
         .login-modal-perms li {
           display: flex; align-items: flex-start; gap: 10px;
-          font-size: 0.88rem; color: var(--md-bw-on-surface-variant, #666); line-height: 1.4;
+          font-size: var(--fs-body-medium); color: var(--md-bw-on-surface-variant, #666); line-height: 1.4;
         }
         .perm-check { font-size: 1rem; }
         .perm-cross { font-size: 1rem; }
@@ -490,7 +490,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           width: 100%; padding: 12px; border-radius: 12px; cursor: pointer;
           background: transparent; border: 1px solid var(--glass-border, rgba(255,255,255,0.55));
           color: var(--md-bw-on-surface-variant, #666);
-          font: 600 0.9rem var(--font-sans, 'Roboto', sans-serif); transition: background 0.2s;
+          font: 600 var(--fs-label-large) var(--font-sans, 'Roboto', sans-serif); transition: background 0.2s;
         }
         .login-learn-btn:hover { background: var(--glass-bg, rgba(0,0,0,0.03)); }
         .login-modal-accordion {
@@ -498,10 +498,10 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           border: 1px solid var(--glass-border, rgba(255,255,255,0.55)); border-radius: 12px;
           animation: loginExpandDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .login-modal-accordion h4 { margin: 0 0 6px; font-size: 0.85rem; font-weight: 700; color: var(--md-bw-on-surface, #222); }
-        .login-modal-accordion p { margin: 0; font-size: 0.8rem; color: var(--md-bw-on-surface-variant, #666); line-height: 1.45; }
+        .login-modal-accordion h4 { margin: 0 0 6px; font-size: var(--fs-label-large); font-weight: 700; color: var(--md-bw-on-surface, #222); }
+        .login-modal-accordion p { margin: 0; font-size: var(--fs-body-small); color: var(--md-bw-on-surface-variant, #666); line-height: 1.45; }
         .login-modal-footer {
-          font-size: 0.72rem; color: var(--md-bw-on-surface-variant, #999); text-align: center;
+          font-size: var(--fs-label-small); color: var(--md-bw-on-surface-variant, #999); text-align: center;
           border-top: 1px solid var(--glass-border, rgba(255,255,255,0.55)); padding-top: 16px;
         }
 
@@ -512,12 +512,12 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         .login-error {
           padding: 12px 16px; border-radius: 8px;
           background: rgba(224, 32, 20, 0.08); border: 1px solid rgba(224, 32, 20, 0.2);
-          color: #E02014; font-size: 0.88rem;
+          color: #E02014; font-size: var(--fs-body-medium);
         }
 
                 .login-footer-free {
           margin-top: 16px; padding: 16px;
-          font-size: 0.88rem; font-weight: 700;
+          font-size: var(--fs-body-medium); font-weight: 700;
           color: #fff; text-align: center;
           background: #e02014;
           border-radius: 10px;
@@ -529,7 +529,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           box-sizing: border-box;
         }
         .login-faq-title {
-          font-size: 1.6rem; font-weight: 800; text-align: center;
+          font-size: var(--fs-headline-medium); font-weight: 800; text-align: center;
           margin: 0 0 32px; color: var(--md-bw-on-surface, #222);
         }
         .login-faq-list {
@@ -543,14 +543,14 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         .login-faq-question {
           display: flex; justify-content: space-between; align-items: center;
           width: 100%; padding: 16px 20px; border: none; cursor: pointer;
-          font: 600 0.95rem var(--font-sans, 'Roboto', sans-serif);
+          font: 600 var(--fs-label-large) var(--font-sans, 'Roboto', sans-serif);
           color: var(--md-bw-on-surface, #222);
           background: transparent; transition: background 0.2s;
         }
         .login-faq-question:hover { background: rgba(0,0,0,0.02); }
         .login-faq-answer {
           padding: 0 20px 16px;
-          font-size: 0.88rem; color: var(--md-bw-on-surface-variant, #666);
+          font-size: var(--fs-body-medium); color: var(--md-bw-on-surface-variant, #666);
           line-height: 1.6; animation: loginExpandDown 0.25s ease-out forwards;
         }
 
@@ -585,21 +585,21 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           background: var(--md-bw-primary, #222);
           border-radius: 6px; display: flex; align-items: center; justify-content: center;
           color: var(--md-bw-on-primary, #fff);
-          font: 700 12px/1 'Roboto', sans-serif;
+          font: 700 var(--fs-label-small)/1 'Roboto', sans-serif;
         }
         .login-footer-logo-text {
-          font: 700 18px/24px 'Roboto', sans-serif;
+          font: 700 var(--fs-title-large)/1.33 'Roboto', sans-serif;
           color: var(--md-bw-on-surface, #222);
         }
         .login-footer-desc {
-          font-size: 0.85rem; color: var(--md-bw-on-surface-variant, #999);
+          font-size: var(--fs-body-medium); color: var(--md-bw-on-surface-variant, #999);
           line-height: 1.6; margin: 0; max-width: 360px;
         }
         .login-footer-links {
           display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
         }
         .login-footer-links a {
-          font-size: 0.82rem; color: var(--md-bw-on-surface-variant, #999);
+          font-size: var(--fs-label-medium); color: var(--md-bw-on-surface-variant, #999);
           text-decoration: none; transition: color 0.15s;
         }
         .login-footer-links a:hover { color: var(--md-bw-primary, #222); }
@@ -607,22 +607,22 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           max-width: 960px; margin: 0 auto;
           padding: 20px 0; margin-top: 36px;
           border-top: 1px solid var(--glass-border, rgba(0,0,0,0.06));
-          font-size: 0.75rem; color: var(--md-bw-on-surface-variant, #999);
+          font-size: var(--fs-label-small); color: var(--md-bw-on-surface-variant, #999);
           text-align: center;
         }
 
         @media (max-width: 768px) {
           .login-topbar { top: 8px; width: calc(100% - 16px); border-radius: 14px; height: 48px; min-height: 48px; padding: 0 14px; }
-          .login-topbar-badge { font-size: 0.6rem; padding: 4px 10px; }
+          .login-topbar-badge { font-size: var(--fs-label-small); padding: 4px 10px; }
           .login-auth { padding: 80px 12px 24px; }
           .login-auth-card { padding: 20px; border-radius: 16px; }
-          .login-footer-free { font-size: 0.82rem; padding: 14px; }
+          .login-footer-free { font-size: var(--fs-label-medium); padding: 14px; }
           .login-tabs { gap: 4px; }
-          .login-tab { font-size: 0.88rem; padding: 14px; }
+          .login-tab { font-size: var(--fs-body-medium); padding: 14px; }
           .login-faq { padding: 32px 12px 48px; }
-          .login-faq-title { font-size: 1.2rem; margin-bottom: 20px; }
-          .login-faq-question { padding: 14px 16px; font-size: 0.88rem; }
-          .login-faq-answer { padding: 0 16px 14px; font-size: 0.82rem; }
+          .login-faq-title { font-size: var(--fs-title-large); margin-bottom: 20px; }
+          .login-faq-question { padding: 14px 16px; font-size: var(--fs-body-medium); }
+          .login-faq-answer { padding: 0 16px 14px; font-size: var(--fs-label-medium); }
           .login-footer { padding: 32px 12px 0; margin-top: 24px; }
           .login-footer-bottom { margin-top: 24px; padding: 16px 0; }
         }
