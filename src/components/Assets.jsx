@@ -6,7 +6,7 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { formatDate } from '../services/date.js'
 
-function AssetDashboard({ stats, alerts, setActiveView, assets, employees, addLog }) {
+function AssetDashboard({ stats, alerts, setActiveView, assets, employees, syncLogs }) {
   const quickActions = [
     { id: 'inventory', label: 'View Inventory', icon: <Package size={24} />, desc: 'Browse all assets' },
     { id: 'assignments', label: 'Assign Assets', icon: <FileSignature size={24} />, desc: 'Manage assignments' },
@@ -100,16 +100,16 @@ function AssetDashboard({ stats, alerts, setActiveView, assets, employees, addLo
       {/* Recent Activity */}
       <div className="glass-card" style={{ padding: '20px' }}>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '0.95rem' }}>Recent Activity</h3>
-        {(!addLog || addLog.length === 0) ? (
+        {(!syncLogs || syncLogs.length === 0) ? (
           <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
             No recent activity logged.
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {addLog.slice(-5).reverse().map((log, i) => (
+            {syncLogs.slice(-5).reverse().map((log, i) => (
               <div key={i} style={{ padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>{log.message || log.action || log.details}</span>
-                <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{log.date || log.timestamp || ''}</span>
+                <span>{log.action || log.message || log.details}</span>
+                <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{log.timestamp || ''}</span>
               </div>
             ))}
           </div>
@@ -525,7 +525,7 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
   )
 }
 
-export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, addLog, addToast, currentUser, simulatedRole }) {
+export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, addLog, addToast, currentUser, simulatedRole, syncLogs }) {
   const [activeView, setActiveView] = useState('dashboard')
 
   // Search & Filter
@@ -773,7 +773,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
         return <AssetMaintenance assets={assets} selectedAssetForMaint={selectedAssetForMaint} setSelectedAssetForMaint={setSelectedAssetForMaint} maintForm={maintForm} setMaintForm={setMaintForm} handleAddMaintenance={handleAddMaintenance} calculateBookValue={calculateBookValue} />
       case 'dashboard':
       default:
-        return <AssetDashboard stats={stats} alerts={alerts} setActiveView={setActiveView} assets={assets} employees={employees} addLog={addLog} />
+        return <AssetDashboard stats={stats} alerts={alerts} setActiveView={setActiveView} assets={assets} employees={employees} syncLogs={syncLogs} />
     }
   }
 
