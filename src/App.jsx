@@ -18,7 +18,7 @@ import TooltipPopover from './components/TooltipPopover.jsx'
 import { readMeta, writeMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBackup, createBackup } from './services/googleDrive.js'
 import { clearLocalCache } from './services/db.js'
 import { validateDatabase } from './services/validator.js'
-import { Search, LayoutDashboard, Users, CreditCard, Calendar as CalendarIcon, Receipt, BarChart3, Settings as SettingsIcon, HardDrive, FileText, Megaphone, CalendarDays, Monitor, Database, User, History, Moon, Trash2, Sun, Menu } from 'lucide-react'
+import { Search, LayoutDashboard, Users, CreditCard, CalendarCheck, Receipt, BarChart3, Settings as SettingsIcon, HardDrive, FileText, Megaphone, CalendarDays, Monitor, Database, User, History, Moon, Trash2, Sun, Menu } from 'lucide-react'
 import { useModal } from './services/useModal.js'
 
 const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
@@ -75,18 +75,18 @@ function timestampArrayChanges(prev, next) {
 }
 
 const allNavItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} />, bg: 'linear-gradient(135deg, #007aff, #005bb5)' },
-  { id: 'announcements', label: 'Announcements', icon: <Megaphone size={18} />, bg: 'linear-gradient(135deg, #ff9500, #e68600)' },
-  { id: 'calendar', label: 'Calendar', icon: <CalendarDays size={18} />, bg: 'linear-gradient(135deg, #ff3b30, #d63328)' },
-  { id: 'documents', label: 'Documents', icon: <FileText size={18} />, bg: 'linear-gradient(135deg, #5856d6, #4e4cb8)' },
-  { id: 'employees', label: 'Employees', icon: <Users size={18} />, bg: 'linear-gradient(135deg, #34c759, #2eb350)' },
-  { id: 'payroll', label: 'Payroll', icon: <CreditCard size={18} />, bg: 'linear-gradient(135deg, #32ade6, #2c97c9)' },
-  { id: 'attendance', label: 'Leaves & Attendance', icon: <CalendarIcon size={18} />, bg: 'linear-gradient(135deg, #ff2d55, #e6284c)' },
-  { id: 'expenses', label: 'Expenses', icon: <Receipt size={18} />, bg: 'linear-gradient(135deg, #ffcc00, #e6b800)' },
-  { id: 'assets', label: 'Assets', icon: <Monitor size={18} />, bg: 'linear-gradient(135deg, #8e8e93, #7a7a7d)' },
-  { id: 'reports', label: 'Reports', icon: <BarChart3 size={18} />, bg: 'linear-gradient(135deg, #af52de, #9948c2)' },
-  { id: 'settings', label: 'Settings', icon: <SettingsIcon size={18} />, bg: 'linear-gradient(135deg, #8e8e93, #7a7a7d)' },
-  { id: 'drive', label: 'Drive Sync', icon: <Database size={18} />, bg: 'linear-gradient(135deg, #34c759, #2eb350)' },
+  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+  { id: 'announcements', label: 'Announcements', icon: <Megaphone size={18} /> },
+  { id: 'calendar', label: 'Calendar', icon: <CalendarDays size={18} /> },
+  { id: 'documents', label: 'Documents', icon: <FileText size={18} /> },
+  { id: 'employees', label: 'Employees', icon: <Users size={18} /> },
+  { id: 'payroll', label: 'Payroll', icon: <CreditCard size={18} /> },
+  { id: 'attendance', label: 'Leaves & Attendance', icon: <CalendarCheck size={18} /> },
+  { id: 'expenses', label: 'Expenses', icon: <Receipt size={18} /> },
+  { id: 'assets', label: 'Assets', icon: <Monitor size={18} /> },
+  { id: 'reports', label: 'Reports', icon: <BarChart3 size={18} /> },
+  { id: 'settings', label: 'Settings', icon: <SettingsIcon size={18} /> },
+  { id: 'drive', label: 'Drive Sync', icon: <Database size={18} /> },
 ]
 
 export default function App() {
@@ -1725,7 +1725,7 @@ export default function App() {
             const isActive = currentView === item.id;
             return (
               <TooltipPopover key={item.id} label={item.label} isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
-              <div className={`nav-item ${isActive ? 'active' : ''}`} data-label={item.label} onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }} style={{
+              <div className={`nav-item ${isActive ? 'active' : ''}`} data-active={isActive ? 'true' : 'false'} data-label={item.label} onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }} style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
@@ -1737,12 +1737,10 @@ export default function App() {
                 transition: 'all 0.2s ease',
                 position: 'relative',
                 textDecoration: 'none',
-                background: isActive ? (item.bg || 'rgba(0, 0, 0, 0.06)') : 'transparent',
-                color: isActive ? '#ffffff' : 'var(--md-bw-on-surface-variant)',
-                '--nav-bg': item.bg || 'var(--md-bw-primary)'
+                color: 'var(--md-bw-on-surface-variant)'
               }}>
                 {/* Icon container */}
-                <div style={{
+                <div className="nav-icon" style={{
                   width: '32px',
                   height: '32px',
                   display: 'flex',
@@ -1750,17 +1748,13 @@ export default function App() {
                   justifyContent: 'center',
                   borderRadius: '8px',
                   flexShrink: 0,
-                  transition: 'all 0.2s ease',
-                  background: isActive ? 'rgba(255, 255, 255, 0.2)' : (item.bg || 'var(--md-bw-primary)'),
-                  color: '#ffffff',
-                  boxShadow: '0 3px 8px rgba(0,0,0,0.18), inset 0 1px 2px rgba(255,255,255,0.4)'
+                  transition: 'all 0.2s ease'
                 }}>
                   {item.icon}
                 </div>
                 
                 <span className="nav-label" style={{
                   font: "500 13px/20px 'Roboto'",
-                  color: isActive ? '#ffffff' : 'var(--md-bw-on-surface-variant)',
                   whiteSpace: 'nowrap',
                   flex: 1,
                   opacity: isCollapsed ? 0 : 1,
