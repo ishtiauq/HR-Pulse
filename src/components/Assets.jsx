@@ -6,7 +6,7 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { formatDate } from '../services/date.js'
 
-function AssetDashboard({ stats, alerts, setActiveView, assets, employees }) {
+function AssetDashboard({ stats, alerts, setActiveView, assets, employees, addLog }) {
   const quickActions = [
     { id: 'inventory', label: 'View Inventory', icon: <Package size={24} />, desc: 'Browse all assets' },
     { id: 'assignments', label: 'Assign Assets', icon: <FileSignature size={24} />, desc: 'Manage assignments' },
@@ -95,6 +95,25 @@ function AssetDashboard({ stats, alerts, setActiveView, assets, employees }) {
             )
           })}
         </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="glass-card" style={{ padding: '20px' }}>
+        <h3 style={{ margin: '0 0 16px 0', fontSize: '0.95rem' }}>Recent Activity</h3>
+        {(!addLog || addLog.length === 0) ? (
+          <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+            No recent activity logged.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {addLog.slice(-5).reverse().map((log, i) => (
+              <div key={i} style={{ padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '8px', fontSize: '0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{log.message || log.action || log.details}</span>
+                <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>{log.date || log.timestamp || ''}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -187,7 +206,7 @@ function AssetInventory({ filteredAssets, search, setSearch, filterCategory, set
 function DetailModal({ asset, onClose }) {
   useModal(onClose)
   const calculateBookValue = (asset) => {
-    if (!asset.purchasePrice || !asset.purchaseDate || !asset.usefulLife) return asset.purchasePrice || 0
+    if (asset.purchasePrice === undefined || asset.purchasePrice === null || !asset.purchaseDate || !asset.usefulLife) return asset.purchasePrice || 0
     const purchaseDate = new Date(asset.purchaseDate)
     const today = new Date()
     const monthsElapsed = (today.getFullYear() - purchaseDate.getFullYear()) * 12 + (today.getMonth() - purchaseDate.getMonth())
@@ -549,6 +568,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     setAssets(prev => [asset, ...prev])
     setShowAddModal(false)
     addToast('Asset added to inventory', 'success')
+    addLog('Asset "' + newAsset.name + '" added to inventory')
     setNewAsset({ name: '', category: 'Laptop', serialNumber: '', purchaseDate: '', purchasePrice: '', warrantyExpiry: '', usefulLife: 36, condition: 'New' })
   }
 
@@ -628,6 +648,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
 
     setShowAssignModal(false)
     addToast('Asset assigned successfully', 'success')
+    addLog('Asset "' + assignTarget.name + '" assigned to ' + (employees.find(emp => emp.id === assignForm.employeeId)?.name || 'unknown'))
 
     generateAgreementPDF(assignTarget, employees.find(emp => emp.id === assignForm.employeeId), assignForm.notes)
   }
@@ -674,6 +695,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
   }
 
   const handleReturnAsset = (id) => {
+    const asset = assets.find(a => a.id === id)
     setAssets(prev => prev.map(a => {
       if (a.id === id) {
         return { ...a, status: 'Available', assignedTo: null, assignmentDate: null }
@@ -681,12 +703,14 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       return a
     }))
     addToast('Asset returned to inventory', 'success')
+    if (asset) addLog('Asset "' + asset.name + '" returned to inventory')
   }
 
   // --- Requests Logic ---
   const handleRequestAction = (reqId, action) => {
     setAssetRequests(prev => prev.map(r => r.id === reqId ? { ...r, status: action } : r))
     addToast(`Request ${action.toLowerCase()}`, 'info')
+    addLog('Asset request ' + action.toLowerCase())
   }
 
   // --- Maintenance & Depreciation ---
@@ -708,10 +732,11 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     setMaintForm({ date: '', issue: '', cost: '', vendor: '' })
     setSelectedAssetForMaint(null)
     addToast('Maintenance log added, asset marked as Under Repair', 'success')
+    addLog('Maintenance logged for "' + selectedAssetForMaint.name + '"')
   }
 
   const calculateBookValue = (asset) => {
-    if (!asset.purchasePrice || !asset.purchaseDate || !asset.usefulLife) return asset.purchasePrice || 0
+    if (asset.purchasePrice === undefined || asset.purchasePrice === null || !asset.purchaseDate || !asset.usefulLife) return asset.purchasePrice || 0
     const purchaseDate = new Date(asset.purchaseDate)
     const today = new Date()
     const monthsElapsed = (today.getFullYear() - purchaseDate.getFullYear()) * 12 + (today.getMonth() - purchaseDate.getMonth())
@@ -748,7 +773,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
         return <AssetMaintenance assets={assets} selectedAssetForMaint={selectedAssetForMaint} setSelectedAssetForMaint={setSelectedAssetForMaint} maintForm={maintForm} setMaintForm={setMaintForm} handleAddMaintenance={handleAddMaintenance} calculateBookValue={calculateBookValue} />
       case 'dashboard':
       default:
-        return <AssetDashboard stats={stats} alerts={alerts} setActiveView={setActiveView} assets={assets} employees={employees} />
+        return <AssetDashboard stats={stats} alerts={alerts} setActiveView={setActiveView} assets={assets} employees={employees} addLog={addLog} />
     }
   }
 
