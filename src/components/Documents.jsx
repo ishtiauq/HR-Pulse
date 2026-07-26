@@ -177,27 +177,26 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
-        <div style={{ flex: 1, minWidth: '200px', position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <Search size={16} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)' }} />
-          <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search documents..."
-            style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.9rem' }} />
-        </div>
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          <button onClick={() => setSelectedCategory('all')}
-            style={{ padding: '6px 14px', borderRadius: '20px', background: selectedCategory === 'all' ? 'var(--accent-primary)' : 'var(--bg-secondary)', color: selectedCategory === 'all' ? '#fff' : 'var(--text-secondary)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: selectedCategory === 'all' ? 'none' : '1px solid var(--border-color)' }}>
-            All
-          </button>
-          {CATEGORIES.map(cat => {
-            const isActive = selectedCategory === cat.id
-            return (
-              <button key={cat.id} onClick={() => setSelectedCategory(cat.id)}
-                style={{ padding: '6px 14px', borderRadius: '20px', background: isActive ? cat.color : 'var(--bg-secondary)', color: isActive ? '#fff' : 'var(--text-secondary)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: isActive ? 'none' : '1px solid var(--border-color)' }}>
-                {cat.label}
-              </button>
-            )
-          })}
-        </div>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+        <Search size={16} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)' }} />
+        <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search documents..."
+          style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.9rem' }} />
+      </div>
+
+      <div className="glass-card" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '20px', padding: '12px 16px', borderRadius: '12px' }}>
+        <button onClick={() => setSelectedCategory('all')}
+          style={{ padding: '6px 14px', borderRadius: '20px', background: selectedCategory === 'all' ? 'var(--md-bw-primary)' : 'var(--md-bw-surface-variant)', color: selectedCategory === 'all' ? 'var(--md-bw-on-primary)' : 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: selectedCategory === 'all' ? 'none' : '1px solid var(--md-bw-outline)' }}>
+          All
+        </button>
+        {CATEGORIES.map(cat => {
+          const isActive = selectedCategory === cat.id
+          return (
+            <button key={cat.id} onClick={() => setSelectedCategory(cat.id)}
+              style={{ padding: '6px 14px', borderRadius: '20px', background: isActive ? cat.color : 'var(--md-bw-surface-variant)', color: isActive ? '#fff' : 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: isActive ? 'none' : '1px solid var(--md-bw-outline)' }}>
+              {cat.label}
+            </button>
+          )
+        })}
       </div>
 
       {filteredDocs.length === 0 ? (
