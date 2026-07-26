@@ -100,6 +100,141 @@ function AssetDashboard({ stats, alerts, setActiveView, assets, employees }) {
   )
 }
 
+function AssetInventory({ filteredAssets, search, setSearch, filterCategory, setFilterCategory, alerts, showAddModal, setShowAddModal, newAsset, setNewAsset, handleAddAsset, triggerFileInput, fileInputRef, handleImportCSV, addToast }) {
+  const [detailAsset, setDetailAsset] = useState(null)
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Search & Action Bar */}
+      <div className="glass-card" style={{ padding: '20px', display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', gap: '12px', flex: 1, minWidth: '280px' }}>
+          <div className="search-bar" style={{ position: 'relative', flex: 1 }}>
+            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+            <input type="text" className="form-input" placeholder="Search by name or serial..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '36px' }} />
+          </div>
+          <select className="form-input" value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={{ width: 'auto', minWidth: 140 }}>
+            <option value="All">All Categories</option>
+            <option value="Laptop">Laptops</option>
+            <option value="Phone">Phones</option>
+            <option value="Monitor">Monitors</option>
+            <option value="Peripherals">Peripherals</option>
+            <option value="Access Card">Access Cards</option>
+          </select>
+        </div>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button className="btn-tonal" onClick={triggerFileInput}><Upload size={16} /> Import CSV</button>
+          <input type="file" ref={fileInputRef} onChange={handleImportCSV} accept=".csv" style={{ display: 'none' }} />
+          <button className="btn-filled" onClick={() => setShowAddModal(true)}><Plus size={16} /> Add Asset</button>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="table-container">
+        <table className="table-responsive w-full table-striped">
+          <thead>
+            <tr>
+              <th>ID / Serial</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Purchase Info</th>
+              <th>Warranty</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredAssets.map(asset => (
+              <tr key={asset.id} onClick={() => setDetailAsset(asset)} style={{ cursor: 'pointer' }}>
+                <td data-label="ID / Serial">
+                  <div style={{ fontWeight: 600 }}>{asset.id}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>SN: {asset.serialNumber}</div>
+                </td>
+                <td data-label="Name">{asset.name}</td>
+                <td data-label="Category">{asset.category}</td>
+                <td data-label="Purchase">
+                  <div>${asset.purchasePrice}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{asset.purchaseDate}</div>
+                </td>
+                <td data-label="Warranty">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {asset.warrantyExpiry}
+                    {alerts.find(a => a.id === asset.id) && <AlertTriangle size={14} color="var(--accent-warning)" />}
+                  </div>
+                </td>
+                <td data-label="Status">
+                  <span className={`badge ${
+                    asset.status === 'Available' ? 'badge-success' :
+                    asset.status === 'Assigned' ? 'badge-info' :
+                    asset.status === 'Under Repair' ? 'badge-warning' : 'badge-danger'
+                  }`}>{asset.status}</span>
+                </td>
+              </tr>
+            ))}
+            {filteredAssets.length === 0 && (
+              <tr><td colSpan="6" style={{ textAlign: 'center', padding: '24px', color: 'var(--text-secondary)' }}>No assets found.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Detail Modal */}
+      {detailAsset && (
+        <DetailModal asset={detailAsset} onClose={() => setDetailAsset(null)} />
+      )}
+    </div>
+  )
+}
+
+function DetailModal({ asset, onClose }) {
+  useModal(onClose)
+  const calculateBookValue = (asset) => {
+    if (!asset.purchasePrice || !asset.purchaseDate || !asset.usefulLife) return asset.purchasePrice || 0
+    const purchaseDate = new Date(asset.purchaseDate)
+    const today = new Date()
+    const monthsElapsed = (today.getFullYear() - purchaseDate.getFullYear()) * 12 + (today.getMonth() - purchaseDate.getMonth())
+    if (monthsElapsed >= asset.usefulLife) return 0
+    const monthlyDepreciation = asset.purchasePrice / asset.usefulLife
+    const bookValue = asset.purchasePrice - (monthlyDepreciation * monthsElapsed)
+    return Math.max(0, bookValue).toFixed(2)
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content glass-card" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', width: '100%' }}>
+        <h2 style={{ marginTop: 0 }}>{asset.name}</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Asset ID</div><div style={{ fontWeight: 600 }}>{asset.id}</div></div>
+          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Serial Number</div><div style={{ fontWeight: 600 }}>{asset.serialNumber}</div></div>
+          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Category</div><div>{asset.category}</div></div>
+          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Status</div><span className={`badge ${asset.status === 'Available' ? 'badge-success' : asset.status === 'Assigned' ? 'badge-info' : 'badge-warning'}`}>{asset.status}</span></div>
+          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Purchase Price</div><div>${asset.purchasePrice}</div></div>
+          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Book Value</div><div style={{ color: 'var(--accent-success)', fontWeight: 600 }}>${calculateBookValue(asset)}</div></div>
+          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Purchase Date</div><div>{asset.purchaseDate}</div></div>
+          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Warranty Expiry</div><div>{asset.warrantyExpiry}</div></div>
+          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Useful Life</div><div>{asset.usefulLife} months</div></div>
+          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Condition</div><div>{asset.condition}</div></div>
+        </div>
+        {asset.maintenanceLogs?.length > 0 && (
+          <div>
+            <h3 style={{ margin: '16px 0 8px 0', fontSize: '0.95rem' }}>Maintenance History</h3>
+            {asset.maintenanceLogs.map(log => (
+              <div key={log.id} style={{ padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '8px', marginBottom: '6px', fontSize: '0.85rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>{log.date} - {log.vendor}</span>
+                  <span style={{ color: 'var(--accent-danger)' }}>${log.cost}</span>
+                </div>
+                <div style={{ color: 'var(--text-secondary)', marginTop: '2px' }}>{log.issue}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+          <button className="btn-tonal" onClick={onClose}>Close</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, addLog, addToast, currentUser, simulatedRole }) {
   const [activeView, setActiveView] = useState('dashboard')
 
@@ -333,7 +468,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
   const renderView = () => {
     switch (activeView) {
       case 'inventory':
-        return <div>Inventory view</div>
+        return <AssetInventory filteredAssets={filteredAssets} search={search} setSearch={setSearch} filterCategory={filterCategory} setFilterCategory={setFilterCategory} alerts={alerts} showAddModal={showAddModal} setShowAddModal={setShowAddModal} newAsset={newAsset} setNewAsset={setNewAsset} handleAddAsset={handleAddAsset} triggerFileInput={triggerFileInput} fileInputRef={fileInputRef} handleImportCSV={handleImportCSV} addToast={addToast} />
       case 'assignments':
         return <div>Assignments view</div>
       case 'requests':
