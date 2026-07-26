@@ -1844,7 +1844,7 @@ export default function App() {
 
             {/* ROLE BUTTON */}
             <TooltipPopover label={`Role: ${simulatedRole}`} isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
-            <button className="role-btn" data-active={showRoleModal ? "true" : "false"} data-label={`Role: ${simulatedRole}`} onClick={() => { if (isCollapsed) setIsCollapsed(false); setShowRoleModal(!showRoleModal); }} style={{
+            <button className="role-btn btn-shine" data-active={showRoleModal ? "true" : "false"} data-label={`Role: ${simulatedRole}`} onClick={() => { if (isCollapsed) setIsCollapsed(false); setShowRoleModal(!showRoleModal); }} style={{
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
@@ -1852,12 +1852,13 @@ export default function App() {
               borderRadius: '10px',
               cursor: 'pointer',
               border: 'none',
-              background: showRoleModal ? 'linear-gradient(135deg, #0062E6 0%, #003A8C 100%)' : 'rgba(0, 98, 230, 0.12)',
+              background: '#0062E6',
               width: '100%',
               height: '52px',
               boxSizing: 'border-box',
               transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
               position: 'relative',
+              overflow: 'hidden',
               justifyContent: isCollapsed ? 'center' : 'flex-start'
             }}>
               <div style={{
@@ -1869,9 +1870,8 @@ export default function App() {
                 borderRadius: '8px',
                 flexShrink: 0,
                 transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                background: showRoleModal ? 'rgba(255, 255, 255, 0.2)' : 'linear-gradient(135deg, #0062E6 0%, #003A8C 100%)',
+                background: 'rgba(255, 255, 255, 0.2)',
                 color: '#ffffff',
-                boxShadow: '0 3px 8px rgba(0,0,0,0.18), inset 0 1px 2px rgba(255,255,255,0.4)'
               }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -1879,7 +1879,7 @@ export default function App() {
               </div>
               <span className="btn-label" style={{
                 font: "500 13px/20px 'Roboto'",
-                color: showRoleModal ? '#ffffff' : '#0055D4',
+                color: '#ffffff',
                 whiteSpace: 'nowrap',
                 opacity: isCollapsed ? 0 : 1,
                 transition: 'opacity 0.2s ease, width 0.3s ease',
@@ -1887,7 +1887,7 @@ export default function App() {
               }}>Role: {simulatedRole}</span>
               
               {!isCollapsed && (
-                <svg className="expand-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={showRoleModal ? '#ffffff' : '#0055D4'} strokeWidth="1.5" style={{ 
+                <svg className="expand-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.5" style={{ 
                   marginLeft: 'auto', flexShrink: 0, position: 'relative', zIndex: 1, 
                   transform: showRoleModal ? 'rotate(180deg)' : 'rotate(0deg)',
                   transition: 'transform 0.2s ease' 
@@ -1929,7 +1929,7 @@ export default function App() {
             
             {/* LOGOUT BUTTON */}
             <TooltipPopover label="Log Out" isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
-            <button className="logout-btn" data-label="Log Out" onClick={handleLogout} style={{
+            <button className="logout-btn btn-shine" data-label="Log Out" onClick={handleLogout} style={{
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
@@ -1937,12 +1937,13 @@ export default function App() {
               borderRadius: '10px',
               cursor: 'pointer',
               border: 'none',
-              background: 'rgba(224, 32, 20, 0.08)',
+              background: '#E02014',
               width: '100%',
               height: '52px',
               boxSizing: 'border-box',
               transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
               position: 'relative',
+              overflow: 'hidden',
               justifyContent: isCollapsed ? 'center' : 'flex-start'
             }}>
               <div style={{
@@ -1954,9 +1955,8 @@ export default function App() {
                 borderRadius: '8px',
                 flexShrink: 0,
                 transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                background: 'linear-gradient(135deg, #E02014 0%, #9C140C 100%)',
+                background: 'rgba(255, 255, 255, 0.2)',
                 color: '#ffffff',
-                boxShadow: '0 3px 8px rgba(0,0,0,0.18), inset 0 1px 2px rgba(255,255,255,0.4)'
               }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -1966,7 +1966,12 @@ export default function App() {
               </div>
               <span className="btn-label" style={{
                 font: "500 13px/20px 'Roboto'",
-                color: '#E02014',
+                color: '#ffffff',
+                whiteSpace: 'nowrap',
+                opacity: isCollapsed ? 0 : 1,
+                transition: 'opacity 0.2s ease, width 0.3s ease',
+                width: isCollapsed ? 0 : 'auto'
+              }}>Log Out</span>
                 whiteSpace: 'nowrap',
                 opacity: isCollapsed ? 0 : 1,
                 transition: 'opacity 0.2s ease, width 0.3s ease',
