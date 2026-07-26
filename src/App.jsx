@@ -1737,7 +1737,6 @@ export default function App() {
                 transition: 'all 0.2s ease',
                 position: 'relative',
                 textDecoration: 'none',
-                color: 'var(--md-bw-on-surface-variant)'
               }}>
                 {/* Icon container */}
                 <div className="nav-icon" style={{
