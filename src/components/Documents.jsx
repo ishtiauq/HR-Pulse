@@ -117,6 +117,16 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
     return matchSearch && matchCategory
   })
 
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+  const theme = {
+    bg: isDark ? '#000000' : '#ffffff',
+    text: isDark ? '#ffffff' : '#000000',
+    secondary: isDark ? '#cccccc' : '#333333',
+    muted: isDark ? '#999999' : '#666666',
+    border: isDark ? '#333333' : '#e0e0e0',
+    inputBg: isDark ? '#1a1a1a' : '#f5f5f5'
+  }
+
   return (
     <div className="fade-in" style={{ paddingBottom: '40px' }}>
       <div className="page-header">
@@ -124,10 +134,40 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
           <FileText size={28} className="page-title-icon" />
           Documents
         </h1>
-        <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-          onClick={openUploadModal}>
-          <Upload size={16} /> Upload
-        </button>
+      </div>
+
+      {/* Upload Hero Card */}
+      <div className="glass-card" onClick={openUploadModal}
+        style={{
+          padding: '36px 24px', cursor: 'pointer', textAlign: 'center', marginBottom: '24px',
+          border: '2px dashed var(--border-color)', borderRadius: '16px',
+          background: 'var(--bg-secondary)',
+          transition: 'border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = 'var(--accent-primary)';
+          e.currentTarget.style.background = 'var(--accent-primary-glow, rgba(59,130,246,0.04))';
+          e.currentTarget.style.transform = 'translateY(-2px)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = 'var(--border-color)';
+          e.currentTarget.style.background = 'var(--bg-secondary)';
+          e.currentTarget.style.transform = 'translateY(0)';
+        }}>
+        <div style={{
+          width: '56px', height: '56px', borderRadius: '14px',
+          background: 'var(--accent-primary-glow, rgba(59,130,246,0.1))',
+          color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <Upload size={28} />
+        </div>
+        <div>
+          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Upload Document</h3>
+          <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            Click to upload — PDF, images, spreadsheets & more
+          </p>
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -221,20 +261,48 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
       )}
 
       {showUploadModal && (
-        <div className="modal-overlay" onClick={() => { setShowUploadModal(false); resetForm() }}>
-          <div className="modal-container" style={{ maxWidth: '500px' }} onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>{editingDoc ? 'Edit Document' : 'Upload Document'}</h2>
-              <button className="modal-close" onClick={() => { setShowUploadModal(false); resetForm() }}><X size={20} /></button>
+        <div className="modal-overlay" onClick={() => { setShowUploadModal(false); resetForm() }}
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 10000, padding: '20px'
+          }}>
+          <div className="modal-container"
+            style={{ maxWidth: '520px', width: '100%', padding: 0, borderRadius: '14px', background: theme.bg, boxShadow: '0 8px 32px rgba(0,0,0,0.3)', animation: 'modalFadeIn 0.2s ease' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="modal-header" style={{ padding: '20px 24px', borderBottom: `1px solid ${theme.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '40px', height: '40px', borderRadius: '10px',
+                  background: 'rgba(59,130,246,0.1)',
+                  color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  <Upload size={20} />
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '1.1rem', color: theme.text }}>{editingDoc ? 'Edit Document' : 'Upload Document'}</h2>
+                  <p style={{ margin: '2px 0 0 0', fontSize: '0.8rem', color: theme.muted }}>
+                    {editingDoc ? 'Update document details' : 'Add a new document to the repository'}
+                  </p>
+                </div>
+              </div>
+              <button className="modal-close" onClick={() => { setShowUploadModal(false); resetForm() }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.muted, padding: '4px' }}><X size={20} /></button>
             </div>
-            <form onSubmit={handleSave} className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form onSubmit={handleSave} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Document Name *</label>
+                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: theme.secondary }}>Document Name *</label>
                 <input type="text" required value={formName} onChange={e => setFormName(e.target.value)} placeholder="e.g. Employee Handbook 2026"
-                  style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.95rem' }} />
+                  style={{
+                    padding: '10px 14px', borderRadius: '8px', border: `1px solid ${theme.border}`,
+                    background: theme.inputBg, color: theme.text, fontSize: '0.95rem',
+                    outline: 'none', transition: 'border-color var(--transition-fast)'
+                  }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = theme.border} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Category</label>
+                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: theme.secondary }}>Category</label>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {CATEGORIES.map(cat => {
                     const isActive = formCategory === cat.id
@@ -242,11 +310,12 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                     return (
                       <button key={cat.id} type="button" onClick={() => setFormCategory(cat.id)}
                         style={{
-                          display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 12px', borderRadius: '8px',
-                          border: isActive ? `2px solid ${cat.color}` : '1px solid var(--border-color)',
-                          background: isActive ? `${cat.color}15` : 'var(--bg-tertiary)',
-                          color: isActive ? cat.color : 'var(--text-secondary)',
+                          display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '8px',
+                          border: isActive ? `2px solid ${cat.color}` : `1px solid ${theme.border}`,
+                          background: isActive ? `${cat.color}18` : theme.inputBg,
+                          color: isActive ? cat.color : theme.secondary,
                           fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer',
+                          transition: 'border-color var(--transition-fast), background var(--transition-fast)',
                         }}>
                         <Icon size={14} /> {cat.label}
                       </button>
@@ -256,35 +325,57 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
               </div>
               {!editingDoc && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>File</label>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: theme.secondary }}>File</label>
                   <div onClick={() => fileInputRef.current?.click()}
                     style={{
-                      padding: '24px', borderRadius: '8px', border: '2px dashed var(--border-color)',
-                      textAlign: 'center', cursor: 'pointer', color: 'var(--text-muted)',
-                      background: formFile ? 'var(--accent-success-glow)' : 'var(--bg-tertiary)',
-                      borderColor: formFile ? 'var(--accent-success)' : 'var(--border-color)',
-                      transition: 'border-color var(--transition-fast), background-color var(--transition-fast)'
+                      padding: '32px 20px', borderRadius: '10px', border: `2px dashed ${theme.border}`,
+                      textAlign: 'center', cursor: 'pointer',
+                      background: formFile ? 'rgba(16,185,129,0.06)' : theme.inputBg,
+                      borderColor: formFile ? '#10b981' : theme.border,
+                      transition: 'border-color var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast)'
                     }}
-                    onMouseEnter={(e) => { if (!formFile) e.currentTarget.style.borderColor = 'var(--accent-primary)' }}
-                    onMouseLeave={(e) => { if (!formFile) e.currentTarget.style.borderColor = 'var(--border-color)' }}>
-                    <Upload size={24} style={{ marginBottom: '8px', opacity: 0.5 }} />
-                    <p style={{ margin: 0, fontSize: '0.85rem' }}>{formFile ? formFile.name : 'Click to select a file'}</p>
-                    {formFile && <p style={{ margin: '4px 0 0 0', fontSize: '0.75rem' }}>{formatFileSize(formFile.size)}</p>}
+                    onMouseEnter={(e) => {
+                      if (!formFile) { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.background = 'rgba(59,130,246,0.04)' }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!formFile) { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.background = theme.inputBg }
+                    }}>
+                    {formFile ? (
+                      <>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(16,185,129,0.12)', color: '#10b981', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
+                          <FileText size={20} />
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: theme.text }}>{formFile.name}</p>
+                        <p style={{ margin: '4px 0 0 0', fontSize: '0.78rem', color: theme.muted }}>{formatFileSize(formFile.size)}</p>
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={28} style={{ marginBottom: '10px', color: theme.muted, opacity: 0.6 }} />
+                        <p style={{ margin: 0, fontSize: '0.9rem', color: theme.secondary }}><span style={{ color: '#3b82f6', fontWeight: 600 }}>Click to browse</span> or drop a file</p>
+                        <p style={{ margin: '6px 0 0 0', fontSize: '0.75rem', color: theme.muted }}>PDF, Images, Spreadsheets — up to 10MB</p>
+                      </>
+                    )}
                   </div>
                   <input type="file" ref={fileInputRef} onChange={handleFileSelect} style={{ display: 'none' }} />
                 </div>
               )}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Description</label>
+                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: theme.secondary }}>Description</label>
                 <textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={3} placeholder="Brief description (optional)"
-                  style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.95rem', resize: 'vertical' }} />
+                  style={{
+                    padding: '10px 14px', borderRadius: '8px', border: `1px solid ${theme.border}`,
+                    background: theme.inputBg, color: theme.text, fontSize: '0.95rem',
+                    resize: 'vertical', outline: 'none', transition: 'border-color var(--transition-fast)'
+                  }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = theme.border} />
               </div>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: `1px solid ${theme.border}`, paddingTop: '20px' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowUploadModal(false); resetForm() }}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  {editingDoc ? 'Update' : 'Upload'}
+                <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Upload size={16} /> {editingDoc ? 'Update' : 'Upload'}
                 </button>
               </div>
             </form>
