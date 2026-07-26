@@ -25,7 +25,7 @@ function AssetDashboard({ stats, alerts, setActiveView, assets, employees }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Stat Cards */}
-      <div className="dash-grid-3" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+      <div className="stats-grid">
         <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ width: 48, height: 48, borderRadius: '12px', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Monitor size={24} />
@@ -65,7 +65,7 @@ function AssetDashboard({ stats, alerts, setActiveView, assets, employees }) {
       </div>
 
       {/* Quick Actions */}
-      <div className="dash-grid-3" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+      <div className="actions-grid">
         {quickActions.map(action => (
           <button key={action.id} className="btn-tonal" onClick={() => setActiveView(action.id)}
             style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer', textAlign: 'center' }}>
@@ -377,7 +377,7 @@ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
 
 function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMaint, maintForm, setMaintForm, handleAddMaintenance, calculateBookValue }) {
   return (
-    <div className="dash-grid-2" style={{ gap: '24px' }}>
+    <div className="maintenance-grid">
       {/* Asset Selection Panel */}
       <div className="glass-card" style={{ padding: '20px' }}>
         <h3 style={{ margin: '0 0 16px 0' }}>Select Asset</h3>
