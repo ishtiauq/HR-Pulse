@@ -375,6 +375,87 @@ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
   )
 }
 
+function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMaint, maintForm, setMaintForm, handleAddMaintenance, calculateBookValue }) {
+  return (
+    <div className="dash-grid-2" style={{ gap: '24px' }}>
+      {/* Asset Selection Panel */}
+      <div className="glass-card" style={{ padding: '20px' }}>
+        <h3 style={{ margin: '0 0 16px 0' }}>Select Asset</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '500px', overflowY: 'auto' }}>
+          {assets.map(asset => (
+            <div key={asset.id}
+              className={selectedAssetForMaint?.id === asset.id ? 'card-filled' : 'card-outlined'}
+              onClick={() => setSelectedAssetForMaint(asset)}
+              style={{ padding: '12px', cursor: 'pointer' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ fontWeight: 600 }}>{asset.name}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{asset.id}</div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.8rem' }}>
+                <span className={`badge ${asset.status === 'Under Repair' ? 'badge-warning' : asset.status === 'Assigned' ? 'badge-info' : 'badge-success'}`}>{asset.status}</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Purchased: {asset.purchaseDate}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Details Panel */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        {selectedAssetForMaint ? (
+          <>
+            <div className="glass-card" style={{ padding: '20px' }}>
+              <h3 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}>
+                <TrendingDown size={20} color="var(--accent-primary)" /> Depreciation & Value
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Purchase Price</div><div style={{ fontSize: '1.2rem', fontWeight: 700 }}>${selectedAssetForMaint.purchasePrice}</div></div>
+                <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Book Value</div><div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--accent-success)' }}>${calculateBookValue(selectedAssetForMaint)}</div></div>
+                <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Useful Life</div><div>{selectedAssetForMaint.usefulLife} months</div></div>
+                <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Condition</div><div>{selectedAssetForMaint.condition}</div></div>
+              </div>
+            </div>
+
+            <div className="glass-card" style={{ padding: '20px' }}>
+              <h3 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}>
+                <PenTool size={20} color="var(--accent-warning)" /> Log Maintenance
+              </h3>
+              <form onSubmit={handleAddMaintenance} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <input type="date" required className="form-input" value={maintForm.date} onChange={e => setMaintForm(p => ({...p, date: e.target.value}))} />
+                  <input type="number" required placeholder="Repair Cost ($)" className="form-input" value={maintForm.cost} onChange={e => setMaintForm(p => ({...p, cost: e.target.value}))} />
+                </div>
+                <input type="text" required placeholder="Vendor / Service Center" className="form-input" value={maintForm.vendor} onChange={e => setMaintForm(p => ({...p, vendor: e.target.value}))} />
+                <textarea required rows={3} placeholder="Describe the issue..." className="form-input" value={maintForm.issue} onChange={e => setMaintForm(p => ({...p, issue: e.target.value}))} />
+                <button type="submit" className="btn-filled" style={{ alignSelf: 'flex-start' }}>Log Repair</button>
+              </form>
+
+              {selectedAssetForMaint.maintenanceLogs?.length > 0 && (
+                <div style={{ marginTop: '24px' }}>
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem' }}>Repair History</h4>
+                  {selectedAssetForMaint.maintenanceLogs.map(log => (
+                    <div key={log.id} style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', marginBottom: '8px', fontSize: '0.9rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
+                        <span>{log.date} - {log.vendor}</span>
+                        <span style={{ color: 'var(--accent-danger)' }}>${log.cost}</span>
+                      </div>
+                      <div style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>{log.issue}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="glass-card" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            Select an asset to view depreciation and maintenance.
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, addLog, addToast, currentUser, simulatedRole }) {
   const [activeView, setActiveView] = useState('dashboard')
 
@@ -614,7 +695,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       case 'requests':
         return <AssetRequests assetRequests={assetRequests} employees={employees} handleRequestAction={handleRequestAction} />
       case 'maintenance':
-        return <div>Maintenance view</div>
+        return <AssetMaintenance assets={assets} selectedAssetForMaint={selectedAssetForMaint} setSelectedAssetForMaint={setSelectedAssetForMaint} maintForm={maintForm} setMaintForm={setMaintForm} handleAddMaintenance={handleAddMaintenance} calculateBookValue={calculateBookValue} />
       case 'dashboard':
       default:
         return <AssetDashboard stats={stats} alerts={alerts} setActiveView={setActiveView} assets={assets} employees={employees} />
