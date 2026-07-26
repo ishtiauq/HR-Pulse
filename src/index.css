@@ -987,6 +987,35 @@ a {
 .card-hover { transition: border-color var(--duration-md-sys-short); cursor: default; }
 .card-hover:hover { border-color: var(--color-md-sys-primary); }
 
+/* Table Container */
+.table-container {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+  overflow: hidden;
+}
+
+/* Tab Button Base */
+.tab-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.tab-btn:hover {
+  background: var(--bg-active-tab);
+  color: var(--text-active-tab);
+}
+.tab-btn.active {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
 /* Mobile Responsive Table */
 @media (max-width: 768px) {
   .table-responsive { border: 0; }
@@ -1520,7 +1549,7 @@ a {
   --bg-sidebar: rgba(255, 255, 255, 0.9);
 
   --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-border: rgba(0, 0, 0, 0.15);
   --glass-highlight: rgba(255, 255, 255, 0.9);
 
   --accent-primary: #007aff;
@@ -1549,7 +1578,7 @@ a {
 
   /* Glass Styling Details */
   --glass-bg: rgba(30, 30, 30, 0.5);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.18);
   --glass-highlight: rgba(255, 255, 255, 0.15);
 
   --accent-primary: #0a84ff;   

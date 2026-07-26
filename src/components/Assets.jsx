@@ -127,9 +127,11 @@ function AssetInventory({ filteredAssets, search, setSearch, filterCategory, set
       {/* Search & Action Bar */}
       <div className="glass-card" style={{ padding: '20px', display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', gap: '12px', flex: 1, minWidth: '280px' }}>
-          <div className="search-bar" style={{ position: 'relative', flex: 1 }}>
-            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-            <input type="text" className="form-input" placeholder="Search by name or serial..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '36px' }} />
+          <div className="search-bar" style={{ flex: 1 }}>
+            <div className="tf-icon-leading">
+              <Search size={20} />
+            </div>
+            <input type="text" placeholder="Search by name or serial..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <select className="form-input" value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={{ width: 'auto', minWidth: 140 }}>
             <option value="All">All Categories</option>
@@ -785,16 +787,16 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
           Asset Management
         </h1>
         <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
-          <button className={`tab-btn ${activeView === 'dashboard' ? 'active' : ''}`} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeView === 'dashboard' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'dashboard' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }} onClick={() => setActiveView('dashboard')}>Dashboard</button>
-          <button className={`tab-btn ${activeView === 'inventory' ? 'active' : ''}`} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeView === 'inventory' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'inventory' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }} onClick={() => setActiveView('inventory')}>Inventory</button>
-          <button className={`tab-btn ${activeView === 'assignments' ? 'active' : ''}`} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeView === 'assignments' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'assignments' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }} onClick={() => setActiveView('assignments')}>Assignments</button>
-          <button className={`tab-btn ${activeView === 'requests' ? 'active' : ''}`} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeView === 'requests' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'requests' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer', position: 'relative' }} onClick={() => setActiveView('requests')}>
+          <button className={`tab-btn ${activeView === 'dashboard' ? 'active' : ''}`} style={{ background: activeView === 'dashboard' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'dashboard' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveView('dashboard')}>Dashboard</button>
+          <button className={`tab-btn ${activeView === 'inventory' ? 'active' : ''}`} style={{ background: activeView === 'inventory' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'inventory' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveView('inventory')}>Inventory</button>
+          <button className={`tab-btn ${activeView === 'assignments' ? 'active' : ''}`} style={{ background: activeView === 'assignments' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'assignments' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveView('assignments')}>Assignments</button>
+          <button className={`tab-btn ${activeView === 'requests' ? 'active' : ''}`} style={{ background: activeView === 'requests' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'requests' ? 'var(--text-primary)' : 'var(--text-secondary)', position: 'relative' }} onClick={() => setActiveView('requests')}>
             Requests
             {assetRequests?.filter(r => r.status === 'Pending').length > 0 && (
               <div style={{ position: 'absolute', top: -5, right: -5, background: 'var(--accent-danger)', color: '#fff', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '10px' }}>{assetRequests.filter(r => r.status === 'Pending').length}</div>
             )}
           </button>
-          <button className={`tab-btn ${activeView === 'maintenance' ? 'active' : ''}`} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeView === 'maintenance' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'maintenance' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }} onClick={() => setActiveView('maintenance')}>Maintenance</button>
+          <button className={`tab-btn ${activeView === 'maintenance' ? 'active' : ''}`} style={{ background: activeView === 'maintenance' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'maintenance' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveView('maintenance')}>Maintenance</button>
         </div>
       </div>
 
