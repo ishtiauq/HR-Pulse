@@ -7,7 +7,6 @@ import { formatDate } from '../services/date.js'
 const CATEGORIES = [
   { id: 'hr-docs', label: 'HR Documents', icon: Folder, color: '#3b82f6' },
   { id: 'policies', label: 'Policies', icon: FileText, color: '#10b981' },
-  { id: 'reports', label: 'Reports', icon: FileSpreadsheet, color: '#f59e0b' },
   { id: 'forms', label: 'Forms', icon: FileText, color: '#8b5cf6' },
   { id: 'training', label: 'Training', icon: FileArchive, color: '#ec4899' },
   { id: 'other', label: 'Other', icon: File, color: '#64748b' },
@@ -110,7 +109,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
     }
   }
 
-  const getCategoryInfo = (catId) => CATEGORIES.find(c => c.id === catId) || CATEGORIES[5]
+  const getCategoryInfo = (catId) => CATEGORIES.find(c => c.id === catId) || CATEGORIES[CATEGORIES.length - 1]
 
   const filteredDocs = documents.filter(d => {
     const matchSearch = !search || d.name.toLowerCase().includes(search.toLowerCase()) || (d.description || '').toLowerCase().includes(search.toLowerCase())

@@ -7,7 +7,6 @@ import Login from './components/Login.jsx'
 import Payroll from './components/Payroll.jsx'
 import Settings from './components/Settings.jsx'
 import Attendance from './components/Attendance.jsx'
-import Reports from './components/Reports.jsx'
 import Expenses from './components/Expenses.jsx'
 import Announcements from './components/Announcements.jsx'
 import Assets from './components/Assets.jsx'
@@ -18,7 +17,7 @@ import TooltipPopover from './components/TooltipPopover.jsx'
 import { readMeta, writeMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBackup, createBackup } from './services/googleDrive.js'
 import { clearLocalCache } from './services/db.js'
 import { validateDatabase } from './services/validator.js'
-import { Search, LayoutDashboard, Users, CreditCard, CalendarCheck, Receipt, BarChart3, Settings as SettingsIcon, HardDrive, FileText, Megaphone, CalendarDays, Monitor, Database, User, History, Moon, Trash2, Sun, Menu } from 'lucide-react'
+import { Search, LayoutDashboard, Users, CreditCard, CalendarCheck, Receipt, Settings as SettingsIcon, HardDrive, FileText, Megaphone, CalendarDays, Monitor, Database, User, History, Moon, Trash2, Sun, Menu } from 'lucide-react'
 import { useModal } from './services/useModal.js'
 
 const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
@@ -84,7 +83,6 @@ const allNavItems = [
   { id: 'attendance', label: 'Leaves & Attendance', icon: <CalendarCheck size={18} /> },
   { id: 'expenses', label: 'Expenses', icon: <Receipt size={18} /> },
   { id: 'assets', label: 'Assets', icon: <Monitor size={18} /> },
-  { id: 'reports', label: 'Reports', icon: <BarChart3 size={18} /> },
   { id: 'settings', label: 'Settings', icon: <SettingsIcon size={18} /> },
   { id: 'drive', label: 'Drive Sync', icon: <Database size={18} /> },
 ]
@@ -167,10 +165,10 @@ export default function App() {
       return ['dashboard', 'attendance', 'expenses', 'calendar'].includes(resource)
     }
     if (simulatedRole === 'Payroll Manager') {
-      return ['dashboard', 'employees', 'payroll', 'reports', 'expenses', 'calendar', 'documents'].includes(resource)
+      return ['dashboard', 'employees', 'payroll', 'expenses', 'calendar', 'documents'].includes(resource)
     }
     if (simulatedRole === 'HR Manager') {
-      return ['dashboard', 'employees', 'attendance', 'payroll', 'reports', 'expenses', 'calendar', 'documents'].includes(resource)
+      return ['dashboard', 'employees', 'attendance', 'payroll', 'expenses', 'calendar', 'documents'].includes(resource)
     }
     return false
   }
@@ -455,7 +453,6 @@ export default function App() {
     if (saved) { try { return JSON.parse(saved) } catch (e) { console.error(e) } }
     return [
       { id: 'doc-1', name: 'Employee Handbook 2026', category: 'hr-docs', description: 'Official company policies and procedures handbook', fileName: 'Employee_Handbook_2026.pdf', fileSize: 2450000, fileType: 'application/pdf', uploadedBy: 'EMP-101', uploadedAt: new Date().toISOString() },
-      { id: 'doc-2', name: 'Q2 Financial Report', category: 'reports', description: 'Quarterly financial performance report', fileName: 'Q2_Financial_Report.xlsx', fileSize: 1800000, fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', uploadedBy: 'EMP-101', uploadedAt: new Date().toISOString() },
     ]
   })
 
@@ -1371,17 +1368,6 @@ export default function App() {
             simulatedRole={simulatedRole}
           />
         )
-      case 'reports':
-        return (
-          <Reports 
-            employees={employees}
-            payroll={payroll}
-            attendance={attendance}
-            addLog={addLog}
-            addToast={addToast}
-            simulatedRole={simulatedRole}
-          />
-        )
       case 'expenses':
         return (
           <Expenses
@@ -1492,7 +1478,6 @@ export default function App() {
       { id: 'page-calendar', category: 'Pages', label: 'Go to Calendar', action: () => setCurrentView('calendar'), keywords: 'calendar events meetings holidays schedule' },
       { id: 'page-documents', category: 'Pages', label: 'Go to Documents', action: () => setCurrentView('documents'), keywords: 'documents files upload download manager' },
       { id: 'page-assets', category: 'Pages', label: 'Go to Assets', action: () => setCurrentView('assets'), keywords: 'assets inventory devices macbook laptop' },
-      { id: 'page-reports', category: 'Pages', label: 'Go to Reports', action: () => setCurrentView('reports'), keywords: 'reports analytics charts download' },
       { id: 'page-expenses', category: 'Pages', label: 'Go to Expenses', action: () => setCurrentView('expenses'), keywords: 'expenses claims reimbursements money' },
       { id: 'page-settings', category: 'Pages', label: 'Go to Settings', action: () => setCurrentView('settings'), keywords: 'settings admin config role audit' },
       { id: 'page-drive', category: 'Pages', label: 'Go to Google Drive Sync', action: () => setCurrentView('drive'), keywords: 'drive sync backup restore cloud' }
