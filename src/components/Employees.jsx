@@ -593,9 +593,9 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                       )}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, flex: 1 }}>
-                      <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: 'var(--md-bw-on-surface)', overflowWrap: 'break-word' }}>{emp.name}</h4>
-                      <span style={{ fontSize: '11px', color: 'var(--md-bw-on-surface-variant)', fontWeight: 500, overflowWrap: 'break-word' }}>{emp.role}</span>
-                      <span style={{ fontSize: '11px', color: 'var(--md-bw-on-surface-variant)', opacity: 0.75, overflowWrap: 'break-word' }}>{emp.department}</span>
+                      <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: 'var(--md-bw-on-surface)', whiteSpace: 'nowrap' }}>{emp.name}</h4>
+                      <span style={{ fontSize: '11px', color: 'var(--md-bw-on-surface-variant)', fontWeight: 500, whiteSpace: 'nowrap' }}>{emp.role}</span>
+                      <span style={{ fontSize: '11px', color: 'var(--md-bw-on-surface-variant)', opacity: 0.75, whiteSpace: 'nowrap' }}>{emp.department}</span>
                     </div>
                   </div>
                   
