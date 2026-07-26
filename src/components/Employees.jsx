@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Users, Mail, Eye, ChevronDown } from 'lucide-react'
+import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Users, Mail, Eye, ChevronDown, Download } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
@@ -13,6 +13,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
   const [viewingEmployee, setViewingEmployee] = useState(null)
   const [imageErrors, setImageErrors] = useState({})
   const [expandedCardId, setExpandedCardId] = useState(null)
+  const [selectedIds, setSelectedIds] = useState(new Set())
   useModal(() => setViewingEmployee(null))
 
   useEffect(() => {
@@ -216,6 +217,70 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
     if (addAuditLog) addAuditLog('DELETE', 'Employee', `Deleted employee profile for ${name} (${id})`)
   }
 
+  const toggleSelect = (id, e) => {
+    e.stopPropagation()
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    setSelectedIds(prev => {
+      if (prev.size > 0 && [...prev].every(id => filteredEmployees.some(emp => emp.id === id))) {
+        return new Set()
+      }
+      return new Set(filteredEmployees.map(emp => emp.id))
+    })
+  }
+
+  const clearSelection = () => setSelectedIds(new Set())
+
+  const handleBulkDelete = () => {
+    const count = selectedIds.size
+    if (count === 0) return
+    const confirmed = window.confirm(`Delete ${count} selected employee(s)? This action cannot be undone.`)
+    if (!confirmed) return
+    const deletedNames = employees.filter(emp => selectedIds.has(emp.id)).map(emp => emp.name).join(', ')
+    setEmployees(prev => prev.filter(emp => !selectedIds.has(emp.id)))
+    addLog('Bulk deleted employees', `Removed ${count} employees: ${deletedNames}`)
+    if (addAuditLog) addAuditLog('DELETE_MANY', 'Employee', `Bulk deleted ${count} employee records`)
+    clearSelection()
+  }
+
+  const handleDownloadSelected = () => {
+    const count = selectedIds.size
+    if (count === 0) return
+    const selected = employees.filter(emp => selectedIds.has(emp.id))
+    const headers = ['ID', 'Name', 'Role', 'Department', 'Email', 'Status', 'DOB', 'Joining Date']
+    const csvRows = [headers.join(',')]
+    selected.forEach(emp => {
+      csvRows.push([
+        emp.id,
+        `"${(emp.name || '').replace(/"/g, '""')}"`,
+        `"${(emp.role || '').replace(/"/g, '""')}"`,
+        `"${(emp.department || '').replace(/"/g, '""')}"`,
+        emp.email || '',
+        emp.status || '',
+        emp.dob || '',
+        emp.joiningDate || ''
+      ].join(','))
+    })
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `selected_employees_${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    addLog('Downloaded employee data', `Exported ${count} employee records as CSV`)
+    clearSelection()
+  }
+
   // Filter list
   const filteredEmployees = employees.filter(emp => {
     const matchesSearch = emp.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || 
@@ -348,6 +413,17 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
         flexWrap: 'wrap',
         gap: '16px'
       }}>
+        {/* Select All */}
+        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '13px', color: 'var(--md-bw-on-surface-variant)', userSelect: 'none', flexShrink: 0 }}>
+          <input
+            type="checkbox"
+            checked={filteredEmployees.length > 0 && selectedIds.size === filteredEmployees.length}
+            onChange={toggleSelectAll}
+            style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: 'var(--md-bw-primary)', margin: 0 }}
+          />
+          Select All
+        </label>
+
         {/* Search */}
         <div className="search-bar" style={{ flex: '1', maxWidth: '400px' }}>
           <div className="tf-icon-leading">
@@ -419,6 +495,45 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
         </div>
       )}
 
+      {/* Selection Bar */}
+      {selectedIds.size > 0 && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '10px 16px',
+          borderRadius: '12px',
+          background: 'var(--md-bw-primary-container)',
+          color: 'var(--md-bw-on-primary-container)',
+          fontSize: '13px',
+          fontWeight: 500,
+        }}>
+          <Check size={16} style={{ flexShrink: 0 }} />
+          <span style={{ flex: 1 }}>{selectedIds.size} selected</span>
+          <button
+            className="btn btn-filled"
+            onClick={handleBulkDelete}
+            style={{ height: '30px', minHeight: '30px', padding: '0 12px', fontSize: '11px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#dc3545', color: '#fff', border: 'none', cursor: 'pointer' }}
+          >
+            <Trash2 size={11} /> Delete ({selectedIds.size})
+          </button>
+          <button
+            className="btn btn-filled"
+            onClick={handleDownloadSelected}
+            style={{ height: '30px', minHeight: '30px', padding: '0 12px', fontSize: '11px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'var(--md-bw-primary)', color: '#fff', border: 'none', cursor: 'pointer' }}
+          >
+            <Download size={11} /> Download CSV
+          </button>
+          <button
+            onClick={clearSelection}
+            style={{ height: '30px', minHeight: '30px', padding: '0 8px', fontSize: '11px', borderRadius: '6px', background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', opacity: 0.7 }}
+            title="Clear selection"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       {/* Directory Grid */}
       {filteredEmployees.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -440,8 +555,19 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               <div className="macos-card employee-card" style={{
                 padding: '14px 16px',
                 display: 'flex', flexDirection: 'column', cursor: 'pointer',
+                position: 'relative',
               }} onClick={() => setViewingEmployee(emp)}>
                 
+                {/* Checkbox — absolutely positioned so it doesn't steal space from text */}
+                <div onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', top: '12px', left: '10px', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '4px', background: selectedIds.has(emp.id) ? 'var(--md-bw-primary)' : 'rgba(255,255,255,0.85)', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(emp.id)}
+                    onChange={(e) => toggleSelect(emp.id, e)}
+                    style={{ cursor: 'pointer', width: '14px', height: '14px', accentColor: 'var(--md-bw-primary)', margin: 0, opacity: 0.85 }}
+                  />
+                </div>
+
                 {/* Row 1: Base content — avatar + info | status badge */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0, flex: 1 }}>
