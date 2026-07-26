@@ -3,7 +3,7 @@ import { Save, Settings as SettingsIcon, DollarSign, Sliders, Info, Percent, Bui
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDateTime } from '../services/date.js'
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
+
 
 const pInp = { width: '100%', padding: '10px 14px', borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', transition: 'border 0.15s' }
 const pSel = { width: '100%', padding: '10px 14px', borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', cursor: 'pointer', appearance: 'none' }
@@ -106,9 +106,6 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     }, 1000)
   }
 
-  const SEG_COLORS = ['#0062E6', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14', '#20c997', '#e83e8c', '#17a2b8', '#6610f2']
-  const getSegmentColor = (_, index) => SEG_COLORS[index % SEG_COLORS.length]
-
   const handleLogoUpload = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -197,20 +194,6 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               </div>
             )}
 
-            {salaryStructure.length > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie data={salaryStructure.map(item => ({ ...item, value: item.percentage }))}
-                      cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={2}>
-                      {salaryStructure.map((item, index) => (
-                        <Cell key={item.id} fill={getSegmentColor(item, index)} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {salaryStructure.length === 0 ? (
