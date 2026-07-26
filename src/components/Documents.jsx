@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { useModal } from '../services/useModal.js'
-import { FileText, Search, Upload, Download, Trash2, Folder, X, FileSpreadsheet, FileImage, FileArchive, File } from 'lucide-react'
+import { FileText, Search, Upload, Download, Trash2, Folder, X, FileSpreadsheet, FileImage, FileArchive, File, Settings, Pencil, ChevronLeft, ChevronRight } from 'lucide-react'
 import AdSlot from './AdSlot'
 import { formatDate } from '../services/date.js'
 
-const CATEGORIES = [
+const defaultCategories = [
   { id: 'hr-docs', label: 'HR Documents', icon: Folder, color: '#3b82f6' },
   { id: 'policies', label: 'Policies', icon: FileText, color: '#10b981' },
   { id: 'forms', label: 'Forms', icon: FileText, color: '#8b5cf6' },
@@ -35,10 +35,44 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [editingDoc, setEditingDoc] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+  const [categories, setCategories] = useState(defaultCategories)
+  const [showCategoryModal, setShowCategoryModal] = useState(false)
+  const [editingCategory, setEditingCategory] = useState(null)
+  const [catFormName, setCatFormName] = useState('')
+  const [catFormColor, setCatFormColor] = useState('#3b82f6')
+  const categoryScrollRef = useRef(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+
+  const checkCategoryScroll = () => {
+    const el = categoryScrollRef.current
+    if (el) {
+      setCanScrollLeft(el.scrollLeft > 0)
+      setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2)
+    }
+  }
+
+  useEffect(() => {
+    checkCategoryScroll()
+    const el = categoryScrollRef.current
+    if (el) {
+      el.addEventListener('scroll', checkCategoryScroll)
+      return () => el.removeEventListener('scroll', checkCategoryScroll)
+    }
+  }, [categories])
+
+  const scrollCategory = (dir) => {
+    const el = categoryScrollRef.current
+    if (el) el.scrollBy({ left: dir * 200, behavior: 'smooth' })
+  }
+
   const fileInputRef = useRef(null)
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768)
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768)
+      setTimeout(checkCategoryScroll, 50)
+    }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
@@ -116,7 +150,38 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
     }
   }
 
-  const getCategoryInfo = (catId) => CATEGORIES.find(c => c.id === catId) || CATEGORIES[CATEGORIES.length - 1]
+  const handleSaveCategory = () => {
+    if (!catFormName.trim()) return addToast('Category name is required', 'warning')
+    if (editingCategory) {
+      setCategories(prev => prev.map(c =>
+        c.id === editingCategory.id ? { ...c, label: catFormName.trim(), color: catFormColor } : c
+      ))
+      addToast('Category updated', 'success')
+    } else {
+      setCategories(prev => [...prev, { id: `cat-${Date.now()}`, label: catFormName.trim(), icon: File, color: catFormColor }])
+      addToast('Category added', 'success')
+    }
+    setShowCategoryModal(false)
+  }
+
+  const handleDeleteCategory = (catId) => {
+    const docsInCategory = documents.filter(d => d.category === catId)
+    if (docsInCategory.length > 0) {
+      if (!window.confirm(`"${getCategoryInfo(catId)?.label}" category has ${docsInCategory.length} document(s). Moving them to the first available category. Delete anyway?`)) return
+      const remaining = categories.filter(c => c.id !== catId)
+      const fallback = remaining.length > 0 ? remaining[0].id : 'other'
+      setDocuments(prev => prev.map(d =>
+        d.category === catId ? { ...d, category: fallback } : d
+      ))
+    } else {
+      if (!window.confirm(`Delete "${getCategoryInfo(catId)?.label}" category?`)) return
+    }
+    setCategories(prev => prev.filter(c => c.id !== catId))
+    if (selectedCategory === catId) setSelectedCategory('all')
+    addToast('Category deleted', 'info')
+  }
+
+  const getCategoryInfo = (catId) => categories.find(c => c.id === catId) || categories[categories.length - 1]
 
   const filteredDocs = documents.filter(d => {
     const matchSearch = !search || d.name.toLowerCase().includes(search.toLowerCase()) || (d.description || '').toLowerCase().includes(search.toLowerCase())
@@ -183,20 +248,40 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
           style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.9rem' }} />
       </div>
 
-      <div className="glass-card" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '20px', padding: '12px 16px', borderRadius: '12px' }}>
-        <button onClick={() => setSelectedCategory('all')}
-          style={{ padding: '6px 14px', borderRadius: '20px', background: selectedCategory === 'all' ? 'var(--md-bw-primary)' : 'var(--md-bw-surface-variant)', color: selectedCategory === 'all' ? 'var(--md-bw-on-primary)' : 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: selectedCategory === 'all' ? 'none' : '1px solid var(--md-bw-outline)' }}>
-          All
-        </button>
-        {CATEGORIES.map(cat => {
-          const isActive = selectedCategory === cat.id
-          return (
-            <button key={cat.id} onClick={() => setSelectedCategory(cat.id)}
-              style={{ padding: '6px 14px', borderRadius: '20px', background: isActive ? cat.color : 'var(--md-bw-surface-variant)', color: isActive ? '#fff' : 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: isActive ? 'none' : '1px solid var(--md-bw-outline)' }}>
-              {cat.label}
-            </button>
-          )
-        })}
+      <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '0', marginBottom: '20px', padding: '12px 4px 12px 16px', borderRadius: '12px' }}>
+        {canScrollLeft && (
+          <button onClick={() => scrollCategory(-1)}
+            style={{ flexShrink: 0, background: 'var(--md-bw-surface-variant)', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--md-bw-on-surface)', marginRight: '2px', zIndex: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}>
+            <ChevronLeft size={18} />
+          </button>
+        )}
+        <div ref={categoryScrollRef} style={{ display: 'flex', gap: '6px', flexWrap: 'nowrap', overflow: 'hidden', scrollBehavior: 'smooth', flex: 1 }}>
+          <button onClick={() => setSelectedCategory('all')}
+            style={{ flexShrink: 0, padding: '6px 14px', borderRadius: '20px', background: selectedCategory === 'all' ? 'var(--md-bw-primary)' : 'var(--md-bw-surface-variant)', color: selectedCategory === 'all' ? 'var(--md-bw-on-primary)' : 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: selectedCategory === 'all' ? 'none' : '1px solid var(--md-bw-outline)' }}>
+            All
+          </button>
+          {categories.map(cat => {
+            const isActive = selectedCategory === cat.id
+            return (
+              <button key={cat.id} onClick={() => setSelectedCategory(cat.id)}
+                style={{ flexShrink: 0, padding: '6px 14px', borderRadius: '20px', background: isActive ? cat.color : 'var(--md-bw-surface-variant)', color: isActive ? '#fff' : 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: isActive ? 'none' : '1px solid var(--md-bw-outline)', transition: 'border-color var(--transition-fast), background var(--transition-fast)' }}>
+                {cat.label}
+              </button>
+            )
+          })}
+          <button onClick={() => { setEditingCategory(null); setCatFormName(''); setCatFormColor('#3b82f6'); setShowCategoryModal(true) }}
+            style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '20px', background: 'transparent', color: 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: '1px solid var(--md-bw-outline)', display: 'flex', alignItems: 'center', gap: '4px', transition: 'border-color var(--transition-fast), color var(--transition-fast)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.color = 'var(--accent-primary)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--md-bw-outline)'; e.currentTarget.style.color = 'var(--md-bw-on-surface)' }}>
+            <Settings size={14} /> Manage
+          </button>
+        </div>
+        {canScrollRight && (
+          <button onClick={() => scrollCategory(1)}
+            style={{ flexShrink: 0, background: 'var(--md-bw-surface-variant)', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--md-bw-on-surface)', marginLeft: '2px', zIndex: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}>
+            <ChevronRight size={18} />
+          </button>
+        )}
       </div>
 
       {filteredDocs.length === 0 ? (
@@ -315,7 +400,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={{ fontSize: '0.82rem', fontWeight: 600, color: theme.secondary }}>Category</label>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {CATEGORIES.map(cat => {
+                  {categories.map(cat => {
                     const isActive = formCategory === cat.id
                     const Icon = cat.icon
                     return (
@@ -390,6 +475,104 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {showCategoryModal && (
+        <div className="modal-overlay" onClick={() => setShowCategoryModal(false)}
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 10000, padding: isMobile ? '12px' : '20px'
+          }}>
+          <div className="modal-container"
+            style={{ maxWidth: isMobile ? '100%' : '480px', width: '100%', padding: 0, borderRadius: isMobile ? '12px' : '14px', background: theme.bg, boxShadow: '0 8px 32px rgba(0,0,0,0.3)', animation: 'modalFadeIn 0.2s ease', margin: isMobile ? '10px' : '0' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="modal-header" style={{ padding: isMobile ? '16px' : '20px 24px', borderBottom: `1px solid ${theme.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ margin: 0, fontSize: '1.1rem', color: theme.text }}>Manage Categories</h2>
+              <button className="modal-close" onClick={() => setShowCategoryModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.muted, padding: '4px' }}><X size={20} /></button>
+            </div>
+            <div style={{ padding: isMobile ? '16px' : '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Category list */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: theme.secondary }}>Categories</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '240px', overflowY: 'auto' }}>
+                  {categories.filter(c => c.id !== 'other').map(cat => (
+                    <div key={cat.id} style={{
+                      display: 'flex', alignItems: 'center', gap: '10px',
+                      padding: '8px 12px', borderRadius: '8px',
+                      background: theme.inputBg, border: `1px solid ${theme.border}`
+                    }}>
+                      <div style={{
+                        width: '24px', height: '24px', borderRadius: '6px',
+                        background: cat.color, flexShrink: 0
+                      }} />
+                      <span style={{ flex: 1, fontSize: '0.9rem', fontWeight: 500, color: theme.text }}>{cat.label}</span>
+                      <button onClick={() => { setEditingCategory(cat); setCatFormName(cat.label); setCatFormColor(cat.color) }}
+                        style={{ background: 'none', border: 'none', padding: '4px', cursor: 'pointer', color: theme.muted, display: 'flex' }}>
+                        <Pencil size={14} />
+                      </button>
+                      <button onClick={() => handleDeleteCategory(cat.id)}
+                        style={{ background: 'none', border: 'none', padding: '4px', cursor: 'pointer', color: theme.muted, display: 'flex' }}>
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {categories.filter(c => c.id === 'other').map(cat => (
+                    <div key={cat.id} style={{
+                      display: 'flex', alignItems: 'center', gap: '10px',
+                      padding: '8px 12px', borderRadius: '8px',
+                      background: theme.inputBg, border: `1px solid ${theme.border}`, opacity: 0.6
+                    }}>
+                      <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: cat.color, flexShrink: 0 }} />
+                      <span style={{ flex: 1, fontSize: '0.9rem', fontWeight: 500, color: theme.text }}>{cat.label}</span>
+                      <span style={{ fontSize: '0.75rem', color: theme.muted }}>Protected</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ borderTop: `1px solid ${theme.border}`, paddingTop: '16px' }}>
+                <h3 style={{ margin: '0 0 12px 0', fontSize: '0.95rem', fontWeight: 600, color: theme.text }}>{editingCategory ? 'Edit Category' : 'Add New Category'}</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <input type="text" value={catFormName} onChange={e => setCatFormName(e.target.value)}
+                    placeholder={editingCategory ? 'Category name' : 'e.g. Payroll'}
+                    style={{
+                      padding: '10px 14px', borderRadius: '8px', border: `1px solid ${theme.border}`,
+                      background: theme.inputBg, color: theme.text, fontSize: '0.95rem',
+                      outline: 'none', transition: 'border-color var(--transition-fast)'
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
+                    onBlur={(e) => e.currentTarget.style.borderColor = theme.border}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSaveCategory()} />
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {['#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#64748b', '#f59e0b'].map(color => (
+                      <button key={color} type="button" onClick={() => setCatFormColor(color)}
+                        style={{
+                          width: '32px', height: '32px', borderRadius: '50%', background: color,
+                          border: catFormColor === color ? '3px solid var(--md-bw-primary)' : `2px solid ${color}`,
+                          cursor: 'pointer', outline: catFormColor === color ? `2px solid ${color}` : 'none',
+                          outlineOffset: '2px', transition: 'transform var(--transition-fast)',
+                          transform: catFormColor === color ? 'scale(1.15)' : 'scale(1)'
+                        }} />
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                    {editingCategory && (
+                      <button type="button" className="btn btn-secondary" onClick={() => { setEditingCategory(null); setCatFormName(''); setCatFormColor('#3b82f6') }}
+                        style={{ fontSize: '0.85rem', padding: '8px 14px' }}>
+                        Cancel
+                      </button>
+                    )}
+                    <button type="button" className="btn btn-primary" onClick={handleSaveCategory}
+                      style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', padding: '8px 14px' }}>
+                      {editingCategory ? 'Save' : 'Add'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
