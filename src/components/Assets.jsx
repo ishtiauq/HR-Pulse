@@ -340,6 +340,41 @@ function AssignAssetModal({ showAssignModal, setShowAssignModal, assignTarget, a
   )
 }
 
+function AssetRequests({ assetRequests, employees, handleRequestAction }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {assetRequests.length === 0 ? (
+        <div className="glass-card" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>No pending asset requests.</div>
+      ) : (
+        assetRequests.map(req => {
+          const emp = employees.find(e => e.id === req.employeeId) || { name: 'Unknown' }
+          return (
+            <div key={req.id} className="glass-card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontWeight: 600 }}>{emp.name}</span>
+                  <span>requested a</span>
+                  <span style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>{req.category}</span>
+                  <span className={`badge ${req.urgency === 'High' ? 'badge-danger' : req.urgency === 'Medium' ? 'badge-warning' : 'badge-info'}`}>{req.urgency}</span>
+                </div>
+                <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>"{req.justification}"</div>
+              </div>
+              {req.status === 'Pending' ? (
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  <button className="btn-filled" style={{ fontSize: '0.85rem' }} onClick={() => handleRequestAction(req.id, 'Approved')}>Approve & Assign</button>
+                  <button className="btn-tonal" style={{ fontSize: '0.85rem', color: 'var(--accent-danger)' }} onClick={() => handleRequestAction(req.id, 'Rejected')}>Reject</button>
+                </div>
+              ) : (
+                <span className={`badge ${req.status === 'Approved' ? 'badge-success' : 'badge-danger'}`}>{req.status}</span>
+              )}
+            </div>
+          )
+        })
+      )}
+    </div>
+  )
+}
+
 export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, addLog, addToast, currentUser, simulatedRole }) {
   const [activeView, setActiveView] = useState('dashboard')
 
@@ -577,7 +612,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       case 'assignments':
         return <AssetAssignments assets={assets} employees={employees} assignForm={assignForm} setAssignForm={setAssignForm} setAssignTarget={setAssignTarget} assignTarget={assignTarget} showAssignModal={showAssignModal} setShowAssignModal={setShowAssignModal} handleAssignAsset={handleAssignAsset} handleReturnAsset={handleReturnAsset} generateAgreementPDF={generateAgreementPDF} />
       case 'requests':
-        return <div>Requests view</div>
+        return <AssetRequests assetRequests={assetRequests} employees={employees} handleRequestAction={handleRequestAction} />
       case 'maintenance':
         return <div>Maintenance view</div>
       case 'dashboard':
