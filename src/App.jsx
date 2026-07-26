@@ -1672,7 +1672,6 @@ export default function App() {
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.4)',
               borderRadius: '8px',
               cursor: 'pointer',
-              color: 'var(--md-bw-on-surface-variant)',
               flexShrink: 0,
               position: 'relative',
               overflow: 'hidden',
@@ -1695,7 +1694,6 @@ export default function App() {
               {!isCollapsed && (
                 <span className="btn-label" style={{
                   font: "500 13px/20px 'Roboto'",
-                  color: 'var(--md-bw-on-surface-variant)',
                   whiteSpace: 'nowrap',
                   opacity: 1,
                   transition: 'opacity 0.2s ease'
@@ -1967,11 +1965,6 @@ export default function App() {
               <span className="btn-label" style={{
                 font: "500 13px/20px 'Roboto'",
                 color: '#ffffff',
-                whiteSpace: 'nowrap',
-                opacity: isCollapsed ? 0 : 1,
-                transition: 'opacity 0.2s ease, width 0.3s ease',
-                width: isCollapsed ? 0 : 'auto'
-              }}>Log Out</span>
                 whiteSpace: 'nowrap',
                 opacity: isCollapsed ? 0 : 1,
                 transition: 'opacity 0.2s ease, width 0.3s ease',

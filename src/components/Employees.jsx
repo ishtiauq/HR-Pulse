@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Cpu, Users, Mail, Eye } from 'lucide-react'
+import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Users, Mail, Eye, ChevronDown } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
@@ -7,22 +7,6 @@ import { formatDate } from '../services/date.js'
 export default function Employees({ employees, setEmployees, addLog, driveConnected, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast, selectedEmployeeId, setSelectedEmployeeId }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
-  const [columnCount, setColumnCount] = useState(() => {
-    const w = window.innerWidth
-    if (w < 600) return 1
-    if (w < 900) return 2
-    return 3
-  })
-
-  useEffect(() => {
-    const onResize = () => {
-      const w = window.innerWidth
-      const n = w < 600 ? 1 : w < 900 ? 2 : 3
-      setColumnCount(n)
-    }
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
   const [deptFilter, setDeptFilter] = useState('All')
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingEmployee, setEditingEmployee] = useState(null)
@@ -241,9 +225,6 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
     return matchesSearch && matchesDept
   })
 
-  const empColumns = Array.from({ length: columnCount }, () => [])
-  filteredEmployees.forEach((emp, i) => empColumns[i % columnCount].push(emp))
-
   const handleApproveProfileEdit = (editId) => {
     const editReq = pendingProfileEdits.find(e => e.id === editId)
     if (!editReq) return
@@ -334,32 +315,6 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               }
             }}
           />
-          <button className="btn btn-outlined" onClick={() => {
-            const mockEmps = [];
-            for (let i = 1; i <= 100; i++) {
-              const id = `emp-mock-${1000 + i}`;
-              mockEmps.push({
-                id,
-                name: `Mock Employee ${i}`,
-                role: i % 3 === 0 ? 'Developer' : i % 3 === 1 ? 'Designer' : 'Manager',
-                department: i % 2 === 0 ? 'Engineering' : 'Product',
-                email: `mock.emp.${i}@company.com`,
-                status: 'Active',
-                salary: 5000 + (i * 50),
-                avatar: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200`,
-                updated_at: new Date().toISOString()
-              });
-            }
-            setEmployees(prev => {
-              const existingIds = new Set(prev.map(e => e.id));
-              const filteredMock = mockEmps.filter(e => !existingIds.has(e.id));
-              return [...prev, ...filteredMock];
-            });
-            addToast('Successfully generated 100 mock employees.', 'success');
-          }}>
-            <Cpu size={18} className="btn-icon-start" style={{ marginRight: '8px' }} />
-            Mock
-          </button>
           <button 
             className="btn btn-filled" 
             onClick={handleOpenAddForm}
@@ -472,116 +427,128 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
           <button onClick={() => {setSearchTerm(''); setDeptFilter('All')}} className="btn btn-filled">Clear Filters</button>
         </div>
       ) : (
-        <div className="employee-grid" style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-          {empColumns.map((col, colIdx) => (
-          <div key={colIdx} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px', minWidth: 0 }}>
-            {col.map(emp => {
-              const isExpanded = expandedCardId === emp.id
-              return (
-              <div key={emp.id} className="employee-card-wrapper"
-                onMouseEnter={() => setExpandedCardId(emp.id)}
-                onMouseLeave={() => setExpandedCardId(null)}
-                style={{
-                  position: 'relative',
-                  zIndex: isExpanded ? 2 : 1,
-                }}
-              >
-                <div className="macos-card employee-card" style={{
-                  padding: isExpanded ? '20px 20px 24px' : '16px',
-                  display: 'flex', flexDirection: 'column', gap: isExpanded ? '14px' : '16px', cursor: 'pointer',
-                  transition: 'padding 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), gap 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                  boxShadow: isExpanded
-                    ? '0 16px 48px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.08)'
-                    : 'var(--glass-shadow)',
-                }} onClick={() => setViewingEmployee(emp)}>
-                  
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0, flex: 1 }}>
-                      <div style={{
-                        width: '64px', height: '64px',
-                        borderRadius: '16px', overflow: 'hidden', position: 'relative',
-                        border: '1px solid var(--glass-border)', flexShrink: 0,
-                        background: (!emp.avatar || imageErrors[emp.id]) ? 'rgba(0,0,0,0.04)' : '#f3f4f6',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: 'var(--md-bw-on-surface-variant)', fontWeight: 700, fontSize: '1.2rem',
-                        boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)',
-                      }}>
-                        {(!emp.avatar || imageErrors[emp.id]) ? (
-                          <span>{getAvatarFallback(emp.name).initials}</span>
-                        ) : (
-                          <img src={emp.avatar} alt={emp.name} style={{
-                              width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0,
-                              transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`,
-                              transformOrigin: 'center', userSelect: 'none', pointerEvents: 'none'
-                            }}
-                            onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))}
-                          />
-                        )}
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, flex: 1 }}>
-                        <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: 'var(--md-bw-on-surface)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.name}</h4>
-                        <span style={{ fontSize: '12px', color: 'var(--md-bw-on-surface-variant)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>{emp.role}</span>
-                        <span style={{ fontSize: '11px', color: 'var(--md-bw-on-surface-variant)', opacity: 0.75, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.department}</span>
-                      </div>
-                    </div>
-                    
-                    <span style={{ 
-                      height: '20px', padding: '0 8px', fontSize: '10px', fontWeight: 600, borderRadius: '10px',
-                      display: 'inline-flex', alignItems: 'center', flexShrink: 0, marginTop: '2px',
-                      background: emp.status === 'Active' ? 'rgba(40, 167, 69, 0.1)' : (emp.status === 'On Leave' ? 'rgba(240, 173, 78, 0.1)' : 'rgba(220, 53, 69, 0.1)'),
-                      color: emp.status === 'Active' ? '#28a745' : (emp.status === 'On Leave' ? '#f0ad4e' : '#dc3545'),
-                      border: emp.status === 'Active' ? '1px solid rgba(40, 167, 69, 0.15)' : (emp.status === 'On Leave' ? '1px solid rgba(240, 173, 78, 0.15)' : '1px solid rgba(220, 53, 69, 0.15)')
-                    }}>
-                      <span className={`pulse-dot ${emp.status === 'Active' ? 'pulse-dot-green' : (emp.status === 'On Leave' ? 'pulse-dot-orange' : 'pulse-dot-red')}`}></span>
-                      {emp.status}
-                    </span>
-                  </div>
-
-                  {/* Expanded section - slides down smoothly via maxHeight */}
-                  <div style={{
-                    maxHeight: isExpanded ? '280px' : '0px',
-                    opacity: isExpanded ? 1 : 0,
-                    overflow: 'hidden',
-                    transition: 'max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease',
-                  }}>
+        <div className="employee-grid" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: '20px',
+          width: '100%'
+        }}>
+          {filteredEmployees.map(emp => {
+            const isExpanded = expandedCardId === emp.id
+            return (
+            <div key={emp.id}>
+              <div className="macos-card employee-card" style={{
+                padding: '14px 16px',
+                display: 'flex', flexDirection: 'column', cursor: 'pointer',
+              }} onClick={() => setViewingEmployee(emp)}>
+                
+                {/* Row 1: Base content — avatar + info | status badge */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0, flex: 1 }}>
                     <div style={{
-                      borderTop: '1px solid var(--glass-border)',
-                      paddingTop: '12px',
-                      display: 'flex', flexDirection: 'column', gap: '8px',
-                      fontSize: '12px', color: 'var(--md-bw-on-surface-variant)',
+                      width: '56px', height: '56px',
+                      borderRadius: '14px', overflow: 'hidden', position: 'relative', flexShrink: 0,
+                      border: '1px solid var(--glass-border)',
+                      background: (!emp.avatar || imageErrors[emp.id]) ? 'rgba(0,0,0,0.04)' : '#f3f4f6',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: 'var(--md-bw-on-surface-variant)', fontWeight: 700, fontSize: '1.1rem',
+                      boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)',
                     }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Mail size={12} style={{ flexShrink: 0, opacity: 0.7 }} />
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{emp.email}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', opacity: 0.85 }}>
-                        <span>Born: {emp.dob ? formatDate(emp.dob) : 'N/A'}</span>
-                        <span>Joined: {emp.joiningDate ? formatDate(emp.joiningDate) : 'N/A'}</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <span style={{ fontVariantNumeric: 'tabular-nums', opacity: 0.7 }}>ID: {emp.id}</span>
-                      </div>
-                      <div style={{
-                        display: 'flex', gap: '8px',
-                        borderTop: '1px solid var(--glass-border)', paddingTop: '12px', marginTop: '4px',
+                      {(!emp.avatar || imageErrors[emp.id]) ? (
+                        <span>{getAvatarFallback(emp.name).initials}</span>
+                      ) : (
+                        <img src={emp.avatar} alt={emp.name} style={{
+                            width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0,
+                            transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`,
+                            transformOrigin: 'center', userSelect: 'none', pointerEvents: 'none'
+                          }}
+                          onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))}
+                        />
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, flex: 1 }}>
+                      <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: 'var(--md-bw-on-surface)', overflowWrap: 'break-word' }}>{emp.name}</h4>
+                      <span style={{ fontSize: '11px', color: 'var(--md-bw-on-surface-variant)', fontWeight: 500, overflowWrap: 'break-word' }}>{emp.role}</span>
+                      <span style={{ fontSize: '11px', color: 'var(--md-bw-on-surface-variant)', opacity: 0.75, overflowWrap: 'break-word' }}>{emp.department}</span>
+                    </div>
+                  </div>
+                  
+                  <span style={{ 
+                    height: '20px', padding: '0 8px', fontSize: '10px', fontWeight: 600, borderRadius: '10px',
+                    display: 'inline-flex', alignItems: 'center', flexShrink: 0, marginTop: '2px',
+                    background: emp.status === 'Active' ? 'rgba(40, 167, 69, 0.1)' : (emp.status === 'On Leave' ? 'rgba(240, 173, 78, 0.1)' : 'rgba(220, 53, 69, 0.1)'),
+                    color: emp.status === 'Active' ? '#28a745' : (emp.status === 'On Leave' ? '#f0ad4e' : '#dc3545'),
+                    border: emp.status === 'Active' ? '1px solid rgba(40, 167, 69, 0.15)' : (emp.status === 'On Leave' ? '1px solid rgba(240, 173, 78, 0.15)' : '1px solid rgba(220, 53, 69, 0.15)')
+                  }}>
+                    <span className={`pulse-dot ${emp.status === 'Active' ? 'pulse-dot-green' : (emp.status === 'On Leave' ? 'pulse-dot-orange' : 'pulse-dot-red')}`}></span>
+                    {emp.status}
+                  </span>
+                </div>
+
+                {/* Row 2: Expand button — between base and expanded, stays fixed position */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '4px 0 0', height: isExpanded ? '28px' : '20px', transition: 'height 0.3s ease' }}>
+                  <button onClick={(e) => {
+                    e.stopPropagation();
+                    setExpandedCardId(prev => prev === emp.id ? null : emp.id);
+                  }} style={{
+                    width: '20px', height: '20px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer',
+                    color: 'var(--md-bw-on-surface-variant)',
+                    transition: 'background 0.2s ease',
+                  }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--md-surface-variant)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                    <ChevronDown size={13} style={{
+                      transition: 'transform 0.45s cubic-bezier(0.4, 0, 0.2, 1)',
+                      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                    }} />
+                  </button>
+                </div>
+
+                {/* Row 3: Expanded content — slides down naturally */}
+                <div style={{
+                  maxHeight: isExpanded ? '320px' : '0px',
+                  opacity: isExpanded ? 1 : 0,
+                  overflow: 'hidden',
+                  transition: 'max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease 0.05s',
+                }}>
+                  <div style={{
+                    borderTop: '1px solid var(--glass-border)',
+                    paddingTop: '10px',
+                    display: 'flex', flexDirection: 'column', gap: '6px',
+                    fontSize: '12px', color: 'var(--md-bw-on-surface-variant)',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Mail size={11} style={{ flexShrink: 0, opacity: 0.7 }} />
+                      <span style={{ overflowWrap: 'break-word', minWidth: 0 }}>{emp.email}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', opacity: 0.85 }}>
+                      <span>Born: {emp.dob ? formatDate(emp.dob) : 'N/A'}</span>
+                      <span>Joined: {emp.joiningDate ? formatDate(emp.joiningDate) : 'N/A'}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ fontVariantNumeric: 'tabular-nums', opacity: 0.7 }}>ID: {emp.id}</span>
+                    </div>
+                    <div style={{
+                      display: 'flex', gap: '8px',
+                      borderTop: '1px solid var(--glass-border)', paddingTop: '10px', marginTop: '2px',
+                    }}>
+                      <button className="btn btn-mac-blue" style={{ flex: 1, height: '30px', minHeight: '30px', padding: '0', fontSize: '11px', borderRadius: '6px !important', justifyContent: 'center', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={(e) => {
+                        e.stopPropagation(); setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
                       }}>
-                        <button className="btn btn-mac-blue" style={{ flex: 1, height: '32px', minHeight: '32px', padding: '0', fontSize: '11px', borderRadius: '6px !important', justifyContent: 'center', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={(e) => {
-                          e.stopPropagation(); setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
-                        }}>
-                          <Edit size={12} /> Edit
-                        </button>
-                        <button className="btn btn-mac-red" style={{ flex: 1, height: '32px', minHeight: '32px', padding: '0', fontSize: '11px', borderRadius: '6px !important', justifyContent: 'center', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={(e) => { e.stopPropagation(); handleDeleteEmployee(emp.id, emp.name); }}>
-                          <Trash2 size={12} /> Delete
-                        </button>
-                      </div>
+                        <Edit size={11} /> Edit
+                      </button>
+                      <button className="btn btn-mac-red" style={{ flex: 1, height: '30px', minHeight: '30px', padding: '0', fontSize: '11px', borderRadius: '6px !important', justifyContent: 'center', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={(e) => { e.stopPropagation(); handleDeleteEmployee(emp.id, emp.name); }}>
+                        <Trash2 size={11} /> Delete
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
-              )
-            })}
-          </div>
-          ))}
+            </div>
+            )
+          })}
         </div>
       )}
 

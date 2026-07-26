@@ -3289,6 +3289,15 @@ svg.lucide {
   }
 }
 
+.collapse-btn,
+.collapse-btn .btn-label {
+  color: #000000;
+}
+[data-theme="dark"] .collapse-btn,
+[data-theme="dark"] .collapse-btn .btn-label {
+  color: #ffffff;
+}
+
 /* --- ROLE AND LOGOUT BUTTON HOVER/ACTIVE EFFECTS --- */
 .role-btn,
 .logout-btn {
@@ -3298,39 +3307,15 @@ svg.lucide {
 .role-btn:hover {
   transform: translateY(-2px) scale(1.02);
 }
-.role-btn:not([data-active="true"]):hover {
-  box-shadow: 0 8px 24px rgba(0, 85, 212, 0.15);
-  background: rgba(0, 98, 230, 0.18) !important;
-}
-.role-btn[data-active="true"]:hover {
-  box-shadow: 0 8px 24px rgba(0, 85, 212, 0.25);
-}
 .role-btn:active {
   transform: translateY(0);
 }
 
 .logout-btn:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 24px rgba(224, 32, 20, 0.18);
-  background: rgba(224, 32, 20, 0.14) !important;
 }
 .logout-btn:active {
   transform: translateY(0);
-  background: linear-gradient(135deg, #E02014 0%, #9C140C 100%) !important;
-  color: #ffffff !important;
-}
-.logout-btn:active div:first-child {
-  background: rgba(255, 255, 255, 0.2) !important;
-}
-.logout-btn:active .btn-label {
-  color: #ffffff !important;
-}
-
-[data-theme="dark"] .role-btn:not([data-active="true"]):hover {
-  background: rgba(0, 98, 230, 0.22) !important;
-}
-[data-theme="dark"] .logout-btn:hover {
-  background: rgba(224, 32, 20, 0.18) !important;
 }
 
 /* --- macOS 27 GLOBAL REDESIGN SWEEP --- */
@@ -3598,40 +3583,44 @@ textarea:focus,
 
 /* 5. MAC-STYLE CUSTOM ACTION BUTTONS */
 .btn-mac-blue {
-  background: rgba(0, 98, 230, 0.07) !important;
-  color: #0062E6 !important;
-  border: 1px solid rgba(0, 98, 230, 0.16) !important;
+  background: #0062E6 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
 }
 [data-theme="dark"] .btn-mac-blue {
-  background: rgba(0, 98, 230, 0.14) !important;
-  color: #58a6ff !important;
-  border: 1px solid rgba(0, 98, 230, 0.22) !important;
+  background: #0062E6 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
 }
 .btn-mac-blue:hover {
-  background: rgba(0, 98, 230, 0.14) !important;
+  background: #0055CC !important;
+  color: #ffffff !important;
   transform: translateY(-1.5px) scale(1.02) !important;
 }
 [data-theme="dark"] .btn-mac-blue:hover {
-  background: rgba(0, 98, 230, 0.22) !important;
+  background: #0055CC !important;
+  color: #ffffff !important;
   transform: translateY(-1.5px) scale(1.02) !important;
 }
 
 .btn-mac-red {
-  background: rgba(224, 32, 20, 0.07) !important;
-  color: #E02014 !important;
-  border: 1px solid rgba(224, 32, 20, 0.16) !important;
+  background: #E02014 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
 }
 [data-theme="dark"] .btn-mac-red {
-  background: rgba(224, 32, 20, 0.14) !important;
-  color: #ff6b6b !important;
-  border: 1px solid rgba(224, 32, 20, 0.22) !important;
+  background: #E02014 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
 }
 .btn-mac-red:hover {
-  background: rgba(224, 32, 20, 0.14) !important;
+  background: #CC1C10 !important;
+  color: #ffffff !important;
   transform: translateY(-1.5px) scale(1.02) !important;
 }
 [data-theme="dark"] .btn-mac-red:hover {
-  background: rgba(224, 32, 20, 0.22) !important;
+  background: #CC1C10 !important;
+  color: #ffffff !important;
   transform: translateY(-1.5px) scale(1.02) !important;
 }
 
