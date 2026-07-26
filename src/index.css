@@ -1453,6 +1453,15 @@ a {
   background-color: var(--md-bw-surface-variant);
   border: none;
   box-shadow: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 10px;
+}
+.card-filled:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+[data-theme="dark"] .card-filled:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 .card-filled:hover::after {
   opacity: var(--md-state-hover);
@@ -1466,6 +1475,16 @@ a {
   background-color: var(--md-bw-surface);
   border: 1px solid var(--md-bw-outline);
   box-shadow: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  border-radius: 10px;
+}
+.card-outlined:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-color: var(--md-bw-primary);
+}
+[data-theme="dark"] .card-outlined:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 .card-outlined:hover::after {
   opacity: var(--md-state-hover);
@@ -3430,6 +3449,7 @@ svg.lucide {
   box-shadow: 
     0 6px 16px rgba(0, 98, 230, 0.35), 
     inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+  filter: brightness(1.15) !important;
 }
 .btn-filled:active {
   transform: translateY(0) scale(0.98) !important;
@@ -3452,13 +3472,13 @@ svg.lucide {
 }
 .btn-tonal:hover,
 .btn-outlined:hover {
-  background: rgba(0, 0, 0, 0.08) !important;
+  background: rgba(0, 0, 0, 0.15) !important;
   transform: translateY(-1.5px) scale(1.02) !important;
   border-color: rgba(0, 0, 0, 0.15) !important;
 }
 [data-theme="dark"] .btn-tonal:hover,
 [data-theme="dark"] .btn-outlined:hover {
-  background: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.20) !important;
   border-color: rgba(255, 255, 255, 0.15) !important;
 }
 .btn-tonal:active,

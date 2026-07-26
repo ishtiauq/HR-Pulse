@@ -68,7 +68,7 @@ function AssetDashboard({ stats, alerts, setActiveView, assets, employees, syncL
       <div className="actions-grid">
         {quickActions.map(action => (
           <button key={action.id} className="btn-tonal" onClick={() => setActiveView(action.id)}
-            style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer', textAlign: 'center', height: 'auto' }}>
+            style={{ padding: '24px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer', textAlign: 'center', height: 'auto', borderRadius: '14px' }}>
             {action.icon}
             <div style={{ fontWeight: 600 }}>{action.label}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{action.desc}</div>
