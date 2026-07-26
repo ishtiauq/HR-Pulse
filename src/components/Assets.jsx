@@ -16,7 +16,7 @@ function AssetInventory({ filteredAssets, search, setSearch, filterCategory, set
         <div style={{ display: 'flex', gap: '12px', flex: 1, minWidth: '280px' }}>
           <div className="search-bar" style={{ flex: 1 }}>
             <div className="tf-icon-leading">
-              <Search size={20} />
+              <Search size={18} />
             </div>
             <input type="text" placeholder="Search by name or serial..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>

@@ -887,6 +887,33 @@ a {
 .table-striped tbody tr:nth-child(even) { background: var(--color-md-sys-surface-container-high); }
 .table-striped tbody tr:hover { background: var(--color-md-sys-primary-container); }
 
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  animation: modalFadeIn 0.2s ease;
+}
+
+/* Modal autofill fix */
+.modal-content input:-webkit-autofill,
+.modal-content input:-webkit-autofill:hover,
+.modal-content input:-webkit-autofill:focus,
+.modal-content select:-webkit-autofill,
+.modal-content select:-webkit-autofill:hover,
+.modal-content select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--md-bw-on-surface) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--glass-bg) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 /* Modal Fade */
 @keyframes modalFadeIn {
   from { opacity: 0; transform: scale(0.95); }
@@ -3519,13 +3546,15 @@ select,
 textarea,
 .tf-filled,
 .tf-outlined,
-.search-bar {
+.search-bar,
+.form-input {
   background-color: rgba(255, 255, 255, 0.45) !important;
   backdrop-filter: var(--glass-blur) !important;
   -webkit-backdrop-filter: var(--glass-blur) !important;
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
   border-radius: 8px !important;
-  height: 40px !important;
+  height: 38px !important;
+  min-height: 38px !important;
   padding: 0 12px !important;
   color: var(--md-bw-on-surface) !important;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02) !important;
