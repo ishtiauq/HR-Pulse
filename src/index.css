@@ -2839,6 +2839,9 @@ svg.lucide {
 .nav-item {
   transition: all 0.2s ease !important;
 }
+.nav-icon svg {
+  stroke-width: 2.2;
+}
 .nav-item:hover {
   background: rgba(0, 0, 0, 0.04);
 }
