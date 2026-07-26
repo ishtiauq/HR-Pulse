@@ -1635,29 +1635,17 @@ export default function App() {
       }}>
         
         {/* PROGRESSIVE BLUR HEADER */}
-        <div className="sidebar-header-wrapper" style={{
-          flexShrink: 0,
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 10,
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
-          <div className="sidebar-glass-header" style={{
+          <div className="sidebar-header-wrapper" style={{
+            flexShrink: 0,
             position: 'absolute',
-            inset: 0,
-            zIndex: 1,
-            background: isDarkMode ? 'rgba(18, 18, 18, 0.85)' : 'rgba(248, 249, 250, 0.85)',
-            backdropFilter: 'blur(32px) saturate(200%)',
-            WebkitBackdropFilter: 'blur(32px) saturate(200%)',
-            maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',
-            borderBottom: '1px solid rgba(0, 0, 0, 0.04)'
-          }}></div>
-          
-          <div style={{
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 10,
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            <div style={{
             position: 'relative',
             zIndex: 2,
             width: '100%',
@@ -1796,18 +1784,6 @@ export default function App() {
           display: 'flex',
           flexDirection: 'column'
         }}>
-          <div className="sidebar-glass-footer" style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 1,
-            background: isDarkMode ? 'rgba(18, 18, 18, 0.85)' : 'rgba(248, 249, 250, 0.85)',
-            backdropFilter: 'blur(32px) saturate(200%)',
-            WebkitBackdropFilter: 'blur(32px) saturate(200%)',
-            maskImage: 'linear-gradient(to top, black 70%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(to top, black 70%, transparent 100%)',
-            borderTop: '1px solid rgba(0, 0, 0, 0.04)'
-          }}></div>
-          
           <div className="sidebar-footer" style={{
             position: 'relative',
             zIndex: 2,
