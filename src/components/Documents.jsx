@@ -248,40 +248,46 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
           style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.9rem' }} />
       </div>
 
-      <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '0', marginBottom: '20px', padding: '12px 4px 12px 16px', borderRadius: '12px' }}>
-        {canScrollLeft && (
-          <button onClick={() => scrollCategory(-1)}
-            style={{ flexShrink: 0, background: 'var(--md-bw-surface-variant)', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--md-bw-on-surface)', marginRight: '2px', zIndex: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}>
-            <ChevronLeft size={18} />
-          </button>
-        )}
-        <div ref={categoryScrollRef} style={{ display: 'flex', gap: '6px', flexWrap: 'nowrap', overflow: 'hidden', scrollBehavior: 'smooth', flex: 1 }}>
-          <button onClick={() => setSelectedCategory('all')}
-            style={{ flexShrink: 0, padding: '6px 14px', borderRadius: '20px', background: selectedCategory === 'all' ? 'var(--md-bw-primary)' : 'var(--md-bw-surface-variant)', color: selectedCategory === 'all' ? 'var(--md-bw-on-primary)' : 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: selectedCategory === 'all' ? 'none' : '1px solid var(--md-bw-outline)' }}>
-            All
-          </button>
-          {categories.map(cat => {
-            const isActive = selectedCategory === cat.id
-            return (
-              <button key={cat.id} onClick={() => setSelectedCategory(cat.id)}
-                style={{ flexShrink: 0, padding: '6px 14px', borderRadius: '20px', background: isActive ? cat.color : 'var(--md-bw-surface-variant)', color: isActive ? '#fff' : 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: isActive ? 'none' : '1px solid var(--md-bw-outline)', transition: 'border-color var(--transition-fast), background var(--transition-fast)' }}>
-                {cat.label}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+        <div className="glass-card" style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', padding: '12px 0 12px 4px', borderRadius: '12px' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: 0, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+            {canScrollLeft && (
+              <button onClick={() => scrollCategory(-1)}
+                style={{ position: 'absolute', left: '4px', zIndex: 3, background: 'var(--md-bw-surface-variant)', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--md-bw-on-surface)', boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}>
+                <ChevronLeft size={18} />
               </button>
-            )
-          })}
+            )}
+            <div ref={categoryScrollRef} style={{ display: 'flex', gap: '6px', flexWrap: 'nowrap', overflow: 'hidden', scrollBehavior: 'smooth', flex: 1, padding: '0 4px' }}>
+              <button onClick={() => setSelectedCategory('all')}
+                style={{ flexShrink: 0, padding: '6px 14px', borderRadius: '20px', background: selectedCategory === 'all' ? 'var(--md-bw-primary)' : 'var(--md-bw-surface-variant)', color: selectedCategory === 'all' ? 'var(--md-bw-on-primary)' : 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: selectedCategory === 'all' ? 'none' : '1px solid var(--md-bw-outline)' }}>
+                All
+              </button>
+              {categories.map(cat => {
+                const isActive = selectedCategory === cat.id
+                return (
+                  <button key={cat.id} onClick={() => setSelectedCategory(cat.id)}
+                    style={{ flexShrink: 0, padding: '6px 14px', borderRadius: '20px', background: isActive ? cat.color : 'var(--md-bw-surface-variant)', color: isActive ? '#fff' : 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: isActive ? 'none' : '1px solid var(--md-bw-outline)', transition: 'border-color var(--transition-fast), background var(--transition-fast)' }}>
+                    {cat.label}
+                  </button>
+                )
+              })}
+            </div>
+            {canScrollRight && (
+              <button onClick={() => scrollCategory(1)}
+                style={{ position: 'absolute', right: '4px', zIndex: 3, background: 'var(--md-bw-surface-variant)', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--md-bw-on-surface)', boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}>
+                <ChevronRight size={18} />
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="glass-card" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', padding: '12px 16px', borderRadius: '12px' }}>
           <button onClick={() => { setEditingCategory(null); setCatFormName(''); setCatFormColor('#3b82f6'); setShowCategoryModal(true) }}
-            style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '20px', background: 'transparent', color: 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: '1px solid var(--md-bw-outline)', display: 'flex', alignItems: 'center', gap: '4px', transition: 'border-color var(--transition-fast), color var(--transition-fast)' }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.color = 'var(--accent-primary)' }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--md-bw-outline)'; e.currentTarget.style.color = 'var(--md-bw-on-surface)' }}>
+            style={{ padding: '6px 10px', borderRadius: '8px', background: 'transparent', color: 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', gap: '4px', transition: 'color var(--transition-fast)', whiteSpace: 'nowrap' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent-primary)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--md-bw-on-surface)' }}>
             <Settings size={14} /> Manage
           </button>
         </div>
-        {canScrollRight && (
-          <button onClick={() => scrollCategory(1)}
-            style={{ flexShrink: 0, background: 'var(--md-bw-surface-variant)', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--md-bw-on-surface)', marginLeft: '2px', zIndex: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}>
-            <ChevronRight size={18} />
-          </button>
-        )}
       </div>
 
       {filteredDocs.length === 0 ? (
