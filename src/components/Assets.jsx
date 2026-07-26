@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature, Wrench } from 'lucide-react'
+import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature, Wrench } from 'lucide-react'
 import AdSlot from './AdSlot'
 import { useModal } from '../services/useModal.js'
 import jsPDF from 'jspdf'
