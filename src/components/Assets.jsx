@@ -456,6 +456,56 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
   )
 }
 
+function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, handleAddAsset }) {
+  useModal(() => setShowAddModal(false))
+
+  return (
+    <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
+      <div className="modal-content glass-card" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', width: '100%' }}>
+        <h2 style={{ marginTop: 0 }}>Add New Asset</h2>
+        <form onSubmit={handleAddAsset} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="form-group">
+              <label>Asset Name</label>
+              <input type="text" className="form-input" required value={newAsset.name} onChange={e => setNewAsset(p => ({...p, name: e.target.value}))} />
+            </div>
+            <div className="form-group">
+              <label>Category</label>
+              <select className="form-input" value={newAsset.category} onChange={e => setNewAsset(p => ({...p, category: e.target.value}))}>
+                <option>Laptop</option><option>Phone</option><option>Monitor</option><option>Peripherals</option><option>Access Card</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Serial Number / IMEI</label>
+              <input type="text" className="form-input" required value={newAsset.serialNumber} onChange={e => setNewAsset(p => ({...p, serialNumber: e.target.value}))} />
+            </div>
+            <div className="form-group">
+              <label>Purchase Date</label>
+              <input type="date" className="form-input" required value={newAsset.purchaseDate} onChange={e => setNewAsset(p => ({...p, purchaseDate: e.target.value}))} />
+            </div>
+            <div className="form-group">
+              <label>Purchase Price ($)</label>
+              <input type="number" className="form-input" required value={newAsset.purchasePrice} onChange={e => setNewAsset(p => ({...p, purchasePrice: e.target.value}))} />
+            </div>
+            <div className="form-group">
+              <label>Useful Life (Months)</label>
+              <input type="number" className="form-input" required value={newAsset.usefulLife} onChange={e => setNewAsset(p => ({...p, usefulLife: e.target.value}))} />
+            </div>
+            <div className="form-group">
+              <label>Warranty Expiry</label>
+              <input type="date" className="form-input" required value={newAsset.warrantyExpiry} onChange={e => setNewAsset(p => ({...p, warrantyExpiry: e.target.value}))} />
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' }}>
+            <button type="button" className="btn-tonal" onClick={() => setShowAddModal(false)}>Cancel</button>
+            <button type="submit" className="btn-filled">Save Asset</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, addLog, addToast, currentUser, simulatedRole }) {
   const [activeView, setActiveView] = useState('dashboard')
 
@@ -744,55 +794,8 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
 
       {renderView()}
 
-      {/* --- ADD ASSET MODAL --- */}
       {showAddModal && (
-        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="modal-content glass-card fade-in" style={{ maxWidth: '600px', width: '100%' }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ marginTop: 0 }}>Add New Asset</h2>
-            <form onSubmit={handleAddAsset} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div className="form-group">
-                  <label>Asset Name</label>
-                  <input type="text" className="form-input" required value={newAsset.name} onChange={e => setNewAsset(p => ({...p, name: e.target.value}))} />
-                </div>
-                <div className="form-group">
-                  <label>Category</label>
-                  <select className="form-input" value={newAsset.category} onChange={e => setNewAsset(p => ({...p, category: e.target.value}))}>
-                    <option>Laptop</option>
-                    <option>Phone</option>
-                    <option>Monitor</option>
-                    <option>Peripherals</option>
-                    <option>Access Card</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Serial Number / IMEI</label>
-                  <input type="text" className="form-input" required value={newAsset.serialNumber} onChange={e => setNewAsset(p => ({...p, serialNumber: e.target.value}))} />
-                </div>
-                <div className="form-group">
-                  <label>Purchase Date</label>
-                  <input type="date" className="form-input" required value={newAsset.purchaseDate} onChange={e => setNewAsset(p => ({...p, purchaseDate: e.target.value}))} />
-                </div>
-                <div className="form-group">
-                  <label>Purchase Price ($)</label>
-                  <input type="number" className="form-input" required value={newAsset.purchasePrice} onChange={e => setNewAsset(p => ({...p, purchasePrice: e.target.value}))} />
-                </div>
-                <div className="form-group">
-                  <label>Useful Life (Months)</label>
-                  <input type="number" className="form-input" required value={newAsset.usefulLife} onChange={e => setNewAsset(p => ({...p, usefulLife: e.target.value}))} />
-                </div>
-                <div className="form-group">
-                  <label>Warranty Expiry</label>
-                  <input type="date" className="form-input" required value={newAsset.warrantyExpiry} onChange={e => setNewAsset(p => ({...p, warrantyExpiry: e.target.value}))} />
-                </div>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' }}>
-                <button type="button" className="btn-tonal" onClick={() => setShowAddModal(false)}>Cancel</button>
-                <button type="submit" className="btn-filled">Save Asset</button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <AddAssetModal showAddModal={showAddModal} setShowAddModal={setShowAddModal} newAsset={newAsset} setNewAsset={setNewAsset} handleAddAsset={handleAddAsset} />
       )}
 
       <AdSlot />
