@@ -143,9 +143,9 @@ function AssetInventory({ filteredAssets, search, setSearch, filterCategory, set
           </select>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn-tonal" onClick={triggerFileInput}><Upload size={16} /> Import CSV</button>
+          <button className="btn btn-tonal" onClick={triggerFileInput}><Upload size={16} className="btn-icon-start" /> Import CSV</button>
           <input type="file" ref={fileInputRef} onChange={handleImportCSV} accept=".csv" style={{ display: 'none' }} />
-          <button className="btn-filled" onClick={() => setShowAddModal(true)}><Plus size={16} /> Add Asset</button>
+          <button className="btn btn-filled" onClick={() => setShowAddModal(true)}><Plus size={16} className="btn-icon-start" /> Add Asset</button>
         </div>
       </div>
 
@@ -249,7 +249,7 @@ function DetailModal({ asset, onClose }) {
           </div>
         )}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-          <button className="btn-tonal" onClick={onClose}>Close</button>
+          <button className="btn btn-tonal" onClick={onClose}>Close</button>
         </div>
       </div>
     </div>
@@ -265,7 +265,7 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
       {/* Filter Pills */}
       <div className="glass-card" style={{ padding: '12px 20px', display: 'flex', gap: '8px' }}>
         {['All', 'Available', 'Assigned'].map(s => (
-          <button key={s} className={`${s === filterStatus ? 'btn-filled' : 'btn-tonal'} btn-sm`} onClick={() => setFilterStatus(s)}>{s}</button>
+          <button key={s} className={`btn ${s === filterStatus ? 'btn-filled' : 'btn-tonal'} btn-sm`} onClick={() => setFilterStatus(s)}>{s}</button>
         ))}
       </div>
 
@@ -306,11 +306,11 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
                   <td data-label="Condition">{asset.condition || '-'}</td>
                   <td data-label="Actions">
                     {asset.status === 'Available' ? (
-                      <button className="btn-filled btn-sm" onClick={() => { setAssignTarget(asset); setShowAssignModal(true) }}>Assign</button>
+                      <button className="btn btn-filled btn-sm" onClick={() => { setAssignTarget(asset); setShowAssignModal(true) }}>Assign</button>
                     ) : (
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="btn-tonal btn-sm" onClick={() => generateAgreementPDF(asset, emp, asset.condition)}><FileSignature size={14} /> PDF</button>
-                        <button className="btn-tonal btn-sm" style={{ color: 'var(--accent-warning)' }} onClick={() => handleReturnAsset(asset.id)}>Return</button>
+                        <button className="btn btn-tonal btn-sm" onClick={() => generateAgreementPDF(asset, emp, asset.condition)}><FileSignature size={14} /> PDF</button>
+                        <button className="btn btn-tonal btn-sm" style={{ color: 'var(--accent-warning)' }} onClick={() => handleReturnAsset(asset.id)}>Return</button>
                       </div>
                     )}
                   </td>
@@ -352,8 +352,8 @@ function AssignAssetModal({ showAssignModal, setShowAssignModal, assignTarget, a
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Agreement PDF will be auto-generated on assignment.</p>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-            <button type="button" className="btn-tonal" onClick={() => setShowAssignModal(false)}>Cancel</button>
-            <button type="submit" className="btn-filled">Assign & Generate PDF</button>
+            <button type="button" className="btn btn-tonal" onClick={() => setShowAssignModal(false)}>Cancel</button>
+            <button type="submit" className="btn btn-filled">Assign & Generate PDF</button>
           </div>
         </form>
       </div>
@@ -382,8 +382,8 @@ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
               </div>
               {req.status === 'Pending' ? (
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                  <button className="btn-filled btn-sm" onClick={() => handleRequestAction(req.id, 'Approved')}>Approve & Assign</button>
-                  <button className="btn-tonal btn-sm" style={{ color: 'var(--accent-danger)' }} onClick={() => handleRequestAction(req.id, 'Rejected')}>Reject</button>
+                  <button className="btn btn-filled btn-sm" onClick={() => handleRequestAction(req.id, 'Approved')}>Approve & Assign</button>
+                  <button className="btn btn-tonal btn-sm" style={{ color: 'var(--accent-danger)' }} onClick={() => handleRequestAction(req.id, 'Rejected')}>Reject</button>
                 </div>
               ) : (
                 <span className={`badge ${req.status === 'Approved' ? 'badge-success' : 'badge-danger'}`}>{req.status}</span>
@@ -448,7 +448,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
                 </div>
                 <input type="text" required placeholder="Vendor / Service Center" className="form-input" value={maintForm.vendor} onChange={e => setMaintForm(p => ({...p, vendor: e.target.value}))} />
                 <textarea required rows={3} placeholder="Describe the issue..." className="form-input" value={maintForm.issue} onChange={e => setMaintForm(p => ({...p, issue: e.target.value}))} />
-                <button type="submit" className="btn-filled" style={{ alignSelf: 'flex-start' }}>Log Repair</button>
+                <button type="submit" className="btn btn-filled" style={{ alignSelf: 'flex-start' }}>Log Repair</button>
               </form>
 
               {selectedAssetForMaint.maintenanceLogs?.length > 0 && (
@@ -518,8 +518,8 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' }}>
-            <button type="button" className="btn-tonal" onClick={() => setShowAddModal(false)}>Cancel</button>
-            <button type="submit" className="btn-filled">Save Asset</button>
+            <button type="button" className="btn btn-tonal" onClick={() => setShowAddModal(false)}>Cancel</button>
+            <button type="submit" className="btn btn-filled">Save Asset</button>
           </div>
         </form>
       </div>

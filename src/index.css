@@ -998,15 +998,6 @@ a {
   overflow: hidden;
 }
 
-/* Small Button Variant */
-.btn-sm {
-  height: auto !important;
-  min-height: 32px !important;
-  padding: 4px 14px !important;
-  font-size: 0.8rem !important;
-  border-radius: 6px !important;
-}
-
 /* Tab Button Base */
 .tab-btn {
   border: none;
@@ -3434,6 +3425,15 @@ svg.lucide {
   letter-spacing: normal !important;
   transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
   box-sizing: border-box !important;
+}
+
+/* Small Button Variant */
+.btn-sm {
+  height: auto !important;
+  min-height: 32px !important;
+  padding: 4px 14px !important;
+  font-size: 0.8rem !important;
+  border-radius: 6px !important;
 }
 
 .btn-filled {
