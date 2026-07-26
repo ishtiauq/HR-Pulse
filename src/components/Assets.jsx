@@ -68,7 +68,7 @@ function AssetDashboard({ stats, alerts, setActiveView, assets, employees, syncL
       <div className="actions-grid">
         {quickActions.map(action => (
           <button key={action.id} className="btn-tonal" onClick={() => setActiveView(action.id)}
-            style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer', textAlign: 'center' }}>
+            style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer', textAlign: 'center', height: 'auto' }}>
             {action.icon}
             <div style={{ fontWeight: 600 }}>{action.label}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{action.desc}</div>
@@ -265,7 +265,7 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
       {/* Filter Pills */}
       <div className="glass-card" style={{ padding: '12px 20px', display: 'flex', gap: '8px' }}>
         {['All', 'Available', 'Assigned'].map(s => (
-          <button key={s} className={s === filterStatus ? 'btn-filled' : 'btn-tonal'} style={{ padding: '6px 14px', fontSize: '0.85rem' }} onClick={() => setFilterStatus(s)}>{s}</button>
+          <button key={s} className={`${s === filterStatus ? 'btn-filled' : 'btn-tonal'} btn-sm`} onClick={() => setFilterStatus(s)}>{s}</button>
         ))}
       </div>
 
@@ -306,11 +306,11 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
                   <td data-label="Condition">{asset.condition || '-'}</td>
                   <td data-label="Actions">
                     {asset.status === 'Available' ? (
-                      <button className="btn-filled" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => { setAssignTarget(asset); setShowAssignModal(true) }}>Assign</button>
+                      <button className="btn-filled btn-sm" onClick={() => { setAssignTarget(asset); setShowAssignModal(true) }}>Assign</button>
                     ) : (
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="btn-tonal" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => generateAgreementPDF(asset, emp, asset.condition)}><FileSignature size={14} /> PDF</button>
-                        <button className="btn-tonal" style={{ padding: '6px 12px', fontSize: '0.8rem', color: 'var(--accent-warning)' }} onClick={() => handleReturnAsset(asset.id)}>Return</button>
+                        <button className="btn-tonal btn-sm" onClick={() => generateAgreementPDF(asset, emp, asset.condition)}><FileSignature size={14} /> PDF</button>
+                        <button className="btn-tonal btn-sm" style={{ color: 'var(--accent-warning)' }} onClick={() => handleReturnAsset(asset.id)}>Return</button>
                       </div>
                     )}
                   </td>
@@ -382,8 +382,8 @@ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
               </div>
               {req.status === 'Pending' ? (
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                  <button className="btn-filled" style={{ fontSize: '0.85rem' }} onClick={() => handleRequestAction(req.id, 'Approved')}>Approve & Assign</button>
-                  <button className="btn-tonal" style={{ fontSize: '0.85rem', color: 'var(--accent-danger)' }} onClick={() => handleRequestAction(req.id, 'Rejected')}>Reject</button>
+                  <button className="btn-filled btn-sm" onClick={() => handleRequestAction(req.id, 'Approved')}>Approve & Assign</button>
+                  <button className="btn-tonal btn-sm" style={{ color: 'var(--accent-danger)' }} onClick={() => handleRequestAction(req.id, 'Rejected')}>Reject</button>
                 </div>
               ) : (
                 <span className={`badge ${req.status === 'Approved' ? 'badge-success' : 'badge-danger'}`}>{req.status}</span>
@@ -803,7 +803,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       {/* Back to Dashboard breadcrumb */}
       {activeView !== 'dashboard' && (
         <div style={{ marginBottom: '16px' }}>
-          <button className="btn-text" onClick={() => setActiveView('dashboard')} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', background: 'none', border: 'none', color: 'var(--accent-primary)', padding: '4px 0' }}>
+          <button className="btn-text" onClick={() => setActiveView('dashboard')} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', background: 'none', border: 'none', color: 'var(--accent-primary)', padding: '6px 0', height: 'auto' }}>
             <ArrowLeft size={16} /> Back to Dashboard
           </button>
         </div>
