@@ -1,10 +1,104 @@
 import { useState, useRef, useEffect } from 'react'
-import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature, ArrowLeft } from 'lucide-react'
+import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature, ArrowLeft, Package, MessageSquare, Wrench, CheckCircle, BadgeCheck } from 'lucide-react'
 import AdSlot from './AdSlot'
 import { useModal } from '../services/useModal.js'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { formatDate } from '../services/date.js'
+
+function AssetDashboard({ stats, alerts, setActiveView, assets, employees }) {
+  const quickActions = [
+    { id: 'inventory', label: 'View Inventory', icon: <Package size={24} />, desc: 'Browse all assets' },
+    { id: 'assignments', label: 'Assign Assets', icon: <FileSignature size={24} />, desc: 'Manage assignments' },
+    { id: 'requests', label: 'Pending Requests', icon: <MessageSquare size={24} />, desc: 'Approve or reject' },
+    { id: 'maintenance', label: 'Maintenance', icon: <Wrench size={24} />, desc: 'Log repairs & depreciation' },
+  ]
+
+  const categories = [
+    { label: 'Laptops', key: 'Laptop' },
+    { label: 'Phones', key: 'Phone' },
+    { label: 'Monitors', key: 'Monitor' },
+    { label: 'Peripherals', key: 'Peripherals' },
+    { label: 'Access Cards', key: 'Access Card' },
+  ]
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Stat Cards */}
+      <div className="dash-grid-3" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+        <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ width: 48, height: 48, borderRadius: '12px', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Monitor size={24} />
+          </div>
+          <div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stats.total}</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Total Assets</div>
+          </div>
+        </div>
+        <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ width: 48, height: 48, borderRadius: '12px', background: 'rgba(52,199,89,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CheckCircle size={24} color="#34c759" />
+          </div>
+          <div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stats.available}</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Available</div>
+          </div>
+        </div>
+        <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ width: 48, height: 48, borderRadius: '12px', background: 'rgba(0,122,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <BadgeCheck size={24} color="#007aff" />
+          </div>
+          <div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stats.assigned}</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Assigned</div>
+          </div>
+        </div>
+        <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ width: 48, height: 48, borderRadius: '12px', background: 'rgba(255,149,0,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Wrench size={24} color="#ff9500" />
+          </div>
+          <div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stats.underRepair}</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Under Repair</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="dash-grid-3" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+        {quickActions.map(action => (
+          <button key={action.id} className="btn-tonal" onClick={() => setActiveView(action.id)}
+            style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer', textAlign: 'center' }}>
+            {action.icon}
+            <div style={{ fontWeight: 600 }}>{action.label}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{action.desc}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Category Breakdown */}
+      <div className="glass-card" style={{ padding: '20px' }}>
+        <h3 style={{ margin: '0 0 16px 0', fontSize: '0.95rem' }}>Category Breakdown</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {categories.map(cat => {
+            const count = assets.filter(a => a.category === cat.key).length
+            const max = Math.max(assets.length, 1)
+            const pct = (count / max) * 100
+            return (
+              <div key={cat.key} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ width: 100, fontSize: '0.85rem' }}>{cat.label}</span>
+                <div style={{ flex: 1, height: 8, borderRadius: '4px', background: 'var(--bg-secondary)', overflow: 'hidden' }}>
+                  <div style={{ width: `${pct}%`, height: '100%', borderRadius: '4px', background: 'var(--accent-primary)', opacity: 0.7 }} />
+                </div>
+                <span style={{ fontSize: '0.85rem', fontWeight: 600, minWidth: 24, textAlign: 'right' }}>{count}</span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, addLog, addToast, currentUser, simulatedRole }) {
   const [activeView, setActiveView] = useState('dashboard')
@@ -248,7 +342,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
         return <div>Maintenance view</div>
       case 'dashboard':
       default:
-        return <div>Dashboard view</div>
+        return <AssetDashboard stats={stats} alerts={alerts} setActiveView={setActiveView} assets={assets} employees={employees} />
     }
   }
 
