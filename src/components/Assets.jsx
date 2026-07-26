@@ -235,6 +235,111 @@ function DetailModal({ asset, onClose }) {
   )
 }
 
+function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAssignTarget, showAssignModal, setShowAssignModal, handleAssignAsset, handleReturnAsset, generateAgreementPDF }) {
+  const [filterStatus, setFilterStatus] = useState('All')
+  const assignableAssets = assets.filter(a => filterStatus === 'All' ? (a.status === 'Available' || a.status === 'Assigned') : a.status === filterStatus)
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Filter Pills */}
+      <div className="glass-card" style={{ padding: '12px 20px', display: 'flex', gap: '8px' }}>
+        {['All', 'Available', 'Assigned'].map(s => (
+          <button key={s} className={s === filterStatus ? 'btn-filled' : 'btn-tonal'} style={{ padding: '6px 14px', fontSize: '0.85rem' }} onClick={() => setFilterStatus(s)}>{s}</button>
+        ))}
+      </div>
+
+      <div className="table-container">
+        <table className="table-responsive w-full table-striped">
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th>Status / Assignee</th>
+              <th>Assignment Date</th>
+              <th>Condition</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {assignableAssets.map(asset => {
+              const emp = asset.assignedTo ? employees.find(e => e.id === asset.assignedTo) : null
+              return (
+                <tr key={asset.id}>
+                  <td data-label="Asset">
+                    <div style={{ fontWeight: 600 }}>{asset.name}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{asset.id}</div>
+                  </td>
+                  <td data-label="Status / Assignee">
+                    {asset.status === 'Assigned' && emp ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {emp.avatar ? <img src={emp.avatar} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} /> : <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--bg-tertiary)' }} />}
+                        <div>
+                          <div style={{ fontWeight: 600 }}>{emp.name}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{emp.department}</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="badge badge-success">Available</span>
+                    )}
+                  </td>
+                  <td data-label="Assignment Date">{asset.assignmentDate || '-'}</td>
+                  <td data-label="Condition">{asset.condition || '-'}</td>
+                  <td data-label="Actions">
+                    {asset.status === 'Available' ? (
+                      <button className="btn-filled" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => { setAssignTarget(asset); setShowAssignModal(true) }}>Assign</button>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="btn-tonal" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => generateAgreementPDF(asset, emp, asset.condition)}><FileSignature size={14} /> PDF</button>
+                        <button className="btn-tonal" style={{ padding: '6px 12px', fontSize: '0.8rem', color: 'var(--accent-warning)' }} onClick={() => handleReturnAsset(asset.id)}>Return</button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Assign Modal */}
+      {showAssignModal && (
+        <AssignAssetModal showAssignModal={showAssignModal} setShowAssignModal={setShowAssignModal} assignTarget={assignTarget} assignForm={assignForm} setAssignForm={setAssignForm} handleAssignAsset={handleAssignAsset} employees={employees} />
+      )}
+    </div>
+  )
+}
+
+function AssignAssetModal({ showAssignModal, setShowAssignModal, assignTarget, assignForm, setAssignForm, handleAssignAsset, employees }) {
+  useModal(() => setShowAssignModal(false))
+
+  return (
+    <div className="modal-overlay" onClick={() => setShowAssignModal(false)}>
+      <div className="modal-content glass-card" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px', width: '100%' }}>
+        <h2 style={{ marginTop: 0 }}>Assign Asset: {assignTarget?.name}</h2>
+        <form onSubmit={handleAssignAsset} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="form-group">
+            <label>Select Employee</label>
+            <select className="form-input" required value={assignForm.employeeId} onChange={e => setAssignForm(p => ({...p, employeeId: e.target.value}))}>
+              <option value="">-- Choose Employee --</option>
+              {employees.map(emp => (
+                <option key={emp.id} value={emp.id}>{emp.name} ({emp.department})</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Condition Notes</label>
+            <input type="text" className="form-input" value={assignForm.notes} onChange={e => setAssignForm(p => ({...p, notes: e.target.value}))} />
+          </div>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Agreement PDF will be auto-generated on assignment.</p>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+            <button type="button" className="btn-tonal" onClick={() => setShowAssignModal(false)}>Cancel</button>
+            <button type="submit" className="btn-filled">Assign & Generate PDF</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, addLog, addToast, currentUser, simulatedRole }) {
   const [activeView, setActiveView] = useState('dashboard')
 
@@ -470,7 +575,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       case 'inventory':
         return <AssetInventory filteredAssets={filteredAssets} search={search} setSearch={setSearch} filterCategory={filterCategory} setFilterCategory={setFilterCategory} alerts={alerts} showAddModal={showAddModal} setShowAddModal={setShowAddModal} newAsset={newAsset} setNewAsset={setNewAsset} handleAddAsset={handleAddAsset} triggerFileInput={triggerFileInput} fileInputRef={fileInputRef} handleImportCSV={handleImportCSV} addToast={addToast} />
       case 'assignments':
-        return <div>Assignments view</div>
+        return <AssetAssignments assets={assets} employees={employees} assignForm={assignForm} setAssignForm={setAssignForm} setAssignTarget={setAssignTarget} showAssignModal={showAssignModal} setShowAssignModal={setShowAssignModal} handleAssignAsset={handleAssignAsset} handleReturnAsset={handleReturnAsset} generateAgreementPDF={generateAgreementPDF} />
       case 'requests':
         return <div>Requests view</div>
       case 'maintenance':
@@ -574,36 +679,6 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
         </div>
       )}
 
-      {/* --- ASSIGN ASSET MODAL --- */}
-      {showAssignModal && (
-        <div className="modal-overlay" onClick={() => setShowAssignModal(false)}>
-          <div className="modal-content glass-card fade-in" style={{ maxWidth: '500px', width: '100%' }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ marginTop: 0 }}>Assign Asset: {assignTarget?.name}</h2>
-            <form onSubmit={handleAssignAsset} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div className="form-group">
-                <label>Select Employee</label>
-                <select className="form-input" required value={assignForm.employeeId} onChange={e => setAssignForm(p => ({...p, employeeId: e.target.value}))}>
-                  <option value="">-- Choose Employee --</option>
-                  {employees.map(emp => (
-                    <option key={emp.id} value={emp.id}>{emp.name} ({emp.department})</option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Condition Notes</label>
-                <input type="text" className="form-input" value={assignForm.notes} onChange={e => setAssignForm(p => ({...p, notes: e.target.value}))} />
-              </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                Upon assignment, an Agreement PDF will be automatically generated.
-              </p>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' }}>
-                <button type="button" className="btn-tonal" onClick={() => setShowAssignModal(false)}>Cancel</button>
-                <button type="submit" className="btn-filled">Assign & Generate PDF</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
       <AdSlot />
     </div>
   )
