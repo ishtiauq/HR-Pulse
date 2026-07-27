@@ -8,4 +8,5 @@
 - Task 4: complete (commits 0ca8289..71b20f8, review clean)
 - Task 5: complete (commits 71b20f8..276a22d, review clean)
 - Task 6: complete (commits 276a22d..343635f, review clean)
+- Task 7: complete (commits 343635f..e8f283d, review clean)
 
