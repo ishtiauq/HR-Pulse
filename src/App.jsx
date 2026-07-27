@@ -23,12 +23,10 @@ import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, allNavItems } from './uti
 import { encryptJson, decryptJson } from './services/crypto.js'
 import { useTheme } from './hooks/useTheme.js'
 import { useToast } from './hooks/useToast.js'
+import { useAuth } from './hooks/useAuth.js'
 
 export default function App() {
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('hr_pulse_user')
-    return saved ? JSON.parse(saved) : null
-  })
+  const { user, setUser, handleLogin, handleLogout } = useAuth()
   const [currentView, setCurrentView] = useState(() => localStorage.getItem('hr_pulse_current_view') || 'dashboard')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true')
@@ -201,23 +199,6 @@ export default function App() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
-
-  const handleLogin = (userInfo) => {
-    setUser(userInfo)
-    localStorage.setItem('hr_pulse_user', JSON.stringify(userInfo))
-    if (!userInfo.isEmployee && userInfo.token) {
-      sessionStorage.setItem('hr_pulse_hr_token', userInfo.token)
-    }
-  }
-
-  const handleLogout = () => {
-    setUser(null)
-    localStorage.removeItem('hr_pulse_user')
-    if (!user?.isEmployee) {
-      sessionStorage.removeItem('hr_pulse_hr_token')
-    }
-    setCurrentView('dashboard')
-  }
 
   const [employees, setEmployees] = useState(() => {
     const plain = localStorage.getItem(EMPLOYEES_STORAGE_KEY + '_plain')
