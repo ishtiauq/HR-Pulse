@@ -171,12 +171,12 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
     <div className="flex-1 flex flex-col gap-6 sm:gap-8">
       
       {/* Page Title */}
-      <div className="flex items-center justify-between pb-3 border-b border-[rgba(0,0,0,0.06)]">
-        <h1 className="page-title m-0 flex items-center gap-3.5 text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--md-bw-on-surface)]">
-          <LayoutDashboard size={32} className="text-[#007AFF]" />
-          Dashboard Overview
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+          <LayoutDashboard size={20} className="text-primary" />
+          Dashboard
         </h1>
-        <span className="text-xs sm:text-sm font-semibold text-[var(--md-bw-on-surface-variant)] bg-[rgba(0,0,0,0.04)] px-4 py-2 rounded-full border border-[rgba(0,0,0,0.05)] shadow-xs">
+        <span className="text-xs font-medium text-muted-foreground bg-muted px-3 py-1.5 rounded-full border border-border">
           {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
         </span>
       </div>

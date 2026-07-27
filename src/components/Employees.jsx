@@ -381,7 +381,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Employees</h1>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground"><Users size={20} className="text-primary" />Employees</h1>
           <p className="text-muted-foreground">Manage your team members and their information.</p>
         </div>
         <div className="flex gap-2 items-center">

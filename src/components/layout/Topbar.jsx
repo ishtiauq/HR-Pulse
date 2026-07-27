@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 
 export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, notifications, showNotifications, setShowNotifications, markNotificationsRead, unreadCount }) {
   return (
-    <header aria-label="Top bar" className="topbar w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-4 flex items-center justify-between rounded-full bg-card/90 text-card-foreground backdrop-blur-xl border border-border shadow-md transition-all duration-300">
+    <header aria-label="Top bar" className="topbar w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-4 flex items-center justify-between rounded-full bg-card text-card-foreground border border-border shadow-md transition-all duration-300">
       
       {/* Left Section: Mobile Menu + Brand Pill */}
       <div className="flex items-center gap-3 sm:gap-4">
