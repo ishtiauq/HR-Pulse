@@ -146,24 +146,30 @@ export default function App() {
         setSimulatedRole={appData.setSimulatedRole}
         setMobileMenuOpen={setMobileMenuOpen}
       />
-      <main className="content dashboard-content p-4 md:p-6 lg:p-8 flex-1 overflow-y-auto flex flex-col items-center" style={{ scrollbarGutter: 'stable' }}>
-        <div className="w-full max-w-[1600px] flex flex-col gap-6">
-          <Topbar
-            isDarkMode={isDarkMode}
-            toggleSidebar={toggleSidebar}
-            themeMode={themeMode}
-            toggleTheme={toggleTheme}
-            handleSync={appData.handleSync}
-            isSyncing={appData.isSyncing}
-            driveConnected={appData.driveConnected}
-            syncConflicts={appData.syncConflicts}
-            notifications={appData.notifications}
-            showNotifications={appData.showNotifications}
-            setShowNotifications={appData.setShowNotifications}
-            markNotificationsRead={appData.markNotificationsRead}
-            unreadCount={unreadCount}
-          />
-          <AppContent
+      <main className="content dashboard-content pb-12 flex-1 overflow-y-auto flex flex-col items-center" style={{ scrollbarGutter: 'stable' }}>
+        <div className="w-full max-w-[1600px] flex flex-col relative">
+          
+          {/* Solid Sticky Header Wrapper */}
+          <div className="sticky top-0 z-40 w-full bg-background pt-6 md:pt-8 lg:pt-10 pb-6 md:pb-8 lg:pb-10 px-4 md:px-6 lg:px-8">
+            <Topbar
+              isDarkMode={isDarkMode}
+              toggleSidebar={toggleSidebar}
+              themeMode={themeMode}
+              toggleTheme={toggleTheme}
+              handleSync={appData.handleSync}
+              isSyncing={appData.isSyncing}
+              driveConnected={appData.driveConnected}
+              syncConflicts={appData.syncConflicts}
+              notifications={appData.notifications}
+              showNotifications={appData.showNotifications}
+              setShowNotifications={appData.setShowNotifications}
+              markNotificationsRead={appData.markNotificationsRead}
+              unreadCount={unreadCount}
+            />
+          </div>
+
+          <div className="w-full flex-1 px-4 md:px-6 lg:px-8">
+            <AppContent
             currentView={currentView}
             setCurrentView={setCurrentView}
             isAppLoading={appData.isAppLoading}
@@ -173,6 +179,7 @@ export default function App() {
             addToast={addToast}
             {...appData}
           />
+          </div>
         </div>
       </main>
       <ToastContainer toasts={toasts} removeToast={removeToast} />

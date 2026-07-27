@@ -5,6 +5,15 @@ import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
 import { hashPassword } from '../services/crypto.js'
 
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+
+
+
 export default function Employees({ employees, setEmployees, addLog, driveConnected, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast, selectedEmployeeId, setSelectedEmployeeId }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
@@ -351,31 +360,31 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
   }
 
   return (
-    <div className="animate-fade-in flex flex-col gap-8">
+    <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
       
-      {confirmDelete && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.4)' }}>
-            <div className="p-6 rounded-xl max-w-[400px]" style={{ background: 'var(--md-bw-surface)' }}>
-            <h3 className="mb-3">Confirm Delete</h3>
-            <p className="mb-4">Are you sure you want to delete the selected employee(s)?</p>
-            <div className="flex gap-2 justify-end">
-              <button onClick={() => setConfirmDelete(null)} className="btn btn-text">Cancel</button>
-              <button onClick={() => { confirmDelete(); }} className="btn btn-filled">Delete</button>
-            </div>
+      {/* Confirm Delete Dialog */}
+      <Dialog open={!!confirmDelete} onOpenChange={(open) => { if(!open) setConfirmDelete(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Delete</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-muted-foreground">Are you sure you want to delete the selected employee(s)? This action cannot be undone.</p>
           </div>
-        </div>
-      )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDelete(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => { if(confirmDelete) confirmDelete(); }}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="headline-small m-0" style={{ color: 'var(--md-bw-on-surface)' }}>
-          Employees
-        </h1>
-        <div className="flex gap-3 flex-wrap">
-          <button className="btn btn-outlined" onClick={() => document.getElementById('csv-file-input').click()}>
-            <FileSpreadsheet size={18} className="btn-icon-start mr-2" />
-            Import CSV
-          </button>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Employees</h1>
+          <p className="text-muted-foreground">Manage your team members and their information.</p>
+        </div>
+        <div className="flex gap-2 items-center">
           <input 
             id="csv-file-input" 
             type="file" 
@@ -388,7 +397,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                 reader.onload = async (event) => {
                   const csvText = event.target.result;
                   try {
-                    const lines = csvText.split('\n').filter(line => line.trim());
+                    const lines = csvText.split('\\n').filter(line => line.trim());
                     if (lines.length < 2) {
                       addToast('CSV file must have a header row and at least one data row.', 'warning');
                       return;
@@ -421,7 +430,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                       imported.push(row);
                     }
                     if (errors.length > 0) {
-                      addToast(`Skipped ${errors.length} invalid row(s): ${errors.slice(0, 3).join('; ')}${errors.length > 3 ? ` (+${errors.length - 3} more)` : ''}`, 'warning');
+                      addToast(`Skipped ${errors.length} invalid row(s)`, 'warning');
                     }
                     if (imported.length > 0) {
                       setEmployees(prev => {
@@ -429,9 +438,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                         const filteredImport = imported.filter(e => !existingIds.has(e.id));
                         return [...prev, ...filteredImport];
                       });
-                      addToast(`Successfully imported ${imported.length} employees from CSV.`, 'success');
-                    } else if (errors.length === 0) {
-                      addToast('No valid employee records found in CSV.', 'warning');
+                      addToast(`Successfully imported ${imported.length} employees.`, 'success');
                     }
                   } catch (err) {
                     addToast('Failed to parse CSV file: ' + err.message, 'danger');
@@ -441,666 +448,460 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               }
             }}
           />
-          <button 
-            className="btn btn-filled fixed bottom-6 right-6 w-14 h-14 z-[90] flex items-center justify-center p-0"
-            aria-label="Add employee"
-            onClick={handleOpenAddForm}
-            style={{
-              borderRadius: '16px',
-              backgroundColor: 'var(--md-bw-primary-container)',
-              color: 'var(--md-bw-on-primary-container)',
-              boxShadow: 'var(--md-shadow-level3)',
-            }}
-          >
-            <Plus size={24} />
-          </button>
+          <Button variant="outline" onClick={() => document.getElementById('csv-file-input').click()}>
+            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            Import CSV
+          </Button>
+          <Button onClick={handleOpenAddForm}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Employee
+          </Button>
         </div>
       </div>
 
       {/* Filters Toolbar */}
-      <div className="flex justify-between items-center flex-wrap gap-4">
-        {/* Select All */}
-        <label className="flex items-center gap-1.5 cursor-pointer text-[13px] shrink-0" style={{ color: 'var(--md-bw-on-surface-variant)', userSelect: 'none' }}>
-          <input
-            type="checkbox"
-            checked={filteredEmployees.length > 0 && selectedIds.size === filteredEmployees.length}
-            onChange={toggleSelectAll}
-            className="cursor-pointer w-4 h-4 m-0"
-            style={{ accentColor: 'var(--md-bw-primary)' }}
-          />
-          Select All
-        </label>
-
-        {/* Search */}
-        <div className="search-bar flex-1 max-w-[400px]">
-          <div className="tf-icon-leading">
-            <Search size={24} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+      <Card className="border-none shadow-sm bg-card">
+        <CardContent className="p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          
+          <div className="flex items-center gap-4 w-full md:w-auto flex-1">
+            <div className="flex items-center gap-2 pr-4 border-r border-border min-w-max">
+              <input
+                type="checkbox"
+                checked={filteredEmployees.length > 0 && selectedIds.size === filteredEmployees.length}
+                onChange={toggleSelectAll}
+                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <span className="text-sm font-medium">Select All</span>
+            </div>
+            
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search by name, role, email..."
+                className="pl-9 bg-muted/50 w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </div>
-          <input
-            type="text"
-            placeholder="Search by name, role, email..."
-            aria-label="Search employees"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
 
-        {/* Dept Filters */}
-        <div role="tablist" aria-label="Filter by department" className="flex gap-2 flex-wrap">
-          {filterDepartments.map(dept => (
-            <button
-              key={dept}
-              role="tab"
-              aria-selected={deptFilter === dept}
-              onClick={() => setDeptFilter(dept)}
-              className={`m3-chip m3-chip-filter ${deptFilter === dept ? 'selected' : ''}`}
-            >
-              {deptFilter === dept && <Check size={18} className="mr-2" />}
-              {dept}
-            </button>
-          ))}
-        </div>
-      </div>
+          <div className="flex gap-2 flex-wrap md:justify-end w-full md:w-auto">
+            {filterDepartments.map(dept => (
+              <Badge
+                key={dept}
+                variant={deptFilter === dept ? 'default' : 'secondary'}
+                className="cursor-pointer hover:bg-primary/80 transition-colors"
+                onClick={() => setDeptFilter(dept)}
+              >
+                {deptFilter === dept && <Check className="mr-1 h-3 w-3" />}
+                {dept}
+              </Badge>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Pending Profile Updates Queue */}
       {pendingProfileEdits && pendingProfileEdits.length > 0 && (
-        <div className="macos-card p-[18px] mb-6">
-          <h2 className="flex items-center gap-2 m-0 mb-4 text-[15px] font-semibold" style={{ color: 'var(--md-bw-on-surface)' }}>
-            <AlertCircle size={18} style={{ color: '#007aff' }} />
-            Pending Profile Update Requests ({pendingProfileEdits.length})
-          </h2>
-          <div className="flex flex-col gap-3">
+        <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2 text-blue-700 dark:text-blue-400">
+              <AlertCircle className="h-5 w-5" />
+              Pending Profile Update Requests ({pendingProfileEdits.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
             {pendingProfileEdits.map(editReq => {
               const emp = employees.find(e => e.id === editReq.employeeId)
               return (
-                <div key={editReq.id} className="flex justify-between items-center p-3 px-4 flex-wrap gap-3" style={{ background: 'rgba(0,0,0,0.02)', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                <div key={editReq.id} className="flex justify-between items-center p-3 rounded-lg bg-background border border-border shadow-sm flex-wrap gap-3">
                   <div className="flex flex-col gap-1.5 min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <strong className="text-[13.5px]" style={{ color: 'var(--md-bw-on-surface)' }}>{emp ? emp.name : 'Unknown Employee'}</strong>
-                      <span className="text-[11px] opacity-80" style={{ color: 'var(--md-bw-on-surface-variant)' }}>ID: {editReq.employeeId}</span>
+                      <strong className="text-sm">{emp ? emp.name : 'Unknown Employee'}</strong>
+                      <span className="text-xs text-muted-foreground">ID: {editReq.employeeId}</span>
                     </div>
-                    <div className="flex gap-1.5 flex-wrap text-[11.5px]">
+                    <div className="flex gap-1.5 flex-wrap text-xs">
                       {Object.entries(editReq.changes).map(([key, val]) => (
                         val ? (
-                          <span key={key} className="p-0.5 px-1.5 inline-flex gap-1" style={{ background: 'rgba(0,0,0,0.03)', borderRadius: '4px', border: '1px solid var(--glass-border)' }}>
-                            <strong style={{ color: 'var(--md-bw-on-surface-variant)' }}>{key}: </strong> 
-                            <span style={{ color: 'var(--md-bw-on-surface)' }}>{val}</span>
-                          </span>
+                          <Badge variant="outline" key={key} className="bg-muted/50 font-normal">
+                            <strong className="mr-1 font-medium">{key}: </strong> {val}
+                          </Badge>
                         ) : null
                       ))}
                     </div>
                   </div>
                   <div className="flex gap-2 shrink-0">
-                    <button className="btn btn-filled" onClick={() => handleApproveProfileEdit(editReq.id)} style={{ height: '30px', minHeight: '30px', padding: '0 12px', fontSize: '11.5px', borderRadius: '6px !important' }}>
-                      <Check size={12} className="mr-1" /> Approve
-                    </button>
-                    <button className="btn btn-tonal" onClick={() => handleRejectProfileEdit(editReq.id)} style={{ height: '30px', minHeight: '30px', padding: '0 12px', fontSize: '11.5px', borderRadius: '6px !important', color: '#dc3545', border: '1px solid rgba(220, 53, 69, 0.15)' }}>
-                      <X size={12} className="mr-1" /> Reject
-                    </button>
+                    <Button size="sm" onClick={() => handleApproveProfileEdit(editReq.id)}>
+                      <Check className="mr-1 h-3.5 w-3.5" /> Approve
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleRejectProfileEdit(editReq.id)}>
+                      <X className="mr-1 h-3.5 w-3.5" /> Reject
+                    </Button>
                   </div>
                 </div>
               )
             })}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Selection Bar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium" style={{ background: 'var(--md-bw-primary-container)', color: 'var(--md-bw-on-primary-container)' }}>
-          <Check size={16} className="shrink-0" />
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 text-primary text-sm font-medium border border-primary/20">
+          <Check className="h-4 w-4 shrink-0" />
           <span className="flex-1">{selectedIds.size} selected</span>
-          <button
-            className="btn btn-filled inline-flex items-center gap-1 text-[11px]"
-            onClick={handleBulkDelete}
-            style={{ height: '30px', minHeight: '30px', padding: '0 12px', borderRadius: '6px', background: '#dc3545', color: '#fff', border: 'none', cursor: 'pointer' }}
-          >
-            <Trash2 size={11} /> Delete ({selectedIds.size})
-          </button>
-          <button
-            className="btn btn-filled inline-flex items-center gap-1 text-[11px]"
-            onClick={handleDownloadSelected}
-            style={{ height: '30px', minHeight: '30px', padding: '0 12px', borderRadius: '6px', background: 'var(--md-bw-primary)', color: '#fff', border: 'none', cursor: 'pointer' }}
-          >
-            <Download size={11} /> Download CSV
-          </button>
-          <button
-            onClick={clearSelection}
-            aria-label="Clear selection"
-            className="inline-flex items-center opacity-70 text-[11px]"
-            style={{ height: '30px', minHeight: '30px', padding: '0 8px', borderRadius: '6px', background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer' }}
-            title="Clear selection"
-          >
-            <X size={14} />
-          </button>
+          <Button size="sm" variant="destructive" className="h-8" onClick={handleBulkDelete}>
+            <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete ({selectedIds.size})
+          </Button>
+          <Button size="sm" variant="default" className="h-8" onClick={handleDownloadSelected}>
+            <Download className="mr-1 h-3.5 w-3.5" /> Download CSV
+          </Button>
+          <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-primary/20 hover:text-primary rounded-full" onClick={clearSelection}>
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       )}
 
       {/* Directory Grid */}
       {filteredEmployees.length === 0 ? (
-        <div className="text-center p-12 flex flex-col items-center">
-          <Users size={120} className="mb-6 opacity-50" style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-          <h3 className="headline-small mb-6" style={{ color: 'var(--md-bw-on-surface-variant)' }}>No employees found</h3>
-          <button onClick={() => {setSearchTerm(''); setDeptFilter('All')}} className="btn btn-filled">Clear Filters</button>
+        <div className="text-center py-20 flex flex-col items-center">
+          <Users className="h-16 w-16 mb-4 text-muted-foreground/50" />
+          <h3 className="text-xl font-medium text-foreground mb-4">No employees found</h3>
+          <Button variant="outline" onClick={() => {setSearchTerm(''); setDeptFilter('All')}}>Clear Filters</Button>
         </div>
       ) : (
-        <div className="employee-grid w-full" style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '20px',
-        }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredEmployees.map(emp => {
             const isExpanded = expandedCardId === emp.id
             return (
-            <div key={emp.id}>
-              <div className="macos-card employee-card flex flex-col cursor-pointer relative p-4 sm:p-5" role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setViewingEmployee(emp); } }} onClick={() => setViewingEmployee(emp)}>
+              <Card key={emp.id} className="relative overflow-visible group hover:border-primary/50 transition-colors cursor-pointer" onClick={() => setViewingEmployee(emp)}>
                 
-                {/* Checkbox — absolutely positioned so it doesn't steal space from text */}
-                <div onClick={(e) => e.stopPropagation()} className="absolute z-[2] flex items-center justify-center w-5 h-5 cursor-pointer" style={{ top: '12px', left: '10px', borderRadius: '4px', background: selectedIds.has(emp.id) ? 'var(--md-bw-primary)' : 'rgba(255,255,255,0.85)', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}>
+                {/* Selection Checkbox */}
+                <div 
+                  onClick={(e) => e.stopPropagation()} 
+                  className={`absolute top-3 left-3 z-10 p-1 rounded bg-background/80 backdrop-blur-sm border shadow-sm transition-opacity ${selectedIds.has(emp.id) ? 'opacity-100 border-primary' : 'opacity-0 group-hover:opacity-100 border-border'}`}
+                >
                   <input
                     type="checkbox"
                     checked={selectedIds.has(emp.id)}
                     onChange={(e) => toggleSelect(emp.id, e)}
-                    className="cursor-pointer w-3.5 h-3.5 m-0 opacity-85"
-                    style={{ accentColor: 'var(--md-bw-primary)' }}
+                    className="w-4 h-4 cursor-pointer m-0 block"
                   />
                 </div>
 
-                {/* Row 1: Base content — avatar + info | status badge */}
-                <div className="flex items-start justify-between gap-3.5">
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                    <div className="w-14 h-14 overflow-hidden relative shrink-0 flex items-center justify-center text-[1.1rem] font-bold" style={{ borderRadius: '14px', border: '1px solid var(--glass-border)', background: (!emp.avatar || imageErrors[emp.id]) ? 'rgba(0,0,0,0.04)' : '#f3f4f6', color: 'var(--md-bw-on-surface-variant)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)' }}>
-                      {(!emp.avatar || imageErrors[emp.id]) ? (
-                        <span>{getAvatarFallback(emp.name).initials}</span>
-                      ) : (
-                        <img src={emp.avatar} alt={emp.name} className="absolute top-0 left-0 w-full h-full object-cover" style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center', userSelect: 'none', pointerEvents: 'none' }}
-                          onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))}
-                        />
-                      )}
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar className="h-12 w-12 border shadow-sm">
+                        <AvatarImage src={emp.avatar} alt={emp.name} style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} />
+                        <AvatarFallback className="bg-primary/5 text-primary font-semibold">
+                          {getAvatarFallback(emp.name).initials}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <h4 className="font-semibold text-sm truncate">{emp.name}</h4>
+                        <span className="text-xs text-muted-foreground truncate">{emp.role}</span>
+                        <span className="text-[10px] text-muted-foreground/75 truncate uppercase tracking-wider">{emp.department}</span>
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                      <h4 className="m-0 text-[14px] font-semibold whitespace-nowrap" style={{ color: 'var(--md-bw-on-surface)' }}>{emp.name}</h4>
-                      <span className="text-[11px] font-medium whitespace-nowrap" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{emp.role}</span>
-                      <span className="text-[11px] opacity-75 whitespace-nowrap" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{emp.department}</span>
+                    
+                    <Badge variant={emp.status === 'Active' ? 'default' : emp.status === 'On Leave' ? 'secondary' : 'destructive'} className={`shrink-0 text-[10px] h-5 ${emp.status==='Active'?'bg-green-500/10 text-green-700 hover:bg-green-500/20 border-green-500/20':''}`}>
+                      {emp.status}
+                    </Badge>
+                  </div>
+
+                  {/* Expand Toggle */}
+                  <div className="flex justify-center mt-3 -mb-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-full hover:bg-muted/50 rounded-md"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedCardId(prev => prev === emp.id ? null : emp.id);
+                      }}
+                    >
+                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                    </Button>
+                  </div>
+
+                  {/* Expanded Content */}
+                  <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[300px] opacity-100 mt-3 pt-3 border-t border-border' : 'max-h-0 opacity-0'}`}>
+                    <div className="flex flex-col gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">{emp.email}</span>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <span>Born: {emp.dob ? formatDate(emp.dob) : 'N/A'}</span>
+                        <span>Joined: {emp.joiningDate ? formatDate(emp.joiningDate) : 'N/A'}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="font-mono text-[10px]">ID: {emp.id}</span>
+                      </div>
+                      <div className="flex gap-2 mt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1 h-8 text-xs bg-muted/30"
+                          onClick={(e) => {
+                            e.stopPropagation(); 
+                            setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
+                          }}
+                        >
+                          <Edit className="mr-1.5 h-3 w-3" /> Edit
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1 h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200"
+                          onClick={(e) => { e.stopPropagation(); handleDeleteEmployee(emp.id, emp.name); }}
+                        >
+                          <Trash2 className="mr-1.5 h-3 w-3" /> Delete
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                  
-                  <span role="status" className="h-5 px-2 text-[10px] font-semibold inline-flex items-center shrink-0 mt-0.5" style={{ borderRadius: '10px', background: emp.status === 'Active' ? 'rgba(40, 167, 69, 0.1)' : (emp.status === 'On Leave' ? 'rgba(240, 173, 78, 0.1)' : 'rgba(220, 53, 69, 0.1)'), color: emp.status === 'Active' ? '#28a745' : (emp.status === 'On Leave' ? '#f0ad4e' : '#dc3545'), border: emp.status === 'Active' ? '1px solid rgba(40, 167, 69, 0.15)' : (emp.status === 'On Leave' ? '1px solid rgba(240, 173, 78, 0.15)' : '1px solid rgba(220, 53, 69, 0.15)') }}>
-                    <span className={`pulse-dot ${emp.status === 'Active' ? 'pulse-dot-green' : (emp.status === 'On Leave' ? 'pulse-dot-orange' : 'pulse-dot-red')}`}></span>
-                    {emp.status}
-                  </span>
-                </div>
-
-                {/* Row 2: Expand button — between base and expanded, stays fixed position */}
-                <div className="flex justify-end pt-1" style={{ height: isExpanded ? '28px' : '20px', transition: 'height 0.3s ease' }}>
-                  <button aria-label={isExpanded ? 'Collapse details' : 'Expand details'} onClick={(e) => {
-                    e.stopPropagation();
-                    setExpandedCardId(prev => prev === emp.id ? null : emp.id);
-                  }} className="w-5 h-5 flex items-center justify-center cursor-pointer rounded" style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', transition: 'background 0.2s ease' }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--md-surface-variant)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
-                    <ChevronDown size={13} style={{
-                      transition: 'transform 0.45s cubic-bezier(0.4, 0, 0.2, 1)',
-                      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                    }} />
-                  </button>
-                </div>
-
-                {/* Row 3: Expanded content — slides down naturally */}
-                <div style={{
-                  maxHeight: isExpanded ? '320px' : '0px',
-                  opacity: isExpanded ? 1 : 0,
-                  overflow: 'hidden',
-                  transition: 'max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease 0.05s',
-                }}>
-                  <div className="flex flex-col gap-1.5 text-xs pt-2.5" style={{ borderTop: '1px solid var(--glass-border)', color: 'var(--md-bw-on-surface-variant)' }}>
-                    <div className="flex items-center gap-1.5">
-                      <Mail size={11} className="shrink-0 opacity-70" />
-                      <span className="break-words min-w-0">{emp.email}</span>
-                    </div>
-                    <div className="flex justify-between gap-2 opacity-85">
-                      <span>Born: {emp.dob ? formatDate(emp.dob) : 'N/A'}</span>
-                      <span>Joined: {emp.joiningDate ? formatDate(emp.joiningDate) : 'N/A'}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="opacity-70" style={{ fontVariantNumeric: 'tabular-nums' }}>ID: {emp.id}</span>
-                    </div>
-                    <div className="flex gap-2 pt-2.5 mt-0.5" style={{ borderTop: '1px solid var(--glass-border)' }}>
-                      <button className="btn btn-mac-blue flex-1 h-[30px] min-h-[30px] p-0 text-[11px] justify-center inline-flex items-center gap-1" style={{ borderRadius: '6px !important' }} onClick={(e) => {
-                        e.stopPropagation(); setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
-                      }}>
-                        <Edit size={11} /> Edit
-                      </button>
-                      <button className="btn btn-mac-red flex-1 h-[30px] min-h-[30px] p-0 text-[11px] justify-center inline-flex items-center gap-1" style={{ borderRadius: '6px !important' }} onClick={(e) => { e.stopPropagation(); handleDeleteEmployee(emp.id, emp.name); }}>
-                        <Trash2 size={11} /> Delete
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+                </CardContent>
+              </Card>
             )
           })}
         </div>
       )}
 
       {/* Employee Detail Modal */}
-      {viewingEmployee && (
-        <div className="dialog-scrim" onClick={() => setViewingEmployee(null)}>
-          <div className="m3-dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="flex flex-col items-center mb-6">
-              <div className="w-24 h-24 overflow-hidden mb-4 relative flex items-center justify-center text-[1.6rem] font-bold" style={{ borderRadius: '50%', border: '2px solid var(--md-bw-primary)', background: (!viewingEmployee.avatar || imageErrors[viewingEmployee.id]) ? 'var(--md-bw-surface-variant)' : '#f3f4f6', color: 'var(--md-bw-on-surface-variant)' }}>
-                {(!viewingEmployee.avatar || imageErrors[viewingEmployee.id]) ? (
-                  <span>{getAvatarFallback(viewingEmployee.name).initials}</span>
-                ) : (
-                  <img src={viewingEmployee.avatar} alt={viewingEmployee.name} className="absolute top-0 left-0 w-full h-full object-cover" style={{ transform: `translate(${viewingEmployee.photoX || 0}px, ${viewingEmployee.photoY || 0}px) scale(${viewingEmployee.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
-                )}
+      <Dialog open={!!viewingEmployee} onOpenChange={(open) => { if(!open) setViewingEmployee(null) }}>
+        <DialogContent className="sm:max-w-md">
+          {viewingEmployee && (
+            <>
+              <div className="flex flex-col items-center pt-4 pb-2">
+                <Avatar className="h-24 w-24 mb-4 border-2 border-primary/20 shadow-sm text-2xl">
+                  <AvatarImage src={viewingEmployee.avatar} alt={viewingEmployee.name} style={{ transform: `translate(${viewingEmployee.photoX || 0}px, ${viewingEmployee.photoY || 0}px) scale(${viewingEmployee.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
+                  <AvatarFallback className="bg-primary/5 text-primary">{getAvatarFallback(viewingEmployee.name).initials}</AvatarFallback>
+                </Avatar>
+                <h3 className="text-xl font-bold text-foreground text-center">{viewingEmployee.name}</h3>
+                <p className="text-sm text-muted-foreground text-center mt-1">{viewingEmployee.role}</p>
+                <Badge variant={viewingEmployee.status === 'Active' ? 'default' : 'secondary'} className="mt-3">
+                  {viewingEmployee.status}
+                </Badge>
               </div>
-              <h3 className="headline-small m-0 text-center" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.name}</h3>
-              <span className="body-large text-center" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{viewingEmployee.role}</span>
-            </div>
-            
-            <ul className="m3-list mb-6">
-              <li className="list-item two-line px-4">
-                <div className="list-content">
-                  <span className="label-small uppercase" style={{ color: 'var(--md-bw-on-surface-variant)' }}>ID</span>
-                  <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.id}</span>
-                </div>
-              </li>
-              <li className="list-item two-line px-4">
-                <div className="list-content">
-                  <span className="label-small uppercase" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Status</span>
-                  <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.status}</span>
-                </div>
-              </li>
-              <li className="list-item two-line px-4">
-                <div className="list-content">
-                  <span className="label-small uppercase" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Department</span>
-                  <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.department}</span>
-                </div>
-              </li>
-              <li className="list-item two-line px-4">
-                <div className="list-content">
-                  <span className="label-small uppercase" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Email</span>
-                  <span className="body-large break-all" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.email}</span>
-                </div>
-              </li>
-              <li className="list-item two-line px-4">
-                <div className="list-content">
-                  <span className="label-small uppercase" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Joined</span>
-                  <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.joiningDate ? formatDate(viewingEmployee.joiningDate) : 'N/A'}</span>
-                </div>
-              </li>
-            </ul>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <button className="btn btn-text" onClick={() => setViewingEmployee(null)}>Close</button>
-              <button className="btn btn-tonal" onClick={() => {
-                setViewingEmployee(null);
-                setEditingEmployee(viewingEmployee);
-                setNewEmpId(viewingEmployee.id);
-                setNewName(viewingEmployee.name);
-                setNewRole(viewingEmployee.role);
-                setNewDept(viewingEmployee.department);
-                setNewEmail(viewingEmployee.email);
-                setNewStatus(viewingEmployee.status);
-                setNewDob(viewingEmployee.dob || '');
-                setNewJoiningDate(viewingEmployee.joiningDate || '');
-                setNewCvFileName(viewingEmployee.cvFileName || '');
-                setNewNidFileName(viewingEmployee.nidFileName || '');
-                setNewAvatar(viewingEmployee.avatar || '');
-                setPhotoX(viewingEmployee.photoX || 0);
-                setPhotoY(viewingEmployee.photoY || 0);
-                setPhotoZoom(viewingEmployee.photoZoom || 1);
-                setIsCustomDept(false);
-                setCustomDept('');
-                setShowAddForm(true);
-              }}>Edit Profile</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Form Modal/Overlay */}
-      {showAddForm && (
-        <div className="modal-overlay" onClick={() => handleCloseForm()}>
-          <div className="macos-modal max-w-lg p-7 sm:p-8 flex flex-col gap-6" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center pb-4 border-b border-[rgba(0,0,0,0.06)]">
-              <h3 className="text-xl sm:text-2xl font-extrabold flex items-center gap-3 m-0" style={{ color: 'var(--md-bw-on-surface)' }}>
-                {editingEmployee ? <Edit size={22} className="text-[#007AFF]" /> : <UserPlus size={22} className="text-[#007AFF]" />}
-                {editingEmployee ? 'Edit Employee Profile' : 'New Employee Record'}
-              </h3>
-              <button
-                onClick={handleCloseForm}
-                aria-label="Close form"
-                className="size-9 flex items-center justify-center rounded-full bg-[rgba(0,0,0,0.05)] hover:bg-[rgba(0,0,0,0.1)] transition-colors cursor-pointer border-none"
-                style={{ color: 'var(--md-bw-on-surface-variant)' }}
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveEmployee} className="flex flex-col gap-4">
               
-              {/* HD Profile Photo Upload & Reposition Frame */}
-              <div className="flex flex-col gap-2 p-4 rounded-2xl" style={{ border: '1px dashed var(--glass-border)', background: 'rgba(0,0,0,0.01)' }}>
-                <label className="text-[0.85rem] font-bold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Profile Photo & Repositioner</label>
-                
-                <div className="flex gap-4 items-center">
-                  {/* Panning Preview Frame */}
-                  <div 
-                    onPointerMove={handlePointerMove}
-                    onPointerUp={handlePointerUp}
-                    onPointerLeave={handlePointerUp}
-                    className="overflow-hidden relative"
-                    style={{
-                      width: '90px',
-                      height: '90px',
-                      borderRadius: '20px',
-                      border: '1.5px solid var(--glass-border)',
-                      background: '#f3f4f6',
-                      cursor: dragStart ? 'grabbing' : 'grab',
-                      touchAction: 'none',
-                      userSelect: 'none'
-                    }}
-                  >
-                    {newAvatar ? (
-                      <img
-                        src={newAvatar}
-                        alt="Upload preview"
-                        onPointerDown={handlePointerDown}
-                        className="absolute top-0 left-0 w-full h-full object-cover"
-                        style={{
-                          transform: `translate(${photoX}px, ${photoY}px) scale(${photoZoom})`,
-                          transformOrigin: 'center',
-                          userSelect: 'none',
-                          pointerEvents: 'auto'
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-center p-2 opacity-70" style={{ color: 'var(--md-bw-on-surface-variant)', fontSize: '0.75rem', userSelect: 'none' }}>
-                        No Image
-                      </div>
-                    )}
-                  </div>
+              <div className="grid gap-4 py-4 px-2">
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <span className="text-sm font-medium text-muted-foreground text-right">Employee ID</span>
+                  <span className="col-span-2 text-sm font-semibold font-mono">{viewingEmployee.id}</span>
+                </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <span className="text-sm font-medium text-muted-foreground text-right">Department</span>
+                  <span className="col-span-2 text-sm">{viewingEmployee.department}</span>
+                </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <span className="text-sm font-medium text-muted-foreground text-right">Email Address</span>
+                  <span className="col-span-2 text-sm break-all text-primary">{viewingEmployee.email}</span>
+                </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <span className="text-sm font-medium text-muted-foreground text-right">Joined Date</span>
+                  <span className="col-span-2 text-sm">{viewingEmployee.joiningDate ? formatDate(viewingEmployee.joiningDate) : 'N/A'}</span>
+                </div>
+              </div>
 
-                  <div className="flex-1 flex flex-col gap-2">
-                    <button
-                      type="button"
-                      className="btn btn-secondary px-3 py-2"
-                      style={{ fontSize: '0.8rem', justifyContent: 'center', height: '34px', minHeight: '34px' }}
-                      onClick={() => document.getElementById('photo-file-input').click()}
-                    >
-                      {newAvatar ? 'Change Photo' : 'Upload HD Photo'}
-                    </button>
-                    <input
-                      id="photo-file-input"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          const file = e.target.files[0]
-                          const reader = new FileReader()
-                          reader.onload = (event) => {
-                            setNewAvatar(event.target.result)
-                            setPhotoX(0)
-                            setPhotoY(0)
-                            setPhotoZoom(1)
-                          }
-                          reader.readAsDataURL(file)
-                        }
+              <DialogFooter className="sm:justify-end gap-2 mt-4">
+                <Button variant="secondary" onClick={() => setViewingEmployee(null)}>Close</Button>
+                <Button onClick={() => {
+                  setViewingEmployee(null);
+                  setEditingEmployee(viewingEmployee);
+                  setNewEmpId(viewingEmployee.id);
+                  setNewName(viewingEmployee.name);
+                  setNewRole(viewingEmployee.role);
+                  setNewDept(viewingEmployee.department);
+                  setNewEmail(viewingEmployee.email);
+                  setNewStatus(viewingEmployee.status);
+                  setNewDob(viewingEmployee.dob || '');
+                  setNewJoiningDate(viewingEmployee.joiningDate || '');
+                  setNewCvFileName(viewingEmployee.cvFileName || '');
+                  setNewNidFileName(viewingEmployee.nidFileName || '');
+                  setNewAvatar(viewingEmployee.avatar || '');
+                  setPhotoX(viewingEmployee.photoX || 0);
+                  setPhotoY(viewingEmployee.photoY || 0);
+                  setPhotoZoom(viewingEmployee.photoZoom || 1);
+                  setIsCustomDept(false);
+                  setCustomDept('');
+                  setShowAddForm(true);
+                }}>
+                  <Edit className="mr-2 h-4 w-4" /> Edit Profile
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Form Dialog */}
+      <Dialog open={showAddForm} onOpenChange={handleCloseForm}>
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {editingEmployee ? <Edit className="h-5 w-5 text-primary" /> : <UserPlus className="h-5 w-5 text-primary" />}
+              {editingEmployee ? 'Edit Employee Profile' : 'New Employee Record'}
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveEmployee} className="flex flex-col gap-6 py-4">
+            
+            {/* HD Profile Photo Upload */}
+            <div className="p-4 rounded-xl border border-dashed bg-muted/20">
+              <label className="text-sm font-medium mb-3 block">Profile Photo & Framing</label>
+              <div className="flex gap-4 items-center">
+                <div 
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerLeave={handlePointerUp}
+                  className="overflow-hidden relative h-20 w-20 rounded-full border-2 border-primary/20 bg-muted/50 cursor-grab active:cursor-grabbing"
+                  style={{ touchAction: 'none' }}
+                >
+                  {newAvatar ? (
+                    <img
+                      src={newAvatar}
+                      alt="Preview"
+                      onPointerDown={handlePointerDown}
+                      className="absolute top-0 left-0 w-full h-full object-cover"
+                      style={{
+                        transform: `translate(${photoX}px, ${photoY}px) scale(${photoZoom})`,
+                        transformOrigin: 'center',
+                        pointerEvents: 'auto'
                       }}
                     />
-                    <span className="text-[0.7rem] opacity-65" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
-                      *Drag image inside the frame to adjust framing.
-                    </span>
-                  </div>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground text-center">No Image</div>
+                  )}
                 </div>
 
-                {newAvatar && (
-                  <div className="flex flex-col gap-1 mt-1">
-                    <div className="flex justify-between text-[0.75rem]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
-                      <span>Zoom Scale:</span>
-                      <span>{Math.round(photoZoom * 100)}%</span>
-                    </div>
-                    <input 
-                      type="range" 
-                      min="1" 
-                      max="3" 
-                      step="0.02" 
-                      aria-label="Zoom scale"
-                      value={photoZoom} 
-                      onChange={(e) => setPhotoZoom(parseFloat(e.target.value))}
-                      className="w-full cursor-pointer"
-                      style={{ accentColor: 'var(--accent-primary)' }}
-                    />
+                <div className="flex-1 flex flex-col gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-fit"
+                    onClick={() => document.getElementById('photo-file-input').click()}
+                  >
+                    {newAvatar ? 'Change Photo' : 'Upload Photo'}
+                  </Button>
+                  <input
+                    id="photo-file-input"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          setNewAvatar(event.target.result);
+                          setPhotoX(0); setPhotoY(0); setPhotoZoom(1);
+                        };
+                        reader.readAsDataURL(e.target.files[0]);
+                      }
+                    }}
+                  />
+                  <span className="text-[10px] text-muted-foreground">Drag image inside frame to adjust.</span>
+                </div>
+              </div>
+
+              {newAvatar && (
+                <div className="mt-3">
+                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                    <span>Zoom</span>
+                    <span>{Math.round(photoZoom * 100)}%</span>
                   </div>
-                )}
-              </div>
+                  <input 
+                    type="range" min="1" max="3" step="0.02" 
+                    value={photoZoom} onChange={(e) => setPhotoZoom(parseFloat(e.target.value))}
+                    className="w-full accent-primary"
+                  />
+                </div>
+              )}
+            </div>
 
-              {/* Employee ID */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Employee ID (Auto-generated, editable)</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. EMP-101"
-                  value={newEmpId}
-                  onChange={(e) => setNewEmpId(e.target.value.trim().toUpperCase())}
-                  className="font-bold"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Employee ID</label>
+                <Input required value={newEmpId} onChange={(e) => setNewEmpId(e.target.value.trim().toUpperCase())} className="font-mono" />
               </div>
-
-              {/* Name */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Full Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. John Doe"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                />
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Full Name</label>
+                <Input required value={newName} onChange={(e) => setNewName(e.target.value)} />
               </div>
-
-              {/* Role */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Job Title</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. HR Associate"
-                  value={newRole}
-                  onChange={(e) => setNewRole(e.target.value)}
-                />
+              
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Job Title</label>
+                <Input required value={newRole} onChange={(e) => setNewRole(e.target.value)} />
               </div>
-
-              {/* Department Selection */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Department</label>
+              
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Department</label>
                 <select
                   value={isCustomDept ? 'NEW' : newDept}
                   onChange={(e) => {
-                    if (e.target.value === 'NEW') {
-                      setIsCustomDept(true)
-                    } else {
-                      setIsCustomDept(false)
-                      setNewDept(e.target.value)
-                    }
+                    if (e.target.value === 'NEW') { setIsCustomDept(true); } 
+                    else { setIsCustomDept(false); setNewDept(e.target.value); }
                   }}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
-                  {activeDepts.map(d => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
+                  {activeDepts.map(d => <option key={d} value={d}>{d}</option>)}
                   <option value="NEW">+ Add New Department...</option>
                 </select>
-
-                {/* Custom Department Name Entry */}
                 {isCustomDept && (
-                  <input
-                    type="text"
-                    required
-                    aria-label="New department name"
-                    placeholder="Enter new department name..."
-                    value={customDept}
-                    onChange={(e) => setCustomDept(e.target.value)}
-                    className="text-sm px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl mt-2"
-                    style={{ border: '1px solid var(--border-color)', background: '#ffffff', color: 'var(--text-primary)', outline: 'none' }}
-                  />
+                  <Input required placeholder="New dept name..." value={customDept} onChange={(e) => setCustomDept(e.target.value)} className="mt-1" />
                 )}
               </div>
 
-              {/* Email */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Email Address</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="e.g. john@hrpulse.io"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                />
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Email Address</label>
+                <Input type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+              </div>
+              
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Password {editingEmployee && <span className="text-xs text-muted-foreground font-normal">(Leave blank to keep)</span>}</label>
+                <Input type="text" placeholder={editingEmployee ? "Leave blank" : "Set password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
               </div>
 
-              {/* Password */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
-                  Login Password {editingEmployee ? '(leave blank to keep current)' : ''}
-                </label>
-                <input
-                  type="text"
-                  placeholder={editingEmployee ? 'Leave blank to keep current' : 'Set employee login password'}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="font-mono"
-                />
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Date of Birth</label>
+                <Input type="date" value={newDob} onChange={(e) => setNewDob(e.target.value)} />
               </div>
 
-              {/* DOB & Joining Date */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Date of Birth</label>
-                  <input
-                    type="date"
-                    value={newDob}
-                    onChange={(e) => setNewDob(e.target.value)}
-                    className="cursor-pointer"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Joining Date</label>
-                  <input
-                    type="date"
-                    value={newJoiningDate}
-                    onChange={(e) => setNewJoiningDate(e.target.value)}
-                    className="cursor-pointer"
-                  />
-                </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Joining Date</label>
+                <Input type="date" value={newJoiningDate} onChange={(e) => setNewJoiningDate(e.target.value)} />
               </div>
 
-              {/* Custom CV and Passport/NID upload fields */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Upload CV</label>
-                  <div className="relative">
-                    <button 
-                      type="button" 
-                      className="btn btn-mac-green w-full justify-center px-3.5 py-2.5" 
-                      style={{ 
-                        fontSize: '0.8rem', 
-                        borderRadius: '10px', 
-                        height: '38px',
-                        minHeight: '38px'
-                      }} 
-                      onClick={() => document.getElementById('cv-file-input').click()}
-                    >
-                      {newCvFileName ? '📄 ' + (newCvFileName.length > 12 ? newCvFileName.substring(0, 10) + '...' : newCvFileName) : 'Upload CV'}
-                    </button>
-                    <input
-                      id="cv-file-input"
-                      type="file"
-                      accept=".pdf,.doc,.docx"
-                      className="hidden"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          setNewCvFileName(e.target.files[0].name)
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Passport/NID</label>
-                  <div className="relative">
-                    <button 
-                      type="button" 
-                      className="btn btn-mac-green w-full justify-center px-3.5 py-2.5" 
-                      style={{ 
-                        fontSize: '0.8rem', 
-                        borderRadius: '10px', 
-                        height: '38px',
-                        minHeight: '38px'
-                      }} 
-                      onClick={() => document.getElementById('nid-file-input').click()}
-                    >
-                      {newNidFileName ? '🪪 ' + (newNidFileName.length > 12 ? newNidFileName.substring(0, 10) + '...' : newNidFileName) : 'Upload ID'}
-                    </button>
-                    <input
-                      id="nid-file-input"
-                      type="file"
-                      accept="image/*,.pdf"
-                      className="hidden"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          setNewNidFileName(e.target.files[0].name)
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Upload CV</label>
+                <Button type="button" variant="outline" className="w-full justify-start" onClick={() => document.getElementById('cv-file-input').click()}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4 text-muted-foreground" />
+                  {newCvFileName ? (newCvFileName.length > 15 ? newCvFileName.substring(0, 15) + '...' : newCvFileName) : 'Upload Document'}
+                </Button>
+                <input id="cv-file-input" type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={(e) => e.target.files && setNewCvFileName(e.target.files[0].name)} />
               </div>
 
-              {/* Status */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Employment Status</label>
-                <select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  className="cursor-pointer"
-                >
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Employment Status</label>
+                <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                   <option value="Active">Active</option>
                   <option value="On Leave">On Leave</option>
                   <option value="Inactive">Inactive</option>
                 </select>
               </div>
+            </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-3 mt-4 justify-end">
-                <button
-                  type="button"
-                  className="btn btn-mac-red flex-1 inline-flex items-center justify-center gap-1.5 text-xs px-4 sm:px-5 py-2 sm:py-2.5"
-                  style={{ height: '38px', minHeight: '38px', borderRadius: '8px !important' }}
-                  onClick={handleCloseForm}
-                >
-                  <X size={14} /> Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-mac-blue flex-1 inline-flex items-center justify-center gap-1.5 text-xs px-4 sm:px-5 py-2 sm:py-2.5"
-                  style={{ height: '38px', minHeight: '38px', borderRadius: '8px !important' }}
-                >
-                  <Check size={14} /> {editingEmployee ? 'Save Changes' : 'Save Record'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            <DialogFooter className="mt-4 border-t pt-4">
+              <Button type="button" variant="outline" onClick={handleCloseForm}>Cancel</Button>
+              <Button type="submit">{editingEmployee ? 'Save Changes' : 'Create Record'}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-      {/* Google Ads Placement */}
       <AdSlot type="horizontal" className="mt-8" />
     </div>
   )

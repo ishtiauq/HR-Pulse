@@ -5,11 +5,13 @@ import AdSlot from './AdSlot.jsx'
 import { formatDateTime } from '../services/date.js'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 
-const pInp = { width: '100%', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', transition: 'border 0.15s' }
-const pSel = { width: '100%', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', cursor: 'pointer', appearance: 'none' }
-const lbl = { font: "500 11px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--md-bw-on-surface-variant)', display: 'block' }
-const card = { background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid var(--glass-border)', borderRadius: 'var(--glass-radius)', boxShadow: 'var(--glass-shadow)' }
 const SEG_COLORS = ['#0062E6', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14', '#20c997', '#e83e8c', '#17a2b8', '#6610f2']
 const getSegmentColor = (item, index) => item.type === 'deduction' ? '#dc3545' : SEG_COLORS[index % SEG_COLORS.length]
 
@@ -160,575 +162,532 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const renderSettingsContent = (id) => {
     switch (id) {
       case 'payroll': return (
-        <div className="payroll-settings-grid">
-          {/* Currency Setup */}
-          <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Currency Setup</h4>
-            <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Select the currency symbol applied globally across dashboards and receipts.</p>
-            <div style={{ position: 'relative', width: '100%', maxWidth: '260px' }}>
-              <select className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" value={currency} onChange={e => setCurrency(e.target.value)} style={{ ...pSel }}>
-                <option value="$">$ (USD)</option>
-                <option value="৳">৳ (BDT)</option>
-                <option value="€">€ (EUR)</option>
-                <option value="£">£ (GBP)</option>
-                <option value="₹">₹ (INR)</option>
-                <option value="¥">¥ (JPY)</option>
-              </select>
-              <ChevronDown size={14} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }} />
-            </div>
-          </div>
-
-          {/* Salary Structure */}
-          <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Salary Structure</h4>
-              <button onClick={handleAddComponent} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
-                <Plus size={14} /> Add Component
-              </button>
-            </div>
-
-            {isOver100 && (
-              <div className="p-3 px-4" style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '100px', color: 'var(--md-bw-on-surface)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
-                <Info size={16} /> Component total exceeds 100%. Please adjust before saving.
+        <div className="flex flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Currency Setup</CardTitle>
+              <CardDescription>Select the currency symbol applied globally across dashboards and receipts.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="relative w-full max-w-[260px]">
+                <select className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none" value={currency} onChange={e => setCurrency(e.target.value)}>
+                  <option value="$">$ (USD)</option>
+                  <option value="৳">৳ (BDT)</option>
+                  <option value="€">€ (EUR)</option>
+                  <option value="£">£ (GBP)</option>
+                  <option value="₹">₹ (INR)</option>
+                  <option value="¥">¥ (JPY)</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-3 h-4 w-4 opacity-50" />
               </div>
-            )}
+            </CardContent>
+          </Card>
 
-            {/* Donut Chart */}
-            {salaryStructure.length > 0 && (
-              <div className="py-2" style={{ display: 'flex', justifyContent: 'center' }}>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie data={salaryStructure.map(item => ({ ...item, value: item.percentage }))}
-                      cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={2}>
-                      {salaryStructure.map((item, index) => (
-                        <Cell key={item.id} fill={getSegmentColor(item, index)} stroke="none" />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+          <Card>
+            <CardHeader className="flex flex-row justify-between items-center space-y-0">
+              <div>
+                <CardTitle className="text-lg">Salary Structure</CardTitle>
+                <CardDescription>Configure earning and deduction components for your payroll.</CardDescription>
               </div>
-            )}
-
-            {/* Component List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {salaryStructure.length === 0 ? (
-                <span className="body-medium py-5" style={{ color: 'var(--md-bw-on-surface-variant)', textAlign: 'center' }}>
-                  No salary components configured. Click "Add Component" to get started.
-                </span>
-              ) : (
-                salaryStructure.map(item => (
-                  <div key={item.id} className="p-3 px-4" style={{
-                    display: 'flex', alignItems: 'center', gap: '10px',
-                    background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)',
-                  }}>
-                    <input type="text" value={item.name} onChange={e => handleComponentChange(item.id, 'name', e.target.value)}
-                      placeholder="Component name"
-                      className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full"
-                      style={{ flex: 1, minWidth: '120px', ...pInp, fontSize: '13px' }} />
-
-                    <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
-                      <button onClick={() => handleComponentChange(item.id, 'type', 'earning')}
-                        className="px-3 py-1.5"
-                        style={{
-                          borderRadius: '100px', border: '1px solid',
-                          fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
-                          background: item.type === 'earning' ? '#0062E6' : 'transparent',
-                          color: item.type === 'earning' ? '#fff' : 'var(--md-bw-on-surface-variant)',
-                          borderColor: item.type === 'earning' ? '#0062E6' : 'var(--glass-border)',
-                        }}>Earning</button>
-                      <button onClick={() => handleComponentChange(item.id, 'type', 'deduction')}
-                        className="px-3 py-1.5"
-                        style={{
-                          borderRadius: '100px', border: '1px solid',
-                          fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
-                          background: item.type === 'deduction' ? '#dc3545' : 'transparent',
-                          color: item.type === 'deduction' ? '#fff' : 'var(--md-bw-on-surface-variant)',
-                          borderColor: item.type === 'deduction' ? '#dc3545' : 'var(--glass-border)',
-                        }}>Deduction</button>
-                    </div>
-
-                    <div style={{ position: 'relative', width: '70px', flexShrink: 0 }}>
-                      <input type="number" min="0" max="100" value={item.percentage}
-                        onChange={e => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
-                        className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full"
-                        style={{ ...pInp, fontSize: '13px', textAlign: 'center', paddingRight: '20px' }} />
-                      <span style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', fontSize: '12px', color: 'var(--md-bw-on-surface-variant)', pointerEvents: 'none' }}>%</span>
-                    </div>
-
-                    <button onClick={() => handleRemoveComponent(item.id)}
-                      className="p-1.5" style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', display: 'flex', flexShrink: 0 }}>
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                ))
+              <Button variant="outline" size="sm" onClick={handleAddComponent}>
+                <Plus className="mr-2 h-4 w-4" /> Add Component
+              </Button>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-6">
+              {isOver100 && (
+                <div className="p-3 bg-red-100 text-red-900 border border-red-200 rounded-lg flex items-center gap-2 text-sm">
+                  <Info className="h-4 w-4" /> Component total exceeds 100%. Please adjust before saving.
+                </div>
               )}
-            </div>
 
-            {/* Net Earning Ratio */}
-            {salaryStructure.length > 0 && (
-              <div className="p-3 px-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
-                <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 600 }}>Net Earning Ratio</span>
-                <span className="body-medium" style={{
-                  color: netPayPercent >= 0 ? 'var(--md-bw-on-surface)' : '#dc3545',
-                  fontVariantNumeric: 'tabular-nums', fontWeight: 700,
-                }}>{netPayPercent}%</span>
+              {salaryStructure.length > 0 && (
+                <div className="py-2 flex justify-center">
+                  <ResponsiveContainer width="100%" height={200}>
+                    <PieChart>
+                      <Pie data={salaryStructure.map(item => ({ ...item, value: item.percentage }))}
+                        cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={2}>
+                        {salaryStructure.map((item, index) => (
+                          <Cell key={item.id} fill={getSegmentColor(item, index)} stroke="none" />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-3">
+                {salaryStructure.length === 0 ? (
+                  <span className="text-sm text-muted-foreground text-center py-4">No components configured.</span>
+                ) : (
+                  salaryStructure.map(item => (
+                    <div key={item.id} className="flex flex-wrap md:flex-nowrap items-center gap-3 p-3 bg-muted/40 border border-border rounded-lg">
+                      <Input value={item.name} onChange={e => handleComponentChange(item.id, 'name', e.target.value)} placeholder="Component name" className="flex-1 min-w-[120px]" />
+                      
+                      <div className="flex bg-muted rounded-md p-1">
+                        <button onClick={() => handleComponentChange(item.id, 'type', 'earning')}
+                          className={`px-3 py-1 text-xs rounded-sm transition-all ${item.type === 'earning' ? 'bg-background shadow-sm text-blue-600 font-medium' : 'text-muted-foreground'}`}>Earning</button>
+                        <button onClick={() => handleComponentChange(item.id, 'type', 'deduction')}
+                          className={`px-3 py-1 text-xs rounded-sm transition-all ${item.type === 'deduction' ? 'bg-background shadow-sm text-red-600 font-medium' : 'text-muted-foreground'}`}>Deduction</button>
+                      </div>
+
+                      <div className="relative w-[80px]">
+                        <Input type="number" min="0" max="100" value={item.percentage} onChange={e => handleComponentChange(item.id, 'percentage', Number(e.target.value))} className="pr-6 text-center" />
+                        <span className="absolute right-2 top-2.5 text-xs text-muted-foreground pointer-events-none">%</span>
+                      </div>
+
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-red-500" onClick={() => handleRemoveComponent(item.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))
+                )}
               </div>
-            )}
-          </div>
+
+              {salaryStructure.length > 0 && (
+                <div className="flex justify-between items-center p-4 bg-muted/30 border border-border rounded-lg mt-2">
+                  <span className="font-semibold text-sm">Net Earning Ratio</span>
+                  <span className={`font-bold text-lg font-mono ${netPayPercent >= 0 ? 'text-foreground' : 'text-red-500'}`}>{netPayPercent}%</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       )
       case 'company': return (
-        <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Building2 size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-            <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Company Profile Settings</h4>
-          </div>
-          <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Manage public details regarding your enterprise. These details are used to brand generated documents like reports, receipts, and payslips.</p>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span className="mb-1 sm:mb-1.5" style={lbl}>Brand Logo</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div role="button" tabIndex={0} aria-label="Edit logo" onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (logo) setShowLogoModal(true); else triggerFileInput() } }} onClick={() => { if (logo) setShowLogoModal(true); else triggerFileInput() }}
-                  style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: 'pointer', overflow: 'hidden', position: 'relative' }}>
-                  {logo ? <img src={logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`, transformOrigin: 'center' }} />
-                    : <Activity size={24} color="var(--md-bw-on-surface-variant)" />}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-muted-foreground" />
+              <CardTitle className="text-lg">Company Profile Settings</CardTitle>
+            </div>
+            <CardDescription>Manage public details used to brand generated documents.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Brand Logo</label>
+              <div className="flex items-center gap-4">
+                <div role="button" tabIndex={0} onClick={() => { if (logo) setShowLogoModal(true); else triggerFileInput() }}
+                  className="w-16 h-16 rounded-xl border-2 border-dashed flex items-center justify-center cursor-pointer overflow-hidden hover:bg-muted/50 transition-colors relative">
+                  {logo ? <img src={logo} alt="" className="w-full h-full object-cover" style={{ transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)` }} />
+                    : <Upload className="h-6 w-6 text-muted-foreground/50" />}
                 </div>
-                <button aria-label="Upload new logo" onClick={triggerFileInput} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
-                  <Upload size={14} /> Upload New Logo
-                </button>
-                <input type="file" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" aria-hidden="true" tabIndex={-1} style={{ display: 'none' }} />
+                <Button variant="outline" size="sm" onClick={triggerFileInput}>
+                  <Upload className="mr-2 h-4 w-4" /> Upload Logo
+                </Button>
+                <input type="file" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" className="hidden" />
               </div>
             </div>
 
-            {['Name', 'Email', 'Website'].map(field => {
-              const val = field === 'Name' ? companyName : field === 'Email' ? companyEmail : companyWebsite
-              const set = field === 'Name' ? setCompanyName : field === 'Email' ? setCompanyEmail : setCompanyWebsite
-              const Icon = field === 'Name' ? Building2 : field === 'Email' ? Mail : Globe
-              const ph = field === 'Name' ? 'HR Pulse Ltd.' : field === 'Email' ? 'hr@hrpulse.io' : 'www.hrpulse.io'
-              const type = field === 'Email' ? 'email' : 'text'
-              return (
-                <div key={field} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <span className="mb-1 sm:mb-1.5" style={lbl}>{field === 'Name' ? 'Legal Entity Name' : field === 'Email' ? 'HR Support Email' : 'Company Website URL'}</span>
-                  <div style={{ position: 'relative' }}>
-                    <Icon size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--md-bw-on-surface-variant)' }} />
-                    <input aria-label={field === 'Name' ? 'Company name' : field === 'Email' ? 'Company email address' : 'Company website URL'} type={type} value={val} onChange={e => set(e.target.value)} placeholder={ph}
-                      className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full"
-                      style={{ ...pInp, paddingLeft: '38px', fontSize: '13px' }} />
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Legal Entity Name</label>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="HR Pulse Ltd." className="pl-9" />
                 </div>
-              )
-            })}
-          </div>
-        </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">HR Support Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="hr@hrpulse.io" className="pl-9" />
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 md:col-span-2">
+                <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Company Website URL</label>
+                <div className="relative">
+                  <Globe className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input value={companyWebsite} onChange={e => setCompanyWebsite(e.target.value)} placeholder="www.hrpulse.io" className="pl-9" />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )
       case 'notifications': return (
-        <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Bell size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-            <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Notification Preferences</h4>
-          </div>
-          <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Enable alerts, sync logs alerts, or background notification parameters.</p>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-muted-foreground" />
+              <CardTitle className="text-lg">Notification Preferences</CardTitle>
+            </div>
+            <CardDescription>Enable alerts, sync logs alerts, or background notification parameters.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col">
             {[
               { label: 'Enable Real-time Sync Alerts', desc: 'Displays popups when files successfully sync with Google Drive.', val: syncAlerts, set: setSyncAlerts },
               { label: 'Email Monthly Payout Digest', desc: 'Sends a copy of the payroll statements to the HR support inbox.', val: emailDigests, set: setEmailDigests },
             ].map((item, i) => (
-              <div key={item.label} className="py-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: i === 0 ? '1px solid var(--glass-border)' : 'none' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 500 }}>{item.label}</span>
-                  <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{item.desc}</span>
+              <div key={item.label} className={`py-4 flex justify-between items-center ${i === 0 ? 'border-b border-border' : ''}`}>
+                <div className="flex flex-col gap-1">
+                  <span className="font-medium text-sm">{item.label}</span>
+                  <span className="text-xs text-muted-foreground">{item.desc}</span>
                 </div>
-                <input type="checkbox" role="switch" aria-checked={item.val} aria-label={item.label} checked={item.val} onChange={e => item.set(e.target.checked)}
-                  style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#0062E6', borderRadius: '4px', flexShrink: 0 }} />
+                <input type="checkbox" checked={item.val} onChange={e => item.set(e.target.checked)} className="h-4 w-4 rounded accent-primary cursor-pointer shrink-0 ml-4" />
               </div>
             ))}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )
       case 'expenses': return (
-        <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Receipt size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-            <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Expense Policies</h4>
-          </div>
-          <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Set maximum reimbursement limits per category. Expenses exceeding these limits will be flagged for review in the approval queue.</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
-            {Object.keys(expensePolicies).map(cat => (
-              <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span className="mb-1 sm:mb-1.5" style={lbl}>{cat}</span>
-                <input aria-label={`Expense limit for ${cat}`} type="number" value={expensePolicies[cat]} onChange={e => setExpensePolicies(prev => ({ ...prev, [cat]: Number(e.target.value) }))}
-                  className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full"
-                  style={{ ...pInp, fontSize: '13px' }} />
-              </div>
-            ))}
-          </div>
-        </div>
-      )
-      case 'rosters': return (
-        <>
-          <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CalendarClock size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-                <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Shift Templates</h4>
-              </div>
-              <button aria-label="Add shift template" className="btn btn-outlined" onClick={() => setShiftTemplates(prev => [...prev, { id: `st-${Date.now()}`, name: 'New Shift', start: '09:00', end: '17:00', break: 60, color: '#333333' }])}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
-                <Plus size={14} /> Add Shift
-              </button>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Receipt className="h-5 w-5 text-muted-foreground" />
+              <CardTitle className="text-lg">Expense Policies</CardTitle>
             </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {shiftTemplates.map(t => (
-                <div key={t.id} className="p-4" style={{ ...card, display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <div style={{ flex: '1.5', minWidth: '140px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <span className="mb-1 sm:mb-1.5" style={lbl}>Shift Name</span>
-                    <input aria-label="Shift name" type="text" value={t.name} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, name: e.target.value } : x))} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pInp, fontSize: '13px' }} />
-                  </div>
-                  <div style={{ flex: '1', minWidth: '100px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <span className="mb-1 sm:mb-1.5" style={lbl}>Start</span>
-                    <input aria-label="Shift start time" type="time" value={t.start} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, start: e.target.value } : x))} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pInp, fontSize: '13px' }} />
-                  </div>
-                  <div style={{ flex: '1', minWidth: '100px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <span className="mb-1 sm:mb-1.5" style={lbl}>End</span>
-                    <input aria-label="Shift end time" type="time" value={t.end} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, end: e.target.value } : x))} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pInp, fontSize: '13px' }} />
-                  </div>
-                  <div style={{ flex: '0.8', minWidth: '80px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <span className="mb-1 sm:mb-1.5" style={lbl}>Break (min)</span>
-                    <input aria-label="Break duration in minutes" type="number" value={t.break} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, break: parseInt(e.target.value) || 0 } : x))} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pInp, fontSize: '13px' }} />
-                  </div>
-                  <div style={{ width: '50px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <span className="mb-1 sm:mb-1.5" style={{ ...lbl, color: 'transparent' }}>C</span>
-                    <input aria-label="Shift color" type="color" value={t.color} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, color: e.target.value } : x))}
-                      style={{ padding: 0, borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'transparent', width: '100%', height: '38px', cursor: 'pointer' }} />
-                  </div>
-                  <button aria-label="Delete shift template" className="btn btn-text p-2.5" style={{ color: 'var(--md-bw-on-surface-variant)', flexShrink: 0, alignSelf: 'flex-end' }}
-                    onClick={() => setShiftTemplates(prev => prev.filter(x => x.id !== t.id))}>
-                    <Trash2 size={16} />
-                  </button>
+            <CardDescription>Set maximum reimbursement limits per category.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {Object.keys(expensePolicies).map(cat => (
+                <div key={cat} className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">{cat}</label>
+                  <Input type="number" value={expensePolicies[cat]} onChange={e => setExpensePolicies(prev => ({ ...prev, [cat]: Number(e.target.value) }))} />
                 </div>
               ))}
             </div>
-          </div>
+          </CardContent>
+        </Card>
+      )
+      case 'rosters': return (
+        <div className="flex flex-col gap-6">
+          <Card>
+            <CardHeader className="flex flex-row justify-between items-center space-y-0">
+              <div className="flex items-center gap-2">
+                <CalendarClock className="h-5 w-5 text-muted-foreground" />
+                <CardTitle className="text-lg">Shift Templates</CardTitle>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setShiftTemplates(prev => [...prev, { id: `st-${Date.now()}`, name: 'New Shift', start: '09:00', end: '17:00', break: 60, color: '#333333' }])}>
+                <Plus className="mr-2 h-4 w-4" /> Add Shift
+              </Button>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              {shiftTemplates.map(t => (
+                <div key={t.id} className="flex flex-wrap gap-4 items-end p-4 bg-muted/30 border border-border rounded-lg">
+                  <div className="flex-1 min-w-[140px] flex flex-col gap-2">
+                    <label className="text-xs font-medium text-muted-foreground uppercase">Shift Name</label>
+                    <Input value={t.name} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, name: e.target.value } : x))} />
+                  </div>
+                  <div className="w-[100px] flex flex-col gap-2">
+                    <label className="text-xs font-medium text-muted-foreground uppercase">Start</label>
+                    <Input type="time" value={t.start} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, start: e.target.value } : x))} />
+                  </div>
+                  <div className="w-[100px] flex flex-col gap-2">
+                    <label className="text-xs font-medium text-muted-foreground uppercase">End</label>
+                    <Input type="time" value={t.end} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, end: e.target.value } : x))} />
+                  </div>
+                  <div className="w-[80px] flex flex-col gap-2">
+                    <label className="text-xs font-medium text-muted-foreground uppercase">Break(m)</label>
+                    <Input type="number" value={t.break} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, break: parseInt(e.target.value) || 0 } : x))} />
+                  </div>
+                  <div className="w-[50px] flex flex-col gap-2">
+                    <label className="text-xs font-medium text-transparent uppercase">C</label>
+                    <input type="color" value={t.color} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, color: e.target.value } : x))} className="h-10 w-full p-0 border-0 bg-transparent rounded cursor-pointer" />
+                  </div>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-red-500 mb-0.5" onClick={() => setShiftTemplates(prev => prev.filter(x => x.id !== t.id))}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
 
-          <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Activity size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-              <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Overtime Rules</h4>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span className="mb-1 sm:mb-1.5" style={lbl}>Weekday Multiplier</span>
-                <input aria-label="Weekday overtime multiplier" type="number" step="0.1" value={overtimeRules.multiplierWeekday} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekday: parseFloat(e.target.value) || 1 }))} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pInp, fontSize: '13px' }} />
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-muted-foreground" />
+                <CardTitle className="text-lg">Overtime Rules</CardTitle>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span className="mb-1 sm:mb-1.5" style={lbl}>Weekend/Holiday Multiplier</span>
-                <input aria-label="Weekend overtime multiplier" type="number" step="0.1" value={overtimeRules.multiplierWeekend} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekend: parseFloat(e.target.value) || 1 }))} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pInp, fontSize: '13px' }} />
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Weekday Multiplier</label>
+                  <Input type="number" step="0.1" value={overtimeRules.multiplierWeekday} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekday: parseFloat(e.target.value) || 1 }))} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Weekend/Holiday Multiplier</label>
+                  <Input type="number" step="0.1" value={overtimeRules.multiplierWeekend} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekend: parseFloat(e.target.value) || 1 }))} />
+                </div>
               </div>
-            </div>
-          </div>
-        </>
+            </CardContent>
+          </Card>
+        </div>
       )
       case 'audit': return (
-        <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+        <Card>
+          <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <List size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-                <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Audit Logs</h4>
+              <div className="flex items-center gap-2">
+                <List className="h-5 w-5 text-muted-foreground" />
+                <CardTitle className="text-lg">Audit Logs</CardTitle>
               </div>
-              <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Review all system actions for compliance and security.</p>
+              <CardDescription>Review all system actions for compliance and security.</CardDescription>
             </div>
-            <button aria-label="Export audit logs as CSV" onClick={handleExportCSV} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
-              <Download size={14} /> Export CSV
-            </button>
-          </div>
-
-          <div className="p-4" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', background: 'var(--glass-bg)', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
-            <div style={{ minWidth: '140px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span className="mb-1 sm:mb-1.5" style={lbl}>Date</span>
-              <input aria-label="Filter by date" type="date" value={auditFilterDate} onChange={e => setAuditFilterDate(e.target.value)} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pInp, fontSize: '13px' }} />
-            </div>
-            <div style={{ minWidth: '140px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span className="mb-1 sm:mb-1.5" style={lbl}>Action Type</span>
-              <div style={{ position: 'relative' }}>
-                <select aria-label="Filter by action type" value={auditFilterAction} onChange={e => setAuditFilterAction(e.target.value)} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pSel, fontSize: '13px' }}>
-                  <option value="All">All Actions</option>
-                  <option value="CREATE">CREATE</option>
-                  <option value="UPDATE">UPDATE</option>
-                  <option value="DELETE">DELETE</option>
-                </select>
-                <ChevronDown size={14} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }} />
+            <Button variant="outline" size="sm" onClick={handleExportCSV}>
+              <Download className="mr-2 h-4 w-4" /> Export CSV
+            </Button>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-end gap-4 p-4 bg-muted/40 border border-border rounded-lg">
+              <div className="flex-1 min-w-[140px] flex flex-col gap-2">
+                <label className="text-xs font-medium text-muted-foreground uppercase">Date</label>
+                <Input type="date" value={auditFilterDate} onChange={e => setAuditFilterDate(e.target.value)} />
               </div>
+              <div className="flex-1 min-w-[140px] flex flex-col gap-2">
+                <label className="text-xs font-medium text-muted-foreground uppercase">Action Type</label>
+                <div className="relative">
+                  <select className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm appearance-none" value={auditFilterAction} onChange={e => setAuditFilterAction(e.target.value)}>
+                    <option value="All">All Actions</option>
+                    <option value="CREATE">CREATE</option>
+                    <option value="UPDATE">UPDATE</option>
+                    <option value="DELETE">DELETE</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-3 h-4 w-4 opacity-50" />
+                </div>
+              </div>
+              <Button variant="ghost" onClick={() => { setAuditFilterDate(''); setAuditFilterAction('All') }}>Clear</Button>
             </div>
-            <button aria-label="Clear audit filters" onClick={() => { setAuditFilterDate(''); setAuditFilterAction('All') }} className="btn btn-text" style={{ height: '36px', fontSize: '13px', alignSelf: 'flex-end' }}>Clear</button>
-          </div>
 
-          <div className="payroll-table-container">
-            <div className="payroll-table-header-wrap">
-              <table className="payroll-table">
-                <colgroup>
-                  <col style={{ width: '160px' }} /><col style={{ width: '120px' }} />
-                  <col style={{ width: '90px' }} /><col style={{ width: '100px' }} />
-                  <col /><col style={{ width: '130px' }} />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th style={{ ...thStyle }}>Timestamp</th>
-                    <th style={{ ...thStyle }}>User</th>
-                    <th style={{ ...thStyle }}>Action</th>
-                    <th style={{ ...thStyle }}>Entity</th>
-                    <th style={{ ...thStyle }}>Details</th>
-                    <th style={{ ...thStyle }}>IP Address</th>
-                  </tr>
-                </thead>
-              </table>
-            </div>
-            <div className="payroll-table-body-scroll" style={{ maxHeight: '400px' }}>
-              <table className="payroll-table">
-                <colgroup>
-                  <col style={{ width: '160px' }} /><col style={{ width: '120px' }} />
-                  <col style={{ width: '90px' }} /><col style={{ width: '100px' }} />
-                  <col /><col style={{ width: '130px' }} />
-                </colgroup>
-                <tbody>
+            <div className="border border-border rounded-lg overflow-hidden mt-2">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow>
+                    <TableHead>Timestamp</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Entity</TableHead>
+                    <TableHead>Details</TableHead>
+                    <TableHead>IP Address</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {(auditLogs || []).filter(l => {
                     if (auditFilterAction !== 'All' && l.action !== auditFilterAction) return false
                     if (auditFilterDate && !l.timestamp.startsWith(auditFilterDate)) return false
                     return true
                   }).length === 0 ? (
-                    <tr><td colSpan="6" className="p-8" style={{ textAlign: 'center', color: 'var(--md-bw-on-surface-variant)', fontSize: '13px' }}>No logs found for selected filters.</td></tr>
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No logs found for selected filters.</TableCell></TableRow>
                   ) : (
                     (auditLogs || []).filter(l => {
                       if (auditFilterAction !== 'All' && l.action !== auditFilterAction) return false
                       if (auditFilterDate && !l.timestamp.startsWith(auditFilterDate)) return false
                       return true
                     }).map(log => (
-                      <tr key={log.id}>
-                        <td style={{ ...cellStyle, fontSize: '12px', fontVariantNumeric: 'tabular-nums' }}>{formatDateTime(log.timestamp)}</td>
-                        <td style={{ ...cellStyle, fontWeight: 500, fontSize: '13px' }}>{log.user}</td>
-                        <td style={cellStyle}>
-                          <span style={{
-                            display: 'inline-flex', height: '22px', padding: '0 8px', fontSize: '11px', fontWeight: 600, alignItems: 'center', borderRadius: '20px',
-                            background: log.action === 'CREATE' ? '#28a745' : log.action === 'UPDATE' ? '#007aff' : log.action === 'DELETE' ? '#dc3545' : 'var(--glass-bg)',
-                            color: '#fff'
-                          }}>{log.action}</span>
-                        </td>
-                        <td style={cellStyle}>{log.entity}</td>
-                        <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', fontSize: '12px' }}>{log.details}</td>
-                        <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', fontSize: '12px', fontVariantNumeric: 'tabular-nums' }}>{log.ip}</td>
-                      </tr>
+                      <TableRow key={log.id}>
+                        <TableCell className="font-mono text-xs">{formatDateTime(log.timestamp)}</TableCell>
+                        <TableCell className="font-medium text-sm">{log.user}</TableCell>
+                        <TableCell>
+                          <Badge variant={log.action === 'CREATE' ? 'default' : log.action === 'UPDATE' ? 'secondary' : log.action === 'DELETE' ? 'destructive' : 'outline'} className={`${log.action==='CREATE'?'bg-green-500 hover:bg-green-600':log.action==='UPDATE'?'bg-blue-500 text-white hover:bg-blue-600':''}`}>
+                            {log.action}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">{log.entity}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate" title={log.details}>{log.details}</TableCell>
+                        <TableCell className="font-mono text-xs text-muted-foreground">{log.ip}</TableCell>
+                      </TableRow>
                     ))
                   )}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )
       case 'security': return (
-        <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShieldCheck size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-            <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Session Management</h4>
-          </div>
-          <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Review devices currently logged into your account.</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {activeSessions.map(sess => (
-              <div key={sess.id} className="p-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                    <span className="body-medium" style={{ fontWeight: 500, color: 'var(--md-bw-on-surface)' }}>{sess.device}</span>
-                    {sess.current && <span style={{ height: '22px', padding: '0 8px', fontSize: '11px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', borderRadius: '20px', background: '#28a745', color: '#fff' }}>This Device</span>}
-                  </div>
-                  <div className="body-small" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--md-bw-on-surface-variant)' }}>
-                    <span>{sess.location}</span><span>•</span><span>{sess.time}</span><span>•</span><span>{sess.ip}</span>
-                  </div>
-                </div>
-                {!sess.current && (
-                  <button aria-label="Sign out of this session" className="btn btn-outlined" style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}
-                    onClick={() => {
-                      if (addToast) addToast("Session terminated", "success")
-                    }}>Sign Out</button>
-                )}
-              </div>
-            ))}
-          </div>
-          {activeSessions.length > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button aria-label="Sign out all other devices" className="btn btn-filled" style={{ height: '36px', fontSize: '13px' }}
-                onClick={() => { if (addToast) addToast("All other devices signed out", "success") }}>
-                Sign out all other devices
-              </button>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-muted-foreground" />
+              <CardTitle className="text-lg">Session Management</CardTitle>
             </div>
-          )}
-        </div>
+            <CardDescription>Review devices currently logged into your account.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            {activeSessions.length === 0 ? (
+               <div className="text-center text-muted-foreground py-8 border border-border rounded-lg border-dashed">No active sessions tracked locally.</div>
+            ) : (
+              activeSessions.map(sess => (
+                <div key={sess.id} className="p-4 bg-muted/30 border border-border rounded-lg flex justify-between items-center gap-4 flex-wrap">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-sm">{sess.device}</span>
+                      {sess.current && <Badge className="bg-green-500 hover:bg-green-600">This Device</Badge>}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>{sess.location}</span><span>•</span><span>{sess.time}</span><span>•</span><span>{sess.ip}</span>
+                    </div>
+                  </div>
+                  {!sess.current && (
+                    <Button variant="outline" size="sm" onClick={() => { if (addToast) addToast("Session terminated", "success") }}>Sign Out</Button>
+                  )}
+                </div>
+              ))
+            )}
+            
+            {activeSessions.length > 1 && (
+              <div className="flex justify-end mt-2">
+                <Button onClick={() => { if (addToast) addToast("All other devices signed out", "success") }}>
+                  Sign out all other devices
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )
       case 'sync': return (
-        <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Activity size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
-            <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Sync Conflicts</h4>
-          </div>
-          <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Review and resolve data conflicts between local and remote databases.</p>
-
-          <div className="payroll-table-container">
-            <div className="payroll-table-header-wrap">
-              <table className="payroll-table">
-                <colgroup>
-                  <col style={{ width: '120px' }} /><col style={{ width: '100px' }} />
-                  <col /><col /><col style={{ width: '100px' }} /><col style={{ width: '100px' }} />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th style={thStyle}>File</th>
-                    <th style={thStyle}>Record ID</th>
-                    <th style={thStyle}>Local Value</th>
-                    <th style={thStyle}>Remote Value</th>
-                    <th style={thStyle}>Resolution</th>
-                    <th style={{ ...thStyle, textAlign: 'center' }}>Actions</th>
-                  </tr>
-                </thead>
-              </table>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-muted-foreground" />
+              <CardTitle className="text-lg">Sync Conflicts</CardTitle>
             </div>
-            <div className="payroll-table-body-scroll">
-              <table className="payroll-table">
-                <colgroup>
-                  <col style={{ width: '120px' }} /><col style={{ width: '100px' }} />
-                  <col /><col /><col style={{ width: '100px' }} /><col style={{ width: '100px' }} />
-                </colgroup>
-                <tbody>
+            <CardDescription>Review and resolve data conflicts between local and remote databases.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="border border-border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow>
+                    <TableHead>File</TableHead>
+                    <TableHead>Record ID</TableHead>
+                    <TableHead>Local Value</TableHead>
+                    <TableHead>Remote Value</TableHead>
+                    <TableHead>Resolution</TableHead>
+                    <TableHead className="text-center">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {!syncConflicts || syncConflicts.length === 0 ? (
-                    <tr><td colSpan="6" className="p-8" style={{ textAlign: 'center', color: 'var(--md-bw-on-surface-variant)', fontSize: '13px' }}>No sync conflicts detected.</td></tr>
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No sync conflicts detected.</TableCell></TableRow>
                   ) : (
                     syncConflicts.map((conflict, i) => (
-                      <tr key={`${conflict.file}-${conflict.recordId}`}>
-                        <td style={{ ...cellStyle, fontWeight: 500 }}>{conflict.file}</td>
-                        <td style={cellStyle}>{conflict.recordId}</td>
-                        <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }} title={JSON.stringify(conflict.localValue)}>{JSON.stringify(conflict.localValue)}</td>
-                        <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }} title={JSON.stringify(conflict.remoteValue)}>{JSON.stringify(conflict.remoteValue)}</td>
-                        <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', fontSize: '12px' }}>{conflict.resolution}</td>
-                        <td style={{ ...cellStyle, textAlign: 'center' }}>
-                          <button aria-label="Acknowledge sync conflict" className="btn btn-outlined" style={{ height: '30px', padding: '0 12px', fontSize: '12px' }}
-                            onClick={() => { setSyncConflicts(prev => prev.filter((_, idx) => idx !== i)); if (addToast) addToast("Conflict acknowledged", "success") }}>
+                      <TableRow key={`${conflict.file}-${conflict.recordId}`}>
+                        <TableCell className="font-medium">{conflict.file}</TableCell>
+                        <TableCell>{conflict.recordId}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[150px] truncate" title={JSON.stringify(conflict.localValue)}>{JSON.stringify(conflict.localValue)}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[150px] truncate" title={JSON.stringify(conflict.remoteValue)}>{JSON.stringify(conflict.remoteValue)}</TableCell>
+                        <TableCell className="text-xs">{conflict.resolution}</TableCell>
+                        <TableCell className="text-center">
+                          <Button variant="outline" size="sm" onClick={() => { setSyncConflicts(prev => prev.filter((_, idx) => idx !== i)); if (addToast) addToast("Conflict acknowledged", "success") }}>
                             Acknowledge
-                          </button>
-                        </td>
-                      </tr>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
                     ))
                   )}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )
       default: return null
     }
   }
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-        <h1 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>System Settings</h1>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button aria-label="Reset settings to defaults" className="btn btn-text" onClick={() => setShowResetModal(true)} style={{ height: '36px', fontSize: '13px' }}>Reset Defaults</button>
-          <button aria-label="Save settings" className="btn btn-filled" onClick={handleSave} disabled={isSaving || isOver100} style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '36px', fontSize: '13px' }}>
-            {isSaving ? <div className="skeleton" style={{ width: 14, height: 14, borderRadius: '50%' }} /> : <Save size={14} />}
+    <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">System Settings</h1>
+          <p className="text-muted-foreground">Configure HR Pulse modules and preferences.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="ghost" onClick={() => setShowResetModal(true)}>Reset Defaults</Button>
+          <Button onClick={handleSave} disabled={isSaving || isOver100}>
+            {isSaving ? <Activity className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
             {isSaving ? 'Saving...' : 'Save Settings'}
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+      <div className="flex flex-col gap-4">
         {menuItems.map(item => {
           const Icon = item.icon
           const isActive = activeSubmenu === item.id && panelOpen
           return (
-            <button key={item.id} onClick={() => setTab(item.id)}
-              className="py-5 px-3"
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
-                borderRadius: '16px', border: '1px solid',
-                borderColor: isActive ? 'var(--accent-primary, #0062E6)' : 'var(--glass-border)',
-                background: isActive ? 'linear-gradient(135deg, rgba(0,98,230,0.08), rgba(0,58,140,0.04))' : 'var(--glass-bg)',
-                backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
-                cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none',
-                color: isActive ? 'var(--accent-primary, #0062E6)' : 'var(--md-bw-on-surface-variant)',
-                boxShadow: isActive ? '0 0 0 1px rgba(0,98,230,0.3), var(--glass-shadow)' : 'var(--glass-shadow)',
-              }}>
-              <Icon size={24} />
-              <span style={{ fontSize: '12px', fontWeight: 600, textAlign: 'center', lineHeight: '1.3' }}>{item.label}</span>
-              {item.badge > 0 && (
-                <span style={{ background: isActive ? 'var(--accent-primary, #0062E6)' : 'var(--md-bw-on-surface)', color: '#fff', fontSize: '10px', padding: '1px 6px', borderRadius: '12px', fontWeight: 600, marginTop: '-4px' }}>{item.badge}</span>
-              )}
-            </button>
+            <Card key={item.id} className={`overflow-hidden transition-all duration-200 shadow-xs border-border ${isActive ? 'ring-1 ring-primary/20' : ''}`}>
+              <button 
+                onClick={() => setTab(item.id)}
+                className="w-full flex items-center justify-between p-4 md:p-5 bg-card hover:bg-muted/50 transition-colors border-0 outline-none cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-muted text-muted-foreground'}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <span className={`font-semibold text-base transition-colors ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    {item.label}
+                  </span>
+                  {item.badge > 0 && (
+                    <Badge variant={isActive ? 'default' : 'secondary'} className="ml-2">{item.badge}</Badge>
+                  )}
+                </div>
+                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform duration-300 ${isActive ? 'rotate-180' : ''}`} />
+              </button>
+              
+              <div className={`grid transition-all duration-300 ease-in-out ${isActive ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                <div className="overflow-hidden">
+                  <div className="p-4 md:p-6 border-t border-border bg-muted/10 flex flex-col gap-6">
+                    {isActive && renderSettingsContent(item.id)}
+                  </div>
+                </div>
+              </div>
+            </Card>
           )
         })}
       </div>
 
-      <div style={{
-        overflow: 'hidden',
-        transition: 'max-height 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease, margin 0.35s ease',
-        maxHeight: panelOpen ? '2000px' : '0px',
-        opacity: panelOpen ? 1 : 0,
-        marginTop: panelOpen ? '24px' : '0px',
-      }}>
-        <div style={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {renderSettingsContent(activeSubmenu)}
-        </div>
-      </div>
+      <AdSlot type="horizontal" className="mt-4" />
 
-      <AdSlot type="horizontal" style={{ marginTop: '4px' }} />
-
-      {showLogoModal && (
-        <div className="modal-overlay" aria-label="Close logo editor" onClick={() => setShowLogoModal(false)}>
-          <div onClick={e => e.stopPropagation()} className="p-4 sm:p-6 lg:p-8" style={{ ...card, maxWidth: '380px', width: '90%', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-              <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Edit Brand Logo</h3>
-              <button aria-label="Close logo editor" onClick={() => setShowLogoModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--md-bw-on-surface-variant)', display: 'flex', padding: '4px' }}><X size={18} /></button>
-            </div>
-            <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', textAlign: 'center', margin: 0 }}>Drag the image to reposition it, or use the slider below to zoom.</p>
+      {/* Logo Editor Modal */}
+      <Dialog open={showLogoModal} onOpenChange={setShowLogoModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Brand Logo</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-6 py-4">
+            <p className="text-sm text-muted-foreground text-center">Drag the image to reposition it, or use the slider below to zoom.</p>
             <div role="img" aria-label="Logo preview" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onPointerLeave={handlePointerUp}
-              style={{ width: '120px', height: '120px', borderRadius: '24px', background: 'var(--glass-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', cursor: dragStart ? 'grabbing' : 'grab', touchAction: 'none', border: '1px solid var(--glass-border)' }}>
-              {logo ? <img src={logo} alt="" draggable="false" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`, transformOrigin: 'center', pointerEvents: 'none' }} />
-                : <Activity size={36} color="var(--md-bw-on-surface-variant)" />}
+              className="w-32 h-32 rounded-2xl bg-muted border border-border flex items-center justify-center overflow-hidden relative cursor-grab active:cursor-grabbing touch-none">
+              {logo ? <img src={logo} alt="" draggable="false" className="w-full h-full object-cover pointer-events-none" style={{ transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)` }} />
+                : <Activity className="h-8 w-8 text-muted-foreground/50" />}
             </div>
-            <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '12px', color: 'var(--md-bw-on-surface-variant)', fontWeight: 500 }}>Zoom</span>
-              <input aria-label="Logo zoom level" type="range" min="0.5" max="3" step="0.05" value={logoZoom} onChange={e => setLogoZoom(parseFloat(e.target.value))} style={{ flex: 1, accentColor: '#0062E6' }} />
+            <div className="w-full flex items-center gap-3">
+              <span className="text-xs font-medium text-muted-foreground">Zoom</span>
+              <input type="range" min="0.5" max="3" step="0.05" value={logoZoom} onChange={e => setLogoZoom(parseFloat(e.target.value))} className="flex-1 accent-primary" />
             </div>
-            <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
-              <button aria-label="Replace logo" className="btn btn-outlined" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', height: '36px', fontSize: '12px' }} onClick={triggerFileInput}>
-                <Upload size={14} /> Replace
-              </button>
-              <button aria-label="Remove logo" className="btn btn-outlined" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', height: '36px', fontSize: '12px', color: '#dc3545' }} onClick={handleRemoveLogo}>
-                <Trash2 size={14} /> Remove
-              </button>
+            <div className="flex gap-3 w-full">
+              <Button variant="outline" className="flex-1" onClick={triggerFileInput}>
+                <Upload className="mr-2 h-4 w-4" /> Replace
+              </Button>
+              <Button variant="outline" className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200" onClick={handleRemoveLogo}>
+                <Trash2 className="mr-2 h-4 w-4" /> Remove
+              </Button>
             </div>
-            <button aria-label="Done editing logo" className="btn btn-filled" style={{ width: '100%', height: '36px', fontSize: '13px' }} onClick={() => setShowLogoModal(false)}>
-              <Check size={14} /> Done
-            </button>
           </div>
-        </div>
-      )}
+          <DialogFooter>
+            <Button className="w-full" onClick={() => setShowLogoModal(false)}>
+              <Check className="mr-2 h-4 w-4" /> Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      {showResetModal && (
-        <div className="modal-overlay" aria-label="Close reset modal" onClick={() => setShowResetModal(false)}>
-          <div onClick={e => e.stopPropagation()} className="p-4 sm:p-6 lg:p-8" style={{ ...card, maxWidth: '380px', width: '90%', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Confirm Reset</h3>
-            <p className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Are you sure? This will reset all settings in the active tab to their default values.</p>
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '8px' }}>
-              <button aria-label="Cancel reset" className="btn btn-text" onClick={() => setShowResetModal(false)} style={{ height: '36px', fontSize: '13px' }}>Cancel</button>
-              <button aria-label="Confirm reset to defaults" className="btn btn-filled" onClick={() => { setShowResetModal(false); if (addToast) addToast('Settings reset to defaults', 'info') }} style={{ height: '36px', fontSize: '13px' }}>Reset Defaults</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Reset Modal */}
+      <Dialog open={showResetModal} onOpenChange={setShowResetModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Reset</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground py-2">Are you sure? This will reset all settings in the active tab to their default values.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResetModal(false)}>Cancel</Button>
+            <Button onClick={() => { setShowResetModal(false); if (addToast) addToast('Settings reset to defaults', 'info') }}>Reset Defaults</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
-
-const thStyle = { padding: '0 16px', height: '48px', textAlign: 'left', borderBottom: '1.5px solid var(--glass-border)', textTransform: 'uppercase', fontSize: '13px', fontWeight: 600, letterSpacing: '0.01em', color: 'var(--md-bw-on-surface)', whiteSpace: 'nowrap' }
-const cellStyle = { padding: '0 16px', height: '48px', color: 'var(--md-bw-on-surface)', fontSize: '13px' }

@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Megaphone, Calendar as CalendarIcon, CreditCard, ChevronDown, LayoutDashboard, Gift, Award, Users } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { formatDateShort } from '../services/date.js'
 
 export default function Dashboard({ employees, driveConnected, onSync, attendance, setCurrentView, announcements, events, payroll }) {
@@ -179,129 +182,127 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       </div>
 
       {/* Unified 12-Column Responsive & Adaptive Dashboard Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5 lg:gap-6 items-stretch">
         
         {/* Widget 1 — Employee Directory (Span 4) */}
-        <div className="macos-card flex flex-col h-full bg-[rgba(255,255,255,0.7)] border border-[rgba(0,0,0,0.06)] rounded-[24px] p-5 sm:p-6 lg:p-6.5 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-lg lg:col-span-4">
-          <div className="flex items-center justify-between pb-4 mb-5 border-b border-[rgba(0,0,0,0.08)]">
+        <Card className="flex flex-col h-full lg:col-span-4 p-0">
+          <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(0,122,255,0.12)] shrink-0">
-                <Users size={18} className="text-[#007AFF]" />
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary/10 text-primary shrink-0">
+                <Users size={18} />
               </div>
-              <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--md-bw-on-surface)] m-0">
-                Employee Directory
-              </h2>
+              <CardTitle className="text-base font-extrabold m-0">Employee Directory</CardTitle>
             </div>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setCurrentView && setCurrentView('employees')}
-              className="py-1.5 px-3.5 rounded-full text-xs font-extrabold bg-[rgba(0,122,255,0.12)] text-[#007AFF] hover:bg-[rgba(0,122,255,0.22)] transition-colors cursor-pointer border-none"
+              className="text-xs font-semibold"
             >
               View All
-            </button>
-          </div>
-          <div className="flex-1 flex items-center justify-around py-3">
+            </Button>
+          </CardHeader>
+          <CardContent className="flex-1 flex items-center justify-around py-4">
             <div className="flex flex-col items-center gap-1.5">
-              <span className="text-4xl sm:text-5xl font-black tabular-nums text-[var(--md-bw-on-surface)]">{activeCount}</span>
-              <span className="inline-flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-xs font-bold bg-[rgba(52,199,89,0.12)] border border-[rgba(52,199,89,0.3)] text-[#1a7d3a]">
-                <span className="sync-dot sync-blink w-2 h-2 rounded-full bg-[#34c759]"></span>
+              <span className="text-4xl font-black tabular-nums text-foreground">{activeCount}</span>
+              <Badge variant="success" className="gap-1.5 py-1 px-3">
+                <span className="sync-dot sync-blink w-2 h-2 rounded-full bg-emerald-500"></span>
                 Active
-              </span>
+              </Badge>
             </div>
-            <div className="w-[1.5px] h-14 bg-[rgba(0,0,0,0.08)]"></div>
+            <div className="w-[1px] h-12 bg-border"></div>
             <div className="flex flex-col items-center gap-1.5">
-              <span className="text-4xl sm:text-5xl font-black tabular-nums text-[var(--md-bw-on-surface)]">{inactiveCount}</span>
-              <span className="inline-flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-xs font-bold bg-[rgba(224,32,20,0.1)] border border-[rgba(224,32,20,0.25)] text-[#dc3545]">
-                <span className="sync-dot w-2 h-2 rounded-full bg-[#dc3545]"></span>
+              <span className="text-4xl font-black tabular-nums text-foreground">{inactiveCount}</span>
+              <Badge variant="destructive" className="gap-1.5 py-1 px-3">
+                <span className="sync-dot w-2 h-2 rounded-full bg-destructive"></span>
                 Inactive
-              </span>
+              </Badge>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Widget 2 — Today's Attendance (Span 4) */}
-        <div className="macos-card flex flex-col h-full bg-[rgba(255,255,255,0.7)] border border-[rgba(0,0,0,0.06)] rounded-[24px] p-5 sm:p-6 lg:p-6.5 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-lg lg:col-span-4">
-          <div className="flex items-center justify-between pb-4 mb-5 border-b border-[rgba(0,0,0,0.08)]">
+        <Card className="flex flex-col h-full lg:col-span-4 p-0">
+          <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(52,199,89,0.12)] shrink-0">
-                <Users size={18} className="text-[#34C759]" />
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                <Users size={18} />
               </div>
-              <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--md-bw-on-surface)] m-0">
-                Today's Attendance
-              </h2>
+              <CardTitle className="text-base font-extrabold m-0">Today's Attendance</CardTitle>
             </div>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setShowAttDropdown(!showAttDropdown)}
-              className="py-1.5 px-3.5 rounded-full text-xs font-extrabold bg-[rgba(0,122,255,0.12)] text-[#007AFF] hover:bg-[rgba(0,122,255,0.22)] transition-colors cursor-pointer border-none"
+              className="text-xs font-semibold"
             >
               {showAttDropdown ? 'Hide' : 'Details'}
-            </button>
-          </div>
-          <div className="flex-1 flex flex-col justify-between">
-            <div className="flex items-center justify-between gap-3 py-3">
+            </Button>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col justify-between pt-4">
+            <div className="flex items-center justify-between gap-3 py-2">
               <div className="flex flex-col items-center flex-1">
-                <span className="text-2xl sm:text-3xl font-black text-[#34C759] flex items-center gap-1.5">
+                <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
                   <span className="pulse-dot pulse-dot-green m-0"></span>
                   {todayStats.present}
                 </span>
-                <span className="text-xs font-bold text-[var(--md-bw-on-surface-variant)] mt-1">Present</span>
+                <span className="text-xs font-medium text-muted-foreground mt-1">Present</span>
               </div>
-              <div className="w-[1.5px] h-10 bg-[rgba(0,0,0,0.08)]"></div>
+              <div className="w-[1px] h-10 bg-border"></div>
               <div className="flex flex-col items-center flex-1">
-                <span className="text-2xl sm:text-3xl font-black text-[#dc3545] flex items-center gap-1.5">
+                <span className="text-2xl sm:text-3xl font-black text-destructive flex items-center gap-1.5">
                   <span className="pulse-dot pulse-dot-red m-0"></span>
                   {todayStats.absent}
                 </span>
-                <span className="text-xs font-bold text-[var(--md-bw-on-surface-variant)] mt-1">Absent</span>
+                <span className="text-xs font-medium text-muted-foreground mt-1">Absent</span>
               </div>
-              <div className="w-[1.5px] h-10 bg-[rgba(0,0,0,0.08)]"></div>
+              <div className="w-[1px] h-10 bg-border"></div>
               <div className="flex flex-col items-center flex-1">
-                <span className="text-2xl sm:text-3xl font-black text-[#f0ad4e] flex items-center gap-1.5">
+                <span className="text-2xl sm:text-3xl font-black text-amber-500 flex items-center gap-1.5">
                   <span className="pulse-dot pulse-dot-orange m-0"></span>
                   {todayStats.onLeave}
                 </span>
-                <span className="text-xs font-bold text-[var(--md-bw-on-surface-variant)] mt-1">Leave</span>
+                <span className="text-xs font-medium text-muted-foreground mt-1">Leave</span>
               </div>
             </div>
-            <div className="mt-4 pt-3 border-t border-[rgba(0,0,0,0.06)] flex justify-between items-center text-xs font-semibold text-[var(--md-bw-on-surface-variant)]">
+            <div className="mt-3 pt-3 border-t border-border flex justify-between items-center text-xs font-medium text-muted-foreground">
               <span>Attendance Rate</span>
-              <span className="font-black text-sm sm:text-base text-[var(--md-bw-on-surface)]">{attendanceRate}%</span>
+              <span className="font-extrabold text-sm text-foreground">{attendanceRate}%</span>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Widget 3 — Drive Connection (Span 4) */}
-        <div className={`macos-card flex flex-col h-full rounded-[24px] p-5 sm:p-6 lg:p-6.5 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-lg lg:col-span-4 ${driveConnected ? 'bg-[rgba(52,199,89,0.08)] border border-[rgba(52,199,89,0.3)]' : 'bg-[rgba(255,59,48,0.08)] border border-[rgba(255,59,48,0.3)]'}`}>
-          <div className="flex items-center justify-between pb-4 mb-5 border-b border-[rgba(0,0,0,0.08)]">
+        <Card className={`flex flex-col h-full lg:col-span-4 p-0 ${driveConnected ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-destructive/5 border-destructive/20'}`}>
+          <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(52,199,89,0.15)] shrink-0">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#34C759]">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M17.5 19a4.5 4.5 0 0 0 0-9 4.4 4.4 0 0 0-.8.1 7 7 0 1 0-11 5.9"></path>
                 </svg>
               </div>
-              <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[#34C759] m-0">
-                Drive Connection
-              </h2>
+              <CardTitle className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 m-0">Drive Connection</CardTitle>
             </div>
-            <span className={`py-1.5 px-3 rounded-full text-xs font-black uppercase tracking-wider ${driveConnected ? 'bg-[#34c759]/15 text-[#34C759]' : 'bg-[#dc3545]/15 text-[#FF453A]'}`}>
+            <Badge variant={driveConnected ? "success" : "destructive"}>
               {driveConnected ? 'Synced' : 'Error'}
-            </span>
-          </div>
-          <div className="flex-1 flex flex-col justify-between">
+            </Badge>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col justify-between pt-4">
             <div className="flex items-center gap-3">
-              <span className="text-xl sm:text-2xl font-black text-[#34C759]">
+              <span className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">
                 {driveConnected ? 'Healthy Connection' : 'Drive Disconnected'}
               </span>
             </div>
-            <p className="text-xs font-semibold m-0 mt-3 text-[var(--md-bw-on-surface-variant)] leading-relaxed">
+            <p className="text-xs font-medium m-0 mt-3 text-muted-foreground leading-relaxed">
               {driveConnected ? 'Google Drive biometric & roster logs sync automatically.' : 'Re-authenticate with Google Drive to enable auto sync.'}
             </p>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Attendance Details Dropdown (Span 12 Full Width) */}
         {showAttDropdown && (
-          <div className="macos-card bg-[rgba(255,255,255,0.7)] border border-[rgba(0,0,0,0.06)] rounded-[24px] overflow-hidden shadow-sm backdrop-blur-md lg:col-span-12">
-            <div className="px-6 py-4 border-b border-[rgba(0,0,0,0.06)] font-extrabold text-xs uppercase tracking-wider text-[var(--md-bw-on-surface-variant)]">
+          <Card className="lg:col-span-12 overflow-hidden p-0">
+            <div className="px-6 py-3.5 border-b border-border font-extrabold text-xs uppercase tracking-wider text-muted-foreground">
               Today's Attendance Roster Breakdowns
             </div>
             {[
@@ -309,32 +310,32 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
               { key: 'absent', label: 'Absent', count: todayStats.absent, dot: 'pulse-dot-red' },
               { key: 'onLeave', label: 'On Leave', count: todayStats.onLeave, dot: 'pulse-dot-orange' },
             ].map(item => (
-              <div key={item.key} className="border-b border-[rgba(0,0,0,0.04)] last:border-none">
+              <div key={item.key} className="border-b border-border/50 last:border-none">
                 <button
                   onClick={() => setAttFilter(attFilter === item.key ? null : item.key)}
-                  className="w-full flex items-center justify-between px-6 py-3.5 border-none bg-transparent hover:bg-[rgba(0,0,0,0.02)] transition-colors cursor-pointer text-xs sm:text-sm font-bold text-[var(--md-bw-on-surface)]"
+                  className="w-full flex items-center justify-between px-6 py-3 border-none bg-transparent hover:bg-muted/50 transition-colors cursor-pointer text-xs sm:text-sm font-bold text-foreground"
                 >
                   <span className="flex items-center gap-3">
                     <span className={`pulse-dot ${item.dot} m-0`}></span>
                     {item.label}
                   </span>
-                  <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-[rgba(0,0,0,0.06)] text-[var(--md-bw-on-surface-variant)]">
+                  <Badge variant="secondary" className="px-3 py-1">
                     {item.count}
-                  </span>
+                  </Badge>
                 </button>
                 {attFilter === item.key && (
-                  <div className="px-6 pb-4 pt-1 bg-[rgba(0,0,0,0.015)]">
+                  <div className="px-6 pb-4 pt-1 bg-muted/20">
                     {attendanceLists[item.key].length === 0 ? (
-                      <p className="my-1.5 text-xs text-[var(--md-bw-on-surface-variant)] italic">No personnel in this category</p>
+                      <p className="my-1.5 text-xs text-muted-foreground italic">No personnel in this category</p>
                     ) : (
                       attendanceLists[item.key].map((emp) => (
-                        <div key={emp.id} className="flex items-center gap-3.5 py-2 border-b border-[rgba(0,0,0,0.04)] last:border-none">
+                        <div key={emp.id} className="flex items-center gap-3.5 py-2 border-b border-border/40 last:border-none">
                           <img src={emp.avatar} alt={emp.name} className="w-8 h-8 rounded-full object-cover shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <span className="block text-xs font-extrabold text-[var(--md-bw-on-surface)]">{emp.name}</span>
-                            <span className="text-[11px] font-semibold text-[var(--md-bw-on-surface-variant)]">{emp.role}</span>
+                            <span className="block text-xs font-extrabold text-foreground">{emp.name}</span>
+                            <span className="text-[11px] font-medium text-muted-foreground">{emp.role}</span>
                           </div>
-                          {emp.time && <span className="text-[11px] font-bold text-[var(--md-bw-on-surface-variant)] bg-[rgba(0,0,0,0.04)] px-2.5 py-0.5 rounded-md">{emp.time}</span>}
+                          {emp.time && <Badge variant="outline" className="text-[11px] px-2.5 py-0.5">{emp.time}</Badge>}
                         </div>
                       ))
                     )}
@@ -342,232 +343,228 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 )}
               </div>
             ))}
-          </div>
+          </Card>
         )}
 
         {/* Widget 4 — Announcements (Span 6) */}
-        <div className="macos-card flex flex-col h-full bg-[rgba(255,255,255,0.7)] border border-[rgba(0,0,0,0.06)] rounded-[24px] p-5 sm:p-6 lg:p-6.5 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-lg lg:col-span-6">
-          <div className="flex items-center justify-between pb-4 mb-5 border-b border-[rgba(0,0,0,0.08)]">
+        <Card className="flex flex-col h-full lg:col-span-6 p-0">
+          <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(255,149,0,0.12)] shrink-0">
-                <Megaphone size={18} className="text-[#FF9500]" />
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-amber-500/10 text-amber-500 shrink-0">
+                <Megaphone size={18} />
               </div>
-              <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--md-bw-on-surface)] m-0">
-                Announcements
-              </h2>
+              <CardTitle className="text-base font-extrabold m-0">Announcements</CardTitle>
             </div>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setCurrentView && setCurrentView('announcements')}
-              className="py-1.5 px-3.5 rounded-full text-xs font-extrabold bg-[rgba(0,122,255,0.12)] text-[#007AFF] hover:bg-[rgba(0,122,255,0.22)] transition-colors cursor-pointer border-none"
+              className="text-xs font-semibold"
             >
               View All
-            </button>
-          </div>
-          <div className="flex-1 flex flex-col justify-start gap-3">
+            </Button>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col justify-start gap-2.5 pt-4">
             {recentAnnouncements.length === 0 ? (
-              <p className="text-center my-auto text-xs text-[var(--md-bw-on-surface-variant)]">No active announcements</p>
+              <p className="text-center my-auto text-xs text-muted-foreground">No active announcements</p>
             ) : (
               recentAnnouncements.map((ann, idx) => (
                 <div
                   key={ann.id || idx}
-                  className="flex items-center gap-3 p-3 sm:p-3.5 px-3.5 sm:px-4 rounded-xl bg-[rgba(0,0,0,0.02)] border border-[rgba(0,0,0,0.04)] hover:bg-[rgba(0,0,0,0.04)] transition-colors cursor-pointer"
+                  className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/70 transition-colors cursor-pointer"
                   onClick={() => setCurrentView && setCurrentView('announcements')}
                 >
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(255,149,0,0.12)] shrink-0">
-                    <Megaphone size={17} className="text-[#FF9500]" />
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-500/10 text-amber-500 shrink-0">
+                    <Megaphone size={16} />
                   </div>
                   <div className="flex-1 min-w-0 pr-2">
-                    <p className="m-0 text-xs sm:text-sm font-extrabold text-[var(--md-bw-on-surface)] truncate">{ann.title}</p>
-                    <p className="m-0 mt-0.5 text-[11px] font-semibold text-[var(--md-bw-on-surface-variant)]">
+                    <p className="m-0 text-xs font-bold text-foreground truncate">{ann.title}</p>
+                    <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">
                       {getEmployeeName(ann.authorId)} &middot; {new Date(ann.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </p>
                   </div>
                   {ann.priority === 'Important' && (
-                    <span className="uppercase tracking-wider text-[10px] font-black text-[#D32F2F] bg-[#FFEBEE] px-3 py-1 rounded-lg shrink-0 border border-[#FFCDD2] ml-1">
+                    <Badge variant="destructive" className="uppercase text-[10px]">
                       Important
-                    </span>
+                    </Badge>
                   )}
                 </div>
               ))
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Widget 5 — Payroll Summary (Span 6) */}
-        <div className="macos-card flex flex-col h-full bg-[rgba(255,255,255,0.7)] border border-[rgba(0,0,0,0.06)] rounded-[24px] p-5 sm:p-6 lg:p-6.5 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-lg lg:col-span-6">
-          <div className="flex items-center justify-between pb-4 mb-5 border-b border-[rgba(0,0,0,0.08)]">
+        <Card className="flex flex-col h-full lg:col-span-6 p-0">
+          <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(0,122,255,0.12)] shrink-0">
-                <CreditCard size={18} className="text-[#007AFF]" />
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary/10 text-primary shrink-0">
+                <CreditCard size={18} />
               </div>
-              <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--md-bw-on-surface)] m-0">
-                Payroll Summary
-              </h2>
+              <CardTitle className="text-base font-extrabold m-0">Payroll Summary</CardTitle>
             </div>
             {currentPayrollMonth && (
-              <span className="text-xs font-bold text-[var(--md-bw-on-surface-variant)] bg-[rgba(0,0,0,0.04)] px-3 py-1 rounded-full">
+              <Badge variant="secondary" className="px-3 py-1">
                 {currentPayrollMonth}
-              </span>
+              </Badge>
             )}
-          </div>
-          <div className="flex-1 flex flex-col justify-between">
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col justify-between pt-4">
             {!currentPayrollMonth ? (
-              <p className="text-center my-auto text-xs text-[var(--md-bw-on-surface-variant)]">No payroll data found</p>
+              <p className="text-center my-auto text-xs text-muted-foreground">No payroll data found</p>
             ) : (
               <>
-                <div className="grid grid-cols-3 gap-3 p-4 rounded-xl bg-[rgba(0,0,0,0.02)] border border-[rgba(0,0,0,0.04)]">
+                <div className="grid grid-cols-3 gap-3 p-3.5 rounded-lg bg-muted/40 border border-border/50">
                   <div>
-                    <span className="block text-xs font-bold text-[var(--md-bw-on-surface-variant)]">Paid</span>
-                    <span className="text-2xl sm:text-3xl font-black tabular-nums text-[#34C759] mt-0.5 block">{paidCount}</span>
+                    <span className="block text-xs font-medium text-muted-foreground">Paid</span>
+                    <span className="text-2xl font-black tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5 block">{paidCount}</span>
                   </div>
                   <div>
-                    <span className="block text-xs font-bold text-[var(--md-bw-on-surface-variant)]">Pending</span>
-                    <span className="text-2xl sm:text-3xl font-black tabular-nums text-[#FF9500] mt-0.5 block">{pendingCount}</span>
+                    <span className="block text-xs font-medium text-muted-foreground">Pending</span>
+                    <span className="text-2xl font-black tabular-nums text-amber-500 mt-0.5 block">{pendingCount}</span>
                   </div>
                   <div className="text-right">
-                    <span className="block text-xs font-bold text-[var(--md-bw-on-surface-variant)]">Total Payroll</span>
-                    <span className="text-2xl sm:text-3xl font-black tabular-nums text-[var(--md-bw-on-surface)] mt-0.5 block">${totalPayrollCost.toLocaleString()}</span>
+                    <span className="block text-xs font-medium text-muted-foreground">Total Payroll</span>
+                    <span className="text-2xl font-black tabular-nums text-foreground mt-0.5 block">${totalPayrollCost.toLocaleString()}</span>
                   </div>
                 </div>
-                <div className="mt-4 pt-3 flex justify-between items-center border-t border-[rgba(0,0,0,0.06)]">
-                  <span className="text-xs font-semibold text-[var(--md-bw-on-surface-variant)]">{currentPayrollData.length} Employees total</span>
-                  <button
+                <div className="mt-3 pt-3 flex justify-between items-center border-t border-border">
+                  <span className="text-xs font-medium text-muted-foreground">{currentPayrollData.length} Employees total</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => setCurrentView && setCurrentView('payroll')}
-                    className="py-1.5 px-3.5 rounded-full text-xs font-extrabold bg-[rgba(0,122,255,0.12)] text-[#007AFF] hover:bg-[rgba(0,122,255,0.22)] transition-colors cursor-pointer border-none"
+                    className="text-xs font-semibold"
                   >
                     View Payroll
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Widget 6 — Upcoming Events (Span 4) */}
-        <div className="macos-card flex flex-col h-full bg-[rgba(255,255,255,0.7)] border border-[rgba(0,0,0,0.06)] rounded-[24px] p-5 sm:p-6 lg:p-6.5 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-lg lg:col-span-4">
-          <div className="flex items-center justify-between pb-4 mb-5 border-b border-[rgba(0,0,0,0.08)]">
+        <Card className="flex flex-col h-full lg:col-span-4 p-0">
+          <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(52,199,89,0.12)] shrink-0">
-                <CalendarIcon size={18} className="text-[#34C759]" />
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                <CalendarIcon size={18} />
               </div>
-              <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--md-bw-on-surface)] m-0">
-                Upcoming Events
-              </h2>
+              <CardTitle className="text-base font-extrabold m-0">Upcoming Events</CardTitle>
             </div>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setCurrentView && setCurrentView('calendar')}
-              className="py-1.5 px-3.5 rounded-full text-xs font-extrabold bg-[rgba(0,122,255,0.12)] text-[#007AFF] hover:bg-[rgba(0,122,255,0.22)] transition-colors cursor-pointer border-none"
+              className="text-xs font-semibold"
             >
               Calendar
-            </button>
-          </div>
-          <div className="flex-1 flex flex-col justify-start gap-3">
+            </Button>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col justify-start gap-2.5 pt-4">
             {upcomingEvents.length === 0 ? (
-              <p className="text-center my-auto text-xs text-[var(--md-bw-on-surface-variant)]">No upcoming events</p>
+              <p className="text-center my-auto text-xs text-muted-foreground">No upcoming events</p>
             ) : (
               upcomingEvents.map((evt, idx) => (
                 <div
                   key={evt.id || idx}
-                  className="flex items-center gap-3 p-3 sm:p-3.5 px-3.5 sm:px-4 rounded-xl bg-[rgba(0,0,0,0.02)] border border-[rgba(0,0,0,0.04)] hover:bg-[rgba(0,0,0,0.04)] transition-colors cursor-pointer"
+                  className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/70 transition-colors cursor-pointer"
                   onClick={() => setCurrentView && setCurrentView('calendar')}
                 >
                   <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: evt.type === 'holiday' ? 'rgba(52, 199, 89, 0.12)' : evt.type === 'birthday' ? 'rgba(255, 149, 0, 0.12)' : 'rgba(0, 122, 255, 0.12)' }}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: evt.type === 'holiday' ? 'rgba(16, 185, 129, 0.12)' : evt.type === 'birthday' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(59, 130, 246, 0.12)' }}
                   >
-                    <CalendarIcon size={17} style={{ color: evt.type === 'holiday' ? '#34C759' : evt.type === 'birthday' ? '#FF9500' : '#007AFF' }} />
+                    <CalendarIcon size={16} style={{ color: evt.type === 'holiday' ? '#10b981' : evt.type === 'birthday' ? '#f59e0b' : '#3b82f6' }} />
                   </div>
                   <div className="flex-1 min-w-0 pr-2">
-                    <p className="m-0 text-xs sm:text-sm font-extrabold text-[var(--md-bw-on-surface)] truncate">{evt.title}</p>
-                    <p className="m-0 mt-0.5 text-[11px] font-semibold text-[var(--md-bw-on-surface-variant)] truncate">
+                    <p className="m-0 text-xs font-bold text-foreground truncate">{evt.title}</p>
+                    <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground truncate">
                       {formatDate(evt.date)}{evt.time ? ` at ${evt.time}` : ''}
                     </p>
                   </div>
-                  <span className="capitalize text-[10px] sm:text-xs font-bold text-[var(--md-bw-on-surface-variant)] bg-[rgba(0,0,0,0.05)] px-2.5 py-1 rounded-lg shrink-0 ml-1">
+                  <Badge variant="outline" className="capitalize text-[10px] px-2 py-0.5">
                     {evt.type}
-                  </span>
+                  </Badge>
                 </div>
               ))
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Widget 7 — Drive Sync Logs (Span 4) */}
-        <div className="macos-card flex flex-col h-full bg-[rgba(255,255,255,0.7)] border border-[rgba(0,0,0,0.06)] rounded-[24px] p-5 sm:p-6 lg:p-6.5 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-lg lg:col-span-4">
-          <div className="flex items-center justify-between pb-4 mb-5 border-b border-[rgba(0,0,0,0.08)]">
+        <Card className="flex flex-col h-full lg:col-span-4 p-0">
+          <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(0,122,255,0.12)] shrink-0">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#007AFF]">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary/10 text-primary shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                 </svg>
               </div>
-              <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--md-bw-on-surface)] m-0">
-                Drive Sync Logs
-              </h2>
+              <CardTitle className="text-base font-extrabold m-0">Drive Sync Logs</CardTitle>
             </div>
-            <span className="text-xs font-black text-[#1a7d3a] bg-[rgba(52,199,89,0.12)] px-3.5 py-1 rounded-full">
+            <Badge variant="success">
               Live
-            </span>
-          </div>
-          <div className="flex-1 flex flex-col justify-start gap-3">
+            </Badge>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col justify-start gap-2.5 pt-4">
             {syncLogs.map((log) => (
-              <div key={log.id} className="flex items-center gap-3 p-3 sm:p-3.5 px-3.5 sm:px-4 rounded-xl bg-[rgba(0,0,0,0.02)] border border-[rgba(0,0,0,0.04)]">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(0,0,0,0.05)] shrink-0">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[var(--md-bw-on-surface-variant)]">
+              <div key={log.id} className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-muted text-muted-foreground shrink-0 border border-border/40">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0 pr-2">
-                  <p className="m-0 text-xs sm:text-sm font-extrabold text-[var(--md-bw-on-surface)] truncate">{log.action}</p>
-                  <p className="m-0 mt-0.5 text-[11px] font-semibold text-[var(--md-bw-on-surface-variant)] truncate">{log.details}</p>
+                  <p className="m-0 text-xs font-bold text-foreground truncate">{log.action}</p>
+                  <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground truncate">{log.details}</p>
                 </div>
-                <span className={`text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-lg shrink-0 ml-1 ${log.status === 'success' ? 'bg-[#34c759]/15 text-[#1A7D3A]' : log.status === 'error' ? 'bg-[#dc3545]/15 text-[#D32F2F]' : 'bg-[#ff9f0a]/15 text-[#b8860b]'}`}>
+                <Badge variant={log.status === 'success' ? 'success' : log.status === 'error' ? 'destructive' : 'warning'} className="uppercase text-[10px]">
                   {log.status === 'success' ? 'Synced' : log.status === 'error' ? 'Failed' : 'Pending'}
-                </span>
+                </Badge>
               </div>
             ))}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Widget 8 — Upcoming Milestones (Span 4) */}
-        <div className="macos-card flex flex-col h-full bg-[rgba(255,255,255,0.7)] border border-[rgba(0,0,0,0.06)] rounded-[24px] p-5 sm:p-6 lg:p-6.5 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-lg lg:col-span-4">
-          <div className="flex items-center justify-between pb-4 mb-5 border-b border-[rgba(0,0,0,0.08)]">
+        <Card className="flex flex-col h-full lg:col-span-4 p-0">
+          <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[rgba(255,149,0,0.12)] shrink-0">
-                <Award size={18} className="text-[#FF9500]" />
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-amber-500/10 text-amber-500 shrink-0">
+                <Award size={18} />
               </div>
-              <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[var(--md-bw-on-surface)] m-0">
-                Upcoming Milestones
-              </h2>
+              <CardTitle className="text-base font-extrabold m-0">Upcoming Milestones</CardTitle>
             </div>
-            <span className="text-xs font-bold text-[var(--md-bw-on-surface-variant)] bg-[rgba(0,0,0,0.05)] px-3.5 py-1 rounded-full">
+            <Badge variant="secondary" className="px-3 py-1">
               30 Days
-            </span>
-          </div>
-          <div className="flex-1 flex flex-col justify-start">
+            </Badge>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col justify-start pt-4">
             {upcomingMilestones.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-5">
-                <Gift size={36} className="text-[var(--md-bw-on-surface-variant)] opacity-40 mb-2" />
-                <p className="m-0 text-xs font-semibold text-[var(--md-bw-on-surface-variant)] max-w-[200px] leading-relaxed">No birthdays or work anniversaries in the next 30 days.</p>
+                <Gift size={34} className="text-muted-foreground/40 mb-2" />
+                <p className="m-0 text-xs font-medium text-muted-foreground max-w-[200px] leading-relaxed">No birthdays or work anniversaries in the next 30 days.</p>
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2.5">
                 {upcomingMilestones.map((milestone) => (
-                  <div key={`${milestone.type}-${milestone.empName}`} className="flex items-center gap-3 p-3 sm:p-3.5 px-3.5 sm:px-4 rounded-xl bg-[rgba(0,0,0,0.02)] border border-[rgba(0,0,0,0.04)] hover:bg-[rgba(0,0,0,0.04)] transition-colors">
-                    <img src={milestone.avatar} alt={milestone.empName} className="w-9 h-9 rounded-full object-cover shrink-0" />
+                  <div key={`${milestone.type}-${milestone.empName}`} className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/70 transition-colors">
+                    <img src={milestone.avatar} alt={milestone.empName} className="w-8 h-8 rounded-full object-cover shrink-0" />
                     <div className="flex-1 min-w-0 pr-2">
-                      <p className="m-0 text-xs sm:text-sm font-extrabold text-[var(--md-bw-on-surface)] truncate">{milestone.empName}</p>
-                      <p className="m-0 mt-0.5 text-[11px] font-semibold text-[var(--md-bw-on-surface-variant)]">{milestone.label}</p>
+                      <p className="m-0 text-xs font-bold text-foreground truncate">{milestone.empName}</p>
+                      <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">{milestone.label}</p>
                     </div>
-                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider bg-[rgba(0,122,255,0.12)] text-[#007AFF] px-2.5 py-1 rounded-lg shrink-0 ml-1">
+                    <Badge variant="default" className="uppercase text-[10px]">
                       {milestone.daysRemaining === 0 ? 'Today' : `${milestone.daysRemaining}d`}
-                    </span>
+                    </Badge>
                   </div>
                 ))}
               </div>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
       </div>
     </div>

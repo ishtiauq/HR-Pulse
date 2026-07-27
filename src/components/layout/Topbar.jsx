@@ -1,71 +1,92 @@
-import { Monitor, Sun, Moon, Menu } from 'lucide-react'
+import { Monitor, Sun, Moon, Menu, Bell, RefreshCw } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 
 export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, notifications, showNotifications, setShowNotifications, markNotificationsRead, unreadCount }) {
   return (
-    <header aria-label="Top bar" className="macos-toolbar topbar h-16 min-h-16 flex items-center justify-between px-6 md:px-8 sticky top-0 shrink-0 w-full rounded-2xl z-10" style={{
-      background: isDarkMode ? 'rgba(24, 24, 27, 0.75)' : 'rgba(255, 255, 255, 0.75)',
-      backdropFilter: 'blur(30px) saturate(150%)',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
-      border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0,0,0,0.06)'
-    }}>
-      <div className="left flex items-center gap-3 sm:gap-5">
-        <button aria-label="Open menu" className="mobile-menu-btn size-10 flex lg:hidden items-center justify-center bg-[rgba(0,0,0,0.05)] border-0 rounded-xl cursor-pointer hover:bg-[rgba(0,0,0,0.08)] transition-colors" onClick={toggleSidebar} style={{
-          color: 'var(--md-bw-on-surface)'
-        }}>
+    <header aria-label="Top bar" className="topbar w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-4 flex items-center justify-between rounded-full bg-card/90 text-card-foreground backdrop-blur-xl border border-border shadow-md transition-all duration-300">
+      
+      {/* Left Section: Mobile Menu + Brand Pill */}
+      <div className="flex items-center gap-3 sm:gap-4">
+        <Button
+          aria-label="Open menu"
+          variant="ghost"
+          size="icon"
+          className="lg:hidden shrink-0 rounded-full size-10"
+          onClick={toggleSidebar}
+        >
           <Menu size={22} />
-        </button>
+        </Button>
 
-        <div className="brand-container flex items-center gap-3">
-          <div className="size-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm" style={{ background: '#007AFF' }}>
-            <span className="text-xs font-black text-white tracking-wider">HP</span>
+        <div className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-muted/40 border border-border/50">
+          <div className="size-8 sm:size-9 rounded-full flex items-center justify-center shrink-0 bg-primary text-primary-foreground font-black text-xs sm:text-sm tracking-wider shadow-sm">
+            HP
           </div>
-          <span className="brand-text text-lg sm:text-xl font-extrabold leading-6 tracking-tight whitespace-nowrap" style={{ color: 'var(--md-bw-on-surface)' }}>
+          <span className="text-sm sm:text-base font-extrabold tracking-tight text-foreground whitespace-nowrap">
             HR Pulse
           </span>
         </div>
       </div>
-      <div className="right flex items-center gap-4 sm:gap-6 ml-4 sm:ml-6">
-        <button aria-label="Sync status" aria-pressed={isSyncing} className="sync-btn flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold leading-3.5 cursor-pointer transition-all" onClick={handleSync} disabled={isSyncing} style={{
-          background: isSyncing ? 'rgba(255, 159, 10, 0.12)' : (!driveConnected || syncConflicts.length > 0) ? 'rgba(224, 32, 20, 0.1)' : 'rgba(52, 199, 89, 0.12)',
-          border: isSyncing ? '1px solid rgba(255, 159, 10, 0.3)' : (!driveConnected || syncConflicts.length > 0) ? '1px solid rgba(224, 32, 20, 0.25)' : '1px solid rgba(52, 199, 89, 0.3)',
-          color: isSyncing ? '#b8860b' : (!driveConnected || syncConflicts.length > 0) ? 'var(--md-bw-error)' : '#1a7d3a',
-        }}>
-          <span className={`sync-dot ${isSyncing ? 'sync-spin' : (!driveConnected || syncConflicts.length > 0) ? '' : 'sync-blink'} size-2 rounded-full inline-block`} style={{
-            background: isSyncing ? '#ff9f0a' : (!driveConnected || syncConflicts.length > 0) ? '#dc3545' : '#34c759'
-          }}></span>
-          {isSyncing ? 'Syncing...' : (!driveConnected || syncConflicts.length > 0) ? 'Not Synced' : 'Synced'}
-        </button>
 
-        <button aria-label="Toggle theme" className="icon-btn size-9 flex items-center justify-center bg-transparent border-0 rounded-lg cursor-pointer hover:bg-[rgba(0,0,0,0.04)] transition-colors" onClick={toggleTheme} title={`Theme: ${themeMode}`} style={{ color: 'var(--md-bw-on-surface-variant)' }}>
-          {themeMode === 'system' ? <Monitor size={19} /> : themeMode === 'light' ? <Sun size={19} /> : <Moon size={19} />}
-        </button>
+      {/* Right Section: Sync Badge + Theme Toggle + Notification Trigger */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        
+        {/* Sync Status Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSync}
+          disabled={isSyncing}
+          className="h-8 sm:h-9 rounded-full px-3.5 sm:px-4 text-xs font-semibold gap-2 shrink-0"
+        >
+          <span className={`size-2 rounded-full inline-block ${isSyncing ? 'bg-amber-500 animate-spin' : (!driveConnected || syncConflicts.length > 0) ? 'bg-destructive' : 'bg-emerald-500'}`}></span>
+          <span className="hidden sm:inline">{isSyncing ? 'Syncing...' : (!driveConnected || syncConflicts.length > 0) ? 'Not Synced' : 'Synced'}</span>
+        </Button>
+
+        {/* Theme Toggle Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          title={`Theme: ${themeMode}`}
+          className="rounded-full size-9 sm:size-10 text-foreground hover:bg-muted"
+        >
+          {themeMode === 'system' ? <Monitor size={20} /> : themeMode === 'light' ? <Sun size={20} /> : <Moon size={20} />}
+        </Button>
+
+        {/* Notifications Button & Dropdown */}
         <div className="relative">
-          <button aria-label="Notifications" aria-expanded={showNotifications} className="icon-btn size-9 flex items-center justify-center bg-transparent border-0 rounded-lg cursor-pointer hover:bg-[rgba(0,0,0,0.04)] transition-colors relative" onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }} style={{ color: 'var(--md-bw-on-surface-variant)' }}>
-            <svg className={unreadCount > 0 ? 'bell-ring' : ''} width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-            {unreadCount > 0 && <span aria-live="polite" aria-atomic="true" className="notif-badge">{unreadCount}</span>}
-          </button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }}
+            className="rounded-full size-9 sm:size-10 text-foreground hover:bg-muted relative"
+          >
+            <Bell size={20} />
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 flex size-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                <span className="relative inline-flex rounded-full size-3 bg-destructive"></span>
+              </span>
+            )}
+          </Button>
 
           {showNotifications && (
-            <div role="dialog" aria-label="Notifications" className="macos-card absolute top-full right-0 mt-2 w-[320px] rounded-2xl z-30 overflow-hidden" style={{
-              background: 'rgba(255, 255, 255, 0.8)',
-              backdropFilter: 'blur(20px) saturate(180%)',
-              border: '1px solid rgba(0,0,0,0.08)',
-              boxShadow: '0 12px 32px rgba(0,0,0,0.1)',
-            }}>
-              <div className="p-4 flex justify-between items-center" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                <h3 className="text-base font-bold m-0" style={{ color: 'var(--md-bw-on-surface)' }}>Notifications</h3>
+            <div role="dialog" aria-label="Notifications" className="absolute top-full right-0 mt-2.5 w-[300px] sm:w-[340px] rounded-2xl z-50 overflow-hidden bg-popover text-popover-foreground border border-border shadow-xl backdrop-blur-xl animate-in fade-in-0 zoom-in-95 p-0">
+              <div className="p-3.5 px-4 flex justify-between items-center border-b border-border bg-muted/30">
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-foreground m-0">Notifications</h3>
+                <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
+                  {notifications.length} Total
+                </Badge>
               </div>
-              <div className="max-h-[300px] overflow-y-auto">
+              <div className="max-h-[280px] overflow-y-auto p-1">
                 {notifications.length === 0 ? (
-                  <div className="p-6 text-center text-sm" style={{ color: 'var(--md-bw-on-surface-variant)' }}>No new notifications</div>
+                  <div className="p-6 text-center text-xs text-muted-foreground italic">No new notifications</div>
                 ) : (
                   notifications.map(n => (
-                    <div role="listitem" key={n.id} className="px-4 py-3" style={{
-                      borderBottom: '1px solid rgba(0,0,0,0.04)',
-                      background: n.read ? 'transparent' : 'rgba(0,0,0,0.03)'
-                    }}>
-                      <p className="text-sm m-0 leading-[1.4]" style={{ color: 'var(--md-bw-on-surface)', fontWeight: n.read ? 400 : 500 }}>{n.text}</p>
-                      <span className="text-xs block mt-1" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{n.time}</span>
+                    <div role="listitem" key={n.id} className="p-3 px-3.5 rounded-xl hover:bg-muted/60 transition-colors cursor-pointer my-0.5">
+                      <p className="text-xs m-0 leading-relaxed text-foreground" style={{ fontWeight: n.read ? 400 : 600 }}>{n.text}</p>
+                      <span className="text-[10px] font-medium block mt-1 text-muted-foreground">{n.time}</span>
                     </div>
                   ))
                 )}
@@ -73,6 +94,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
             </div>
           )}
         </div>
+
       </div>
     </header>
   )

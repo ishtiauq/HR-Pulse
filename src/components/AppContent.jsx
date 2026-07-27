@@ -9,6 +9,7 @@ import Documents from './Documents.jsx'
 import Assets from './Assets.jsx'
 import Settings from './Settings.jsx'
 import DriveSync from './DriveSync.jsx'
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AppContent({ currentView, setCurrentView, isAppLoading, hasPermission, simulatedRole, user, ...data }) {
   const renderBreadcrumbs = () => {
@@ -27,45 +28,55 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
   if (isAppLoading) {
     const skeletonLayouts = {
       dashboard: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div className="skeleton skeleton-header" />
-          <div className="skeleton skeleton-subtitle" />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-            {[1,2,3,4].map(i => <div key={i} className="skeleton skeleton-stat-card" />)}
+        <div className="flex flex-col gap-6 w-full">
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-96" />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            <div className="skeleton skeleton-card" style={{ height: '240px' }} />
-            <div className="skeleton skeleton-card" style={{ height: '240px' }} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-32 rounded-xl" />)}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Skeleton className="h-[300px] rounded-xl" />
+            <Skeleton className="h-[300px] rounded-xl" />
           </div>
         </div>
       ),
       employees: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div className="skeleton skeleton-header" />
-          <div className="skeleton skeleton-subtitle" />
-          <div className="skeleton" style={{ height: '44px', borderRadius: '12px', marginBottom: '8px' }} />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-            {[1,2,3,4,5,6].map(i => <div key={i} className="skeleton skeleton-card" />)}
+        <div className="flex flex-col gap-6 w-full">
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <Skeleton className="h-12 w-full rounded-xl" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-64 rounded-xl" />)}
           </div>
         </div>
       ),
       table: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div className="skeleton skeleton-header" />
-          <div className="skeleton skeleton-subtitle" />
-          <div className="skeleton skeleton-tabs" />
-          {[1,2,3,4,5,6].map(i => <div key={i} className="skeleton skeleton-row" />)}
+        <div className="flex flex-col gap-6 w-full">
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <Skeleton className="h-12 w-full max-w-sm rounded-lg" />
+          <div className="flex flex-col gap-3">
+            {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-16 w-full rounded-lg" />)}
+          </div>
         </div>
       ),
       settings: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div className="skeleton skeleton-header" />
-          <div className="skeleton skeleton-subtitle" />
-          <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: '20px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {[1,2,3,4,5].map(i => <div key={i} className="skeleton skeleton-row" />)}
+        <div className="flex flex-col gap-6 w-full">
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6">
+            <div className="flex flex-col gap-2">
+              {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
             </div>
-            <div className="skeleton skeleton-card" style={{ height: '400px' }} />
+            <Skeleton className="h-[500px] rounded-xl" />
           </div>
         </div>
       )
