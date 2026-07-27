@@ -20,40 +20,7 @@ import { validateDatabase } from './services/validator.js'
 import { Search, LayoutDashboard, Settings as SettingsIcon, HardDrive, FileText, Monitor, User, History, Moon, Trash2, Sun, Menu } from 'lucide-react'
 import { useModal } from './services/useModal.js'
 import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, allNavItems } from './utils/helpers.js'
-
-const textEncoder = new TextEncoder()
-const textDecoder = new TextDecoder()
-
-const toBase64 = (bytes) => btoa(String.fromCharCode(...bytes))
-const fromBase64 = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))
-
-const deriveAesKey = async (material) => {
-  const digest = await crypto.subtle.digest('SHA-256', textEncoder.encode(material))
-  return crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt'])
-}
-
-const encryptJson = async (value, keyMaterial) => {
-  const iv = crypto.getRandomValues(new Uint8Array(12))
-  const key = await deriveAesKey(keyMaterial)
-  const plaintext = textEncoder.encode(JSON.stringify(value))
-  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext)
-  return JSON.stringify({
-    iv: toBase64(iv),
-    data: toBase64(new Uint8Array(ciphertext))
-  })
-}
-
-const decryptJson = async (payload, keyMaterial) => {
-  const parsed = JSON.parse(payload)
-  if (!parsed?.iv || !parsed?.data) return null
-  const key = await deriveAesKey(keyMaterial)
-  const decrypted = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv: fromBase64(parsed.iv) },
-    key,
-    fromBase64(parsed.data)
-  )
-  return JSON.parse(textDecoder.decode(new Uint8Array(decrypted)))
-}
+import { encryptJson, decryptJson } from './services/crypto.js'
 
 export default function App() {
   const [user, setUser] = useState(() => {
