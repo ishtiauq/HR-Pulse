@@ -25,7 +25,7 @@ export default function Sidebar({
         }}>
           {/* ANIMATED COLLAPSE TRIGGER BUTTON */}
           <TooltipPopover label="Expand Sidebar" isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
-          <button id="sidebar-toggle" aria-label="Toggle sidebar" className="collapse-btn flex items-center rounded-lg cursor-pointer shrink-0 relative overflow-hidden" style={{
+          <button id="sidebar-toggle" aria-label="Toggle sidebar" className="collapse-btn flex items-center rounded-lg cursor-pointer shrink-0 relative overflow-hidden" onClick={toggleSidebar} style={{
             width: isCollapsed ? '32px' : '100%',
             height: isCollapsed ? '32px' : '44px',
             justifyContent: isCollapsed ? 'center' : 'flex-start',
