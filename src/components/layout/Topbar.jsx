@@ -1,8 +1,7 @@
-import { Monitor, Sun, Moon, Menu, Bell, RefreshCw } from 'lucide-react'
+import { Monitor, Sun, Moon, Menu, Bell } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 
-export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, notifications, showNotifications, setShowNotifications, markNotificationsRead, unreadCount }) {
+export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, setShowNotifications, markNotificationsRead, unreadCount }) {
   return (
     <header aria-label="Top bar" className="topbar w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-4 flex items-center justify-between rounded-full bg-card text-card-foreground border border-border shadow-md transition-all duration-300">
       
@@ -54,13 +53,14 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
           {themeMode === 'system' ? <Monitor size={20} /> : themeMode === 'light' ? <Sun size={20} /> : <Moon size={20} />}
         </Button>
 
-        {/* Notifications Button & Dropdown */}
+        {/* Notifications Button */}
         <div className="relative">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }}
             className="rounded-full size-9 sm:size-10 text-foreground hover:bg-muted relative"
+            id="notification-trigger"
           >
             <Bell size={20} />
             {unreadCount > 0 && (
@@ -70,29 +70,6 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
               </span>
             )}
           </Button>
-
-          {showNotifications && (
-            <div role="dialog" aria-label="Notifications" className="absolute top-full right-0 mt-2.5 w-[300px] sm:w-[340px] rounded-2xl z-50 overflow-hidden bg-popover text-popover-foreground border border-border shadow-xl backdrop-blur-xl animate-in fade-in-0 zoom-in-95 p-0">
-              <div className="p-3.5 px-4 flex justify-between items-center border-b border-border bg-muted/30">
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-foreground m-0">Notifications</h3>
-                <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
-                  {notifications.length} Total
-                </Badge>
-              </div>
-              <div className="max-h-[280px] overflow-y-auto p-1">
-                {notifications.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-muted-foreground italic">No new notifications</div>
-                ) : (
-                  notifications.map(n => (
-                    <div role="listitem" key={n.id} className="p-3 px-3.5 rounded-xl hover:bg-muted/60 transition-colors cursor-pointer my-0.5">
-                      <p className="text-xs m-0 leading-relaxed text-foreground" style={{ fontWeight: n.read ? 400 : 600 }}>{n.text}</p>
-                      <span className="text-[10px] font-medium block mt-1 text-muted-foreground">{n.time}</span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
         </div>
 
       </div>
