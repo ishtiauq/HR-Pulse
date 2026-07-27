@@ -683,6 +683,7 @@ export async function checkAndRunAutoBackup(token) {
  * Fallback backward compatibility export so existing code doesn't crash 
  * before we update App.jsx completely
  */
+// DEPRECATED - Will be removed in next cleanup
 export async function loadOrInitializeDatabase() {
   console.warn("loadOrInitializeDatabase is deprecated, use the new strict boot sequence");
   return { data: null, fileId: null };

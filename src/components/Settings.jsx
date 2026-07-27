@@ -25,10 +25,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const [auditFilterDate, setAuditFilterDate] = useState('')
   const [auditFilterAction, setAuditFilterAction] = useState('All')
 
-  const [activeSessions] = useState([
-    { id: 'sess-1', device: 'Chrome / Windows', location: 'New York, US', current: true, ip: '192.168.1.1', time: 'Active now' },
-    { id: 'sess-2', device: 'Safari / iPhone 13', location: 'New York, US', current: false, ip: '192.168.1.5', time: 'Last active 2 hours ago' }
-  ])
+  const [activeSessions] = useState([]) // Sessions will be implemented with real backend auth
 
   const [currency, setCurrency] = useState(settings.currency || '৳')
   const [salaryStructure, setSalaryStructure] = useState(settings.salaryStructure || [])
@@ -76,7 +73,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const deductionsSum = salaryStructure.filter(s => s.type === 'deduction').reduce((a, c) => a + c.percentage, 0)
   const netPayPercent = earningsSum - deductionsSum
   const totalComponents = earningsSum + deductionsSum
-  const isOver100 = totalComponents > 100
+  const isOver100 = earningsSum > 100
 
   const handleComponentChange = (id, field, value) => {
     setSalaryStructure(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item))
@@ -92,7 +89,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
   const handleSave = () => {
     setIsSaving(true)
-    setTimeout(() => {
+    Promise.resolve().then(() => {
       setSettings({
         ...settings,
         currency, salaryStructure, expensePolicies, shiftTemplates, overtimeRules,
@@ -103,7 +100,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
       setIsSaving(false)
       if (addToast) addToast("Settings saved successfully and synced to Google Drive!", "success")
       else addLog('Settings Saved', 'Settings saved successfully', 'success')
-    }, 1000)
+    })
   }
 
   const handleLogoUpload = (e) => {
@@ -123,7 +120,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     e.currentTarget.setPointerCapture(e.pointerId)
   }
 
-  const handlePointerMove = (e) => { if (dragStart) setLogoX(e.clientX - dragStart.x); setLogoY(e.clientY - dragStart.y) }
+  const handlePointerMove = (e) => { if (dragStart) { setLogoX(e.clientX - dragStart.x); setLogoY(e.clientY - dragStart.y) } }
   const handlePointerUp = () => setDragStart(null)
 
   const handleRemoveLogo = () => { setLogo(''); setLogoX(0); setLogoY(0); setLogoZoom(1); setShowLogoModal(false) }
@@ -581,7 +578,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                     <tr><td colSpan="6" style={{ padding: '32px', textAlign: 'center', color: 'var(--md-bw-on-surface-variant)', fontSize: '13px' }}>No sync conflicts detected.</td></tr>
                   ) : (
                     syncConflicts.map((conflict, i) => (
-                      <tr key={i}>
+                      <tr key={`${conflict.file}-${conflict.recordId}`}>
                         <td style={{ ...cellStyle, fontWeight: 500 }}>{conflict.file}</td>
                         <td style={cellStyle}>{conflict.recordId}</td>
                         <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }} title={JSON.stringify(conflict.localValue)}>{JSON.stringify(conflict.localValue)}</td>

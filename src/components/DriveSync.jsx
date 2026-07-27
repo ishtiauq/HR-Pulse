@@ -9,7 +9,6 @@ import { formatDateTime } from '../services/date.js'
 export default function DriveSync({ user, driveConnected, setDriveConnected, addLog, addToast }) {
   const [timeSinceSync, setTimeSinceSync] = useState(2)
   const [timeUntilSync, setTimeUntilSync] = useState(13)
-  const [previewFile, setPreviewFile] = useState(null)
   const [cacheSize, setCacheSize] = useState('0.00')
   const [isClearing, setIsClearing] = useState(false)
   const [backupsList, setBackupsList] = useState([])
@@ -17,7 +16,6 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
   const [isRestoring, setIsRestoring] = useState(false)
   const [selectedRestoreBackup, setSelectedRestoreBackup] = useState(null)
   useModal(() => setSelectedRestoreBackup(null))
-  useModal(() => setPreviewFile(null))
   
   useEffect(() => {
     const fetchCacheSize = async () => {
@@ -432,29 +430,6 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
         </button>
       </div>
 
-
-      {/* JSON Preview Modal */}
-      {previewFile && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }} onClick={() => setPreviewFile(null)}>
-          <div style={{ background: 'var(--bg-primary)', padding: '24px', borderRadius: '16px', width: '100%', maxWidth: '600px', maxHeight: '80vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}><FileJson size={18}/> Preview: {previewFile.name}</h3>
-              <button onClick={() => setPreviewFile(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><X size={20}/></button>
-            </div>
-            <pre style={{ background: 'rgba(0,0,0,0.03)', padding: '16px', borderRadius: '8px', overflowY: 'auto', fontSize: '0.85rem', flex: 1 }}>
-{`{
-  "__schema": "HRPulse",
-  "version": "1.0",
-  "records": 42,
-  "data": [
-    // Simulating ${previewFile.name} contents...
-    // Actual parsing would happen here.
-  ]
-}`}
-            </pre>
-          </div>
-        </div>
-      )}
 
       <style>{`
         @keyframes slideLoop {

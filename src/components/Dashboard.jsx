@@ -43,7 +43,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
     employees.forEach(emp => {
       if (emp.status === 'Terminated') return
       const log = todayLogs[emp.id]
-      const entry = { name: emp.name, avatar: emp.avatar, role: emp.role, time: log?.checkIn || null }
+      const entry = { id: emp.id, name: emp.name, avatar: emp.avatar, role: emp.role, time: log?.checkIn || null }
       if (log) {
         if (log.status === 'Present' || log.status === 'Late') {
           presentList.push(entry)
@@ -288,8 +288,8 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                   {attendanceLists[item.key].length === 0 ? (
                     <p style={{ font: "400 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '4px 0' }}>No one</p>
                   ) : (
-                    attendanceLists[item.key].map((emp, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 0' }}>
+                    attendanceLists[item.key].map((emp) => (
+                      <div key={emp.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 0' }}>
                         <img src={emp.avatar} alt="" style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <span style={{ font: "400 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface)', display: 'block' }}>{emp.name}</span>
@@ -441,7 +441,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
             ) : (
               <div style={{ width: '100%' }}>
                 {upcomingMilestones.map((milestone, idx) => (
-                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: idx !== upcomingMilestones.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
+                  <div key={`${milestone.type}-${milestone.empName}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: idx !== upcomingMilestones.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
                     <div style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '7px', flexShrink: 0 }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
                         {milestone.type === 'birthday' ? (

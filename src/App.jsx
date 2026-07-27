@@ -143,7 +143,7 @@ export default function App() {
   const [showRoleModal, setShowRoleModal] = useState(false)
   const [pendingProfileEdits, setPendingProfileEdits] = useState([])
   const [auditLogs, setAuditLogs] = useState([
-    { id: 'audit-1', timestamp: new Date(Date.now() - 86400000).toISOString(), user: 'System', action: 'CREATE', entity: 'System', details: 'Initialized audit logging.', ip: '192.168.1.1' }
+    { id: 'audit-1', timestamp: new Date(Date.now() - 86400000).toISOString(), user: 'System', action: 'CREATE', entity: 'System', details: 'Initialized audit logging.', ip: 'N/A' }
   ])
 
   const addAuditLog = (action, entity, details) => {
@@ -154,7 +154,7 @@ export default function App() {
       action,
       entity,
       details,
-      ip: '192.168.1.1'
+      ip: 'N/A'
     }
     setAuditLogs(prev => [newLog, ...prev])
   }
@@ -175,8 +175,8 @@ export default function App() {
 
   const [toasts, setToasts] = useState([])
   const addToast = (message, type = 'success', action = null) => {
-    const id = Date.now()
-    setToasts(prev => [...prev, { id, message, type, action }])
+    const id = Date.now() + Math.random()
+    setToasts(prev => [...prev.slice(-5), { id, message, type, action }])
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id))
     }, 4000)
@@ -308,7 +308,7 @@ export default function App() {
     setUser(userInfo)
     localStorage.setItem('hr_pulse_user', JSON.stringify(userInfo))
     if (!userInfo.isEmployee && userInfo.token) {
-      localStorage.setItem('hr_pulse_hr_token', userInfo.token)
+      sessionStorage.setItem('hr_pulse_hr_token', userInfo.token)
     }
   }
 
@@ -316,7 +316,7 @@ export default function App() {
     setUser(null)
     localStorage.removeItem('hr_pulse_user')
     if (!user?.isEmployee) {
-      localStorage.removeItem('hr_pulse_hr_token')
+      sessionStorage.removeItem('hr_pulse_hr_token')
     }
     setCurrentView('dashboard')
   }
@@ -915,6 +915,7 @@ export default function App() {
         if (issues.length > 0) {
           setDbStatus('corruption')
           addLog('Data Integrity Warning', `${issues.length} corruption issues detected in the database.`, 'warning')
+          addToast('Data integrity issues found. Check console for details.', 'warning')
         }
 
         setIsSyncing(false)

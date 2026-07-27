@@ -1,13 +1,16 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 export function useModal(onClose) {
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
-        onClose()
+        onCloseRef.current()
       }
     }
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
-  }, [onClose])
+  }, [])
 }

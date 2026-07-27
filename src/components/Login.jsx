@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Shield, Cloud, ArrowRight, HelpCircle, ChevronDown, ChevronUp, LogIn, Eye, EyeOff, Users, Zap, Sun, Moon, Monitor } from 'lucide-react'
 import { fetchUserProfile } from '../services/googleDrive.js'
+import { verifyPassword } from '../services/crypto.js'
 
 export default function Login({ onLogin, themeMode, toggleTheme }) {
   const [authTab, setAuthTab] = useState('manager') // 'manager' | 'employee'
@@ -54,7 +55,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
               onLogin(googleUser)
             } catch (err) {
               setIsLoading(false)
-              alert("Failed to fetch Google profile details: " + err.message)
+              setError("Failed to fetch Google profile details: " + err.message)
             }
           } else {
             setIsLoading(false)
@@ -62,13 +63,13 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         },
         error_callback: (err) => {
           setIsLoading(false)
-          alert("Authorization error: " + err.message)
+          setError("Authorization error: " + err.message)
         }
       })
       client.requestAccessToken({ prompt: 'consent' })
     } catch (e) {
       setIsLoading(false)
-      alert("Error initializing Google Login client: " + e.message)
+      setError("Error initializing Google Login client: " + e.message)
     }
   }
 
@@ -100,8 +101,14 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         return
       }
       const employees = JSON.parse(storedEmployees)
-      const employee = employees.find(e => e.email === email && e.password === password)
+      const employee = employees.find(e => e.email === email)
       if (!employee) {
+        setError('Invalid email or password.')
+        setIsLoading(false)
+        return
+      }
+      const valid = await verifyPassword(password, employee.passwordHash || employee.password)
+      if (!valid) {
         setError('Invalid email or password.')
         setIsLoading(false)
         return
@@ -160,9 +167,12 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           </div>
 
           {/* Tab content rendered eagerly — conditionally visible */}
-          <div style={{ display: authTab === 'manager' ? 'block' : 'none' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <button onClick={handleConnectClick} className="login-drive-btn" disabled={isLoading}>
+            <div style={{ display: authTab === 'manager' ? 'block' : 'none' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {error && (
+                  <div className="login-error">{error}</div>
+                )}
+                <button onClick={handleConnectClick} className="login-drive-btn" disabled={isLoading}>
                 {isLoading ? (
                   <span>Connecting Drive...</span>
                 ) : (

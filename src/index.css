@@ -1,9 +1,5 @@
 @import "tailwindcss";
 
-* {
-  font-family: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-}
-
 @theme {
   /* M3 Monochrome Light Palette */
   --color-md-sys-primary: #000000;

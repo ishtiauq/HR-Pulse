@@ -3,6 +3,7 @@ import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpread
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
+import { hashPassword } from '../services/crypto.js'
 
 export default function Employees({ employees, setEmployees, addLog, driveConnected, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast, selectedEmployeeId, setSelectedEmployeeId }) {
   const [searchTerm, setSearchTerm] = useState('')
@@ -14,6 +15,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
   const [imageErrors, setImageErrors] = useState({})
   const [expandedCardId, setExpandedCardId] = useState(null)
   const [selectedIds, setSelectedIds] = useState(new Set())
+  const [confirmDelete, setConfirmDelete] = useState(null)
   useModal(() => setViewingEmployee(null))
 
   useEffect(() => {
@@ -113,7 +115,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
     setShowAddForm(true)
   }
 
-  const handleSaveEmployee = (e) => {
+  const handleSaveEmployee = async (e) => {
     e.preventDefault()
     if (!newEmpId || !newName || !newRole || !newEmail) return
 
@@ -126,17 +128,28 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       return
     }
 
+    let passwordHash;
+    if (editingEmployee) {
+      if (newPassword) {
+        passwordHash = await hashPassword(newPassword);
+      } else {
+        passwordHash = editingEmployee.passwordHash || editingEmployee.password || '';
+      }
+    } else {
+      passwordHash = newPassword ? await hashPassword(newPassword) : '';
+    }
+
     if (editingEmployee) {
       // Update employee list
       setEmployees(prev => prev.map(emp => emp.id === editingEmployee.id ? {
         ...emp,
-        id: newEmpId, // Allow ID editing
+        id: newEmpId,
         name: newName,
         role: newRole,
         department: finalDept,
         status: newStatus,
         email: newEmail,
-        password: newPassword || emp.password,
+        passwordHash,
         dob: newDob,
         joiningDate: newJoiningDate,
         cvFileName: newCvFileName,
@@ -158,13 +171,13 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
     } else {
       // Add new employee
       const newEmp = {
-        id: newEmpId, // Use the user's manual or auto-generated ID
+        id: newEmpId,
         name: newName,
         role: newRole,
         department: finalDept,
         status: newStatus,
         email: newEmail,
-        password: newPassword,
+        passwordHash,
         avatar: newAvatar || `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 1000000)}?auto=format&fit=crop&q=80&w=200`,
         dob: newDob,
         joiningDate: newJoiningDate,
@@ -241,13 +254,14 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
   const handleBulkDelete = () => {
     const count = selectedIds.size
     if (count === 0) return
-    const confirmed = window.confirm(`Delete ${count} selected employee(s)? This action cannot be undone.`)
-    if (!confirmed) return
-    const deletedNames = employees.filter(emp => selectedIds.has(emp.id)).map(emp => emp.name).join(', ')
-    setEmployees(prev => prev.filter(emp => !selectedIds.has(emp.id)))
-    addLog('Bulk deleted employees', `Removed ${count} employees: ${deletedNames}`)
-    if (addAuditLog) addAuditLog('DELETE_MANY', 'Employee', `Bulk deleted ${count} employee records`)
-    clearSelection()
+    setConfirmDelete(() => () => {
+      const deletedNames = employees.filter(emp => selectedIds.has(emp.id)).map(emp => emp.name).join(', ')
+      setEmployees(prev => prev.filter(emp => !selectedIds.has(emp.id)))
+      addLog('Bulk deleted employees', `Removed ${count} employees: ${deletedNames}`)
+      if (addAuditLog) addAuditLog('DELETE_MANY', 'Employee', `Bulk deleted ${count} employee records`)
+      clearSelection()
+      setConfirmDelete(null)
+    })
   }
 
   const handleDownloadSelected = () => {
@@ -321,9 +335,37 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
     addToast('Profile updates rejected.', 'info')
   }
 
+  const expectedHeaders = ['id', 'name', 'email', 'department', 'role', 'status', 'dob', 'joiningDate', 'avatar', 'password', 'passwordHash']
+
+  const validateCSVRow = (row) => {
+    if (!row.name || !row.name.trim()) return 'Name is required'
+    if (!row.email || !row.email.trim()) return 'Email is required'
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(row.email.trim())) return `Invalid email format: ${row.email}`
+    return null
+  }
+
+  const sanitizeCell = (value) => {
+    if (typeof value !== 'string') return value
+    return value.replace(/^[=+\-@\t\r]/, '')
+  }
+
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       
+      {confirmDelete && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.4)',zIndex:10000,display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <div style={{background:'var(--md-bw-surface)',padding:24,borderRadius:12,maxWidth:400}}>
+            <h3 style={{marginBottom:12}}>Confirm Delete</h3>
+            <p style={{marginBottom:16}}>Are you sure you want to delete the selected employee(s)?</p>
+            <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
+              <button onClick={() => setConfirmDelete(null)} className="btn btn-text">Cancel</button>
+              <button onClick={() => { confirmDelete(); }} className="btn btn-filled">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h1 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>
@@ -343,24 +385,43 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               const file = e.target.files?.[0];
               if (file) {
                 const reader = new FileReader();
-                reader.onload = (event) => {
+                reader.onload = async (event) => {
                   const csvText = event.target.result;
                   try {
-                    const lines = csvText.split('\n');
-                    const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+                    const lines = csvText.split('\n').filter(line => line.trim());
+                    if (lines.length < 2) {
+                      addToast('CSV file must have a header row and at least one data row.', 'warning');
+                      return;
+                    }
+                    const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, '').toLowerCase());
+                    const validHeaders = expectedHeaders.filter(h => rawHeaders.includes(h));
+                    if (validHeaders.length === 0) {
+                      addToast('CSV headers must include at least one of: ' + expectedHeaders.join(', '), 'warning');
+                      return;
+                    }
                     const imported = [];
+                    const errors = [];
                     for (let i = 1; i < lines.length; i++) {
-                      if (!lines[i].trim()) continue;
-                      const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
-                      const emp = {};
-                      headers.forEach((header, index) => {
-                        emp[header] = cols[index] || '';
+                      const cols = lines[i].split(',').map(c => sanitizeCell(c.trim().replace(/^["']|["']$/g, '')));
+                      const row = {};
+                      rawHeaders.forEach((header, index) => {
+                        row[header] = cols[index] || '';
                       });
-                      if (emp.id && emp.name) {
-                        emp.avatar = emp.avatar || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200`;
-                        emp.updated_at = new Date().toISOString();
-                        imported.push(emp);
+                      const error = validateCSVRow(row);
+                      if (error) {
+                        errors.push(`Row ${i + 1}: ${error}`);
+                        continue;
                       }
+                      if (row.password) {
+                        row.passwordHash = await hashPassword(row.password);
+                        delete row.password;
+                      }
+                      row.avatar = row.avatar || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200`;
+                      row.updated_at = new Date().toISOString();
+                      imported.push(row);
+                    }
+                    if (errors.length > 0) {
+                      addToast(`Skipped ${errors.length} invalid row(s): ${errors.slice(0, 3).join('; ')}${errors.length > 3 ? ` (+${errors.length - 3} more)` : ''}`, 'warning');
                     }
                     if (imported.length > 0) {
                       setEmployees(prev => {
@@ -369,7 +430,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                         return [...prev, ...filteredImport];
                       });
                       addToast(`Successfully imported ${imported.length} employees from CSV.`, 'success');
-                    } else {
+                    } else if (errors.length === 0) {
                       addToast('No valid employee records found in CSV.', 'warning');
                     }
                   } catch (err) {

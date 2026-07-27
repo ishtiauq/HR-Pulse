@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { LogIn, ArrowLeft, Shield, Activity, Lock, Eye, EyeOff, Users } from 'lucide-react'
+import { verifyPassword } from '../services/crypto.js'
 
 export default function EmployeeLogin({ onLogin, onBack }) {
   const [email, setEmail] = useState('')
@@ -22,9 +23,16 @@ export default function EmployeeLogin({ onLogin, onBack }) {
       }
 
       const employees = JSON.parse(storedEmployees)
-      const employee = employees.find(e => e.email === email && e.password === password)
+      const employee = employees.find(e => e.email === email)
 
       if (!employee) {
+        setError('Invalid email or password.')
+        setIsLoading(false)
+        return
+      }
+
+      const valid = await verifyPassword(password, employee.passwordHash || employee.password)
+      if (!valid) {
         setError('Invalid email or password.')
         setIsLoading(false)
         return
