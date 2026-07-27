@@ -55,6 +55,14 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const [isSaving, setIsSaving] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
   useModal(() => setShowResetModal(false))
+  const [componentToDelete, setComponentToDelete] = useState(null)
+  useModal(() => setComponentToDelete(null))
+
+  const [showAddComponentModal, setShowAddComponentModal] = useState(false)
+  const [newCompName, setNewCompName] = useState('')
+  const [newCompType, setNewCompType] = useState('earning')
+  const [newCompPercent, setNewCompPercent] = useState('')
+  useModal(() => setShowAddComponentModal(false))
 
   useEffect(() => {
     if (settings.currency && settings.currency !== currency) setCurrency(settings.currency)
@@ -86,7 +94,16 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   }
 
   const handleAddComponent = () => {
-    setSalaryStructure(prev => [...prev, { id: `comp-${Date.now()}`, name: 'New Component', percentage: 5, type: 'earning' }])
+    setNewCompName('')
+    setNewCompType('earning')
+    setNewCompPercent('')
+    setShowAddComponentModal(true)
+  }
+
+  const saveNewComponent = () => {
+    if (!newCompName.trim() || !newCompPercent) return
+    setSalaryStructure(prev => [...prev, { id: `comp-${Date.now()}`, name: newCompName, percentage: Number(newCompPercent), type: newCompType }])
+    setShowAddComponentModal(false)
   }
 
   const handleRemoveComponent = (id) => {
@@ -219,7 +236,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                         <span className="absolute right-2 top-2.5 text-xs text-muted-foreground pointer-events-none">%</span>
                       </div>
 
-                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-red-500" onClick={() => handleRemoveComponent(item.id)}>
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-red-500" onClick={() => setComponentToDelete(item.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -666,6 +683,55 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowResetModal(false)}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={() => { setShowResetModal(false); if (addToast) addToast('Settings reset to defaults', 'info') }}>Reset Defaults</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Add Component Modal */}
+      <Dialog open={showAddComponentModal} onOpenChange={setShowAddComponentModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Salary Component</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold">Component Name</label>
+              <Input placeholder="e.g. House Rent" value={newCompName} onChange={(e) => setNewCompName(e.target.value)} />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold">Type</label>
+              <Select value={newCompType} onChange={setNewCompType}>
+                <SelectItem id="earning">Earning</SelectItem>
+                <SelectItem id="deduction">Deduction</SelectItem>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold">Percentage (%)</label>
+              <Input type="number" min="0" max="100" placeholder="e.g. 10" value={newCompPercent} onChange={(e) => setNewCompPercent(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddComponentModal(false)}>Cancel</Button>
+            <Button onClick={saveNewComponent} disabled={!newCompName.trim() || !newCompPercent}>Add Component</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Component Alert */}
+      <AlertDialog open={!!componentToDelete} onOpenChange={(open) => !open && setComponentToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone. This will permanently remove the salary component.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setComponentToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (componentToDelete) {
+                handleRemoveComponent(componentToDelete)
+                setComponentToDelete(null)
+              }
+            }} className="bg-red-600 hover:bg-red-700 text-white">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
