@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Users, Mail, Eye, ChevronDown, Download, Building2 } from 'lucide-react'
+import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Users, Mail, Eye, ChevronDown, Download, Building2, User } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
@@ -592,10 +592,12 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <Avatar className="h-12 w-12 border shadow-sm">
-                        <AvatarImage src={emp.avatar} alt={emp.name} style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} />
-                        <AvatarFallback className="bg-primary/5 text-primary font-semibold">
-                          {getAvatarFallback(emp.name).initials}
+                      <Avatar className={`h-12 w-12 border shadow-sm transition-all duration-300 ${emp.status !== 'Active' ? 'grayscale opacity-70' : ''}`}>
+                        {emp.avatar && !imageErrors[emp.id] && (
+                          <AvatarImage src={emp.avatar} alt={emp.name} style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} />
+                        )}
+                        <AvatarFallback className="bg-muted/50 text-muted-foreground">
+                          <User size={20} />
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col gap-0.5 min-w-0">
