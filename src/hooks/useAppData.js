@@ -366,6 +366,7 @@ export default function useAppData({ user, addToast }) {
         checkAndRunAutoBackup(user.token)
       } catch (err) {
         setIsSyncing(false)
+        setIsAppLoading(false)
         setDbStatus('corruption')
         addLog('Sync Failed', 'Could not sync database with Google Drive: ' + err.message, 'danger')
         console.error(err)

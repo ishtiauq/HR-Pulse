@@ -26,7 +26,11 @@ export default function App() {
   const [isCollapsed, setIsCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true')
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null)
 
-  useEffect(() => { localStorage.setItem('hr_pulse_current_view', currentView) }, [currentView])
+  useEffect(() => {
+    localStorage.setItem('hr_pulse_current_view', currentView)
+    const timer = setTimeout(() => appData.setIsAppLoading(false), 500)
+    return () => clearTimeout(timer)
+  }, [currentView])
 
   useEffect(() => {
     const handleResize = () => setMobileMenuOpen(false)
