@@ -553,7 +553,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
   }
 
   return (
-    <div className="animate-fade-in flex flex-col gap-8">
+    <div className="animate-fade-in flex flex-col gap-[32px]">
       
       {/* Header and Month Selector */}
       <div className="page-header">
@@ -651,7 +651,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
       ) : (
         <>
           {/* Stats Cards Row */}
-          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+          <div className="grid gap-16" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
             {/* Total Cost Card */}
             <div className="m3-card m3-card-elevated p-4 flex flex-col">
               <span className="label-small uppercase mb-2" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Total Payout Budget</span>
@@ -692,7 +692,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
           </div>
 
           {/* Toolbar Filter Section */}
-          <div className="flex justify-between items-center flex-wrap gap-4 mt-4">
+          <div className="flex justify-between items-center flex-wrap gap-16 mt-4">
             {/* Search */}
             <div className="search-bar flex-1 max-w-[350px]">
               <div className="tf-icon-leading">

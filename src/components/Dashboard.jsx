@@ -165,7 +165,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
   const recentAnnouncements = (announcements || []).slice(0, 3)
 
   return (
-    <div className="flex-1 p-4 flex flex-col gap-4">
+    <div className="flex-1 p-4 flex flex-col gap-16">
       
       {/* Page Title */}
       <h1 className="page-title">
@@ -382,7 +382,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                     <p style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '1px 0 0' }}>{currentPayrollData.length} employee{currentPayrollData.length !== 1 ? 's' : ''}</p>
                   </div>
                 </div>
-                <div className="flex gap-4 mb-2.5">
+                <div className="flex gap-16 mb-2.5">
                   <div>
                     <p className="m-0" style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>Paid</p>
                     <p className="m-0 tabular-nums text-[#34C759]" style={{ font: "700 18px/24px 'Roboto'" }}>{paidCount}</p>

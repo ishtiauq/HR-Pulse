@@ -7,7 +7,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
       border: '1px solid rgba(0,0,0,0.05)'
     }}>
-      <div className="left flex items-center gap-4">
+      <div className="left flex items-center gap-16">
         <button aria-label="Open menu" className="mobile-menu-btn size-8 hidden items-center justify-center bg-transparent border-0 rounded-md cursor-pointer" onClick={toggleSidebar} style={{
           color: 'var(--md-bw-on-surface-variant)'
         }}>
@@ -23,7 +23,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
           </span>
         </div>
       </div>
-      <div className="right flex items-center gap-4 ml-8">
+      <div className="right flex items-center gap-16 ml-8">
         <button aria-label="Sync status" aria-pressed={isSyncing} className="sync-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium leading-3.5 cursor-pointer" onClick={handleSync} disabled={isSyncing} style={{
           background: isSyncing ? 'rgba(255, 159, 10, 0.12)' : (!driveConnected || syncConflicts.length > 0) ? 'rgba(224, 32, 20, 0.1)' : 'rgba(52, 199, 89, 0.1)',
           border: isSyncing ? '1px solid rgba(255, 159, 10, 0.3)' : (!driveConnected || syncConflicts.length > 0) ? '1px solid rgba(224, 32, 20, 0.25)' : '1px solid rgba(52, 199, 89, 0.3)',

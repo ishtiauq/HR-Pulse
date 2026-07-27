@@ -183,7 +183,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
             </div>
           </div>
           <div style={{ display: authTab === 'employee' ? 'block' : 'none' }}>
-            <form onSubmit={handleEmployeeSubmit} aria-label="Employee login form" className="flex flex-col gap-4">
+            <form onSubmit={handleEmployeeSubmit} aria-label="Employee login form" className="flex flex-col gap-16">
               {error && (
                 <div className="login-error">{error}</div>
               )}
