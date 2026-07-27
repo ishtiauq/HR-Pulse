@@ -6,9 +6,9 @@ import { formatDateTime } from '../services/date.js'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 
 
-const pInp = { width: '100%', padding: '10px 14px', borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', transition: 'border 0.15s' }
-const pSel = { width: '100%', padding: '10px 14px', borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', cursor: 'pointer', appearance: 'none' }
-const lbl = { font: "500 11px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--md-bw-on-surface-variant)', marginBottom: '6px', display: 'block' }
+const pInp = { width: '100%', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', transition: 'border 0.15s' }
+const pSel = { width: '100%', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', cursor: 'pointer', appearance: 'none' }
+const lbl = { font: "500 11px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--md-bw-on-surface-variant)', display: 'block' }
 const card = { background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid var(--glass-border)', borderRadius: 'var(--glass-radius)', boxShadow: 'var(--glass-shadow)' }
 const SEG_COLORS = ['#0062E6', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14', '#20c997', '#e83e8c', '#17a2b8', '#6610f2']
 const getSegmentColor = (item, index) => item.type === 'deduction' ? '#dc3545' : SEG_COLORS[index % SEG_COLORS.length]
@@ -162,11 +162,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
       case 'payroll': return (
         <div className="payroll-settings-grid">
           {/* Currency Setup */}
-          <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Currency Setup</h4>
             <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Select the currency symbol applied globally across dashboards and receipts.</p>
             <div style={{ position: 'relative', width: '100%', maxWidth: '260px' }}>
-              <select value={currency} onChange={e => setCurrency(e.target.value)} style={{ ...pSel }}>
+              <select className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" value={currency} onChange={e => setCurrency(e.target.value)} style={{ ...pSel }}>
                 <option value="$">$ (USD)</option>
                 <option value="৳">৳ (BDT)</option>
                 <option value="€">€ (EUR)</option>
@@ -179,7 +179,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           </div>
 
           {/* Salary Structure */}
-          <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Salary Structure</h4>
               <button onClick={handleAddComponent} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
@@ -188,14 +188,14 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             </div>
 
             {isOver100 && (
-              <div style={{ padding: '12px 16px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '100px', color: 'var(--md-bw-on-surface)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
+              <div className="p-3 px-4" style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '100px', color: 'var(--md-bw-on-surface)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
                 <Info size={16} /> Component total exceeds 100%. Please adjust before saving.
               </div>
             )}
 
             {/* Donut Chart */}
             {salaryStructure.length > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
+              <div className="py-2" style={{ display: 'flex', justifyContent: 'center' }}>
                 <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
                     <Pie data={salaryStructure.map(item => ({ ...item, value: item.percentage }))}
@@ -212,31 +212,34 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             {/* Component List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {salaryStructure.length === 0 ? (
-                <span className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)', textAlign: 'center', padding: '20px 0' }}>
+                <span className="body-medium py-5" style={{ color: 'var(--md-bw-on-surface-variant)', textAlign: 'center' }}>
                   No salary components configured. Click "Add Component" to get started.
                 </span>
               ) : (
                 salaryStructure.map(item => (
-                  <div key={item.id} style={{
-                    display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px',
+                  <div key={item.id} className="p-3 px-4" style={{
+                    display: 'flex', alignItems: 'center', gap: '10px',
                     background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)',
                   }}>
                     <input type="text" value={item.name} onChange={e => handleComponentChange(item.id, 'name', e.target.value)}
                       placeholder="Component name"
-                      style={{ flex: 1, minWidth: '120px', ...pInp, padding: '8px 12px', fontSize: '13px' }} />
+                      className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full"
+                      style={{ flex: 1, minWidth: '120px', ...pInp, fontSize: '13px' }} />
 
                     <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
                       <button onClick={() => handleComponentChange(item.id, 'type', 'earning')}
+                        className="px-3 py-1.5"
                         style={{
-                          padding: '6px 12px', borderRadius: '100px', border: '1px solid',
+                          borderRadius: '100px', border: '1px solid',
                           fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
                           background: item.type === 'earning' ? '#0062E6' : 'transparent',
                           color: item.type === 'earning' ? '#fff' : 'var(--md-bw-on-surface-variant)',
                           borderColor: item.type === 'earning' ? '#0062E6' : 'var(--glass-border)',
                         }}>Earning</button>
                       <button onClick={() => handleComponentChange(item.id, 'type', 'deduction')}
+                        className="px-3 py-1.5"
                         style={{
-                          padding: '6px 12px', borderRadius: '100px', border: '1px solid',
+                          borderRadius: '100px', border: '1px solid',
                           fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
                           background: item.type === 'deduction' ? '#dc3545' : 'transparent',
                           color: item.type === 'deduction' ? '#fff' : 'var(--md-bw-on-surface-variant)',
@@ -247,12 +250,13 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                     <div style={{ position: 'relative', width: '70px', flexShrink: 0 }}>
                       <input type="number" min="0" max="100" value={item.percentage}
                         onChange={e => handleComponentChange(item.id, 'percentage', Number(e.target.value))}
-                        style={{ ...pInp, padding: '8px 10px', fontSize: '13px', textAlign: 'center', paddingRight: '20px' }} />
+                        className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full"
+                        style={{ ...pInp, fontSize: '13px', textAlign: 'center', paddingRight: '20px' }} />
                       <span style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', fontSize: '12px', color: 'var(--md-bw-on-surface-variant)', pointerEvents: 'none' }}>%</span>
                     </div>
 
                     <button onClick={() => handleRemoveComponent(item.id)}
-                      style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', padding: '6px', display: 'flex', flexShrink: 0 }}>
+                      className="p-1.5" style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', display: 'flex', flexShrink: 0 }}>
                       <Trash2 size={15} />
                     </button>
                   </div>
@@ -262,7 +266,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
             {/* Net Earning Ratio */}
             {salaryStructure.length > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+              <div className="p-3 px-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
                 <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 600 }}>Net Earning Ratio</span>
                 <span className="body-medium" style={{
                   color: netPayPercent >= 0 ? 'var(--md-bw-on-surface)' : '#dc3545',
@@ -274,7 +278,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         </div>
       )
       case 'company': return (
-        <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Building2 size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
             <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Company Profile Settings</h4>
@@ -283,7 +287,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={lbl}>Brand Logo</span>
+              <span className="mb-1 sm:mb-1.5" style={lbl}>Brand Logo</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div role="button" tabIndex={0} aria-label="Edit logo" onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (logo) setShowLogoModal(true); else triggerFileInput() } }} onClick={() => { if (logo) setShowLogoModal(true); else triggerFileInput() }}
                   style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: 'pointer', overflow: 'hidden', position: 'relative' }}>
@@ -305,10 +309,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               const type = field === 'Email' ? 'email' : 'text'
               return (
                 <div key={field} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <span style={lbl}>{field === 'Name' ? 'Legal Entity Name' : field === 'Email' ? 'HR Support Email' : 'Company Website URL'}</span>
+                  <span className="mb-1 sm:mb-1.5" style={lbl}>{field === 'Name' ? 'Legal Entity Name' : field === 'Email' ? 'HR Support Email' : 'Company Website URL'}</span>
                   <div style={{ position: 'relative' }}>
                     <Icon size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--md-bw-on-surface-variant)' }} />
                     <input aria-label={field === 'Name' ? 'Company name' : field === 'Email' ? 'Company email address' : 'Company website URL'} type={type} value={val} onChange={e => set(e.target.value)} placeholder={ph}
+                      className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full"
                       style={{ ...pInp, paddingLeft: '38px', fontSize: '13px' }} />
                   </div>
                 </div>
@@ -318,7 +323,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         </div>
       )
       case 'notifications': return (
-        <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Bell size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
             <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Notification Preferences</h4>
@@ -329,7 +334,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               { label: 'Enable Real-time Sync Alerts', desc: 'Displays popups when files successfully sync with Google Drive.', val: syncAlerts, set: setSyncAlerts },
               { label: 'Email Monthly Payout Digest', desc: 'Sends a copy of the payroll statements to the HR support inbox.', val: emailDigests, set: setEmailDigests },
             ].map((item, i) => (
-              <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: i === 0 ? '1px solid var(--glass-border)' : 'none' }}>
+              <div key={item.label} className="py-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: i === 0 ? '1px solid var(--glass-border)' : 'none' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                   <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 500 }}>{item.label}</span>
                   <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{item.desc}</span>
@@ -342,7 +347,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         </div>
       )
       case 'expenses': return (
-        <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Receipt size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
             <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Expense Policies</h4>
@@ -351,8 +356,9 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
             {Object.keys(expensePolicies).map(cat => (
               <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={lbl}>{cat}</span>
+                <span className="mb-1 sm:mb-1.5" style={lbl}>{cat}</span>
                 <input aria-label={`Expense limit for ${cat}`} type="number" value={expensePolicies[cat]} onChange={e => setExpensePolicies(prev => ({ ...prev, [cat]: Number(e.target.value) }))}
+                  className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full"
                   style={{ ...pInp, fontSize: '13px' }} />
               </div>
             ))}
@@ -361,7 +367,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
       )
       case 'rosters': return (
         <>
-          <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <CalendarClock size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
@@ -375,29 +381,29 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {shiftTemplates.map(t => (
-                <div key={t.id} style={{ ...card, padding: '16px', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div key={t.id} className="p-4" style={{ ...card, display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <div style={{ flex: '1.5', minWidth: '140px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <span style={lbl}>Shift Name</span>
-                    <input aria-label="Shift name" type="text" value={t.name} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, name: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
+                    <span className="mb-1 sm:mb-1.5" style={lbl}>Shift Name</span>
+                    <input aria-label="Shift name" type="text" value={t.name} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, name: e.target.value } : x))} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pInp, fontSize: '13px' }} />
                   </div>
                   <div style={{ flex: '1', minWidth: '100px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <span style={lbl}>Start</span>
-                    <input aria-label="Shift start time" type="time" value={t.start} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, start: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
+                    <span className="mb-1 sm:mb-1.5" style={lbl}>Start</span>
+                    <input aria-label="Shift start time" type="time" value={t.start} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, start: e.target.value } : x))} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pInp, fontSize: '13px' }} />
                   </div>
                   <div style={{ flex: '1', minWidth: '100px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <span style={lbl}>End</span>
-                    <input aria-label="Shift end time" type="time" value={t.end} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, end: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
+                    <span className="mb-1 sm:mb-1.5" style={lbl}>End</span>
+                    <input aria-label="Shift end time" type="time" value={t.end} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, end: e.target.value } : x))} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pInp, fontSize: '13px' }} />
                   </div>
                   <div style={{ flex: '0.8', minWidth: '80px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <span style={lbl}>Break (min)</span>
-                    <input aria-label="Break duration in minutes" type="number" value={t.break} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, break: parseInt(e.target.value) || 0 } : x))} style={{ ...pInp, fontSize: '13px' }} />
+                    <span className="mb-1 sm:mb-1.5" style={lbl}>Break (min)</span>
+                    <input aria-label="Break duration in minutes" type="number" value={t.break} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, break: parseInt(e.target.value) || 0 } : x))} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pInp, fontSize: '13px' }} />
                   </div>
                   <div style={{ width: '50px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <span style={{ ...lbl, color: 'transparent' }}>C</span>
+                    <span className="mb-1 sm:mb-1.5" style={{ ...lbl, color: 'transparent' }}>C</span>
                     <input aria-label="Shift color" type="color" value={t.color} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, color: e.target.value } : x))}
                       style={{ padding: 0, borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'transparent', width: '100%', height: '38px', cursor: 'pointer' }} />
                   </div>
-                  <button aria-label="Delete shift template" className="btn btn-text" style={{ padding: '10px', color: 'var(--md-bw-on-surface-variant)', flexShrink: 0, alignSelf: 'flex-end' }}
+                  <button aria-label="Delete shift template" className="btn btn-text p-2.5" style={{ color: 'var(--md-bw-on-surface-variant)', flexShrink: 0, alignSelf: 'flex-end' }}
                     onClick={() => setShiftTemplates(prev => prev.filter(x => x.id !== t.id))}>
                     <Trash2 size={16} />
                   </button>
@@ -406,26 +412,26 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             </div>
           </div>
 
-          <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Activity size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
               <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Overtime Rules</h4>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={lbl}>Weekday Multiplier</span>
-                <input aria-label="Weekday overtime multiplier" type="number" step="0.1" value={overtimeRules.multiplierWeekday} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekday: parseFloat(e.target.value) || 1 }))} style={{ ...pInp, fontSize: '13px' }} />
+                <span className="mb-1 sm:mb-1.5" style={lbl}>Weekday Multiplier</span>
+                <input aria-label="Weekday overtime multiplier" type="number" step="0.1" value={overtimeRules.multiplierWeekday} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekday: parseFloat(e.target.value) || 1 }))} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pInp, fontSize: '13px' }} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <span style={lbl}>Weekend/Holiday Multiplier</span>
-                <input aria-label="Weekend overtime multiplier" type="number" step="0.1" value={overtimeRules.multiplierWeekend} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekend: parseFloat(e.target.value) || 1 }))} style={{ ...pInp, fontSize: '13px' }} />
+                <span className="mb-1 sm:mb-1.5" style={lbl}>Weekend/Holiday Multiplier</span>
+                <input aria-label="Weekend overtime multiplier" type="number" step="0.1" value={overtimeRules.multiplierWeekend} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekend: parseFloat(e.target.value) || 1 }))} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pInp, fontSize: '13px' }} />
               </div>
             </div>
           </div>
         </>
       )
       case 'audit': return (
-        <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
@@ -439,15 +445,15 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             </button>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', padding: '16px', background: 'var(--glass-bg)', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
+          <div className="p-4" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', background: 'var(--glass-bg)', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
             <div style={{ minWidth: '140px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={lbl}>Date</span>
-              <input aria-label="Filter by date" type="date" value={auditFilterDate} onChange={e => setAuditFilterDate(e.target.value)} style={{ ...pInp, fontSize: '13px' }} />
+              <span className="mb-1 sm:mb-1.5" style={lbl}>Date</span>
+              <input aria-label="Filter by date" type="date" value={auditFilterDate} onChange={e => setAuditFilterDate(e.target.value)} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pInp, fontSize: '13px' }} />
             </div>
             <div style={{ minWidth: '140px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={lbl}>Action Type</span>
+              <span className="mb-1 sm:mb-1.5" style={lbl}>Action Type</span>
               <div style={{ position: 'relative' }}>
-                <select aria-label="Filter by action type" value={auditFilterAction} onChange={e => setAuditFilterAction(e.target.value)} style={{ ...pSel, fontSize: '13px' }}>
+                <select aria-label="Filter by action type" value={auditFilterAction} onChange={e => setAuditFilterAction(e.target.value)} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-full" style={{ ...pSel, fontSize: '13px' }}>
                   <option value="All">All Actions</option>
                   <option value="CREATE">CREATE</option>
                   <option value="UPDATE">UPDATE</option>
@@ -492,7 +498,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                     if (auditFilterDate && !l.timestamp.startsWith(auditFilterDate)) return false
                     return true
                   }).length === 0 ? (
-                    <tr><td colSpan="6" style={{ padding: '32px', textAlign: 'center', color: 'var(--md-bw-on-surface-variant)', fontSize: '13px' }}>No logs found for selected filters.</td></tr>
+                    <tr><td colSpan="6" className="p-8" style={{ textAlign: 'center', color: 'var(--md-bw-on-surface-variant)', fontSize: '13px' }}>No logs found for selected filters.</td></tr>
                   ) : (
                     (auditLogs || []).filter(l => {
                       if (auditFilterAction !== 'All' && l.action !== auditFilterAction) return false
@@ -522,7 +528,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         </div>
       )
       case 'security': return (
-        <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ShieldCheck size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
             <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Session Management</h4>
@@ -530,7 +536,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Review devices currently logged into your account.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {activeSessions.map(sess => (
-              <div key={sess.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+              <div key={sess.id} className="p-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
                     <span className="body-medium" style={{ fontWeight: 500, color: 'var(--md-bw-on-surface)' }}>{sess.device}</span>
@@ -560,7 +566,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         </div>
       )
       case 'sync': return (
-        <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="p-4 sm:p-6 lg:p-8" style={{ ...card, display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Activity size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
             <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Sync Conflicts</h4>
@@ -594,7 +600,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 </colgroup>
                 <tbody>
                   {!syncConflicts || syncConflicts.length === 0 ? (
-                    <tr><td colSpan="6" style={{ padding: '32px', textAlign: 'center', color: 'var(--md-bw-on-surface-variant)', fontSize: '13px' }}>No sync conflicts detected.</td></tr>
+                    <tr><td colSpan="6" className="p-8" style={{ textAlign: 'center', color: 'var(--md-bw-on-surface-variant)', fontSize: '13px' }}>No sync conflicts detected.</td></tr>
                   ) : (
                     syncConflicts.map((conflict, i) => (
                       <tr key={`${conflict.file}-${conflict.recordId}`}>
@@ -641,9 +647,10 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           const isActive = activeSubmenu === item.id && panelOpen
           return (
             <button key={item.id} onClick={() => setTab(item.id)}
+              className="py-5 px-3"
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
-                padding: '20px 12px', borderRadius: '16px', border: '1px solid',
+                borderRadius: '16px', border: '1px solid',
                 borderColor: isActive ? 'var(--accent-primary, #0062E6)' : 'var(--glass-border)',
                 background: isActive ? 'linear-gradient(135deg, rgba(0,98,230,0.08), rgba(0,58,140,0.04))' : 'var(--glass-bg)',
                 backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
@@ -677,7 +684,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
       {showLogoModal && (
         <div className="modal-overlay" aria-label="Close logo editor" onClick={() => setShowLogoModal(false)}>
-          <div onClick={e => e.stopPropagation()} style={{ ...card, padding: '24px', maxWidth: '380px', width: '90%', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+          <div onClick={e => e.stopPropagation()} className="p-4 sm:p-6 lg:p-8" style={{ ...card, maxWidth: '380px', width: '90%', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
               <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Edit Brand Logo</h3>
               <button aria-label="Close logo editor" onClick={() => setShowLogoModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--md-bw-on-surface-variant)', display: 'flex', padding: '4px' }}><X size={18} /></button>
@@ -709,7 +716,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
       {showResetModal && (
         <div className="modal-overlay" aria-label="Close reset modal" onClick={() => setShowResetModal(false)}>
-          <div onClick={e => e.stopPropagation()} style={{ ...card, padding: '24px', maxWidth: '380px', width: '90%', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div onClick={e => e.stopPropagation()} className="p-4 sm:p-6 lg:p-8" style={{ ...card, maxWidth: '380px', width: '90%', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Confirm Reset</h3>
             <p className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Are you sure? This will reset all settings in the active tab to their default values.</p>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '8px' }}>

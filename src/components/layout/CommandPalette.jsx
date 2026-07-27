@@ -6,11 +6,11 @@ export default function CommandPalette({ showCommandPalette, setShowCommandPalet
       {showCommandPalette && (
         <div className="command-palette-overlay" role="dialog" aria-modal="true" aria-label="Command palette" onClick={(e) => { if (e.target === e.currentTarget) setShowCommandPalette(false) }}>
           <div className="command-palette">
-            <div className="command-palette-search-wrapper">
+            <div className="command-palette-search-wrapper p-3 sm:p-4">
               <Search size={18} style={{ color: 'var(--color-md-sys-on-surface-variant)' }} />
               <input
                 autoFocus
-                className="command-palette-input"
+                className="command-palette-input px-3 py-2 sm:px-4 sm:py-2.5"
                 type="text"
                 aria-label="Search commands"
                 placeholder="Type a command or search..."
@@ -42,7 +42,7 @@ export default function CommandPalette({ showCommandPalette, setShowCommandPalet
                 }}
               />
             </div>
-            <div className="command-palette-list" role="listbox" aria-label="Search results">
+            <div className="command-palette-list p-3 sm:p-4" role="listbox" aria-label="Search results">
               {filteredItems.length === 0 ? (
                 <div className="p-6 text-center" role="status" aria-live="polite" style={{ color: 'var(--color-md-sys-on-surface-variant)', fontSize: '0.9rem' }}>
                   No results found.
@@ -56,7 +56,7 @@ export default function CommandPalette({ showCommandPalette, setShowCommandPalet
                     return (
                       <div key={item.id}>
                         {showHeader && (
-                          <div className="command-palette-section-header">
+                          <div className="command-palette-section-header px-3 py-1.5 sm:px-4 sm:py-2">
                             {item.category}
                           </div>
                         )}
@@ -64,11 +64,11 @@ export default function CommandPalette({ showCommandPalette, setShowCommandPalet
                           role="option"
                           aria-selected={paletteIndex === index}
                           id={item.id}
-                          className={`command-palette-item ${paletteIndex === index ? 'active' : ''}`}
+                          className={`command-palette-item p-2 sm:p-3 ${paletteIndex === index ? 'active' : ''}`}
                           onClick={() => selectPaletteItem(index)}
                           onMouseEnter={() => setPaletteIndex(index)}
                         >
-                          <div className="command-palette-item-left">
+                            <div className="command-palette-item-left gap-2 sm:gap-3">
                             <span className="command-palette-item-icon">
                               {getCategoryIcon(item.category, item.id)}
                             </span>

@@ -66,7 +66,7 @@ export default function ClockWidget({ employees, attendance, setAttendance, addT
   const canCheckOut = clockEmpId && empLog && empLog.checkIn !== '--' && empLog.checkOut === '--'
 
   return (
-    <div className="flex items-center justify-between flex-wrap gap-4 px-6 py-5" style={{
+    <div className="flex items-center justify-between flex-wrap gap-4 p-5 sm:p-6" style={{
       background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
       border: '1px solid var(--glass-border)', borderRadius: 'var(--glass-radius)', boxShadow: 'var(--glass-shadow)',
     }}>
@@ -92,9 +92,9 @@ export default function ClockWidget({ employees, attendance, setAttendance, addT
           ))}
         </select>
 
-        <button aria-label="Clock in" aria-pressed={canCheckIn} onClick={handleCheckIn} disabled={!canCheckIn}
+        <button aria-label="Clock in" aria-pressed={canCheckIn} onClick={handleCheckIn} disabled={!canCheckIn} className="px-4 sm:px-6"
           style={{
-            padding: '0 24px', borderRadius: '100px', height: '40px', border: 'none',
+            borderRadius: '100px', height: '40px', border: 'none',
             cursor: canCheckIn ? 'pointer' : 'not-allowed',
             background: canCheckIn ? '#28a745' : 'rgba(128,128,128,0.12)',
             color: canCheckIn ? '#fff' : 'rgba(128,128,128,0.4)',
@@ -105,9 +105,9 @@ export default function ClockWidget({ employees, attendance, setAttendance, addT
           <Clock size={15} /> Check In
         </button>
 
-        <button aria-label="Clock out" aria-pressed={canCheckOut} onClick={handleCheckOut} disabled={!canCheckOut}
+        <button aria-label="Clock out" aria-pressed={canCheckOut} onClick={handleCheckOut} disabled={!canCheckOut} className="px-4 sm:px-6"
           style={{
-            padding: '0 24px', borderRadius: '100px', height: '40px',
+            borderRadius: '100px', height: '40px',
             border: '2px solid', cursor: canCheckOut ? 'pointer' : 'not-allowed',
             background: canCheckOut ? '#dc3545' : 'transparent',
             color: canCheckOut ? '#fff' : 'rgba(128,128,128,0.35)',

@@ -177,7 +177,7 @@ export default function EmployeePortal({
                   aria-selected={active}
                   onClick={() => setActiveTab(item.id)}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(item.id) } }}
-                  className="flex items-center gap-3 p-3 rounded-lg border-0 cursor-pointer text-left"
+                  className="flex items-center gap-3 p-2 sm:p-3 rounded-lg border-0 cursor-pointer text-left"
                   style={{
                     background: active ? 'var(--bg-tertiary)' : 'transparent',
                     color: active ? '#ffffff' : 'var(--text-secondary)',
@@ -209,7 +209,7 @@ export default function EmployeePortal({
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto" style={{ padding: isMobile ? '16px' : '32px', paddingBottom: isMobile ? '80px' : '32px' }}>
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-20 sm:pb-8">
         {renderContent()}
       </div>
 
@@ -309,7 +309,7 @@ function DashboardView({ currentUser, attendance, expenses, announcements, setAc
     .slice(0, 3)
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1000px] mx-auto">
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto">
       <div className="glass-card p-6 flex items-center gap-5">
         {getInitialsAvatar(currentUser.name)}
         <div>
@@ -472,7 +472,7 @@ function AttendanceView({
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1000px] mx-auto">
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto">
       <h2 className="m-0">My Attendance & Roster</h2>
       
       <div className="flex gap-3 pb-3" style={{ borderBottom: '1px solid var(--border-color)' }}>
@@ -569,7 +569,7 @@ function PayslipsView({ currentUser, payroll, addToast }) {
   const myPayslips = (payroll?.history || []).filter(p => p.employeeId === currentUser.id)
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1000px] mx-auto">
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto">
       <h2 className="m-0">My Payslips</h2>
       
       {myPayslips.length === 0 ? (
@@ -643,7 +643,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-[1000px] mx-auto">
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto">
       <h2 className="m-0">My Leave</h2>
       
       <div className="glass-card p-6">
@@ -773,7 +773,7 @@ function ProfileView({ currentUser, pendingProfileEdits, setPendingProfileEdits,
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-[800px] mx-auto">
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[800px] mx-auto">
       <div className="flex justify-between items-center">
         <h2 className="m-0">My Profile</h2>
         {!editMode && !hasPending && (
@@ -929,7 +929,7 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-[800px] mx-auto pb-10">
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[800px] mx-auto pb-10">
       <div className="flex justify-between items-center">
         <h2 className="m-0 flex items-center gap-3">
           <Megaphone size={24} color="var(--accent-primary)" />
@@ -1112,7 +1112,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-[900px] mx-auto">
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[900px] mx-auto">
       <div className="flex justify-between items-center">
         <h2 className="m-0 flex items-center gap-3">
           <Monitor size={24} color="var(--accent-primary)" />

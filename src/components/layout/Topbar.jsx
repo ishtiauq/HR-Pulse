@@ -2,12 +2,12 @@ import { Monitor, Sun, Moon, Menu } from 'lucide-react'
 
 export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, notifications, showNotifications, setShowNotifications, markNotificationsRead, unreadCount }) {
   return (
-    <header aria-label="Top bar" className="macos-toolbar topbar h-14 min-h-14 flex items-center justify-between px-5 sticky top-0 shrink-0 mx-auto w-full max-w-[700px] rounded-full z-10" style={{
+    <header aria-label="Top bar" className="macos-toolbar topbar h-14 min-h-14 flex items-center justify-between px-4 sm:px-5 sticky top-0 shrink-0 mx-auto w-full max-w-[700px] rounded-full z-10" style={{
       background: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(30px) saturate(150%)',
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
       border: '1px solid rgba(0,0,0,0.05)'
     }}>
-      <div className="left flex items-center gap-16">
+      <div className="left flex items-center gap-4 sm:gap-6 md:gap-10">
         <button aria-label="Open menu" className="mobile-menu-btn size-8 hidden items-center justify-center bg-transparent border-0 rounded-md cursor-pointer" onClick={toggleSidebar} style={{
           color: 'var(--md-bw-on-surface-variant)'
         }}>
@@ -23,7 +23,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
           </span>
         </div>
       </div>
-      <div className="right flex items-center gap-16 ml-8">
+      <div className="right flex items-center gap-4 sm:gap-6 md:gap-10 ml-4 sm:ml-6">
         <button aria-label="Sync status" aria-pressed={isSyncing} className="sync-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium leading-3.5 cursor-pointer" onClick={handleSync} disabled={isSyncing} style={{
           background: isSyncing ? 'rgba(255, 159, 10, 0.12)' : (!driveConnected || syncConflicts.length > 0) ? 'rgba(224, 32, 20, 0.1)' : 'rgba(52, 199, 89, 0.1)',
           border: isSyncing ? '1px solid rgba(255, 159, 10, 0.3)' : (!driveConnected || syncConflicts.length > 0) ? '1px solid rgba(224, 32, 20, 0.25)' : '1px solid rgba(52, 199, 89, 0.3)',

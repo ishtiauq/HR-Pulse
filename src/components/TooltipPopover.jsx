@@ -92,7 +92,7 @@ export default function TooltipPopover({ label, isCollapsed, isDarkMode, childre
       {visible && pos && createPortal(
         <div id={tooltipId} role="tooltip" className="fixed z-[9999] pointer-events-none"
           style={{ ...pos, animation: 'hrp-tooltip-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards' }}>
-          <div className="rounded-[10px] px-3.5 py-2 whitespace-nowrap text-[13px] font-medium leading-[18px] relative tracking-tight"
+          <div className="rounded-[10px] px-3 py-1.5 sm:px-3.5 sm:py-2 whitespace-nowrap text-[13px] font-medium leading-[18px] relative tracking-tight"
             style={{
             background: bgColor,
             backdropFilter: 'blur(40px) saturate(250%)',

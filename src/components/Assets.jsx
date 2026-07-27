@@ -25,7 +25,7 @@ function AssetDashboard({ stats, setActiveView, assets }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="stats-grid">
-        <div className="glass-card p-5 flex items-center gap-4">
+        <div className="glass-card p-4 sm:p-5 flex items-center gap-4">
           <div className="dash-stat-icon">
             <Monitor size={24} />
           </div>
@@ -34,7 +34,7 @@ function AssetDashboard({ stats, setActiveView, assets }) {
             <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Total Assets</div>
           </div>
         </div>
-        <div className="glass-card p-5 flex items-center gap-4">
+        <div className="glass-card p-4 sm:p-5 flex items-center gap-4">
           <div className="dash-stat-icon" style={{ background: 'rgba(52,199,89,0.15)' }}>
             <CheckCircle size={24} color="#34c759" />
           </div>
@@ -43,7 +43,7 @@ function AssetDashboard({ stats, setActiveView, assets }) {
             <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Available</div>
           </div>
         </div>
-        <div className="glass-card p-5 flex items-center gap-4">
+        <div className="glass-card p-4 sm:p-5 flex items-center gap-4">
           <div className="dash-stat-icon" style={{ background: 'rgba(0,122,255,0.15)' }}>
             <BadgeCheck size={24} color="#007aff" />
           </div>
@@ -52,7 +52,7 @@ function AssetDashboard({ stats, setActiveView, assets }) {
             <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Assigned</div>
           </div>
         </div>
-        <div className="glass-card p-5 flex items-center gap-4">
+        <div className="glass-card p-4 sm:p-5 flex items-center gap-4">
           <div className="dash-stat-icon" style={{ background: 'rgba(255,149,0,0.15)' }}>
             <Wrench size={24} color="#ff9500" />
           </div>
@@ -168,7 +168,7 @@ function AssetInventory({ filteredAssets, search, setSearch, filterCategory, set
               </tr>
             ))}
             {filteredAssets.length === 0 && (
-              <tr><td colSpan="6" className="text-center p-6" style={{ color: 'var(--text-secondary)' }}>No assets found.</td></tr>
+              <tr><td colSpan="6" className="text-center p-4 sm:p-5" style={{ color: 'var(--text-secondary)' }}>No assets found.</td></tr>
             )}
           </tbody>
         </table>
@@ -214,7 +214,7 @@ function DetailModal({ asset, onClose }) {
           <div>
             <h3 className="my-4 text-sm">Maintenance History</h3>
             {asset.maintenanceLogs.map(log => (
-              <div key={log.id} className="px-3 py-2 rounded-lg mb-1.5 text-sm" style={{ background: 'var(--bg-secondary)' }}>
+              <div key={log.id} className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg mb-1.5 text-sm" style={{ background: 'var(--bg-secondary)' }}>
                 <div className="flex justify-between">
                   <span>{log.date} - {log.vendor}</span>
                   <span style={{ color: 'var(--accent-danger)' }}>${log.cost}</span>
@@ -238,7 +238,7 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="glass-card px-5 py-3 flex gap-2" role="tablist">
+      <div className="glass-card px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 md:py-3 flex gap-2" role="tablist">
         {['All', 'Available', 'Assigned'].map(s => (
           <button key={s} className={`btn ${s === filterStatus ? 'btn-filled' : 'btn-tonal'} btn-sm`} role="tab" aria-selected={s === filterStatus} onClick={() => setFilterStatus(s)}>{s}</button>
         ))}
@@ -339,7 +339,7 @@ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
   return (
     <div className="flex flex-col gap-4">
       {assetRequests.length === 0 ? (
-        <div className="glass-card p-10 text-center" style={{ color: 'var(--text-secondary)' }}>No pending asset requests.</div>
+        <div className="glass-card p-8 sm:p-10 lg:p-12 text-center" style={{ color: 'var(--text-secondary)' }}>No pending asset requests.</div>
       ) : (
         assetRequests.map(req => {
           const emp = employees.find(e => e.id === req.employeeId) || { name: 'Unknown' }
@@ -439,7 +439,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
             </div>
           </>
         ) : (
-          <div className="glass-card p-10 text-center h-full flex items-center justify-center" style={{ color: 'var(--text-secondary)' }}>
+          <div className="glass-card p-8 sm:p-10 lg:p-12 text-center h-full flex items-center justify-center" style={{ color: 'var(--text-secondary)' }}>
             Select an asset to view depreciation and maintenance.
           </div>
         )}

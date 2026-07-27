@@ -165,7 +165,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
   const recentAnnouncements = (announcements || []).slice(0, 3)
 
   return (
-    <div className="flex-1 p-4 flex flex-col gap-16">
+    <div className="flex-1 flex flex-col gap-6 sm:gap-8 lg:gap-10">
       
       {/* Page Title */}
       <h1 className="page-title">
@@ -179,7 +179,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         {/* Employee Directory */}
         <div className="flex flex-col h-full">
           <h2 className="m-0 mb-2 tracking-tight" style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Employee Directory</h2>
-          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-3.5 cursor-pointer flex flex-col"
+          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-4 sm:p-5 cursor-pointer flex flex-col"
             style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
             onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.06)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
@@ -188,21 +188,21 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
             <div className="flex items-center gap-6 flex-1 pl-3">
               <div className="flex items-center gap-3 shrink-0">
                 <span className="tabular-nums" style={{ font: "700 22px/26px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>{activeCount}</span>
-                <span className="inline-flex items-center gap-1.5 py-[5px] px-3 rounded-[20px] text-xs font-medium leading-4 bg-[rgba(52,199,89,0.1)] border border-[rgba(52,199,89,0.3)] text-[#1a7d3a]">
+                <span className="inline-flex items-center gap-1.5 py-1 sm:py-1.5 px-2 sm:px-3 rounded-[20px] text-xs font-medium leading-4 bg-[rgba(52,199,89,0.1)] border border-[rgba(52,199,89,0.3)] text-[#1a7d3a]">
                   <span className="sync-dot sync-blink w-[7px] h-[7px] rounded-full bg-[#34c759]"></span>
                   Active
                 </span>
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 <span className="tabular-nums" style={{ font: "700 22px/26px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>{inactiveCount}</span>
-                <span className="inline-flex items-center gap-1.5 py-[5px] px-3 rounded-[20px] text-xs font-medium leading-4 bg-[rgba(224,32,20,0.1)] border border-[rgba(224,32,20,0.25)] text-[#dc3545]">
+                <span className="inline-flex items-center gap-1.5 py-1 sm:py-1.5 px-2 sm:px-3 rounded-[20px] text-xs font-medium leading-4 bg-[rgba(224,32,20,0.1)] border border-[rgba(224,32,20,0.25)] text-[#dc3545]">
                   <span className="sync-dot w-[7px] h-[7px] rounded-full bg-[#dc3545]"></span>
                   Inactive
                 </span>
               </div>
             </div>
             <button onClick={(e) => { e.stopPropagation(); setCurrentView && setCurrentView('employees') }}
-              className="mt-2.5 py-[5px] px-3 rounded-[20px] cursor-pointer self-start border-none"
+              className="mt-2.5 py-1 sm:py-1.5 px-2 sm:px-3 rounded-[20px] cursor-pointer self-start border-none"
               style={{
                 font: "500 11px/16px 'Roboto'",
                 background: 'rgba(0, 122, 255, 0.1)', color: '#007AFF',
@@ -218,7 +218,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         {/* Attendance Card */}
         <div className="flex flex-col h-full">
           <h2 className="m-0 mb-2 tracking-tight" style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Attendance</h2>
-          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-3.5 flex flex-col cursor-pointer"
+          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-4 sm:p-5 flex flex-col cursor-pointer"
             style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
             onClick={() => setShowAttDropdown(!showAttDropdown)} role="button" tabIndex={0}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowAttDropdown(!showAttDropdown); } }}>
@@ -239,7 +239,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
             <div className="flex items-center gap-2.5 mt-2 pl-3">
               <span style={{ font: "400 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>Rate: {attendanceRate}%</span>
               <button onClick={(e) => { e.stopPropagation(); setShowAttDropdown(!showAttDropdown) }}
-                className="py-[5px] px-3 rounded-[20px] cursor-pointer border-none"
+                className="py-1 sm:py-1.5 px-2 sm:px-3 rounded-[20px] cursor-pointer border-none"
                 style={{
                   font: "500 11px/16px 'Roboto'",
                   background: 'rgba(0, 122, 255, 0.1)', color: '#007AFF',
@@ -255,7 +255,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
 
         {/* Drive Connection */}
         <div className="flex flex-col h-full">
-          <div className={`macos-card dash-card drive-card drive-card--${driveConnected ? 'healthy' : 'error'} rounded-[14px] p-3.5 flex flex-col`}
+          <div className={`macos-card dash-card drive-card drive-card--${driveConnected ? 'healthy' : 'error'} rounded-[14px] p-4 sm:p-5 flex flex-col`}
             style={{
               flex: 1, background: driveConnected ? '#E8F8EE' : '#FDE8E8',
               border: driveConnected ? '1px solid rgba(52, 199, 89, 0.35)' : '1px solid rgba(255, 59, 48, 0.35)',
@@ -292,7 +292,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           ].map(item => (
             <div key={item.key}>
               <button onClick={() => setAttFilter(attFilter === item.key ? null : item.key)}
-                className="w-full flex items-center justify-between px-4 py-2.5 border-none cursor-pointer"
+                className="w-full flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 border-none cursor-pointer"
                 style={{
                   background: attFilter === item.key ? 'rgba(0,0,0,0.03)' : 'transparent',
                   font: "500 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface)',
@@ -335,7 +335,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         {/* Announcements Card */}
         <div className="flex flex-col h-full">
           <h2 className="m-0 mb-2 tracking-tight" style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Announcements</h2>
-          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-4"
+          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-5 sm:p-6"
             style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
             {recentAnnouncements.length === 0 ? (
               <p className="text-center m-0" style={{ font: "400 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>No announcements</p>
@@ -367,7 +367,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         {/* Payroll Summary Card */}
         <div className="flex flex-col h-full">
           <h2 className="m-0 mb-2 tracking-tight" style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Payroll Summary</h2>
-          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-4 flex flex-col"
+          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-5 sm:p-6 flex flex-col"
             style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
             {!currentPayrollMonth ? (
               <p className="text-center m-auto" style={{ font: "400 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>No payroll data</p>
@@ -421,7 +421,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         {/* Events Card */}
         <div className="flex flex-col h-full">
           <h2 className="m-0 mb-2 tracking-tight" style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Events</h2>
-          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-4"
+          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-5 sm:p-6"
             style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
             {upcomingEvents.length === 0 ? (
               <p className="text-center m-0" style={{ font: "400 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>No upcoming events</p>
@@ -476,7 +476,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         {/* Milestones */}
         <div className="flex flex-col h-full">
           <h2 className="m-0 mb-2 tracking-tight" style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Milestones</h2>
-          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-4 flex items-center justify-center"
+          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-5 sm:p-6 flex items-center justify-center"
             style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
             {upcomingMilestones.length === 0 ? (
               <p style={{ font: "400 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>No milestones</p>

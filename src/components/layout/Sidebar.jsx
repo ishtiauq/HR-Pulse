@@ -18,7 +18,7 @@ export default function Sidebar({
       
       {/* PROGRESSIVE BLUR HEADER */}
           <div className="sidebar-header-wrapper shrink-0 absolute top-0 inset-x-0 z-20 flex flex-col">
-          <div className="relative w-full flex items-center gap-3" style={{
+          <div className="relative w-full flex items-center gap-3 py-3 px-4" style={{
           zIndex: 2,
           padding: isCollapsed ? '12px 8px' : '12px 16px',
           justifyContent: isCollapsed ? 'center' : 'flex-start'

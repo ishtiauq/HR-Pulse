@@ -91,19 +91,19 @@ export default function Announcements({ employees, announcements, setAnnouncemen
       </div>
 
       {activeTab === 'create' && (
-        <div className="glass-card p-8 max-w-[800px] mx-auto">
+        <div className="glass-card p-6 sm:p-8 lg:p-10 max-w-[800px] mx-auto">
           <h2 className="mt-0 mb-6 text-[1.4rem]">Create Announcement</h2>
           
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-6">
             <div className="flex flex-col gap-2">
               <label className="text-[0.9rem] font-semibold" style={{ color: 'var(--text-secondary)' }}>Title</label>
-              <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} className="p-3 rounded-lg text-base" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="e.g. Q3 Town Hall Meeting" />
+              <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} className="p-3 sm:p-3.5 rounded-lg text-base" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="e.g. Q3 Town Hall Meeting" />
             </div>
 
             <div className="grid grid-cols-3 gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-[0.9rem] font-semibold" style={{ color: 'var(--text-secondary)' }}>Category</label>
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className="p-3 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="p-3 sm:p-3.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
                   <option value="General">General</option>
                   <option value="Policy Update">Policy Update</option>
                   <option value="Event">Event</option>
@@ -112,7 +112,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-[0.9rem] font-semibold" style={{ color: 'var(--text-secondary)' }}>Priority</label>
-                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="p-3 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
+                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="p-3 sm:p-3.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
                   <option value="Normal">Normal (Blue)</option>
                   <option value="Important">Important (Orange)</option>
                   <option value="Urgent">Urgent (Red - Pinned)</option>
@@ -120,7 +120,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-[0.9rem] font-semibold" style={{ color: 'var(--text-secondary)' }}>Target Audience</label>
-                <select value={audience} onChange={(e) => setAudience(e.target.value)} className="p-3 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
+                <select value={audience} onChange={(e) => setAudience(e.target.value)} className="p-3 sm:p-3.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
                   <option value="all">All Employees</option>
                   <option value="Engineering">Engineering Dept</option>
                   <option value="Design">Design Dept</option>
@@ -131,7 +131,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
 
             <div className="flex flex-col gap-2">
               <label className="text-[0.9rem] font-semibold" style={{ color: 'var(--text-secondary)' }}>Message Content</label>
-              <textarea required rows={6} value={content} onChange={(e) => setContent(e.target.value)} className="p-3 rounded-lg resize-y" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Type your message here..." />
+              <textarea required rows={6} value={content} onChange={(e) => setContent(e.target.value)} className="p-3 sm:p-3.5 rounded-lg resize-y" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Type your message here..." />
               <div className="text-[0.8rem]" style={{ color: 'var(--text-muted)' }}>* Line breaks will be preserved. Formatting tools coming soon.</div>
             </div>
 
@@ -145,16 +145,16 @@ export default function Announcements({ employees, announcements, setAnnouncemen
               
               {hasPoll && (
                 <div className="flex flex-col gap-3 mt-3">
-                  <input aria-label="Poll question" type="text" value={pollQuestion} onChange={(e) => setPollQuestion(e.target.value)} className="p-2.5 rounded-md" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="Poll Question..." />
+                  <input aria-label="Poll question" type="text" value={pollQuestion} onChange={(e) => setPollQuestion(e.target.value)} className="p-3 sm:p-3.5 rounded-md" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="Poll Question..." />
                   {pollOptions.map((opt, i) => (
-                    <input key={i} aria-label={`Poll option ${i + 1}`} type="text" value={opt} onChange={(e) => handlePollOptionChange(i, e.target.value)} className="p-2.5 rounded-md" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder={`Option ${i + 1}`} />
+                    <input key={i} aria-label={`Poll option ${i + 1}`} type="text" value={opt} onChange={(e) => handlePollOptionChange(i, e.target.value)} className="p-3 sm:p-3.5 rounded-md" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder={`Option ${i + 1}`} />
                   ))}
                   <button type="button" aria-label="Add poll option" onClick={handleAddPollOption} className="self-start bg-transparent border-0 cursor-pointer text-sm font-semibold" style={{ color: 'var(--accent-primary)' }}>+ Add Option</button>
                 </div>
               )}
             </div>
 
-            <button aria-label="Publish announcement" type="submit" className="btn btn-primary p-3.5 text-base mt-3">
+            <button aria-label="Publish announcement" type="submit" className="btn btn-primary p-3 sm:p-3.5 text-base mt-3">
               Publish Announcement
             </button>
           </form>
@@ -162,9 +162,9 @@ export default function Announcements({ employees, announcements, setAnnouncemen
       )}
 
       {activeTab === 'feed' && (
-        <div className="flex flex-col gap-5 max-w-[800px] mx-auto">
+        <div className="flex flex-col gap-4 sm:gap-6 max-w-[800px] mx-auto">
           {announcements.length === 0 ? (
-            <div className="glass-card p-10 text-center" style={{ color: 'var(--text-secondary)' }}>
+            <div className="glass-card p-8 sm:p-10 text-center" style={{ color: 'var(--text-secondary)' }}>
               No announcements found.
             </div>
           ) : (
@@ -174,7 +174,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
               const isUrgent = post.priority === 'Urgent'
 
               return (
-                <div key={post.id} className="glass-card p-6 relative" style={{ borderLeft: `4px solid ${getPriorityColor(post.priority)}` }}>
+                <div key={post.id} className="glass-card p-5 sm:p-6 relative" style={{ borderLeft: `4px solid ${getPriorityColor(post.priority)}` }}>
                   {isUrgent && (
                     <div className="absolute top-3 right-3 text-[0.7rem] font-bold px-2 py-1 rounded-xl uppercase" style={{ background: 'var(--accent-danger)', color: '#fff' }}>
                       Pinned

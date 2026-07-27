@@ -127,7 +127,7 @@ export default function App() {
   const unreadCount = appData.notifications.filter(n => !n.read).length
 
   return (
-    <div className="dashboard-root app-shell" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', padding: '16px', gap: '16px', boxSizing: 'border-box' }}>
+    <div className="dashboard-root app-shell" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
       {mobileMenuOpen && <div className="sidebar-overlay open" onClick={() => setMobileMenuOpen(false)} />}
       <Sidebar
         visibleNavItems={visibleNavItems}
@@ -146,7 +146,7 @@ export default function App() {
         setSimulatedRole={appData.setSimulatedRole}
         setMobileMenuOpen={setMobileMenuOpen}
       />
-      <main className="content dashboard-content" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', scrollbarGutter: 'stable' }}>
+      <main className="content dashboard-content p-4 md:p-6 lg:p-8" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', scrollbarGutter: 'stable', gap: '16px' }}>
         <Topbar
           isDarkMode={isDarkMode}
           toggleSidebar={toggleSidebar}

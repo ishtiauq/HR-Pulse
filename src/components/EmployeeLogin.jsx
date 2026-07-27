@@ -59,7 +59,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
   }
 
   return (
-    <div className="welcome-screen-wrapper">
+    <div className="welcome-screen-wrapper p-4 sm:p-6 lg:p-10">
       <div className="welcome-brand">
         <div className="welcome-logo-box">
           <Activity size={24} color="#fff" />
@@ -84,7 +84,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
           Sign in with your company credentials
         </p>
 
-        <form onSubmit={handleSubmit} aria-label="Employee login form" className="w-full max-w-[400px]">
+        <form onSubmit={handleSubmit} aria-label="Employee login form" className="w-full max-w-[400px] p-6 sm:p-8">
           {error && (
             <div className="px-4 py-3 rounded-lg mb-4 bg-[rgba(224,32,20,0.08)] text-[#E02014]"
               style={{ border: '1px solid rgba(224, 32, 20, 0.2)', fontSize: 'var(--fs-label-small)' }}>
@@ -150,7 +150,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
           <button
             type="submit"
             disabled={isLoading}
-            className="connect-btn w-full justify-center mb-4"
+            className="connect-btn w-full justify-center mb-4 px-5 sm:px-6 py-3 sm:py-3.5"
           >
             {isLoading ? 'Signing in...' : 'Sign In'}
             {!isLoading && <LogIn size={16} />}
@@ -174,7 +174,6 @@ export default function EmployeeLogin({ onLogin, onBack }) {
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          padding: 48px;
           background: var(--bg-primary);
           font-family: var(--font-sans);
           position: relative;
@@ -246,7 +245,6 @@ export default function EmployeeLogin({ onLogin, onBack }) {
           background: var(--color-accent);
           color: #ffffff;
           border: none;
-          padding: 16px 32px;
           border-radius: 14px;
           font-size: 1.05rem;
           cursor: pointer;
@@ -274,14 +272,10 @@ export default function EmployeeLogin({ onLogin, onBack }) {
           .welcome-heading {
             font-size: 2.25rem;
           }
-          .welcome-screen-wrapper {
-            padding: 24px;
-          }
         }
 
         @media (max-width: 480px) {
           .welcome-screen-wrapper {
-            padding: 16px;
             justify-content: center;
           }
           .welcome-heading {
@@ -291,7 +285,6 @@ export default function EmployeeLogin({ onLogin, onBack }) {
             gap: 16px;
           }
           .connect-btn {
-            padding: 14px 24px;
             font-size: 0.95rem;
           }
         }

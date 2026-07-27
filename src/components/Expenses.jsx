@@ -148,7 +148,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
   const canReimburse = ['Admin', 'Payroll Manager'].includes(simulatedRole)
 
   return (
-    <div className="animate-fade-in flex flex-col gap-6">
+    <div className="animate-fade-in flex flex-col gap-4 sm:gap-6 lg:gap-8">
       
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
@@ -190,24 +190,24 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
             <div className="flex gap-4">
               <div className="flex-1 flex flex-col gap-1.5">
                 <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Category</label>
-                <select aria-label="Expense category" value={category} onChange={e => setCategory(e.target.value)} className="px-3.5 py-2.5 rounded-lg outline-none" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
+                <select aria-label="Expense category" value={category} onChange={e => setCategory(e.target.value)} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg outline-none" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
                   {expenseCategories.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div className="flex-1 flex flex-col gap-1.5">
                 <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Date</label>
-                <input type="date" value={date} onChange={e => setDate(e.target.value)} required aria-label="Expense date" className="px-3.5 py-2.5 rounded-lg outline-none" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }} />
+                <input type="date" value={date} onChange={e => setDate(e.target.value)} required aria-label="Expense date" className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg outline-none" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }} />
               </div>
             </div>
 
             <div className="flex gap-4">
               <div className="flex-[2] flex flex-col gap-1.5">
                 <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Amount</label>
-                <input type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} required placeholder="0.00" aria-label="Expense amount" className="px-3.5 py-2.5 rounded-lg outline-none" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }} />
+                <input type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} required placeholder="0.00" aria-label="Expense amount" className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg outline-none" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }} />
               </div>
               <div className="flex-1 flex flex-col gap-1.5">
                 <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Currency</label>
-                <select aria-label="Currency" value={currency} onChange={e => setCurrency(e.target.value)} className="px-3.5 py-2.5 rounded-lg outline-none" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
+                <select aria-label="Currency" value={currency} onChange={e => setCurrency(e.target.value)} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg outline-none" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
                   {currencies.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
@@ -215,7 +215,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
 
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Description</label>
-              <textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Briefly describe the expense..." rows={3} aria-label="Expense description" className="px-3.5 py-2.5 rounded-lg outline-none resize-y" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}></textarea>
+              <textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Briefly describe the expense..." rows={3} aria-label="Expense description" className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg outline-none resize-y" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}></textarea>
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -223,10 +223,10 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
               <input type="file" accept="image/*,.pdf" ref={fileInputRef} onChange={handleReceiptUpload} className="hidden" />
               <div 
                 onClick={() => fileInputRef.current.click()}
+                className="p-6 sm:p-8"
                 style={{
                   border: '2px dashed var(--border-color)',
                   borderRadius: '12px',
-                  padding: '24px',
                   textAlign: 'center',
                   cursor: 'pointer',
                   background: 'var(--bg-secondary)',
@@ -248,7 +248,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary mt-3 p-3.5 justify-center">
+            <button type="submit" className="btn btn-primary mt-3 p-3 sm:p-3.5 justify-center">
               Submit for Approval
             </button>
           </form>
@@ -299,11 +299,11 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                               </div>
                             </div>
                           </td>
-                          <td style={{ padding: '16px' }}>
+                          <td className="p-4">
                             <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{exp.category}</div>
                             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{exp.date} • {exp.description}</div>
                           </td>
-                          <td style={{ padding: '16px' }}>
+                          <td className="p-4">
                             <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{exp.currency} {exp.amount.toFixed(2)}</div>
                             {isOverLimit && (
                               <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent-warning)', fontSize: '0.75rem', marginTop: '4px' }}>
@@ -311,7 +311,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                               </div>
                             )}
                           </td>
-                          <td style={{ padding: '16px' }}>
+                          <td className="p-4">
                             {exp.receipt ? (
                               <img src={exp.receipt} alt="Receipt" className="w-10 h-10 rounded-md object-cover" style={{ border: '1px solid var(--border-color)' }} />
                             ) : (
@@ -352,7 +352,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
               <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>Total pending reimbursements (in USD)</p>
             </div>
 
-            <div className="glass-card p-6">
+            <div className="glass-card p-5 sm:p-6 lg:p-8">
               <h3 className="text-base mb-4">Expenses by Category</h3>
               <div className="h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -396,18 +396,18 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                       const emp = employees.find(e => e.id === exp.employeeId)
                       return (
                         <tr key={exp.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }}>
-                          <td style={{ padding: '16px' }}>
+                          <td className="p-4">
                             <div className="font-semibold text-sm">{emp?.name}</div>
                             <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{exp.id}</div>
                           </td>
                           <td className="p-4 text-sm">{exp.category}</td>
                           <td className="p-4 font-semibold">{exp.currency} {exp.amount.toFixed(2)}</td>
-                          <td style={{ padding: '16px' }}>
+                          <td className="p-4">
                             <span role="status" style={{ background: 'rgba(59,130,246,0.1)', color: 'var(--accent-primary)', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>
                               Approved
                             </span>
                           </td>
-                          <td style={{ padding: '16px', textAlign: 'right' }}>
+                          <td className="p-4" style={{ textAlign: 'right' }}>
                             <button className="btn btn-primary px-3 py-1.5 text-xs" onClick={() => handleMarkReimbursed(exp.id)}>
                               Mark Reimbursed
                             </button>
@@ -426,14 +426,14 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
       {/* Reject Reason Modal */}
       {rejectReasonModal.open && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="glass-card animate-fade-in p-6 w-full max-w-[400px]">
+          <div className="glass-card animate-fade-in p-5 sm:p-6 lg:p-8 w-full max-w-[400px]">
             <h3 className="mt-0 mb-4">Reject Expense</h3>
             <textarea 
               value={rejectReasonModal.reason}
               onChange={e => setRejectReasonModal(prev => ({ ...prev, reason: e.target.value }))}
               placeholder="Provide a reason for rejection..."
               rows={4}
-              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', resize: 'vertical' }}
+              className="p-3" style={{ width: '100%', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', resize: 'vertical' }}
             />
             <div className="flex justify-end gap-3 mt-5">
               <button className="btn btn-secondary" onClick={() => setRejectReasonModal({ open: false, id: null, reason: '' })}>Cancel</button>

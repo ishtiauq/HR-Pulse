@@ -156,7 +156,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
 
       {/* Auth Panel */}
       <div className="login-auth">
-        <div className="login-auth-card">
+          <div className="login-auth-card p-6 sm:p-8 lg:p-10">
           {/* Tabs */}
           <div className="login-tabs" role="tablist">
             <button role="tab" aria-selected={authTab === 'manager'} className={`login-tab ${authTab === 'manager' ? 'active' : ''}`} onClick={() => setAuthTab('manager')}>HR Manager</button>
@@ -169,7 +169,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                 {error && (
                   <div className="login-error">{error}</div>
                 )}
-                <button onClick={handleConnectClick} className="login-drive-btn" disabled={isLoading}>
+                <button onClick={handleConnectClick} className="login-drive-btn px-5 py-2.5 sm:px-6 sm:py-3" disabled={isLoading}>
                 {isLoading ? (
                   <span>Connecting Drive...</span>
                 ) : (
@@ -191,7 +191,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
               <div>
                 <label className="login-label" htmlFor="login-email">Email Address</label>
                 <input id="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)}
-                  placeholder="you@company.com" required className="login-input" />
+                  placeholder="you@company.com" required className="login-input px-3 sm:px-4 py-2 sm:py-2.5" />
               </div>
 
               <div>
@@ -199,7 +199,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                 <div className="relative">
                   <input id="login-password" type={showPassword ? 'text' : 'password'} value={password}
                     onChange={e => setPassword(e.target.value)} placeholder="Enter your password"
-                    required className="login-input pr-11" />
+                    required className="login-input px-3 sm:px-4 py-2 sm:py-2.5 pr-11" />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
                     className="login-eye-btn" aria-label={showPassword ? 'Hide password' : 'Show password'}>
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -207,7 +207,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                 </div>
               </div>
 
-              <button type="submit" disabled={isLoading} className="login-drive-btn mt-2" aria-label="Log in">
+              <button type="submit" disabled={isLoading} className="login-drive-btn px-5 py-2.5 sm:px-6 sm:py-3 mt-2" aria-label="Log in">
                 {isLoading ? 'Signing in...' : 'Sign In'}
                 {!isLoading && <LogIn size={16} />}
               </button>
@@ -238,7 +238,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
             </ul>
 
             <div className="flex flex-col gap-2.5">
-              <button onClick={handleConfirmAuthorize} className="login-drive-btn justify-center">
+              <button onClick={handleConfirmAuthorize} className="login-drive-btn px-5 py-2.5 sm:px-6 sm:py-3 justify-center">
                 Authorize Google Drive <ArrowRight size={16} />
               </button>
               <button onClick={() => setShowAccordion(prev => !prev)} className="login-learn-btn">
@@ -381,7 +381,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           backdrop-filter: var(--glass-blur, blur(24px) saturate(180%));
           -webkit-backdrop-filter: var(--glass-blur, blur(24px) saturate(180%));
           border: 1px solid var(--glass-border, rgba(255,255,255,0.55));
-          border-radius: 20px; padding: 32px;
+          border-radius: 20px;
           box-shadow: var(--glass-shadow, 0 8px 32px rgba(0,0,0,0.04));
         }
         .login-page :where(.login-auth-card, .login-input, .login-modal, .login-modal-illustration, .login-modal-accordion, .login-learn-btn, .login-faq-item) {
@@ -401,7 +401,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         }
         .login-drive-btn {
           display: flex; align-items: center; justify-content: center; gap: 12px;
-          width: 100%; padding: 16px; border: none; border-radius: 14px;
+          width: 100%; border: none; border-radius: 14px;
           background: #0062E6; color: #fff; position: relative; overflow: hidden;
           font: 600 var(--fs-body-large) var(--font-sans, 'Roboto', sans-serif); cursor: pointer;
           transition: background 0.2s, transform 0.15s;
@@ -444,7 +444,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           color: var(--md-bw-on-surface-variant, #666);
         }
         .login-input {
-          width: 100%; padding: 12px 16px; border-radius: 10px; box-sizing: border-box;
+          width: 100%; border-radius: 10px; box-sizing: border-box;
           border: 1px solid var(--glass-border, rgba(255,255,255,0.55));
           background: var(--color-md-sys-surface, #fff);
           color: var(--md-bw-on-surface, #222);
@@ -622,7 +622,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           .login-topbar { top: 8px; width: calc(100% - 16px); border-radius: 14px; height: 48px; min-height: 48px; padding: 0 14px; }
           .login-topbar-badge { font-size: var(--fs-label-small); padding: 4px 10px; }
           .login-auth { padding: 80px 12px 24px; }
-          .login-auth-card { padding: 20px; border-radius: 16px; }
+          .login-auth-card { border-radius: 16px; }
           .login-footer-free { font-size: var(--fs-label-medium); padding: 14px; }
           .login-tabs { gap: 4px; }
           .login-tab { font-size: var(--fs-body-medium); padding: 14px; }

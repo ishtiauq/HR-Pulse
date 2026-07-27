@@ -553,7 +553,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
   }
 
   return (
-    <div className="animate-fade-in flex flex-col gap-[32px]">
+    <div className="animate-fade-in flex flex-col gap-6 sm:gap-8 lg:gap-10">
       
       {/* Header and Month Selector */}
       <div className="page-header">
@@ -635,7 +635,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
 
       {/* RENDER BASED ON INITIALIZATION STATE */}
       {!entries ? (
-        <div className="glass-card animate-fade-in flex flex-col items-center gap-5 text-center" style={{ padding: '60px 20px' }}>
+        <div className="glass-card animate-fade-in flex flex-col items-center gap-5 text-center p-10 sm:p-12 lg:p-16">
           <Calendar size={48} className="opacity-80" style={{ color: 'var(--accent-primary)' }} />
           <div>
             <h3 className="text-xl font-semibold mb-2">Payroll Not Initialized</h3>
@@ -644,7 +644,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
               Initialize it to pull the active roster and carry over compensation parameters.
             </p>
           </div>
-          <button onClick={handleInitializeMonth} className="btn btn-primary flex items-center gap-2" style={{ padding: '12px 24px' }}>
+          <button onClick={handleInitializeMonth} className="btn btn-primary flex items-center gap-2 px-5 py-2.5 sm:px-6 sm:py-3">
             <PlusCircle size={18} /> Initialize Month Payroll
           </button>
         </div>
@@ -653,19 +653,19 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
           {/* Stats Cards Row */}
           <div className="grid gap-16" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
             {/* Total Cost Card */}
-            <div className="m3-card m3-card-elevated p-4 flex flex-col">
+            <div className="m3-card m3-card-elevated p-5 sm:p-6 flex flex-col">
               <span className="label-small uppercase mb-2" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Total Payout Budget</span>
               <h3 className="display-small m-0" style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--md-bw-on-surface)' }}>{currency}{totalCost.toLocaleString()}</h3>
             </div>
 
             {/* Average Salary Card */}
-            <div className="m3-card m3-card-elevated p-4 flex flex-col">
+            <div className="m3-card m3-card-elevated p-5 sm:p-6 flex flex-col">
               <span className="label-small uppercase mb-2" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Average Salary</span>
               <h3 className="display-small m-0" style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--md-bw-on-surface)' }}>{currency}{averageSalary.toLocaleString()}</h3>
             </div>
 
             {/* Progress Card */}
-            <div className="m3-card m3-card-elevated p-4 flex flex-col">
+            <div className="m3-card m3-card-elevated p-5 sm:p-6 flex flex-col">
               <span className="label-small uppercase mb-2" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Disbursement Flow</span>
               <div className="flex items-center justify-between mb-2">
                 <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{paidCount} of {totalCount} Paid</span>
@@ -716,8 +716,8 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
                   aria-selected={statusFilter === status}
                   onClick={() => setStatusFilter(status)}
                   className="flex items-center gap-2 text-sm font-medium outline-none cursor-pointer"
+                  className="px-4 py-2"
                   style={{
-                    padding: '8px 16px',
                     border: 'none',
                     borderRight: status !== 'Pending' ? '1px solid var(--md-bw-outline)' : 'none',
                     background: statusFilter === status ? 'var(--md-bw-secondary-container)' : 'var(--md-bw-surface)',
@@ -733,9 +733,8 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
 
           {/* Bulk Actions Sticky Bar */}
           {selectedRows.length > 0 && (
-            <div className="sticky top-2.5 z-[50] flex justify-between items-center mb-4 rounded-xl" style={{
+            <div className="sticky top-2.5 z-[50] p-3 px-6 flex justify-between items-center mb-4 rounded-xl" style={{
               background: 'var(--md-bw-surface-variant)', color: 'var(--md-bw-on-surface-variant)',
-              padding: '12px 24px',
               animation: 'slideDownFade 0.2s ease-out'
             }}>
               <div className="flex items-center gap-2 font-semibold">
@@ -944,7 +943,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
       {/* MANAGE COMPENSATION MODAL */}
       {selectedEmpLog && (
         <div className={`dialog-scrim${isDrawerOpen ? ' visible' : ''}`} onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }} style={{ zIndex: 999 }}>
-          <div className="m3-dialog flex flex-col gap-[14px] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()} style={{ padding: '24px', maxWidth: '460px', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)' }}>
+          <div className="m3-dialog flex flex-col gap-[14px] max-h-[90vh] overflow-y-auto p-6 sm:p-8" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '460px', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)' }}>
             
             {/* Header */}
             <div className="flex justify-between items-center mb-4">
@@ -958,7 +957,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
             </div>
 
             {/* Employee Info */}
-            <div className="flex items-center gap-2.5 p-2.5 px-3 rounded-xl mb-4" style={{ background: 'var(--md-bw-surface-variant)' }}>
+            <div className="flex items-center gap-2.5 p-2 sm:p-2.5 px-2 sm:px-3 rounded-xl mb-4" style={{ background: 'var(--md-bw-surface-variant)' }}>
               <img src={selectedEmpLog.employee.avatar} alt={selectedEmpLog.employee.name} className="w-8 h-8 rounded-full object-cover shrink-0" />
               <div>
                 <span className="text-[0.85rem] font-semibold block" style={{ color: 'var(--md-bw-on-surface)' }}>{selectedEmpLog.employee.name}</span>
@@ -970,14 +969,14 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
               {/* Gross Salary */}
               <div className="flex flex-col gap-1">
                 <label className="text-[0.75rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Gross Monthly Salary ({currency})</label>
-                <input type="number" min="0" value={grossSalaryInput} onChange={(e) => setGrossSalaryInput(e.target.value)} className="font-semibold text-[0.85rem]" style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none' }} />
+                <input type="number" min="0" value={grossSalaryInput} onChange={(e) => setGrossSalaryInput(e.target.value)} className="font-semibold text-[0.85rem] px-3 py-2" style={{ borderRadius: '8px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none' }} />
                 <span className="text-[0.65rem]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Basic and allowances dynamically split from gross.</span>
               </div>
 
               {/* Advance Pay */}
               <div className="flex flex-col gap-1">
                 <label className="text-[0.75rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Salary Advance ({currency})</label>
-                <input type="number" min="0" value={advanceInput} onChange={(e) => setAdvanceInput(e.target.value)} className="text-[0.85rem]" style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none' }} />
+                <input type="number" min="0" value={advanceInput} onChange={(e) => setAdvanceInput(e.target.value)} className="text-[0.85rem] px-3 py-2" style={{ borderRadius: '8px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none' }} />
                 <span className="text-[0.65rem]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Deducted in full from the next payout.</span>
               </div>
 
@@ -987,16 +986,16 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="flex flex-col gap-1">
                     <label className="text-[0.7rem]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Total Principal</label>
-                    <input type="number" min="0" value={loanTotalInput} onChange={(e) => setLoanTotalInput(e.target.value)} className="text-[0.8rem]" style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none' }} />
+                    <input type="number" min="0" value={loanTotalInput} onChange={(e) => setLoanTotalInput(e.target.value)} className="text-[0.8rem] px-2.5 py-1.5" style={{ borderRadius: '6px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none' }} />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-[0.7rem]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Remaining Balance</label>
-                    <input type="number" min="0" value={loanRemainingInput} onChange={(e) => setLoanRemainingInput(e.target.value)} className="text-[0.8rem]" style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none' }} />
+                    <input type="number" min="0" value={loanRemainingInput} onChange={(e) => setLoanRemainingInput(e.target.value)} className="text-[0.8rem] px-2.5 py-1.5" style={{ borderRadius: '6px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none' }} />
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-[0.7rem]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Monthly Installment Deduction ({currency})</label>
-                  <input type="number" min="0" value={loanInstallmentInput} onChange={(e) => setLoanInstallmentInput(e.target.value)} className="text-[0.85rem]" style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none' }} />
+                  <input type="number" min="0" value={loanInstallmentInput} onChange={(e) => setLoanInstallmentInput(e.target.value)} className="text-[0.85rem] px-3 py-2" style={{ borderRadius: '8px', border: '1px solid var(--md-bw-outline)', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)', outline: 'none' }} />
                   <span className="text-[0.65rem]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Deducted monthly until balance reaches $0.</span>
                 </div>
               </div>
@@ -1023,8 +1022,8 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
 
               {/* Actions */}
               <div className="flex gap-2.5 justify-end">
-                <button type="button" className="btn btn-text text-[0.8rem]" onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }} style={{ padding: '8px 16px' }}>Cancel</button>
-                <button type="submit" className="btn btn-filled text-[0.8rem] flex items-center gap-1.5" style={{ padding: '8px 16px' }}><CheckSquare size={14} /> Apply Changes</button>
+                <button type="button" className="btn btn-text text-[0.8rem] px-5 py-2.5 sm:px-6 sm:py-3" onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }}>Cancel</button>
+                <button type="submit" className="btn btn-filled text-[0.8rem] flex items-center gap-1.5 px-5 py-2.5 sm:px-6 sm:py-3"><CheckSquare size={14} /> Apply Changes</button>
               </div>
             </form>
           </div>

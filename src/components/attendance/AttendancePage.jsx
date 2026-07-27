@@ -18,7 +18,7 @@ export default function AttendancePage({ employees, attendance, setAttendance, r
     { id: 'overtime', label: 'Overtime', icon: Cpu },
   ]
   return (
-    <div className="animate-fade-in flex flex-col gap-6">
+    <div className="animate-fade-in flex flex-col gap-4 sm:gap-6 lg:gap-8">
       <h1 className="headline-small m-0" style={{ color: 'var(--md-bw-on-surface)' }}>Attendance & Leaves</h1>
       <ClockWidget employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />
       <div role="tablist" aria-label="Attendance sections" className="flex gap-2 flex-wrap">

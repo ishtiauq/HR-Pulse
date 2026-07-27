@@ -92,7 +92,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
   }
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px', position: 'relative' }}>
+    <div className="animate-fade-in gap-6 sm:gap-8 lg:gap-10" style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
       
       {/* Header */}
       <div className="page-header">
@@ -103,8 +103,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
       </div>
 
       {/* Connection Controller Card */}
-      <div className="glass-card" style={{
-        padding: '32px',
+      <div className="glass-card p-6 sm:p-8 lg:p-10" style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -213,11 +212,11 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
         
         {/* Sync Mechanism Diagram */}
-        <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="glass-card p-6 sm:p-8 lg:p-10" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <h4 style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>Data Synchronization Flow</h4>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%', justifyContent: 'space-between', padding: '20px 0' }}>
-            <div style={{ flex: 1, minWidth: '100px', padding: '12px 8px', borderRadius: '12px', background: 'rgba(0, 0, 0, 0.01)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+          <div className="py-5" style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%', justifyContent: 'space-between' }}>
+            <div className="p-3 px-2" style={{ flex: 1, minWidth: '100px', borderRadius: '12px', background: 'rgba(0, 0, 0, 0.01)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
               <HardDrive size={24} style={{ color: 'var(--accent-primary)', margin: '0 auto 6px' }} />
               <span style={{ fontSize: '0.8rem', display: 'block', fontWeight: 600 }}>Local Cache</span>
               <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>{driveConnected ? '0 pending' : 'Offline queue'}</span>
@@ -234,7 +233,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
               </span>
             </div>
 
-            <div style={{ flex: 1, minWidth: '100px', padding: '12px 8px', borderRadius: '12px', background: 'rgba(0, 0, 0, 0.01)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
+            <div className="p-3 px-2" style={{ flex: 1, minWidth: '100px', borderRadius: '12px', background: 'rgba(0, 0, 0, 0.01)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
               <CloudLightning size={24} style={{ color: driveConnected ? 'var(--accent-success)' : 'var(--text-muted)', margin: '0 auto 6px' }} />
               <span style={{ fontSize: '0.8rem', display: 'block', fontWeight: 600 }}>Drive DB</span>
               <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{driveConnected ? 'Synced' : 'Waiting'}</span>
@@ -243,7 +242,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
         </div>
 
         {/* Database backup commands */}
-        <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
+        <div className="glass-card p-6 sm:p-8 lg:p-10" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
           <div>
             <h4 style={{ fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '8px' }}>Manual Backup</h4>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
@@ -265,7 +264,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
         </div>
 
         {/* Data Integrity Testing */}
-        <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
+        <div className="glass-card p-6 sm:p-8 lg:p-10" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
           <div>
             <h4 style={{ fontSize: '1rem', color: 'var(--accent-danger)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <AlertCircle size={18} /> Data Integrity Testing
@@ -316,7 +315,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
       </div>
 
       {/* Backup Browser Widget */}
-      <div className="glass-card" style={{ padding: '24px' }}>
+      <div className="glass-card p-6 sm:p-8 lg:p-10">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div>
             <h4 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -330,34 +329,34 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
           <table className="table-striped" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                <th style={{ padding: '12px' }}>Backup Name</th>
-                <th style={{ padding: '12px' }}>Size</th>
-                <th style={{ padding: '12px' }}>Created Date</th>
-                <th style={{ padding: '12px', textAlign: 'right' }}>Actions</th>
+                <th className="p-3">Backup Name</th>
+                <th className="p-3">Size</th>
+                <th className="p-3">Created Date</th>
+                <th className="p-3" style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {(!Array.isArray(backupsList) || backupsList.length === 0) ? (
                 <tr>
-                  <td colSpan="4" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>No backups found.</td>
+                  <td colSpan="4" className="p-6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No backups found.</td>
                 </tr>
               ) : backupsList.map(f => (
                 <tr key={f.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
-                  <td style={{ padding: '12px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <td className="p-3" style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <FileJson size={16} style={{ color: 'var(--text-muted)' }} /> {f.name}
                   </td>
-                  <td style={{ padding: '12px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  <td className="p-3" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     {f.size ? (parseInt(f.size) / 1024).toFixed(1) + ' KB' : 'Unknown'}
                   </td>
-                  <td style={{ padding: '12px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  <td className="p-3" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     {formatDateTime(f.modifiedTime)}
                   </td>
-                  <td style={{ padding: '12px', textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                  <td className="p-3" style={{ textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                     <button 
                       aria-label="Download backup"
                       onClick={() => window.open(`https://drive.google.com/uc?export=download&id=${f.id}`, '_blank')}
-                      className="btn btn-secondary" 
-                      style={{ padding: '4px 8px', fontSize: '0.75rem', height: 'auto' }}
+                      className="btn btn-secondary px-2 py-1" 
+                      style={{ fontSize: '0.75rem', height: 'auto' }}
                       title="Download Backup"
                     >
                       <Download size={14} />
@@ -365,8 +364,8 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
                     <button 
                       aria-label="Restore from this backup"
                       onClick={() => setSelectedRestoreBackup(f)}
-                      className="btn" 
-                      style={{ padding: '4px 8px', fontSize: '0.75rem', height: 'auto', background: 'var(--accent-warning)', color: '#fff' }}
+                      className="btn px-2 py-1" 
+                      style={{ fontSize: '0.75rem', height: 'auto', background: 'var(--accent-warning)', color: '#fff' }}
                       title="Restore from this backup"
                     >
                       <RotateCcw size={14} />
@@ -390,7 +389,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
             </div>
             <div className="modal-body">
               <p>You are about to restore the database from:</p>
-              <div style={{ background: 'var(--bg-secondary)', padding: '12px', borderRadius: '8px', margin: '16px 0', fontFamily: 'monospace' }}>
+              <div className="p-3" style={{ background: 'var(--bg-secondary)', borderRadius: '8px', margin: '16px 0', fontFamily: 'monospace' }}>
                 {selectedRestoreBackup.name}
               </div>
               <p style={{ color: 'var(--accent-danger)', fontSize: '0.85rem' }}>
@@ -422,7 +421,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
       )}
 
       {/* Info Warning Alert */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderRadius: '12px', backgroundColor: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.15)' }}>
+      <div className="p-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '12px', backgroundColor: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.15)' }}>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'start' }}>
           <Info size={18} style={{ color: 'var(--accent-primary)', flexShrink: 0, marginTop: '2px' }} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>

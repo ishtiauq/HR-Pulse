@@ -129,7 +129,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
       })
 
   const renderCalendarGrid = () => (
-    <div className="glass-card p-6">
+    <div className="glass-card p-5 sm:p-6">
       <div className="flex justify-between items-center mb-5">
         <div className="flex items-center gap-3">
           <button onClick={prevMonth} aria-label="Previous month" className="flex rounded-lg p-2 cursor-pointer" style={{ background: 'var(--bg-tertiary)', border: 'none', color: 'var(--text-secondary)' }}>
@@ -197,7 +197,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
   )
 
   const renderEventList = () => (
-    <div className="glass-card p-6">
+    <div className="glass-card p-5 sm:p-6">
       <h3 className="text-lg font-bold m-0 mb-4 flex items-center gap-2">
         <CalendarIcon size={18} color="var(--accent-primary)" />
         {selectedDate ? `Events on ${formatDate(selectedDate)}` : 'This Month\'s Events'}
@@ -213,7 +213,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
             const typeInfo = getTypeInfo(ev.type)
             const TypeIcon = typeInfo.icon
             return (
-              <div key={ev.id} role="listitem" className="flex items-center gap-3 p-3 px-4" style={{
+              <div key={ev.id} role="listitem" className="flex items-center gap-3 p-2 sm:p-3 px-3 sm:px-4" style={{
                 borderRadius: 'var(--radius-sm)',
                 background: 'var(--bg-tertiary)', transition: 'all var(--transition-fast)'
               }}>
@@ -263,7 +263,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
   )
 
   return (
-    <div className="fade-in pb-10">
+    <div className="fade-in p-4 md:p-6 lg:p-8 pb-6 sm:pb-8 lg:pb-10">
       <div className="page-header">
         <h1 className="page-title">
           <CalendarIcon size={28} className="page-title-icon" />
@@ -300,18 +300,18 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Title *</label>
                 <input type="text" required value={formTitle} onChange={e => setFormTitle(e.target.value)} placeholder="Event title" aria-label="Event title"
-                  className="p-2.5 px-3 rounded-lg text-[0.95rem]" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
+                  className="p-2 sm:p-2.5 px-2 sm:px-3 rounded-lg text-[0.95rem]" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Date *</label>
                   <input type="date" required value={formDate} onChange={e => setFormDate(e.target.value)} aria-label="Event date"
-                    className="p-2.5 px-3 rounded-lg text-[0.95rem]" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
+                    className="p-2 sm:p-2.5 px-2 sm:px-3 rounded-lg text-[0.95rem]" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Time</label>
                   <input type="time" value={formTime} onChange={e => setFormTime(e.target.value)} aria-label="Event time"
-                    className="p-2.5 px-3 rounded-lg text-[0.95rem]" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
+                    className="p-2 sm:p-2.5 px-2 sm:px-3 rounded-lg text-[0.95rem]" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
@@ -337,7 +337,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Description</label>
                 <textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={3} placeholder="Event description (optional)" aria-label="Event description"
-                  className="p-2.5 px-3 rounded-lg text-[0.95rem] resize-y" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
+                  className="p-2 sm:p-2.5 px-2 sm:px-3 rounded-lg text-[0.95rem] resize-y" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
               </div>
               <div className="flex gap-3 justify-end mt-2">
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowEventModal(false); resetForm() }}>

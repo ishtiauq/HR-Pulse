@@ -201,7 +201,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
   }
 
   return (
-    <div className="fade-in" style={{ padding: isMobile ? '0 4px 40px' : '0 0 40px 0' }}>
+    <div className="fade-in px-1 sm:px-0 pb-10">
       <div className="page-header">
         <h1 className="page-title">
           <FileText size={28} className="page-title-icon" />
@@ -210,10 +210,9 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
       </div>
 
       {/* Upload Hero Card */}
-      <div className="glass-card cursor-pointer text-center mb-6 flex flex-col items-center gap-3" onClick={openUploadModal} role="button" tabIndex={0} aria-label="Upload document"
+      <div className="glass-card cursor-pointer text-center mb-6 flex flex-col items-center gap-3 p-6 sm:p-8 lg:p-10" onClick={openUploadModal} role="button" tabIndex={0} aria-label="Upload document"
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openUploadModal() } }}
         style={{
-          padding: isMobile ? '24px 16px' : '36px 24px',
           border: '2px dashed var(--border-color)', borderRadius: '16px',
           background: 'var(--bg-secondary)',
           transition: 'border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast)',
@@ -274,8 +273,8 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                     onMouseEnter={() => setHoveredCategory(cat.id)}
                     onMouseLeave={() => setHoveredCategory(null)}>
                     <button onClick={() => setSelectedCategory(cat.id)}
-                      style={{
-                        padding: '6px 14px', borderRadius: '20px', background: isActive ? cat.color : 'var(--md-bw-surface-variant)',
+                      className="px-2 sm:px-3 py-1 sm:py-1.5"
+                      style={{borderRadius: '20px', background: isActive ? cat.color : 'var(--md-bw-surface-variant)',
                         color: isActive ? '#fff' : 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem',
                         cursor: 'pointer', border: isActive ? 'none' : '1px solid var(--md-bw-outline)',
                         paddingRight: showActions ? '32px' : '14px',
@@ -305,8 +304,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                   setCatFormColor('#3b82f6')
                   setShowCategoryModal(true)
                 }}
-                  style={{
-                    padding: '6px 12px', borderRadius: '20px', background: 'transparent',
+                  className="px-2 sm:px-3 py-1 sm:py-1.5" style={{borderRadius: '20px', background: 'transparent',
                     color: 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.85rem',
                     cursor: 'pointer', border: '1px dashed var(--md-bw-outline)',
                     display: 'flex', alignItems: 'center', gap: '4px',
@@ -339,7 +337,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
       </div>
 
       {filteredDocs.length === 0 ? (
-        <div className="glass-card text-center" style={{ padding: isMobile ? '48px 20px' : '64px 32px' }}>
+        <div className="glass-card text-center p-8 sm:p-10 lg:p-12">
           <FileText size={48} className="mb-4 opacity-50" style={{ color: 'var(--text-muted)' }} />
           <h3 className="m-0 mb-2" style={{ color: 'var(--text-secondary)' }}>No documents found</h3>
           <p className="m-0 text-[0.9rem]" style={{ color: 'var(--text-muted)' }}>
@@ -353,9 +351,9 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
             const Icon = getFileIcon(doc.fileType)
             const CatIcon = catInfo.icon
             return (
-              <div key={doc.id} role="listitem" className="glass-card cursor-default" style={{
+              <div key={doc.id} role="listitem" className="glass-card cursor-default p-3 sm:p-4 lg:p-5" style={{
                 display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center',
-                gap: isMobile ? '12px' : '16px', padding: isMobile ? '14px' : '16px 20px',
+                gap: isMobile ? '12px' : '16px',
                 transition: 'border-color var(--transition-fast)',
               }}
                 onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent-primary)'}
@@ -599,13 +597,13 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                   </div>
                   <div className="flex gap-2 justify-end">
                     {editingCategory && (
-                      <button type="button" className="btn btn-secondary" onClick={() => { setEditingCategory(null); setCatFormName(''); setCatFormColor('#3b82f6') }}
-                        style={{ fontSize: '0.85rem', padding: '8px 14px' }}>
+                      <button type="button" className="btn btn-secondary px-3.5 py-2" onClick={() => { setEditingCategory(null); setCatFormName(''); setCatFormColor('#3b82f6') }}
+                        style={{ fontSize: '0.85rem' }}>
                         Cancel
                       </button>
                     )}
-                    <button type="button" className="btn btn-primary flex items-center gap-1.5" onClick={handleSaveCategory}
-                      style={{ fontSize: '0.85rem', padding: '8px 14px' }}>
+                    <button type="button" className="btn btn-primary flex items-center gap-1.5 px-3.5 py-2" onClick={handleSaveCategory}
+                      style={{ fontSize: '0.85rem' }}>
                       {editingCategory ? 'Save' : 'Add'}
                     </button>
                   </div>

@@ -79,7 +79,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
 
   if (!hasPermission(currentView)) {
     return (
-      <div className="animate-fade-in" style={{ padding: '64px 32px', textAlign: 'center', background: 'var(--color-md-sys-surface-container)', borderRadius: '16px', border: '1px solid var(--color-md-sys-outline-variant)', marginTop: '24px' }}>
+      <div className="animate-fade-in p-16 px-8" style={{ textAlign: 'center', background: 'var(--color-md-sys-surface-container)', borderRadius: '16px', border: '1px solid var(--color-md-sys-outline-variant)', marginTop: '24px' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-md-sys-error)', marginBottom: '16px' }}>
           <span style={{ fontSize: '2rem', fontWeight: 700 }}>!</span>
         </div>

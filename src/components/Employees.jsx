@@ -547,7 +547,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
       {/* Selection Bar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center gap-3 px-4 rounded-xl text-[13px] font-medium" style={{ padding: '10px 16px', background: 'var(--md-bw-primary-container)', color: 'var(--md-bw-on-primary-container)' }}>
+        <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium" style={{ background: 'var(--md-bw-primary-container)', color: 'var(--md-bw-on-primary-container)' }}>
           <Check size={16} className="shrink-0" />
           <span className="flex-1">{selectedIds.size} selected</span>
           <button
@@ -593,7 +593,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
             const isExpanded = expandedCardId === emp.id
             return (
             <div key={emp.id}>
-              <div className="macos-card employee-card flex flex-col cursor-pointer relative" role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setViewingEmployee(emp); } }} style={{ padding: '14px 16px' }} onClick={() => setViewingEmployee(emp)}>
+              <div className="macos-card employee-card flex flex-col cursor-pointer relative p-4 sm:p-5" role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setViewingEmployee(emp); } }} onClick={() => setViewingEmployee(emp)}>
                 
                 {/* Checkbox — absolutely positioned so it doesn't steal space from text */}
                 <div onClick={(e) => e.stopPropagation()} className="absolute z-[2] flex items-center justify-center w-5 h-5 cursor-pointer" style={{ top: '12px', left: '10px', borderRadius: '4px', background: selectedIds.has(emp.id) ? 'var(--md-bw-primary)' : 'rgba(255,255,255,0.85)', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}>
@@ -764,10 +764,9 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       {/* Form Modal/Overlay */}
       {showAddForm && (
         <div className="dialog-scrim visible" onClick={() => handleCloseForm()}>
-          <div className="m3-dialog flex flex-col gap-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()} style={{
+          <div className="m3-dialog p-8 flex flex-col gap-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()} style={{
             width: '100%',
             maxWidth: '500px',
-            padding: '32px',
           }}>
             <div className="flex justify-between items-center">
               <h3 className="text-xl flex items-center gap-2 m-0" style={{ color: 'var(--md-bw-on-surface)' }}>
@@ -833,8 +832,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                   <div className="flex-1 flex flex-col gap-2">
                     <button
                       type="button"
-                      className="btn btn-secondary"
-                      style={{ padding: '8px 12px', fontSize: '0.8rem', justifyContent: 'center', height: '34px', minHeight: '34px' }}
+                      className="btn btn-secondary px-3 py-2"
+                      style={{ fontSize: '0.8rem', justifyContent: 'center', height: '34px', minHeight: '34px' }}
                       onClick={() => document.getElementById('photo-file-input').click()}
                     >
                       {newAvatar ? 'Change Photo' : 'Upload HD Photo'}
@@ -951,7 +950,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                     placeholder="Enter new department name..."
                     value={customDept}
                     onChange={(e) => setCustomDept(e.target.value)}
-                    className="text-sm px-3.5 py-2.5 rounded-xl mt-2"
+                    className="text-sm px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl mt-2"
                     style={{ border: '1px solid var(--border-color)', background: '#ffffff', color: 'var(--text-primary)', outline: 'none' }}
                   />
                 )}
@@ -1013,9 +1012,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                   <div className="relative">
                     <button 
                       type="button" 
-                      className="btn btn-mac-green w-full justify-center" 
+                      className="btn btn-mac-green w-full justify-center px-3.5 py-2.5" 
                       style={{ 
-                        padding: '10px 14px', 
                         fontSize: '0.8rem', 
                         borderRadius: '10px', 
                         height: '38px',
@@ -1044,9 +1042,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                   <div className="relative">
                     <button 
                       type="button" 
-                      className="btn btn-mac-green w-full justify-center" 
+                      className="btn btn-mac-green w-full justify-center px-3.5 py-2.5" 
                       style={{ 
-                        padding: '10px 14px', 
                         fontSize: '0.8rem', 
                         borderRadius: '10px', 
                         height: '38px',
@@ -1089,16 +1086,16 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               <div className="flex gap-3 mt-4 justify-end">
                 <button
                   type="button"
-                  className="btn btn-mac-red flex-1 inline-flex items-center justify-center gap-1.5 text-xs"
-                  style={{ height: '38px', minHeight: '38px', padding: '0 16px', borderRadius: '8px !important' }}
+                  className="btn btn-mac-red flex-1 inline-flex items-center justify-center gap-1.5 text-xs px-4 sm:px-5 py-2 sm:py-2.5"
+                  style={{ height: '38px', minHeight: '38px', borderRadius: '8px !important' }}
                   onClick={handleCloseForm}
                 >
                   <X size={14} /> Cancel
                 </button>
                 <button
                   type="submit"
-                  className="btn btn-mac-blue flex-1 inline-flex items-center justify-center gap-1.5 text-xs"
-                  style={{ height: '38px', minHeight: '38px', padding: '0 16px', borderRadius: '8px !important' }}
+                  className="btn btn-mac-blue flex-1 inline-flex items-center justify-center gap-1.5 text-xs px-4 sm:px-5 py-2 sm:py-2.5"
+                  style={{ height: '38px', minHeight: '38px', borderRadius: '8px !important' }}
                 >
                   <Check size={14} /> {editingEmployee ? 'Save Changes' : 'Save Record'}
                 </button>
