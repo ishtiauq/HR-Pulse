@@ -29,7 +29,7 @@ export default function Sidebar({
             : 'hidden lg:flex'}
         `}
         style={{
-          width: mobileMenuOpen ? '100%' : (isCollapsed ? '64px' : '220px'),
+          width: mobileMenuOpen ? '100%' : (isCollapsed ? '64px' : '200px'),
         }}
       >
       
@@ -81,7 +81,7 @@ export default function Sidebar({
         {/* MIDDLE SCROLLABLE NAV AREA */}
         <nav 
           aria-label="Main navigation" 
-          className="sidebar-nav-scroll flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-1"
+          className="sidebar-nav-scroll flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-2"
         >
           {visibleNavItems.map(item => {
             const isActive = currentView === item.id;
@@ -91,7 +91,7 @@ export default function Sidebar({
                   role="button"
                   tabIndex={0}
                   aria-label={item.label}
-                  className={`${isActive ? 'active bg-primary text-primary-foreground font-semibold shadow-xs' : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'} flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer h-10 box-border transition-all duration-200 relative no-underline shrink-0`}
+                  className={`${isActive ? 'active bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm' : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'} flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer h-9 box-border transition-colors duration-200 relative no-underline shrink-0`}
                   data-active={isActive ? 'true' : 'false'}
                   data-label={item.label}
                   onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }}
@@ -103,7 +103,7 @@ export default function Sidebar({
                   </div>
                   
                   {/* Label: always visible on mobile, animated on desktop */}
-                  <span className="text-xs font-semibold leading-5 whitespace-nowrap transition-[opacity,max-width] duration-300 overflow-hidden" style={{
+                  <span className="text-sm font-medium leading-5 whitespace-nowrap transition-[opacity,max-width] duration-300 overflow-hidden" style={{
                     opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
                     maxWidth: (mobileMenuOpen || !isCollapsed) ? '160px' : 0,
                   }}>{item.label}</span>
@@ -114,62 +114,54 @@ export default function Sidebar({
         </nav>
 
         {/* FOOTER SECTION */}
-        <div className="shrink-0 p-3 pt-2 flex flex-col gap-2 border-t border-sidebar-border bg-sidebar/80">
+        <div className="shrink-0 p-3 pt-4 flex flex-col gap-1 border-t border-sidebar-border bg-sidebar/80">
           
-          {/* USER PROFILE BOX */}
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-sidebar-accent/40 border border-sidebar-border relative overflow-hidden transition-all">
+          {/* USER PROFILE */}
+          <div className="flex items-center gap-3 mb-2 px-2">
             <img 
               src={user?.avatar || "https://i.pravatar.cc/150?u=a042581f4e29026704d"} 
-              className="rounded-full object-cover shrink-0 relative w-8 h-8 border border-sidebar-border" 
+              className="rounded-full object-cover shrink-0 relative w-8 h-8 shadow-sm border border-sidebar-border/50" 
               alt={user?.name ? `${user.name}'s avatar` : "User avatar"} 
             />
-            
-            <div className="overflow-hidden whitespace-nowrap flex-1 min-w-0 relative transition-[opacity,max-width] duration-300" style={{
+            <div className="overflow-hidden whitespace-nowrap flex-1 min-w-0 transition-[opacity,max-width] duration-300" style={{
               opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
               maxWidth: (mobileMenuOpen || !isCollapsed) ? '160px' : 0,
             }}>
-              <p className="text-xs font-extrabold m-0 text-sidebar-foreground truncate">{user?.name || "Ishtiaq Rizve"}</p>
-              <p className="text-[10px] font-semibold m-0 text-sidebar-foreground/70 truncate">{user?.role || "HR Administrator"}</p>
+              <p className="text-sm font-semibold m-0 text-sidebar-foreground truncate leading-tight">{user?.name || "Ishtiaq Rizve"}</p>
+              <p className="text-[11px] font-medium m-0 text-sidebar-foreground/70 truncate">{simulatedRole || user?.role || "Admin"}</p>
             </div>
           </div>
 
-          {/* ROLE + LOGOUT */}
-          <div className="flex flex-col gap-1.5">
-            <TooltipPopover label={`Role: ${simulatedRole || "Admin"}`} isCollapsed={isCollapsed && !mobileMenuOpen} isDarkMode={isDarkMode}>
-              <button
-                onClick={() => setShowRoleModal && setShowRoleModal(true)}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-sidebar-accent/40 border border-sidebar-border hover:bg-sidebar-accent transition-all cursor-pointer text-left"
-              >
-                <div className="size-8 flex items-center justify-center rounded-full bg-sidebar-accent border border-sidebar-border shrink-0">
-                  <ArrowLeftRight size={14} className="text-sidebar-foreground/80" />
-                </div>
-                <div className="overflow-hidden whitespace-nowrap flex-1 min-w-0 transition-[opacity,max-width] duration-300" style={{
-                  opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
-                  maxWidth: (mobileMenuOpen || !isCollapsed) ? '160px' : 0,
-                }}>
-                  <p className="text-xs font-extrabold m-0 text-sidebar-foreground truncate">Role: {simulatedRole || "Admin"}</p>
-                  <p className="text-[10px] font-semibold m-0 text-sidebar-foreground/60 truncate">Click to switch</p>
-                </div>
-              </button>
-            </TooltipPopover>
-            <TooltipPopover label="Logout" isCollapsed={isCollapsed && !mobileMenuOpen} isDarkMode={isDarkMode}>
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-destructive/10 border border-destructive/20 hover:bg-destructive/20 transition-all cursor-pointer text-left"
-              >
-                <div className="size-8 flex items-center justify-center rounded-full bg-destructive/10 border border-destructive/20 shrink-0">
-                  <LogOut size={14} className="text-destructive" />
-                </div>
-                <div className="overflow-hidden whitespace-nowrap flex-1 min-w-0 transition-[opacity,max-width] duration-300" style={{
-                  opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
-                  maxWidth: (mobileMenuOpen || !isCollapsed) ? '160px' : 0,
-                }}>
-                  <p className="text-xs font-extrabold m-0 text-destructive truncate">Logout</p>
-                  <p className="text-[10px] font-semibold m-0 text-destructive/60 truncate">Sign out</p>
-                </div>
-              </button>
-            </TooltipPopover>
-          </div>
+          {/* ACTION BUTTONS */}
+          <TooltipPopover label="Switch Role" isCollapsed={isCollapsed && !mobileMenuOpen} isDarkMode={isDarkMode}>
+            <button
+              onClick={() => setShowRoleModal && setShowRoleModal(true)}
+              className="btn-shimmer w-full flex items-center gap-3 px-3 rounded-md bg-[#2563eb] hover:bg-[#1d4ed8] text-white transition-colors cursor-pointer h-9 box-border border-none"
+            >
+              <div className="size-6 flex items-center justify-center shrink-0">
+                <ArrowLeftRight size={16} />
+              </div>
+              <span className="truncate overflow-hidden transition-[opacity,max-width] duration-300 text-left font-medium text-xs" style={{
+                opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
+                maxWidth: (mobileMenuOpen || !isCollapsed) ? '160px' : 0,
+              }}>Switch Role</span>
+            </button>
+          </TooltipPopover>
+          
+          <TooltipPopover label="Logout" isCollapsed={isCollapsed && !mobileMenuOpen} isDarkMode={isDarkMode}>
+            <button
+              onClick={handleLogout}
+              className="btn-shimmer mt-1 w-full flex items-center gap-3 px-3 rounded-md bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer h-9 box-border border-none"
+            >
+              <div className="size-6 flex items-center justify-center shrink-0">
+                <LogOut size={16} />
+              </div>
+              <span className="truncate overflow-hidden transition-[opacity,max-width] duration-300 text-left font-medium text-xs" style={{
+                opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
+                maxWidth: (mobileMenuOpen || !isCollapsed) ? '160px' : 0,
+              }}>Logout</span>
+            </button>
+          </TooltipPopover>
         </div>
       </aside>
 
@@ -248,6 +240,26 @@ export default function Sidebar({
         }
         .dark .sidebar-nav-scroll:hover::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes shimmer-slide {
+          0% { transform: translateX(-150%) skewX(-20deg); }
+          30% { transform: translateX(150%) skewX(-20deg); }
+          100% { transform: translateX(150%) skewX(-20deg); }
+        }
+        .btn-shimmer {
+          position: relative;
+          overflow: hidden;
+        }
+        .btn-shimmer::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(to right, transparent, rgba(255,255,255,0.2) 20%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.2) 80%, transparent);
+          animation: shimmer-slide 4s infinite ease-in-out;
         }
       `}</style>
     </>

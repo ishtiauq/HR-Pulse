@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useModal } from '../services/useModal.js'
-import { Calendar as CalendarIcon, Plus, Edit, Trash2, ChevronLeft, ChevronRight, FileText, Users, Gift, AlertTriangle, Clock, X } from 'lucide-react'
+import { Calendar as CalendarIcon, CalendarDays, Plus, Edit, Trash2, ChevronLeft, ChevronRight, FileText, Users, Gift, AlertTriangle, Clock, X } from 'lucide-react'
 import { useConfirm } from '../hooks/useConfirm'
 import AdSlot from './AdSlot'
 import { formatDate } from '../services/date.js'
@@ -263,7 +263,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <CalendarIcon size={20} className="text-primary" />
+          <CalendarDays size={20} className="text-primary" />
           Calendar
         </h1>
       </div>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { FileText, Search, Upload, Download, Trash2, X, Folder, FileSpreadsheet, FileImage, FileArchive, File, Settings, Pencil, ChevronLeft, ChevronRight } from 'lucide-react'
+import { FileText, Search, Upload, Download, Trash2, X, Folder, FolderOpen, FileSpreadsheet, FileImage, FileArchive, File, Settings, Pencil, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card, CardContent } from "@/components/ui/card"
 import { useConfirm } from '../hooks/useConfirm'
 import { Button } from "@/components/ui/button"
@@ -182,33 +182,17 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
 
   return (
     <div className="fade-in px-1 sm:px-0 pb-10">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <FileText size={20} className="text-primary" />
+          <FolderOpen size={20} className="text-primary" />
           Documents
         </h1>
+        <Button variant="default" size="sm" onClick={() => { resetForm(); setShowUploadModal(true) }}>
+          <Upload size={16} className="mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Upload</span>
+        </Button>
       </div>
       <div className="border-t border-border mb-6" />
-
-      {/* Upload Hero Card */}
-      <Card
-        className="cursor-pointer text-center mb-6 flex flex-col items-center gap-3 p-6 sm:p-8 lg:p-10 border-2 border-dashed border-border hover:border-primary hover:bg-muted/30 transition-all hover:-translate-y-0.5"
-        onClick={() => { resetForm(); setShowUploadModal(true) }}
-        role="button"
-        tabIndex={0}
-        aria-label="Upload document"
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); resetForm(); setShowUploadModal(true) } }}
-      >
-        <div className="flex items-center justify-center w-11 sm:w-14 h-11 sm:h-14 rounded-xl sm:rounded-[14px] bg-primary/10 text-primary">
-          <Upload size={isMobile ? 22 : 28} />
-        </div>
-        <div>
-          <h3 className="m-0 font-bold text-[0.95rem] sm:text-[1.1rem] text-foreground">Upload Document</h3>
-          <p className="m-0 mt-1 text-[0.85rem] text-muted-foreground">
-            Click to upload — PDF, images, spreadsheets & more
-          </p>
-        </div>
-      </Card>
 
       <div className="relative flex items-center mb-3">
         <Search size={16} className="absolute left-3 text-muted-foreground" />

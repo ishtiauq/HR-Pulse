@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Save, Settings as SettingsIcon, DollarSign, Sliders, Info, Percent, Building2, Bell, Globe, Mail, Plus, Trash2, Upload, Activity, X, ShieldCheck, List, FileSpreadsheet, Download, Receipt, CalendarClock, Check, ChevronDown } from 'lucide-react'
+import { Save, Settings2, DollarSign, Sliders, Info, Percent, Building2, Bell, Globe, Mail, Plus, Trash2, Upload, Activity, X, ShieldCheck, List, FileSpreadsheet, Download, Receipt, CalendarClock, Check, ChevronDown } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDateTime } from '../services/date.js'
@@ -571,7 +571,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <SettingsIcon size={20} className="text-primary" />
+          <Settings2 size={20} className="text-primary" />
           System Settings
         </h1>
         <div className="flex gap-2">

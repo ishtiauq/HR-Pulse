@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, CreditCard, CalendarCheck, Receipt, Settings as SettingsIcon, FileText, Megaphone, CalendarDays, Monitor, Database } from 'lucide-react'
+import { LayoutDashboard, Users, Banknote, Clock, Receipt, Settings2, FolderOpen, Megaphone, CalendarDays, Laptop, CloudSync } from 'lucide-react'
 
 import { createElement } from 'react'
 
@@ -25,12 +25,12 @@ export const allNavItems = [
   { id: 'dashboard', label: 'Dashboard', icon: createElement(LayoutDashboard, { size: 18 }) },
   { id: 'announcements', label: 'Announcements', icon: createElement(Megaphone, { size: 18 }) },
   { id: 'calendar', label: 'Calendar', icon: createElement(CalendarDays, { size: 18 }) },
-  { id: 'documents', label: 'Documents', icon: createElement(FileText, { size: 18 }) },
+  { id: 'documents', label: 'Documents', icon: createElement(FolderOpen, { size: 18 }) },
   { id: 'employees', label: 'Employees', icon: createElement(Users, { size: 18 }) },
-  { id: 'payroll', label: 'Payroll', icon: createElement(CreditCard, { size: 18 }) },
-  { id: 'attendance', label: 'Leaves & Attendance', icon: createElement(CalendarCheck, { size: 18 }) },
+  { id: 'payroll', label: 'Payroll', icon: createElement(Banknote, { size: 18 }) },
+  { id: 'attendance', label: 'Leaves & Attendance', icon: createElement(Clock, { size: 18 }) },
   { id: 'expenses', label: 'Expenses', icon: createElement(Receipt, { size: 18 }) },
-  { id: 'assets', label: 'Assets', icon: createElement(Monitor, { size: 18 }) },
-  { id: 'settings', label: 'Settings', icon: createElement(SettingsIcon, { size: 18 }) },
-  { id: 'drive', label: 'Drive Sync', icon: createElement(Database, { size: 18 }) },
+  { id: 'assets', label: 'Assets', icon: createElement(Laptop, { size: 18 }) },
+  { id: 'settings', label: 'Settings', icon: createElement(Settings2, { size: 18 }) },
+  { id: 'drive', label: 'Drive Sync', icon: createElement(CloudSync, { size: 18 }) },
 ]

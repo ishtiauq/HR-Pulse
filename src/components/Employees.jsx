@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Users, Mail, Eye, ChevronDown, Download } from 'lucide-react'
+import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Users, Mail, Eye, ChevronDown, Download, Building2 } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
@@ -599,9 +599,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col gap-0.5 min-w-0">
-                        <h4 className="font-semibold text-sm truncate">{emp.name}</h4>
-                        <span className="text-xs text-muted-foreground truncate">{emp.role}</span>
-                        <span className="text-[10px] text-muted-foreground/75 truncate uppercase tracking-wider">{emp.department}</span>
+                        <h4 className="font-bold text-base truncate leading-none mb-0.5">{emp.name}</h4>
+                        <span className="text-sm font-medium text-muted-foreground truncate">{emp.role}</span>
                       </div>
                     </div>
                     
@@ -609,10 +608,13 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                       {emp.status}
                     </Badge>
                   </div>
-
                   {/* Expanded Content */}
                   <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[300px] opacity-100 mt-3 pt-3 border-t border-border' : 'max-h-0 opacity-0'}`}>
                     <div className="flex flex-col gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate font-medium">{emp.department}</span>
+                      </div>
                       <div className="flex items-center gap-2">
                         <Mail className="h-3.5 w-3.5 shrink-0" />
                         <span className="truncate">{emp.email}</span>

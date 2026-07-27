@@ -1,16 +1,18 @@
 import { useState } from 'react'
 import { Megaphone, Plus, Image as ImageIcon, FileText, Send, Calendar, Clock, Edit, Trash2, Users, AlertTriangle, MessageSquare, Heart, ThumbsUp, PartyPopper } from 'lucide-react'
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { useConfirm } from '../hooks/useConfirm'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectItem } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import AdSlot from './AdSlot'
 import { formatDateTime } from '../services/date.js'
 
 export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser }) {
-  const [activeTab, setActiveTab] = useState('feed')
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   // Form States
   const [title, setTitle] = useState('')
@@ -22,6 +24,8 @@ export default function Announcements({ employees, announcements, setAnnouncemen
   const [hasPoll, setHasPoll] = useState(false)
   const [pollQuestion, setPollQuestion] = useState('')
   const [pollOptions, setPollOptions] = useState(['', ''])
+
+  const [filterCategory, setFilterCategory] = useState('All')
 
   const { confirm, ConfirmDialog } = useConfirm()
 
@@ -67,7 +71,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     setHasPoll(false)
     setPollQuestion('')
     setPollOptions(['', ''])
-    setActiveTab('feed')
+    setIsDialogOpen(false)
   }
 
   const handleDelete = async (id) => {
@@ -82,68 +86,83 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     if (p === 'Important') return 'border-l-amber-500'
     return 'border-l-primary'
   }
+  
+  const getPriorityBadgeVariant = (p) => {
+    if (p === 'Urgent') return 'destructive'
+    if (p === 'Important') return 'secondary'
+    return 'outline'
+  }
+
+  const filteredAnnouncements = announcements.filter(a => filterCategory === 'All' || a.category === filterCategory)
 
   return (
-    <div className="fade-in pb-10">
-      <div className="flex items-center justify-between">
+    <div className="fade-in pb-10 max-w-5xl mx-auto">
+      <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
           <Megaphone size={20} className="text-primary" />
           Announcements
         </h1>
+        
         <div className="flex gap-3">
-          <Button variant={activeTab === 'feed' ? 'secondary' : 'ghost'} size="sm" onClick={() => setActiveTab('feed')}>Company Feed</Button>
-          <Button variant={activeTab === 'create' ? 'default' : 'ghost'} size="sm" onClick={() => setActiveTab('create')}>
-            <Plus size={16} /> New Post
-          </Button>
-        </div>
-      </div>
-      <div className="border-t border-border" />
-
-      {activeTab === 'create' && (
-        <Card className="max-w-[800px] mx-auto mt-6">
-          <CardContent className="p-6 sm:p-8 lg:p-10">
-            <h2 className="mt-0 mb-6 text-xl text-foreground font-bold">Create Announcement</h2>
-
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus size={16} className="mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">New Post</span>
+              </Button>
+            </DialogTrigger>
+          <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Create Announcement</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6 mt-4">
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-foreground">Title</label>
+                <label className="text-sm font-medium text-foreground">Title</label>
                 <Input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Q3 Town Hall Meeting" />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <Select label="Category" value={category} onChange={setCategory}>
-                  <SelectItem id="General">General</SelectItem>
-                  <SelectItem id="Policy Update">Policy Update</SelectItem>
-                  <SelectItem id="Event">Event</SelectItem>
-                  <SelectItem id="Emergency">Emergency</SelectItem>
-                </Select>
-                <Select label="Priority" value={priority} onChange={setPriority}>
-                  <SelectItem id="Normal">Normal (Blue)</SelectItem>
-                  <SelectItem id="Important">Important (Orange)</SelectItem>
-                  <SelectItem id="Urgent">Urgent (Red - Pinned)</SelectItem>
-                </Select>
-                <Select label="Target Audience" value={audience} onChange={setAudience}>
-                  <SelectItem id="all">All Employees</SelectItem>
-                  <SelectItem id="Engineering">Engineering Dept</SelectItem>
-                  <SelectItem id="Design">Design Dept</SelectItem>
-                  <SelectItem id="HR">HR Dept</SelectItem>
-                </Select>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-foreground">Category</label>
+                  <Select value={category} onChange={setCategory}>
+                    <SelectItem id="General">General</SelectItem>
+                    <SelectItem id="Policy Update">Policy Update</SelectItem>
+                    <SelectItem id="Event">Event</SelectItem>
+                    <SelectItem id="Emergency">Emergency</SelectItem>
+                  </Select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-foreground">Priority</label>
+                  <Select value={priority} onChange={setPriority}>
+                    <SelectItem id="Normal">Normal</SelectItem>
+                    <SelectItem id="Important">Important</SelectItem>
+                    <SelectItem id="Urgent">Urgent</SelectItem>
+                  </Select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-foreground">Target Audience</label>
+                  <Select value={audience} onChange={setAudience}>
+                    <SelectItem id="all">All Employees</SelectItem>
+                    <SelectItem id="Engineering">Engineering Dept</SelectItem>
+                    <SelectItem id="Design">Design Dept</SelectItem>
+                    <SelectItem id="HR">HR Dept</SelectItem>
+                  </Select>
+                </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-foreground">Message Content</label>
-                <textarea required rows={6} value={content} onChange={(e) => setContent(e.target.value)} className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-xs sm:text-sm shadow-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-y" placeholder="Type your message here..." />
-                <p className="text-xs text-muted-foreground">Line breaks will be preserved. Formatting tools coming soon.</p>
+                <label className="text-sm font-medium text-foreground">Message Content</label>
+                <textarea required rows={6} value={content} onChange={(e) => setContent(e.target.value)} className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-y" placeholder="Type your message here..." />
               </div>
 
-              <div className="flex flex-col gap-3 p-4 rounded-lg border border-dashed border-border bg-muted/30">
+              <div className="flex flex-col gap-4 p-4 rounded-lg border border-dashed bg-muted/50">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-foreground flex items-center gap-2">
-                    <AlertTriangle size={14} className="text-muted-foreground" /> Attach Poll (Optional)
+                  <span className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <AlertTriangle size={16} className="text-muted-foreground" /> Attach Poll (Optional)
                   </span>
-                  <button type="button" role="checkbox" aria-checked={hasPoll} onClick={() => setHasPoll(!hasPoll)}
-                    className={`w-9 h-5 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 ${hasPoll ? 'bg-primary' : 'bg-input'}`}>
-                    <span className={`block w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${hasPoll ? 'translate-x-[18px]' : 'translate-x-0.5'}`} />
+                  <button type="button" role="switch" aria-checked={hasPoll} onClick={() => setHasPoll(!hasPoll)}
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${hasPoll ? 'bg-primary' : 'bg-input'}`}>
+                    <span className={`pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform ${hasPoll ? 'translate-x-4' : 'translate-x-0'}`} />
                   </button>
                 </div>
 
@@ -151,123 +170,137 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                   <div className="flex flex-col gap-3 pt-2">
                     <Input aria-label="Poll question" type="text" value={pollQuestion} onChange={(e) => setPollQuestion(e.target.value)} placeholder="Poll Question..." />
                     {pollOptions.map((opt, i) => (
-                      <Input key={i} aria-label={`Poll option ${i + 1}`} type="text" value={opt} onChange={(e) => setPollOptionChange(i, e.target.value)} placeholder={`Option ${i + 1}`} />
+                      <Input key={i} aria-label={`Poll option ${i + 1}`} type="text" value={opt} onChange={(e) => handlePollOptionChange(i, e.target.value)} placeholder={`Option ${i + 1}`} />
                     ))}
-                    <Button type="button" variant="link" size="sm" onClick={handleAddPollOption} className="self-start">+ Add Option</Button>
+                    <Button type="button" variant="outline" size="sm" onClick={handleAddPollOption} className="self-start mt-1">
+                      <Plus size={14} className="mr-1" /> Add Option
+                    </Button>
                   </div>
                 )}
               </div>
 
-              <Button type="submit" size="lg" className="mt-2">
-                Publish Announcement
-              </Button>
+              <div className="flex justify-end gap-3 mt-4">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                <Button type="submit">Publish Announcement</Button>
+              </div>
             </form>
-          </CardContent>
-        </Card>
-      )}
-
-      {activeTab === 'feed' && (
-        <div className="flex flex-col gap-4 sm:gap-6 max-w-[800px] mx-auto">
-          {announcements.length === 0 ? (
-            <Card>
-              <CardContent className="p-8 sm:p-10 text-center text-muted-foreground">
-                No announcements found.
-              </CardContent>
-            </Card>
-          ) : (
-            announcements.map(post => {
-              const author = post.authorId === 'system' ? { name: 'System Auto-Post', avatar: '' } : employees.find(e => e.id === post.authorId) || { name: 'Unknown User' }
-              const dateStr = formatDateTime(post.date)
-              const isUrgent = post.priority === 'Urgent'
-
-              return (
-                <Card key={post.id} className={`border-l-4 ${getPriorityBorder(post.priority)}`}>
-                  <CardContent className="p-5 sm:p-6 relative">
-                    {isUrgent && (
-                      <div className="absolute top-3 right-3 text-[0.7rem] font-bold px-2 py-1 rounded-xl uppercase bg-destructive text-white">
-                        Pinned
-                      </div>
-                    )}
-
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex items-center gap-3">
-                        {author.avatar ? (
-                          <img src={author.avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-muted text-muted-foreground">
-                            <Megaphone size={20} />
-                          </div>
-                        )}
-                        <div>
-                          <div className="font-semibold text-foreground">{author.name}</div>
-                          <div className="text-[0.8rem] text-muted-foreground">{dateStr} • {post.audience === 'all' ? 'All Employees' : post.audience}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[0.8rem] px-2 py-1 rounded bg-muted text-muted-foreground">
-                          {post.category}
-                        </span>
-                        <Button variant="ghost" size="icon-xs" aria-label="Delete announcement" onClick={() => handleDelete(post.id)} className="text-destructive hover:text-destructive" title="Delete Post">
-                          <Trash2 size={16} />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <h3 className="m-0 mb-3 text-xl text-foreground">{post.title}</h3>
-                    <div className="whitespace-pre-wrap leading-relaxed text-[0.95rem] text-muted-foreground">
-                      {post.content}
-                    </div>
-
-                    {post.poll && (
-                      <div className="mt-5 p-4 rounded-lg bg-muted/30">
-                        <h4 className="m-0 mb-3 text-base text-foreground">📊 {post.poll.question}</h4>
-                        <div className="flex flex-col gap-2">
-                          {post.poll.options.map((opt, i) => {
-                            const votes = opt.votes.length
-                            const totalVotes = post.poll.options.reduce((sum, o) => sum + o.votes.length, 0)
-                            const pct = totalVotes === 0 ? 0 : Math.round((votes / totalVotes) * 100)
-                            return (
-                              <div key={i} className="flex items-center gap-3">
-                                <div className="flex-1 relative overflow-hidden h-8 rounded bg-muted">
-                                  <div className="absolute top-0 left-0 h-full opacity-20 bg-primary" style={{ width: `${pct}%` }} />
-                                  <div className="absolute top-0 left-0 h-full w-full flex items-center px-3 text-[0.9rem] text-foreground">
-                                    {opt.text}
-                                  </div>
-                                </div>
-                                <div className="w-10 text-sm text-right text-muted-foreground">{votes}</div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between items-center mt-5 pt-4 border-t border-border">
-                      <div className="flex gap-4" aria-label="Post reactions">
-                        <span aria-label={`${post.reactions['👍']} like reactions`} className="flex items-center gap-1.5 text-[0.9rem] text-muted-foreground">
-                          👍 {post.reactions['👍']}
-                        </span>
-                        <span aria-label={`${post.reactions['❤️']} heart reactions`} className="flex items-center gap-1.5 text-[0.9rem] text-muted-foreground">
-                          ❤️ {post.reactions['❤️']}
-                        </span>
-                        <span aria-label={`${post.reactions['🎉']} celebrate reactions`} className="flex items-center gap-1.5 text-[0.9rem] text-muted-foreground">
-                          🎉 {post.reactions['🎉']}
-                        </span>
-                        <span aria-label={`${post.comments.length} comments`} className="flex items-center gap-1.5 text-[0.9rem] ml-3 text-muted-foreground">
-                          <MessageSquare size={16} /> {post.comments.length}
-                        </span>
-                      </div>
-                      <div className="text-sm flex items-center gap-1.5 text-muted-foreground/60">
-                        <Users size={14} /> Read by {post.readBy.length} employees
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })
-          )}
+          </DialogContent>
+        </Dialog>
         </div>
-      )}
+      </div>
+      <div className="border-t border-border mb-6" />
+      
+      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-none">
+        {['All', 'General', 'Policy Update', 'Event', 'Emergency'].map(cat => (
+          <Badge 
+            key={cat} 
+            variant={filterCategory === cat ? 'default' : 'secondary'}
+            className="cursor-pointer hover:bg-primary/80 whitespace-nowrap"
+            onClick={() => setFilterCategory(cat)}
+          >
+            {cat}
+          </Badge>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-4 sm:gap-6">
+        {filteredAnnouncements.length === 0 ? (
+          <Card className="border-dashed border-2 bg-muted/10">
+            <CardContent className="p-12 text-center flex flex-col items-center gap-3 text-muted-foreground">
+              <Megaphone size={40} className="text-muted-foreground/50" />
+              <p>No announcements found in this category.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          filteredAnnouncements.map(post => {
+            const author = post.authorId === 'system' ? { name: 'System Auto-Post', avatar: '' } : employees.find(e => e.id === post.authorId) || { name: 'Unknown User' }
+            const dateStr = formatDateTime(post.date)
+            const isUrgent = post.priority === 'Urgent'
+
+            return (
+              <Card key={post.id} className="overflow-hidden mb-4 shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3 pt-5 flex flex-row items-start justify-between">
+                  <div className="flex items-center gap-3.5">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={author.avatar} alt={author.name} />
+                      <AvatarFallback className="bg-primary/10 text-primary"><Megaphone size={18} /></AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-sm leading-none">{author.name}</span>
+                        {isUrgent && <Badge variant="destructive" className="h-5 px-1.5 text-[10px] uppercase animate-pulse tracking-wider">Pinned</Badge>}
+                        {post.priority !== 'Normal' && <Badge variant={getPriorityBadgeVariant(post.priority)} className="h-5 px-1.5 text-[10px] uppercase tracking-wider">{post.priority}</Badge>}
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {dateStr} &bull; {post.audience === 'all' ? 'All Employees' : post.audience}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="hidden sm:inline-flex">{post.category}</Badge>
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(post.id)} className="h-8 w-8 text-muted-foreground hover:text-destructive" aria-label="Delete post">
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pb-5">
+                  <h3 className="text-lg font-semibold tracking-tight text-foreground mb-2">{post.title}</h3>
+                  <div className="whitespace-pre-wrap leading-relaxed text-sm text-foreground/90">
+                    {post.content}
+                  </div>
+
+                  {post.poll && (
+                    <div className="mt-6 p-4 rounded-xl border border-border/50 bg-muted/20">
+                      <h4 className="font-medium text-sm mb-4 flex items-center gap-2 text-foreground">
+                         <span className="text-lg">📊</span> {post.poll.question}
+                      </h4>
+                      <div className="flex flex-col gap-3">
+                        {post.poll.options.map((opt, i) => {
+                          const votes = opt.votes.length
+                          const totalVotes = post.poll.options.reduce((sum, o) => sum + o.votes.length, 0)
+                          const pct = totalVotes === 0 ? 0 : Math.round((votes / totalVotes) * 100)
+                          return (
+                            <div key={i} className="flex items-center gap-3">
+                              <div className="flex-1 relative overflow-hidden h-9 rounded-md bg-muted/50 border border-transparent hover:border-border transition-colors">
+                                <div className="absolute top-0 left-0 h-full opacity-10 bg-primary transition-all duration-500 ease-in-out" style={{ width: `${pct}%` }} />
+                                <div className="absolute top-0 left-0 h-full w-full flex items-center px-3 text-sm font-medium text-foreground">
+                                  {opt.text}
+                                </div>
+                              </div>
+                              <div className="w-10 text-sm text-right text-muted-foreground font-medium">{votes}</div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+                
+                <CardFooter className="pt-3 pb-3 border-t flex flex-wrap justify-between items-center gap-3">
+                  <div className="flex flex-wrap gap-1 -ml-2">
+                    <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                      👍 <span className="ml-1.5 text-xs font-medium">{post.reactions['👍']}</span>
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                      ❤️ <span className="ml-1.5 text-xs font-medium">{post.reactions['❤️']}</span>
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                      🎉 <span className="ml-1.5 text-xs font-medium">{post.reactions['🎉']}</span>
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-8 px-2 ml-1 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                      <MessageSquare size={14} className="mr-1.5" /> <span className="text-xs font-medium">{post.comments.length}</span>
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Users size={13} /> {post.readBy.length} views
+                  </div>
+                </CardFooter>
+              </Card>
+            )
+          })
+        )}
+      </div>
       <ConfirmDialog />
       <AdSlot />
     </div>

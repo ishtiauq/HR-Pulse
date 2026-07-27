@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 
 export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, setShowNotifications, markNotificationsRead, unreadCount }) {
   return (
-    <header aria-label="Top bar" className="topbar w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-4 flex items-center justify-between rounded-full bg-card text-card-foreground border border-border shadow-md transition-all duration-300">
+    <header aria-label="Top bar" className="topbar w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-4 flex items-center justify-between rounded-full bg-background/50 backdrop-blur-lg saturate-150 text-foreground border border-border/50 shadow-sm transition-all duration-300">
       
       {/* Left Section: Mobile Menu + Brand Pill */}
       <div className="flex items-center gap-3 sm:gap-4">

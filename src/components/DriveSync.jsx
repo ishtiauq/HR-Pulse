@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Database, HardDrive, CloudOff, CloudLightning, ArrowLeftRight, Download, Info, FileJson, AlertCircle, RefreshCw, X, Trash2, Shield, RotateCcw } from 'lucide-react'
+import { CloudSync, HardDrive, CloudOff, CloudLightning, ArrowLeftRight, Download, Info, FileJson, AlertCircle, RefreshCw, X, Trash2, Shield, RotateCcw } from 'lucide-react'
 import { Card, CardContent } from "@/components/ui/card"
 import { useConfirm } from '../hooks/useConfirm'
 import { Button } from "@/components/ui/button"
@@ -103,7 +103,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Database size={20} className="text-primary" />
+          <CloudSync size={20} className="text-primary" />
           Google Drive Sync Management
         </h1>
       </div>

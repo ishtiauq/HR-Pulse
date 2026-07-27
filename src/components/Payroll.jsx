@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import jsPDF from 'jspdf'
-import { CreditCard, Download, Search, X, PlusCircle, Calendar, Pencil, CheckSquare, Trash2, ChevronDown, Check } from 'lucide-react'
+import { Banknote, Download, Search, X, PlusCircle, Calendar, Pencil, CheckSquare, Trash2, ChevronDown, Check } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -566,7 +566,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
       {/* Header and Month Selector */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <CreditCard size={20} className="text-primary" />
+          <Banknote size={20} className="text-primary" />
           Payroll
         </h1>
 
@@ -631,7 +631,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium uppercase text-muted-foreground tracking-wider">Total Payout Budget</CardTitle>
-                <CreditCard className="h-4 w-4 text-muted-foreground" />
+                <Banknote className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold font-mono">{currency}{totalCost.toLocaleString()}</div>

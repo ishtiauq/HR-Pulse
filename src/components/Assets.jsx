@@ -853,7 +853,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     <div className="animate-fade-in pb-10 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-          <Monitor size={20} className="text-primary" />
+          <Laptop size={20} className="text-primary" />
           Asset Management
         </h1>
       </div>
