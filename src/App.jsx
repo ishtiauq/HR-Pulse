@@ -17,10 +17,9 @@ import TooltipPopover from './components/TooltipPopover.jsx'
 import { readMeta, writeMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBackup, createBackup } from './services/googleDrive.js'
 import { clearLocalCache } from './services/db.js'
 import { validateDatabase } from './services/validator.js'
-import { Search, LayoutDashboard, Users, CreditCard, CalendarCheck, Receipt, Settings as SettingsIcon, HardDrive, FileText, Megaphone, CalendarDays, Monitor, Database, User, History, Moon, Trash2, Sun, Menu } from 'lucide-react'
+import { Search, LayoutDashboard, Settings as SettingsIcon, HardDrive, FileText, Monitor, User, History, Moon, Trash2, Sun, Menu } from 'lucide-react'
 import { useModal } from './services/useModal.js'
-
-const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
+import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, allNavItems } from './utils/helpers.js'
 
 const textEncoder = new TextEncoder()
 const textDecoder = new TextDecoder()
@@ -55,37 +54,6 @@ const decryptJson = async (payload, keyMaterial) => {
   )
   return JSON.parse(textDecoder.decode(new Uint8Array(decrypted)))
 }
-
-function timestampArrayChanges(prev, next) {
-  if (!Array.isArray(prev) || !Array.isArray(next)) return next;
-  const prevMap = new Map(prev.map(item => [item.id, item]));
-  return next.map(item => {
-    const prevItem = prevMap.get(item.id);
-    if (!prevItem) {
-      return { ...item, updated_at: new Date().toISOString() };
-    }
-    const cleanPrev = { ...prevItem, updated_at: undefined, _conflict: undefined };
-    const cleanItem = { ...item, updated_at: undefined, _conflict: undefined };
-    if (JSON.stringify(cleanPrev) !== JSON.stringify(cleanItem)) {
-      return { ...item, updated_at: new Date().toISOString() };
-    }
-    return item;
-  });
-}
-
-const allNavItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
-  { id: 'announcements', label: 'Announcements', icon: <Megaphone size={18} /> },
-  { id: 'calendar', label: 'Calendar', icon: <CalendarDays size={18} /> },
-  { id: 'documents', label: 'Documents', icon: <FileText size={18} /> },
-  { id: 'employees', label: 'Employees', icon: <Users size={18} /> },
-  { id: 'payroll', label: 'Payroll', icon: <CreditCard size={18} /> },
-  { id: 'attendance', label: 'Leaves & Attendance', icon: <CalendarCheck size={18} /> },
-  { id: 'expenses', label: 'Expenses', icon: <Receipt size={18} /> },
-  { id: 'assets', label: 'Assets', icon: <Monitor size={18} /> },
-  { id: 'settings', label: 'Settings', icon: <SettingsIcon size={18} /> },
-  { id: 'drive', label: 'Drive Sync', icon: <Database size={18} /> },
-]
 
 export default function App() {
   const [user, setUser] = useState(() => {
