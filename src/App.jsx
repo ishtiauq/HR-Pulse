@@ -149,16 +149,9 @@ export default function App() {
       <main className="content dashboard-content pb-12 flex-1 overflow-y-auto flex flex-col items-center" style={{ scrollbarGutter: 'stable' }}>
         <div className="w-full max-w-[1600px] flex flex-col relative">
           
-          {/* Progressive Blur Sticky Header Wrapper */}
-          <div className="sticky top-0 z-40 w-full pt-6 md:pt-8 lg:pt-10 pb-6 md:pb-8 lg:pb-10 px-4 md:px-6 lg:px-8" style={{ maskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 60%, transparent 100%)' }}>
-            {/* Blur background layers */}
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-xl" style={{ maskImage: 'linear-gradient(to bottom, black 0%, black 50%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 50%, transparent 100%)' }} />
-            <div className="absolute inset-0 bg-background/60 backdrop-blur-lg" style={{ maskImage: 'linear-gradient(to bottom, transparent 40%, black 60%, transparent 85%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 40%, black 60%, transparent 85%)' }} />
-            <div className="absolute inset-0 bg-background/30 backdrop-blur-md" style={{ maskImage: 'linear-gradient(to bottom, transparent 60%, black 75%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 60%, black 75%, transparent 100%)' }} />
-            <div className="absolute inset-0 bg-background/10 backdrop-blur-sm" style={{ maskImage: 'linear-gradient(to bottom, transparent 75%, black 90%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 75%, black 90%, transparent 100%)' }} />
-            
-            <div className="relative z-10">
-              <Topbar
+          {/* Sticky Header Wrapper */}
+          <div className="sticky top-0 z-40 w-full pt-6 md:pt-8 lg:pt-10 pb-6 md:pb-8 lg:pb-10 px-4 md:px-6 lg:px-8">
+            <Topbar
                 isDarkMode={isDarkMode}
                 toggleSidebar={toggleSidebar}
                 themeMode={themeMode}
@@ -172,9 +165,8 @@ export default function App() {
                 unreadCount={unreadCount}
               />
             </div>
-          </div>
 
-          {/* Notification Panel — rendered outside the masked sticky header */}
+          {/* Notification Panel */}
           {appData.showNotifications && (
             <div
               role="dialog"

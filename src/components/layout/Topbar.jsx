@@ -58,7 +58,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }}
+            onClick={() => { setShowNotifications(prev => !prev); markNotificationsRead() }}
             className="rounded-full size-9 sm:size-10 text-foreground hover:bg-muted relative"
             id="notification-trigger"
           >
