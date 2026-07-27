@@ -2,45 +2,46 @@ import { Monitor, Sun, Moon, Menu } from 'lucide-react'
 
 export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, notifications, showNotifications, setShowNotifications, markNotificationsRead, unreadCount }) {
   return (
-    <header aria-label="Top bar" className="macos-toolbar topbar h-14 min-h-14 flex items-center justify-between px-4 sm:px-5 sticky top-0 shrink-0 mx-auto w-full max-w-[700px] rounded-full z-10" style={{
-      background: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(30px) saturate(150%)',
-      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
-      border: '1px solid rgba(0,0,0,0.05)'
+    <header aria-label="Top bar" className="macos-toolbar topbar h-16 min-h-16 flex items-center justify-between px-6 md:px-8 sticky top-0 shrink-0 w-full rounded-2xl z-10" style={{
+      background: isDarkMode ? 'rgba(24, 24, 27, 0.75)' : 'rgba(255, 255, 255, 0.75)',
+      backdropFilter: 'blur(30px) saturate(150%)',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
+      border: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0,0,0,0.06)'
     }}>
-      <div className="left flex items-center gap-4 sm:gap-6 md:gap-10">
-        <button aria-label="Open menu" className="mobile-menu-btn size-8 hidden items-center justify-center bg-transparent border-0 rounded-md cursor-pointer" onClick={toggleSidebar} style={{
-          color: 'var(--md-bw-on-surface-variant)'
+      <div className="left flex items-center gap-3 sm:gap-5">
+        <button aria-label="Open menu" className="mobile-menu-btn size-10 flex lg:hidden items-center justify-center bg-[rgba(0,0,0,0.05)] border-0 rounded-xl cursor-pointer hover:bg-[rgba(0,0,0,0.08)] transition-colors" onClick={toggleSidebar} style={{
+          color: 'var(--md-bw-on-surface)'
         }}>
-          <Menu size={18} />
+          <Menu size={22} />
         </button>
 
-        <div className="brand-container flex items-center gap-2">
-          <div className="size-7 rounded-md flex items-center justify-center shrink-0" style={{ background: 'var(--md-bw-primary)' }}>
-            <span className="text-xs font-bold" style={{ color: 'var(--md-bw-on-primary)' }}>HP</span>
+        <div className="brand-container flex items-center gap-3">
+          <div className="size-9 rounded-xl flex items-center justify-center shrink-0 shadow-sm" style={{ background: '#007AFF' }}>
+            <span className="text-xs font-black text-white tracking-wider">HP</span>
           </div>
-          <span className="brand-text text-lg font-bold leading-6 tracking-[-0.01em] whitespace-nowrap" style={{ color: 'var(--md-bw-on-surface)' }}>
+          <span className="brand-text text-lg sm:text-xl font-extrabold leading-6 tracking-tight whitespace-nowrap" style={{ color: 'var(--md-bw-on-surface)' }}>
             HR Pulse
           </span>
         </div>
       </div>
-      <div className="right flex items-center gap-4 sm:gap-6 md:gap-10 ml-4 sm:ml-6">
-        <button aria-label="Sync status" aria-pressed={isSyncing} className="sync-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium leading-3.5 cursor-pointer" onClick={handleSync} disabled={isSyncing} style={{
-          background: isSyncing ? 'rgba(255, 159, 10, 0.12)' : (!driveConnected || syncConflicts.length > 0) ? 'rgba(224, 32, 20, 0.1)' : 'rgba(52, 199, 89, 0.1)',
+      <div className="right flex items-center gap-4 sm:gap-6 ml-4 sm:ml-6">
+        <button aria-label="Sync status" aria-pressed={isSyncing} className="sync-btn flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold leading-3.5 cursor-pointer transition-all" onClick={handleSync} disabled={isSyncing} style={{
+          background: isSyncing ? 'rgba(255, 159, 10, 0.12)' : (!driveConnected || syncConflicts.length > 0) ? 'rgba(224, 32, 20, 0.1)' : 'rgba(52, 199, 89, 0.12)',
           border: isSyncing ? '1px solid rgba(255, 159, 10, 0.3)' : (!driveConnected || syncConflicts.length > 0) ? '1px solid rgba(224, 32, 20, 0.25)' : '1px solid rgba(52, 199, 89, 0.3)',
           color: isSyncing ? '#b8860b' : (!driveConnected || syncConflicts.length > 0) ? 'var(--md-bw-error)' : '#1a7d3a',
         }}>
-          <span className={`sync-dot ${isSyncing ? 'sync-spin' : (!driveConnected || syncConflicts.length > 0) ? '' : 'sync-blink'} size-1.5 rounded-full inline-block`} style={{
+          <span className={`sync-dot ${isSyncing ? 'sync-spin' : (!driveConnected || syncConflicts.length > 0) ? '' : 'sync-blink'} size-2 rounded-full inline-block`} style={{
             background: isSyncing ? '#ff9f0a' : (!driveConnected || syncConflicts.length > 0) ? '#dc3545' : '#34c759'
           }}></span>
           {isSyncing ? 'Syncing...' : (!driveConnected || syncConflicts.length > 0) ? 'Not Synced' : 'Synced'}
         </button>
 
-        <button aria-label="Toggle theme" className="icon-btn size-8 flex items-center justify-center bg-transparent border-0 rounded-md cursor-pointer" onClick={toggleTheme} title={`Theme: ${themeMode}`} style={{ color: 'var(--md-bw-on-surface-variant)' }}>
-          {themeMode === 'system' ? <Monitor size={18} /> : themeMode === 'light' ? <Sun size={18} /> : <Moon size={18} />}
+        <button aria-label="Toggle theme" className="icon-btn size-9 flex items-center justify-center bg-transparent border-0 rounded-lg cursor-pointer hover:bg-[rgba(0,0,0,0.04)] transition-colors" onClick={toggleTheme} title={`Theme: ${themeMode}`} style={{ color: 'var(--md-bw-on-surface-variant)' }}>
+          {themeMode === 'system' ? <Monitor size={19} /> : themeMode === 'light' ? <Sun size={19} /> : <Moon size={19} />}
         </button>
         <div className="relative">
-          <button aria-label="Notifications" aria-expanded={showNotifications} className="icon-btn size-8 flex items-center justify-center bg-transparent border-0 rounded-md cursor-pointer relative" onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }} style={{ color: 'var(--md-bw-on-surface-variant)' }}>
-            <svg className={unreadCount > 0 ? 'bell-ring' : ''} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          <button aria-label="Notifications" aria-expanded={showNotifications} className="icon-btn size-9 flex items-center justify-center bg-transparent border-0 rounded-lg cursor-pointer hover:bg-[rgba(0,0,0,0.04)] transition-colors relative" onClick={() => { setShowNotifications(!showNotifications); markNotificationsRead() }} style={{ color: 'var(--md-bw-on-surface-variant)' }}>
+            <svg className={unreadCount > 0 ? 'bell-ring' : ''} width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
             {unreadCount > 0 && <span aria-live="polite" aria-atomic="true" className="notif-badge">{unreadCount}</span>}
           </button>
 

@@ -146,32 +146,34 @@ export default function App() {
         setSimulatedRole={appData.setSimulatedRole}
         setMobileMenuOpen={setMobileMenuOpen}
       />
-      <main className="content dashboard-content p-4 md:p-6 lg:p-8" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', scrollbarGutter: 'stable', gap: '16px' }}>
-        <Topbar
-          isDarkMode={isDarkMode}
-          toggleSidebar={toggleSidebar}
-          themeMode={themeMode}
-          toggleTheme={toggleTheme}
-          handleSync={appData.handleSync}
-          isSyncing={appData.isSyncing}
-          driveConnected={appData.driveConnected}
-          syncConflicts={appData.syncConflicts}
-          notifications={appData.notifications}
-          showNotifications={appData.showNotifications}
-          setShowNotifications={appData.setShowNotifications}
-          markNotificationsRead={appData.markNotificationsRead}
-          unreadCount={unreadCount}
-        />
-        <AppContent
-          currentView={currentView}
-          setCurrentView={setCurrentView}
-          isAppLoading={appData.isAppLoading}
-          hasPermission={appData.hasPermission}
-          simulatedRole={appData.simulatedRole}
-          user={user}
-          addToast={addToast}
-          {...appData}
-        />
+      <main className="content dashboard-content p-4 md:p-6 lg:p-8 flex-1 overflow-y-auto flex flex-col items-center" style={{ scrollbarGutter: 'stable' }}>
+        <div className="w-full max-w-[1600px] flex flex-col gap-6">
+          <Topbar
+            isDarkMode={isDarkMode}
+            toggleSidebar={toggleSidebar}
+            themeMode={themeMode}
+            toggleTheme={toggleTheme}
+            handleSync={appData.handleSync}
+            isSyncing={appData.isSyncing}
+            driveConnected={appData.driveConnected}
+            syncConflicts={appData.syncConflicts}
+            notifications={appData.notifications}
+            showNotifications={appData.showNotifications}
+            setShowNotifications={appData.setShowNotifications}
+            markNotificationsRead={appData.markNotificationsRead}
+            unreadCount={unreadCount}
+          />
+          <AppContent
+            currentView={currentView}
+            setCurrentView={setCurrentView}
+            isAppLoading={appData.isAppLoading}
+            hasPermission={appData.hasPermission}
+            simulatedRole={appData.simulatedRole}
+            user={user}
+            addToast={addToast}
+            {...appData}
+          />
+        </div>
       </main>
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <CommandPalette

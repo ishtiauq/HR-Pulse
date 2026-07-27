@@ -763,25 +763,20 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
       {/* Form Modal/Overlay */}
       {showAddForm && (
-        <div className="dialog-scrim visible" onClick={() => handleCloseForm()}>
-          <div className="m3-dialog p-8 flex flex-col gap-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()} style={{
-            width: '100%',
-            maxWidth: '500px',
-          }}>
-            <div className="flex justify-between items-center">
-              <h3 className="text-xl flex items-center gap-2 m-0" style={{ color: 'var(--md-bw-on-surface)' }}>
-                {editingEmployee ? <Edit size={20} style={{ color: 'var(--md-bw-on-surface)' }} /> : <UserPlus size={20} style={{ color: 'var(--md-bw-on-surface)' }} />}
+        <div className="modal-overlay" onClick={() => handleCloseForm()}>
+          <div className="macos-modal max-w-lg p-7 sm:p-8 flex flex-col gap-6" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center pb-4 border-b border-[rgba(0,0,0,0.06)]">
+              <h3 className="text-xl sm:text-2xl font-extrabold flex items-center gap-3 m-0" style={{ color: 'var(--md-bw-on-surface)' }}>
+                {editingEmployee ? <Edit size={22} className="text-[#007AFF]" /> : <UserPlus size={22} className="text-[#007AFF]" />}
                 {editingEmployee ? 'Edit Employee Profile' : 'New Employee Record'}
               </h3>
               <button
                 onClick={handleCloseForm}
                 aria-label="Close form"
-                className="flex items-center justify-center p-1 rounded-full"
-                style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', transition: 'background-color 0.2s' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                className="size-9 flex items-center justify-center rounded-full bg-[rgba(0,0,0,0.05)] hover:bg-[rgba(0,0,0,0.1)] transition-colors cursor-pointer border-none"
+                style={{ color: 'var(--md-bw-on-surface-variant)' }}
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 

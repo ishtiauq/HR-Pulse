@@ -942,16 +942,16 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
 
       {/* MANAGE COMPENSATION MODAL */}
       {selectedEmpLog && (
-        <div className={`dialog-scrim${isDrawerOpen ? ' visible' : ''}`} onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }} style={{ zIndex: 999 }}>
-          <div className="m3-dialog flex flex-col gap-[14px] max-h-[90vh] overflow-y-auto p-6 sm:p-8" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '460px', background: 'var(--md-bw-surface)', color: 'var(--md-bw-on-surface)' }}>
+        <div className="modal-overlay" onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }}>
+          <div className="macos-modal max-w-lg flex flex-col gap-5 p-7 sm:p-8" onClick={(e) => e.stopPropagation()}>
             
             {/* Header */}
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="m-0 text-[1.1rem] font-bold flex items-center gap-2" style={{ color: 'var(--md-bw-on-surface)' }}>
-                <Pencil size={18} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+            <div className="flex justify-between items-center pb-3 mb-2 border-b border-[rgba(0,0,0,0.06)]">
+              <h3 className="m-0 text-xl font-extrabold flex items-center gap-2.5" style={{ color: 'var(--md-bw-on-surface)' }}>
+                <Pencil size={20} className="text-[#007AFF]" />
                 Manage Compensation
               </h3>
-              <button onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }} aria-label="Close compensation panel" className="flex items-center justify-center p-1 rounded-full" style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer' }}>
+              <button onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }} aria-label="Close compensation panel" className="size-9 flex items-center justify-center rounded-full bg-[rgba(0,0,0,0.05)] hover:bg-[rgba(0,0,0,0.1)] transition-colors border-none cursor-pointer">
                 <X size={18} />
               </button>
             </div>
