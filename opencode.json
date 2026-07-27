@@ -3,5 +3,18 @@
   "plugin": [
     "superpowers@git+https://github.com/obra/superpowers.git",
     "opencode-mem"
-  ]
+  ],
+  "mcp": {
+    "codegraph": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "codegraph",
+        "serve",
+        "--mcp"
+      ],
+      "enabled": true
+    }
+  }
 }

@@ -17,7 +17,7 @@ export default function Sidebar({
     }}>
       
       {/* PROGRESSIVE BLUR HEADER */}
-        <div className="sidebar-header-wrapper shrink-0 absolute top-0 inset-x-0 z-10 flex flex-col">
+          <div className="sidebar-header-wrapper shrink-0 absolute top-0 inset-x-0 z-20 flex flex-col">
           <div className="relative w-full flex items-center gap-3" style={{
           zIndex: 2,
           padding: isCollapsed ? '12px 8px' : '12px 16px',
@@ -80,7 +80,7 @@ export default function Sidebar({
       </nav>
 
       {/* PROGRESSIVE BLUR FOOTER */}
-      <div className="sidebar-footer-wrapper shrink-0 absolute bottom-0 inset-x-0 z-10 flex flex-col">
+      <div className="sidebar-footer-wrapper shrink-0 absolute bottom-0 inset-x-0 z-20 flex flex-col">
         <div className="sidebar-footer relative flex flex-col gap-2" style={{
           zIndex: 2,
           padding: isCollapsed ? '12px 8px' : '12px'
