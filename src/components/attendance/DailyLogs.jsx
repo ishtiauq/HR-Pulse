@@ -15,50 +15,50 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '0 0 16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative' }}>
-          <button onClick={(e) => { e.stopPropagation(); setShowDatePicker(v => !v); setCalYear(selYear); setCalMonth(selMonth) }}
+      <div className="flex justify-between items-center flex-wrap gap-3 pb-4">
+        <div className="flex items-center gap-3 relative">
+          <button aria-label={`Selected date: ${selectedDate}`} onClick={(e) => { e.stopPropagation(); setShowDatePicker(v => !v); setCalYear(selYear); setCalMonth(selMonth) }}
+            className="pl-3.5 pr-[38px] py-2.5 rounded-full min-h-10 cursor-pointer flex items-center gap-2 outline-none font-medium text-sm"
             style={{
-              padding: '10px 38px 10px 14px', borderRadius: '100px', minHeight: '40px',
               border: '1px solid var(--glass-border)', background: 'var(--glass-bg)',
-              color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
+              color: 'var(--md-bw-on-surface)', fontFamily: "'Roboto'"
             }}>
             {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-            <CalendarDays size={16} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+            <CalendarDays size={16} className="opacity-60" style={{ color: 'var(--md-bw-on-surface-variant)' }} />
           </button>
           <span className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
             {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' })}
           </span>
           {showDatePicker && (
             <div onClick={e => e.stopPropagation()}
-              style={{ position: 'absolute', top: 'calc(100% + 6px)', left: '0', zIndex: 50, width: '280px', padding: '16px',
+              className="absolute top-full left-0 z-50 w-[280px] p-4 mt-1.5"
+              style={{
                 background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
                 border: '1px solid var(--glass-border)', borderRadius: 'var(--glass-radius)', boxShadow: 'var(--glass-shadow)',
                 color: 'var(--md-bw-on-surface)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <button onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1) } else setCalMonth(m => m - 1) }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--md-bw-on-surface)', display: 'flex' }}>
+              <div className="flex justify-between items-center mb-3">
+                <button aria-label="Previous month" onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1) } else setCalMonth(m => m - 1) }}
+                  className="bg-transparent border-0 cursor-pointer p-1 flex" style={{ color: 'var(--md-bw-on-surface)' }}>
                   <ChevronLeft size={16} />
                 </button>
-                <span style={{ font: "600 14px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>
+                <span className="font-semibold text-sm" style={{ fontFamily: "'Roboto'", color: 'var(--md-bw-on-surface)' }}>
                   {new Date(calYear, calMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 </span>
-                <button onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1) } else setCalMonth(m => m + 1) }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--md-bw-on-surface)', display: 'flex' }}>
+                <button aria-label="Next month" onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1) } else setCalMonth(m => m + 1) }}
+                  className="bg-transparent border-0 cursor-pointer p-1 flex" style={{ color: 'var(--md-bw-on-surface)' }}>
                   <ChevronRight size={16} />
                 </button>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '2px', textAlign: 'center' }}>
+              <div className="grid grid-cols-7 gap-0.5 text-center">
                 {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-                  <span key={d} style={{ font: "500 11px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', padding: '4px 0' }}>{d}</span>
+                  <span key={d} className="font-medium text-xs py-1" style={{ fontFamily: "'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>{d}</span>
                 ))}
                 {calGrid.map((d, i) => (
                   d === null ? <div key={i} /> : (
-                    <button key={i} onClick={() => { setSelectedDate(`${calYear}-${z(calMonth+1)}-${z(d)}`); setShowDatePicker(false) }}
+                    <button key={i} aria-label={`${calYear}-${z(calMonth+1)}-${z(d)}`} onClick={() => { setSelectedDate(`${calYear}-${z(calMonth+1)}-${z(d)}`); setShowDatePicker(false) }}
+                      className="size-8 rounded-full border-0 cursor-pointer mx-auto font-normal text-[13px]"
                       style={{
-                        width: '32px', height: '32px', borderRadius: '50%', border: 'none', cursor: 'pointer',
-                        font: "400 13px 'Roboto'", margin: '0 auto',
+                        fontFamily: "'Roboto'",
                         background: d === selNum && calMonth === selMonth && calYear === selYear
                           ? 'linear-gradient(135deg, #0062E6 0%, #003A8C 100%)' : 'transparent',
                         color: d === selNum && calMonth === selMonth && calYear === selYear ? '#fff' : 'var(--md-bw-on-surface)',
@@ -74,7 +74,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
             </div>
           )}
         </div>
-        <button className="btn btn-text" onClick={() => markAll(employees)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <button aria-label="Mark all employees present" className="btn btn-text flex items-center gap-1.5" onClick={() => markAll(employees)}>
           <Plus size={15} /> Mark All Present
         </button>
       </div>
@@ -99,7 +99,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
             </thead>
           </table>
         </div>
-        <div className="payroll-table-body-scroll" style={{ maxHeight: '520px' }}>
+        <div className="payroll-table-body-scroll max-h-[520px]">
           <table className="payroll-table">
             <colgroup>
               <col style={{ width: '200px' }} />
@@ -115,47 +115,49 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                 return (
                   <tr key={emp.id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
                     <td style={cell}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <img src={emp.avatar} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
+                      <div className="flex items-center gap-2.5">
+                        <img src={emp.avatar} alt="" className="size-7 rounded-full object-cover" />
                         <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{emp.name}</span>
                       </div>
                     </td>
                     <td style={{ ...cell, textAlign: 'center' }}>
-                      <input type="text" value={log.checkIn} onChange={e => setLog(emp.id, { [e.target.name]: e.target.value })} name="checkIn"
-                        style={{ width: '90px', textAlign: 'center', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "400 13px 'Roboto'", outline: 'none' }}
+                      <input aria-label={`Check-in time for ${emp.name}`} type="text" value={log.checkIn} onChange={e => setLog(emp.id, { [e.target.name]: e.target.value })} name="checkIn"
+                        className="w-[90px] text-center py-1.5 px-2 rounded-md outline-none font-normal text-[13px]"
+                        style={{ border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', fontFamily: "'Roboto'" }}
                         placeholder="09:00 AM"
                       />
                     </td>
                     <td style={{ ...cell, textAlign: 'center' }}>
-                      <input type="text" value={log.checkOut} onChange={e => setLog(emp.id, { [e.target.name]: e.target.value })} name="checkOut"
-                        style={{ width: '90px', textAlign: 'center', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "400 13px 'Roboto'", outline: 'none' }}
+                      <input aria-label={`Check-out time for ${emp.name}`} type="text" value={log.checkOut} onChange={e => setLog(emp.id, { [e.target.name]: e.target.value })} name="checkOut"
+                        className="w-[90px] text-center py-1.5 px-2 rounded-md outline-none font-normal text-[13px]"
+                        style={{ border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', fontFamily: "'Roboto'" }}
                         placeholder="06:00 PM"
                       />
                     </td>
                     <td style={{ ...cell, textAlign: 'center' }}>
-                      <span className="body-large" style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--md-bw-on-surface)', fontWeight: 600 }}>{log.hours}</span>
+                      <span className="body-large tabular-nums font-semibold" style={{ color: 'var(--md-bw-on-surface)' }}>{log.hours}</span>
                     </td>
                     <td style={cell}>
-                      <div style={{ position: 'relative' }}>
-                        <button onClick={(e) => { e.stopPropagation(); setOpenStatusEmp(v => v === emp.id ? null : emp.id) }}
+                      <div className="relative">
+                        <button aria-label={`Status: ${log.status} for ${emp.name}`} role="status" onClick={(e) => { e.stopPropagation(); setOpenStatusEmp(v => v === emp.id ? null : emp.id) }}
                           style={{ ...selStyle, background: ps.bg, color: ps.color, border: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
                           {log.status}
-                          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ opacity: 0.7 }}><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className="opacity-70"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         </button>
                         {openStatusEmp === emp.id && (
                           <div onClick={e => e.stopPropagation()}
-                            style={{ position: 'absolute', top: 'calc(100% + 4px)', left: '0', zIndex: 50, minWidth: '140px', padding: '6px',
+                            className="absolute left-0 z-50 min-w-[140px] p-1.5"
+                            style={{ top: 'calc(100% + 4px)',
                               background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
                               border: '1px solid var(--glass-border)', borderRadius: 'var(--glass-radius)', boxShadow: 'var(--glass-shadow)',
                               color: 'var(--md-bw-on-surface)' }}>
                             {Object.entries(PILL_STYLES).map(([k, v]) => (
                               <button key={k} onClick={() => { setLog(emp.id, { status: k }); setOpenStatusEmp(null) }}
+                                className="block w-full px-3 py-2 rounded-full border-0 cursor-pointer text-xs text-left transition-all duration-150"
                                 style={{
-                                  display: 'block', width: '100%', padding: '8px 12px', borderRadius: '100px', border: 'none',
-                                  cursor: 'pointer', font: "600 12px 'Roboto'", textAlign: 'left',
+                                  fontFamily: "'Roboto'", fontWeight: 600,
                                   background: k === log.status ? v.bg : 'transparent',
                                   color: k === log.status ? v.color : 'var(--md-bw-on-surface)',
-                                  transition: 'all 0.15s',
                                 }}
                                 onMouseEnter={e => { if (k !== log.status) e.target.style.background = 'var(--glass-bg)' }}
                                 onMouseLeave={e => { if (k !== log.status) e.target.style.background = 'transparent' }}>
@@ -172,8 +174,8 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
             </tbody>
           </table>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 24px' }}>
-          <button className="btn btn-filled" onClick={() => addToast('Daily logs saved.', 'success')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="flex justify-end px-6 py-4">
+          <button aria-label="Save daily logs" className="btn btn-filled flex items-center gap-2" onClick={() => addToast('Daily logs saved.', 'success')}>
             <Check size={16} /> Save Daily Logs
           </button>
         </div>

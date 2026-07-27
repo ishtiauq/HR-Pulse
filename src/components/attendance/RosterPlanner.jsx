@@ -38,20 +38,20 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', padding: '0 0 16px' }}>
-        <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Weekly Roster Planner</h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button className="btn btn-outlined" onClick={handleCopyPrev} style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '36px', fontSize: '12px' }}>
+      <div className="flex justify-between items-center flex-wrap gap-3 pb-4">
+        <h3 className="title-medium m-0" style={{ color: 'var(--md-bw-on-surface)' }}>Weekly Roster Planner</h3>
+        <div className="flex items-center gap-3">
+          <button aria-label="Copy previous week roster" className="btn btn-outlined flex items-center gap-1.5 h-9 text-xs" onClick={handleCopyPrev}>
             <CalendarDays size={14} /> Copy Prev Week
           </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--glass-bg)', padding: '3px', borderRadius: '100px', border: '1px solid var(--glass-border)' }}>
-            <button className="btn btn-text" style={{ padding: '4px 8px', minHeight: '30px' }} onClick={goBack}>
+          <div className="flex items-center gap-1 p-[3px] rounded-full" style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}>
+            <button aria-label="Previous week" className="btn btn-text px-2 py-1 min-h-[30px]" onClick={goBack}>
               <ChevronLeft size={15} />
             </button>
-            <span style={{ fontSize: '0.82rem', fontWeight: 600, padding: '0 8px', color: 'var(--md-bw-on-surface)', whiteSpace: 'nowrap' }}>
+            <span className="text-[0.82rem] font-semibold px-2 whitespace-nowrap" style={{ color: 'var(--md-bw-on-surface)' }}>
               {formatDateShort(weekDates[0])} — {formatDateShort(weekDates[6])}
             </span>
-            <button className="btn btn-text" style={{ padding: '4px 8px', minHeight: '30px' }} onClick={goNext}>
+            <button aria-label="Next week" className="btn btn-text px-2 py-1 min-h-[30px]" onClick={goNext}>
               <ChevronRight size={15} />
             </button>
           </div>
@@ -76,7 +76,7 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
             </thead>
           </table>
         </div>
-        <div className="payroll-table-body-scroll" style={{ maxHeight: '520px' }}>
+        <div className="payroll-table-body-scroll max-h-[520px]">
           <table className="payroll-table">
             <colgroup>
               <col style={{ width: '160px' }} />
@@ -86,11 +86,11 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
               {employees.map(emp => (
                 <tr key={emp.id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
                   <td style={cell}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--md-bw-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700 }}>
+                    <div className="flex items-center gap-2">
+                      <div className="size-6 rounded-full text-white flex items-center justify-center text-[0.6rem] font-bold" style={{ background: 'var(--md-bw-primary)' }}>
                         {emp.name.split(' ').map(n => n[0]).join('')}
                       </div>
-                      <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 500 }}>{emp.name}</span>
+                      <span className="body-medium font-medium" style={{ color: 'var(--md-bw-on-surface)' }}>{emp.name}</span>
                     </div>
                   </td>
                   {weekDates.map(d => {
@@ -100,43 +100,41 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
                     const isOpen = openRosterEmp === emp.id && openRosterDate === d
                     return (
                       <td key={d} style={{ ...cell, textAlign: 'center', padding: '8px', position: 'relative' }}>
-                        <button onClick={(e) => { e.stopPropagation(); setOpenRosterEmp(v => v === emp.id && openRosterDate === d ? null : emp.id); setOpenRosterDate(d) }}
+                        <button aria-label={`${emp.name} - ${tmpl ? tmpl.name : 'Off'}`} onClick={(e) => { e.stopPropagation(); setOpenRosterEmp(v => v === emp.id && openRosterDate === d ? null : emp.id); setOpenRosterDate(d) }}
+                          className="w-full px-2 py-1.5 rounded-md text-[0.7rem] font-semibold min-h-8 outline-none cursor-pointer flex items-center justify-center gap-1"
                           style={{
-                            width: '100%', padding: '6px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600, minHeight: '32px',
-                            border: '1px solid var(--glass-border)', outline: 'none', cursor: 'pointer',
+                            border: '1px solid var(--glass-border)',
                             background: tmpl ? `${tmpl.color}18` : 'var(--glass-bg)',
                             color: tmpl ? tmpl.color : 'var(--md-bw-on-surface-variant)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px'
                           }}>
                           {tmpl ? tmpl.name : 'Off'}
-                          <svg width="8" height="5" viewBox="0 0 10 6" fill="none" style={{ opacity: 0.5 }}><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          <svg width="8" height="5" viewBox="0 0 10 6" fill="none" className="opacity-50"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         </button>
                         {isOpen && (
                           <div onClick={e => e.stopPropagation()}
-                            style={{ position: 'absolute', top: 'calc(100% + 4px)', left: '50%', transform: 'translateX(-50%)', zIndex: 50, minWidth: '120px', padding: '6px',
+                            className="absolute left-1/2 z-50 min-w-[120px] p-1.5 -translate-x-1/2"
+                            style={{ top: 'calc(100% + 4px)',
                               background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
                               border: '1px solid var(--glass-border)', borderRadius: 'var(--glass-radius)', boxShadow: 'var(--glass-shadow)',
                               color: 'var(--md-bw-on-surface)' }}>
-                            <button key="Off" onClick={() => { assignWithRestCheck(emp.id, d, 'Off'); setOpenRosterEmp(null) }}
+                            <button key="Off" aria-label="Set as off" onClick={() => { assignWithRestCheck(emp.id, d, 'Off'); setOpenRosterEmp(null) }}
+                              className="block w-full px-2.5 py-1.5 rounded-full border-0 cursor-pointer text-xs text-center transition-all duration-150"
                               style={{
-                                display: 'block', width: '100%', padding: '6px 10px', borderRadius: '100px', border: 'none',
-                                cursor: 'pointer', font: "600 11px 'Roboto'", textAlign: 'center',
+                                fontFamily: "'Roboto'", fontWeight: 600,
                                 background: tid === 'Off' ? '#6c757d' : 'transparent',
                                 color: tid === 'Off' ? '#fff' : 'var(--md-bw-on-surface)',
-                                transition: 'all 0.15s',
                               }}
                               onMouseEnter={e => { if (tid !== 'Off') e.target.style.background = 'var(--glass-bg)' }}
                               onMouseLeave={e => { if (tid !== 'Off') e.target.style.background = 'transparent' }}>
                               Off
                             </button>
                             {(shiftTemplates || []).map(t => (
-                              <button key={t.id} onClick={() => { assignWithRestCheck(emp.id, d, t.id); setOpenRosterEmp(null) }}
+                              <button key={t.id} aria-label={`Set shift: ${t.name}`} onClick={() => { assignWithRestCheck(emp.id, d, t.id); setOpenRosterEmp(null) }}
+                                className="block w-full px-2.5 py-1.5 rounded-full border-0 cursor-pointer text-xs text-center transition-all duration-150"
                                 style={{
-                                  display: 'block', width: '100%', padding: '6px 10px', borderRadius: '100px', border: 'none',
-                                  cursor: 'pointer', font: "600 11px 'Roboto'", textAlign: 'center',
+                                  fontFamily: "'Roboto'", fontWeight: 600,
                                   background: tid === t.id ? t.color : 'transparent',
                                   color: tid === t.id ? '#fff' : 'var(--md-bw-on-surface)',
-                                  transition: 'all 0.15s',
                                 }}
                                 onMouseEnter={e => { if (tid !== t.id) e.target.style.background = 'var(--glass-bg)' }}
                                 onMouseLeave={e => { if (tid !== t.id) e.target.style.background = 'transparent' }}>

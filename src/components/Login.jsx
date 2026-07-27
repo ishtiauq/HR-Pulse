@@ -142,12 +142,9 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           </div>
           <span className="login-topbar-brand">HR Pulse</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button onClick={toggleTheme} title={`Theme: ${themeMode}`} style={{
-            width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'transparent', border: 'none', borderRadius: '6px',
-            color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer',
-          }}>
+        <div className="flex items-center gap-2">
+          <button onClick={toggleTheme} title={`Theme: ${themeMode}`} aria-label="Toggle theme"
+            className="w-8 h-8 flex items-center justify-center bg-transparent border-none rounded-md text-[var(--md-bw-on-surface-variant)] cursor-pointer">
             {themeMode === 'system' ? <Monitor size={16} /> : themeMode === 'light' ? <Sun size={16} /> : <Moon size={16} />}
           </button>
           <div className="login-topbar-badge">
@@ -161,14 +158,14 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
       <div className="login-auth">
         <div className="login-auth-card">
           {/* Tabs */}
-          <div className="login-tabs">
-            <button className={`login-tab ${authTab === 'manager' ? 'active' : ''}`} onClick={() => setAuthTab('manager')}>HR Manager</button>
-            <button className={`login-tab ${authTab === 'employee' ? 'active' : ''}`} onClick={() => setAuthTab('employee')}>Employee</button>
+          <div className="login-tabs" role="tablist">
+            <button role="tab" aria-selected={authTab === 'manager'} className={`login-tab ${authTab === 'manager' ? 'active' : ''}`} onClick={() => setAuthTab('manager')}>HR Manager</button>
+            <button role="tab" aria-selected={authTab === 'employee'} className={`login-tab ${authTab === 'employee' ? 'active' : ''}`} onClick={() => setAuthTab('employee')}>Employee</button>
           </div>
 
           {/* Tab content rendered eagerly — conditionally visible */}
             <div style={{ display: authTab === 'manager' ? 'block' : 'none' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div className="flex flex-col gap-5">
                 {error && (
                   <div className="login-error">{error}</div>
                 )}
@@ -178,7 +175,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                 ) : (
                   <>
                     <svg width="20" height="20" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="currentColor"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="currentColor"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.5l-12.85 22.2z" fill="currentColor"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="currentColor"/><path d="m59.8 53h-27.5l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h24.5c1.6 0 3.15-.45 4.5-1.2z" fill="currentColor"/><path d="m73.4 26.5-12.2-21.1c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.4 28.4 11.6-19.6 1.35-2.35c.8-1.35 1.2-2.85 1.2-4.4 0-1.55-.4-3.05-1.2-4.45z" fill="currentColor"/></svg>
-                    <span style={{ fontWeight: 600 }}>Connect Google Drive</span>
+                    <span className="font-semibold">Connect Google Drive</span>
                   </>
                 )}
               </button>
@@ -186,36 +183,36 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
             </div>
           </div>
           <div style={{ display: authTab === 'employee' ? 'block' : 'none' }}>
-            <form onSubmit={handleEmployeeSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form onSubmit={handleEmployeeSubmit} aria-label="Employee login form" className="flex flex-col gap-4">
               {error && (
                 <div className="login-error">{error}</div>
               )}
 
               <div>
-                <label className="login-label">Email Address</label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                <label className="login-label" htmlFor="login-email">Email Address</label>
+                <input id="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)}
                   placeholder="you@company.com" required className="login-input" />
               </div>
 
               <div>
-                <label className="login-label">Password</label>
-                <div style={{ position: 'relative' }}>
-                  <input type={showPassword ? 'text' : 'password'} value={password}
+                <label className="login-label" htmlFor="login-password">Password</label>
+                <div className="relative">
+                  <input id="login-password" type={showPassword ? 'text' : 'password'} value={password}
                     onChange={e => setPassword(e.target.value)} placeholder="Enter your password"
-                    required className="login-input" style={{ paddingRight: '44px' }} />
+                    required className="login-input pr-11" />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="login-eye-btn">
+                    className="login-eye-btn" aria-label={showPassword ? 'Hide password' : 'Show password'}>
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
 
-              <button type="submit" disabled={isLoading} className="login-drive-btn" style={{ marginTop: '8px' }}>
+              <button type="submit" disabled={isLoading} className="login-drive-btn mt-2" aria-label="Log in">
                 {isLoading ? 'Signing in...' : 'Sign In'}
                 {!isLoading && <LogIn size={16} />}
               </button>
 
-              <p className="login-trust-line" style={{ marginTop: 0 }}>
+              <p className="login-trust-line mt-0">
                 <Users size={14} />
                 Sign in with the credentials provided by your HR department.
               </p>
@@ -231,7 +228,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
             <p className="login-modal-desc">HR Pulse needs permission to create a private app folder in your Google Drive.</p>
 
             <div className="login-modal-illustration">
-              <Cloud size={38} style={{ color: '#444' }} />
+              <Cloud size={38} className="text-[#444]" />
             </div>
 
             <ul className="login-modal-perms">
@@ -240,8 +237,8 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
               <li><span className="perm-cross">❌</span> We do NOT share your data with third parties</li>
             </ul>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <button onClick={handleConfirmAuthorize} className="login-drive-btn" style={{ justifyContent: 'center' }}>
+            <div className="flex flex-col gap-2.5">
+              <button onClick={handleConfirmAuthorize} className="login-drive-btn justify-center">
                 Authorize Google Drive <ArrowRight size={16} />
               </button>
               <button onClick={() => setShowAccordion(prev => !prev)} className="login-learn-btn">

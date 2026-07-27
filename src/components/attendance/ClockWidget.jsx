@@ -66,28 +66,25 @@ export default function ClockWidget({ employees, attendance, setAttendance, addT
   const canCheckOut = clockEmpId && empLog && empLog.checkIn !== '--' && empLog.checkOut === '--'
 
   return (
-    <div style={{
+    <div className="flex items-center justify-between flex-wrap gap-4 px-6 py-5" style={{
       background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
       border: '1px solid var(--glass-border)', borderRadius: 'var(--glass-radius)', boxShadow: 'var(--glass-shadow)',
-      padding: '20px 24px',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px'
     }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-        <span style={{ fontSize: '30px', fontWeight: 700, color: 'var(--md-bw-on-surface)', fontVariantNumeric: 'tabular-nums', lineHeight: 1.2, letterSpacing: '0.02em' }}>
+      <div className="flex flex-col gap-0.5">
+        <span aria-live="polite" role="timer" className="text-[30px] font-bold tabular-nums leading-[1.2] tracking-[0.02em]" style={{ color: 'var(--md-bw-on-surface)' }}>
           {timeStr}
         </span>
-        <span style={{ fontSize: '12px', color: 'var(--md-bw-on-surface-variant)', fontWeight: 500 }}>
+        <span className="text-xs font-medium" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
           {dateStr}
         </span>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-        <select value={clockEmpId} onChange={e => setClockEmpId(e.target.value)}
+      <div className="flex items-center gap-2.5 flex-wrap">
+        <select aria-label="Select employee" value={clockEmpId} onChange={e => setClockEmpId(e.target.value)}
+          className="py-2 pl-3.5 pr-8 rounded-full h-10 cursor-pointer appearance-none min-w-[170px] outline-none font-medium text-[13px]"
           style={{
-            padding: '8px 32px 8px 14px', borderRadius: '100px', height: '40px',
             border: '1px solid var(--glass-border)', background: 'var(--glass-bg)',
-            color: 'var(--md-bw-on-surface)', font: "500 13px 'Roboto'", outline: 'none',
-            cursor: 'pointer', appearance: 'none', minWidth: '170px'
+            color: 'var(--md-bw-on-surface)', fontFamily: "'Roboto'"
           }}>
           <option value="">— Select employee —</option>
           {employees.map(emp => (
@@ -95,7 +92,7 @@ export default function ClockWidget({ employees, attendance, setAttendance, addT
           ))}
         </select>
 
-        <button onClick={handleCheckIn} disabled={!canCheckIn}
+        <button aria-label="Clock in" aria-pressed={canCheckIn} onClick={handleCheckIn} disabled={!canCheckIn}
           style={{
             padding: '0 24px', borderRadius: '100px', height: '40px', border: 'none',
             cursor: canCheckIn ? 'pointer' : 'not-allowed',
@@ -108,7 +105,7 @@ export default function ClockWidget({ employees, attendance, setAttendance, addT
           <Clock size={15} /> Check In
         </button>
 
-        <button onClick={handleCheckOut} disabled={!canCheckOut}
+        <button aria-label="Clock out" aria-pressed={canCheckOut} onClick={handleCheckOut} disabled={!canCheckOut}
           style={{
             padding: '0 24px', borderRadius: '100px', height: '40px',
             border: '2px solid', cursor: canCheckOut ? 'pointer' : 'not-allowed',
@@ -122,10 +119,10 @@ export default function ClockWidget({ employees, attendance, setAttendance, addT
         </button>
 
         {clockEmpId && empLog && empLog.checkIn !== '--' && (
-          <span style={{ fontSize: '12px', color: 'var(--md-bw-on-surface-variant)', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-            <span style={{ color: '#28a745', fontWeight: 600 }}>In: {empLog.checkIn}</span>
+          <span role="status" className="text-xs flex items-center gap-1.5 whitespace-nowrap" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
+            <span className="font-semibold" style={{ color: '#28a745' }}>In: {empLog.checkIn}</span>
             {empLog.checkOut !== '--' && (
-              <><span style={{ opacity: 0.3 }}>|</span><span style={{ color: '#dc3545', fontWeight: 600 }}>Out: {empLog.checkOut}</span><span style={{ opacity: 0.3 }}>|</span><span style={{ fontWeight: 600, color: 'var(--md-bw-on-surface)' }}>{empLog.hours}h</span></>
+              <><span className="opacity-30">|</span><span className="font-semibold" style={{ color: '#dc3545' }}>Out: {empLog.checkOut}</span><span className="opacity-30">|</span><span className="font-semibold" style={{ color: 'var(--md-bw-on-surface)' }}>{empLog.hours}h</span></>
             )}
           </span>
         )}

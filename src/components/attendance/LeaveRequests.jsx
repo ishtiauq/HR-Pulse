@@ -13,20 +13,20 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
   }
 
   return (
-    <div className="payroll-table-container" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>
-        Pending Requests {pendingCount > 0 && <span style={{ fontWeight: 400, color: 'var(--md-bw-on-surface-variant)' }}>({pendingCount})</span>}
+    <div className="payroll-table-container flex flex-col gap-6 p-6">
+      <h3 className="title-medium m-0" style={{ color: 'var(--md-bw-on-surface)' }}>
+        Pending Requests {pendingCount > 0 && <span className="font-normal" style={{ color: 'var(--md-bw-on-surface-variant)' }}>({pendingCount})</span>}
       </h3>
       {pendingLeaves.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px', color: 'var(--md-bw-on-surface-variant)' }}>
-          <CalendarDays size={32} style={{ opacity: 0.3, marginBottom: '12px' }} />
-          <p className="body-medium" style={{ margin: 0 }}>No pending leave requests.</p>
+        <div className="text-center p-12" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
+          <CalendarDays size={32} className="opacity-30 mb-3" />
+          <p className="body-medium m-0">No pending leave requests.</p>
         </div>
       ) : (
         <div className="payroll-table-header-wrap">
-          <table className="payroll-table" style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          <table className="payroll-table w-full" style={{ borderCollapse: 'collapse', tableLayout: 'fixed' }}>
             <colgroup>
-              <col style={{ width: '160px' }} /><col style={{ width: '120px' }} /><col style={{ width: '180px' }} /><col style={{ width: '60px' }} /><col /><col style={{ width: '200px' }} />
+              <col style={{ width: '160px' }} /><col style={{ width: '120px' }} /><col style={{ width: '180px' }} /><col className="w-[60px]" /><col /><col className="w-[200px]" />
             </colgroup>
             <thead>
               <tr>
@@ -45,15 +45,15 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
                   <tr key={l.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                     <td style={cell}><span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{emp?.name || l.employeeId}</span></td>
                     <td style={cell}><span style={{ color: 'var(--md-bw-on-surface)' }}>{l.leaveType}</span></td>
-                    <td style={cell}><span style={{ color: 'var(--md-bw-on-surface-variant)', fontSize: '0.85rem' }}>{formatDateShort(l.startDate)} — {formatDateShort(l.endDate)}</span></td>
-                    <td style={{ ...cell, textAlign: 'center' }}><span className="body-large" style={{ fontWeight: 600, color: 'var(--md-bw-on-surface)' }}>{l.days || '—'}</span></td>
-                    <td style={cell}><span style={{ color: 'var(--md-bw-on-surface-variant)', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: '200px' }}>{l.reason || '—'}</span></td>
+                    <td style={cell}><span className="text-[0.85rem]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{formatDateShort(l.startDate)} — {formatDateShort(l.endDate)}</span></td>
+                    <td style={{ ...cell, textAlign: 'center' }}><span className="body-large font-semibold" style={{ color: 'var(--md-bw-on-surface)' }}>{l.days || '—'}</span></td>
+                    <td style={cell}><span className="text-[0.85rem] overflow-hidden text-ellipsis whitespace-nowrap block max-w-[200px]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{l.reason || '—'}</span></td>
                     <td style={{ ...cell, textAlign: 'right' }}>
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                        <button className="btn btn-tonal" style={{ padding: '0 14px', height: '32px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }} onClick={() => approveLeave(l.id)}>
+                      <div className="flex gap-2 justify-end">
+                        <button aria-label="Approve leave request" className="btn btn-tonal px-3.5 h-8 text-xs flex items-center gap-1" onClick={() => approveLeave(l.id)}>
                           <Check size={13} /> Approve
                         </button>
-                        <button className="btn btn-outlined" style={{ padding: '0 14px', height: '32px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--md-bw-error)' }} onClick={() => rejectLeave(l.id)}>
+                        <button aria-label="Reject leave request" className="btn btn-outlined px-3.5 h-8 text-xs flex items-center gap-1" style={{ color: 'var(--md-bw-error)' }} onClick={() => rejectLeave(l.id)}>
                           <X size={13} /> Reject
                         </button>
                       </div>
@@ -68,9 +68,9 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
 
       {historyLeaves.length > 0 && (
         <>
-          <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>History</h3>
+          <h3 className="title-medium m-0" style={{ color: 'var(--md-bw-on-surface)' }}>History</h3>
           <div className="payroll-table-header-wrap">
-            <table className="payroll-table" style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+            <table className="payroll-table w-full" style={{ borderCollapse: 'collapse', tableLayout: 'fixed' }}>
               <colgroup>
                 <col style={{ width: '180px' }} /><col style={{ width: '120px' }} /><col style={{ width: '200px' }} /><col style={{ width: '100px' }} />
               </colgroup>
@@ -87,11 +87,11 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
                   const emp = employees.find(e => e.id === l.employeeId)
                   const s = STATUS[l.status] || STATUS.Pending
                   return (
-                    <tr key={l.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                      <td style={cell}><span style={{ color: 'var(--md-bw-on-surface)', fontSize: '0.85rem' }}>{emp?.name || l.employeeId}</span></td>
-                      <td style={cell}><span style={{ color: 'var(--md-bw-on-surface-variant)', fontSize: '0.85rem' }}>{l.leaveType}</span></td>
-                      <td style={cell}><span style={{ color: 'var(--md-bw-on-surface-variant)', fontSize: '0.85rem' }}>{formatDateShort(l.startDate)} — {formatDateShort(l.endDate)}</span></td>
-                      <td style={cell}><span style={pill(s.bg, s.color)}>{l.status}</span></td>
+                  <tr key={l.id} className="border-b border-black/[0.06]">
+                      <td style={cell}><span className="text-[0.85rem]" style={{ color: 'var(--md-bw-on-surface)' }}>{emp?.name || l.employeeId}</span></td>
+                      <td style={cell}><span className="text-[0.85rem]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{l.leaveType}</span></td>
+                      <td style={cell}><span className="text-[0.85rem]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{formatDateShort(l.startDate)} — {formatDateShort(l.endDate)}</span></td>
+                      <td style={cell}><span role="status" style={pill(s.bg, s.color)}>{l.status}</span></td>
                     </tr>
                   )
                 })}

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useModal } from '../services/useModal.js'
-import { FileText, Search, Upload, Download, Trash2, Folder, X, FileSpreadsheet, FileImage, FileArchive, File, Settings, Pencil, ChevronLeft, ChevronRight } from 'lucide-react'
+import { FileText, Search, Upload, Download, Trash2, Folder, X, FileSpreadsheet, FileImage, FileArchive, File, Settings, Pencil, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import AdSlot from './AdSlot'
 import { formatDate } from '../services/date.js'
 
@@ -40,6 +40,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
   const [editingCategory, setEditingCategory] = useState(null)
   const [catFormName, setCatFormName] = useState('')
   const [catFormColor, setCatFormColor] = useState('#3b82f6')
+  const [hoveredCategory, setHoveredCategory] = useState(null)
   const categoryScrollRef = useRef(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -209,13 +210,13 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
       </div>
 
       {/* Upload Hero Card */}
-      <div className="glass-card" onClick={openUploadModal}
+      <div className="glass-card cursor-pointer text-center mb-6 flex flex-col items-center gap-3" onClick={openUploadModal} role="button" tabIndex={0} aria-label="Upload document"
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openUploadModal() } }}
         style={{
-          padding: isMobile ? '24px 16px' : '36px 24px', cursor: 'pointer', textAlign: 'center', marginBottom: '24px',
+          padding: isMobile ? '24px 16px' : '36px 24px',
           border: '2px dashed var(--border-color)', borderRadius: '16px',
           background: 'var(--bg-secondary)',
           transition: 'border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px'
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.borderColor = 'var(--accent-primary)';
@@ -227,62 +228,109 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
           e.currentTarget.style.background = 'var(--bg-secondary)';
           e.currentTarget.style.transform = 'translateY(0)';
         }}>
-        <div style={{
+        <div className="flex items-center justify-center" style={{
           width: isMobile ? '44px' : '56px', height: isMobile ? '44px' : '56px', borderRadius: isMobile ? '12px' : '14px',
           background: 'var(--accent-primary-glow, rgba(59,130,246,0.1))',
-          color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+          color: 'var(--accent-primary)',
         }}>
           <Upload size={isMobile ? 22 : 28} />
         </div>
         <div>
-          <h3 style={{ margin: 0, fontSize: isMobile ? '0.95rem' : '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Upload Document</h3>
-          <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+          <h3 className="m-0 font-bold" style={{ fontSize: isMobile ? '0.95rem' : '1.1rem', color: 'var(--text-primary)' }}>Upload Document</h3>
+          <p className="m-0 mt-1 text-[0.85rem]" style={{ color: 'var(--text-muted)' }}>
             Click to upload — PDF, images, spreadsheets & more
           </p>
         </div>
       </div>
 
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-        <Search size={16} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)' }} />
-        <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search documents..."
-          style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.9rem' }} />
+      <div className="relative flex items-center mb-3">
+        <Search size={16} className="absolute left-3" style={{ color: 'var(--text-muted)' }} />
+        <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search documents..." aria-label="Search documents"
+          className="w-full p-2.5 pl-9 rounded-lg text-[0.9rem]" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }} />
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
-        <div className="glass-card" style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', padding: '12px 0 12px 4px', borderRadius: '12px' }}>
-          <div style={{ position: 'relative', flex: 1, minWidth: 0, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
+      <div className="flex gap-2 mb-5">
+        <div className="glass-card flex-1 min-w-0 flex items-center p-3 pl-1 rounded-xl">
+          <div className="relative flex-1 min-w-0 overflow-hidden flex items-center">
             {canScrollLeft && (
               <button onClick={() => scrollCategory(-1)}
-                style={{ position: 'absolute', left: '4px', zIndex: 3, background: 'var(--md-bw-surface-variant)', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--md-bw-on-surface)', boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}>
+                className="absolute left-1 z-[3] flex items-center justify-center rounded-full cursor-pointer"
+                style={{ background: 'var(--md-bw-surface-variant)', border: 'none', width: '28px', height: '28px', color: 'var(--md-bw-on-surface)', boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}>
                 <ChevronLeft size={18} />
               </button>
             )}
-            <div ref={categoryScrollRef} style={{ display: 'flex', gap: '6px', flexWrap: 'nowrap', overflow: 'hidden', scrollBehavior: 'smooth', flex: 1, padding: '0 4px' }}>
+            <div ref={categoryScrollRef} className="flex gap-1.5 flex-nowrap overflow-hidden scroll-smooth flex-1 px-1">
               <button onClick={() => setSelectedCategory('all')}
-                style={{ flexShrink: 0, padding: '6px 14px', borderRadius: '20px', background: selectedCategory === 'all' ? 'var(--md-bw-primary)' : 'var(--md-bw-surface-variant)', color: selectedCategory === 'all' ? 'var(--md-bw-on-primary)' : 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: selectedCategory === 'all' ? 'none' : '1px solid var(--md-bw-outline)' }}>
+                className="shrink-0 px-3.5 py-1.5 rounded-full font-semibold text-[0.8rem] cursor-pointer"
+                style={{ background: selectedCategory === 'all' ? 'var(--md-bw-primary)' : 'var(--md-bw-surface-variant)', color: selectedCategory === 'all' ? 'var(--md-bw-on-primary)' : 'var(--md-bw-on-surface)', border: selectedCategory === 'all' ? 'none' : '1px solid var(--md-bw-outline)' }}>
                 All
               </button>
               {categories.map(cat => {
                 const isActive = selectedCategory === cat.id
+                const isProtected = cat.id === 'other'
+                const showActions = hoveredCategory === cat.id && !isActive && !isProtected
                 return (
-                  <button key={cat.id} onClick={() => setSelectedCategory(cat.id)}
-                    style={{ flexShrink: 0, padding: '6px 14px', borderRadius: '20px', background: isActive ? cat.color : 'var(--md-bw-surface-variant)', color: isActive ? '#fff' : 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: isActive ? 'none' : '1px solid var(--md-bw-outline)', transition: 'border-color var(--transition-fast), background var(--transition-fast)' }}>
-                    {cat.label}
-                  </button>
+                  <div key={cat.id} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
+                    onMouseEnter={() => setHoveredCategory(cat.id)}
+                    onMouseLeave={() => setHoveredCategory(null)}>
+                    <button onClick={() => setSelectedCategory(cat.id)}
+                      style={{
+                        padding: '6px 14px', borderRadius: '20px', background: isActive ? cat.color : 'var(--md-bw-surface-variant)',
+                        color: isActive ? '#fff' : 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem',
+                        cursor: 'pointer', border: isActive ? 'none' : '1px solid var(--md-bw-outline)',
+                        paddingRight: showActions ? '32px' : '14px',
+                        transition: 'border-color var(--transition-fast), background var(--transition-fast)'
+                      }}>
+                      {cat.label}
+                    </button>
+                    {showActions && (
+                      <span style={{ position: 'absolute', right: '8px', display: 'flex', gap: '2px', alignItems: 'center' }}>
+                        <button onClick={(e) => { e.stopPropagation(); setEditingCategory(cat); setCatFormName(cat.label); setCatFormColor(cat.color); setShowCategoryModal(true) }}
+                          style={{ background: 'none', border: 'none', padding: '2px', cursor: 'pointer', color: 'var(--md-bw-on-surface)', display: 'flex', alignItems: 'center', lineHeight: 1 }}>
+                          <Pencil size={10} />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteCategory(cat.id) }}
+                          style={{ background: 'none', border: 'none', padding: '2px', cursor: 'pointer', color: 'var(--accent-danger)', display: 'flex', alignItems: 'center', lineHeight: 1 }}>
+                          <Trash2 size={10} />
+                        </button>
+                      </span>
+                    )}
+                  </div>
                 )
               })}
+              {categories.length > 0 && (
+                <button onClick={() => {
+                  setEditingCategory(null)
+                  setCatFormName('')
+                  setCatFormColor('#3b82f6')
+                  setShowCategoryModal(true)
+                }}
+                  style={{
+                    padding: '6px 12px', borderRadius: '20px', background: 'transparent',
+                    color: 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.85rem',
+                    cursor: 'pointer', border: '1px dashed var(--md-bw-outline)',
+                    display: 'flex', alignItems: 'center', gap: '4px',
+                    transition: 'border-color var(--transition-fast), color var(--transition-fast)'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.color = 'var(--accent-primary)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--md-bw-outline)'; e.currentTarget.style.color = 'var(--md-bw-on-surface)' }}>
+                  <Plus size={14} /> Add
+                </button>
+              )}
             </div>
             {canScrollRight && (
               <button onClick={() => scrollCategory(1)}
-                style={{ position: 'absolute', right: '4px', zIndex: 3, background: 'var(--md-bw-surface-variant)', border: 'none', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--md-bw-on-surface)', boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}>
+                className="absolute right-1 z-[3] flex items-center justify-center rounded-full cursor-pointer"
+                style={{ background: 'var(--md-bw-surface-variant)', border: 'none', width: '28px', height: '28px', color: 'var(--md-bw-on-surface)', boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}>
                 <ChevronRight size={18} />
               </button>
             )}
           </div>
         </div>
-        <div className="glass-card" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', padding: '12px 16px', borderRadius: '12px' }}>
+        <div className="glass-card shrink-0 flex items-center p-3 px-4 rounded-xl">
           <button onClick={() => { setEditingCategory(null); setCatFormName(''); setCatFormColor('#3b82f6'); setShowCategoryModal(true) }}
-            style={{ padding: '6px 10px', borderRadius: '8px', background: 'transparent', color: 'var(--md-bw-on-surface)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', gap: '4px', transition: 'color var(--transition-fast)', whiteSpace: 'nowrap' }}
+            className="px-2.5 py-1.5 rounded-lg bg-transparent font-semibold text-[0.8rem] cursor-pointer border-0 flex items-center gap-1 whitespace-nowrap"
+            style={{ color: 'var(--md-bw-on-surface)', transition: 'color var(--transition-fast)' }}
             onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent-primary)' }}
             onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--md-bw-on-surface)' }}>
             <Settings size={14} /> Manage
@@ -291,45 +339,42 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
       </div>
 
       {filteredDocs.length === 0 ? (
-        <div className="glass-card" style={{ padding: isMobile ? '48px 20px' : '64px 32px', textAlign: 'center' }}>
-          <FileText size={48} style={{ color: 'var(--text-muted)', marginBottom: '16px', opacity: 0.5 }} />
-          <h3 style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0' }}>No documents found</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>
+        <div className="glass-card text-center" style={{ padding: isMobile ? '48px 20px' : '64px 32px' }}>
+          <FileText size={48} className="mb-4 opacity-50" style={{ color: 'var(--text-muted)' }} />
+          <h3 className="m-0 mb-2" style={{ color: 'var(--text-secondary)' }}>No documents found</h3>
+          <p className="m-0 text-[0.9rem]" style={{ color: 'var(--text-muted)' }}>
             {search || selectedCategory !== 'all' ? 'Try a different search or filter' : 'Upload your first document to get started'}
           </p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div role="list" className="flex flex-col gap-2">
           {filteredDocs.map(doc => {
             const catInfo = getCategoryInfo(doc.category)
             const Icon = getFileIcon(doc.fileType)
             const CatIcon = catInfo.icon
             return (
-              <div key={doc.id} className="glass-card" style={{
+              <div key={doc.id} role="listitem" className="glass-card cursor-default" style={{
                 display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center',
                 gap: isMobile ? '12px' : '16px', padding: isMobile ? '14px' : '16px 20px',
-                transition: 'border-color var(--transition-fast)', cursor: 'default'
+                transition: 'border-color var(--transition-fast)',
               }}
                 onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent-primary)'}
                 onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}>
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: '12px', width: '100%'
-                }}>
-                  <div style={{
-                    width: isMobile ? '38px' : '44px', height: isMobile ? '38px' : '44px', borderRadius: '10px',
+                <div className="flex items-center gap-3 w-full">
+                  <div className="flex items-center justify-center shrink-0 rounded-xl" style={{
+                    width: isMobile ? '38px' : '44px', height: isMobile ? '38px' : '44px',
                     background: `${catInfo.color}15`, color: catInfo.color,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                   }}>
                     <Icon size={isMobile ? 18 : 20} />
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ fontWeight: 700, fontSize: isMobile ? '0.85rem' : '0.95rem', color: 'var(--text-primary)' }}>{doc.name}</span>
-                      <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '20px', background: `${catInfo.color}20`, color: catInfo.color, fontWeight: 600 }}>
-                        <CatIcon size={10} style={{ display: 'inline', marginRight: '3px' }} />{catInfo.label}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold" style={{ fontSize: isMobile ? '0.85rem' : '0.95rem', color: 'var(--text-primary)' }}>{doc.name}</span>
+                      <span className="text-[0.7rem] px-2 py-0.5 rounded-full font-semibold" style={{ background: `${catInfo.color}20`, color: catInfo.color }}>
+                        <CatIcon size={10} className="inline mr-0.5" />{catInfo.label}
                       </span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', flexWrap: 'wrap' }}>
+                    <div className="flex items-center gap-3 mt-1 flex-wrap">
                       <span style={{ fontSize: isMobile ? '0.75rem' : '0.8rem', color: 'var(--text-muted)' }}>{doc.fileName}</span>
                       <span style={{ fontSize: isMobile ? '0.7rem' : '0.75rem', color: 'var(--text-muted)' }}>{formatFileSize(doc.fileSize)}</span>
                       <span style={{ fontSize: isMobile ? '0.7rem' : '0.75rem', color: 'var(--text-muted)' }}>Uploaded {formatDate(doc.uploadedAt)}</span>
@@ -339,18 +384,18 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                     )}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '4px', justifyContent: isMobile ? 'flex-end' : 'flex-start', borderTop: isMobile ? '1px solid var(--border-color)' : 'none', paddingTop: isMobile ? '10px' : '0' }}>
-                  <button title="Download" style={{ background: 'transparent', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}
+                <div className="flex gap-1" style={{ justifyContent: isMobile ? 'flex-end' : 'flex-start', borderTop: isMobile ? '1px solid var(--border-color)' : 'none', paddingTop: isMobile ? '10px' : '0' }}>
+                  <button aria-label="Download document" className="bg-transparent border-0 px-3 py-2 rounded-lg cursor-pointer flex items-center gap-1 text-[0.8rem]" style={{ color: 'var(--text-muted)' }}
                     onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent-primary)'}
                     onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}>
                     <Download size={16} /> {isMobile ? 'Download' : ''}
                   </button>
-                  <button title="Edit" onClick={() => openEditModal(doc)} style={{ background: 'transparent', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}
+                  <button aria-label="Edit document" onClick={() => openEditModal(doc)} className="bg-transparent border-0 px-3 py-2 rounded-lg cursor-pointer flex items-center gap-1 text-[0.8rem]" style={{ color: 'var(--text-muted)' }}
                     onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent-primary)'}
                     onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}>
                     <Upload size={16} /> {isMobile ? 'Edit' : ''}
                   </button>
-                  <button title="Delete" onClick={() => handleDelete(doc.id)} style={{ background: 'transparent', border: 'none', padding: '8px 12px', borderRadius: '8px', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}
+                  <button aria-label="Delete document" onClick={() => handleDelete(doc.id)} className="bg-transparent border-0 px-3 py-2 rounded-lg cursor-pointer flex items-center gap-1 text-[0.8rem]" style={{ color: 'var(--text-muted)' }}
                     onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent-danger)'}
                     onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}>
                     <Trash2 size={16} /> {isMobile ? 'Delete' : ''}
@@ -363,60 +408,58 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
       )}
 
       {showUploadModal && (
-        <div className="modal-overlay" onClick={() => { setShowUploadModal(false); resetForm() }}
+        <div className="fixed inset-0 flex items-center justify-center" onClick={() => { setShowUploadModal(false); resetForm() }}
           style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
             background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 10000, padding: isMobile ? '12px' : '20px'
           }}>
           <div className="modal-container"
             style={{ maxWidth: isMobile ? '100%' : '520px', width: '100%', padding: 0, borderRadius: isMobile ? '12px' : '14px', background: theme.bg, boxShadow: '0 8px 32px rgba(0,0,0,0.3)', animation: 'modalFadeIn 0.2s ease', margin: isMobile ? '10px' : '0' }}
             onClick={e => e.stopPropagation()}>
-            <div className="modal-header" style={{ padding: isMobile ? '16px' : '20px 24px', borderBottom: `1px solid ${theme.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '40px', height: '40px', borderRadius: '10px',
+            <div className="modal-header flex justify-between items-start" style={{ padding: isMobile ? '16px' : '20px 24px', borderBottom: `1px solid ${theme.border}` }}>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center rounded-xl" style={{
+                  width: '40px', height: '40px',
                   background: 'rgba(59,130,246,0.1)',
-                  color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  color: '#3b82f6',
                 }}>
                   <Upload size={20} />
                 </div>
                 <div>
-                  <h2 style={{ margin: 0, fontSize: '1.1rem', color: theme.text }}>{editingDoc ? 'Edit Document' : 'Upload Document'}</h2>
-                  <p style={{ margin: '2px 0 0 0', fontSize: '0.8rem', color: theme.muted }}>
+                  <h2 className="m-0 text-lg" style={{ color: theme.text }}>{editingDoc ? 'Edit Document' : 'Upload Document'}</h2>
+                  <p className="m-0 mt-0.5 text-[0.8rem]" style={{ color: theme.muted }}>
                     {editingDoc ? 'Update document details' : 'Add a new document to the repository'}
                   </p>
                 </div>
               </div>
-              <button className="modal-close" onClick={() => { setShowUploadModal(false); resetForm() }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.muted, padding: '4px' }}><X size={20} /></button>
+              <button className="modal-close bg-transparent border-0 cursor-pointer p-1" aria-label="Close" onClick={() => { setShowUploadModal(false); resetForm() }} style={{ color: theme.muted }}><X size={20} /></button>
             </div>
-            <form onSubmit={handleSave} style={{ padding: isMobile ? '16px' : '24px', display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '20px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: theme.secondary }}>Document Name *</label>
-                <input type="text" required value={formName} onChange={e => setFormName(e.target.value)} placeholder="e.g. Employee Handbook 2026"
+            <form onSubmit={handleSave} className="flex flex-col" style={{ padding: isMobile ? '16px' : '24px', gap: isMobile ? '16px' : '20px' }}>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[0.82rem] font-semibold" style={{ color: theme.secondary }}>Document Name *</label>
+                <input type="text" required value={formName} onChange={e => setFormName(e.target.value)} placeholder="e.g. Employee Handbook 2026" aria-label="Document name"
+                  className="p-2.5 px-3.5 rounded-lg text-[0.95rem] outline-none"
                   style={{
-                    padding: '10px 14px', borderRadius: '8px', border: `1px solid ${theme.border}`,
-                    background: theme.inputBg, color: theme.text, fontSize: '0.95rem',
-                    outline: 'none', transition: 'border-color var(--transition-fast)'
+                    border: `1px solid ${theme.border}`,
+                    background: theme.inputBg, color: theme.text,
+                    transition: 'border-color var(--transition-fast)'
                   }}
                   onFocus={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
                   onBlur={(e) => e.currentTarget.style.borderColor = theme.border} />
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: theme.secondary }}>Category</label>
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[0.82rem] font-semibold" style={{ color: theme.secondary }}>Category</label>
+                <div className="flex gap-1.5 flex-wrap">
                   {categories.map(cat => {
                     const isActive = formCategory === cat.id
                     const Icon = cat.icon
                     return (
                       <button key={cat.id} type="button" onClick={() => setFormCategory(cat.id)}
+                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-semibold text-[0.8rem] cursor-pointer"
                         style={{
-                          display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '8px',
                           border: isActive ? `2px solid ${cat.color}` : `1px solid ${theme.border}`,
                           background: isActive ? `${cat.color}18` : theme.inputBg,
                           color: isActive ? cat.color : theme.secondary,
-                          fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer',
                           transition: 'border-color var(--transition-fast), background var(--transition-fast)',
                         }}>
                         <Icon size={14} /> {cat.label}
@@ -426,14 +469,14 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                 </div>
               </div>
               {!editingDoc && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 600, color: theme.secondary }}>File</label>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[0.82rem] font-semibold" style={{ color: theme.secondary }}>File</label>
                   <div onClick={() => fileInputRef.current?.click()}
+                    className="rounded-xl text-center cursor-pointer"
                     style={{
-                      padding: isMobile ? '24px 16px' : '32px 20px', borderRadius: '10px', border: `2px dashed ${theme.border}`,
-                      textAlign: 'center', cursor: 'pointer',
+                      padding: isMobile ? '24px 16px' : '32px 20px',
+                      border: `2px dashed ${formFile ? '#10b981' : theme.border}`,
                       background: formFile ? 'rgba(16,185,129,0.06)' : theme.inputBg,
-                      borderColor: formFile ? '#10b981' : theme.border,
                       transition: 'border-color var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast)'
                     }}
                     onMouseEnter={(e) => {
@@ -444,39 +487,40 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                     }}>
                     {formFile ? (
                       <>
-                        <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(16,185,129,0.12)', color: '#10b981', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
+                        <div className="w-10 h-10 rounded-xl inline-flex items-center justify-center mb-2.5" style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}>
                           <FileText size={20} />
                         </div>
-                        <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: theme.text }}>{formFile.name}</p>
-                        <p style={{ margin: '4px 0 0 0', fontSize: '0.78rem', color: theme.muted }}>{formatFileSize(formFile.size)}</p>
+                        <p className="m-0 text-[0.9rem] font-semibold" style={{ color: theme.text }}>{formFile.name}</p>
+                        <p className="m-0 mt-1 text-[0.78rem]" style={{ color: theme.muted }}>{formatFileSize(formFile.size)}</p>
                       </>
                     ) : (
                       <>
-                        <Upload size={isMobile ? 22 : 28} style={{ marginBottom: '10px', color: theme.muted, opacity: 0.6 }} />
-                        <p style={{ margin: 0, fontSize: '0.9rem', color: theme.secondary }}><span style={{ color: '#3b82f6', fontWeight: 600 }}>Click to browse</span> or drop a file</p>
-                        <p style={{ margin: '6px 0 0 0', fontSize: '0.75rem', color: theme.muted }}>PDF, Images, Spreadsheets — up to 10MB</p>
+                        <Upload size={isMobile ? 22 : 28} className="mb-2.5 opacity-60" style={{ color: theme.muted }} />
+                        <p className="m-0 text-[0.9rem]" style={{ color: theme.secondary }}><span className="font-semibold" style={{ color: '#3b82f6' }}>Click to browse</span> or drop a file</p>
+                        <p className="m-0 mt-1.5 text-[0.75rem]" style={{ color: theme.muted }}>PDF, Images, Spreadsheets — up to 10MB</p>
                       </>
                     )}
                   </div>
-                  <input type="file" ref={fileInputRef} onChange={handleFileSelect} style={{ display: 'none' }} />
+                  <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" />
                 </div>
               )}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: theme.secondary }}>Description</label>
-                <textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={3} placeholder="Brief description (optional)"
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[0.82rem] font-semibold" style={{ color: theme.secondary }}>Description</label>
+                <textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={3} placeholder="Brief description (optional)" aria-label="Document description"
+                  className="p-2.5 px-3.5 rounded-lg text-[0.95rem] resize-y outline-none"
                   style={{
-                    padding: '10px 14px', borderRadius: '8px', border: `1px solid ${theme.border}`,
-                    background: theme.inputBg, color: theme.text, fontSize: '0.95rem',
-                    resize: 'vertical', outline: 'none', transition: 'border-color var(--transition-fast)'
+                    border: `1px solid ${theme.border}`,
+                    background: theme.inputBg, color: theme.text,
+                    transition: 'border-color var(--transition-fast)'
                   }}
                   onFocus={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
                   onBlur={(e) => e.currentTarget.style.borderColor = theme.border} />
               </div>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: `1px solid ${theme.border}`, paddingTop: isMobile ? '16px' : '20px' }}>
+              <div className="flex gap-3 justify-end" style={{ borderTop: `1px solid ${theme.border}`, paddingTop: isMobile ? '16px' : '20px' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowUploadModal(false); resetForm() }}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <button type="submit" className="btn btn-primary flex items-center gap-1.5">
                   <Upload size={16} /> {editingDoc ? 'Update' : 'Upload'}
                 </button>
               </div>
@@ -485,94 +529,83 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
         </div>
       )}
       {showCategoryModal && (
-        <div className="modal-overlay" onClick={() => setShowCategoryModal(false)}
+        <div className="fixed inset-0 flex items-center justify-center" onClick={() => setShowCategoryModal(false)}
           style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
             background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 10000, padding: isMobile ? '12px' : '20px'
           }}>
           <div className="modal-container"
             style={{ maxWidth: isMobile ? '100%' : '480px', width: '100%', padding: 0, borderRadius: isMobile ? '12px' : '14px', background: theme.bg, boxShadow: '0 8px 32px rgba(0,0,0,0.3)', animation: 'modalFadeIn 0.2s ease', margin: isMobile ? '10px' : '0' }}
             onClick={e => e.stopPropagation()}>
-            <div className="modal-header" style={{ padding: isMobile ? '16px' : '20px 24px', borderBottom: `1px solid ${theme.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ margin: 0, fontSize: '1.1rem', color: theme.text }}>Manage Categories</h2>
-              <button className="modal-close" onClick={() => setShowCategoryModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.muted, padding: '4px' }}><X size={20} /></button>
+            <div className="modal-header flex justify-between items-center" style={{ padding: isMobile ? '16px' : '20px 24px', borderBottom: `1px solid ${theme.border}` }}>
+              <h2 className="m-0 text-lg" style={{ color: theme.text }}>Manage Categories</h2>
+              <button className="modal-close bg-transparent border-0 cursor-pointer p-1" aria-label="Close" onClick={() => setShowCategoryModal(false)} style={{ color: theme.muted }}><X size={20} /></button>
             </div>
-            <div style={{ padding: isMobile ? '16px' : '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="flex flex-col gap-5" style={{ padding: isMobile ? '16px' : '24px' }}>
               {/* Category list */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.82rem', fontWeight: 600, color: theme.secondary }}>Categories</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '240px', overflowY: 'auto' }}>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[0.82rem] font-semibold" style={{ color: theme.secondary }}>Categories</label>
+                <div className="flex flex-col gap-1.5 max-h-[240px] overflow-y-auto">
                   {categories.filter(c => c.id !== 'other').map(cat => (
-                    <div key={cat.id} style={{
-                      display: 'flex', alignItems: 'center', gap: '10px',
-                      padding: '8px 12px', borderRadius: '8px',
-                      background: theme.inputBg, border: `1px solid ${theme.border}`
-                    }}>
-                      <div style={{
-                        width: '24px', height: '24px', borderRadius: '6px',
-                        background: cat.color, flexShrink: 0
-                      }} />
-                      <span style={{ flex: 1, fontSize: '0.9rem', fontWeight: 500, color: theme.text }}>{cat.label}</span>
-                      <button onClick={() => { setEditingCategory(cat); setCatFormName(cat.label); setCatFormColor(cat.color) }}
-                        style={{ background: 'none', border: 'none', padding: '4px', cursor: 'pointer', color: theme.muted, display: 'flex' }}>
+                    <div key={cat.id} className="flex items-center gap-2.5 p-2 px-3 rounded-lg" style={{ background: theme.inputBg, border: `1px solid ${theme.border}` }}>
+                      <div className="w-6 h-6 rounded-md shrink-0" style={{ background: cat.color }} />
+                      <span className="flex-1 text-[0.9rem] font-medium" style={{ color: theme.text }}>{cat.label}</span>
+                      <button aria-label="Edit category" onClick={() => { setEditingCategory(cat); setCatFormName(cat.label); setCatFormColor(cat.color) }}
+                        className="bg-transparent border-0 p-1 cursor-pointer flex" style={{ color: theme.muted }}>
                         <Pencil size={14} />
                       </button>
-                      <button onClick={() => handleDeleteCategory(cat.id)}
-                        style={{ background: 'none', border: 'none', padding: '4px', cursor: 'pointer', color: theme.muted, display: 'flex' }}>
+                      <button aria-label="Delete category" onClick={() => handleDeleteCategory(cat.id)}
+                        className="bg-transparent border-0 p-1 cursor-pointer flex" style={{ color: theme.muted }}>
                         <Trash2 size={14} />
                       </button>
                     </div>
                   ))}
                   {categories.filter(c => c.id === 'other').map(cat => (
-                    <div key={cat.id} style={{
-                      display: 'flex', alignItems: 'center', gap: '10px',
-                      padding: '8px 12px', borderRadius: '8px',
-                      background: theme.inputBg, border: `1px solid ${theme.border}`, opacity: 0.6
-                    }}>
-                      <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: cat.color, flexShrink: 0 }} />
-                      <span style={{ flex: 1, fontSize: '0.9rem', fontWeight: 500, color: theme.text }}>{cat.label}</span>
-                      <span style={{ fontSize: '0.75rem', color: theme.muted }}>Protected</span>
+                    <div key={cat.id} className="flex items-center gap-2.5 p-2 px-3 rounded-lg opacity-60" style={{ background: theme.inputBg, border: `1px solid ${theme.border}` }}>
+                      <div className="w-6 h-6 rounded-md shrink-0" style={{ background: cat.color }} />
+                      <span className="flex-1 text-[0.9rem] font-medium" style={{ color: theme.text }}>{cat.label}</span>
+                      <span className="text-[0.75rem]" style={{ color: theme.muted }}>Protected</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div style={{ borderTop: `1px solid ${theme.border}`, paddingTop: '16px' }}>
-                <h3 style={{ margin: '0 0 12px 0', fontSize: '0.95rem', fontWeight: 600, color: theme.text }}>{editingCategory ? 'Edit Category' : 'Add New Category'}</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <input type="text" value={catFormName} onChange={e => setCatFormName(e.target.value)}
+                <h3 className="m-0 mb-3 text-[0.95rem] font-semibold" style={{ color: theme.text }}>{editingCategory ? 'Edit Category' : 'Add New Category'}</h3>
+                <div className="flex flex-col gap-3">
+                  <input type="text" value={catFormName} onChange={e => setCatFormName(e.target.value)} aria-label="Category name"
                     placeholder={editingCategory ? 'Category name' : 'e.g. Payroll'}
+                    className="p-2.5 px-3.5 rounded-lg text-[0.95rem] outline-none"
                     style={{
-                      padding: '10px 14px', borderRadius: '8px', border: `1px solid ${theme.border}`,
-                      background: theme.inputBg, color: theme.text, fontSize: '0.95rem',
-                      outline: 'none', transition: 'border-color var(--transition-fast)'
+                      border: `1px solid ${theme.border}`,
+                      background: theme.inputBg, color: theme.text,
+                      transition: 'border-color var(--transition-fast)'
                     }}
                     onFocus={(e) => e.currentTarget.style.borderColor = '#3b82f6'}
                     onBlur={(e) => e.currentTarget.style.borderColor = theme.border}
                     onKeyDown={(e) => e.key === 'Enter' && handleSaveCategory()} />
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <div className="flex gap-2 flex-wrap">
                     {['#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#64748b', '#f59e0b'].map(color => (
                       <button key={color} type="button" onClick={() => setCatFormColor(color)}
+                        className="rounded-full cursor-pointer"
                         style={{
-                          width: '32px', height: '32px', borderRadius: '50%', background: color,
+                          width: '32px', height: '32px', background: color,
                           border: catFormColor === color ? '3px solid var(--md-bw-primary)' : `2px solid ${color}`,
-                          cursor: 'pointer', outline: catFormColor === color ? `2px solid ${color}` : 'none',
+                          outline: catFormColor === color ? `2px solid ${color}` : 'none',
                           outlineOffset: '2px', transition: 'transform var(--transition-fast)',
                           transform: catFormColor === color ? 'scale(1.15)' : 'scale(1)'
                         }} />
                     ))}
                   </div>
-                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                  <div className="flex gap-2 justify-end">
                     {editingCategory && (
                       <button type="button" className="btn btn-secondary" onClick={() => { setEditingCategory(null); setCatFormName(''); setCatFormColor('#3b82f6') }}
                         style={{ fontSize: '0.85rem', padding: '8px 14px' }}>
                         Cancel
                       </button>
                     )}
-                    <button type="button" className="btn btn-primary" onClick={handleSaveCategory}
-                      style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', padding: '8px 14px' }}>
+                    <button type="button" className="btn btn-primary flex items-center gap-1.5" onClick={handleSaveCategory}
+                      style={{ fontSize: '0.85rem', padding: '8px 14px' }}>
                       {editingCategory ? 'Save' : 'Add'}
                     </button>
                   </div>

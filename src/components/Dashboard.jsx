@@ -165,7 +165,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
   const recentAnnouncements = (announcements || []).slice(0, 3)
 
   return (
-    <div style={{ flex: 1, padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div className="flex-1 p-4 flex flex-col gap-4">
       
       {/* Page Title */}
       <h1 className="page-title">
@@ -177,59 +177,76 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       <div className="dash-grid-3">
         
         {/* Employee Directory */}
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <h2 style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: '0 0 8px', letterSpacing: '-0.01em' }}>Employee Directory</h2>
-          <div className="macos-card" style={{ flex: 1, background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '14px', padding: '14px', cursor: 'pointer', transition: 'transform 0.2s ease, box-shadow 0.2s ease', display: 'flex', flexDirection: 'column' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.06)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }} onClick={() => setCurrentView && setCurrentView('employees')}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flex: 1, paddingLeft: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-                <span style={{ font: "700 22px/26px 'Roboto'", color: 'var(--md-bw-on-surface)', fontVariantNumeric: 'tabular-nums' }}>{activeCount}</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 500, lineHeight: '16px', background: 'rgba(52, 199, 89, 0.1)', border: '1px solid rgba(52, 199, 89, 0.3)', color: '#1a7d3a' }}>
-                  <span className="sync-dot sync-blink" style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#34c759' }}></span>
+        <div className="flex flex-col h-full">
+          <h2 className="m-0 mb-2 tracking-tight" style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Employee Directory</h2>
+          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-3.5 cursor-pointer flex flex-col"
+            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.06)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+            onClick={() => setCurrentView && setCurrentView('employees')} role="button" tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCurrentView && setCurrentView('employees'); } }}>
+            <div className="flex items-center gap-6 flex-1 pl-3">
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="tabular-nums" style={{ font: "700 22px/26px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>{activeCount}</span>
+                <span className="inline-flex items-center gap-1.5 py-[5px] px-3 rounded-[20px] text-xs font-medium leading-4 bg-[rgba(52,199,89,0.1)] border border-[rgba(52,199,89,0.3)] text-[#1a7d3a]">
+                  <span className="sync-dot sync-blink w-[7px] h-[7px] rounded-full bg-[#34c759]"></span>
                   Active
                 </span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-                <span style={{ font: "700 22px/26px 'Roboto'", color: 'var(--md-bw-on-surface)', fontVariantNumeric: 'tabular-nums' }}>{inactiveCount}</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 500, lineHeight: '16px', background: 'rgba(224, 32, 20, 0.1)', border: '1px solid rgba(224, 32, 20, 0.25)', color: '#dc3545' }}>
-                  <span className="sync-dot" style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#dc3545' }}></span>
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="tabular-nums" style={{ font: "700 22px/26px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>{inactiveCount}</span>
+                <span className="inline-flex items-center gap-1.5 py-[5px] px-3 rounded-[20px] text-xs font-medium leading-4 bg-[rgba(224,32,20,0.1)] border border-[rgba(224,32,20,0.25)] text-[#dc3545]">
+                  <span className="sync-dot w-[7px] h-[7px] rounded-full bg-[#dc3545]"></span>
                   Inactive
                 </span>
               </div>
             </div>
-            <button onClick={(e) => { e.stopPropagation(); setCurrentView && setCurrentView('employees') }} style={{
-              marginTop: '10px', padding: '5px 12px', font: "500 11px/16px 'Roboto'",
-              background: 'rgba(0, 122, 255, 0.1)', color: '#007AFF', border: 'none',
-              borderRadius: '20px', cursor: 'pointer', transition: 'background 0.15s ease', alignSelf: 'flex-start'
-            }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.18)'}
-               onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.1)'}>
+            <button onClick={(e) => { e.stopPropagation(); setCurrentView && setCurrentView('employees') }}
+              className="mt-2.5 py-[5px] px-3 rounded-[20px] cursor-pointer self-start border-none"
+              style={{
+                font: "500 11px/16px 'Roboto'",
+                background: 'rgba(0, 122, 255, 0.1)', color: '#007AFF',
+                transition: 'background 0.15s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.18)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.1)'}>
               View All
             </button>
           </div>
         </div>
 
         {/* Attendance Card */}
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <h2 style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: '0 0 8px', letterSpacing: '-0.01em' }}>Attendance</h2>
-          <div className="macos-card" style={{ flex: 1, background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', cursor: 'pointer' }} onClick={() => setShowAttDropdown(!showAttDropdown)}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, paddingLeft: '12px' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', font: "600 15px/20px 'Roboto'", color: '#34C759' }}><span className="pulse-dot pulse-dot-green" style={{ margin: 0 }}></span>{todayStats.present}
-                <span style={{ fontWeight: 400, fontSize: '11px', color: 'var(--md-bw-on-surface-variant)' }}>Present</span>
+        <div className="flex flex-col h-full">
+          <h2 className="m-0 mb-2 tracking-tight" style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Attendance</h2>
+          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-3.5 flex flex-col cursor-pointer"
+            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+            onClick={() => setShowAttDropdown(!showAttDropdown)} role="button" tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowAttDropdown(!showAttDropdown); } }}>
+            <div className="flex items-center gap-3.5 flex-1 pl-3">
+              <span className="flex items-center gap-2 text-[#34C759]" style={{ font: "600 15px/20px 'Roboto'" }}>
+                <span className="pulse-dot pulse-dot-green m-0"></span>{todayStats.present}
+                <span className="font-normal text-[11px] text-[var(--md-bw-on-surface-variant)]">Present</span>
               </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', font: "600 15px/20px 'Roboto'", color: '#dc3545' }}><span className="pulse-dot pulse-dot-red" style={{ margin: 0 }}></span>{todayStats.absent}
-                <span style={{ fontWeight: 400, fontSize: '11px', color: 'var(--md-bw-on-surface-variant)' }}>Absent</span>
+              <span className="flex items-center gap-2 text-[#dc3545]" style={{ font: "600 15px/20px 'Roboto'" }}>
+                <span className="pulse-dot pulse-dot-red m-0"></span>{todayStats.absent}
+                <span className="font-normal text-[11px] text-[var(--md-bw-on-surface-variant)]">Absent</span>
               </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', font: "600 15px/20px 'Roboto'", color: '#f0ad4e' }}><span className="pulse-dot pulse-dot-orange" style={{ margin: 0 }}></span>{todayStats.onLeave}
-                <span style={{ fontWeight: 400, fontSize: '11px', color: 'var(--md-bw-on-surface-variant)' }}>On Leave</span>
+              <span className="flex items-center gap-2 text-[#f0ad4e]" style={{ font: "600 15px/20px 'Roboto'" }}>
+                <span className="pulse-dot pulse-dot-orange m-0"></span>{todayStats.onLeave}
+                <span className="font-normal text-[11px] text-[var(--md-bw-on-surface-variant)]">On Leave</span>
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px', paddingLeft: '12px' }}>
+            <div className="flex items-center gap-2.5 mt-2 pl-3">
               <span style={{ font: "400 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>Rate: {attendanceRate}%</span>
-              <button onClick={(e) => { e.stopPropagation(); setShowAttDropdown(!showAttDropdown) }} style={{
-                padding: '5px 12px', font: "500 11px/16px 'Roboto'",
-                background: 'rgba(0, 122, 255, 0.1)', color: '#007AFF', border: 'none',
-                borderRadius: '20px', cursor: 'pointer', transition: 'background 0.15s ease'
-              }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.18)'}
-                 onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.1)'}>
+              <button onClick={(e) => { e.stopPropagation(); setShowAttDropdown(!showAttDropdown) }}
+                className="py-[5px] px-3 rounded-[20px] cursor-pointer border-none"
+                style={{
+                  font: "500 11px/16px 'Roboto'",
+                  background: 'rgba(0, 122, 255, 0.1)', color: '#007AFF',
+                  transition: 'background 0.15s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.18)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.1)'}>
                 {showAttDropdown ? 'Hide' : 'View Details'}
               </button>
             </div>
@@ -237,21 +254,26 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         </div>
 
         {/* Drive Connection */}
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <div className={`macos-card dash-card drive-card drive-card--${driveConnected ? 'healthy' : 'error'}`} style={{
-            flex: 1, background: driveConnected ? '#E8F8EE' : '#FDE8E8',
-            border: driveConnected ? '1px solid rgba(52, 199, 89, 0.35)' : '1px solid rgba(255, 59, 48, 0.35)',
-            borderRadius: '14px', padding: '14px', transition: 'transform 0.2s ease, box-shadow 0.2s ease', display: 'flex', flexDirection: 'column'
-          }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.06)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <div className="icon-3d" style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '7px' }}>
+        <div className="flex flex-col h-full">
+          <div className={`macos-card dash-card drive-card drive-card--${driveConnected ? 'healthy' : 'error'} rounded-[14px] p-3.5 flex flex-col`}
+            style={{
+              flex: 1, background: driveConnected ? '#E8F8EE' : '#FDE8E8',
+              border: driveConnected ? '1px solid rgba(52, 199, 89, 0.35)' : '1px solid rgba(255, 59, 48, 0.35)',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.06)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="icon-3d w-7 h-7 flex items-center justify-center rounded-[7px]">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
                   <path d="M17.5 19a4.5 4.5 0 0 0 0-9 4.4 4.4 0 0 0-.8.1 7 7 0 1 0-11 5.9"></path>
                 </svg>
               </div>
-              <span style={{ font: "500 9px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.08em', color: driveConnected ? '#1A7D3A' : '#D32F2F' }}>Drive Connection</span>
+              <span className="uppercase tracking-wide"
+                style={{ font: "500 9px/12px 'Roboto'", letterSpacing: '0.08em', color: driveConnected ? '#1A7D3A' : '#D32F2F' }}>Drive Connection</span>
             </div>
-            <p style={{ display: 'flex', alignItems: 'center', gap: '8px', font: "500 16px/28px 'Roboto'", color: driveConnected ? '#1A7D3A' : '#D32F2F', margin: 0, flex: 1, paddingLeft: '12px' }}>
+            <p className="flex items-center gap-2 m-0 flex-1 pl-3"
+              style={{ font: "500 16px/28px 'Roboto'", color: driveConnected ? '#1A7D3A' : '#D32F2F' }}>
               {driveConnected ? 'Healthy' : 'Disconnected'}
             </p>
           </div>
@@ -260,42 +282,43 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
 
       {/* Attendance Details Dropdown */}
       {showAttDropdown && (
-        <div className="macos-card" style={{
-          background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-          border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '14px', overflow: 'hidden'
-        }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(0,0,0,0.06)', font: "500 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Today's Attendance Details</div>
+        <div className="macos-card bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] overflow-hidden"
+          style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
+          <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)', font: "500 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Today's Attendance Details</div>
           {[
             { key: 'present', label: 'Present', count: todayStats.present, dot: 'pulse-dot-green' },
             { key: 'absent', label: 'Absent', count: todayStats.absent, dot: 'pulse-dot-red' },
             { key: 'onLeave', label: 'On Leave', count: todayStats.onLeave, dot: 'pulse-dot-orange' },
           ].map(item => (
             <div key={item.key}>
-              <button onClick={() => setAttFilter(attFilter === item.key ? null : item.key)} style={{
-                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '10px 16px', background: attFilter === item.key ? 'rgba(0,0,0,0.03)' : 'transparent',
-                border: 'none', cursor: 'pointer', font: "500 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface)',
-                transition: 'background 0.15s ease'
-              }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.04)'} onMouseLeave={(e) => e.currentTarget.style.background = attFilter === item.key ? 'rgba(0,0,0,0.03)' : 'transparent'}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className={`pulse-dot ${item.dot}`} style={{ margin: 0 }}></span>
+              <button onClick={() => setAttFilter(attFilter === item.key ? null : item.key)}
+                className="w-full flex items-center justify-between px-4 py-2.5 border-none cursor-pointer"
+                style={{
+                  background: attFilter === item.key ? 'rgba(0,0,0,0.03)' : 'transparent',
+                  font: "500 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface)',
+                  transition: 'background 0.15s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.04)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = attFilter === item.key ? 'rgba(0,0,0,0.03)' : 'transparent'}>
+                <span className="flex items-center gap-2">
+                  <span className={`pulse-dot ${item.dot} m-0`}></span>
                   {item.label}
                 </span>
                 <span style={{ color: 'var(--md-bw-on-surface-variant)', font: "500 12px/16px 'Roboto'" }}>{item.count}</span>
               </button>
               {attFilter === item.key && (
-                <div style={{ padding: '0 16px 10px' }}>
+                <div className="px-4 pb-2.5">
                   {attendanceLists[item.key].length === 0 ? (
-                    <p style={{ font: "400 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '4px 0' }}>No one</p>
+                    <p className="my-1" style={{ font: "400 12px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>No one</p>
                   ) : (
                     attendanceLists[item.key].map((emp) => (
-                      <div key={emp.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 0' }}>
-                        <img src={emp.avatar} alt="" style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <span style={{ font: "400 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface)', display: 'block' }}>{emp.name}</span>
+                      <div key={emp.id} className="flex items-center gap-2.5 py-1.5">
+                        <img src={emp.avatar} alt={emp.name} className="w-6 h-6 rounded-full object-cover shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <span className="block" style={{ font: "400 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>{emp.name}</span>
                           <span style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>{emp.role}</span>
                         </div>
-                        {emp.time && <span style={{ font: "400 11px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', flexShrink: 0 }}>{emp.time}</span>}
+                        {emp.time && <span className="shrink-0" style={{ font: "400 11px/16px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>{emp.time}</span>}
                       </div>
                     ))
                   )}
@@ -310,25 +333,30 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       <div className="dash-grid-2">
         
         {/* Announcements Card */}
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <h2 style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: '0 0 8px', letterSpacing: '-0.01em' }}>Announcements</h2>
-          <div className="macos-card" style={{ flex: 1, background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '14px', padding: '16px' }}>
+        <div className="flex flex-col h-full">
+          <h2 className="m-0 mb-2 tracking-tight" style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Announcements</h2>
+          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-4"
+            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
             {recentAnnouncements.length === 0 ? (
-              <p style={{ font: "400 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', textAlign: 'center', margin: 0 }}>No announcements</p>
+              <p className="text-center m-0" style={{ font: "400 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>No announcements</p>
             ) : (
               recentAnnouncements.map((ann, idx) => (
-                <div key={ann.id || idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 0', borderBottom: idx < recentAnnouncements.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none', cursor: 'pointer' }} onClick={() => setCurrentView && setCurrentView('announcements')}>
-                  <div style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '7px', flexShrink: 0 }}>
+                <div key={ann.id || idx} className="flex items-center gap-2.5 py-1.5 cursor-pointer"
+                  style={{ borderBottom: idx < recentAnnouncements.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}
+                  onClick={() => setCurrentView && setCurrentView('announcements')} role="button" tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCurrentView && setCurrentView('announcements'); } }}>
+                  <div className="w-7 h-7 flex items-center justify-center bg-[rgba(0,0,0,0.04)] rounded-[7px] shrink-0">
                     <Megaphone size={14} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ font: "500 12px/18px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ann.title}</p>
-                    <p style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '2px 0 0' }}>
+                  <div className="flex-1 min-w-0">
+                    <p className="m-0 truncate" style={{ font: "500 12px/18px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>{ann.title}</p>
+                    <p className="mt-0.5" style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>
                       {getEmployeeName(ann.authorId)} &middot; {new Date(ann.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </p>
                   </div>
                   {ann.priority === 'Important' && (
-                    <span style={{ font: "500 8px/10px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.05em', color: '#D32F2F', background: '#FFEBEE', padding: '2px 6px', borderRadius: '4px', flexShrink: 0 }}>Important</span>
+                    <span className="uppercase tracking-wide text-[#D32F2F] bg-[#FFEBEE] px-1.5 py-0.5 rounded shrink-0"
+                      style={{ font: "500 8px/10px 'Roboto'", letterSpacing: '0.05em' }}>Important</span>
                   )}
                 </div>
               ))
@@ -337,43 +365,47 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         </div>
 
         {/* Payroll Summary Card */}
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <h2 style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: '0 0 8px', letterSpacing: '-0.01em' }}>Payroll Summary</h2>
-          <div className="macos-card" style={{ flex: 1, background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column' }}>
+        <div className="flex flex-col h-full">
+          <h2 className="m-0 mb-2 tracking-tight" style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Payroll Summary</h2>
+          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-4 flex flex-col"
+            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
             {!currentPayrollMonth ? (
-              <p style={{ font: "400 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', textAlign: 'center', margin: 'auto' }}>No payroll data</p>
+              <p className="text-center m-auto" style={{ font: "400 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>No payroll data</p>
             ) : (
               <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                  <div style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 122, 255, 0.12)', borderRadius: '8px', flexShrink: 0 }}>
-                    <CreditCard size={16} style={{ color: '#007AFF' }} />
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="w-8 h-8 flex items-center justify-center bg-[rgba(0,122,255,0.12)] rounded-lg shrink-0">
+                    <CreditCard size={16} className="text-[#007AFF]" />
                   </div>
                   <div>
-                    <p style={{ font: "500 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0 }}>Month: {currentPayrollMonth}</p>
+                    <p className="m-0" style={{ font: "500 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Month: {currentPayrollMonth}</p>
                     <p style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '1px 0 0' }}>{currentPayrollData.length} employee{currentPayrollData.length !== 1 ? 's' : ''}</p>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '16px', marginBottom: '10px' }}>
+                <div className="flex gap-4 mb-2.5">
                   <div>
-                    <p style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Paid</p>
-                    <p style={{ font: "700 18px/24px 'Roboto'", color: '#34C759', margin: 0, fontVariantNumeric: 'tabular-nums' }}>{paidCount}</p>
+                    <p className="m-0" style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>Paid</p>
+                    <p className="m-0 tabular-nums text-[#34C759]" style={{ font: "700 18px/24px 'Roboto'" }}>{paidCount}</p>
                   </div>
                   <div>
-                    <p style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Pending</p>
-                    <p style={{ font: "700 18px/24px 'Roboto'", color: '#FF9500', margin: 0, fontVariantNumeric: 'tabular-nums' }}>{pendingCount}</p>
+                    <p className="m-0" style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>Pending</p>
+                    <p className="m-0 tabular-nums text-[#FF9500]" style={{ font: "700 18px/24px 'Roboto'" }}>{pendingCount}</p>
                   </div>
-                  <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-                    <p style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Total</p>
-                    <p style={{ font: "700 18px/24px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, fontVariantNumeric: 'tabular-nums' }}>${totalPayrollCost.toLocaleString()}</p>
+                  <div className="ml-auto text-right">
+                    <p className="m-0" style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>Total</p>
+                    <p className="m-0 tabular-nums" style={{ font: "700 18px/24px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>${totalPayrollCost.toLocaleString()}</p>
                   </div>
                 </div>
-                <div style={{ marginTop: 'auto' }}>
-                  <button onClick={() => setCurrentView && setCurrentView('payroll')} style={{
-                    padding: '6px 14px', font: "500 11px/16px 'Roboto'",
-                    background: 'rgba(0, 122, 255, 0.1)', color: '#007AFF', border: 'none',
-                    borderRadius: '20px', cursor: 'pointer', transition: 'background 0.15s ease'
-                  }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.18)'}
-                     onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.1)'}>
+                <div className="mt-auto">
+                  <button onClick={() => setCurrentView && setCurrentView('payroll')}
+                    className="py-1.5 px-3.5 rounded-[20px] cursor-pointer border-none"
+                    style={{
+                      font: "500 11px/16px 'Roboto'",
+                      background: 'rgba(0, 122, 255, 0.1)', color: '#007AFF',
+                      transition: 'background 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.18)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0, 122, 255, 0.1)'}>
                     View Payroll
                   </button>
                 </div>
@@ -387,24 +419,30 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       <div className="dash-grid-3">
         
         {/* Events Card */}
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <h2 style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: '0 0 8px', letterSpacing: '-0.01em' }}>Events</h2>
-          <div className="macos-card" style={{ flex: 1, background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '14px', padding: '16px' }}>
+        <div className="flex flex-col h-full">
+          <h2 className="m-0 mb-2 tracking-tight" style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Events</h2>
+          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-4"
+            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
             {upcomingEvents.length === 0 ? (
-              <p style={{ font: "400 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', textAlign: 'center', margin: 0 }}>No upcoming events</p>
+              <p className="text-center m-0" style={{ font: "400 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>No upcoming events</p>
             ) : (
               upcomingEvents.map((evt, idx) => (
-                <div key={evt.id || idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 0', borderBottom: idx < upcomingEvents.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none', cursor: 'pointer' }} onClick={() => setCurrentView && setCurrentView('calendar')}>
-                  <div style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: evt.type === 'holiday' ? 'rgba(52, 199, 89, 0.12)' : evt.type === 'birthday' ? 'rgba(255, 149, 0, 0.12)' : 'rgba(0, 122, 255, 0.12)', borderRadius: '7px', flexShrink: 0 }}>
+                <div key={evt.id || idx} className="flex items-center gap-2.5 py-1.5 cursor-pointer"
+                  style={{ borderBottom: idx < upcomingEvents.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}
+                  onClick={() => setCurrentView && setCurrentView('calendar')} role="button" tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCurrentView && setCurrentView('calendar'); } }}>
+                  <div className="w-7 h-7 flex items-center justify-center rounded-[7px] shrink-0"
+                    style={{ background: evt.type === 'holiday' ? 'rgba(52, 199, 89, 0.12)' : evt.type === 'birthday' ? 'rgba(255, 149, 0, 0.12)' : 'rgba(0, 122, 255, 0.12)' }}>
                     <CalendarIcon size={14} style={{ color: evt.type === 'holiday' ? '#34C759' : evt.type === 'birthday' ? '#FF9500' : '#007AFF' }} />
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ font: "500 12px/18px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{evt.title}</p>
-                    <p style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '2px 0 0' }}>
+                  <div className="flex-1 min-w-0">
+                    <p className="m-0 truncate" style={{ font: "500 12px/18px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>{evt.title}</p>
+                    <p className="mt-0.5" style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>
                       {formatDate(evt.date)}{evt.time ? ` at ${evt.time}` : ''}
                     </p>
                   </div>
-                  <span style={{ font: "500 8px/10px 'Roboto'", textTransform: 'capitalize', letterSpacing: '0.03em', color: 'var(--md-bw-on-surface-variant)', flexShrink: 0 }}>{evt.type}</span>
+                  <span className="capitalize shrink-0 tracking-wide"
+                    style={{ font: "500 8px/10px 'Roboto'", letterSpacing: '0.03em', color: 'var(--md-bw-on-surface-variant)' }}>{evt.type}</span>
                 </div>
               ))
             )}
@@ -412,37 +450,42 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         </div>
 
         {/* Drive Logs */}
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <h2 style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: '0 0 8px', letterSpacing: '-0.01em' }}>Drive Logs</h2>
-          <div className="macos-card" style={{ flex: 1, background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '14px', padding: '12px 14px' }}>
+        <div className="flex flex-col h-full">
+          <h2 className="m-0 mb-2 tracking-tight" style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Drive Logs</h2>
+          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-3 px-3.5"
+            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
             {syncLogs.map((log, idx) => (
-              <div key={log.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: idx !== syncLogs.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
-                <div style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '7px', flexShrink: 0 }}>
+              <div key={log.id} className="flex items-center gap-2.5 py-2"
+                style={{ borderBottom: idx !== syncLogs.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
+                <div className="w-7 h-7 flex items-center justify-center bg-[rgba(0,0,0,0.04)] rounded-[7px] shrink-0">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
                   </svg>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ font: "500 12px/18px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{log.action}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="m-0 truncate" style={{ font: "500 12px/18px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>{log.action}</p>
                   <p style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '1px 0 0' }}>{log.details}</p>
                 </div>
-                <span style={{ font: "500 9px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--md-bw-on-surface-variant)', flexShrink: 0 }}>{log.status === 'success' ? 'Synced' : (log.status === 'error' ? 'Failed' : 'Pending')}</span>
+                <span className="uppercase shrink-0 tracking-wide"
+                  style={{ font: "500 9px/12px 'Roboto'", letterSpacing: '0.05em', color: 'var(--md-bw-on-surface-variant)' }}>{log.status === 'success' ? 'Synced' : (log.status === 'error' ? 'Failed' : 'Pending')}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Milestones */}
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <h2 style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: '0 0 8px', letterSpacing: '-0.01em' }}>Milestones</h2>
-          <div className="macos-card" style={{ flex: 1, background: 'rgba(255, 255, 255, 0.6)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0, 0, 0, 0.06)', borderRadius: '14px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="flex flex-col h-full">
+          <h2 className="m-0 mb-2 tracking-tight" style={{ font: "700 16px/22px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>Milestones</h2>
+          <div className="macos-card flex-1 bg-[rgba(255,255,255,0.6)] border border-[rgba(0,0,0,0.06)] rounded-[14px] p-4 flex items-center justify-center"
+            style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
             {upcomingMilestones.length === 0 ? (
               <p style={{ font: "400 13px/18px 'Roboto'", color: 'var(--md-bw-on-surface-variant)' }}>No milestones</p>
             ) : (
-              <div style={{ width: '100%' }}>
+              <div className="w-full">
                 {upcomingMilestones.map((milestone, idx) => (
-                  <div key={`${milestone.type}-${milestone.empName}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: idx !== upcomingMilestones.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
-                    <div style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.04)', borderRadius: '7px', flexShrink: 0 }}>
+                  <div key={`${milestone.type}-${milestone.empName}`} className="flex items-center gap-2.5 py-2"
+                    style={{ borderBottom: idx !== upcomingMilestones.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
+                    <div className="w-7 h-7 flex items-center justify-center bg-[rgba(0,0,0,0.04)] rounded-[7px] shrink-0">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
                         {milestone.type === 'birthday' ? (
                           <><rect x="3" y="8" width="18" height="4" rx="1" ry="1"></rect><path d="M12 8v13"></path><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"></path></>
@@ -451,11 +494,12 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                         )}
                       </svg>
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ font: "500 12px/18px 'Roboto'", color: 'var(--md-bw-on-surface)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{milestone.empName}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="m-0 truncate" style={{ font: "500 12px/18px 'Roboto'", color: 'var(--md-bw-on-surface)' }}>{milestone.empName}</p>
                       <p style={{ font: "400 11px/14px 'Roboto'", color: 'var(--md-bw-on-surface-variant)', margin: '1px 0 0' }}>{milestone.label}</p>
                     </div>
-                    <span style={{ font: "500 9px/12px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--md-bw-on-surface-variant)', flexShrink: 0 }}>{milestone.daysRemaining === 0 ? 'Today' : `${milestone.daysRemaining}d`}</span>
+                    <span className="uppercase shrink-0 tracking-wide"
+                      style={{ font: "500 9px/12px 'Roboto'", letterSpacing: '0.05em', color: 'var(--md-bw-on-surface-variant)' }}>{milestone.daysRemaining === 0 ? 'Today' : `${milestone.daysRemaining}d`}</span>
                   </div>
                 ))}
               </div>

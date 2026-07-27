@@ -3,21 +3,25 @@ import { Save, Settings as SettingsIcon, DollarSign, Sliders, Info, Percent, Bui
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDateTime } from '../services/date.js'
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 
 
 const pInp = { width: '100%', padding: '10px 14px', borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', transition: 'border 0.15s' }
 const pSel = { width: '100%', padding: '10px 14px', borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'var(--md-bw-on-surface)', font: "500 14px 'Roboto'", outline: 'none', cursor: 'pointer', appearance: 'none' }
 const lbl = { font: "500 11px 'Roboto'", textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--md-bw-on-surface-variant)', marginBottom: '6px', display: 'block' }
 const card = { background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)', border: '1px solid var(--glass-border)', borderRadius: 'var(--glass-radius)', boxShadow: 'var(--glass-shadow)' }
+const SEG_COLORS = ['#0062E6', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14', '#20c997', '#e83e8c', '#17a2b8', '#6610f2']
+const getSegmentColor = (item, index) => item.type === 'deduction' ? '#dc3545' : SEG_COLORS[index % SEG_COLORS.length]
 
 export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, simulatedRole, syncConflicts, setSyncConflicts }) {
   const [activeSubmenu, setActiveSubmenu] = useState(() => localStorage.getItem('hr_pulse_settings_tab') || null)
-
+  const [panelOpen, setPanelOpen] = useState(false)
   const setTab = (id) => {
-    if (activeSubmenu === id) {
-      setActiveSubmenu(null)
+    if (activeSubmenu === id && panelOpen) {
+      setPanelOpen(false)
     } else {
       setActiveSubmenu(id)
+      setPanelOpen(true)
       localStorage.setItem('hr_pulse_settings_tab', id)
     }
   }
@@ -157,27 +161,25 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     switch (id) {
       case 'payroll': return (
         <div className="payroll-settings-grid">
+          {/* Currency Setup */}
           <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-              <div style={{ flex: 1, minWidth: '200px' }}>
-                <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Currency & Salary</h4>
-                <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: '4px 0 0' }}>Currency symbol and salary component configuration.</p>
-              </div>
-              <div style={{ position: 'relative', width: '180px', flexShrink: 0 }}>
-                <select value={currency} onChange={e => setCurrency(e.target.value)} style={{ ...pSel }}>
-                  <option value="$">$ (USD)</option>
-                  <option value="৳">৳ (BDT)</option>
-                  <option value="€">€ (EUR)</option>
-                  <option value="£">£ (GBP)</option>
-                  <option value="₹">₹ (INR)</option>
-                  <option value="¥">¥ (JPY)</option>
-                </select>
-                <ChevronDown size={14} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }} />
-              </div>
+            <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Currency Setup</h4>
+            <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Select the currency symbol applied globally across dashboards and receipts.</p>
+            <div style={{ position: 'relative', width: '100%', maxWidth: '260px' }}>
+              <select value={currency} onChange={e => setCurrency(e.target.value)} style={{ ...pSel }}>
+                <option value="$">$ (USD)</option>
+                <option value="৳">৳ (BDT)</option>
+                <option value="€">€ (EUR)</option>
+                <option value="£">£ (GBP)</option>
+                <option value="₹">₹ (INR)</option>
+                <option value="¥">¥ (JPY)</option>
+              </select>
+              <ChevronDown size={14} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }} />
             </div>
+          </div>
 
-            <hr style={{ margin: 0, border: 'none', borderTop: '1px solid var(--glass-border)' }} />
-
+          {/* Salary Structure */}
+          <div style={{ ...card, padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Salary Structure</h4>
               <button onClick={handleAddComponent} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
@@ -191,7 +193,23 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               </div>
             )}
 
+            {/* Donut Chart */}
+            {salaryStructure.length > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie data={salaryStructure.map(item => ({ ...item, value: item.percentage }))}
+                      cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={2}>
+                      {salaryStructure.map((item, index) => (
+                        <Cell key={item.id} fill={getSegmentColor(item, index)} stroke="none" />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
 
+            {/* Component List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {salaryStructure.length === 0 ? (
                 <span className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)', textAlign: 'center', padding: '20px 0' }}>
@@ -214,7 +232,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                           fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
                           background: item.type === 'earning' ? '#0062E6' : 'transparent',
                           color: item.type === 'earning' ? '#fff' : 'var(--md-bw-on-surface-variant)',
-                          borderColor: item.type === 'earning' ? '#0062E6' : 'rgba(128,128,128,0.35)',
+                          borderColor: item.type === 'earning' ? '#0062E6' : 'var(--glass-border)',
                         }}>Earning</button>
                       <button onClick={() => handleComponentChange(item.id, 'type', 'deduction')}
                         style={{
@@ -222,7 +240,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                           fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
                           background: item.type === 'deduction' ? '#dc3545' : 'transparent',
                           color: item.type === 'deduction' ? '#fff' : 'var(--md-bw-on-surface-variant)',
-                          borderColor: item.type === 'deduction' ? '#dc3545' : 'rgba(128,128,128,0.35)',
+                          borderColor: item.type === 'deduction' ? '#dc3545' : 'var(--glass-border)',
                         }}>Deduction</button>
                     </div>
 
@@ -242,6 +260,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               )}
             </div>
 
+            {/* Net Earning Ratio */}
             {salaryStructure.length > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
                 <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 600 }}>Net Earning Ratio</span>
@@ -266,15 +285,15 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <span style={lbl}>Brand Logo</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div onClick={() => { if (logo) setShowLogoModal(true); else triggerFileInput() }}
+                <div role="button" tabIndex={0} aria-label="Edit logo" onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (logo) setShowLogoModal(true); else triggerFileInput() } }} onClick={() => { if (logo) setShowLogoModal(true); else triggerFileInput() }}
                   style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: 'pointer', overflow: 'hidden', position: 'relative' }}>
                   {logo ? <img src={logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`, transformOrigin: 'center' }} />
                     : <Activity size={24} color="var(--md-bw-on-surface-variant)" />}
                 </div>
-                <button onClick={triggerFileInput} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
+                <button aria-label="Upload new logo" onClick={triggerFileInput} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
                   <Upload size={14} /> Upload New Logo
                 </button>
-                <input type="file" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" style={{ display: 'none' }} />
+                <input type="file" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" aria-hidden="true" tabIndex={-1} style={{ display: 'none' }} />
               </div>
             </div>
 
@@ -289,7 +308,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                   <span style={lbl}>{field === 'Name' ? 'Legal Entity Name' : field === 'Email' ? 'HR Support Email' : 'Company Website URL'}</span>
                   <div style={{ position: 'relative' }}>
                     <Icon size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--md-bw-on-surface-variant)' }} />
-                    <input type={type} value={val} onChange={e => set(e.target.value)} placeholder={ph}
+                    <input aria-label={field === 'Name' ? 'Company name' : field === 'Email' ? 'Company email address' : 'Company website URL'} type={type} value={val} onChange={e => set(e.target.value)} placeholder={ph}
                       style={{ ...pInp, paddingLeft: '38px', fontSize: '13px' }} />
                   </div>
                 </div>
@@ -315,7 +334,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                   <span className="body-medium" style={{ color: 'var(--md-bw-on-surface)', fontWeight: 500 }}>{item.label}</span>
                   <span className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{item.desc}</span>
                 </div>
-                <input type="checkbox" checked={item.val} onChange={e => item.set(e.target.checked)}
+                <input type="checkbox" role="switch" aria-checked={item.val} aria-label={item.label} checked={item.val} onChange={e => item.set(e.target.checked)}
                   style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#0062E6', borderRadius: '4px', flexShrink: 0 }} />
               </div>
             ))}
@@ -333,7 +352,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             {Object.keys(expensePolicies).map(cat => (
               <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <span style={lbl}>{cat}</span>
-                <input type="number" value={expensePolicies[cat]} onChange={e => setExpensePolicies(prev => ({ ...prev, [cat]: Number(e.target.value) }))}
+                <input aria-label={`Expense limit for ${cat}`} type="number" value={expensePolicies[cat]} onChange={e => setExpensePolicies(prev => ({ ...prev, [cat]: Number(e.target.value) }))}
                   style={{ ...pInp, fontSize: '13px' }} />
               </div>
             ))}
@@ -348,7 +367,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 <CalendarClock size={20} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
                 <h4 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Shift Templates</h4>
               </div>
-              <button className="btn btn-outlined" onClick={() => setShiftTemplates(prev => [...prev, { id: `st-${Date.now()}`, name: 'New Shift', start: '09:00', end: '17:00', break: 60, color: '#333333' }])}
+              <button aria-label="Add shift template" className="btn btn-outlined" onClick={() => setShiftTemplates(prev => [...prev, { id: `st-${Date.now()}`, name: 'New Shift', start: '09:00', end: '17:00', break: 60, color: '#333333' }])}
                 style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
                 <Plus size={14} /> Add Shift
               </button>
@@ -359,26 +378,26 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 <div key={t.id} style={{ ...card, padding: '16px', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <div style={{ flex: '1.5', minWidth: '140px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={lbl}>Shift Name</span>
-                    <input type="text" value={t.name} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, name: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
+                    <input aria-label="Shift name" type="text" value={t.name} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, name: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
                   </div>
                   <div style={{ flex: '1', minWidth: '100px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={lbl}>Start</span>
-                    <input type="time" value={t.start} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, start: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
+                    <input aria-label="Shift start time" type="time" value={t.start} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, start: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
                   </div>
                   <div style={{ flex: '1', minWidth: '100px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={lbl}>End</span>
-                    <input type="time" value={t.end} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, end: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
+                    <input aria-label="Shift end time" type="time" value={t.end} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, end: e.target.value } : x))} style={{ ...pInp, fontSize: '13px' }} />
                   </div>
                   <div style={{ flex: '0.8', minWidth: '80px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={lbl}>Break (min)</span>
-                    <input type="number" value={t.break} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, break: parseInt(e.target.value) || 0 } : x))} style={{ ...pInp, fontSize: '13px' }} />
+                    <input aria-label="Break duration in minutes" type="number" value={t.break} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, break: parseInt(e.target.value) || 0 } : x))} style={{ ...pInp, fontSize: '13px' }} />
                   </div>
                   <div style={{ width: '50px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ ...lbl, color: 'transparent' }}>C</span>
-                    <input type="color" value={t.color} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, color: e.target.value } : x))}
+                    <input aria-label="Shift color" type="color" value={t.color} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, color: e.target.value } : x))}
                       style={{ padding: 0, borderRadius: '100px', border: '1px solid var(--glass-border)', background: 'transparent', width: '100%', height: '38px', cursor: 'pointer' }} />
                   </div>
-                  <button className="btn btn-text" style={{ padding: '10px', color: 'var(--md-bw-on-surface-variant)', flexShrink: 0, alignSelf: 'flex-end' }}
+                  <button aria-label="Delete shift template" className="btn btn-text" style={{ padding: '10px', color: 'var(--md-bw-on-surface-variant)', flexShrink: 0, alignSelf: 'flex-end' }}
                     onClick={() => setShiftTemplates(prev => prev.filter(x => x.id !== t.id))}>
                     <Trash2 size={16} />
                   </button>
@@ -395,11 +414,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <span style={lbl}>Weekday Multiplier</span>
-                <input type="number" step="0.1" value={overtimeRules.multiplierWeekday} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekday: parseFloat(e.target.value) || 1 }))} style={{ ...pInp, fontSize: '13px' }} />
+                <input aria-label="Weekday overtime multiplier" type="number" step="0.1" value={overtimeRules.multiplierWeekday} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekday: parseFloat(e.target.value) || 1 }))} style={{ ...pInp, fontSize: '13px' }} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <span style={lbl}>Weekend/Holiday Multiplier</span>
-                <input type="number" step="0.1" value={overtimeRules.multiplierWeekend} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekend: parseFloat(e.target.value) || 1 }))} style={{ ...pInp, fontSize: '13px' }} />
+                <input aria-label="Weekend overtime multiplier" type="number" step="0.1" value={overtimeRules.multiplierWeekend} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekend: parseFloat(e.target.value) || 1 }))} style={{ ...pInp, fontSize: '13px' }} />
               </div>
             </div>
           </div>
@@ -415,7 +434,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               </div>
               <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Review all system actions for compliance and security.</p>
             </div>
-            <button onClick={handleExportCSV} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
+            <button aria-label="Export audit logs as CSV" onClick={handleExportCSV} className="btn btn-outlined" style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '34px', fontSize: '12px' }}>
               <Download size={14} /> Export CSV
             </button>
           </div>
@@ -423,12 +442,12 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', padding: '16px', background: 'var(--glass-bg)', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
             <div style={{ minWidth: '140px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <span style={lbl}>Date</span>
-              <input type="date" value={auditFilterDate} onChange={e => setAuditFilterDate(e.target.value)} style={{ ...pInp, fontSize: '13px' }} />
+              <input aria-label="Filter by date" type="date" value={auditFilterDate} onChange={e => setAuditFilterDate(e.target.value)} style={{ ...pInp, fontSize: '13px' }} />
             </div>
             <div style={{ minWidth: '140px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <span style={lbl}>Action Type</span>
               <div style={{ position: 'relative' }}>
-                <select value={auditFilterAction} onChange={e => setAuditFilterAction(e.target.value)} style={{ ...pSel, fontSize: '13px' }}>
+                <select aria-label="Filter by action type" value={auditFilterAction} onChange={e => setAuditFilterAction(e.target.value)} style={{ ...pSel, fontSize: '13px' }}>
                   <option value="All">All Actions</option>
                   <option value="CREATE">CREATE</option>
                   <option value="UPDATE">UPDATE</option>
@@ -437,7 +456,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 <ChevronDown size={14} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--md-bw-on-surface-variant)' }} />
               </div>
             </div>
-            <button onClick={() => { setAuditFilterDate(''); setAuditFilterAction('All') }} className="btn btn-text" style={{ height: '36px', fontSize: '13px', alignSelf: 'flex-end' }}>Clear</button>
+            <button aria-label="Clear audit filters" onClick={() => { setAuditFilterDate(''); setAuditFilterAction('All') }} className="btn btn-text" style={{ height: '36px', fontSize: '13px', alignSelf: 'flex-end' }}>Clear</button>
           </div>
 
           <div className="payroll-table-container">
@@ -522,7 +541,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                   </div>
                 </div>
                 {!sess.current && (
-                  <button className="btn btn-outlined" style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}
+                  <button aria-label="Sign out of this session" className="btn btn-outlined" style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}
                     onClick={() => {
                       if (addToast) addToast("Session terminated", "success")
                     }}>Sign Out</button>
@@ -532,7 +551,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           </div>
           {activeSessions.length > 1 && (
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button className="btn btn-filled" style={{ height: '36px', fontSize: '13px' }}
+              <button aria-label="Sign out all other devices" className="btn btn-filled" style={{ height: '36px', fontSize: '13px' }}
                 onClick={() => { if (addToast) addToast("All other devices signed out", "success") }}>
                 Sign out all other devices
               </button>
@@ -585,7 +604,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                         <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12px' }} title={JSON.stringify(conflict.remoteValue)}>{JSON.stringify(conflict.remoteValue)}</td>
                         <td style={{ ...cellStyle, color: 'var(--md-bw-on-surface-variant)', fontSize: '12px' }}>{conflict.resolution}</td>
                         <td style={{ ...cellStyle, textAlign: 'center' }}>
-                          <button className="btn btn-outlined" style={{ height: '30px', padding: '0 12px', fontSize: '12px' }}
+                          <button aria-label="Acknowledge sync conflict" className="btn btn-outlined" style={{ height: '30px', padding: '0 12px', fontSize: '12px' }}
                             onClick={() => { setSyncConflicts(prev => prev.filter((_, idx) => idx !== i)); if (addToast) addToast("Conflict acknowledged", "success") }}>
                             Acknowledge
                           </button>
@@ -608,85 +627,80 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <h1 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>System Settings</h1>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn btn-text" onClick={() => setShowResetModal(true)} style={{ height: '36px', fontSize: '13px' }}>Reset Defaults</button>
-          <button className="btn btn-filled" onClick={handleSave} disabled={isSaving || isOver100} style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '36px', fontSize: '13px' }}>
+          <button aria-label="Reset settings to defaults" className="btn btn-text" onClick={() => setShowResetModal(true)} style={{ height: '36px', fontSize: '13px' }}>Reset Defaults</button>
+          <button aria-label="Save settings" className="btn btn-filled" onClick={handleSave} disabled={isSaving || isOver100} style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '36px', fontSize: '13px' }}>
             {isSaving ? <div className="skeleton" style={{ width: 14, height: 14, borderRadius: '50%' }} /> : <Save size={14} />}
             {isSaving ? 'Saving...' : 'Save Settings'}
           </button>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
         {menuItems.map(item => {
           const Icon = item.icon
-          const isOpen = activeSubmenu === item.id
+          const isActive = activeSubmenu === item.id && panelOpen
           return (
-            <div key={item.id} style={{ display: 'flex', flexDirection: 'column' }}>
-              <button onClick={() => setTab(item.id)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '14px 18px',
-                  borderRadius: '14px', border: '1px solid', cursor: 'pointer', fontSize: '14px', fontWeight: 500,
-                  textAlign: 'left', outline: 'none', transition: 'all 0.2s ease',
-                  borderColor: isOpen ? 'var(--accent-primary, #0062E6)' : 'var(--glass-border)',
-                  background: isOpen ? 'linear-gradient(135deg, rgba(0,98,230,0.08), rgba(0,58,140,0.04))' : 'var(--glass-bg)',
-                  backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
-                  color: isOpen ? 'var(--accent-primary, #0062E6)' : 'var(--md-bw-on-surface)',
-                  boxShadow: isOpen ? '0 0 0 1px rgba(0,98,230,0.3), var(--glass-shadow)' : 'var(--glass-shadow)',
-                }}>
-                <Icon size={18} />
-                <span style={{ flex: 1 }}>{item.label}</span>
-                {item.badge > 0 && (
-                  <span style={{ background: isOpen ? 'var(--accent-primary, #0062E6)' : 'var(--md-bw-on-surface)', color: '#fff', fontSize: '11px', padding: '1px 7px', borderRadius: '12px', fontWeight: 600 }}>{item.badge}</span>
-                )}
-                <ChevronDown size={16} style={{
-                  transition: 'transform 0.3s ease',
-                  transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                  color: 'var(--md-bw-on-surface-variant)',
-                }} />
-              </button>
-              <div style={{
-                overflow: 'hidden',
-                transition: 'max-height 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease',
-                maxHeight: isOpen ? '2000px' : '0px',
-                opacity: isOpen ? 1 : 0,
+            <button key={item.id} onClick={() => setTab(item.id)}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
+                padding: '20px 12px', borderRadius: '16px', border: '1px solid',
+                borderColor: isActive ? 'var(--accent-primary, #0062E6)' : 'var(--glass-border)',
+                background: isActive ? 'linear-gradient(135deg, rgba(0,98,230,0.08), rgba(0,58,140,0.04))' : 'var(--glass-bg)',
+                backdropFilter: 'var(--glass-blur)', WebkitBackdropFilter: 'var(--glass-blur)',
+                cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none',
+                color: isActive ? 'var(--accent-primary, #0062E6)' : 'var(--md-bw-on-surface-variant)',
+                boxShadow: isActive ? '0 0 0 1px rgba(0,98,230,0.3), var(--glass-shadow)' : 'var(--glass-shadow)',
               }}>
-                <div style={{ padding: '12px 0 4px 0' }}>
-                  {renderSettingsContent(item.id)}
-                </div>
-              </div>
-            </div>
+              <Icon size={24} />
+              <span style={{ fontSize: '12px', fontWeight: 600, textAlign: 'center', lineHeight: '1.3' }}>{item.label}</span>
+              {item.badge > 0 && (
+                <span style={{ background: isActive ? 'var(--accent-primary, #0062E6)' : 'var(--md-bw-on-surface)', color: '#fff', fontSize: '10px', padding: '1px 6px', borderRadius: '12px', fontWeight: 600, marginTop: '-4px' }}>{item.badge}</span>
+              )}
+            </button>
           )
         })}
+      </div>
+
+      <div style={{
+        overflow: 'hidden',
+        transition: 'max-height 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease, margin 0.35s ease',
+        maxHeight: panelOpen ? '2000px' : '0px',
+        opacity: panelOpen ? 1 : 0,
+        marginTop: panelOpen ? '24px' : '0px',
+      }}>
+        <div style={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {renderSettingsContent(activeSubmenu)}
+        </div>
       </div>
 
       <AdSlot type="horizontal" style={{ marginTop: '4px' }} />
 
       {showLogoModal && (
-        <div className="modal-overlay" onClick={() => setShowLogoModal(false)}>
+        <div className="modal-overlay" aria-label="Close logo editor" onClick={() => setShowLogoModal(false)}>
           <div onClick={e => e.stopPropagation()} style={{ ...card, padding: '24px', maxWidth: '380px', width: '90%', display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
               <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Edit Brand Logo</h3>
-              <button onClick={() => setShowLogoModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--md-bw-on-surface-variant)', display: 'flex', padding: '4px' }}><X size={18} /></button>
+              <button aria-label="Close logo editor" onClick={() => setShowLogoModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--md-bw-on-surface-variant)', display: 'flex', padding: '4px' }}><X size={18} /></button>
             </div>
             <p className="body-small" style={{ color: 'var(--md-bw-on-surface-variant)', textAlign: 'center', margin: 0 }}>Drag the image to reposition it, or use the slider below to zoom.</p>
-            <div onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onPointerLeave={handlePointerUp}
+            <div role="img" aria-label="Logo preview" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onPointerLeave={handlePointerUp}
               style={{ width: '120px', height: '120px', borderRadius: '24px', background: 'var(--glass-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', cursor: dragStart ? 'grabbing' : 'grab', touchAction: 'none', border: '1px solid var(--glass-border)' }}>
               {logo ? <img src={logo} alt="" draggable="false" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)`, transformOrigin: 'center', pointerEvents: 'none' }} />
                 : <Activity size={36} color="var(--md-bw-on-surface-variant)" />}
             </div>
             <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontSize: '12px', color: 'var(--md-bw-on-surface-variant)', fontWeight: 500 }}>Zoom</span>
-              <input type="range" min="0.5" max="3" step="0.05" value={logoZoom} onChange={e => setLogoZoom(parseFloat(e.target.value))} style={{ flex: 1, accentColor: '#0062E6' }} />
+              <input aria-label="Logo zoom level" type="range" min="0.5" max="3" step="0.05" value={logoZoom} onChange={e => setLogoZoom(parseFloat(e.target.value))} style={{ flex: 1, accentColor: '#0062E6' }} />
             </div>
             <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
-              <button className="btn btn-outlined" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', height: '36px', fontSize: '12px' }} onClick={triggerFileInput}>
+              <button aria-label="Replace logo" className="btn btn-outlined" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', height: '36px', fontSize: '12px' }} onClick={triggerFileInput}>
                 <Upload size={14} /> Replace
               </button>
-              <button className="btn btn-outlined" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', height: '36px', fontSize: '12px', color: '#dc3545' }} onClick={handleRemoveLogo}>
+              <button aria-label="Remove logo" className="btn btn-outlined" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', height: '36px', fontSize: '12px', color: '#dc3545' }} onClick={handleRemoveLogo}>
                 <Trash2 size={14} /> Remove
               </button>
             </div>
-            <button className="btn btn-filled" style={{ width: '100%', height: '36px', fontSize: '13px' }} onClick={() => setShowLogoModal(false)}>
+            <button aria-label="Done editing logo" className="btn btn-filled" style={{ width: '100%', height: '36px', fontSize: '13px' }} onClick={() => setShowLogoModal(false)}>
               <Check size={14} /> Done
             </button>
           </div>
@@ -694,13 +708,13 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
       )}
 
       {showResetModal && (
-        <div className="modal-overlay" onClick={() => setShowResetModal(false)}>
+        <div className="modal-overlay" aria-label="Close reset modal" onClick={() => setShowResetModal(false)}>
           <div onClick={e => e.stopPropagation()} style={{ ...card, padding: '24px', maxWidth: '380px', width: '90%', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <h3 className="title-medium" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Confirm Reset</h3>
             <p className="body-medium" style={{ color: 'var(--md-bw-on-surface-variant)', margin: 0 }}>Are you sure? This will reset all settings in the active tab to their default values.</p>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '8px' }}>
-              <button className="btn btn-text" onClick={() => setShowResetModal(false)} style={{ height: '36px', fontSize: '13px' }}>Cancel</button>
-              <button className="btn btn-filled" onClick={() => { setShowResetModal(false); if (addToast) addToast('Settings reset to defaults', 'info') }} style={{ height: '36px', fontSize: '13px' }}>Reset Defaults</button>
+              <button aria-label="Cancel reset" className="btn btn-text" onClick={() => setShowResetModal(false)} style={{ height: '36px', fontSize: '13px' }}>Cancel</button>
+              <button aria-label="Confirm reset to defaults" className="btn btn-filled" onClick={() => { setShowResetModal(false); if (addToast) addToast('Settings reset to defaults', 'info') }} style={{ height: '36px', fontSize: '13px' }}>Reset Defaults</button>
             </div>
           </div>
         </div>

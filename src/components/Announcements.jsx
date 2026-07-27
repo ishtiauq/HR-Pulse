@@ -4,14 +4,14 @@ import AdSlot from './AdSlot'
 import { formatDateTime } from '../services/date.js'
 
 export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser }) {
-  const [activeTab, setActiveTab] = useState('feed') // 'feed', 'create'
+  const [activeTab, setActiveTab] = useState('feed')
   
   // Form States
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [category, setCategory] = useState('General')
   const [priority, setPriority] = useState('Normal')
-  const [audience, setAudience] = useState('all') // 'all', department name, or 'selected'
+  const [audience, setAudience] = useState('all')
   
   const [hasPoll, setHasPoll] = useState(false)
   const [pollQuestion, setPollQuestion] = useState('')
@@ -37,7 +37,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
       category,
       priority,
       audience,
-      attachments: [], // Mocking for now
+      attachments: [],
       reactions: { '👍': 0, '❤️': 0, '🎉': 0 },
       comments: [],
       readBy: [],
@@ -51,7 +51,6 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     addToast('Announcement published successfully!', 'success')
     addLog('Announcement Created', `Title: ${title}`)
     
-    // Reset
     setTitle('')
     setContent('')
     setCategory('General')
@@ -77,51 +76,51 @@ export default function Announcements({ employees, announcements, setAnnouncemen
   }
 
   return (
-    <div className="fade-in" style={{ paddingBottom: '40px' }}>
+    <div className="fade-in pb-10">
       <div className="page-header">
         <h1 className="page-title">
           <Megaphone size={28} className="page-title-icon" />
           Announcements
         </h1>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className={`tab-btn ${activeTab === 'feed' ? 'active' : ''}`} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'feed' ? 'var(--bg-secondary)' : 'transparent', color: activeTab === 'feed' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }} onClick={() => setActiveTab('feed')}>Company Feed</button>
-          <button className={`tab-btn ${activeTab === 'create' ? 'active' : ''}`} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'create' ? 'var(--accent-primary)' : 'transparent', color: activeTab === 'create' ? '#fff' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }} onClick={() => setActiveTab('create')}>
+        <div className="flex gap-3">
+          <button aria-label={activeTab === 'feed' ? 'View company feed (active)' : 'View company feed'} className={`tab-btn px-4 py-2 rounded-lg border-0 font-semibold cursor-pointer ${activeTab === 'feed' ? 'active' : ''}`} style={{ background: activeTab === 'feed' ? 'var(--bg-secondary)' : 'transparent', color: activeTab === 'feed' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveTab('feed')}>Company Feed</button>
+          <button aria-label={activeTab === 'create' ? 'Create new post (active)' : 'Create new post'} className={`tab-btn px-4 py-2 rounded-lg border-0 font-semibold cursor-pointer flex items-center gap-1.5 ${activeTab === 'create' ? 'active' : ''}`} style={{ background: activeTab === 'create' ? 'var(--accent-primary)' : 'transparent', color: activeTab === 'create' ? '#fff' : 'var(--text-secondary)' }} onClick={() => setActiveTab('create')}>
             <Plus size={16} /> New Post
           </button>
         </div>
       </div>
 
       {activeTab === 'create' && (
-        <div className="glass-card" style={{ padding: '32px', maxWidth: '800px', margin: '0 auto' }}>
-          <h2 style={{ marginTop: 0, marginBottom: '24px', fontSize: '1.4rem' }}>Create Announcement</h2>
+        <div className="glass-card p-8 max-w-[800px] mx-auto">
+          <h2 className="mt-0 mb-6 text-[1.4rem]">Create Announcement</h2>
           
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Title</label>
-              <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '1.1rem' }} placeholder="e.g. Q3 Town Hall Meeting" />
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-[0.9rem] font-semibold" style={{ color: 'var(--text-secondary)' }}>Title</label>
+              <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} className="p-3 rounded-lg text-base" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="e.g. Q3 Town Hall Meeting" />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Category</label>
-                <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-[0.9rem] font-semibold" style={{ color: 'var(--text-secondary)' }}>Category</label>
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="p-3 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
                   <option value="General">General</option>
                   <option value="Policy Update">Policy Update</option>
                   <option value="Event">Event</option>
                   <option value="Emergency">Emergency</option>
                 </select>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Priority</label>
-                <select value={priority} onChange={(e) => setPriority(e.target.value)} style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
+              <div className="flex flex-col gap-2">
+                <label className="text-[0.9rem] font-semibold" style={{ color: 'var(--text-secondary)' }}>Priority</label>
+                <select value={priority} onChange={(e) => setPriority(e.target.value)} className="p-3 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
                   <option value="Normal">Normal (Blue)</option>
                   <option value="Important">Important (Orange)</option>
                   <option value="Urgent">Urgent (Red - Pinned)</option>
                 </select>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Target Audience</label>
-                <select value={audience} onChange={(e) => setAudience(e.target.value)} style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
+              <div className="flex flex-col gap-2">
+                <label className="text-[0.9rem] font-semibold" style={{ color: 'var(--text-secondary)' }}>Target Audience</label>
+                <select value={audience} onChange={(e) => setAudience(e.target.value)} className="p-3 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
                   <option value="all">All Employees</option>
                   <option value="Engineering">Engineering Dept</option>
                   <option value="Design">Design Dept</option>
@@ -130,32 +129,32 @@ export default function Announcements({ employees, announcements, setAnnouncemen
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Message Content</label>
-              <textarea required rows={6} value={content} onChange={(e) => setContent(e.target.value)} style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontFamily: 'inherit', resize: 'vertical' }} placeholder="Type your message here..." />
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>* Line breaks will be preserved. Formatting tools coming soon.</div>
+            <div className="flex flex-col gap-2">
+              <label className="text-[0.9rem] font-semibold" style={{ color: 'var(--text-secondary)' }}>Message Content</label>
+              <textarea required rows={6} value={content} onChange={(e) => setContent(e.target.value)} className="p-3 rounded-lg resize-y" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Type your message here..." />
+              <div className="text-[0.8rem]" style={{ color: 'var(--text-muted)' }}>* Line breaks will be preserved. Formatting tools coming soon.</div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '16px', borderRadius: '8px', border: '1px dashed var(--border-color)', background: 'var(--bg-secondary)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="flex flex-col gap-2 p-4 rounded-lg" style={{ border: '1px dashed var(--border-color)', background: 'var(--bg-secondary)' }}>
+              <div className="flex justify-between items-center">
+                <label className="text-[0.9rem] font-semibold flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
                   <AlertTriangle size={16} /> Attach Poll (Optional)
                 </label>
-                <input type="checkbox" checked={hasPoll} onChange={(e) => setHasPoll(e.target.checked)} />
+                <input type="checkbox" aria-label="Enable poll" checked={hasPoll} onChange={(e) => setHasPoll(e.target.checked)} />
               </div>
               
               {hasPoll && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
-                  <input type="text" value={pollQuestion} onChange={(e) => setPollQuestion(e.target.value)} style={{ padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="Poll Question..." />
+                <div className="flex flex-col gap-3 mt-3">
+                  <input aria-label="Poll question" type="text" value={pollQuestion} onChange={(e) => setPollQuestion(e.target.value)} className="p-2.5 rounded-md" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="Poll Question..." />
                   {pollOptions.map((opt, i) => (
-                    <input key={i} type="text" value={opt} onChange={(e) => handlePollOptionChange(i, e.target.value)} style={{ padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder={`Option ${i + 1}`} />
+                    <input key={i} aria-label={`Poll option ${i + 1}`} type="text" value={opt} onChange={(e) => handlePollOptionChange(i, e.target.value)} className="p-2.5 rounded-md" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder={`Option ${i + 1}`} />
                   ))}
-                  <button type="button" onClick={handleAddPollOption} style={{ alignSelf: 'flex-start', background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>+ Add Option</button>
+                  <button type="button" aria-label="Add poll option" onClick={handleAddPollOption} className="self-start bg-transparent border-0 cursor-pointer text-sm font-semibold" style={{ color: 'var(--accent-primary)' }}>+ Add Option</button>
                 </div>
               )}
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ padding: '14px', fontSize: '1.1rem', marginTop: '12px' }}>
+            <button aria-label="Publish announcement" type="submit" className="btn btn-primary p-3.5 text-base mt-3">
               Publish Announcement
             </button>
           </form>
@@ -163,9 +162,9 @@ export default function Announcements({ employees, announcements, setAnnouncemen
       )}
 
       {activeTab === 'feed' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '800px', margin: '0 auto' }}>
+        <div className="flex flex-col gap-5 max-w-[800px] mx-auto">
           {announcements.length === 0 ? (
-            <div className="glass-card" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+            <div className="glass-card p-10 text-center" style={{ color: 'var(--text-secondary)' }}>
               No announcements found.
             </div>
           ) : (
@@ -175,59 +174,59 @@ export default function Announcements({ employees, announcements, setAnnouncemen
               const isUrgent = post.priority === 'Urgent'
 
               return (
-                <div key={post.id} className="glass-card" style={{ padding: '24px', borderLeft: `4px solid ${getPriorityColor(post.priority)}`, position: 'relative' }}>
+                <div key={post.id} className="glass-card p-6 relative" style={{ borderLeft: `4px solid ${getPriorityColor(post.priority)}` }}>
                   {isUrgent && (
-                    <div style={{ position: 'absolute', top: '12px', right: '12px', background: 'var(--accent-danger)', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '4px 8px', borderRadius: '12px', textTransform: 'uppercase' }}>
+                    <div className="absolute top-3 right-3 text-[0.7rem] font-bold px-2 py-1 rounded-xl uppercase" style={{ background: 'var(--accent-danger)', color: '#fff' }}>
                       Pinned
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
                       {author.avatar ? (
-                        <img src={author.avatar} alt="" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                        <img src={author.avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
                       ) : (
-                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
                           <Megaphone size={20} />
                         </div>
                       )}
                       <div>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{author.name}</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{dateStr} • {post.audience === 'all' ? 'All Employees' : post.audience}</div>
+                        <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{author.name}</div>
+                        <div className="text-[0.8rem]" style={{ color: 'var(--text-secondary)' }}>{dateStr} • {post.audience === 'all' ? 'All Employees' : post.audience}</div>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '0.8rem', padding: '4px 8px', borderRadius: '4px', background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[0.8rem] px-2 py-1 rounded" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
                         {post.category}
                       </span>
-                      <button onClick={() => handleDelete(post.id)} style={{ background: 'none', border: 'none', color: 'var(--accent-danger)', cursor: 'pointer', padding: '4px' }} title="Delete Post">
+                      <button aria-label="Delete announcement" onClick={() => handleDelete(post.id)} className="bg-transparent border-0 cursor-pointer p-1" style={{ color: 'var(--accent-danger)' }} title="Delete Post">
                         <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
 
-                  <h3 style={{ margin: '0 0 12px 0', fontSize: '1.25rem', color: 'var(--text-primary)' }}>{post.title}</h3>
-                  <div style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '0.95rem' }}>
+                  <h3 className="m-0 mb-3 text-xl" style={{ color: 'var(--text-primary)' }}>{post.title}</h3>
+                  <div className="whitespace-pre-wrap leading-relaxed text-[0.95rem]" style={{ color: 'var(--text-secondary)' }}>
                     {post.content}
                   </div>
 
                   {post.poll && (
-                    <div style={{ marginTop: '20px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
-                      <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', color: 'var(--text-primary)' }}>📊 {post.poll.question}</h4>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div className="mt-5 p-4 rounded-lg" style={{ background: 'var(--bg-secondary)' }}>
+                      <h4 className="m-0 mb-3 text-base" style={{ color: 'var(--text-primary)' }}>📊 {post.poll.question}</h4>
+                      <div className="flex flex-col gap-2">
                         {post.poll.options.map((opt, i) => {
                           const votes = opt.votes.length
                           const totalVotes = post.poll.options.reduce((sum, o) => sum + o.votes.length, 0)
                           const pct = totalVotes === 0 ? 0 : Math.round((votes / totalVotes) * 100)
                           return (
-                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <div style={{ flex: 1, background: 'var(--bg-tertiary)', borderRadius: '4px', height: '32px', position: 'relative', overflow: 'hidden' }}>
-                                <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: `${pct}%`, background: 'var(--accent-primary)', opacity: 0.2 }}></div>
-                                <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', display: 'flex', alignItems: 'center', padding: '0 12px', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                            <div key={i} className="flex items-center gap-3">
+                              <div className="flex-1 relative overflow-hidden h-8 rounded" style={{ background: 'var(--bg-tertiary)' }}>
+                                <div className="absolute top-0 left-0 h-full opacity-20" style={{ width: `${pct}%`, background: 'var(--accent-primary)' }} />
+                                <div className="absolute top-0 left-0 h-full w-full flex items-center px-3 text-[0.9rem]" style={{ color: 'var(--text-primary)' }}>
                                   {opt.text}
                                 </div>
                               </div>
-                              <div style={{ width: '40px', fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'right' }}>{votes}</div>
+                              <div className="w-10 text-sm text-right" style={{ color: 'var(--text-secondary)' }}>{votes}</div>
                             </div>
                           )
                         })}
@@ -235,22 +234,22 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-color)' }}>
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                  <div className="flex justify-between items-center mt-5 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+                    <div className="flex gap-4" aria-label="Post reactions">
+                      <span aria-label={`${post.reactions['👍']} like reactions`} className="flex items-center gap-1.5 text-[0.9rem]" style={{ color: 'var(--text-secondary)' }}>
                         👍 {post.reactions['👍']}
                       </span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                      <span aria-label={`${post.reactions['❤️']} heart reactions`} className="flex items-center gap-1.5 text-[0.9rem]" style={{ color: 'var(--text-secondary)' }}>
                         ❤️ {post.reactions['❤️']}
                       </span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                      <span aria-label={`${post.reactions['🎉']} celebrate reactions`} className="flex items-center gap-1.5 text-[0.9rem]" style={{ color: 'var(--text-secondary)' }}>
                         🎉 {post.reactions['🎉']}
                       </span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', color: 'var(--text-secondary)', marginLeft: '12px' }}>
+                      <span aria-label={`${post.comments.length} comments`} className="flex items-center gap-1.5 text-[0.9rem] ml-3" style={{ color: 'var(--text-secondary)' }}>
                         <MessageSquare size={16} /> {post.comments.length}
                       </span>
                     </div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div className="text-sm flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
                       <Users size={14} /> Read by {post.readBy.length} employees
                     </div>
                   </div>

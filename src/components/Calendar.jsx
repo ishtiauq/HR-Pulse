@@ -129,28 +129,28 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
       })
 
   const renderCalendarGrid = () => (
-    <div className="glass-card" style={{ padding: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button onClick={prevMonth} style={{ background: 'var(--bg-tertiary)', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex' }}>
+    <div className="glass-card p-6">
+      <div className="flex justify-between items-center mb-5">
+        <div className="flex items-center gap-3">
+          <button onClick={prevMonth} aria-label="Previous month" className="flex rounded-lg p-2 cursor-pointer" style={{ background: 'var(--bg-tertiary)', border: 'none', color: 'var(--text-secondary)' }}>
             <ChevronLeft size={18} />
           </button>
-          <h2 style={{ fontSize: '1.3rem', fontWeight: 700, margin: 0, minWidth: '180px', textAlign: 'center' }}>
+          <h2 className="text-[1.3rem] font-bold m-0 min-w-[180px] text-center">
             {MONTHS[currentMonth]} {currentYear}
           </h2>
-          <button onClick={nextMonth} style={{ background: 'var(--bg-tertiary)', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex' }}>
+          <button onClick={nextMonth} aria-label="Next month" className="flex rounded-lg p-2 cursor-pointer" style={{ background: 'var(--bg-tertiary)', border: 'none', color: 'var(--text-secondary)' }}>
             <ChevronRight size={18} />
           </button>
         </div>
-        <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+        <button className="btn btn-primary flex items-center gap-1.5" aria-label="Add event"
           onClick={() => openCreateModal(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`)}>
           <Plus size={16} /> Add Event
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center' }}>
+      <div role="grid" aria-label="Calendar" className="grid grid-cols-7 gap-1 text-center">
         {DAYS.map(d => (
-          <div key={d} style={{ padding: '8px 0', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{d}</div>
+          <div key={d} role="columnheader" className="py-2 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>{d}</div>
         ))}
         {Array.from({ length: firstDayOfMonth }).map((_, i) => (
           <div key={`empty-${i}`} />
@@ -163,32 +163,30 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
           const isSelected = selectedDate === dateStr
           return (
             <div key={day}
+              role="gridcell"
+              aria-label={`${MONTHS[currentMonth]} ${day}, ${currentYear}`}
               onClick={() => setSelectedDate(dateStr)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedDate(dateStr) } }}
+              tabIndex={0}
+              className="flex flex-col items-center gap-1 p-2 cursor-pointer min-h-[64px]"
               style={{
-                padding: '8px 4px',
                 borderRadius: 'var(--radius-sm)',
                 background: isSelected ? 'var(--accent-primary)' : isToday ? 'var(--accent-primary-dim)' : 'transparent',
                 color: isSelected ? '#fff' : 'var(--text-primary)',
-                cursor: 'pointer',
-                minHeight: '64px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '4px',
                 transition: 'background-color var(--transition-fast), color var(--transition-fast)',
                 border: isToday && !isSelected ? '1px solid var(--accent-primary)' : 'none',
               }}
               onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-tertiary)' }}
               onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = isToday ? 'var(--accent-primary-dim)' : 'transparent' }}
             >
-              <span style={{ fontSize: '0.85rem', fontWeight: isToday ? 800 : 600 }}>{day}</span>
+              <span className="text-sm" style={{ fontWeight: isToday ? 800 : 600 }}>{day}</span>
               {dayEvents.length > 0 && (
-                <div style={{ display: 'flex', gap: '2px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <div className="flex gap-0.5 flex-wrap justify-center">
                   {dayEvents.slice(0, 3).map(ev => {
                     const typeInfo = getTypeInfo(ev.type)
-                    return <div key={ev.id} style={{ width: '6px', height: '6px', borderRadius: '50%', background: typeInfo.color }} />
+                    return <div key={ev.id} className="w-1.5 h-1.5 rounded-full" style={{ background: typeInfo.color }} />
                   })}
-                  {dayEvents.length > 3 && <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>+{dayEvents.length - 3}</span>}
+                  {dayEvents.length > 3 && <span className="text-[0.6rem]" style={{ color: 'var(--text-muted)' }}>+{dayEvents.length - 3}</span>}
                 </div>
               )}
             </div>
@@ -199,60 +197,58 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
   )
 
   const renderEventList = () => (
-    <div className="glass-card" style={{ padding: '24px' }}>
-      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <div className="glass-card p-6">
+      <h3 className="text-lg font-bold m-0 mb-4 flex items-center gap-2">
         <CalendarIcon size={18} color="var(--accent-primary)" />
         {selectedDate ? `Events on ${formatDate(selectedDate)}` : 'This Month\'s Events'}
       </h3>
 
       {filteredEvents.length === 0 ? (
-        <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '32px 0' }}>
+        <p className="text-center py-8" style={{ color: 'var(--text-muted)' }}>
           {selectedDate ? 'No events on this day' : 'No events this month'}
         </p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div role="list" className="flex flex-col gap-2">
           {filteredEvents.map(ev => {
             const typeInfo = getTypeInfo(ev.type)
             const TypeIcon = typeInfo.icon
             return (
-              <div key={ev.id} style={{
-                display: 'flex', alignItems: 'center', gap: '12px',
-                padding: '12px 16px', borderRadius: 'var(--radius-sm)',
+              <div key={ev.id} role="listitem" className="flex items-center gap-3 p-3 px-4" style={{
+                borderRadius: 'var(--radius-sm)',
                 background: 'var(--bg-tertiary)', transition: 'all var(--transition-fast)'
               }}>
-                <div style={{
-                  width: '36px', height: '36px', borderRadius: '8px',
+                <div className="flex items-center justify-center shrink-0 rounded-lg" style={{
+                  width: '36px', height: '36px',
                   background: `${typeInfo.color}20`, color: typeInfo.color,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                 }}>
                   <TypeIcon size={16} />
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{ev.title}</span>
-                    <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '20px', background: `${typeInfo.color}20`, color: typeInfo.color, fontWeight: 600 }}>{typeInfo.label}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-[0.9rem]" style={{ color: 'var(--text-primary)' }}>{ev.title}</span>
+                    <span className="text-[0.7rem] px-2 py-0.5 rounded-full font-semibold" style={{ background: `${typeInfo.color}20`, color: typeInfo.color }}>{typeInfo.label}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px' }}>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-[0.8rem] flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
                       <CalendarIcon size={12} /> {formatDate(ev.date)}
                     </span>
                     {ev.time && (
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span className="text-[0.8rem] flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
                         <Clock size={12} /> {ev.time}
                       </span>
                     )}
                   </div>
                   {ev.description && (
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>{ev.description}</p>
+                    <p className="text-[0.8rem] m-0 mt-1" style={{ color: 'var(--text-secondary)' }}>{ev.description}</p>
                   )}
                 </div>
-                <div style={{ display: 'flex', gap: '4px' }}>
-                  <button onClick={() => openEditModal(ev)} style={{ background: 'transparent', border: 'none', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: 'var(--text-muted)' }}
+                <div className="flex gap-1">
+                  <button aria-label="Edit event" onClick={() => openEditModal(ev)} className="bg-transparent border-0 p-1.5 rounded-md cursor-pointer" style={{ color: 'var(--text-muted)' }}
                     onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent-primary)'}
                     onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}>
                     <Edit size={14} />
                   </button>
-                  <button onClick={() => handleDelete(ev.id)} style={{ background: 'transparent', border: 'none', padding: '6px', borderRadius: '6px', cursor: 'pointer', color: 'var(--text-muted)' }}
+                  <button aria-label="Delete event" onClick={() => handleDelete(ev.id)} className="bg-transparent border-0 p-1.5 rounded-md cursor-pointer" style={{ color: 'var(--text-muted)' }}
                     onMouseEnter={(e) => e.currentTarget.style.color = 'var(--accent-danger)'}
                     onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}>
                     <Trash2 size={14} />
@@ -267,7 +263,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
   )
 
   return (
-    <div className="fade-in" style={{ paddingBottom: '40px' }}>
+    <div className="fade-in pb-10">
       <div className="page-header">
         <h1 className="page-title">
           <CalendarIcon size={28} className="page-title-icon" />
@@ -275,19 +271,19 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
         </h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: selectedDate ? '1fr 380px' : '1fr', gap: '24px', alignItems: 'start' }}>
+      <div className="grid gap-6 items-start" style={{ gridTemplateColumns: selectedDate ? '1fr 380px' : '1fr' }}>
         {renderCalendarGrid()}
         {selectedDate && renderEventList()}
       </div>
 
       {!selectedDate && (
-        <div style={{ marginTop: '24px' }}>{renderEventList()}</div>
+        <div className="mt-6">{renderEventList()}</div>
       )}
 
-      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '16px' }}>
+      <div className="flex gap-2 justify-end mt-4">
         {EVENT_TYPES.map(t => (
-          <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: t.color }} />
+          <div key={t.id} className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+            <div className="w-2 h-2 rounded-full" style={{ background: t.color }} />
             {t.label}
           </div>
         ))}
@@ -295,43 +291,42 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
 
       {showEventModal && (
         <div className="modal-overlay" onClick={() => { setShowEventModal(false); resetForm() }}>
-          <div className="modal-container" style={{ maxWidth: '480px' }} onClick={e => e.stopPropagation()}>
+          <div className="modal-container max-w-[480px]" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{editingEvent ? 'Edit Event' : 'Create Event'}</h2>
-              <button className="modal-close" onClick={() => { setShowEventModal(false); resetForm() }}><X size={20} /></button>
+              <button className="modal-close" aria-label="Close" onClick={() => { setShowEventModal(false); resetForm() }}><X size={20} /></button>
             </div>
-            <form onSubmit={handleSave} className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Title *</label>
-                <input type="text" required value={formTitle} onChange={e => setFormTitle(e.target.value)} placeholder="Event title"
-                  style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.95rem' }} />
+            <form onSubmit={handleSave} className="modal-body flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Title *</label>
+                <input type="text" required value={formTitle} onChange={e => setFormTitle(e.target.value)} placeholder="Event title" aria-label="Event title"
+                  className="p-2.5 px-3 rounded-lg text-[0.95rem]" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Date *</label>
-                  <input type="date" required value={formDate} onChange={e => setFormDate(e.target.value)}
-                    style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.95rem' }} />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Date *</label>
+                  <input type="date" required value={formDate} onChange={e => setFormDate(e.target.value)} aria-label="Event date"
+                    className="p-2.5 px-3 rounded-lg text-[0.95rem]" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Time</label>
-                  <input type="time" value={formTime} onChange={e => setFormTime(e.target.value)}
-                    style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.95rem' }} />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Time</label>
+                  <input type="time" value={formTime} onChange={e => setFormTime(e.target.value)} aria-label="Event time"
+                    className="p-2.5 px-3 rounded-lg text-[0.95rem]" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
                 </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Type</label>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Type</label>
+                <div className="flex gap-2 flex-wrap">
                   {EVENT_TYPES.map(t => {
                     const Icon = t.icon
                     const isActive = formType === t.id
                     return (
                       <button key={t.id} type="button" onClick={() => setFormType(t.id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold text-[0.8rem] cursor-pointer"
                         style={{
-                          display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px',
                           border: isActive ? `2px solid ${t.color}` : '1px solid var(--border-color)',
                           background: isActive ? `${t.color}15` : 'var(--bg-tertiary)',
                           color: isActive ? t.color : 'var(--text-secondary)',
-                          fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer',
                         }}>
                         <Icon size={14} /> {t.label}
                       </button>
@@ -339,12 +334,12 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                   })}
                 </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Description</label>
-                <textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={3} placeholder="Event description (optional)"
-                  style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', fontSize: '0.95rem', resize: 'vertical' }} />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Description</label>
+                <textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={3} placeholder="Event description (optional)" aria-label="Event description"
+                  className="p-2.5 px-3 rounded-lg text-[0.95rem] resize-y" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
               </div>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+              <div className="flex gap-3 justify-end mt-2">
                 <button type="button" className="btn btn-secondary" onClick={() => { setShowEventModal(false); resetForm() }}>
                   Cancel
                 </button>

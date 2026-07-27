@@ -71,83 +71,76 @@ export default function EmployeeLogin({ onLogin, onBack }) {
       </div>
 
       <div className="welcome-center-content">
-        <button onClick={onBack} className="btn btn-outline" style={{
-          display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '24px',
-          padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--color-md-sys-outline-variant)',
-          background: 'transparent', cursor: 'pointer', color: 'var(--text-secondary)',
-          font: "500 13px 'Roboto'"
-        }}>
+        <button onClick={onBack} className="btn btn-outline flex items-center gap-1.5 mb-6 px-4 py-2 rounded-lg bg-transparent cursor-pointer"
+          style={{ border: '1px solid var(--color-md-sys-outline-variant)', color: 'var(--text-secondary)', font: "500 13px 'Roboto'" }}>
           <ArrowLeft size={16} />
           Back to HR Manager Login
         </button>
 
-        <h1 className="welcome-heading" style={{ fontSize: 'var(--fs-headline-large)', marginBottom: '8px' }}>
+        <h1 className="welcome-heading mb-2" style={{ fontSize: 'var(--fs-headline-large)' }}>
           Employee <span className="welcome-accent">Login</span>
         </h1>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', fontSize: 'var(--fs-body-medium)' }}>
+        <p className="mb-8" style={{ color: 'var(--text-secondary)', fontSize: 'var(--fs-body-medium)' }}>
           Sign in with your company credentials
         </p>
 
-        <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: '400px' }}>
+        <form onSubmit={handleSubmit} aria-label="Employee login form" className="w-full max-w-[400px]">
           {error && (
-            <div style={{
-              padding: '12px 16px', borderRadius: '8px', marginBottom: '16px',
-              background: 'rgba(224, 32, 20, 0.08)', border: '1px solid rgba(224, 32, 20, 0.2)',
-              color: '#E02014', fontSize: 'var(--fs-label-small)'
-            }}>
+            <div className="px-4 py-3 rounded-lg mb-4 bg-[rgba(224,32,20,0.08)] text-[#E02014]"
+              style={{ border: '1px solid rgba(224, 32, 20, 0.2)', fontSize: 'var(--fs-label-small)' }}>
               {error}
             </div>
           )}
 
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '6px', font: "500 13px 'Roboto'", color: 'var(--text-secondary)' }}>
+          <div className="mb-4">
+            <label htmlFor="emp-email" className="block mb-1.5" style={{ font: "500 13px 'Roboto'", color: 'var(--text-secondary)' }}>
               Email Address
             </label>
             <input
+              id="emp-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@company.com"
               required
+              className="w-full px-4 py-3 rounded-[10px] outline-none"
               style={{
-                width: '100%', padding: '12px 16px', borderRadius: '10px',
                 border: '1px solid var(--color-md-sys-outline-variant)',
                 background: 'var(--color-md-sys-surface)',
                 color: 'var(--text-primary)',
                 font: "400 14px 'Roboto'",
-                outline: 'none', boxSizing: 'border-box'
+                boxSizing: 'border-box'
               }}
             />
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', marginBottom: '6px', font: "500 13px 'Roboto'", color: 'var(--text-secondary)' }}>
+          <div className="mb-6">
+            <label htmlFor="emp-password" className="block mb-1.5" style={{ font: "500 13px 'Roboto'", color: 'var(--text-secondary)' }}>
               Password
             </label>
-            <div style={{ position: 'relative' }}>
+            <div className="relative">
               <input
+                id="emp-password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 required
+                className="w-full py-3 pl-4 pr-10 rounded-[10px] outline-none"
                 style={{
-                  width: '100%', padding: '12px 40px 12px 16px', borderRadius: '10px',
                   border: '1px solid var(--color-md-sys-outline-variant)',
                   background: 'var(--color-md-sys-surface)',
                   color: 'var(--text-primary)',
                   font: "400 14px 'Roboto'",
-                  outline: 'none', boxSizing: 'border-box'
+                  boxSizing: 'border-box'
                 }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  color: 'var(--text-secondary)', padding: '4px'
-                }}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-1"
+                style={{ color: 'var(--text-secondary)' }}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -157,8 +150,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
           <button
             type="submit"
             disabled={isLoading}
-            className="connect-btn"
-            style={{ width: '100%', justifyContent: 'center', marginBottom: '16px' }}
+            className="connect-btn w-full justify-center mb-4"
           >
             {isLoading ? 'Signing in...' : 'Sign In'}
             {!isLoading && <LogIn size={16} />}
@@ -167,8 +159,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
           <button
             type="button"
             onClick={onBack}
-            className="btn btn-outline"
-            style={{ width: '100%', justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '6px' }}
+            className="btn btn-outline w-full justify-center flex items-center gap-1.5"
           >
             <ArrowLeft size={16} />
             Back to HR Manager Login

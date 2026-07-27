@@ -14,65 +14,27 @@ export default function AdSlot({ type = 'horizontal', style = {} }) {
   const isHorizontal = type === 'horizontal'
   const isCard = type === 'card'
 
-  const containerStyle = {
-    background: 'var(--bg-secondary)',
-    border: '1px dashed var(--border-color)',
-    borderRadius: '12px',
-    padding: '12px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    overflow: 'hidden',
-    marginTop: '20px',
-    minHeight: isHorizontal ? '90px' : isCard ? '160px' : '250px',
-    width: '100%',
-    ...style
-  }
-
   return (
-    <div style={containerStyle}>
+    <div role="complementary" aria-label="Advertisement"
+      className="bg-[var(--bg-secondary)] border border-dashed border-[var(--border-color)] rounded-xl p-3 flex flex-col items-center justify-center relative overflow-hidden mt-5 w-full"
+      style={{ minHeight: isHorizontal ? '90px' : isCard ? '160px' : '250px', ...style }}>
       {/* Label */}
-      <span style={{
-        position: 'absolute',
-        top: '6px',
-        left: '12px',
-        fontSize: '0.65rem',
-        color: 'var(--text-muted)',
-        letterSpacing: '0.05em',
-        textTransform: 'uppercase',
-        fontWeight: 600
-      }}>
+      <span className="absolute top-1.5 left-3 text-[0.65rem] text-[var(--text-muted)] tracking-wide uppercase font-semibold">
         Advertisement
       </span>
 
       {/* Simulated/Mock Ad Content */}
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '4px',
-        color: 'var(--text-muted)'
-      }}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+      <div className="flex flex-col items-center gap-1 text-[var(--text-muted)]">
+        <div className="flex gap-2 items-center">
           {/* AdSense Logo Emblem */}
-          <span style={{
-            background: 'var(--bg-tertiary)',
-            color: 'var(--accent-primary)',
-            padding: '2px 6px',
-            borderRadius: '4px',
-            fontSize: '0.6rem',
-            fontWeight: 700,
-            border: '1px solid rgba(99, 102, 241, 0.2)'
-          }}>
+          <span className="bg-[var(--bg-tertiary)] text-[var(--accent-primary)] px-1.5 py-0.5 rounded text-[0.6rem] font-bold border border-[rgba(99,102,241,0.2)]">
             AdSense
           </span>
-          <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)' }}>
+          <span className="text-[0.75rem] font-medium text-[var(--text-muted)]">
             Google Sponsor Banner
           </span>
         </div>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+        <span className="text-[0.7rem] text-[var(--text-muted)]">
           (Keeps HR Pulse 100% Free)
         </span>
       </div>
@@ -82,8 +44,7 @@ export default function AdSlot({ type = 'horizontal', style = {} }) {
         To enable real ads, uncomment the script in index.html, 
         and configure the fields below with your actual data-ad-client and data-ad-slot:
       */}
-      <ins className="adsbygoogle"
-           style={{ display: 'block', width: '100%', height: '100%' }}
+      <ins className="adsbygoogle block w-full h-full"
            data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
            data-ad-slot="XXXXXXXXXX"
            data-ad-format="auto"

@@ -351,14 +351,14 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
   }
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+    <div className="animate-fade-in flex flex-col gap-8">
       
       {confirmDelete && (
-        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.4)',zIndex:10000,display:'flex',alignItems:'center',justifyContent:'center'}}>
-          <div style={{background:'var(--md-bw-surface)',padding:24,borderRadius:12,maxWidth:400}}>
-            <h3 style={{marginBottom:12}}>Confirm Delete</h3>
-            <p style={{marginBottom:16}}>Are you sure you want to delete the selected employee(s)?</p>
-            <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.4)' }}>
+            <div className="p-6 rounded-xl max-w-[400px]" style={{ background: 'var(--md-bw-surface)' }}>
+            <h3 className="mb-3">Confirm Delete</h3>
+            <p className="mb-4">Are you sure you want to delete the selected employee(s)?</p>
+            <div className="flex gap-2 justify-end">
               <button onClick={() => setConfirmDelete(null)} className="btn btn-text">Cancel</button>
               <button onClick={() => { confirmDelete(); }} className="btn btn-filled">Delete</button>
             </div>
@@ -367,20 +367,20 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       )}
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="headline-small m-0" style={{ color: 'var(--md-bw-on-surface)' }}>
           Employees
         </h1>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div className="flex gap-3 flex-wrap">
           <button className="btn btn-outlined" onClick={() => document.getElementById('csv-file-input').click()}>
-            <FileSpreadsheet size={18} className="btn-icon-start" style={{ marginRight: '8px' }} />
+            <FileSpreadsheet size={18} className="btn-icon-start mr-2" />
             Import CSV
           </button>
           <input 
             id="csv-file-input" 
             type="file" 
             accept=".csv" 
-            style={{ display: 'none' }} 
+            className="hidden" 
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) {
@@ -442,23 +442,14 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
             }}
           />
           <button 
-            className="btn btn-filled" 
+            className="btn btn-filled fixed bottom-6 right-6 w-14 h-14 z-[90] flex items-center justify-center p-0"
+            aria-label="Add employee"
             onClick={handleOpenAddForm}
             style={{
-              position: 'fixed',
-              bottom: '24px',
-              right: '24px',
-              width: '56px',
-              height: '56px',
               borderRadius: '16px',
               backgroundColor: 'var(--md-bw-primary-container)',
               color: 'var(--md-bw-on-primary-container)',
-              zIndex: 90,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               boxShadow: 'var(--md-shadow-level3)',
-              padding: 0
             }}
           >
             <Plus size={24} />
@@ -467,46 +458,44 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       </div>
 
       {/* Filters Toolbar */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '16px'
-      }}>
+      <div className="flex justify-between items-center flex-wrap gap-4">
         {/* Select All */}
-        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '13px', color: 'var(--md-bw-on-surface-variant)', userSelect: 'none', flexShrink: 0 }}>
+        <label className="flex items-center gap-1.5 cursor-pointer text-[13px] shrink-0" style={{ color: 'var(--md-bw-on-surface-variant)', userSelect: 'none' }}>
           <input
             type="checkbox"
             checked={filteredEmployees.length > 0 && selectedIds.size === filteredEmployees.length}
             onChange={toggleSelectAll}
-            style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: 'var(--md-bw-primary)', margin: 0 }}
+            className="cursor-pointer w-4 h-4 m-0"
+            style={{ accentColor: 'var(--md-bw-primary)' }}
           />
           Select All
         </label>
 
         {/* Search */}
-        <div className="search-bar" style={{ flex: '1', maxWidth: '400px' }}>
+        <div className="search-bar flex-1 max-w-[400px]">
           <div className="tf-icon-leading">
             <Search size={24} style={{ color: 'var(--md-bw-on-surface-variant)' }} />
           </div>
           <input
             type="text"
             placeholder="Search by name, role, email..."
+            aria-label="Search employees"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
         {/* Dept Filters */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <div role="tablist" aria-label="Filter by department" className="flex gap-2 flex-wrap">
           {filterDepartments.map(dept => (
             <button
               key={dept}
+              role="tab"
+              aria-selected={deptFilter === dept}
               onClick={() => setDeptFilter(dept)}
               className={`m3-chip m3-chip-filter ${deptFilter === dept ? 'selected' : ''}`}
             >
-              {deptFilter === dept && <Check size={18} style={{ marginRight: '8px' }} />}
+              {deptFilter === dept && <Check size={18} className="mr-2" />}
               {dept}
             </button>
           ))}
@@ -515,25 +504,25 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
       {/* Pending Profile Updates Queue */}
       {pendingProfileEdits && pendingProfileEdits.length > 0 && (
-        <div className="macos-card" style={{ padding: '18px', marginBottom: '24px' }}>
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px 0', fontSize: '15px', fontWeight: 600, color: 'var(--md-bw-on-surface)' }}>
+        <div className="macos-card p-[18px] mb-6">
+          <h2 className="flex items-center gap-2 m-0 mb-4 text-[15px] font-semibold" style={{ color: 'var(--md-bw-on-surface)' }}>
             <AlertCircle size={18} style={{ color: '#007aff' }} />
             Pending Profile Update Requests ({pendingProfileEdits.length})
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div className="flex flex-col gap-3">
             {pendingProfileEdits.map(editReq => {
               const emp = employees.find(e => e.id === editReq.employeeId)
               return (
-                <div key={editReq.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(0,0,0,0.02)', borderRadius: '8px', border: '1px solid var(--glass-border)', flexWrap: 'wrap', gap: '12px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', minWidth: 0, flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <strong style={{ color: 'var(--md-bw-on-surface)', fontSize: '13.5px' }}>{emp ? emp.name : 'Unknown Employee'}</strong>
-                      <span style={{ fontSize: '11px', color: 'var(--md-bw-on-surface-variant)', opacity: 0.8 }}>ID: {editReq.employeeId}</span>
+                <div key={editReq.id} className="flex justify-between items-center p-3 px-4 flex-wrap gap-3" style={{ background: 'rgba(0,0,0,0.02)', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                  <div className="flex flex-col gap-1.5 min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <strong className="text-[13.5px]" style={{ color: 'var(--md-bw-on-surface)' }}>{emp ? emp.name : 'Unknown Employee'}</strong>
+                      <span className="text-[11px] opacity-80" style={{ color: 'var(--md-bw-on-surface-variant)' }}>ID: {editReq.employeeId}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', fontSize: '11.5px' }}>
+                    <div className="flex gap-1.5 flex-wrap text-[11.5px]">
                       {Object.entries(editReq.changes).map(([key, val]) => (
                         val ? (
-                          <span key={key} style={{ padding: '3px 6px', background: 'rgba(0,0,0,0.03)', borderRadius: '4px', border: '1px solid var(--glass-border)', display: 'inline-flex', gap: '4px' }}>
+                          <span key={key} className="p-0.5 px-1.5 inline-flex gap-1" style={{ background: 'rgba(0,0,0,0.03)', borderRadius: '4px', border: '1px solid var(--glass-border)' }}>
                             <strong style={{ color: 'var(--md-bw-on-surface-variant)' }}>{key}: </strong> 
                             <span style={{ color: 'var(--md-bw-on-surface)' }}>{val}</span>
                           </span>
@@ -541,12 +530,12 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                       ))}
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                  <div className="flex gap-2 shrink-0">
                     <button className="btn btn-filled" onClick={() => handleApproveProfileEdit(editReq.id)} style={{ height: '30px', minHeight: '30px', padding: '0 12px', fontSize: '11.5px', borderRadius: '6px !important' }}>
-                      <Check size={12} style={{ marginRight: '4px' }} /> Approve
+                      <Check size={12} className="mr-1" /> Approve
                     </button>
                     <button className="btn btn-tonal" onClick={() => handleRejectProfileEdit(editReq.id)} style={{ height: '30px', minHeight: '30px', padding: '0 12px', fontSize: '11.5px', borderRadius: '6px !important', color: '#dc3545', border: '1px solid rgba(220, 53, 69, 0.15)' }}>
-                      <X size={12} style={{ marginRight: '4px' }} /> Reject
+                      <X size={12} className="mr-1" /> Reject
                     </button>
                   </div>
                 </div>
@@ -558,36 +547,28 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
       {/* Selection Bar */}
       {selectedIds.size > 0 && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          padding: '10px 16px',
-          borderRadius: '12px',
-          background: 'var(--md-bw-primary-container)',
-          color: 'var(--md-bw-on-primary-container)',
-          fontSize: '13px',
-          fontWeight: 500,
-        }}>
-          <Check size={16} style={{ flexShrink: 0 }} />
-          <span style={{ flex: 1 }}>{selectedIds.size} selected</span>
+        <div className="flex items-center gap-3 px-4 rounded-xl text-[13px] font-medium" style={{ padding: '10px 16px', background: 'var(--md-bw-primary-container)', color: 'var(--md-bw-on-primary-container)' }}>
+          <Check size={16} className="shrink-0" />
+          <span className="flex-1">{selectedIds.size} selected</span>
           <button
-            className="btn btn-filled"
+            className="btn btn-filled inline-flex items-center gap-1 text-[11px]"
             onClick={handleBulkDelete}
-            style={{ height: '30px', minHeight: '30px', padding: '0 12px', fontSize: '11px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#dc3545', color: '#fff', border: 'none', cursor: 'pointer' }}
+            style={{ height: '30px', minHeight: '30px', padding: '0 12px', borderRadius: '6px', background: '#dc3545', color: '#fff', border: 'none', cursor: 'pointer' }}
           >
             <Trash2 size={11} /> Delete ({selectedIds.size})
           </button>
           <button
-            className="btn btn-filled"
+            className="btn btn-filled inline-flex items-center gap-1 text-[11px]"
             onClick={handleDownloadSelected}
-            style={{ height: '30px', minHeight: '30px', padding: '0 12px', fontSize: '11px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'var(--md-bw-primary)', color: '#fff', border: 'none', cursor: 'pointer' }}
+            style={{ height: '30px', minHeight: '30px', padding: '0 12px', borderRadius: '6px', background: 'var(--md-bw-primary)', color: '#fff', border: 'none', cursor: 'pointer' }}
           >
             <Download size={11} /> Download CSV
           </button>
           <button
             onClick={clearSelection}
-            style={{ height: '30px', minHeight: '30px', padding: '0 8px', fontSize: '11px', borderRadius: '6px', background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', opacity: 0.7 }}
+            aria-label="Clear selection"
+            className="inline-flex items-center opacity-70 text-[11px]"
+            style={{ height: '30px', minHeight: '30px', padding: '0 8px', borderRadius: '6px', background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer' }}
             title="Clear selection"
           >
             <X size={14} />
@@ -597,93 +578,65 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
       {/* Directory Grid */}
       {filteredEmployees.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Users size={120} style={{ color: 'var(--md-bw-on-surface-variant)', opacity: 0.5, marginBottom: '24px' }} />
-          <h3 className="headline-small" style={{ color: 'var(--md-bw-on-surface-variant)', marginBottom: '24px' }}>No employees found</h3>
+        <div className="text-center p-12 flex flex-col items-center">
+          <Users size={120} className="mb-6 opacity-50" style={{ color: 'var(--md-bw-on-surface-variant)' }} />
+          <h3 className="headline-small mb-6" style={{ color: 'var(--md-bw-on-surface-variant)' }}>No employees found</h3>
           <button onClick={() => {setSearchTerm(''); setDeptFilter('All')}} className="btn btn-filled">Clear Filters</button>
         </div>
       ) : (
-        <div className="employee-grid" style={{
+        <div className="employee-grid w-full" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
           gap: '20px',
-          width: '100%'
         }}>
           {filteredEmployees.map(emp => {
             const isExpanded = expandedCardId === emp.id
             return (
             <div key={emp.id}>
-              <div className="macos-card employee-card" style={{
-                padding: '14px 16px',
-                display: 'flex', flexDirection: 'column', cursor: 'pointer',
-                position: 'relative',
-              }} onClick={() => setViewingEmployee(emp)}>
+              <div className="macos-card employee-card flex flex-col cursor-pointer relative" role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setViewingEmployee(emp); } }} style={{ padding: '14px 16px' }} onClick={() => setViewingEmployee(emp)}>
                 
                 {/* Checkbox — absolutely positioned so it doesn't steal space from text */}
-                <div onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', top: '12px', left: '10px', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '4px', background: selectedIds.has(emp.id) ? 'var(--md-bw-primary)' : 'rgba(255,255,255,0.85)', cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}>
+                <div onClick={(e) => e.stopPropagation()} className="absolute z-[2] flex items-center justify-center w-5 h-5 cursor-pointer" style={{ top: '12px', left: '10px', borderRadius: '4px', background: selectedIds.has(emp.id) ? 'var(--md-bw-primary)' : 'rgba(255,255,255,0.85)', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}>
                   <input
                     type="checkbox"
                     checked={selectedIds.has(emp.id)}
                     onChange={(e) => toggleSelect(emp.id, e)}
-                    style={{ cursor: 'pointer', width: '14px', height: '14px', accentColor: 'var(--md-bw-primary)', margin: 0, opacity: 0.85 }}
+                    className="cursor-pointer w-3.5 h-3.5 m-0 opacity-85"
+                    style={{ accentColor: 'var(--md-bw-primary)' }}
                   />
                 </div>
 
                 {/* Row 1: Base content — avatar + info | status badge */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0, flex: 1 }}>
-                    <div style={{
-                      width: '56px', height: '56px',
-                      borderRadius: '14px', overflow: 'hidden', position: 'relative', flexShrink: 0,
-                      border: '1px solid var(--glass-border)',
-                      background: (!emp.avatar || imageErrors[emp.id]) ? 'rgba(0,0,0,0.04)' : '#f3f4f6',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: 'var(--md-bw-on-surface-variant)', fontWeight: 700, fontSize: '1.1rem',
-                      boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)',
-                    }}>
+                <div className="flex items-start justify-between gap-3.5">
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div className="w-14 h-14 overflow-hidden relative shrink-0 flex items-center justify-center text-[1.1rem] font-bold" style={{ borderRadius: '14px', border: '1px solid var(--glass-border)', background: (!emp.avatar || imageErrors[emp.id]) ? 'rgba(0,0,0,0.04)' : '#f3f4f6', color: 'var(--md-bw-on-surface-variant)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)' }}>
                       {(!emp.avatar || imageErrors[emp.id]) ? (
                         <span>{getAvatarFallback(emp.name).initials}</span>
                       ) : (
-                        <img src={emp.avatar} alt={emp.name} style={{
-                            width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0,
-                            transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`,
-                            transformOrigin: 'center', userSelect: 'none', pointerEvents: 'none'
-                          }}
+                        <img src={emp.avatar} alt={emp.name} className="absolute top-0 left-0 w-full h-full object-cover" style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center', userSelect: 'none', pointerEvents: 'none' }}
                           onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))}
                         />
                       )}
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, flex: 1 }}>
-                      <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: 'var(--md-bw-on-surface)', whiteSpace: 'nowrap' }}>{emp.name}</h4>
-                      <span style={{ fontSize: '11px', color: 'var(--md-bw-on-surface-variant)', fontWeight: 500, whiteSpace: 'nowrap' }}>{emp.role}</span>
-                      <span style={{ fontSize: '11px', color: 'var(--md-bw-on-surface-variant)', opacity: 0.75, whiteSpace: 'nowrap' }}>{emp.department}</span>
+                    <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                      <h4 className="m-0 text-[14px] font-semibold whitespace-nowrap" style={{ color: 'var(--md-bw-on-surface)' }}>{emp.name}</h4>
+                      <span className="text-[11px] font-medium whitespace-nowrap" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{emp.role}</span>
+                      <span className="text-[11px] opacity-75 whitespace-nowrap" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{emp.department}</span>
                     </div>
                   </div>
                   
-                  <span style={{ 
-                    height: '20px', padding: '0 8px', fontSize: '10px', fontWeight: 600, borderRadius: '10px',
-                    display: 'inline-flex', alignItems: 'center', flexShrink: 0, marginTop: '2px',
-                    background: emp.status === 'Active' ? 'rgba(40, 167, 69, 0.1)' : (emp.status === 'On Leave' ? 'rgba(240, 173, 78, 0.1)' : 'rgba(220, 53, 69, 0.1)'),
-                    color: emp.status === 'Active' ? '#28a745' : (emp.status === 'On Leave' ? '#f0ad4e' : '#dc3545'),
-                    border: emp.status === 'Active' ? '1px solid rgba(40, 167, 69, 0.15)' : (emp.status === 'On Leave' ? '1px solid rgba(240, 173, 78, 0.15)' : '1px solid rgba(220, 53, 69, 0.15)')
-                  }}>
+                  <span role="status" className="h-5 px-2 text-[10px] font-semibold inline-flex items-center shrink-0 mt-0.5" style={{ borderRadius: '10px', background: emp.status === 'Active' ? 'rgba(40, 167, 69, 0.1)' : (emp.status === 'On Leave' ? 'rgba(240, 173, 78, 0.1)' : 'rgba(220, 53, 69, 0.1)'), color: emp.status === 'Active' ? '#28a745' : (emp.status === 'On Leave' ? '#f0ad4e' : '#dc3545'), border: emp.status === 'Active' ? '1px solid rgba(40, 167, 69, 0.15)' : (emp.status === 'On Leave' ? '1px solid rgba(240, 173, 78, 0.15)' : '1px solid rgba(220, 53, 69, 0.15)') }}>
                     <span className={`pulse-dot ${emp.status === 'Active' ? 'pulse-dot-green' : (emp.status === 'On Leave' ? 'pulse-dot-orange' : 'pulse-dot-red')}`}></span>
                     {emp.status}
                   </span>
                 </div>
 
                 {/* Row 2: Expand button — between base and expanded, stays fixed position */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '4px 0 0', height: isExpanded ? '28px' : '20px', transition: 'height 0.3s ease' }}>
-                  <button onClick={(e) => {
+                <div className="flex justify-end pt-1" style={{ height: isExpanded ? '28px' : '20px', transition: 'height 0.3s ease' }}>
+                  <button aria-label={isExpanded ? 'Collapse details' : 'Expand details'} onClick={(e) => {
                     e.stopPropagation();
                     setExpandedCardId(prev => prev === emp.id ? null : emp.id);
-                  }} style={{
-                    width: '20px', height: '20px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer',
-                    color: 'var(--md-bw-on-surface-variant)',
-                    transition: 'background 0.2s ease',
-                  }}
+                  }} className="w-5 h-5 flex items-center justify-center cursor-pointer rounded" style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', transition: 'background 0.2s ease' }}
                     onMouseEnter={(e) => e.currentTarget.style.background = 'var(--md-surface-variant)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
                     <ChevronDown size={13} style={{
@@ -700,33 +653,25 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                   overflow: 'hidden',
                   transition: 'max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease 0.05s',
                 }}>
-                  <div style={{
-                    borderTop: '1px solid var(--glass-border)',
-                    paddingTop: '10px',
-                    display: 'flex', flexDirection: 'column', gap: '6px',
-                    fontSize: '12px', color: 'var(--md-bw-on-surface-variant)',
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Mail size={11} style={{ flexShrink: 0, opacity: 0.7 }} />
-                      <span style={{ overflowWrap: 'break-word', minWidth: 0 }}>{emp.email}</span>
+                  <div className="flex flex-col gap-1.5 text-xs pt-2.5" style={{ borderTop: '1px solid var(--glass-border)', color: 'var(--md-bw-on-surface-variant)' }}>
+                    <div className="flex items-center gap-1.5">
+                      <Mail size={11} className="shrink-0 opacity-70" />
+                      <span className="break-words min-w-0">{emp.email}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', opacity: 0.85 }}>
+                    <div className="flex justify-between gap-2 opacity-85">
                       <span>Born: {emp.dob ? formatDate(emp.dob) : 'N/A'}</span>
                       <span>Joined: {emp.joiningDate ? formatDate(emp.joiningDate) : 'N/A'}</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <span style={{ fontVariantNumeric: 'tabular-nums', opacity: 0.7 }}>ID: {emp.id}</span>
+                    <div className="flex items-center">
+                      <span className="opacity-70" style={{ fontVariantNumeric: 'tabular-nums' }}>ID: {emp.id}</span>
                     </div>
-                    <div style={{
-                      display: 'flex', gap: '8px',
-                      borderTop: '1px solid var(--glass-border)', paddingTop: '10px', marginTop: '2px',
-                    }}>
-                      <button className="btn btn-mac-blue" style={{ flex: 1, height: '30px', minHeight: '30px', padding: '0', fontSize: '11px', borderRadius: '6px !important', justifyContent: 'center', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={(e) => {
+                    <div className="flex gap-2 pt-2.5 mt-0.5" style={{ borderTop: '1px solid var(--glass-border)' }}>
+                      <button className="btn btn-mac-blue flex-1 h-[30px] min-h-[30px] p-0 text-[11px] justify-center inline-flex items-center gap-1" style={{ borderRadius: '6px !important' }} onClick={(e) => {
                         e.stopPropagation(); setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
                       }}>
                         <Edit size={11} /> Edit
                       </button>
-                      <button className="btn btn-mac-red" style={{ flex: 1, height: '30px', minHeight: '30px', padding: '0', fontSize: '11px', borderRadius: '6px !important', justifyContent: 'center', display: 'inline-flex', alignItems: 'center', gap: '4px' }} onClick={(e) => { e.stopPropagation(); handleDeleteEmployee(emp.id, emp.name); }}>
+                      <button className="btn btn-mac-red flex-1 h-[30px] min-h-[30px] p-0 text-[11px] justify-center inline-flex items-center gap-1" style={{ borderRadius: '6px !important' }} onClick={(e) => { e.stopPropagation(); handleDeleteEmployee(emp.id, emp.name); }}>
                         <Trash2 size={11} /> Delete
                       </button>
                     </div>
@@ -743,58 +688,52 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       {viewingEmployee && (
         <div className="dialog-scrim" onClick={() => setViewingEmployee(null)}>
           <div className="m3-dialog" onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '24px' }}>
-              <div style={{
-                width: '96px', height: '96px', borderRadius: '50%', overflow: 'hidden',
-                border: '2px solid var(--md-bw-primary)', marginBottom: '16px',
-                background: (!viewingEmployee.avatar || imageErrors[viewingEmployee.id]) ? 'var(--md-bw-surface-variant)' : '#f3f4f6',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--md-bw-on-surface-variant)', fontWeight: 700, fontSize: '1.6rem', position: 'relative'
-              }}>
+            <div className="flex flex-col items-center mb-6">
+              <div className="w-24 h-24 overflow-hidden mb-4 relative flex items-center justify-center text-[1.6rem] font-bold" style={{ borderRadius: '50%', border: '2px solid var(--md-bw-primary)', background: (!viewingEmployee.avatar || imageErrors[viewingEmployee.id]) ? 'var(--md-bw-surface-variant)' : '#f3f4f6', color: 'var(--md-bw-on-surface-variant)' }}>
                 {(!viewingEmployee.avatar || imageErrors[viewingEmployee.id]) ? (
                   <span>{getAvatarFallback(viewingEmployee.name).initials}</span>
                 ) : (
-                  <img src={viewingEmployee.avatar} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, transform: `translate(${viewingEmployee.photoX || 0}px, ${viewingEmployee.photoY || 0}px) scale(${viewingEmployee.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
+                  <img src={viewingEmployee.avatar} alt={viewingEmployee.name} className="absolute top-0 left-0 w-full h-full object-cover" style={{ transform: `translate(${viewingEmployee.photoX || 0}px, ${viewingEmployee.photoY || 0}px) scale(${viewingEmployee.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
                 )}
               </div>
-              <h3 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)', textAlign: 'center' }}>{viewingEmployee.name}</h3>
-              <span className="body-large" style={{ color: 'var(--md-bw-on-surface-variant)', textAlign: 'center' }}>{viewingEmployee.role}</span>
+              <h3 className="headline-small m-0 text-center" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.name}</h3>
+              <span className="body-large text-center" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{viewingEmployee.role}</span>
             </div>
             
-            <ul className="m3-list" style={{ marginBottom: '24px' }}>
-              <li className="list-item two-line" style={{ padding: '0 16px' }}>
+            <ul className="m3-list mb-6">
+              <li className="list-item two-line px-4">
                 <div className="list-content">
-                  <span className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)', textTransform: 'uppercase' }}>ID</span>
+                  <span className="label-small uppercase" style={{ color: 'var(--md-bw-on-surface-variant)' }}>ID</span>
                   <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.id}</span>
                 </div>
               </li>
-              <li className="list-item two-line" style={{ padding: '0 16px' }}>
+              <li className="list-item two-line px-4">
                 <div className="list-content">
-                  <span className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)', textTransform: 'uppercase' }}>Status</span>
+                  <span className="label-small uppercase" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Status</span>
                   <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.status}</span>
                 </div>
               </li>
-              <li className="list-item two-line" style={{ padding: '0 16px' }}>
+              <li className="list-item two-line px-4">
                 <div className="list-content">
-                  <span className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)', textTransform: 'uppercase' }}>Department</span>
+                  <span className="label-small uppercase" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Department</span>
                   <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.department}</span>
                 </div>
               </li>
-              <li className="list-item two-line" style={{ padding: '0 16px' }}>
+              <li className="list-item two-line px-4">
                 <div className="list-content">
-                  <span className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)', textTransform: 'uppercase' }}>Email</span>
-                  <span className="body-large" style={{ color: 'var(--md-bw-on-surface)', wordBreak: 'break-all' }}>{viewingEmployee.email}</span>
+                  <span className="label-small uppercase" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Email</span>
+                  <span className="body-large break-all" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.email}</span>
                 </div>
               </li>
-              <li className="list-item two-line" style={{ padding: '0 16px' }}>
+              <li className="list-item two-line px-4">
                 <div className="list-content">
-                  <span className="label-small" style={{ color: 'var(--md-bw-on-surface-variant)', textTransform: 'uppercase' }}>Joined</span>
+                  <span className="label-small uppercase" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Joined</span>
                   <span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{viewingEmployee.joiningDate ? formatDate(viewingEmployee.joiningDate) : 'N/A'}</span>
                 </div>
               </li>
             </ul>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '16px' }}>
+            <div className="flex justify-end gap-2 pt-4">
               <button className="btn btn-text" onClick={() => setViewingEmployee(null)}>Close</button>
               <button className="btn btn-tonal" onClick={() => {
                 setViewingEmployee(null);
@@ -825,24 +764,21 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       {/* Form Modal/Overlay */}
       {showAddForm && (
         <div className="dialog-scrim visible" onClick={() => handleCloseForm()}>
-          <div className="m3-dialog" onClick={e => e.stopPropagation()} style={{
+          <div className="m3-dialog flex flex-col gap-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()} style={{
             width: '100%',
             maxWidth: '500px',
             padding: '32px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '24px',
-            maxHeight: '90vh',
-            overflowY: 'auto'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px', margin: 0, color: 'var(--md-bw-on-surface)' }}>
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl flex items-center gap-2 m-0" style={{ color: 'var(--md-bw-on-surface)' }}>
                 {editingEmployee ? <Edit size={20} style={{ color: 'var(--md-bw-on-surface)' }} /> : <UserPlus size={20} style={{ color: 'var(--md-bw-on-surface)' }} />}
                 {editingEmployee ? 'Edit Employee Profile' : 'New Employee Record'}
               </h3>
               <button
                 onClick={handleCloseForm}
-                style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px', borderRadius: '50%', transition: 'background-color 0.2s' }}
+                aria-label="Close form"
+                className="flex items-center justify-center p-1 rounded-full"
+                style={{ background: 'transparent', border: 'none', color: 'var(--md-bw-on-surface-variant)', cursor: 'pointer', transition: 'background-color 0.2s' }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
@@ -850,32 +786,23 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               </button>
             </div>
 
-            <form onSubmit={handleSaveEmployee} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form onSubmit={handleSaveEmployee} className="flex flex-col gap-4">
               
               {/* HD Profile Photo Upload & Reposition Frame */}
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: '8px', 
-                border: '1px dashed var(--glass-border)', 
-                padding: '16px', 
-                borderRadius: '16px', 
-                background: 'rgba(0,0,0,0.01)' 
-              }}>
-                <label style={{ fontSize: '0.85rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 700 }}>Profile Photo & Repositioner</label>
+              <div className="flex flex-col gap-2 p-4 rounded-2xl" style={{ border: '1px dashed var(--glass-border)', background: 'rgba(0,0,0,0.01)' }}>
+                <label className="text-[0.85rem] font-bold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Profile Photo & Repositioner</label>
                 
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                <div className="flex gap-4 items-center">
                   {/* Panning Preview Frame */}
                   <div 
                     onPointerMove={handlePointerMove}
                     onPointerUp={handlePointerUp}
                     onPointerLeave={handlePointerUp}
+                    className="overflow-hidden relative"
                     style={{
                       width: '90px',
                       height: '90px',
                       borderRadius: '20px',
-                      overflow: 'hidden',
-                      position: 'relative',
                       border: '1.5px solid var(--glass-border)',
                       background: '#f3f4f6',
                       cursor: dragStart ? 'grabbing' : 'grab',
@@ -888,13 +815,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                         src={newAvatar}
                         alt="Upload preview"
                         onPointerDown={handlePointerDown}
+                        className="absolute top-0 left-0 w-full h-full object-cover"
                         style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
                           transform: `translate(${photoX}px, ${photoY}px) scale(${photoZoom})`,
                           transformOrigin: 'center',
                           userSelect: 'none',
@@ -902,25 +824,13 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                         }}
                       />
                     ) : (
-                      <div style={{ 
-                        width: '100%', 
-                        height: '100%', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        color: 'var(--md-bw-on-surface-variant)', 
-                        fontSize: '0.75rem', 
-                        textAlign: 'center', 
-                        padding: '8px',
-                        userSelect: 'none',
-                        opacity: 0.7
-                      }}>
+                      <div className="w-full h-full flex items-center justify-center text-center p-2 opacity-70" style={{ color: 'var(--md-bw-on-surface-variant)', fontSize: '0.75rem', userSelect: 'none' }}>
                         No Image
                       </div>
                     )}
                   </div>
 
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div className="flex-1 flex flex-col gap-2">
                     <button
                       type="button"
                       className="btn btn-secondary"
@@ -933,13 +843,13 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                       id="photo-file-input"
                       type="file"
                       accept="image/*"
-                      style={{ display: 'none' }}
+                      className="hidden"
                       onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
                           const file = e.target.files[0]
                           const reader = new FileReader()
                           reader.onload = (event) => {
-                            setNewAvatar(event.target.result) // HD Base64 source
+                            setNewAvatar(event.target.result)
                             setPhotoX(0)
                             setPhotoY(0)
                             setPhotoZoom(1)
@@ -948,15 +858,15 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                         }
                       }}
                     />
-                    <span style={{ fontSize: '0.7rem', color: 'var(--md-bw-on-surface-variant)', opacity: 0.65 }}>
+                    <span className="text-[0.7rem] opacity-65" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
                       *Drag image inside the frame to adjust framing.
                     </span>
                   </div>
                 </div>
 
                 {newAvatar && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--md-bw-on-surface-variant)' }}>
+                  <div className="flex flex-col gap-1 mt-1">
+                    <div className="flex justify-between text-[0.75rem]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
                       <span>Zoom Scale:</span>
                       <span>{Math.round(photoZoom * 100)}%</span>
                     </div>
@@ -965,30 +875,32 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                       min="1" 
                       max="3" 
                       step="0.02" 
+                      aria-label="Zoom scale"
                       value={photoZoom} 
                       onChange={(e) => setPhotoZoom(parseFloat(e.target.value))}
-                      style={{ width: '100%', accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
+                      className="w-full cursor-pointer"
+                      style={{ accentColor: 'var(--accent-primary)' }}
                     />
                   </div>
                 )}
               </div>
 
               {/* Employee ID */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Employee ID (Auto-generated, editable)</label>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Employee ID (Auto-generated, editable)</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. EMP-101"
                   value={newEmpId}
                   onChange={(e) => setNewEmpId(e.target.value.trim().toUpperCase())}
-                  style={{ fontWeight: 700 }}
+                  className="font-bold"
                 />
               </div>
 
               {/* Name */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Full Name</label>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Full Name</label>
                 <input
                   type="text"
                   required
@@ -999,8 +911,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               </div>
 
               {/* Role */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Job Title</label>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Job Title</label>
                 <input
                   type="text"
                   required
@@ -1011,8 +923,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               </div>
 
               {/* Department Selection */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Department</label>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Department</label>
                 <select
                   value={isCustomDept ? 'NEW' : newDept}
                   onChange={(e) => {
@@ -1035,26 +947,19 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                   <input
                     type="text"
                     required
+                    aria-label="New department name"
                     placeholder="Enter new department name..."
                     value={customDept}
                     onChange={(e) => setCustomDept(e.target.value)}
-                    style={{
-                      padding: '10px 14px',
-                      borderRadius: '10px',
-                      border: '1px solid var(--border-color)',
-                      background: '#ffffff',
-                      color: 'var(--text-primary)',
-                      outline: 'none',
-                      marginTop: '8px',
-                      fontSize: '0.9rem'
-                    }}
+                    className="text-sm px-3.5 py-2.5 rounded-xl mt-2"
+                    style={{ border: '1px solid var(--border-color)', background: '#ffffff', color: 'var(--text-primary)', outline: 'none' }}
                   />
                 )}
               </div>
 
               {/* Email */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Email Address</label>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Email Address</label>
                 <input
                   type="email"
                   required
@@ -1065,8 +970,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               </div>
 
               {/* Password */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
                   Login Password {editingEmployee ? '(leave blank to keep current)' : ''}
                 </label>
                 <input
@@ -1074,47 +979,45 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                   placeholder={editingEmployee ? 'Leave blank to keep current' : 'Set employee login password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  style={{ fontFamily: 'monospace' }}
+                  className="font-mono"
                 />
               </div>
 
               {/* DOB & Joining Date */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Date of Birth</label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Date of Birth</label>
                   <input
                     type="date"
                     value={newDob}
                     onChange={(e) => setNewDob(e.target.value)}
-                    style={{ cursor: 'pointer' }}
+                    className="cursor-pointer"
                   />
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Joining Date</label>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Joining Date</label>
                   <input
                     type="date"
                     value={newJoiningDate}
                     onChange={(e) => setNewJoiningDate(e.target.value)}
-                    style={{ cursor: 'pointer' }}
+                    className="cursor-pointer"
                   />
                 </div>
               </div>
 
               {/* Custom CV and Passport/NID upload fields */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Upload CV</label>
-                  <div style={{ position: 'relative' }}>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Upload CV</label>
+                  <div className="relative">
                     <button 
                       type="button" 
-                      className="btn btn-mac-green" 
+                      className="btn btn-mac-green w-full justify-center" 
                       style={{ 
-                        width: '100%', 
                         padding: '10px 14px', 
                         fontSize: '0.8rem', 
                         borderRadius: '10px', 
-                        justifyContent: 'center',
                         height: '38px',
                         minHeight: '38px'
                       }} 
@@ -1126,7 +1029,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                       id="cv-file-input"
                       type="file"
                       accept=".pdf,.doc,.docx"
-                      style={{ display: 'none' }}
+                      className="hidden"
                       onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
                           setNewCvFileName(e.target.files[0].name)
@@ -1136,18 +1039,16 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Passport/NID</label>
-                  <div style={{ position: 'relative' }}>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Passport/NID</label>
+                  <div className="relative">
                     <button 
                       type="button" 
-                      className="btn btn-mac-green" 
+                      className="btn btn-mac-green w-full justify-center" 
                       style={{ 
-                        width: '100%', 
                         padding: '10px 14px', 
                         fontSize: '0.8rem', 
                         borderRadius: '10px', 
-                        justifyContent: 'center',
                         height: '38px',
                         minHeight: '38px'
                       }} 
@@ -1159,7 +1060,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                       id="nid-file-input"
                       type="file"
                       accept="image/*,.pdf"
-                      style={{ display: 'none' }}
+                      className="hidden"
                       onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
                           setNewNidFileName(e.target.files[0].name)
@@ -1171,12 +1072,12 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               </div>
 
               {/* Status */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--md-bw-on-surface-variant)', fontWeight: 600 }}>Employment Status</label>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[0.8rem] font-semibold" style={{ color: 'var(--md-bw-on-surface-variant)' }}>Employment Status</label>
                 <select
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value)}
-                  style={{ cursor: 'pointer' }}
+                  className="cursor-pointer"
                 >
                   <option value="Active">Active</option>
                   <option value="On Leave">On Leave</option>
@@ -1185,19 +1086,19 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               </div>
 
               {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: '12px', marginTop: '16px', justifyContent: 'flex-end' }}>
+              <div className="flex gap-3 mt-4 justify-end">
                 <button
                   type="button"
-                  className="btn btn-mac-red"
-                  style={{ flex: 1, height: '38px', minHeight: '38px', padding: '0 16px', fontSize: '12px', borderRadius: '8px !important', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  className="btn btn-mac-red flex-1 inline-flex items-center justify-center gap-1.5 text-xs"
+                  style={{ height: '38px', minHeight: '38px', padding: '0 16px', borderRadius: '8px !important' }}
                   onClick={handleCloseForm}
                 >
                   <X size={14} /> Cancel
                 </button>
                 <button
                   type="submit"
-                  className="btn btn-mac-blue"
-                  style={{ flex: 1, height: '38px', minHeight: '38px', padding: '0 16px', fontSize: '12px', borderRadius: '8px !important', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                  className="btn btn-mac-blue flex-1 inline-flex items-center justify-center gap-1.5 text-xs"
+                  style={{ height: '38px', minHeight: '38px', padding: '0 16px', borderRadius: '8px !important' }}
                 >
                   <Check size={14} /> {editingEmployee ? 'Save Changes' : 'Save Record'}
                 </button>
@@ -1208,7 +1109,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       )}
 
       {/* Google Ads Placement */}
-      <AdSlot type="horizontal" style={{ marginTop: '32px' }} />
+      <AdSlot type="horizontal" className="mt-8" />
     </div>
   )
 }

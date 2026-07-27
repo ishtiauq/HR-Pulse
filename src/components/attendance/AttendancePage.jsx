@@ -18,14 +18,14 @@ export default function AttendancePage({ employees, attendance, setAttendance, r
     { id: 'overtime', label: 'Overtime', icon: Cpu },
   ]
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      <h1 className="headline-small" style={{ margin: 0, color: 'var(--md-bw-on-surface)' }}>Attendance & Leaves</h1>
+    <div className="animate-fade-in flex flex-col gap-6">
+      <h1 className="headline-small m-0" style={{ color: 'var(--md-bw-on-surface)' }}>Attendance & Leaves</h1>
       <ClockWidget employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />
-      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      <div role="tablist" aria-label="Attendance sections" className="flex gap-2 flex-wrap">
         {tabs.map(t => {
           const Icon = t.icon
           return (
-            <button key={t.id} onClick={() => setTab(t.id)} style={tabChip(tab === t.id)}>
+            <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)} style={tabChip(tab === t.id)}>
               <Icon size={15} /> {t.label}
             </button>
           )
@@ -33,13 +33,13 @@ export default function AttendancePage({ employees, attendance, setAttendance, r
       </div>
       {tab === 'daily' && <DailyLogs employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />}
       {tab === 'leave' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="flex flex-col gap-5">
           <LeaveRequests employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />
           <LeaveBalanceCard employees={employees} balances={attendance.balances || {}} />
         </div>
       )}
       {tab === 'roster' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="flex flex-col gap-5">
           <RosterPlanner employees={employees} roster={roster} setRoster={setRoster} shiftTemplates={shiftTemplates} addToast={addToast} />
           <ShiftSwaps employees={employees} shiftSwaps={shiftSwaps} setShiftSwaps={setShiftSwaps} roster={roster} setRoster={setRoster} addToast={addToast} />
         </div>

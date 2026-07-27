@@ -17,20 +17,15 @@ export default class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          minHeight: '100vh', fontFamily: 'sans-serif', color: '#333', padding: '20px', textAlign: 'center'
-        }}>
-          <h1 style={{ fontSize: '2rem', marginBottom: '12px' }}>Something went wrong</h1>
-          <p style={{ marginBottom: '20px', color: '#666' }}>
+        <div className="flex flex-col items-center justify-center min-h-screen font-sans text-[#333] p-5 text-center">
+          <h1 className="text-2xl mb-3">Something went wrong</h1>
+          <p role="alert" className="mb-5 text-[#666]">
             {this.state.error?.message || 'An unexpected error occurred.'}
           </p>
           <button
+            aria-label="Try again"
             onClick={() => { this.setState({ hasError: false, error: null }); window.location.reload() }}
-            style={{
-              padding: '10px 24px', fontSize: '1rem', border: 'none', borderRadius: '8px',
-              background: '#3b82f6', color: '#fff', cursor: 'pointer'
-            }}
+            className="px-6 py-2.5 text-base border-none rounded-lg bg-[#3b82f6] text-white cursor-pointer"
           >
             Retry
           </button>

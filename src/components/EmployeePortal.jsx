@@ -14,11 +14,8 @@ const getInitialsAvatar = (name) => {
   const h = hash % 360
   
   return (
-    <div style={{
-      width: '40px', height: '40px', borderRadius: '50%', 
+    <div className="flex items-center justify-center size-10 rounded-full font-bold text-base shrink-0" style={{
       background: `hsl(${h}, 70%, 80%)`, color: `hsl(${h}, 70%, 20%)`,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontWeight: 'bold', fontSize: '1rem', flexShrink: 0
     }}>
       {initials.toUpperCase()}
     </div>
@@ -101,7 +98,7 @@ export default function EmployeePortal({
   }
 
   if (!currentUser) {
-    return <div style={{ padding: '20px' }}>Loading portal...</div>
+    return <div className="p-5">Loading portal...</div>
   }
 
   const renderContent = () => {
@@ -161,27 +158,30 @@ export default function EmployeePortal({
   ]
 
   return (
-    <div style={{ display: 'flex', height: '100%', width: '100%', background: 'var(--bg-primary)', overflow: 'hidden', flexDirection: isMobile ? 'column' : 'row' }}>
+    <div className="flex h-full w-full overflow-hidden" style={{ background: 'var(--bg-primary)', flexDirection: isMobile ? 'column' : 'row' }}>
       
       {/* Sidebar (Desktop) */}
       {!isMobile && (
-        <div style={{ width: '250px', background: 'var(--bg-secondary)', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', padding: '24px 16px' }}>
-          <div style={{ marginBottom: '32px', padding: '0 12px' }}>
-            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--accent-primary)', margin: 0 }}>HR Pulse <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>ESS</span></h2>
+        <div className="w-[250px] flex flex-col px-4 py-6" style={{ background: 'var(--bg-secondary)', borderRight: '1px solid var(--border-color)' }}>
+          <div className="mb-8 px-3">
+            <h2 className="text-[1.4rem] font-extrabold m-0" style={{ color: 'var(--accent-primary)' }}>HR Pulse <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>ESS</span></h2>
           </div>
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <nav className="flex flex-col gap-2" role="tablist">
             {navItems.map(item => {
               const active = activeTab === item.id
               const Icon = item.icon
               return (
                 <button
                   key={item.id}
+                  role="tab"
+                  aria-selected={active}
                   onClick={() => setActiveTab(item.id)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(item.id) } }}
+                  className="flex items-center gap-3 p-3 rounded-lg border-0 cursor-pointer text-left"
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '12px', padding: '12px',
-                    borderRadius: '8px', border: 'none', background: active ? 'var(--bg-tertiary)' : 'transparent',
-                    color: active ? '#ffffff' : 'var(--text-secondary)', cursor: 'pointer',
-                    fontWeight: active ? 600 : 500, transition: 'background-color 0.2s, color 0.2s', textAlign: 'left'
+                    background: active ? 'var(--bg-tertiary)' : 'transparent',
+                    color: active ? '#ffffff' : 'var(--text-secondary)',
+                    fontWeight: active ? 600 : 500, transition: 'background-color 0.2s, color 0.2s'
                   }}
                   onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = 'var(--text-primary)' }}
                   onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = 'var(--text-secondary)' }}
@@ -193,12 +193,12 @@ export default function EmployeePortal({
             })}
           </nav>
           {!currentUser.isEmployee && (
-            <button onClick={() => setSimulatedRole('Admin')}
+            <button aria-label="Back to admin" onClick={() => setSimulatedRole('Admin')}
+              className="mt-auto flex items-center gap-2.5 p-3 rounded-lg cursor-pointer font-medium w-full text-left"
               style={{
-                marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px',
-                borderRadius: '8px', border: '1px solid var(--border-color)', background: 'transparent',
-                color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500,
-                transition: 'all 0.15s', width: '100%', textAlign: 'left'
+                border: '1px solid var(--border-color)', background: 'transparent',
+                color: 'var(--text-secondary)', fontSize: '0.85rem',
+                transition: 'all 0.15s'
               }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.color = 'var(--accent-primary)' }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.color = 'var(--text-secondary)' }}>
@@ -209,19 +209,15 @@ export default function EmployeePortal({
       )}
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px' : '32px', paddingBottom: isMobile ? '80px' : '32px' }}>
+      <div className="flex-1 overflow-y-auto" style={{ padding: isMobile ? '16px' : '32px', paddingBottom: isMobile ? '80px' : '32px' }}>
         {renderContent()}
       </div>
 
       {/* Bottom Tab Bar (Mobile) */}
       {isMobile && (
-        <div style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0,
+        <div className="fixed bottom-0 left-0 right-0 flex justify-around items-center px-2 py-3 z-[100]" style={{
           background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-color)',
-          display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-          padding: '12px 8px', zIndex: 100,
           backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-          background: 'var(--bg-secondary)'
         }}>
           {navItems.map(item => {
             const active = activeTab === item.id
@@ -229,16 +225,18 @@ export default function EmployeePortal({
             return (
               <button
                 key={item.id}
+                role="tab"
+                aria-selected={active}
                 onClick={() => setActiveTab(item.id)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(item.id) } }}
+                className="flex flex-col items-center justify-center gap-1 border-0 cursor-pointer flex-1 min-h-[44px] p-1.5"
                 style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                  background: 'transparent', border: 'none', cursor: 'pointer',
+                  background: 'transparent',
                   color: active ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                  flex: 1, minHeight: '44px', padding: '6px'
                 }}
               >
                 <Icon size={20} />
-                <span style={{ fontSize: '0.65rem', fontWeight: active ? 600 : 500 }}>{item.label}</span>
+                <span className="text-[0.65rem]" style={{ fontWeight: active ? 600 : 500 }}>{item.label}</span>
               </button>
             )
           })}
@@ -247,11 +245,11 @@ export default function EmployeePortal({
 
       {isMobile && !currentUser.isEmployee && (
         <button onClick={() => setSimulatedRole('Admin')}
+          className="fixed top-3 right-3 z-[101] px-3.5 py-2 rounded-full cursor-pointer font-semibold"
           style={{
-            position: 'fixed', top: '12px', right: '12px', zIndex: 101,
-            padding: '8px 14px', borderRadius: '100px', border: '1px solid var(--border-color)',
+            border: '1px solid var(--border-color)',
             background: 'var(--bg-secondary)', color: 'var(--text-secondary)',
-            cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600,
+            fontSize: '0.78rem',
             backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
             transition: 'all 0.15s', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
           }}
@@ -262,29 +260,27 @@ export default function EmployeePortal({
       )}
 
       {showPunchModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 11000, backdropFilter: 'blur(4px)' }} onClick={() => setShowPunchModal(false)}>
-          <div className="glass-card" style={{ padding: '24px', width: '90%', maxWidth: '400px', background: 'var(--bg-secondary)', display: 'flex', flexDirection: 'column', gap: '16px' }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ margin: 0 }}>Attendance Punch</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Select punch type for today (<strong>{formatDate(new Date().toISOString().split('T')[0])}</strong>):</p>
-            <div style={{ display: 'flex', gap: '12px' }}>
+        <div className="fixed inset-0 flex items-center justify-center z-[11000]" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }} onClick={() => setShowPunchModal(false)}>
+          <div className="glass-card p-6 w-[90%] max-w-[400px] flex flex-col gap-4" style={{ background: 'var(--bg-secondary)' }} onClick={e => e.stopPropagation()}>
+            <h3 className="m-0">Attendance Punch</h3>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Select punch type for today (<strong>{formatDate(new Date().toISOString().split('T')[0])}</strong>):</p>
+            <div className="flex gap-3">
               <button 
-                className={`btn ${punchType === 'In' ? 'btn-primary' : 'btn-secondary'}`} 
-                style={{ flex: 1, minHeight: '44px' }} 
+                className={`btn flex-1 min-h-[44px] ${punchType === 'In' ? 'btn-primary' : 'btn-secondary'}`} 
                 onClick={() => setPunchType('In')}
               >
                 Clock In
               </button>
               <button 
-                className={`btn ${punchType === 'Out' ? 'btn-primary' : 'btn-secondary'}`} 
-                style={{ flex: 1, minHeight: '44px' }} 
+                className={`btn flex-1 min-h-[44px] ${punchType === 'Out' ? 'btn-primary' : 'btn-secondary'}`} 
                 onClick={() => setPunchType('Out')}
               >
                 Clock Out
               </button>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
-              <button className="btn btn-secondary" style={{ minHeight: '44px' }} onClick={() => setShowPunchModal(false)}>Cancel</button>
-              <button className="btn btn-primary" style={{ minHeight: '44px' }} onClick={handlePunchSubmit}>Confirm Punch</button>
+            <div className="flex justify-end gap-3 mt-3">
+              <button className="btn btn-secondary min-h-[44px]" onClick={() => setShowPunchModal(false)}>Cancel</button>
+              <button className="btn btn-primary min-h-[44px]" onClick={handlePunchSubmit}>Confirm Punch</button>
             </div>
           </div>
         </div>
@@ -313,72 +309,72 @@ function DashboardView({ currentUser, attendance, expenses, announcements, setAc
     .slice(0, 3)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1000px', margin: '0 auto' }}>
-      <div className="glass-card" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+    <div className="flex flex-col gap-6 max-w-[1000px] mx-auto">
+      <div className="glass-card p-6 flex items-center gap-5">
         {getInitialsAvatar(currentUser.name)}
         <div>
-          <h1 style={{ fontSize: '1.5rem', margin: '0 0 4px 0', color: 'var(--text-primary)' }}>Welcome back, {currentUser.name}!</h1>
-          <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{currentUser.department} • {currentUser.role}</p>
+          <h1 className="text-2xl m-0 mb-1" style={{ color: 'var(--text-primary)' }}>Welcome back, {currentUser.name}!</h1>
+          <p className="m-0 text-sm" style={{ color: 'var(--text-secondary)' }}>{currentUser.department} • {currentUser.role}</p>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-        <div className="glass-card stat-card" style={{ padding: '20px' }}>
-          <h3 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 8px 0', textTransform: 'uppercase' }}>Annual Leave Balance</h3>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-            {currentBalances.annual.limit - currentBalances.annual.used} <span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>/ {currentBalances.annual.limit} days</span>
+      <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+        <div className="glass-card stat-card p-5">
+          <h3 className="text-sm uppercase m-0 mb-2" style={{ color: 'var(--text-secondary)' }}>Annual Leave Balance</h3>
+          <div className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+            {currentBalances.annual.limit - currentBalances.annual.used} <span className="text-base" style={{ color: 'var(--text-muted)' }}>/ {currentBalances.annual.limit} days</span>
           </div>
         </div>
-        <div className="glass-card stat-card" style={{ padding: '20px' }}>
-          <h3 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 8px 0', textTransform: 'uppercase' }}>Sick Leave Balance</h3>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-            {currentBalances.sick.limit - currentBalances.sick.used} <span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>/ {currentBalances.sick.limit} days</span>
+        <div className="glass-card stat-card p-5">
+          <h3 className="text-sm uppercase m-0 mb-2" style={{ color: 'var(--text-secondary)' }}>Sick Leave Balance</h3>
+          <div className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+            {currentBalances.sick.limit - currentBalances.sick.used} <span className="text-base" style={{ color: 'var(--text-muted)' }}>/ {currentBalances.sick.limit} days</span>
           </div>
         </div>
-        <div className="glass-card stat-card" style={{ padding: '20px' }}>
-          <h3 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 8px 0', textTransform: 'uppercase' }}>Pending Reimbursements</h3>
-          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+        <div className="glass-card stat-card p-5">
+          <h3 className="text-sm uppercase m-0 mb-2" style={{ color: 'var(--text-secondary)' }}>Pending Reimbursements</h3>
+          <div className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
             ${totalPending.toFixed(2)}
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginTop: '16px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-primary)' }}>Quick Actions</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
-            <button className="btn btn-secondary" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }} onClick={() => setActiveTab('leave')}>
+      <div className="grid gap-6 mt-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+        <div className="flex flex-col gap-4">
+          <h3 className="text-lg m-0" style={{ color: 'var(--text-primary)' }}>Quick Actions</h3>
+          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
+            <button className="btn btn-secondary p-4 flex flex-col gap-2 items-center" onClick={() => setActiveTab('leave')}>
               <CalendarIcon size={24} style={{ color: 'var(--accent-primary)' }} />
               Request Leave
             </button>
-            <button className="btn btn-secondary" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }} onClick={() => setActiveTab('payslips')}>
+            <button className="btn btn-secondary p-4 flex flex-col gap-2 items-center" onClick={() => setActiveTab('payslips')}>
               <Download size={24} style={{ color: 'var(--accent-success)' }} />
               Download Payslip
             </button>
-            <button className="btn btn-secondary" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }} onClick={() => setShowPunchModal(true)}>
+            <button className="btn btn-secondary p-4 flex flex-col gap-2 items-center" onClick={() => setShowPunchModal(true)}>
               <Clock size={24} style={{ color: 'var(--accent-warning)' }} />
               Mark Attendance
             </button>
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--text-primary)' }}>Company Feed</h3>
-            <button style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }} onClick={() => setActiveTab('announcements')}>View All</button>
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg m-0" style={{ color: 'var(--text-primary)' }}>Company Feed</h3>
+            <button className="bg-transparent border-0 font-semibold cursor-pointer text-sm" style={{ color: 'var(--accent-primary)' }} onClick={() => setActiveTab('announcements')}>View All</button>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div className="flex flex-col gap-3">
             {recentAnnouncements.length === 0 ? (
-              <div className="glass-card" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}>No new announcements</div>
+              <div className="glass-card p-6 text-center" style={{ color: 'var(--text-secondary)' }}>No new announcements</div>
             ) : (
               recentAnnouncements.map(ann => (
-                <div key={ann.id} className="glass-card" style={{ padding: '16px', borderLeft: ann.priority === 'Urgent' ? '4px solid var(--accent-danger)' : 'none', cursor: 'pointer' }} onClick={() => setActiveTab('announcements')}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', fontWeight: 600 }}>{ann.category}</span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{formatDate(ann.date)}</span>
+                <div key={ann.id} className="glass-card p-4 cursor-pointer" style={{ borderLeft: ann.priority === 'Urgent' ? '4px solid var(--accent-danger)' : 'none' }} onClick={() => setActiveTab('announcements')}>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-xs font-semibold" style={{ color: 'var(--accent-primary)' }}>{ann.category}</span>
+                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{formatDate(ann.date)}</span>
                   </div>
-                  <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', color: 'var(--text-primary)' }}>{ann.title}</h4>
-                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ann.content}</p>
+                  <h4 className="m-0 mb-1 text-base" style={{ color: 'var(--text-primary)' }}>{ann.title}</h4>
+                  <p className="m-0 text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{ann.content}</p>
                 </div>
               ))
             )}
@@ -476,35 +472,32 @@ function AttendanceView({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1000px', margin: '0 auto' }}>
-      <h2 style={{ margin: 0 }}>My Attendance & Roster</h2>
+    <div className="flex flex-col gap-6 max-w-[1000px] mx-auto">
+      <h2 className="m-0">My Attendance & Roster</h2>
       
-      <div style={{ display: 'flex', gap: '12px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-        <button className={`tab-btn ${activeSubTab === 'roster' ? 'active' : ''}`} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeSubTab === 'roster' ? 'var(--bg-secondary)' : 'transparent', color: activeSubTab === 'roster' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }} onClick={() => setActiveSubTab('roster')}>My Schedule</button>
-        <button className={`tab-btn ${activeSubTab === 'swap' ? 'active' : ''}`} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeSubTab === 'swap' ? 'var(--bg-secondary)' : 'transparent', color: activeSubTab === 'swap' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }} onClick={() => setActiveSubTab('swap')}>Request Swap</button>
-        <button className={`tab-btn ${activeSubTab === 'overtime' ? 'active' : ''}`} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeSubTab === 'overtime' ? 'var(--bg-secondary)' : 'transparent', color: activeSubTab === 'overtime' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }} onClick={() => setActiveSubTab('overtime')}>Log Overtime</button>
+      <div className="flex gap-3 pb-3" style={{ borderBottom: '1px solid var(--border-color)' }}>
+        <button className={`tab-btn px-4 py-2 rounded-lg border-0 font-semibold cursor-pointer ${activeSubTab === 'roster' ? 'active' : ''}`} style={{ background: activeSubTab === 'roster' ? 'var(--bg-secondary)' : 'transparent', color: activeSubTab === 'roster' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveSubTab('roster')}>My Schedule</button>
+        <button className={`tab-btn px-4 py-2 rounded-lg border-0 font-semibold cursor-pointer ${activeSubTab === 'swap' ? 'active' : ''}`} style={{ background: activeSubTab === 'swap' ? 'var(--bg-secondary)' : 'transparent', color: activeSubTab === 'swap' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveSubTab('swap')}>Request Swap</button>
+        <button className={`tab-btn px-4 py-2 rounded-lg border-0 font-semibold cursor-pointer ${activeSubTab === 'overtime' ? 'active' : ''}`} style={{ background: activeSubTab === 'overtime' ? 'var(--bg-secondary)' : 'transparent', color: activeSubTab === 'overtime' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveSubTab('overtime')}>Log Overtime</button>
       </div>
 
       {activeSubTab === 'roster' && (
-        <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h3 style={{ margin: 0, fontSize: '1.1rem' }}>This Week ({currentMonth})</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px' }}>
+        <div className="glass-card p-6 flex flex-col gap-4">
+          <h3 className="m-0 text-lg">This Week ({currentMonth})</h3>
+          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}>
             {myRoster.map(({ date, template }, i) => (
-              <div key={i} style={{ 
-                padding: '16px', 
-                borderRadius: '8px', 
+              <div key={i} className="p-4 rounded-lg flex flex-col gap-2" style={{ 
                 border: `1px solid ${template ? template.color : 'var(--border-color)'}`,
                 background: template ? `${template.color}15` : 'var(--bg-secondary)',
-                display: 'flex', flexDirection: 'column', gap: '8px'
               }}>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{formatDateWithWeekday(date.toISOString().split('T')[0])}</div>
+                <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{formatDateWithWeekday(date.toISOString().split('T')[0])}</div>
                 {template ? (
                   <>
-                    <div style={{ fontWeight: 700, color: template.color }}>{template.name}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>{template.start} - {template.end}</div>
+                    <div className="font-bold" style={{ color: template.color }}>{template.name}</div>
+                    <div className="text-xs" style={{ color: 'var(--text-primary)' }}>{template.start} - {template.end}</div>
                   </>
                 ) : (
-                  <div style={{ fontWeight: 600, color: 'var(--text-muted)' }}>Off</div>
+                  <div className="font-semibold" style={{ color: 'var(--text-muted)' }}>Off</div>
                 )}
               </div>
             ))}
@@ -513,17 +506,17 @@ function AttendanceView({
       )}
 
       {activeSubTab === 'swap' && (
-        <div className="glass-card" style={{ padding: '24px', maxWidth: '600px' }}>
-          <h3 style={{ margin: '0 0 20px 0', fontSize: '1.1rem' }}>Request Shift Swap</h3>
-          <form onSubmit={handleRequestSwap} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Date to Swap</label>
-              <input type="date" required value={swapDate} onChange={(e) => setSwapDate(e.target.value)} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
+        <div className="glass-card p-6 max-w-[600px]">
+          <h3 className="m-0 mb-5 text-lg">Request Shift Swap</h3>
+          <form onSubmit={handleRequestSwap} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Date to Swap</label>
+              <input type="date" required value={swapDate} onChange={(e) => setSwapDate(e.target.value)} aria-label="Swap date" className="px-3.5 py-2.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Colleague to Swap With</label>
-              <select required value={swapColleague} onChange={(e) => setSwapColleague(e.target.value)} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Colleague to Swap With</label>
+              <select required value={swapColleague} onChange={(e) => setSwapColleague(e.target.value)} aria-label="Colleague to swap with" className="px-3.5 py-2.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
                 <option value="">Select Colleague...</option>
                 {employees?.filter(e => e.id !== currentUser.id && e.department === currentUser.department).map(emp => (
                   <option key={emp.id} value={emp.id}>{emp.name}</option>
@@ -531,12 +524,12 @@ function AttendanceView({
               </select>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Reason</label>
-              <textarea rows={3} value={swapReason} onChange={(e) => setSwapReason(e.target.value)} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="Why do you need to swap?" />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Reason</label>
+              <textarea rows={3} value={swapReason} onChange={(e) => setSwapReason(e.target.value)} className="px-3.5 py-2.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="Why do you need to swap?" aria-label="Swap reason" />
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start', marginTop: '8px' }}>
+            <button type="submit" className="btn btn-primary self-start mt-2">
               Submit Request
             </button>
           </form>
@@ -544,25 +537,25 @@ function AttendanceView({
       )}
 
       {activeSubTab === 'overtime' && (
-        <div className="glass-card" style={{ padding: '24px', maxWidth: '600px' }}>
-          <h3 style={{ margin: '0 0 20px 0', fontSize: '1.1rem' }}>Log Overtime</h3>
-          <form onSubmit={handleClaimOvertime} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Date</label>
-              <input type="date" required value={otDate} onChange={(e) => setOtDate(e.target.value)} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
+        <div className="glass-card p-6 max-w-[600px]">
+          <h3 className="m-0 mb-5 text-lg">Log Overtime</h3>
+          <form onSubmit={handleClaimOvertime} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Date</label>
+              <input type="date" required value={otDate} onChange={(e) => setOtDate(e.target.value)} aria-label="Overtime date" className="px-3.5 py-2.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
             </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Total Overtime Hours</label>
-              <input type="number" step="0.5" required value={otHours} onChange={(e) => setOtHours(e.target.value)} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="e.g. 2.5" />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Total Overtime Hours</label>
+              <input type="number" step="0.5" required value={otHours} onChange={(e) => setOtHours(e.target.value)} aria-label="Overtime hours" className="px-3.5 py-2.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="e.g. 2.5" />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Justification / Manager Name</label>
-              <textarea rows={3} required value={otReason} onChange={(e) => setOtReason(e.target.value)} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="Explain work done..." />
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Justification / Manager Name</label>
+              <textarea rows={3} required value={otReason} onChange={(e) => setOtReason(e.target.value)} aria-label="Overtime justification" className="px-3.5 py-2.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="Explain work done..." />
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start', marginTop: '8px' }}>
+            <button type="submit" className="btn btn-primary self-start mt-2">
               Submit Overtime
             </button>
           </form>
@@ -576,11 +569,11 @@ function PayslipsView({ currentUser, payroll, addToast }) {
   const myPayslips = (payroll?.history || []).filter(p => p.employeeId === currentUser.id)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1000px', margin: '0 auto' }}>
-      <h2 style={{ margin: 0 }}>My Payslips</h2>
+    <div className="flex flex-col gap-6 max-w-[1000px] mx-auto">
+      <h2 className="m-0">My Payslips</h2>
       
       {myPayslips.length === 0 ? (
-        <div className="glass-card" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+        <div className="glass-card p-10 text-center" style={{ color: 'var(--text-secondary)' }}>
           No payslips available yet.
         </div>
       ) : (
@@ -601,10 +594,10 @@ function PayslipsView({ currentUser, payroll, addToast }) {
                   <td>{slip.date}</td>
                   <td>${slip.gross}</td>
                   <td>${slip.deductions}</td>
-                  <td style={{ fontWeight: 600, color: 'var(--accent-success)' }}>${slip.net}</td>
+                  <td className="font-semibold" style={{ color: 'var(--accent-success)' }}>${slip.net}</td>
                   <td>
-                    <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => addToast('Downloading PDF...', 'info')}>
-                      <Download size={14} style={{ display: 'inline', marginRight: '4px' }} /> PDF
+                    <button className="btn btn-secondary px-3 py-1.5 text-xs" onClick={() => addToast('Downloading PDF...', 'info')}>
+                      <Download size={14} className="inline mr-1" /> PDF
                     </button>
                   </td>
                 </tr>
@@ -650,40 +643,36 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1000px', margin: '0 auto' }}>
-      <h2 style={{ margin: 0 }}>My Leave</h2>
+    <div className="flex flex-col gap-6 max-w-[1000px] mx-auto">
+      <h2 className="m-0">My Leave</h2>
       
-      <div className="glass-card" style={{ padding: '24px' }}>
-        <h3 style={{ marginTop: 0 }}>Apply for Leave</h3>
-        <form onSubmit={handleApply} style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '500px' }}>
-          <select className="form-input" value={type} onChange={e => setType(e.target.value)}>
+      <div className="glass-card p-6">
+        <h3 className="mt-0">Apply for Leave</h3>
+        <form onSubmit={handleApply} className="flex flex-col gap-4 max-w-[500px]">
+          <select className="form-input" value={type} onChange={e => setType(e.target.value)} aria-label="Leave type">
             <option>Annual</option>
             <option>Sick</option>
             <option>Casual</option>
             <option>Unpaid</option>
           </select>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <input type="date" className="form-input" style={{ flex: 1 }} value={startDate} onChange={e => setStartDate(e.target.value)} required />
-            <input type="date" className="form-input" style={{ flex: 1 }} value={endDate} onChange={e => setEndDate(e.target.value)} required />
+          <div className="flex gap-4">
+            <input type="date" className="form-input flex-1" value={startDate} onChange={e => setStartDate(e.target.value)} required aria-label="Leave start date" />
+            <input type="date" className="form-input flex-1" value={endDate} onChange={e => setEndDate(e.target.value)} required aria-label="Leave end date" />
           </div>
-          <textarea className="form-input" placeholder="Reason / Handover notes" rows="3" value={reason} onChange={e => setReason(e.target.value)} required />
+          <textarea className="form-input" placeholder="Reason / Handover notes" rows="3" value={reason} onChange={e => setReason(e.target.value)} required aria-label="Leave reason" />
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Attach Receipt / Medical Certificate</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Attach Receipt / Medical Certificate</label>
+            <div className="flex items-center gap-3">
               <label 
-                className="btn btn-secondary" 
-                style={{ 
-                  margin: 0, padding: '10px 16px', display: 'inline-flex', alignItems: 'center', gap: '8px', 
-                  minHeight: '44px', cursor: 'pointer', fontSize: '0.85rem'
-                }}
+                className="btn btn-secondary m-0 px-4 py-2.5 inline-flex items-center gap-2 min-h-[44px] cursor-pointer text-sm"
               >
                 <Upload size={16} /> 
                 <span>{receiptName ? 'Change Document' : 'Upload File'}</span>
                 <input 
                   type="file" 
                   accept="image/*,application/pdf" 
-                  style={{ display: 'none' }} 
+                  className="hidden" 
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
@@ -698,48 +687,47 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
                 />
               </label>
               {receiptName && (
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '200px' }}>
+                <span className="text-sm truncate max-w-[200px]" style={{ color: 'var(--text-secondary)' }}>
                   {receiptName}
                 </span>
               )}
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start' }}><Send size={16} /> Submit Request</button>
+          <button type="submit" className="btn btn-primary self-start"><Send size={16} /> Submit Request</button>
         </form>
       </div>
 
-      <div className="glass-card" style={{ padding: '24px' }}>
-        <h3 style={{ marginTop: 0 }}>Application History</h3>
+      <div className="glass-card p-6">
+        <h3 className="mt-0">Application History</h3>
         <div className="table-container">
-          <table className="w-full table-striped" style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table className="w-full table-striped w-full border-collapse">
             <thead>
-              <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ padding: '12px' }}>Type</th>
-                <th style={{ padding: '12px' }}>Dates</th>
-                <th style={{ padding: '12px' }}>Reason</th>
-                <th style={{ padding: '12px' }}>Receipt</th>
-                <th style={{ padding: '12px' }}>Status</th>
+              <tr className="text-left" style={{ borderBottom: '1px solid var(--border-color)' }}>
+                <th className="p-3">Type</th>
+                <th className="p-3">Dates</th>
+                <th className="p-3">Reason</th>
+                <th className="p-3">Receipt</th>
+                <th className="p-3">Status</th>
               </tr>
             </thead>
             <tbody>
               {myLeaves.map(l => (
                 <tr key={l.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '12px' }}>{l.leaveType}</td>
-                  <td style={{ padding: '12px' }}>{l.startDate} to {l.endDate}</td>
-                  <td style={{ padding: '12px' }}>{l.reason}</td>
-                  <td style={{ padding: '12px' }}>
+                  <td className="p-3">{l.leaveType}</td>
+                  <td className="p-3">{l.startDate} to {l.endDate}</td>
+                  <td className="p-3">{l.reason}</td>
+                  <td className="p-3">
                     {l.receipt ? (
-                      <a href={l.receipt} target="_blank" rel="noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'underline', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px', minHeight: '44px' }}>
+                      <a href={l.receipt} target="_blank" rel="noreferrer" className="font-semibold inline-flex items-center gap-1 min-h-[44px]" style={{ color: 'var(--accent-primary)', textDecoration: 'underline' }}>
                         <FileText size={14} /> View
                       </a>
                     ) : (
                       <span style={{ color: 'var(--text-muted)' }}>None</span>
                     )}
                   </td>
-                  <td style={{ padding: '12px' }}>
-                    <span style={{ 
-                      padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600,
+                  <td className="p-3">
+                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{ 
                       background: l.status === 'Approved' ? 'rgba(34, 197, 94, 0.2)' : l.status === 'Rejected' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(234, 179, 8, 0.2)',
                       color: l.status === 'Approved' ? 'var(--accent-success)' : l.status === 'Rejected' ? 'var(--accent-danger)' : 'var(--accent-warning)'
                     }}>
@@ -748,7 +736,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
                   </td>
                 </tr>
               ))}
-              {myLeaves.length === 0 && <tr><td colSpan="5" style={{ padding: '12px', textAlign: 'center', color: 'var(--text-secondary)' }}>No leave history found.</td></tr>}
+              {myLeaves.length === 0 && <tr><td colSpan="5" className="p-3 text-center" style={{ color: 'var(--text-secondary)' }}>No leave history found.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -785,86 +773,86 @@ function ProfileView({ currentUser, pendingProfileEdits, setPendingProfileEdits,
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ margin: 0 }}>My Profile</h2>
+    <div className="flex flex-col gap-6 max-w-[800px] mx-auto">
+      <div className="flex justify-between items-center">
+        <h2 className="m-0">My Profile</h2>
         {!editMode && !hasPending && (
           <button className="btn btn-secondary" onClick={() => setEditMode(true)}>Edit Details</button>
         )}
       </div>
 
       {hasPending && (
-        <div style={{ background: 'rgba(234, 179, 8, 0.1)', borderLeft: '4px solid var(--accent-warning)', padding: '16px', borderRadius: '4px', color: 'var(--text-primary)', display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div className="p-4 rounded flex gap-3 items-center" style={{ background: 'rgba(234, 179, 8, 0.1)', borderLeft: '4px solid var(--accent-warning)', color: 'var(--text-primary)' }}>
           <AlertCircle style={{ color: 'var(--accent-warning)' }} />
           <span>You have pending profile updates waiting for HR approval.</span>
         </div>
       )}
 
-      <div className="glass-card" style={{ padding: '24px', display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+      <div className="glass-card p-6 flex gap-6 items-start">
         {getInitialsAvatar(currentUser.name)}
-        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div className="flex-1 grid grid-cols-2 gap-4">
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Full Name</label>
-            <div style={{ fontWeight: 500 }}>{currentUser.name}</div>
+            <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Full Name</label>
+            <div className="font-medium">{currentUser.name}</div>
           </div>
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Employee ID</label>
-            <div style={{ fontWeight: 500 }}>{currentUser.id}</div>
+            <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Employee ID</label>
+            <div className="font-medium">{currentUser.id}</div>
           </div>
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Department</label>
-            <div style={{ fontWeight: 500 }}>{currentUser.department}</div>
+            <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Department</label>
+            <div className="font-medium">{currentUser.department}</div>
           </div>
           <div>
-            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Role</label>
-            <div style={{ fontWeight: 500 }}>{currentUser.role}</div>
+            <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Role</label>
+            <div className="font-medium">{currentUser.role}</div>
           </div>
         </div>
       </div>
 
-      <div className="glass-card" style={{ padding: '24px' }}>
-        <h3 style={{ marginTop: 0, marginBottom: '20px' }}>Contact & Personal Information</h3>
+      <div className="glass-card p-6">
+        <h3 className="mt-0 mb-5">Contact & Personal Information</h3>
         
         {editMode ? (
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Personal Email</label>
-              <input type="email" className="form-input" value={formData.personalEmail} onChange={e => setFormData(p => ({...p, personalEmail: e.target.value}))} />
+          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Personal Email</label>
+              <input type="email" className="form-input" value={formData.personalEmail} onChange={e => setFormData(p => ({...p, personalEmail: e.target.value}))} aria-label="Personal email" />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Phone Number</label>
-              <input type="tel" className="form-input" value={formData.phone} onChange={e => setFormData(p => ({...p, phone: e.target.value}))} />
+            <div className="flex flex-col gap-1">
+              <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Phone Number</label>
+              <input type="tel" className="form-input" value={formData.phone} onChange={e => setFormData(p => ({...p, phone: e.target.value}))} aria-label="Phone number" />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', gridColumn: '1 / -1' }}>
-              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Address</label>
-              <input type="text" className="form-input" value={formData.address} onChange={e => setFormData(p => ({...p, address: e.target.value}))} />
+            <div className="flex flex-col gap-1 col-span-2">
+              <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Address</label>
+              <input type="text" className="form-input" value={formData.address} onChange={e => setFormData(p => ({...p, address: e.target.value}))} aria-label="Address" />
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', gridColumn: '1 / -1' }}>
-              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Emergency Contact</label>
-              <input type="text" className="form-input" value={formData.emergencyContact} onChange={e => setFormData(p => ({...p, emergencyContact: e.target.value}))} />
+            <div className="flex flex-col gap-1 col-span-2">
+              <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Emergency Contact</label>
+              <input type="text" className="form-input" value={formData.emergencyContact} onChange={e => setFormData(p => ({...p, emergencyContact: e.target.value}))} aria-label="Emergency contact" />
             </div>
-            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '12px', marginTop: '8px' }}>
+            <div className="col-span-2 flex gap-3 mt-2">
               <button type="submit" className="btn btn-primary">Submit for Approval</button>
               <button type="button" className="btn btn-secondary" onClick={() => setEditMode(false)}>Cancel</button>
             </div>
           </form>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Personal Email</label>
-              <div style={{ fontWeight: 500 }}>{currentUser.personalEmail || '-'}</div>
+              <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Personal Email</label>
+              <div className="font-medium">{currentUser.personalEmail || '-'}</div>
             </div>
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Phone Number</label>
-              <div style={{ fontWeight: 500 }}>{currentUser.phone || '-'}</div>
+              <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Phone Number</label>
+              <div className="font-medium">{currentUser.phone || '-'}</div>
             </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Address</label>
-              <div style={{ fontWeight: 500 }}>{currentUser.address || '-'}</div>
+            <div className="col-span-2">
+              <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Address</label>
+              <div className="font-medium">{currentUser.address || '-'}</div>
             </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Emergency Contact</label>
-              <div style={{ fontWeight: 500 }}>{currentUser.emergencyContact || '-'}</div>
+            <div className="col-span-2">
+              <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Emergency Contact</label>
+              <div className="font-medium">{currentUser.emergencyContact || '-'}</div>
             </div>
           </div>
         )}
@@ -941,13 +929,13 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '800px', margin: '0 auto', paddingBottom: '40px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <div className="flex flex-col gap-6 max-w-[800px] mx-auto pb-10">
+      <div className="flex justify-between items-center">
+        <h2 className="m-0 flex items-center gap-3">
           <Megaphone size={24} color="var(--accent-primary)" />
           Company Feed
         </h2>
-        <select value={filter} onChange={(e) => setFilter(e.target.value)} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
+        <select aria-label="Filter announcements" value={filter} onChange={(e) => setFilter(e.target.value)} className="px-4 py-2 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
           <option value="All">All Categories</option>
           <option value="General">General</option>
           <option value="Policy Update">Policy Update</option>
@@ -957,9 +945,9 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
         </select>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div className="flex flex-col gap-6">
         {visiblePosts.length === 0 ? (
-          <div className="glass-card" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+          <div className="glass-card p-10 text-center" style={{ color: 'var(--text-secondary)' }}>
             No announcements found in this category.
           </div>
         ) : (
@@ -969,41 +957,41 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
             const isUrgent = post.priority === 'Urgent'
 
             return (
-              <div key={post.id} className="glass-card" style={{ padding: '24px', borderLeft: `4px solid ${getPriorityColor(post.priority)}`, position: 'relative' }}>
+              <div key={post.id} className="glass-card p-6 relative" style={{ borderLeft: `4px solid ${getPriorityColor(post.priority)}` }}>
                 {isUrgent && (
-                  <div style={{ position: 'absolute', top: '12px', right: '12px', background: 'var(--accent-danger)', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '4px 8px', borderRadius: '12px', textTransform: 'uppercase' }}>
+                  <div className="absolute top-3 right-3 px-2 py-1 rounded-xl text-[0.7rem] font-bold uppercase" style={{ background: 'var(--accent-danger)', color: '#fff' }}>
                     Pinned
                   </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-3">
                     {author.avatar ? (
-                      <img src={author.avatar} alt="" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                      <img src={author.avatar} alt="" className="size-10 rounded-full object-cover" />
                     ) : (
-                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+                      <div className="size-10 rounded-full flex items-center justify-center" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
                         <Megaphone size={20} />
                       </div>
                     )}
                     <div>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{author.name}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{dateStr}</div>
+                      <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{author.name}</div>
+                      <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{dateStr}</div>
                     </div>
                   </div>
-                  <span style={{ fontSize: '0.8rem', padding: '4px 8px', borderRadius: '4px', background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
+                  <span className="text-xs px-2 py-1 rounded" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
                     {post.category}
                   </span>
                 </div>
 
-                <h3 style={{ margin: '0 0 12px 0', fontSize: '1.25rem', color: 'var(--text-primary)' }}>{post.title}</h3>
-                <div style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '0.95rem' }}>
+                <h3 className="m-0 mb-3 text-xl" style={{ color: 'var(--text-primary)' }}>{post.title}</h3>
+                <div className="text-sm" style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
                   {post.content}
                 </div>
 
                 {post.poll && (
-                  <div style={{ marginTop: '20px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
-                    <h4 style={{ margin: '0 0 16px 0', fontSize: '1rem', color: 'var(--text-primary)' }}>📊 {post.poll.question}</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div className="mt-5 p-4 rounded-lg" style={{ background: 'var(--bg-secondary)' }}>
+                    <h4 className="m-0 mb-4 text-base" style={{ color: 'var(--text-primary)' }}>📊 {post.poll.question}</h4>
+                    <div className="flex flex-col gap-3">
                       {post.poll.options.map((opt, i) => {
                         const hasVoted = post.poll.options.some(o => o.votes.includes(currentUser.id))
                         const iVoted = opt.votes.includes(currentUser.id)
@@ -1012,19 +1000,19 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
 
                         if (hasVoted) {
                           return (
-                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <div style={{ flex: 1, background: 'var(--bg-tertiary)', borderRadius: '4px', height: '32px', position: 'relative', overflow: 'hidden' }}>
-                                <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: `${pct}%`, background: iVoted ? 'var(--accent-success)' : 'var(--accent-primary)', opacity: 0.2 }}></div>
-                                <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', display: 'flex', alignItems: 'center', padding: '0 12px', fontSize: '0.9rem', color: 'var(--text-primary)' }}>
+                            <div key={i} className="flex items-center gap-3">
+                              <div className="flex-1 relative overflow-hidden rounded h-8" style={{ background: 'var(--bg-tertiary)' }}>
+                                <div className="absolute top-0 left-0 h-full" style={{ width: `${pct}%`, background: iVoted ? 'var(--accent-success)' : 'var(--accent-primary)', opacity: 0.2 }}></div>
+                                <div className="absolute inset-0 flex items-center px-3 text-sm" style={{ color: 'var(--text-primary)' }}>
                                   {opt.text} {iVoted && ' (Your Vote)'}
                                 </div>
                               </div>
-                              <div style={{ width: '40px', fontSize: '0.85rem', color: 'var(--text-secondary)', textAlign: 'right' }}>{pct}%</div>
+                              <div className="w-10 text-sm text-right" style={{ color: 'var(--text-secondary)' }}>{pct}%</div>
                             </div>
                           )
                         } else {
                           return (
-                            <button key={i} className="btn btn-secondary" style={{ textAlign: 'left', padding: '12px 16px' }} onClick={() => handleVote(post.id, i)}>
+                            <button key={i} className="btn btn-secondary text-left p-3 px-4" onClick={() => handleVote(post.id, i)}>
                               {opt.text}
                             </button>
                           )
@@ -1034,20 +1022,20 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
                   </div>
                 )}
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-color)' }}>
-                  <button className="btn btn-secondary" style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }} onClick={() => handleReaction(post.id, '👍')}>
+                <div className="flex items-center gap-4 mt-5 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+                  <button className="btn btn-secondary px-3 py-1.5 flex items-center gap-2 text-sm" onClick={() => handleReaction(post.id, '👍')}>
                     <ThumbsUp size={16} /> {post.reactions['👍']}
                   </button>
-                  <button className="btn btn-secondary" style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }} onClick={() => handleReaction(post.id, '❤️')}>
+                  <button className="btn btn-secondary px-3 py-1.5 flex items-center gap-2 text-sm" onClick={() => handleReaction(post.id, '❤️')}>
                     <Heart size={16} /> {post.reactions['❤️']}
                   </button>
-                  <button className="btn btn-secondary" style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }} onClick={() => handleReaction(post.id, '🎉')}>
+                  <button className="btn btn-secondary px-3 py-1.5 flex items-center gap-2 text-sm" onClick={() => handleReaction(post.id, '🎉')}>
                     <PartyPopper size={16} /> {post.reactions['🎉']}
                   </button>
                   
-                  <div style={{ flex: 1 }}></div>
+                  <div className="flex-1"></div>
                   
-                  <button className="btn btn-secondary" style={{ padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }} onClick={() => addToast('Comments coming soon', 'info')}>
+                  <button className="btn btn-secondary px-3 py-1.5 flex items-center gap-2 text-sm" onClick={() => addToast('Comments coming soon', 'info')}>
                     <MessageSquare size={16} /> Comment
                   </button>
                 </div>
@@ -1124,51 +1112,51 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <div className="flex flex-col gap-6 max-w-[900px] mx-auto">
+      <div className="flex justify-between items-center">
+        <h2 className="m-0 flex items-center gap-3">
           <Monitor size={24} color="var(--accent-primary)" />
           My Assets
         </h2>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'assigned' ? 'var(--bg-secondary)' : 'transparent', color: activeTab === 'assigned' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }} onClick={() => setActiveTab('assigned')}>
+        <div className="flex gap-2">
+          <button className="px-4 py-2 rounded-lg border-0 font-semibold cursor-pointer" style={{ background: activeTab === 'assigned' ? 'var(--bg-secondary)' : 'transparent', color: activeTab === 'assigned' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveTab('assigned')}>
             Assigned to Me
           </button>
-          <button style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'request' ? 'var(--bg-secondary)' : 'transparent', color: activeTab === 'request' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer' }} onClick={() => setActiveTab('request')}>
+          <button className="px-4 py-2 rounded-lg border-0 font-semibold cursor-pointer" style={{ background: activeTab === 'request' ? 'var(--bg-secondary)' : 'transparent', color: activeTab === 'request' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveTab('request')}>
             Request Equipment
           </button>
         </div>
       </div>
 
       {activeTab === 'assigned' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="flex flex-col gap-4">
           {myAssets.length === 0 ? (
-            <div className="glass-card" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+            <div className="glass-card p-10 text-center" style={{ color: 'var(--text-secondary)' }}>
               No assets are currently assigned to you.
             </div>
           ) : (
             myAssets.map(asset => (
-              <div key={asset.id} className="glass-card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div key={asset.id} className="glass-card p-5 flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                  <div className="size-12 rounded-xl flex items-center justify-center" style={{ background: 'var(--bg-secondary)' }}>
                     <Monitor size={24} color="var(--accent-primary)" />
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{asset.name}</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{asset.category} · SN: {asset.serialNumber}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                    <div className="font-bold text-lg">{asset.name}</div>
+                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{asset.category} · SN: {asset.serialNumber}</div>
+                    <div className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
                       Assigned: {asset.assignmentDate} · Condition: {asset.condition}
                     </div>
                     {asset.warrantyExpiry && (
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Warranty until: {asset.warrantyExpiry}</div>
+                      <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Warranty until: {asset.warrantyExpiry}</div>
                     )}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-warning)' }} onClick={() => { setIssueAsset(asset); setShowIssueModal(true) }}>
+                <div className="flex gap-3">
+                  <button className="btn btn-secondary px-4 py-2 text-sm flex items-center gap-1.5" style={{ color: 'var(--accent-warning)' }} onClick={() => { setIssueAsset(asset); setShowIssueModal(true) }}>
                     <AlertTriangle size={14} /> Report Issue
                   </button>
-                  <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '0.85rem' }} onClick={() => handleRequestReturn(asset.id)}>
+                  <button className="btn btn-secondary px-4 py-2 text-sm" onClick={() => handleRequestReturn(asset.id)}>
                     Request Return
                   </button>
                 </div>
@@ -1177,13 +1165,13 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
           )}
 
           {myRequests.length > 0 && (
-            <div style={{ marginTop: '8px' }}>
-              <h4 style={{ margin: '0 0 12px 0', color: 'var(--text-secondary)' }}>My Past Requests</h4>
+            <div className="mt-2">
+              <h4 className="m-0 mb-3" style={{ color: 'var(--text-secondary)' }}>My Past Requests</h4>
               {myRequests.map(req => (
-                <div key={req.id} className="glass-card" style={{ padding: '16px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={req.id} className="glass-card p-4 mb-3 flex justify-between items-center">
                   <div>
-                    <span style={{ fontWeight: 600 }}>{req.category}</span>
-                    <span style={{ color: 'var(--text-secondary)', marginLeft: '8px', fontSize: '0.85rem' }}>"{req.justification}"</span>
+                    <span className="font-semibold">{req.category}</span>
+                    <span className="ml-2 text-sm" style={{ color: 'var(--text-secondary)' }}>"{req.justification}"</span>
                   </div>
                   <span className={`badge ${req.status === 'Approved' ? 'badge-success' : req.status === 'Rejected' ? 'badge-danger' : 'badge-warning'}`}>{req.status}</span>
                 </div>
@@ -1194,9 +1182,9 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
       )}
 
       {activeTab === 'request' && (
-        <div className="glass-card" style={{ padding: '24px' }}>
-          <h3 style={{ margin: '0 0 20px 0' }}>Request New Equipment</h3>
-          <form onSubmit={handleSubmitRequest} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="glass-card p-6">
+          <h3 className="m-0 mb-5">Request New Equipment</h3>
+          <form onSubmit={handleSubmitRequest} className="flex flex-col gap-4">
             <div className="form-group">
               <label>Equipment Category</label>
               <select className="form-input" value={requestForm.category} onChange={e => setRequestForm(p => ({...p, category: e.target.value}))}>
@@ -1219,7 +1207,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
               <label>Justification</label>
               <textarea required rows={4} className="form-input" placeholder="Explain why you need this equipment..." value={requestForm.justification} onChange={e => setRequestForm(p => ({...p, justification: e.target.value}))} />
             </div>
-            <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>Submit Request</button>
+            <button type="submit" className="btn btn-primary self-start">Submit Request</button>
           </form>
         </div>
       )}
@@ -1227,11 +1215,11 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
       {/* Report Issue Modal */}
       {showIssueModal && (
         <div className="modal-overlay">
-          <div className="modal-content glass-card fade-in" style={{ maxWidth: '500px', width: '100%' }}>
-            <h3 style={{ marginTop: 0 }}>Report Issue: {issueAsset?.name}</h3>
-            <form onSubmit={handleReportIssue} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="modal-content glass-card fade-in max-w-[500px] w-full">
+            <h3 className="mt-0">Report Issue: {issueAsset?.name}</h3>
+            <form onSubmit={handleReportIssue} className="flex flex-col gap-4">
               <textarea required rows={5} className="form-input" placeholder="Describe the issue in detail..." value={issueText} onChange={e => setIssueText(e.target.value)} />
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <div className="flex justify-end gap-3">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowIssueModal(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary">Submit Report</button>
               </div>

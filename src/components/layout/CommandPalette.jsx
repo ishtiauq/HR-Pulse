@@ -4,7 +4,7 @@ export default function CommandPalette({ showCommandPalette, setShowCommandPalet
   return (
     <>
       {showCommandPalette && (
-        <div className="command-palette-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowCommandPalette(false) }}>
+        <div className="command-palette-overlay" role="dialog" aria-modal="true" aria-label="Command palette" onClick={(e) => { if (e.target === e.currentTarget) setShowCommandPalette(false) }}>
           <div className="command-palette">
             <div className="command-palette-search-wrapper">
               <Search size={18} style={{ color: 'var(--color-md-sys-on-surface-variant)' }} />
@@ -12,6 +12,7 @@ export default function CommandPalette({ showCommandPalette, setShowCommandPalet
                 autoFocus
                 className="command-palette-input"
                 type="text"
+                aria-label="Search commands"
                 placeholder="Type a command or search..."
                 value={commandSearch}
                 onChange={(e) => {
@@ -41,9 +42,9 @@ export default function CommandPalette({ showCommandPalette, setShowCommandPalet
                 }}
               />
             </div>
-            <div className="command-palette-list">
+            <div className="command-palette-list" role="listbox" aria-label="Search results">
               {filteredItems.length === 0 ? (
-                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--color-md-sys-on-surface-variant)', fontSize: '0.9rem' }}>
+                <div className="p-6 text-center" role="status" aria-live="polite" style={{ color: 'var(--color-md-sys-on-surface-variant)', fontSize: '0.9rem' }}>
                   No results found.
                 </div>
               ) : (
@@ -60,6 +61,9 @@ export default function CommandPalette({ showCommandPalette, setShowCommandPalet
                           </div>
                         )}
                         <div
+                          role="option"
+                          aria-selected={paletteIndex === index}
+                          id={item.id}
                           className={`command-palette-item ${paletteIndex === index ? 'active' : ''}`}
                           onClick={() => selectPaletteItem(index)}
                           onMouseEnter={() => setPaletteIndex(index)}

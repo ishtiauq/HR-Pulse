@@ -1,27 +1,116 @@
 import { useState, useRef, useEffect } from 'react'
-import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature, Wrench, ChevronDown } from 'lucide-react'
+import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature, Wrench, Package, CheckCircle, BadgeCheck, MessageSquare } from 'lucide-react'
 import AdSlot from './AdSlot'
 import { useModal } from '../services/useModal.js'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { formatDate } from '../services/date.js'
 
+function AssetDashboard({ stats, setActiveView, assets }) {
+  const quickActions = [
+    { id: 'inventory', label: 'View Inventory', icon: <Package size={24} />, desc: 'Browse all assets' },
+    { id: 'assignments', label: 'Assign Assets', icon: <FileSignature size={24} />, desc: 'Manage assignments' },
+    { id: 'requests', label: 'Pending Requests', icon: <MessageSquare size={24} />, desc: 'Approve or reject' },
+    { id: 'maintenance', label: 'Maintenance', icon: <Wrench size={24} />, desc: 'Log repairs & depreciation' },
+  ]
+
+  const categories = [
+    { label: 'Laptops', key: 'Laptop' },
+    { label: 'Phones', key: 'Phone' },
+    { label: 'Monitors', key: 'Monitor' },
+    { label: 'Peripherals', key: 'Peripherals' },
+    { label: 'Access Cards', key: 'Access Card' },
+  ]
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="stats-grid">
+        <div className="glass-card p-5 flex items-center gap-4">
+          <div className="dash-stat-icon">
+            <Monitor size={24} />
+          </div>
+          <div>
+            <div className="text-2xl font-bold">{stats.total}</div>
+            <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Total Assets</div>
+          </div>
+        </div>
+        <div className="glass-card p-5 flex items-center gap-4">
+          <div className="dash-stat-icon" style={{ background: 'rgba(52,199,89,0.15)' }}>
+            <CheckCircle size={24} color="#34c759" />
+          </div>
+          <div>
+            <div className="text-2xl font-bold">{stats.available}</div>
+            <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Available</div>
+          </div>
+        </div>
+        <div className="glass-card p-5 flex items-center gap-4">
+          <div className="dash-stat-icon" style={{ background: 'rgba(0,122,255,0.15)' }}>
+            <BadgeCheck size={24} color="#007aff" />
+          </div>
+          <div>
+            <div className="text-2xl font-bold">{stats.assigned}</div>
+            <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Assigned</div>
+          </div>
+        </div>
+        <div className="glass-card p-5 flex items-center gap-4">
+          <div className="dash-stat-icon" style={{ background: 'rgba(255,149,0,0.15)' }}>
+            <Wrench size={24} color="#ff9500" />
+          </div>
+          <div>
+            <div className="text-2xl font-bold">{stats.underRepair}</div>
+            <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Under Repair</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="actions-grid">
+        {quickActions.map(action => (
+          <button key={action.id} className="btn btn-tonal flex flex-col items-center gap-2 p-5 text-center cursor-pointer" onClick={() => setActiveView(action.id)}>
+            {action.icon}
+            <div className="font-semibold">{action.label}</div>
+            <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{action.desc}</div>
+          </button>
+        ))}
+      </div>
+
+      <div className="glass-card p-5">
+        <h3 className="mt-0 mb-4 text-sm">Category Breakdown</h3>
+        <div className="flex flex-col gap-2.5">
+          {categories.map(cat => {
+            const count = assets.filter(a => a.category === cat.key).length
+            const max = Math.max(assets.length, 1)
+            const pct = (count / max) * 100
+            return (
+              <div key={cat.key} className="flex items-center gap-3">
+                <span className="text-sm w-[100px]">{cat.label}</span>
+                <div className="flex-1 h-2 rounded bg-[var(--bg-secondary)] overflow-hidden">
+                  <div className="h-full rounded opacity-70" style={{ width: `${pct}%`, background: 'var(--accent-primary)' }} />
+                </div>
+                <span className="text-sm font-semibold min-w-[24px] text-right">{count}</span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function AssetInventory({ filteredAssets, search, setSearch, filterCategory, setFilterCategory, alerts, showAddModal, setShowAddModal, newAsset, setNewAsset, handleAddAsset, triggerFileInput, fileInputRef, handleImportCSV, addToast }) {
   const [detailAsset, setDetailAsset] = useState(null)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Search & Action Bar */}
-      <div className="glass-card" style={{ padding: '20px', display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', gap: '12px', flex: 1, minWidth: '280px' }}>
-          <div className="search-bar" style={{ flex: 1 }}>
+    <div className="flex flex-col gap-5">
+      <div className="glass-card p-5 flex flex-wrap gap-4 items-center justify-between">
+        <div className="flex gap-3 flex-1 min-w-[280px]">
+          <div className="search-bar flex-1">
             <div className="tf-icon-leading">
               <Search size={18} />
             </div>
-            <input type="text" placeholder="Search by name or serial..." value={search} onChange={e => setSearch(e.target.value)} />
+            <input type="text" placeholder="Search by name or serial..." value={search} onChange={e => setSearch(e.target.value)} aria-label="Search assets" />
           </div>
           <div className="select-wrapper">
-            <select className="form-input" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
+            <select className="form-input" value={filterCategory} onChange={e => setFilterCategory(e.target.value)} aria-label="Filter by category">
               <option value="All">All Categories</option>
               <option value="Laptop">Laptops</option>
               <option value="Phone">Phones</option>
@@ -29,19 +118,17 @@ function AssetInventory({ filteredAssets, search, setSearch, filterCategory, set
               <option value="Peripherals">Peripherals</option>
               <option value="Access Card">Access Cards</option>
             </select>
-            <ChevronDown size={16} className="select-arrow" />
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn btn-tonal" onClick={triggerFileInput}><Upload size={16} className="btn-icon-start" /> Import CSV</button>
-          <input type="file" ref={fileInputRef} onChange={handleImportCSV} accept=".csv" style={{ display: 'none' }} />
-          <button className="btn btn-filled" onClick={() => setShowAddModal(true)}><Plus size={16} className="btn-icon-start" /> Add Asset</button>
+        <div className="flex gap-3">
+          <button className="btn btn-tonal" onClick={triggerFileInput} aria-label="Import CSV"><Upload size={16} className="btn-icon-start" /> Import CSV</button>
+          <input type="file" ref={fileInputRef} onChange={handleImportCSV} accept=".csv" className="hidden" />
+          <button className="btn btn-filled" onClick={() => setShowAddModal(true)} aria-label="Add asset"><Plus size={16} className="btn-icon-start" /> Add Asset</button>
         </div>
       </div>
 
-      {/* Table */}
       <div className="table-container">
-        <table className="table-responsive w-full table-striped">
+        <table role="table" className="table-responsive w-full table-striped">
           <thead>
             <tr>
               <th>ID / Serial</th>
@@ -54,19 +141,19 @@ function AssetInventory({ filteredAssets, search, setSearch, filterCategory, set
           </thead>
           <tbody>
             {filteredAssets.map(asset => (
-              <tr key={asset.id} onClick={() => setDetailAsset(asset)} style={{ cursor: 'pointer' }}>
+              <tr key={asset.id} onClick={() => setDetailAsset(asset)} className="cursor-pointer">
                 <td data-label="ID / Serial">
-                  <div style={{ fontWeight: 600 }}>{asset.id}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>SN: {asset.serialNumber}</div>
+                  <div className="font-semibold">{asset.id}</div>
+                  <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>SN: {asset.serialNumber}</div>
                 </td>
                 <td data-label="Name">{asset.name}</td>
                 <td data-label="Category">{asset.category}</td>
                 <td data-label="Purchase">
                   <div>${asset.purchasePrice}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{asset.purchaseDate}</div>
+                  <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{asset.purchaseDate}</div>
                 </td>
                 <td data-label="Warranty">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div className="flex items-center gap-1.5">
                     {asset.warrantyExpiry}
                     {alerts.find(a => a.id === asset.id) && <AlertTriangle size={14} color="var(--accent-warning)" />}
                   </div>
@@ -76,18 +163,17 @@ function AssetInventory({ filteredAssets, search, setSearch, filterCategory, set
                     asset.status === 'Available' ? 'badge-success' :
                     asset.status === 'Assigned' ? 'badge-info' :
                     asset.status === 'Under Repair' ? 'badge-warning' : 'badge-danger'
-                  }`}>{asset.status}</span>
+                  }`} role="status">{asset.status}</span>
                 </td>
               </tr>
             ))}
             {filteredAssets.length === 0 && (
-              <tr><td colSpan="6" style={{ textAlign: 'center', padding: '24px', color: 'var(--text-secondary)' }}>No assets found.</td></tr>
+              <tr><td colSpan="6" className="text-center p-6" style={{ color: 'var(--text-secondary)' }}>No assets found.</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {/* Detail Modal */}
       {detailAsset && (
         <DetailModal asset={detailAsset} onClose={() => setDetailAsset(null)} />
       )}
@@ -110,35 +196,35 @@ function DetailModal({ asset, onClose }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content glass-card" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', width: '100%' }}>
-        <h2 style={{ marginTop: 0 }}>{asset.name}</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
-          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Asset ID</div><div style={{ fontWeight: 600 }}>{asset.id}</div></div>
-          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Serial Number</div><div style={{ fontWeight: 600 }}>{asset.serialNumber}</div></div>
-          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Category</div><div>{asset.category}</div></div>
-          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Status</div><span className={`badge ${asset.status === 'Available' ? 'badge-success' : asset.status === 'Assigned' ? 'badge-info' : 'badge-warning'}`}>{asset.status}</span></div>
-          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Purchase Price</div><div>${asset.purchasePrice}</div></div>
-          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Book Value</div><div style={{ color: 'var(--accent-success)', fontWeight: 600 }}>${calculateBookValue(asset)}</div></div>
-          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Purchase Date</div><div>{asset.purchaseDate}</div></div>
-          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Warranty Expiry</div><div>{asset.warrantyExpiry}</div></div>
-          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Useful Life</div><div>{asset.usefulLife} months</div></div>
-          <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Condition</div><div>{asset.condition}</div></div>
+      <div className="modal-content glass-card max-w-[600px] w-full" onClick={e => e.stopPropagation()}>
+        <h2 className="mt-0">{asset.name}</h2>
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div><div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Asset ID</div><div className="font-semibold">{asset.id}</div></div>
+          <div><div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Serial Number</div><div className="font-semibold">{asset.serialNumber}</div></div>
+          <div><div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Category</div><div>{asset.category}</div></div>
+          <div><div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Status</div><span className={`badge ${asset.status === 'Available' ? 'badge-success' : asset.status === 'Assigned' ? 'badge-info' : 'badge-warning'}`}>{asset.status}</span></div>
+          <div><div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Purchase Price</div><div>${asset.purchasePrice}</div></div>
+          <div><div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Book Value</div><div className="font-semibold" style={{ color: 'var(--accent-success)' }}>${calculateBookValue(asset)}</div></div>
+          <div><div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Purchase Date</div><div>{asset.purchaseDate}</div></div>
+          <div><div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Warranty Expiry</div><div>{asset.warrantyExpiry}</div></div>
+          <div><div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Useful Life</div><div>{asset.usefulLife} months</div></div>
+          <div><div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Condition</div><div>{asset.condition}</div></div>
         </div>
         {asset.maintenanceLogs?.length > 0 && (
           <div>
-            <h3 style={{ margin: '16px 0 8px 0', fontSize: '0.95rem' }}>Maintenance History</h3>
+            <h3 className="my-4 text-sm">Maintenance History</h3>
             {asset.maintenanceLogs.map(log => (
-              <div key={log.id} style={{ padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '8px', marginBottom: '6px', fontSize: '0.85rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div key={log.id} className="px-3 py-2 rounded-lg mb-1.5 text-sm" style={{ background: 'var(--bg-secondary)' }}>
+                <div className="flex justify-between">
                   <span>{log.date} - {log.vendor}</span>
                   <span style={{ color: 'var(--accent-danger)' }}>${log.cost}</span>
                 </div>
-                <div style={{ color: 'var(--text-secondary)', marginTop: '2px' }}>{log.issue}</div>
+                <div className="mt-0.5" style={{ color: 'var(--text-secondary)' }}>{log.issue}</div>
               </div>
             ))}
           </div>
         )}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+        <div className="flex justify-end mt-5">
           <button className="btn btn-tonal" onClick={onClose}>Close</button>
         </div>
       </div>
@@ -151,16 +237,15 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
   const assignableAssets = assets.filter(a => filterStatus === 'All' ? (a.status === 'Available' || a.status === 'Assigned') : a.status === filterStatus)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Filter Pills */}
-      <div className="glass-card" style={{ padding: '12px 20px', display: 'flex', gap: '8px' }}>
+    <div className="flex flex-col gap-5">
+      <div className="glass-card px-5 py-3 flex gap-2" role="tablist">
         {['All', 'Available', 'Assigned'].map(s => (
-          <button key={s} className={`btn ${s === filterStatus ? 'btn-filled' : 'btn-tonal'} btn-sm`} onClick={() => setFilterStatus(s)}>{s}</button>
+          <button key={s} className={`btn ${s === filterStatus ? 'btn-filled' : 'btn-tonal'} btn-sm`} role="tab" aria-selected={s === filterStatus} onClick={() => setFilterStatus(s)}>{s}</button>
         ))}
       </div>
 
       <div className="table-container">
-        <table className="table-responsive w-full table-striped">
+        <table role="table" className="table-responsive w-full table-striped">
           <thead>
             <tr>
               <th>Asset</th>
@@ -176,16 +261,16 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
               return (
                 <tr key={asset.id}>
                   <td data-label="Asset">
-                    <div style={{ fontWeight: 600 }}>{asset.name}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{asset.id}</div>
+                    <div className="font-semibold">{asset.name}</div>
+                    <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{asset.id}</div>
                   </td>
                   <td data-label="Status / Assignee">
                     {asset.status === 'Assigned' && emp ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {emp.avatar ? <img src={emp.avatar} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} /> : <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--bg-tertiary)' }} />}
+                      <div className="flex items-center gap-2">
+                        {emp.avatar ? <img src={emp.avatar} alt="" className="w-6 h-6 rounded-full object-cover" /> : <div className="w-6 h-6 rounded-full" style={{ background: 'var(--bg-tertiary)' }} />}
                         <div>
-                          <div style={{ fontWeight: 600 }}>{emp.name}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{emp.department}</div>
+                          <div className="font-semibold">{emp.name}</div>
+                          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{emp.department}</div>
                         </div>
                       </div>
                     ) : (
@@ -196,11 +281,11 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
                   <td data-label="Condition">{asset.condition || '-'}</td>
                   <td data-label="Actions">
                     {asset.status === 'Available' ? (
-                      <button className="btn btn-filled btn-sm" onClick={() => { setAssignTarget(asset); setShowAssignModal(true) }}>Assign</button>
+                      <button className="btn btn-filled btn-sm" aria-label="Assign asset" onClick={() => { setAssignTarget(asset); setShowAssignModal(true) }}>Assign</button>
                     ) : (
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="btn btn-tonal btn-sm" onClick={() => generateAgreementPDF(asset, emp, asset.condition)}><FileSignature size={14} /> PDF</button>
-                        <button className="btn btn-tonal btn-sm" style={{ color: 'var(--accent-warning)' }} onClick={() => handleReturnAsset(asset.id)}>Return</button>
+                      <div className="flex gap-2">
+                        <button className="btn btn-tonal btn-sm" aria-label="Generate PDF" onClick={() => generateAgreementPDF(asset, emp, asset.condition)}><FileSignature size={14} /> PDF</button>
+                        <button className="btn btn-tonal btn-sm" aria-label="Return asset" style={{ color: 'var(--accent-warning)' }} onClick={() => handleReturnAsset(asset.id)}>Return</button>
                       </div>
                     )}
                   </td>
@@ -211,7 +296,6 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
         </table>
       </div>
 
-      {/* Assign Modal */}
       {showAssignModal && (
         <AssignAssetModal showAssignModal={showAssignModal} setShowAssignModal={setShowAssignModal} assignTarget={assignTarget} assignForm={assignForm} setAssignForm={setAssignForm} handleAssignAsset={handleAssignAsset} employees={employees} />
       )}
@@ -224,9 +308,9 @@ function AssignAssetModal({ showAssignModal, setShowAssignModal, assignTarget, a
 
   return (
     <div className="modal-overlay" onClick={() => setShowAssignModal(false)}>
-      <div className="modal-content glass-card" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px', width: '100%' }}>
-        <h2 style={{ marginTop: 0 }}>Assign Asset: {assignTarget?.name}</h2>
-        <form onSubmit={handleAssignAsset} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div className="modal-content glass-card max-w-[500px] w-full" onClick={e => e.stopPropagation()}>
+        <h2 className="mt-0">Assign Asset: {assignTarget?.name}</h2>
+        <form onSubmit={handleAssignAsset} className="flex flex-col gap-4">
           <div className="form-group">
             <label>Select Employee</label>
             <select className="form-input" required value={assignForm.employeeId} onChange={e => setAssignForm(p => ({...p, employeeId: e.target.value}))}>
@@ -240,8 +324,8 @@ function AssignAssetModal({ showAssignModal, setShowAssignModal, assignTarget, a
             <label>Condition Notes</label>
             <input type="text" className="form-input" value={assignForm.notes} onChange={e => setAssignForm(p => ({...p, notes: e.target.value}))} />
           </div>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Agreement PDF will be auto-generated on assignment.</p>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Agreement PDF will be auto-generated on assignment.</p>
+          <div className="flex justify-end gap-3">
             <button type="button" className="btn btn-tonal" onClick={() => setShowAssignModal(false)}>Cancel</button>
             <button type="submit" className="btn btn-filled">Assign & Generate PDF</button>
           </div>
@@ -253,25 +337,25 @@ function AssignAssetModal({ showAssignModal, setShowAssignModal, assignTarget, a
 
 function AssetRequests({ assetRequests, employees, handleRequestAction }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div className="flex flex-col gap-4">
       {assetRequests.length === 0 ? (
-        <div className="glass-card" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>No pending asset requests.</div>
+        <div className="glass-card p-10 text-center" style={{ color: 'var(--text-secondary)' }}>No pending asset requests.</div>
       ) : (
         assetRequests.map(req => {
           const emp = employees.find(e => e.id === req.employeeId) || { name: 'Unknown' }
           return (
-            <div key={req.id} className="glass-card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-              <div style={{ flex: 1, minWidth: 200 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 600 }}>{emp.name}</span>
+            <div key={req.id} className="glass-card p-5 flex justify-between items-center flex-wrap gap-3">
+              <div className="flex-1 min-w-[200px]">
+                <div className="flex items-center gap-3 mb-2 flex-wrap">
+                  <span className="font-semibold">{emp.name}</span>
                   <span>requested a</span>
-                  <span style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>{req.category}</span>
+                  <span className="font-semibold" style={{ color: 'var(--accent-primary)' }}>{req.category}</span>
                   <span className={`badge ${req.urgency === 'High' ? 'badge-danger' : req.urgency === 'Medium' ? 'badge-warning' : 'badge-info'}`}>{req.urgency}</span>
                 </div>
-                <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>"{req.justification}"</div>
+                <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>"{req.justification}"</div>
               </div>
               {req.status === 'Pending' ? (
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <div className="flex gap-3 flex-wrap">
                   <button className="btn btn-filled btn-sm" onClick={() => handleRequestAction(req.id, 'Approved')}>Approve & Assign</button>
                   <button className="btn btn-tonal btn-sm" style={{ color: 'var(--accent-danger)' }} onClick={() => handleRequestAction(req.id, 'Rejected')}>Reject</button>
                 </div>
@@ -289,20 +373,18 @@ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
 function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMaint, maintForm, setMaintForm, handleAddMaintenance, calculateBookValue }) {
   return (
     <div className="maintenance-grid">
-      {/* Asset Selection Panel */}
-      <div className="glass-card" style={{ padding: '20px' }}>
-        <h3 style={{ margin: '0 0 16px 0' }}>Select Asset</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '500px', overflowY: 'auto' }}>
+      <div className="glass-card p-5">
+        <h3 className="mt-0 mb-4">Select Asset</h3>
+        <div className="flex flex-col gap-3 max-h-[500px] overflow-y-auto">
           {assets.map(asset => (
             <div key={asset.id}
-              className={selectedAssetForMaint?.id === asset.id ? 'card-filled' : 'card-outlined'}
-              onClick={() => setSelectedAssetForMaint(asset)}
-              style={{ padding: '12px', cursor: 'pointer' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <div style={{ fontWeight: 600 }}>{asset.name}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{asset.id}</div>
+              className={`${selectedAssetForMaint?.id === asset.id ? 'card-filled' : 'card-outlined'} p-3 cursor-pointer`}
+              onClick={() => setSelectedAssetForMaint(asset)}>
+              <div className="flex justify-between">
+                <div className="font-semibold">{asset.name}</div>
+                <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{asset.id}</div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.8rem' }}>
+              <div className="flex justify-between mt-1 text-xs">
                 <span className={`badge ${asset.status === 'Under Repair' ? 'badge-warning' : asset.status === 'Assigned' ? 'badge-info' : 'badge-success'}`}>{asset.status}</span>
                 <span style={{ color: 'var(--text-secondary)' }}>Purchased: {asset.purchaseDate}</span>
               </div>
@@ -311,46 +393,45 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
         </div>
       </div>
 
-      {/* Details Panel */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div className="flex flex-col gap-6">
         {selectedAssetForMaint ? (
           <>
-            <div className="glass-card" style={{ padding: '20px' }}>
-              <h3 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}>
+            <div className="glass-card p-5">
+              <h3 className="mt-0 mb-4 flex items-center gap-2 text-sm">
                 <TrendingDown size={20} color="var(--accent-primary)" /> Depreciation & Value
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Purchase Price</div><div style={{ fontSize: '1.2rem', fontWeight: 700 }}>${selectedAssetForMaint.purchasePrice}</div></div>
-                <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Book Value</div><div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--accent-success)' }}>${calculateBookValue(selectedAssetForMaint)}</div></div>
-                <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Useful Life</div><div>{selectedAssetForMaint.usefulLife} months</div></div>
-                <div><div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Condition</div><div>{selectedAssetForMaint.condition}</div></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Purchase Price</div><div className="text-xl font-bold">${selectedAssetForMaint.purchasePrice}</div></div>
+                <div><div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Book Value</div><div className="text-xl font-bold" style={{ color: 'var(--accent-success)' }}>${calculateBookValue(selectedAssetForMaint)}</div></div>
+                <div><div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Useful Life</div><div>{selectedAssetForMaint.usefulLife} months</div></div>
+                <div><div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Condition</div><div>{selectedAssetForMaint.condition}</div></div>
               </div>
             </div>
 
-            <div className="glass-card" style={{ padding: '20px' }}>
-              <h3 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}>
+            <div className="glass-card p-5">
+              <h3 className="mt-0 mb-4 flex items-center gap-2 text-sm">
                 <PenTool size={20} color="var(--accent-warning)" /> Log Maintenance
               </h3>
-              <form onSubmit={handleAddMaintenance} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <input type="date" required className="form-input" value={maintForm.date} onChange={e => setMaintForm(p => ({...p, date: e.target.value}))} />
-                  <input type="number" required placeholder="Repair Cost ($)" className="form-input" value={maintForm.cost} onChange={e => setMaintForm(p => ({...p, cost: e.target.value}))} />
+              <form onSubmit={handleAddMaintenance} className="flex flex-col gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <input type="date" required className="form-input" value={maintForm.date} onChange={e => setMaintForm(p => ({...p, date: e.target.value}))} aria-label="Maintenance date" />
+                  <input type="number" required placeholder="Repair Cost ($)" className="form-input" value={maintForm.cost} onChange={e => setMaintForm(p => ({...p, cost: e.target.value}))} aria-label="Repair cost" />
                 </div>
-                <input type="text" required placeholder="Vendor / Service Center" className="form-input" value={maintForm.vendor} onChange={e => setMaintForm(p => ({...p, vendor: e.target.value}))} />
-                <textarea required rows={3} placeholder="Describe the issue..." className="form-input" value={maintForm.issue} onChange={e => setMaintForm(p => ({...p, issue: e.target.value}))} />
-                <button type="submit" className="btn btn-filled" style={{ alignSelf: 'flex-start' }}>Log Repair</button>
+                <input type="text" required placeholder="Vendor / Service Center" className="form-input" value={maintForm.vendor} onChange={e => setMaintForm(p => ({...p, vendor: e.target.value}))} aria-label="Vendor" />
+                <textarea required rows={3} placeholder="Describe the issue..." className="form-input" value={maintForm.issue} onChange={e => setMaintForm(p => ({...p, issue: e.target.value}))} aria-label="Issue description" />
+                <button type="submit" className="btn btn-filled self-start" aria-label="Log repair">Log Repair</button>
               </form>
 
               {selectedAssetForMaint.maintenanceLogs?.length > 0 && (
-                <div style={{ marginTop: '24px' }}>
-                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem' }}>Repair History</h4>
+                <div className="mt-6">
+                  <h4 className="mt-0 mb-3 text-sm">Repair History</h4>
                   {selectedAssetForMaint.maintenanceLogs.map(log => (
-                    <div key={log.id} style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', marginBottom: '8px', fontSize: '0.9rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
+                    <div key={log.id} className="p-3 rounded-lg mb-2 text-sm" style={{ background: 'var(--bg-secondary)' }}>
+                      <div className="flex justify-between font-semibold">
                         <span>{log.date} - {log.vendor}</span>
                         <span style={{ color: 'var(--accent-danger)' }}>${log.cost}</span>
                       </div>
-                      <div style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>{log.issue}</div>
+                      <div className="mt-1" style={{ color: 'var(--text-secondary)' }}>{log.issue}</div>
                     </div>
                   ))}
                 </div>
@@ -358,7 +439,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
             </div>
           </>
         ) : (
-          <div className="glass-card" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="glass-card p-10 text-center h-full flex items-center justify-center" style={{ color: 'var(--text-secondary)' }}>
             Select an asset to view depreciation and maintenance.
           </div>
         )}
@@ -372,42 +453,42 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
 
   return (
     <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-      <div className="modal-content glass-card" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px', width: '100%' }}>
-        <h2 style={{ marginTop: 0 }}>Add New Asset</h2>
-        <form onSubmit={handleAddAsset} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      <div className="modal-content glass-card max-w-[600px] w-full" onClick={e => e.stopPropagation()}>
+        <h2 className="mt-0">Add New Asset</h2>
+        <form onSubmit={handleAddAsset} className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="form-group">
               <label>Asset Name</label>
-              <input type="text" className="form-input" required value={newAsset.name} onChange={e => setNewAsset(p => ({...p, name: e.target.value}))} />
+              <input type="text" className="form-input" required value={newAsset.name} onChange={e => setNewAsset(p => ({...p, name: e.target.value}))} aria-label="Asset name" />
             </div>
             <div className="form-group">
               <label>Category</label>
-              <select className="form-input" value={newAsset.category} onChange={e => setNewAsset(p => ({...p, category: e.target.value}))}>
+              <select className="form-input" value={newAsset.category} onChange={e => setNewAsset(p => ({...p, category: e.target.value}))} aria-label="Asset category">
                 <option>Laptop</option><option>Phone</option><option>Monitor</option><option>Peripherals</option><option>Access Card</option>
               </select>
             </div>
             <div className="form-group">
               <label>Serial Number / IMEI</label>
-              <input type="text" className="form-input" required value={newAsset.serialNumber} onChange={e => setNewAsset(p => ({...p, serialNumber: e.target.value}))} />
+              <input type="text" className="form-input" required value={newAsset.serialNumber} onChange={e => setNewAsset(p => ({...p, serialNumber: e.target.value}))} aria-label="Serial number" />
             </div>
             <div className="form-group">
               <label>Purchase Date</label>
-              <input type="date" className="form-input" required value={newAsset.purchaseDate} onChange={e => setNewAsset(p => ({...p, purchaseDate: e.target.value}))} />
+              <input type="date" className="form-input" required value={newAsset.purchaseDate} onChange={e => setNewAsset(p => ({...p, purchaseDate: e.target.value}))} aria-label="Purchase date" />
             </div>
             <div className="form-group">
               <label>Purchase Price ($)</label>
-              <input type="number" className="form-input" required value={newAsset.purchasePrice} onChange={e => setNewAsset(p => ({...p, purchasePrice: e.target.value}))} />
+              <input type="number" className="form-input" required value={newAsset.purchasePrice} onChange={e => setNewAsset(p => ({...p, purchasePrice: e.target.value}))} aria-label="Purchase price" />
             </div>
             <div className="form-group">
               <label>Useful Life (Months)</label>
-              <input type="number" className="form-input" required value={newAsset.usefulLife} onChange={e => setNewAsset(p => ({...p, usefulLife: e.target.value}))} />
+              <input type="number" className="form-input" required value={newAsset.usefulLife} onChange={e => setNewAsset(p => ({...p, usefulLife: e.target.value}))} aria-label="Useful life" />
             </div>
             <div className="form-group">
               <label>Warranty Expiry</label>
-              <input type="date" className="form-input" required value={newAsset.warrantyExpiry} onChange={e => setNewAsset(p => ({...p, warrantyExpiry: e.target.value}))} />
+              <input type="date" className="form-input" required value={newAsset.warrantyExpiry} onChange={e => setNewAsset(p => ({...p, warrantyExpiry: e.target.value}))} aria-label="Warranty expiry" />
             </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' }}>
+          <div className="flex justify-end gap-3 mt-4">
             <button type="button" className="btn btn-tonal" onClick={() => setShowAddModal(false)}>Cancel</button>
             <button type="submit" className="btn btn-filled">Save Asset</button>
           </div>
@@ -418,13 +499,11 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
 }
 
 export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, addLog, addToast, currentUser, simulatedRole }) {
-  const [activeView, setActiveView] = useState('inventory')
+  const [activeView, setActiveView] = useState('dashboard')
 
-  // Search & Filter
   const [search, setSearch] = useState('')
   const [filterCategory, setFilterCategory] = useState('All')
 
-  // Alerts
   const [alerts, setAlerts] = useState([])
 
   useEffect(() => {
@@ -440,7 +519,6 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     setAlerts(expiring)
   }, [assets])
 
-  // --- Add Asset State ---
   const [showAddModal, setShowAddModal] = useState(false)
   useModal(() => setShowAddModal(false))
   const [newAsset, setNewAsset] = useState({ name: '', category: 'Laptop', serialNumber: '', purchaseDate: '', purchasePrice: '', warrantyExpiry: '', usefulLife: 36, condition: 'New' })
@@ -464,7 +542,6 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     setNewAsset({ name: '', category: 'Laptop', serialNumber: '', purchaseDate: '', purchasePrice: '', warrantyExpiry: '', usefulLife: 36, condition: 'New' })
   }
 
-  // --- CSV Import ---
   const fileInputRef = useRef(null)
 
   const triggerFileInput = () => {
@@ -515,7 +592,6 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     reader.readAsText(file)
   }
 
-  // --- Assignment Logic ---
   const [showAssignModal, setShowAssignModal] = useState(false)
   useModal(() => setShowAssignModal(false))
   const [assignTarget, setAssignTarget] = useState(null)
@@ -598,14 +674,12 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     if (asset) addLog('Asset "' + asset.name + '" returned to inventory')
   }
 
-  // --- Requests Logic ---
   const handleRequestAction = (reqId, action) => {
     setAssetRequests(prev => prev.map(r => r.id === reqId ? { ...r, status: action } : r))
     addToast(`Request ${action.toLowerCase()}`, 'info')
     addLog('Asset request ' + action.toLowerCase())
   }
 
-  // --- Maintenance & Depreciation ---
   const [selectedAssetForMaint, setSelectedAssetForMaint] = useState(null)
   const [maintForm, setMaintForm] = useState({ date: '', issue: '', cost: '', vendor: '' })
 
@@ -639,7 +713,13 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     return Math.max(0, bookValue).toFixed(2)
   }
 
-  // Derived data
+  const stats = {
+    total: assets?.length || 0,
+    available: assets?.filter(a => a.status === 'Available').length || 0,
+    assigned: assets?.filter(a => a.status === 'Assigned').length || 0,
+    underRepair: assets?.filter(a => a.status === 'Under Repair').length || 0,
+  }
+
   const filteredAssets = (assets || []).filter(a => {
     const matchesSearch = a.name.toLowerCase().includes(search.toLowerCase()) || a.serialNumber.toLowerCase().includes(search.toLowerCase())
     const matchesCat = filterCategory === 'All' ? true : a.category === filterCategory
@@ -648,6 +728,8 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
 
   const renderView = () => {
     switch (activeView) {
+      case 'dashboard':
+        return <AssetDashboard stats={stats} setActiveView={setActiveView} assets={assets || []} />
       case 'inventory':
         return <AssetInventory filteredAssets={filteredAssets} search={search} setSearch={setSearch} filterCategory={filterCategory} setFilterCategory={setFilterCategory} alerts={alerts} showAddModal={showAddModal} setShowAddModal={setShowAddModal} newAsset={newAsset} setNewAsset={setNewAsset} handleAddAsset={handleAddAsset} triggerFileInput={triggerFileInput} fileInputRef={fileInputRef} handleImportCSV={handleImportCSV} addToast={addToast} />
       case 'assignments':
@@ -657,29 +739,37 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       case 'maintenance':
         return <AssetMaintenance assets={assets} selectedAssetForMaint={selectedAssetForMaint} setSelectedAssetForMaint={setSelectedAssetForMaint} maintForm={maintForm} setMaintForm={setMaintForm} handleAddMaintenance={handleAddMaintenance} calculateBookValue={calculateBookValue} />
       default:
-        return <AssetInventory filteredAssets={filteredAssets} search={search} setSearch={setSearch} filterCategory={filterCategory} setFilterCategory={setFilterCategory} alerts={alerts} showAddModal={showAddModal} setShowAddModal={setShowAddModal} newAsset={newAsset} setNewAsset={setNewAsset} handleAddAsset={handleAddAsset} triggerFileInput={triggerFileInput} fileInputRef={fileInputRef} handleImportCSV={handleImportCSV} addToast={addToast} />
+        return <AssetDashboard stats={stats} setActiveView={setActiveView} assets={assets || []} />
     }
   }
 
   return (
-    <div className="fade-in" style={{ paddingBottom: '40px' }}>
+    <div className="fade-in pb-10">
       <div className="page-header">
         <h1 className="page-title">
           <Monitor size={28} className="page-title-icon" />
           Asset Management
         </h1>
-        <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
-          <button className={`tab-btn ${activeView === 'inventory' ? 'active' : ''}`} style={{ background: activeView === 'inventory' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'inventory' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveView('inventory')}>Inventory</button>
-          <button className={`tab-btn ${activeView === 'assignments' ? 'active' : ''}`} style={{ background: activeView === 'assignments' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'assignments' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveView('assignments')}>Assignments</button>
-          <button className={`tab-btn ${activeView === 'requests' ? 'active' : ''}`} style={{ background: activeView === 'requests' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'requests' ? 'var(--text-primary)' : 'var(--text-secondary)', position: 'relative' }} onClick={() => setActiveView('requests')}>
+        <div className="flex gap-3 overflow-x-auto pb-2" role="tablist">
+          <button className={`tab-btn ${activeView === 'dashboard' ? 'active' : ''}`} role="tab" aria-selected={activeView === 'dashboard'} onClick={() => setActiveView('dashboard')}>Dashboard</button>
+          <button className={`tab-btn ${activeView === 'inventory' ? 'active' : ''}`} role="tab" aria-selected={activeView === 'inventory'} onClick={() => setActiveView('inventory')}>Inventory</button>
+          <button className={`tab-btn ${activeView === 'assignments' ? 'active' : ''}`} role="tab" aria-selected={activeView === 'assignments'} onClick={() => setActiveView('assignments')}>Assignments</button>
+          <button className={`tab-btn ${activeView === 'requests' ? 'active' : ''}`} role="tab" aria-selected={activeView === 'requests'} style={{ position: 'relative' }} onClick={() => setActiveView('requests')}>
             Requests
             {assetRequests?.filter(r => r.status === 'Pending').length > 0 && (
-              <div style={{ position: 'absolute', top: -5, right: -5, background: 'var(--accent-danger)', color: '#fff', fontSize: '0.6rem', padding: '2px 6px', borderRadius: '10px' }}>{assetRequests.filter(r => r.status === 'Pending').length}</div>
+              <span className="badge-count-sm">{assetRequests.filter(r => r.status === 'Pending').length}</span>
             )}
           </button>
-          <button className={`tab-btn ${activeView === 'maintenance' ? 'active' : ''}`} style={{ background: activeView === 'maintenance' ? 'var(--bg-secondary)' : 'transparent', color: activeView === 'maintenance' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveView('maintenance')}>Maintenance</button>
+          <button className={`tab-btn ${activeView === 'maintenance' ? 'active' : ''}`} role="tab" aria-selected={activeView === 'maintenance'} onClick={() => setActiveView('maintenance')}>Maintenance</button>
         </div>
       </div>
+
+      {alerts.length > 0 && activeView === 'dashboard' && (
+        <div className="glass-card p-3 mb-6 flex items-center gap-3" style={{ background: 'var(--accent-warning)', color: '#fff' }}>
+          <AlertTriangle size={20} />
+          <span><strong>Alert:</strong> {alerts.length} asset(s) have warranties expiring within 30 days</span>
+        </div>
+      )}
 
       {renderView()}
 

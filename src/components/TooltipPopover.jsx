@@ -7,6 +7,7 @@ const DELAY = 150
 export default function TooltipPopover({ label, isCollapsed, isDarkMode, children }) {
   const [pos, setPos] = useState(null)
   const [visible, setVisible] = useState(false)
+  const tooltipId = `tooltip-${Math.random().toString(36).slice(2, 9)}`
   const timerRef = useRef(null)
   const mouseRef = useRef({ x: 0, y: 0 })
 
@@ -83,42 +84,26 @@ export default function TooltipPopover({ label, isCollapsed, isDarkMode, childre
       <div
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        style={{ display: 'contents' }}
+        aria-describedby={visible ? tooltipId : undefined}
+        className="contents"
       >
         {children}
       </div>
       {visible && pos && createPortal(
-        <div style={{
-          position: 'fixed',
-          ...pos,
-          zIndex: 9999,
-          pointerEvents: 'none',
-          animation: 'hrp-tooltip-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
-        }}>
-          <div style={{
+        <div id={tooltipId} role="tooltip" className="fixed z-[9999] pointer-events-none"
+          style={{ ...pos, animation: 'hrp-tooltip-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards' }}>
+          <div className="rounded-[10px] px-3.5 py-2 whitespace-nowrap text-[13px] font-medium leading-[18px] relative tracking-tight"
+            style={{
             background: bgColor,
             backdropFilter: 'blur(40px) saturate(250%)',
             WebkitBackdropFilter: 'blur(40px) saturate(250%)',
             border: `1px solid ${borderColor}`,
-            borderRadius: '10px',
-            padding: '8px 14px',
-            whiteSpace: 'nowrap',
-            fontSize: '13px',
-            fontWeight: 500,
-            lineHeight: '18px',
             fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif",
-            letterSpacing: '-0.01em',
             color: textColor,
             boxShadow: shadow,
-            position: 'relative',
           }}>
-            <div style={{
-              position: 'absolute',
-              left: '-6px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: 0,
-              height: 0,
+            <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0 h-0"
+              style={{
               borderTop: '6px solid transparent',
               borderBottom: '6px solid transparent',
               borderRight: `6px solid ${bgColor}`,

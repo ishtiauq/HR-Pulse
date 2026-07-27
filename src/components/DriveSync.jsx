@@ -126,7 +126,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
             position: 'relative'
           }}>
             {driveConnected && (
-              <span className="animate-ping" style={{
+              <span className="animate-ping" role="status" aria-label="Sync active indicator" style={{
                 position: 'absolute',
                 top: '-4px',
                 right: '-4px',
@@ -149,7 +149,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
             )}
             {driveConnected ? <CloudLightning size={28} /> : <CloudOff size={28} />}
           </div>
-          <div>
+          <div role="status" aria-live="polite">
             <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
               {driveConnected ? 'Sync Tunnel Active' : 'Sync Tunnel Paused'}
             </h3>
@@ -182,6 +182,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
             }}
             disabled={isClearing}
             className="btn btn-outline"
+            aria-label="Clear local cache and resync"
             style={{
               borderColor: 'var(--accent-danger)',
               color: 'var(--accent-danger)',
@@ -196,6 +197,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
           </button>
           <button 
             onClick={handleToggleConnection}
+            aria-label={driveConnected ? 'Pause cloud connection' : 'Establish cloud connection'}
             className={`btn ${driveConnected ? 'btn-secondary' : 'btn-primary'}`}
             style={{
               borderColor: driveConnected ? 'var(--accent-warning)' : 'transparent',
@@ -251,6 +253,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
 
           <div style={{ display: 'flex', gap: '12px' }}>
             <button 
+              aria-label="Create backup now"
               className="btn btn-primary" 
               style={{ flex: 1, justifyContent: 'center' }} 
               onClick={handleCreateBackup}
@@ -274,6 +277,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
 
           <div style={{ display: 'flex', gap: '12px' }}>
             <button 
+              aria-label="Simulate drive corruption"
               className="btn btn-secondary" 
               style={{ flex: 1, justifyContent: 'center', borderColor: 'var(--accent-danger)', color: 'var(--accent-danger)' }} 
               onClick={() => {
@@ -322,7 +326,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
           </div>
         </div>
         
-        <div style={{ overflowX: 'auto' }}>
+        <div role="log" aria-live="polite" aria-label="Backup logs" style={{ overflowX: 'auto' }}>
           <table className="table-striped" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
@@ -350,6 +354,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
                   </td>
                   <td style={{ padding: '12px', textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                     <button 
+                      aria-label="Download backup"
                       onClick={() => window.open(`https://drive.google.com/uc?export=download&id=${f.id}`, '_blank')}
                       className="btn btn-secondary" 
                       style={{ padding: '4px 8px', fontSize: '0.75rem', height: 'auto' }}
@@ -358,6 +363,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
                       <Download size={14} />
                     </button>
                     <button 
+                      aria-label="Restore from this backup"
                       onClick={() => setSelectedRestoreBackup(f)}
                       className="btn" 
                       style={{ padding: '4px 8px', fontSize: '0.75rem', height: 'auto', background: 'var(--accent-warning)', color: '#fff' }}
@@ -392,6 +398,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
               </p>
               <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
                 <button 
+                  aria-label="Cancel restore"
                   className="btn btn-secondary" 
                   style={{ flex: 1 }} 
                   onClick={() => setSelectedRestoreBackup(null)}
@@ -400,6 +407,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
                   Cancel
                 </button>
                 <button 
+                  aria-label={isRestoring ? 'Restoring' : 'Confirm overwrite data'}
                   className="btn btn-danger" 
                   style={{ flex: 1 }}
                   onClick={handleExecuteRestore}
@@ -425,7 +433,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
             </span>
           </div>
         </div>
-        <button onClick={handleTestConnection} className="btn btn-secondary" style={{ whiteSpace: 'nowrap' }}>
+        <button aria-label="Test Google Drive connection" onClick={handleTestConnection} className="btn btn-secondary" style={{ whiteSpace: 'nowrap' }}>
           Test Connection
         </button>
       </div>
