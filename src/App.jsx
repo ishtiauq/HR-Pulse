@@ -83,7 +83,7 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  const { showCommandPalette, setShowCommandPalette, commandSearch, setCommandSearch, paletteIndex, setPaletteIndex, filteredItems, selectPaletteItem, getCategoryIcon } = useCommandPalette({
+  const { showCommandPalette, setShowCommandPalette, commandSearch, setCommandSearch, paletteIndex, setPaletteIndex, filteredItems, selectPaletteItem, getCategoryIcon, ConfirmDialog } = useCommandPalette({
     user, employees: appData.employees, themeMode, toggleTheme, setCurrentView, addToast, setSelectedEmployeeId
   })
 
@@ -220,6 +220,7 @@ export default function App() {
         selectPaletteItem={selectPaletteItem}
         getCategoryIcon={getCategoryIcon}
       />
+      <ConfirmDialog />
     </div>
   )
 }

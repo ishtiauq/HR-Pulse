@@ -1,10 +1,17 @@
 import { useState, useRef, useMemo } from 'react'
 import { Receipt, Plus, Upload, Check, X as XIcon, Clock, DollarSign, Filter, Search, Download, AlertTriangle, PieChart as PieChartIcon } from 'lucide-react'
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+import { Select, SelectItem } from "@/components/ui/select"
 import AdSlot from './AdSlot'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
 export default function Expenses({ employees, expenses, setExpenses, settings, addLog, addToast, addAuditLog, simulatedRole }) {
-  const [activeTab, setActiveTab] = useState('submit') // submit, approve, finance
+  const [activeTab, setActiveTab] = useState('submit')
 
   // Employee Submission States
   const [category, setCategory] = useState('Travel')
@@ -13,7 +20,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
   const [date, setDate] = useState('')
   const [description, setDescription] = useState('')
   const [receiptBase64, setReceiptBase64] = useState(null)
-  
+
   // Manager Approval States
   const [selectedExpenses, setSelectedExpenses] = useState([])
   const [rejectReasonModal, setRejectReasonModal] = useState({ open: false, id: null, reason: '' })
@@ -46,7 +53,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
 
     const newExpense = {
       id: `EXP-${Date.now()}`,
-      employeeId: 'EMP-101', // Mocking current user ID
+      employeeId: 'EMP-101',
       category,
       amount: Number(amount),
       currency,
@@ -61,8 +68,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
     setExpenses(prev => [newExpense, ...prev])
     addAuditLog('CREATE', 'Expense', `Submitted ${currency} ${amount} for ${category}`)
     addToast('Expense submitted for approval.', 'success')
-    
-    // Reset form
+
     setAmount('')
     setDescription('')
     setDate('')
@@ -128,7 +134,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
   // Derived Data
   const pendingQueue = expenses.filter(e => e.status === 'Pending')
   const approvedQueue = expenses.filter(e => e.status === 'Approved')
-  
+
   const pendingLiability = pendingQueue.reduce((acc, curr) => acc + (curr.usdAmount || (curr.amount * exchangeRates[curr.currency])), 0)
   const approvedLiability = approvedQueue.reduce((acc, curr) => acc + (curr.usdAmount || (curr.amount * exchangeRates[curr.currency])), 0)
 
@@ -149,7 +155,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
 
   return (
     <div className="animate-fade-in flex flex-col gap-4 sm:gap-6 lg:gap-8">
-      
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
@@ -157,186 +163,174 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
           Expenses
         </h1>
         <div className="flex gap-3">
-          <button className={`btn ${activeTab === 'submit' ? 'btn-primary' : 'btn-secondary'}`} aria-label="Submit expense" onClick={() => setActiveTab('submit')}>
+          <Button variant={activeTab === 'submit' ? 'default' : 'secondary'} size="sm" aria-label="Submit expense" onClick={() => setActiveTab('submit')}>
             <Plus size={16} /> Submit
-          </button>
+          </Button>
           {canApprove && (
-            <button className={`btn ${activeTab === 'approve' ? 'btn-primary' : 'btn-secondary'}`} aria-label="Approvals" onClick={() => setActiveTab('approve')}>
+            <Button variant={activeTab === 'approve' ? 'default' : 'secondary'} size="sm" aria-label="Approvals" onClick={() => setActiveTab('approve')}>
               <Clock size={16} /> Approvals
               {pendingQueue.length > 0 && (
-                <span role="status" style={{ background: 'var(--accent-danger)', color: '#fff', borderRadius: '50%', padding: '2px 6px', fontSize: '0.7rem', marginLeft: '4px' }}>
-                  {pendingQueue.length}
-                </span>
+                <Badge variant="destructive" className="ml-1">{pendingQueue.length}</Badge>
               )}
-            </button>
+            </Button>
           )}
           {canReimburse && (
-            <button className={`btn ${activeTab === 'finance' ? 'btn-primary' : 'btn-secondary'}`} aria-label="Finance" onClick={() => setActiveTab('finance')}>
+            <Button variant={activeTab === 'finance' ? 'default' : 'secondary'} size="sm" aria-label="Finance" onClick={() => setActiveTab('finance')}>
               <PieChartIcon size={16} /> Finance
-            </button>
+            </Button>
           )}
         </div>
       </div>
-      <hr className="border-border my-0" />
+      <div className="border-t border-border" />
 
       {/* Tabs Content */}
       {activeTab === 'submit' && (
-        <div className="glass-card p-8 max-w-[600px]">
-          <h3 className="text-xl mb-6 flex items-center gap-2">
-            <Receipt size={20} style={{ color: 'var(--accent-primary)' }} />
-            New Expense Claim
-          </h3>
-          
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <div className="flex gap-4">
-              <div className="flex-1 flex flex-col gap-1.5">
-                <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Category</label>
-                <select aria-label="Expense category" value={category} onChange={e => setCategory(e.target.value)} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg outline-none" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
-                  {expenseCategories.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div className="flex-1 flex flex-col gap-1.5">
-                <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Date</label>
-                <input type="date" value={date} onChange={e => setDate(e.target.value)} required aria-label="Expense date" className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg outline-none" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }} />
-              </div>
-            </div>
+        <Card className="max-w-[600px]">
+          <CardContent className="p-8">
+            <h3 className="text-xl mb-6 flex items-center gap-2 text-foreground">
+              <Receipt size={20} className="text-primary" />
+              New Expense Claim
+            </h3>
 
-            <div className="flex gap-4">
-              <div className="flex-[2] flex flex-col gap-1.5">
-                <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Amount</label>
-                <input type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} required placeholder="0.00" aria-label="Expense amount" className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg outline-none" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }} />
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              <div className="flex gap-4">
+                <div className="flex-1 flex flex-col gap-1.5">
+                  <Select label="Category" value={category} onChange={setCategory}>
+                    {expenseCategories.map(c => <SelectItem key={c} id={c}>{c}</SelectItem>)}
+                  </Select>
+                </div>
+                <div className="flex-1 flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-muted-foreground">Date</label>
+                  <Input type="date" value={date} onChange={e => setDate(e.target.value)} required aria-label="Expense date" />
+                </div>
               </div>
-              <div className="flex-1 flex flex-col gap-1.5">
-                <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Currency</label>
-                <select aria-label="Currency" value={currency} onChange={e => setCurrency(e.target.value)} className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg outline-none" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
-                  {currencies.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+
+              <div className="flex gap-4">
+                <div className="flex-[2] flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-muted-foreground">Amount</label>
+                  <Input type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} required placeholder="0.00" aria-label="Expense amount" />
+                </div>
+                <div className="flex-1 flex flex-col gap-1.5">
+                  <Select label="Currency" value={currency} onChange={setCurrency}>
+                    {currencies.map(c => <SelectItem key={c} id={c}>{c}</SelectItem>)}
+                  </Select>
+                </div>
               </div>
-            </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Description</label>
-              <textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Briefly describe the expense..." rows={3} aria-label="Expense description" className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg outline-none resize-y" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}></textarea>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Receipt (Image/PDF)</label>
-              <input type="file" accept="image/*,.pdf" ref={fileInputRef} onChange={handleReceiptUpload} className="hidden" />
-              <div 
-                onClick={() => fileInputRef.current.click()}
-                className="p-6 sm:p-8"
-                style={{
-                  border: '2px dashed var(--border-color)',
-                  borderRadius: '12px',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  background: 'var(--bg-secondary)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '8px',
-                  transition: 'background-color 0.2s, border-color 0.2s'
-                }}
-              >
-                {receiptBase64 ? (
-                  <img src={receiptBase64} alt="Receipt" className="max-h-[100px] rounded-lg object-contain" />
-                ) : (
-                  <>
-                    <Upload size={24} style={{ color: 'var(--text-secondary)' }} />
-                    <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Click to upload receipt</span>
-                  </>
-                )}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-muted-foreground">Description</label>
+                <textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Briefly describe the expense..." rows={3} aria-label="Expense description" className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-xs sm:text-sm font-medium shadow-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-y" />
               </div>
-            </div>
 
-            <button type="submit" className="btn btn-primary mt-3 p-3 sm:p-3.5 justify-center">
-              Submit for Approval
-            </button>
-          </form>
-        </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-muted-foreground">Receipt (Image/PDF)</label>
+                <input type="file" accept="image/*,.pdf" ref={fileInputRef} onChange={handleReceiptUpload} className="hidden" />
+                <div
+                  onClick={() => fileInputRef.current.click()}
+                  className="p-6 sm:p-8 rounded-xl border-2 border-dashed border-border bg-muted/30 text-center cursor-pointer flex flex-col items-center gap-2 transition-colors hover:border-primary hover:bg-muted/50"
+                >
+                  {receiptBase64 ? (
+                    <img src={receiptBase64} alt="Receipt" className="max-h-[100px] rounded-lg object-contain" />
+                  ) : (
+                    <>
+                      <Upload size={24} className="text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Click to upload receipt</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <Button type="submit" size="lg" className="mt-3 justify-center">
+                Submit for Approval
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       )}
 
       {activeTab === 'approve' && canApprove && (
         <div className="flex flex-col gap-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold">Approval Queue</h3>
+            <h3 className="text-xl font-semibold text-foreground">Approval Queue</h3>
             {selectedExpenses.length > 0 && (
-              <button className="btn btn-primary" onClick={handleBulkApprove}>
+              <Button variant="default" size="sm" onClick={handleBulkApprove}>
                 <Check size={16} /> Bulk Approve ({selectedExpenses.length})
-              </button>
+              </Button>
             )}
           </div>
 
-          <div className="glass-card overflow-hidden">
-            <div className="overflow-x-auto">
-              <table role="table" className="data-table table-striped w-full text-left border-collapse">
-                <thead>
-                  <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <th className="p-4"><input type="checkbox" aria-label="Select all" onChange={(e) => setSelectedExpenses(e.target.checked ? pendingQueue.map(q => q.id) : [])} checked={selectedExpenses.length === pendingQueue.length && pendingQueue.length > 0} /></th>
-                    <th className="p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>Employee</th>
-                    <th className="p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>Details</th>
-                    <th className="p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>Amount</th>
-                    <th className="p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>Receipt</th>
-                    <th className="p-4 text-sm text-right" style={{ color: 'var(--text-secondary)' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingQueue.length === 0 ? (
-                    <tr><td colSpan="6" className="p-8 text-center" style={{ color: 'var(--text-muted)' }}>No pending expenses.</td></tr>
-                  ) : (
-                    pendingQueue.map(exp => {
-                      const emp = employees.find(e => e.id === exp.employeeId)
-                      const isOverLimit = policies[exp.category] && (exp.usdAmount || (exp.amount * exchangeRates[exp.currency])) > policies[exp.category]
+          <Card>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="p-4"><input type="checkbox" aria-label="Select all" onChange={(e) => setSelectedExpenses(e.target.checked ? pendingQueue.map(q => q.id) : [])} checked={selectedExpenses.length === pendingQueue.length && pendingQueue.length > 0} /></TableHead>
+                      <TableHead className="p-4">Employee</TableHead>
+                      <TableHead className="p-4">Details</TableHead>
+                      <TableHead className="p-4">Amount</TableHead>
+                      <TableHead className="p-4">Receipt</TableHead>
+                      <TableHead className="p-4 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pendingQueue.length === 0 ? (
+                      <TableRow><TableCell colSpan="6" className="p-8 text-center text-muted-foreground">No pending expenses.</TableCell></TableRow>
+                    ) : (
+                      pendingQueue.map(exp => {
+                        const emp = employees.find(e => e.id === exp.employeeId)
+                        const isOverLimit = policies[exp.category] && (exp.usdAmount || (exp.amount * exchangeRates[exp.currency])) > policies[exp.category]
 
-                      return (
-                        <tr key={exp.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }}>
-                          <td className="p-4"><input type="checkbox" checked={selectedExpenses.includes(exp.id)} onChange={() => handleToggleSelect(exp.id)} /></td>
-                          <td className="p-4">
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <img src={emp?.avatar || `https://ui-avatars.com/api/?name=${emp?.name}`} alt="" className="w-8 h-8 rounded-full object-cover" />
-                              <div>
-                                <div className="font-semibold text-sm">{emp?.name}</div>
-                                <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{exp.id}</div>
+                        return (
+                          <TableRow key={exp.id}>
+                            <TableCell className="p-4"><input type="checkbox" checked={selectedExpenses.includes(exp.id)} onChange={() => handleToggleSelect(exp.id)} /></TableCell>
+                            <TableCell className="p-4">
+                              <div className="flex items-center gap-3">
+                                <img src={emp?.avatar || `https://ui-avatars.com/api/?name=${emp?.name}`} alt="" className="w-8 h-8 rounded-full object-cover" />
+                                <div>
+                                  <div className="font-semibold text-sm text-foreground">{emp?.name}</div>
+                                  <div className="text-xs text-muted-foreground">{exp.id}</div>
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{exp.category}</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{exp.date} • {exp.description}</div>
-                          </td>
-                          <td className="p-4">
-                            <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{exp.currency} {exp.amount.toFixed(2)}</div>
-                            {isOverLimit && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent-warning)', fontSize: '0.75rem', marginTop: '4px' }}>
-                                <AlertTriangle size={12} /> Over limit (${policies[exp.category]})
+                            </TableCell>
+                            <TableCell className="p-4">
+                              <div className="font-semibold text-[0.9rem] text-foreground">{exp.category}</div>
+                              <div className="text-[0.8rem] text-muted-foreground">{exp.date} • {exp.description}</div>
+                            </TableCell>
+                            <TableCell className="p-4">
+                              <div className="font-bold text-[0.95rem] text-foreground">{exp.currency} {exp.amount.toFixed(2)}</div>
+                              {isOverLimit && (
+                                <div className="flex items-center gap-1 text-amber-500 text-[0.75rem] mt-1">
+                                  <AlertTriangle size={12} /> Over limit (${policies[exp.category]})
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell className="p-4">
+                              {exp.receipt ? (
+                                <img src={exp.receipt} alt="Receipt" className="w-10 h-10 rounded-md object-cover border border-border" />
+                              ) : (
+                                <span className="text-xs text-muted-foreground">None</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="p-4 text-right">
+                              <div className="flex gap-2 justify-end">
+                                <Button variant="ghost" size="icon-xs" aria-label="Approve" onClick={() => handleApprove(exp.id)} className="text-emerald-500 hover:text-emerald-600" title="Approve">
+                                  <Check size={16} />
+                                </Button>
+                                <Button variant="ghost" size="icon-xs" aria-label="Reject" onClick={() => setRejectReasonModal({ open: true, id: exp.id, reason: '' })} className="text-destructive hover:text-destructive" title="Reject">
+                                  <XIcon size={16} />
+                                </Button>
                               </div>
-                            )}
-                          </td>
-                          <td className="p-4">
-                            {exp.receipt ? (
-                              <img src={exp.receipt} alt="Receipt" className="w-10 h-10 rounded-md object-cover" style={{ border: '1px solid var(--border-color)' }} />
-                            ) : (
-                              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>None</span>
-                            )}
-                          </td>
-                          <td className="p-4 text-right">
-                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                              <button aria-label="Approve" onClick={() => handleApprove(exp.id)} className="border-0 p-1.5 rounded-md cursor-pointer" style={{ background: 'rgba(16,185,129,0.1)', color: 'var(--accent-success)' }} title="Approve">
-                                <Check size={16} />
-                              </button>
-                              <button aria-label="Reject" onClick={() => setRejectReasonModal({ open: true, id: exp.id, reason: '' })} className="border-0 p-1.5 rounded-md cursor-pointer" style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--accent-danger)' }} title="Reject">
-                                <XIcon size={16} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
@@ -344,105 +338,109 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
         <div className="flex flex-col gap-6">
           {/* Finance Metrics */}
           <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">
-            <div className="glass-card p-6 flex flex-col justify-center">
-              <h3 className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>Pending Liability</h3>
-              <div className="text-4xl font-bold flex items-center gap-2" style={{ color: 'var(--accent-warning)' }}>
-                <DollarSign size={32} />
-                {pendingLiability.toFixed(2)}
-              </div>
-              <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>Total pending reimbursements (in USD)</p>
-            </div>
+            <Card>
+              <CardContent className="p-6 flex flex-col justify-center">
+                <h3 className="text-sm mb-2 text-muted-foreground">Pending Liability</h3>
+                <div className="text-4xl font-bold flex items-center gap-2 text-amber-500">
+                  <DollarSign size={32} />
+                  {pendingLiability.toFixed(2)}
+                </div>
+                <p className="text-xs mt-2 text-muted-foreground">Total pending reimbursements (in USD)</p>
+              </CardContent>
+            </Card>
 
-            <div className="glass-card p-5 sm:p-6 lg:p-8">
-              <h3 className="text-base mb-4">Expenses by Category</h3>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={categoryTotals} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5}>
-                      {categoryTotals.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
-                    </Pie>
-                    <Tooltip contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px' }} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+            <Card>
+              <CardContent className="p-5 sm:p-6 lg:p-8">
+                <h3 className="text-base mb-4 text-foreground font-semibold">Expenses by Category</h3>
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={categoryTotals} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5}>
+                        {categoryTotals.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip contentStyle={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Approved & Waiting for Reimbursement Table */}
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold">Ready for Reimbursement</h3>
-            <button className="btn btn-secondary" onClick={exportCSV}>
+            <h3 className="text-xl font-semibold text-foreground">Ready for Reimbursement</h3>
+            <Button variant="secondary" size="sm" onClick={exportCSV}>
               <Download size={16} /> Export CSV
-            </button>
+            </Button>
           </div>
 
-          <div className="glass-card overflow-hidden">
-            <div className="overflow-x-auto">
-              <table role="table" className="data-table table-striped w-full text-left border-collapse">
-                <thead>
-                  <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <th className="p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>Employee</th>
-                    <th className="p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>Category</th>
-                    <th className="p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>Amount</th>
-                    <th className="p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>Status</th>
-                    <th className="p-4 text-sm text-right" style={{ color: 'var(--text-secondary)' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {approvedQueue.length === 0 ? (
-                    <tr><td colSpan="5" className="p-8 text-center" style={{ color: 'var(--text-muted)' }}>No approved expenses waiting for reimbursement.</td></tr>
-                  ) : (
-                    approvedQueue.map(exp => {
-                      const emp = employees.find(e => e.id === exp.employeeId)
-                      return (
-                        <tr key={exp.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }}>
-                          <td className="p-4">
-                            <div className="font-semibold text-sm">{emp?.name}</div>
-                            <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{exp.id}</div>
-                          </td>
-                          <td className="p-4 text-sm">{exp.category}</td>
-                          <td className="p-4 font-semibold">{exp.currency} {exp.amount.toFixed(2)}</td>
-                          <td className="p-4">
-                            <span role="status" style={{ background: 'rgba(59,130,246,0.1)', color: 'var(--accent-primary)', padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 600 }}>
-                              Approved
-                            </span>
-                          </td>
-                          <td className="p-4" style={{ textAlign: 'right' }}>
-                            <button className="btn btn-primary px-3 py-1.5 text-xs" onClick={() => handleMarkReimbursed(exp.id)}>
-                              Mark Reimbursed
-                            </button>
-                          </td>
-                        </tr>
-                      )
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <Card>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="p-4">Employee</TableHead>
+                      <TableHead className="p-4">Category</TableHead>
+                      <TableHead className="p-4">Amount</TableHead>
+                      <TableHead className="p-4">Status</TableHead>
+                      <TableHead className="p-4 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {approvedQueue.length === 0 ? (
+                      <TableRow><TableCell colSpan="5" className="p-8 text-center text-muted-foreground">No approved expenses waiting for reimbursement.</TableCell></TableRow>
+                    ) : (
+                      approvedQueue.map(exp => {
+                        const emp = employees.find(e => e.id === exp.employeeId)
+                        return (
+                          <TableRow key={exp.id}>
+                            <TableCell className="p-4">
+                              <div className="font-semibold text-sm text-foreground">{emp?.name}</div>
+                              <div className="text-xs text-muted-foreground">{exp.id}</div>
+                            </TableCell>
+                            <TableCell className="p-4 text-sm text-foreground">{exp.category}</TableCell>
+                            <TableCell className="p-4 font-semibold text-foreground">{exp.currency} {exp.amount.toFixed(2)}</TableCell>
+                            <TableCell className="p-4">
+                              <Badge variant="outline" className="bg-primary/10 text-primary border-0">Approved</Badge>
+                            </TableCell>
+                            <TableCell className="p-4 text-right">
+                              <Button variant="default" size="sm" className="text-xs" onClick={() => handleMarkReimbursed(exp.id)}>
+                                Mark Reimbursed
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
       {/* Reject Reason Modal */}
-      {rejectReasonModal.open && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="glass-card animate-fade-in p-5 sm:p-6 lg:p-8 w-full max-w-[400px]">
-            <h3 className="mt-0 mb-4">Reject Expense</h3>
-            <textarea 
-              value={rejectReasonModal.reason}
-              onChange={e => setRejectReasonModal(prev => ({ ...prev, reason: e.target.value }))}
-              placeholder="Provide a reason for rejection..."
-              rows={4}
-              className="p-3" style={{ width: '100%', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', outline: 'none', resize: 'vertical' }}
-            />
-            <div className="flex justify-end gap-3 mt-5">
-              <button className="btn btn-secondary" onClick={() => setRejectReasonModal({ open: false, id: null, reason: '' })}>Cancel</button>
-              <button className="btn btn-primary" style={{ background: 'var(--accent-danger)' }} onClick={handleReject}>Confirm Reject</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog open={rejectReasonModal.open} onOpenChange={(open) => { if (!open) setRejectReasonModal({ open: false, id: null, reason: '' }) }}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Reject Expense</DialogTitle>
+          </DialogHeader>
+          <textarea
+            value={rejectReasonModal.reason}
+            onChange={e => setRejectReasonModal(prev => ({ ...prev, reason: e.target.value }))}
+            placeholder="Provide a reason for rejection..."
+            rows={4}
+            className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-xs sm:text-sm font-medium shadow-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-y"
+          />
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setRejectReasonModal({ open: false, id: null, reason: '' })}>Cancel</Button>
+            <Button variant="destructive" onClick={handleReject}>Confirm Reject</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <AdSlot />
     </div>
   )

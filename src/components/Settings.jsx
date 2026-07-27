@@ -3,17 +3,17 @@ import { Save, Settings as SettingsIcon, DollarSign, Sliders, Info, Percent, Bui
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDateTime } from '../services/date.js'
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectItem } from "@/components/ui/select"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 
-const SEG_COLORS = ['#0062E6', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14', '#20c997', '#e83e8c', '#17a2b8', '#6610f2']
-const getSegmentColor = (item, index) => item.type === 'deduction' ? '#dc3545' : SEG_COLORS[index % SEG_COLORS.length]
+
 
 export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, simulatedRole, syncConflicts, setSyncConflicts }) {
   const [activeSubmenu, setActiveSubmenu] = useState(() => localStorage.getItem('hr_pulse_settings_tab') || null)
@@ -169,16 +169,15 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               <CardDescription>Select the currency symbol applied globally across dashboards and receipts.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="relative w-full max-w-[260px]">
-                <select className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none" value={currency} onChange={e => setCurrency(e.target.value)}>
-                  <option value="$">$ (USD)</option>
-                  <option value="৳">৳ (BDT)</option>
-                  <option value="€">€ (EUR)</option>
-                  <option value="£">£ (GBP)</option>
-                  <option value="₹">₹ (INR)</option>
-                  <option value="¥">¥ (JPY)</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-3 h-4 w-4 opacity-50" />
+              <div className="w-full max-w-[260px]">
+                <Select value={currency} onChange={setCurrency} placeholder="$ (USD)">
+                  <SelectItem id="$">$ (USD)</SelectItem>
+                  <SelectItem id="৳">৳ (BDT)</SelectItem>
+                  <SelectItem id="€">€ (EUR)</SelectItem>
+                  <SelectItem id="£">£ (GBP)</SelectItem>
+                  <SelectItem id="₹">₹ (INR)</SelectItem>
+                  <SelectItem id="¥">¥ (JPY)</SelectItem>
+                </Select>
               </div>
             </CardContent>
           </Card>
@@ -197,21 +196,6 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
               {isOver100 && (
                 <div className="p-3 bg-red-100 text-red-900 border border-red-200 rounded-lg flex items-center gap-2 text-sm">
                   <Info className="h-4 w-4" /> Component total exceeds 100%. Please adjust before saving.
-                </div>
-              )}
-
-              {salaryStructure.length > 0 && (
-                <div className="py-2 flex justify-center">
-                  <ResponsiveContainer width="100%" height={200}>
-                    <PieChart>
-                      <Pie data={salaryStructure.map(item => ({ ...item, value: item.percentage }))}
-                        cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={2}>
-                        {salaryStructure.map((item, index) => (
-                          <Cell key={item.id} fill={getSegmentColor(item, index)} stroke="none" />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
                 </div>
               )}
 
@@ -436,16 +420,12 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 <Input type="date" value={auditFilterDate} onChange={e => setAuditFilterDate(e.target.value)} />
               </div>
               <div className="flex-1 min-w-[140px] flex flex-col gap-2">
-                <label className="text-xs font-medium text-muted-foreground uppercase">Action Type</label>
-                <div className="relative">
-                  <select className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm appearance-none" value={auditFilterAction} onChange={e => setAuditFilterAction(e.target.value)}>
-                    <option value="All">All Actions</option>
-                    <option value="CREATE">CREATE</option>
-                    <option value="UPDATE">UPDATE</option>
-                    <option value="DELETE">DELETE</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-3 h-4 w-4 opacity-50" />
-                </div>
+                <Select label="ACTION TYPE" value={auditFilterAction} onChange={setAuditFilterAction}>
+                  <SelectItem id="All">All Actions</SelectItem>
+                  <SelectItem id="CREATE">CREATE</SelectItem>
+                  <SelectItem id="UPDATE">UPDATE</SelectItem>
+                  <SelectItem id="DELETE">DELETE</SelectItem>
+                </Select>
               </div>
               <Button variant="ghost" onClick={() => { setAuditFilterDate(''); setAuditFilterAction('All') }}>Clear</Button>
             </div>
@@ -602,7 +582,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           </Button>
         </div>
       </div>
-      <hr className="border-border my-0" />
+      <div className="border-t border-border" />
 
       <div className="flex flex-col gap-4">
         {menuItems.map(item => {
@@ -677,18 +657,18 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
       </Dialog>
 
       {/* Reset Modal */}
-      <Dialog open={showResetModal} onOpenChange={setShowResetModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirm Reset</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground py-2">Are you sure? This will reset all settings in the active tab to their default values.</p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowResetModal(false)}>Cancel</Button>
-            <Button onClick={() => { setShowResetModal(false); if (addToast) addToast('Settings reset to defaults', 'info') }}>Reset Defaults</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AlertDialog open={showResetModal} onOpenChange={setShowResetModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset Settings?</AlertDialogTitle>
+            <AlertDialogDescription>This will reset all settings in the active tab to their default values.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowResetModal(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setShowResetModal(false); if (addToast) addToast('Settings reset to defaults', 'info') }}>Reset Defaults</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

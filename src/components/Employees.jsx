@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Select, SelectItem } from "@/components/ui/select"
 
 
 
@@ -455,7 +456,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
           </Button>
         </div>
       </div>
-      <hr className="border-border my-0" />
+      <div className="border-t border-border" />
 
       {/* Filters Toolbar */}
       <Card className="border-none shadow-sm bg-card">
@@ -609,21 +610,6 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                     </Badge>
                   </div>
 
-                  {/* Expand Toggle */}
-                  <div className="flex justify-center mt-3 -mb-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-6 w-full hover:bg-muted/50 rounded-md"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setExpandedCardId(prev => prev === emp.id ? null : emp.id);
-                      }}
-                    >
-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
-                    </Button>
-                  </div>
-
                   {/* Expanded Content */}
                   <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[300px] opacity-100 mt-3 pt-3 border-t border-border' : 'max-h-0 opacity-0'}`}>
                     <div className="flex flex-col gap-2 text-xs text-muted-foreground">
@@ -660,6 +646,21 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                         </Button>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Expand Toggle — always at the bottom of the card */}
+                  <div className="flex justify-center mt-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-full hover:bg-muted/50 rounded-md"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedCardId(prev => prev === emp.id ? null : emp.id);
+                      }}
+                    >
+                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -882,14 +883,11 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                 <input id="cv-file-input" type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={(e) => e.target.files && setNewCvFileName(e.target.files[0].name)} />
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Employment Status</label>
-                <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                  <option value="Active">Active</option>
-                  <option value="On Leave">On Leave</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-              </div>
+              <Select label="Employment Status" value={newStatus} onChange={setNewStatus}>
+                <SelectItem id="Active">Active</SelectItem>
+                <SelectItem id="On Leave">On Leave</SelectItem>
+                <SelectItem id="Inactive">Inactive</SelectItem>
+              </Select>
             </div>
 
             <DialogFooter className="mt-4 border-t pt-4">

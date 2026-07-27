@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Clock, CalendarDays, ArrowUpDown, Cpu } from 'lucide-react'
-import { tabChip } from '../../services/attendance.js'
+import { Button } from "@/components/ui/button"
 import ClockWidget from './ClockWidget.jsx'
 import DailyLogs from './DailyLogs.jsx'
 import LeaveRequests from './LeaveRequests.jsx'
@@ -17,20 +17,38 @@ export default function AttendancePage({ employees, attendance, setAttendance, r
     { id: 'roster', label: 'Roster', icon: ArrowUpDown },
     { id: 'overtime', label: 'Overtime', icon: Cpu },
   ]
+
   return (
-    <div className="animate-fade-in flex flex-col gap-4 sm:gap-6 lg:gap-8">
-      <h1 className="headline-small m-0" style={{ color: 'var(--md-bw-on-surface)' }}>Attendance & Leaves</h1>
+    <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+          <CalendarDays size={20} className="text-primary" />
+          Attendance & Leaves
+        </h1>
+      </div>
+      <div className="border-t border-border" />
+
       <ClockWidget employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />
+
       <div role="tablist" aria-label="Attendance sections" className="flex gap-2 flex-wrap">
         {tabs.map(t => {
           const Icon = t.icon
           return (
-            <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)} style={tabChip(tab === t.id)}>
+            <Button
+              key={t.id}
+              role="tab"
+              aria-selected={tab === t.id}
+              variant={tab === t.id ? 'default' : 'outline'}
+              size="sm"
+              className="rounded-full"
+              onClick={() => setTab(t.id)}
+            >
               <Icon size={15} /> {t.label}
-            </button>
+            </Button>
           )
         })}
       </div>
+
       {tab === 'daily' && <DailyLogs employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />}
       {tab === 'leave' && (
         <div className="flex flex-col gap-5">

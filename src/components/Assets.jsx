@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+import { Select, SelectItem } from "@/components/ui/select"
 
 const categoryIcons = {
   'Laptop': <Laptop className="w-4 h-4" />,
@@ -349,15 +350,11 @@ function AssignAssetModal({ showAssignModal, setShowAssignModal, assignTarget, a
         </DialogHeader>
         
         <form onSubmit={handleAssignAsset} className="flex flex-col gap-4 py-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium">Select Employee</label>
-            <select className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" required value={assignForm.employeeId} onChange={e => setAssignForm(p => ({...p, employeeId: e.target.value}))}>
-              <option value="">-- Choose Employee --</option>
-              {employees.map(emp => (
-                <option key={emp.id} value={emp.id}>{emp.name} ({emp.department})</option>
-              ))}
-            </select>
-          </div>
+          <Select label="Select Employee" value={assignForm.employeeId} onChange={(val) => setAssignForm(p => ({...p, employeeId: val}))} placeholder="-- Choose Employee --">
+            {employees.map(emp => (
+              <SelectItem key={emp.id} id={emp.id}>{emp.name} ({emp.department})</SelectItem>
+            ))}
+          </Select>
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium">Condition Notes</label>
             <Input type="text" value={assignForm.notes} onChange={e => setAssignForm(p => ({...p, notes: e.target.value}))} />
@@ -575,12 +572,13 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
               <label className="text-sm font-medium">Asset Name</label>
               <Input type="text" required placeholder="e.g. MacBook Pro M3" value={newAsset.name} onChange={e => setNewAsset(p => ({...p, name: e.target.value}))} />
             </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium">Category</label>
-              <select className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" value={newAsset.category} onChange={e => setNewAsset(p => ({...p, category: e.target.value}))}>
-                <option>Laptop</option><option>Phone</option><option>Monitor</option><option>Peripherals</option><option>Access Card</option>
-              </select>
-            </div>
+            <Select label="Category" value={newAsset.category} onChange={(val) => setNewAsset(p => ({...p, category: val}))}>
+              <SelectItem id="Laptop">Laptop</SelectItem>
+              <SelectItem id="Phone">Phone</SelectItem>
+              <SelectItem id="Monitor">Monitor</SelectItem>
+              <SelectItem id="Peripherals">Peripherals</SelectItem>
+              <SelectItem id="Access Card">Access Card</SelectItem>
+            </Select>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">Serial Number / IMEI</label>
               <Input type="text" required placeholder="SN12345678" value={newAsset.serialNumber} onChange={e => setNewAsset(p => ({...p, serialNumber: e.target.value}))} />
@@ -859,7 +857,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
           Asset Management
         </h1>
       </div>
-      <hr className="border-border my-0" />
+      <div className="border-t border-border" />
       
       <div className="flex gap-2 overflow-x-auto pb-2 border-b border-border w-full max-w-full">
         {['inventory', 'assignments', 'requests', 'maintenance'].map(view => (

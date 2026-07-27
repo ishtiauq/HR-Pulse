@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, AlertTriangle, Upload } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
+import { Select, SelectItem } from "@/components/ui/select"
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -514,15 +515,11 @@ function AttendanceView({
               <input type="date" required value={swapDate} onChange={(e) => setSwapDate(e.target.value)} aria-label="Swap date" className="px-3.5 py-2.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
             </div>
             
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Colleague to Swap With</label>
-              <select required value={swapColleague} onChange={(e) => setSwapColleague(e.target.value)} aria-label="Colleague to swap with" className="px-3.5 py-2.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
-                <option value="">Select Colleague...</option>
-                {employees?.filter(e => e.id !== currentUser.id && e.department === currentUser.department).map(emp => (
-                  <option key={emp.id} value={emp.id}>{emp.name}</option>
-                ))}
-              </select>
-            </div>
+            <Select label="Colleague to Swap With" value={swapColleague} onChange={setSwapColleague} placeholder="Select Colleague...">
+              {employees?.filter(e => e.id !== currentUser.id && e.department === currentUser.department).map(emp => (
+                <SelectItem key={emp.id} id={emp.id}>{emp.name}</SelectItem>
+              ))}
+            </Select>
 
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Reason</label>
@@ -649,12 +646,12 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
       <div className="glass-card p-6">
         <h3 className="mt-0">Apply for Leave</h3>
         <form onSubmit={handleApply} className="flex flex-col gap-4 max-w-[500px]">
-          <select className="form-input" value={type} onChange={e => setType(e.target.value)} aria-label="Leave type">
-            <option>Annual</option>
-            <option>Sick</option>
-            <option>Casual</option>
-            <option>Unpaid</option>
-          </select>
+          <Select value={type} onChange={setType} placeholder="Leave type">
+            <SelectItem id="Annual">Annual</SelectItem>
+            <SelectItem id="Sick">Sick</SelectItem>
+            <SelectItem id="Casual">Casual</SelectItem>
+            <SelectItem id="Unpaid">Unpaid</SelectItem>
+          </Select>
           <div className="flex gap-4">
             <input type="date" className="form-input flex-1" value={startDate} onChange={e => setStartDate(e.target.value)} required aria-label="Leave start date" />
             <input type="date" className="form-input flex-1" value={endDate} onChange={e => setEndDate(e.target.value)} required aria-label="Leave end date" />
@@ -935,14 +932,14 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
           <Megaphone size={24} color="var(--accent-primary)" />
           Company Feed
         </h2>
-        <select aria-label="Filter announcements" value={filter} onChange={(e) => setFilter(e.target.value)} className="px-4 py-2 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
-          <option value="All">All Categories</option>
-          <option value="General">General</option>
-          <option value="Policy Update">Policy Update</option>
-          <option value="Event">Event</option>
-          <option value="Achievement/Birthday/Work Anniversary">Celebrations</option>
-          <option value="Emergency">Emergency</option>
-        </select>
+        <Select value={filter} onChange={setFilter} placeholder="All Categories">
+          <SelectItem id="All">All Categories</SelectItem>
+          <SelectItem id="General">General</SelectItem>
+          <SelectItem id="Policy Update">Policy Update</SelectItem>
+          <SelectItem id="Event">Event</SelectItem>
+          <SelectItem id="Achievement/Birthday/Work Anniversary">Celebrations</SelectItem>
+          <SelectItem id="Emergency">Emergency</SelectItem>
+        </Select>
       </div>
 
       <div className="flex flex-col gap-6">
@@ -1185,24 +1182,18 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
         <div className="glass-card p-6">
           <h3 className="m-0 mb-5">Request New Equipment</h3>
           <form onSubmit={handleSubmitRequest} className="flex flex-col gap-4">
-            <div className="form-group">
-              <label>Equipment Category</label>
-              <select className="form-input" value={requestForm.category} onChange={e => setRequestForm(p => ({...p, category: e.target.value}))}>
-                <option>Laptop</option>
-                <option>Phone</option>
-                <option>Monitor</option>
-                <option>Peripherals</option>
-                <option>Access Card</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Urgency Level</label>
-              <select className="form-input" value={requestForm.urgency} onChange={e => setRequestForm(p => ({...p, urgency: e.target.value}))}>
-                <option>Low</option>
-                <option>Medium</option>
-                <option>High</option>
-              </select>
-            </div>
+            <Select label="Equipment Category" value={requestForm.category} onChange={(val) => setRequestForm(p => ({...p, category: val}))}>
+              <SelectItem id="Laptop">Laptop</SelectItem>
+              <SelectItem id="Phone">Phone</SelectItem>
+              <SelectItem id="Monitor">Monitor</SelectItem>
+              <SelectItem id="Peripherals">Peripherals</SelectItem>
+              <SelectItem id="Access Card">Access Card</SelectItem>
+            </Select>
+            <Select label="Urgency Level" value={requestForm.urgency} onChange={(val) => setRequestForm(p => ({...p, urgency: val}))}>
+              <SelectItem id="Low">Low</SelectItem>
+              <SelectItem id="Medium">Medium</SelectItem>
+              <SelectItem id="High">High</SelectItem>
+            </Select>
             <div className="form-group">
               <label>Justification</label>
               <textarea required rows={4} className="form-input" placeholder="Explain why you need this equipment..." value={requestForm.justification} onChange={e => setRequestForm(p => ({...p, justification: e.target.value}))} />

@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Database, HardDrive, CloudOff, CloudLightning, ArrowLeftRight, Download, Info, FileJson, AlertCircle, RefreshCw, X, Trash2, Shield, RotateCcw } from 'lucide-react'
+import { Card, CardContent } from "@/components/ui/card"
+import { useConfirm } from '../hooks/useConfirm'
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import AdSlot from './AdSlot'
-import { useModal } from '../services/useModal.js'
 import { getLocalCacheSizeMB, clearLocalCache } from '../services/db.js'
 import { createBackup, listBackups, restoreBackup } from '../services/googleDrive.js'
 import { formatDateTime } from '../services/date.js'
@@ -11,12 +15,14 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
   const [timeUntilSync, setTimeUntilSync] = useState(13)
   const [cacheSize, setCacheSize] = useState('0.00')
   const [isClearing, setIsClearing] = useState(false)
+
+  const { confirm, ConfirmDialog } = useConfirm()
+
   const [backupsList, setBackupsList] = useState([])
   const [isBackingUp, setIsBackingUp] = useState(false)
   const [isRestoring, setIsRestoring] = useState(false)
   const [selectedRestoreBackup, setSelectedRestoreBackup] = useState(null)
-  useModal(() => setSelectedRestoreBackup(null))
-  
+
   useEffect(() => {
     const fetchCacheSize = async () => {
       const size = await getLocalCacheSizeMB()
@@ -43,7 +49,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
     }, 60000)
     return () => clearInterval(timer)
   }, [driveConnected, user])
-  
+
   const handleToggleConnection = () => {
     const nextState = !driveConnected
     setDriveConnected(nextState)
@@ -92,8 +98,8 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
   }
 
   return (
-    <div className="animate-fade-in gap-6 sm:gap-8 lg:gap-10" style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
-      
+    <div className="animate-fade-in flex flex-col gap-6 sm:gap-8 lg:gap-10">
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
@@ -101,75 +107,43 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
           Google Drive Sync Management
         </h1>
       </div>
-      <hr className="border-border my-0" />
+      <div className="border-t border-border" />
 
       {/* Connection Controller Card */}
-      <div className="glass-card p-6 sm:p-8 lg:p-10" style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '24px',
-        background: driveConnected ? 'var(--color-success-bg)' : 'var(--glass-bg)'
-      }}>
-        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-          <div style={{
-            width: '56px',
-            height: '56px',
-            borderRadius: '16px',
-            backgroundColor: driveConnected ? 'var(--accent-success-glow)' : 'var(--accent-danger-glow)',
-            color: driveConnected ? 'var(--accent-success)' : 'var(--accent-danger)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: driveConnected ? '0 4px 20px rgba(16, 185, 129, 0.2)' : 'none',
-            position: 'relative'
-          }}>
-            {driveConnected && (
-              <span className="animate-ping" role="status" aria-label="Sync active indicator" style={{
-                position: 'absolute',
-                top: '-4px',
-                right: '-4px',
-                width: '12px',
-                height: '12px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--accent-success)'
-              }} />
-            )}
-            {driveConnected && (
-              <span style={{
-                position: 'absolute',
-                top: '-4px',
-                right: '-4px',
-                width: '12px',
-                height: '12px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--accent-success)'
-              }} />
-            )}
-            {driveConnected ? <CloudLightning size={28} /> : <CloudOff size={28} />}
-          </div>
-          <div role="status" aria-live="polite">
-            <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {driveConnected ? 'Sync Tunnel Active' : 'Sync Tunnel Paused'}
-            </h3>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-              {driveConnected ? (
+      <Card className={`p-6 sm:p-8 lg:p-10 ${driveConnected ? 'bg-emerald-500/5' : ''}`}>
+        <div className="flex justify-between items-center flex-wrap gap-6">
+          <div className="flex gap-5 items-center">
+            <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center ${driveConnected ? 'bg-emerald-500/10 text-emerald-500 shadow-[0_4px_20px_rgba(16,185,129,0.2)]' : 'bg-destructive/10 text-destructive'}`}>
+              {driveConnected && (
                 <>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><RefreshCw size={14} /> Last Synced: {timeSinceSync} minutes ago</span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><ArrowLeftRight size={14} /> Next sync in {timeUntilSync} minutes</span>
+                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500" />
                 </>
-              ) : (
-                'Local database is working offline. Operations will be buffered until connection resumes.'
               )}
+              {driveConnected ? <CloudLightning size={28} /> : <CloudOff size={28} />}
+            </div>
+            <div role="status" aria-live="polite">
+              <h3 className="text-xl flex items-center gap-2 text-foreground">
+                {driveConnected ? 'Sync Tunnel Active' : 'Sync Tunnel Paused'}
+              </h3>
+              <div className="text-muted-foreground text-[0.85rem] mt-1 flex gap-4 flex-wrap">
+                {driveConnected ? (
+                  <>
+                    <span className="flex items-center gap-1"><RefreshCw size={14} /> Last Synced: {timeSinceSync} minutes ago</span>
+                    <span className="flex items-center gap-1"><ArrowLeftRight size={14} /> Next sync in {timeUntilSync} minutes</span>
+                  </>
+                ) : (
+                  'Local database is working offline. Operations will be buffered until connection resumes.'
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button 
-            onClick={async () => {
-              if(window.confirm("Are you sure you want to clear the local cache? Unsynced offline changes will be lost, and the app will reload.")) {
+          <div className="flex gap-3">
+            <Button
+              onClick={async () => {
+                const ok = await confirm('Unsynced offline changes will be lost, and the app will reload.', 'Clear Local Cache?', { destructive: true, confirmText: 'Clear' })
+                if (!ok) return
                 setIsClearing(true)
                 try {
                   await clearLocalCache()
@@ -178,277 +152,256 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
                   addLog('Cache Error', 'Failed to clear local cache', 'error')
                   setIsClearing(false)
                 }
-              }
-            }}
-            disabled={isClearing}
-            className="btn btn-outline"
-            aria-label="Clear local cache and resync"
-            style={{
-              borderColor: 'var(--accent-danger)',
-              color: 'var(--accent-danger)',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <Trash2 size={16} />
-            {isClearing ? 'Clearing...' : 'Clear Local Cache & Resync'}
-          </button>
-          <button 
-            onClick={handleToggleConnection}
-            aria-label={driveConnected ? 'Pause cloud connection' : 'Establish cloud connection'}
-            className={`btn ${driveConnected ? 'btn-secondary' : 'btn-primary'}`}
-            style={{
-              borderColor: driveConnected ? 'var(--accent-warning)' : 'transparent',
-              color: driveConnected ? 'var(--accent-warning)' : '#fff',
-              fontWeight: 600
-            }}
-          >
-            {driveConnected ? 'Pause Cloud Connection' : 'Establish Cloud Connection'}
-          </button>
-        </div>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
-        
-        {/* Sync Mechanism Diagram */}
-        <div className="glass-card p-6 sm:p-8 lg:p-10" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <h4 style={{ fontSize: '1rem', color: 'var(--text-primary)' }}>Data Synchronization Flow</h4>
-          
-          <div className="py-5" style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%', justifyContent: 'space-between' }}>
-            <div className="p-3 px-2" style={{ flex: 1, minWidth: '100px', borderRadius: '12px', background: 'rgba(0, 0, 0, 0.01)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
-              <HardDrive size={24} style={{ color: 'var(--accent-primary)', margin: '0 auto 6px' }} />
-              <span style={{ fontSize: '0.8rem', display: 'block', fontWeight: 600 }}>Local Cache</span>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>{driveConnected ? '0 pending' : 'Offline queue'}</span>
-              <span style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', fontWeight: 600 }}>{cacheSize} MB</span>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', width: '60px', flexShrink: 0 }}>
-              <ArrowLeftRight size={20} style={{ 
-                color: driveConnected ? 'var(--accent-success)' : 'var(--text-muted)',
-                animation: driveConnected ? 'slideLoop 1.5s ease-in-out infinite alternate' : 'none'
-              }} />
-              <span style={{ fontSize: '0.7rem', fontWeight: 600, color: driveConnected ? 'var(--accent-success)' : 'var(--text-muted)' }}>
-                {driveConnected ? 'Active' : 'Offline'}
-              </span>
-            </div>
-
-            <div className="p-3 px-2" style={{ flex: 1, minWidth: '100px', borderRadius: '12px', background: 'rgba(0, 0, 0, 0.01)', border: '1px solid var(--border-color)', textAlign: 'center' }}>
-              <CloudLightning size={24} style={{ color: driveConnected ? 'var(--accent-success)' : 'var(--text-muted)', margin: '0 auto 6px' }} />
-              <span style={{ fontSize: '0.8rem', display: 'block', fontWeight: 600 }}>Drive DB</span>
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{driveConnected ? 'Synced' : 'Waiting'}</span>
-            </div>
+              }}
+              disabled={isClearing}
+              variant="outline"
+              aria-label="Clear local cache and resync"
+              className="border-destructive text-destructive hover:text-destructive font-semibold"
+            >
+              <Trash2 size={16} />
+              {isClearing ? 'Clearing...' : 'Clear Local Cache & Resync'}
+            </Button>
+            <Button
+              onClick={handleToggleConnection}
+              aria-label={driveConnected ? 'Pause cloud connection' : 'Establish cloud connection'}
+              variant={driveConnected ? 'outline' : 'default'}
+              className={driveConnected ? 'border-amber-500 text-amber-500 hover:text-amber-600 font-semibold' : 'font-semibold'}
+            >
+              {driveConnected ? 'Pause Cloud Connection' : 'Establish Cloud Connection'}
+            </Button>
           </div>
         </div>
+      </Card>
+
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
+
+        {/* Sync Mechanism Diagram */}
+        <Card>
+          <CardContent className="p-6 sm:p-8 lg:p-10 flex flex-col gap-5">
+            <h4 className="text-base text-foreground font-semibold">Data Synchronization Flow</h4>
+
+            <div className="py-5 flex items-center gap-3 w-full justify-between">
+              <div className="flex-1 min-w-[100px] rounded-xl border border-border bg-muted/10 text-center p-3 px-2">
+                <HardDrive size={24} className="text-primary mx-auto mb-1.5" />
+                <span className="text-[0.8rem] block font-semibold text-foreground">Local Cache</span>
+                <span className="text-[0.7rem] text-muted-foreground block mb-0.5">{driveConnected ? '0 pending' : 'Offline queue'}</span>
+                <span className="text-[0.7rem] text-primary font-semibold">{cacheSize} MB</span>
+              </div>
+
+              <div className="flex flex-col items-center gap-0.5 w-[60px] shrink-0">
+                <ArrowLeftRight size={20} className={driveConnected ? 'text-emerald-500 animate-pulse' : 'text-muted-foreground'} />
+                <span className={`text-[0.7rem] font-semibold ${driveConnected ? 'text-emerald-500' : 'text-muted-foreground'}`}>
+                  {driveConnected ? 'Active' : 'Offline'}
+                </span>
+              </div>
+
+              <div className="flex-1 min-w-[100px] rounded-xl border border-border bg-muted/10 text-center p-3 px-2">
+                <CloudLightning size={24} className={`mx-auto mb-1.5 ${driveConnected ? 'text-emerald-500' : 'text-muted-foreground'}`} />
+                <span className="text-[0.8rem] block font-semibold text-foreground">Drive DB</span>
+                <span className="text-[0.7rem] text-muted-foreground">{driveConnected ? 'Synced' : 'Waiting'}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Database backup commands */}
-        <div className="glass-card p-6 sm:p-8 lg:p-10" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
-          <div>
-            <h4 style={{ fontSize: '1rem', color: 'var(--text-primary)', marginBottom: '8px' }}>Manual Backup</h4>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              Create an immediate snapshot of the current state, combining all tables into a single JSON package in the `_backups` folder.
-            </p>
-          </div>
+        <Card>
+          <CardContent className="p-6 sm:p-8 lg:p-10 flex flex-col justify-between gap-5">
+            <div>
+              <h4 className="text-base text-foreground font-semibold mb-2">Manual Backup</h4>
+              <p className="text-[0.8rem] text-muted-foreground">
+                Create an immediate snapshot of the current state, combining all tables into a single JSON package in the `_backups` folder.
+              </p>
+            </div>
 
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button 
-              aria-label="Create backup now"
-              className="btn btn-primary" 
-              style={{ flex: 1, justifyContent: 'center' }} 
-              onClick={handleCreateBackup}
-              disabled={isBackingUp || !driveConnected}
-            >
-              <Download size={16} /> {isBackingUp ? 'Creating Backup...' : 'Create Backup Now'}
-            </button>
-          </div>
-        </div>
+            <div className="flex gap-3">
+              <Button
+                aria-label="Create backup now"
+                variant="default"
+                className="flex-1 justify-center"
+                onClick={handleCreateBackup}
+                disabled={isBackingUp || !driveConnected}
+              >
+                <Download size={16} /> {isBackingUp ? 'Creating Backup...' : 'Create Backup Now'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Data Integrity Testing */}
-        <div className="glass-card p-6 sm:p-8 lg:p-10" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
-          <div>
-            <h4 style={{ fontSize: '1rem', color: 'var(--accent-danger)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <AlertCircle size={18} /> Data Integrity Testing
-            </h4>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              Simulate cloud database corruption by writing duplicate IDs to `employees.json` in your Google Drive. Reloading the app will trigger validation alerts and backup recovery flows.
-            </p>
-          </div>
+        <Card>
+          <CardContent className="p-6 sm:p-8 lg:p-10 flex flex-col justify-between gap-5">
+            <div>
+              <h4 className="text-base text-destructive font-semibold mb-2 flex items-center gap-2">
+                <AlertCircle size={18} /> Data Integrity Testing
+              </h4>
+              <p className="text-[0.8rem] text-muted-foreground">
+                Simulate cloud database corruption by writing duplicate IDs to `employees.json` in your Google Drive. Reloading the app will trigger validation alerts and backup recovery flows.
+              </p>
+            </div>
 
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button 
-              aria-label="Simulate drive corruption"
-              className="btn btn-secondary" 
-              style={{ flex: 1, justifyContent: 'center', borderColor: 'var(--accent-danger)', color: 'var(--accent-danger)' }} 
-              onClick={() => {
-                const MOCK_DRIVE_KEY = 'hr_pulse_mock_drive_files';
-                const driveRaw = localStorage.getItem(MOCK_DRIVE_KEY);
-                if (driveRaw) {
-                  try {
-                    const drive = JSON.parse(driveRaw);
-                    if (drive['employees']) {
-                      const employees = drive['employees'].content;
-                      if (Array.isArray(employees) && employees.length > 0) {
-                        const duplicate = { ...employees[0], name: employees[0].name + " (Duplicate)" };
-                        employees.push(duplicate);
-                        drive['employees'].content = employees;
-                        drive['employees'].modifiedTime = new Date().toISOString();
-                        localStorage.setItem(MOCK_DRIVE_KEY, JSON.stringify(drive));
-                        alert('Corruption simulated successfully! Please reload the page to trigger the integrity validator.');
+            <div className="flex gap-3">
+              <Button
+                aria-label="Simulate drive corruption"
+                variant="outline"
+                className="flex-1 justify-center border-destructive text-destructive hover:text-destructive"
+                onClick={() => {
+                  const MOCK_DRIVE_KEY = 'hr_pulse_mock_drive_files';
+                  const driveRaw = localStorage.getItem(MOCK_DRIVE_KEY);
+                  if (driveRaw) {
+                    try {
+                      const drive = JSON.parse(driveRaw);
+                      if (drive['employees']) {
+                        const employees = drive['employees'].content;
+                        if (Array.isArray(employees) && employees.length > 0) {
+                          const duplicate = { ...employees[0], name: employees[0].name + " (Duplicate)" };
+                          employees.push(duplicate);
+                          drive['employees'].content = employees;
+                          drive['employees'].modifiedTime = new Date().toISOString();
+                          localStorage.setItem(MOCK_DRIVE_KEY, JSON.stringify(drive));
+                          alert('Corruption simulated successfully! Please reload the page to trigger the integrity validator.');
+                        } else {
+                          alert('Mock drive has no employees to duplicate. Please load data first.');
+                        }
                       } else {
-                        alert('Mock drive has no employees to duplicate. Please load data first.');
+                        alert('Employees table not found in mock drive. Please sync first.');
                       }
-                    } else {
-                      alert('Employees table not found in mock drive. Please sync first.');
+                    } catch (e) {
+                      alert('Error writing corruption: ' + e.message);
                     }
-                  } catch (e) {
-                    alert('Error writing corruption: ' + e.message);
+                  } else {
+                    alert('No mock drive found in localStorage. Please log in as a simulated user first.');
                   }
-                } else {
-                  alert('No mock drive found in localStorage. Please log in as a simulated user first.');
-                }
-              }}
-            >
-              Simulate Drive Corruption
-            </button>
-          </div>
-        </div>
+                }}
+              >
+                Simulate Drive Corruption
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Backup Browser Widget */}
-      <div className="glass-card p-6 sm:p-8 lg:p-10">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <div>
-            <h4 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Shield size={20} style={{ color: 'var(--accent-primary)' }}/> Database Backups (/_backups/)
-            </h4>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>Automated backups are retained for 7 days + 4 weeks</p>
+      <Card>
+        <CardContent className="p-6 sm:p-8 lg:p-10">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h4 className="text-[1.1rem] font-bold flex items-center gap-2 text-foreground">
+                <Shield size={20} className="text-primary" /> Database Backups (/_backups/)
+              </h4>
+              <p className="text-[0.8rem] text-muted-foreground mt-1">Automated backups are retained for 7 days + 4 weeks</p>
+            </div>
           </div>
-        </div>
-        
-        <div role="log" aria-live="polite" aria-label="Backup logs" style={{ overflowX: 'auto' }}>
-          <table className="table-striped" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                <th className="p-3">Backup Name</th>
-                <th className="p-3">Size</th>
-                <th className="p-3">Created Date</th>
-                <th className="p-3" style={{ textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(!Array.isArray(backupsList) || backupsList.length === 0) ? (
-                <tr>
-                  <td colSpan="4" className="p-6" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No backups found.</td>
-                </tr>
-              ) : backupsList.map(f => (
-                <tr key={f.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
-                  <td className="p-3" style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <FileJson size={16} style={{ color: 'var(--text-muted)' }} /> {f.name}
-                  </td>
-                  <td className="p-3" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {f.size ? (parseInt(f.size) / 1024).toFixed(1) + ' KB' : 'Unknown'}
-                  </td>
-                  <td className="p-3" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                    {formatDateTime(f.modifiedTime)}
-                  </td>
-                  <td className="p-3" style={{ textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                    <button 
-                      aria-label="Download backup"
-                      onClick={() => window.open(`https://drive.google.com/uc?export=download&id=${f.id}`, '_blank')}
-                      className="btn btn-secondary px-2 py-1" 
-                      style={{ fontSize: '0.75rem', height: 'auto' }}
-                      title="Download Backup"
-                    >
-                      <Download size={14} />
-                    </button>
-                    <button 
-                      aria-label="Restore from this backup"
-                      onClick={() => setSelectedRestoreBackup(f)}
-                      className="btn px-2 py-1" 
-                      style={{ fontSize: '0.75rem', height: 'auto', background: 'var(--accent-warning)', color: '#fff' }}
-                      title="Restore from this backup"
-                    >
-                      <RotateCcw size={14} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+
+          <div role="log" aria-live="polite" aria-label="Backup logs" className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="p-3">Backup Name</TableHead>
+                  <TableHead className="p-3">Size</TableHead>
+                  <TableHead className="p-3">Created Date</TableHead>
+                  <TableHead className="p-3 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(!Array.isArray(backupsList) || backupsList.length === 0) ? (
+                  <TableRow>
+                    <TableCell colSpan="4" className="p-6 text-center text-muted-foreground">No backups found.</TableCell>
+                  </TableRow>
+                ) : backupsList.map(f => (
+                  <TableRow key={f.id}>
+                    <TableCell className="p-3 font-medium">
+                      <span className="flex items-center gap-2">
+                        <FileJson size={16} className="text-muted-foreground shrink-0" /> {f.name}
+                      </span>
+                    </TableCell>
+                    <TableCell className="p-3 text-[0.85rem] text-muted-foreground">
+                      {f.size ? (parseInt(f.size) / 1024).toFixed(1) + ' KB' : 'Unknown'}
+                    </TableCell>
+                    <TableCell className="p-3 text-[0.85rem] text-muted-foreground">
+                      {formatDateTime(f.modifiedTime)}
+                    </TableCell>
+                    <TableCell className="p-3 text-right">
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          aria-label="Download backup"
+                          variant="secondary"
+                          size="xs"
+                          onClick={() => window.open(`https://drive.google.com/uc?export=download&id=${f.id}`, '_blank')}
+                          title="Download Backup"
+                        >
+                          <Download size={14} />
+                        </Button>
+                        <Button
+                          aria-label="Restore from this backup"
+                          variant="default"
+                          size="xs"
+                          className="bg-amber-500 hover:bg-amber-600 text-white"
+                          onClick={() => setSelectedRestoreBackup(f)}
+                          title="Restore from this backup"
+                        >
+                          <RotateCcw size={14} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Restore Confirmation Modal */}
-      {selectedRestoreBackup && (
-        <div className="modal-overlay" onClick={() => setSelectedRestoreBackup(null)}>
-          <div className="modal-container" style={{ maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 style={{ color: 'var(--accent-warning)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <AlertCircle size={24} /> Confirm Restore
-              </h2>
+      <Dialog open={!!selectedRestoreBackup} onOpenChange={(open) => { if (!open) setSelectedRestoreBackup(null) }}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-amber-500">
+              <AlertCircle size={24} /> Confirm Restore
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-muted-foreground">You are about to restore the database from:</p>
+            <div className="p-3 rounded-lg bg-muted font-mono text-sm text-foreground">
+              {selectedRestoreBackup?.name}
             </div>
-            <div className="modal-body">
-              <p>You are about to restore the database from:</p>
-              <div className="p-3" style={{ background: 'var(--bg-secondary)', borderRadius: '8px', margin: '16px 0', fontFamily: 'monospace' }}>
-                {selectedRestoreBackup.name}
-              </div>
-              <p style={{ color: 'var(--accent-danger)', fontSize: '0.85rem' }}>
-                WARNING: This will completely overwrite your current active database tables and cannot be undone. Unsynced offline changes will be permanently lost.
-              </p>
-              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-                <button 
-                  aria-label="Cancel restore"
-                  className="btn btn-secondary" 
-                  style={{ flex: 1 }} 
-                  onClick={() => setSelectedRestoreBackup(null)}
-                  disabled={isRestoring}
-                >
-                  Cancel
-                </button>
-                <button 
-                  aria-label={isRestoring ? 'Restoring' : 'Confirm overwrite data'}
-                  className="btn btn-danger" 
-                  style={{ flex: 1 }}
-                  onClick={handleExecuteRestore}
-                  disabled={isRestoring}
-                >
-                  {isRestoring ? 'Restoring...' : 'Yes, Overwrite Data'}
-                </button>
-              </div>
-            </div>
+            <p className="text-sm text-destructive font-medium">
+              WARNING: This will completely overwrite your current active database tables and cannot be undone. Unsynced offline changes will be permanently lost.
+            </p>
           </div>
-        </div>
-      )}
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setSelectedRestoreBackup(null)} disabled={isRestoring}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleExecuteRestore}
+              disabled={isRestoring}
+            >
+              {isRestoring ? 'Restoring...' : 'Yes, Overwrite Data'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Info Warning Alert */}
-      <div className="p-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '12px', backgroundColor: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.15)' }}>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'start' }}>
-          <Info size={18} style={{ color: 'var(--accent-primary)', flexShrink: 0, marginTop: '2px' }} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Authentication Note</span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4', maxWidth: '800px' }}>
-              This application uses standard OAuth2 authentication to establish read/write access to its private App Data folder on Google Drive. 
+      <div className="p-4 flex justify-between items-center rounded-xl bg-indigo-500/5 border border-indigo-500/15">
+        <div className="flex gap-3 items-start">
+          <Info size={18} className="text-primary shrink-0 mt-0.5" />
+          <div className="flex flex-col gap-1">
+            <span className="text-[0.85rem] font-semibold text-foreground">Authentication Note</span>
+            <span className="text-[0.8rem] text-muted-foreground leading-relaxed max-w-[800px]">
+              This application uses standard OAuth2 authentication to establish read/write access to its private App Data folder on Google Drive.
               The database files are stored securely and cannot be read by other tools.
             </span>
           </div>
         </div>
-        <button aria-label="Test Google Drive connection" onClick={handleTestConnection} className="btn btn-secondary" style={{ whiteSpace: 'nowrap' }}>
+        <Button variant="secondary" onClick={handleTestConnection} className="whitespace-nowrap">
           Test Connection
-        </button>
+        </Button>
       </div>
 
-
-      <style>{`
-        @keyframes slideLoop {
-          0% { transform: translateX(-8px); }
-          100% { transform: translateX(8px); }
-        }
-        @keyframes modalFadeIn {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
+      <ConfirmDialog />
       <AdSlot />
     </div>
   )

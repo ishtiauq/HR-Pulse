@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react'
 import { clearLocalCache } from '../services/db.js'
 import { createBackup } from '../services/googleDrive.js'
 import { User, History, Moon, Sun, Trash2, HardDrive, LayoutDashboard, Settings as SettingsIcon, FileText } from 'lucide-react'
+import { useConfirm } from './useConfirm'
 
 export function useCommandPalette({ user, employees, themeMode, toggleTheme, setCurrentView, addToast, setSelectedEmployeeId }) {
   const [showCommandPalette, setShowCommandPalette] = useState(false)
   const [commandSearch, setCommandSearch] = useState('')
   const [paletteIndex, setPaletteIndex] = useState(0)
+
+  const { confirm, ConfirmDialog } = useConfirm()
   const [recentActions, setRecentActions] = useState(() => {
     const saved = localStorage.getItem('hr_pulse_recent_actions')
     return saved ? JSON.parse(saved) : [
@@ -49,10 +52,10 @@ export function useCommandPalette({ user, employees, themeMode, toggleTheme, set
         actionFn = () => setCurrentView(act.view)
       } else if (act.type === 'action') {
         if (act.id === 'action-darkmode') actionFn = toggleTheme
-        if (act.id === 'action-clearcache') actionFn = () => {
-          if (window.confirm("Clear cache?")) {
-            clearLocalCache().then(() => window.location.reload())
-          }
+        if (act.id === 'action-clearcache') actionFn = async () => {
+          const ok = await confirm('Unsynced offline changes will be lost, and the app will reload.', 'Clear Cache?', { destructive: true, confirmText: 'Clear' })
+          if (!ok) return
+          clearLocalCache().then(() => window.location.reload())
         }
         if (act.id === 'action-backup') actionFn = () => {
           if (user?.token) createBackup(user.token).then(() => addToast('Backup created', 'success'))
@@ -84,10 +87,10 @@ export function useCommandPalette({ user, employees, themeMode, toggleTheme, set
 
     const quickActions = [
       { id: 'action-darkmode', category: 'Actions', label: 'Toggle Theme', action: toggleTheme, keywords: 'dark light mode theme appearance toggle system' },
-      { id: 'action-clearcache', category: 'Actions', label: 'Clear Local Cache & Resync', action: () => {
-        if (window.confirm("Clear cache?")) {
-          clearLocalCache().then(() => window.location.reload())
-        }
+      { id: 'action-clearcache', category: 'Actions', label: 'Clear Local Cache & Resync', action: async () => {
+        const ok = await confirm('Unsynced offline changes will be lost, and the app will reload.', 'Clear Cache?', { destructive: true, confirmText: 'Clear' })
+        if (!ok) return
+        clearLocalCache().then(() => window.location.reload())
       }, keywords: 'clear cache reset clean reload' },
       { id: 'action-backup', category: 'Actions', label: 'Trigger Drive Backup', action: () => {
         if (user?.token) {
@@ -157,6 +160,7 @@ export function useCommandPalette({ user, employees, themeMode, toggleTheme, set
     commandSearch, setCommandSearch,
     paletteIndex, setPaletteIndex,
     filteredItems, selectPaletteItem,
-    getCategoryIcon
+    getCategoryIcon,
+    ConfirmDialog
   }
 }

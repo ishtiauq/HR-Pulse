@@ -1,7 +1,10 @@
 import { useLeaves } from '../../hooks/useLeaves.js'
-import { thStyle, cell, pill } from '../../services/attendance.js'
 import { formatDateShort } from '../../services/date.js'
 import { Check, X, CalendarDays } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 
 export default function LeaveRequests({ employees, attendance, setAttendance, addToast }) {
   const { leaves, pendingLeaves, historyLeaves, balances, approveLeave, rejectLeave, pendingCount } = useLeaves(attendance, setAttendance, addToast)
@@ -13,93 +16,89 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
   }
 
   return (
-    <div className="payroll-table-container flex flex-col gap-6 p-6">
-      <h3 className="title-medium m-0" style={{ color: 'var(--md-bw-on-surface)' }}>
-        Pending Requests {pendingCount > 0 && <span className="font-normal" style={{ color: 'var(--md-bw-on-surface-variant)' }}>({pendingCount})</span>}
-      </h3>
-      {pendingLeaves.length === 0 ? (
-        <div className="text-center p-12" style={{ color: 'var(--md-bw-on-surface-variant)' }}>
-          <CalendarDays size={32} className="opacity-30 mb-3" />
-          <p className="body-medium m-0">No pending leave requests.</p>
-        </div>
-      ) : (
-        <div className="payroll-table-header-wrap">
-          <table className="payroll-table w-full" style={{ borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-            <colgroup>
-              <col style={{ width: '160px' }} /><col style={{ width: '120px' }} /><col style={{ width: '180px' }} /><col className="w-[60px]" /><col /><col className="w-[200px]" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th style={thStyle}>Employee</th>
-                <th style={thStyle}>Type</th>
-                <th style={thStyle}>Dates</th>
-                <th style={{ ...thStyle, textAlign: 'center' }}>Days</th>
-                <th style={thStyle}>Reason</th>
-                <th style={{ ...thStyle, textAlign: 'right' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pendingLeaves.map(l => {
-                const emp = employees.find(e => e.id === l.employeeId)
-                return (
-                  <tr key={l.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                    <td style={cell}><span className="body-large" style={{ color: 'var(--md-bw-on-surface)' }}>{emp?.name || l.employeeId}</span></td>
-                    <td style={cell}><span style={{ color: 'var(--md-bw-on-surface)' }}>{l.leaveType}</span></td>
-                    <td style={cell}><span className="text-[0.85rem]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{formatDateShort(l.startDate)} — {formatDateShort(l.endDate)}</span></td>
-                    <td style={{ ...cell, textAlign: 'center' }}><span className="body-large font-semibold" style={{ color: 'var(--md-bw-on-surface)' }}>{l.days || '—'}</span></td>
-                    <td style={cell}><span className="text-[0.85rem] overflow-hidden text-ellipsis whitespace-nowrap block max-w-[200px]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{l.reason || '—'}</span></td>
-                    <td style={{ ...cell, textAlign: 'right' }}>
-                      <div className="flex gap-2 justify-end">
-                        <button aria-label="Approve leave request" className="btn btn-tonal px-3.5 h-8 text-xs flex items-center gap-1" onClick={() => approveLeave(l.id)}>
-                          <Check size={13} /> Approve
-                        </button>
-                        <button aria-label="Reject leave request" className="btn btn-outlined px-3.5 h-8 text-xs flex items-center gap-1" style={{ color: 'var(--md-bw-error)' }} onClick={() => rejectLeave(l.id)}>
-                          <X size={13} /> Reject
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {historyLeaves.length > 0 && (
-        <>
-          <h3 className="title-medium m-0" style={{ color: 'var(--md-bw-on-surface)' }}>History</h3>
-          <div className="payroll-table-header-wrap">
-            <table className="payroll-table w-full" style={{ borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-              <colgroup>
-                <col style={{ width: '180px' }} /><col style={{ width: '120px' }} /><col style={{ width: '200px' }} /><col style={{ width: '100px' }} />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th style={{ ...thStyle, fontSize: '11px', height: '40px' }}>Employee</th>
-                  <th style={{ ...thStyle, fontSize: '11px', height: '40px' }}>Type</th>
-                  <th style={{ ...thStyle, fontSize: '11px', height: '40px' }}>Dates</th>
-                  <th style={{ ...thStyle, fontSize: '11px', height: '40px' }}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {historyLeaves.slice().reverse().map(l => {
+    <Card>
+      <CardContent className="p-5 sm:p-6 flex flex-col gap-6">
+        <h3 className="text-base font-bold m-0 text-foreground">
+          Pending Requests {pendingCount > 0 && <span className="font-normal text-muted-foreground">({pendingCount})</span>}
+        </h3>
+        {pendingLeaves.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <CalendarDays size={32} className="opacity-30 mx-auto mb-3" />
+            <p className="m-0">No pending leave requests.</p>
+          </div>
+        ) : (
+          <div className="rounded-lg border border-border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[160px]">Employee</TableHead>
+                  <TableHead className="w-[120px]">Type</TableHead>
+                  <TableHead className="w-[180px]">Dates</TableHead>
+                  <TableHead className="text-center w-[60px]">Days</TableHead>
+                  <TableHead>Reason</TableHead>
+                  <TableHead className="text-right w-[200px]">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pendingLeaves.map(l => {
                   const emp = employees.find(e => e.id === l.employeeId)
-                  const s = STATUS[l.status] || STATUS.Pending
                   return (
-                  <tr key={l.id} className="border-b border-black/[0.06]">
-                      <td style={cell}><span className="text-[0.85rem]" style={{ color: 'var(--md-bw-on-surface)' }}>{emp?.name || l.employeeId}</span></td>
-                      <td style={cell}><span className="text-[0.85rem]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{l.leaveType}</span></td>
-                      <td style={cell}><span className="text-[0.85rem]" style={{ color: 'var(--md-bw-on-surface-variant)' }}>{formatDateShort(l.startDate)} — {formatDateShort(l.endDate)}</span></td>
-                      <td style={cell}><span role="status" style={pill(s.bg, s.color)}>{l.status}</span></td>
-                    </tr>
+                    <TableRow key={l.id}>
+                      <TableCell><span className="text-sm text-foreground">{emp?.name || l.employeeId}</span></TableCell>
+                      <TableCell><span className="text-sm text-foreground">{l.leaveType}</span></TableCell>
+                      <TableCell><span className="text-xs text-muted-foreground">{formatDateShort(l.startDate)} — {formatDateShort(l.endDate)}</span></TableCell>
+                      <TableCell className="text-center"><span className="text-sm font-semibold text-foreground">{l.days || '—'}</span></TableCell>
+                      <TableCell><span className="text-xs text-muted-foreground block max-w-[200px] truncate">{l.reason || '—'}</span></TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-2 justify-end">
+                          <Button size="sm" variant="default" onClick={() => approveLeave(l.id)}>
+                            <Check size={13} /> Approve
+                          </Button>
+                          <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => rejectLeave(l.id)}>
+                            <X size={13} /> Reject
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   )
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
-        </>
-      )}
-    </div>
+        )}
+
+        {historyLeaves.length > 0 && (
+          <>
+            <h3 className="text-base font-bold m-0 text-foreground">History</h3>
+            <div className="rounded-lg border border-border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[180px]">Employee</TableHead>
+                    <TableHead className="w-[120px]">Type</TableHead>
+                    <TableHead className="w-[200px]">Dates</TableHead>
+                    <TableHead className="w-[100px]">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {historyLeaves.slice().reverse().map(l => {
+                    const emp = employees.find(e => e.id === l.employeeId)
+                    const s = STATUS[l.status] || STATUS.Pending
+                    return (
+                      <TableRow key={l.id}>
+                        <TableCell><span className="text-xs text-foreground">{emp?.name || l.employeeId}</span></TableCell>
+                        <TableCell><span className="text-xs text-muted-foreground">{l.leaveType}</span></TableCell>
+                        <TableCell><span className="text-xs text-muted-foreground">{formatDateShort(l.startDate)} — {formatDateShort(l.endDate)}</span></TableCell>
+                        <TableCell><Badge style={{ background: s.bg, color: s.color }}>{l.status}</Badge></TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   )
 }
