@@ -1,5 +1,7 @@
 import TooltipPopover from '../TooltipPopover.jsx'
-import { X } from 'lucide-react'
+import { X, Shield, User as UserIcon, BadgeCheck, Building2, LogOut, ArrowLeftRight } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription } from "@/components/ui/alert-dialog"
 
 export default function Sidebar({
   visibleNavItems, isCollapsed, isDarkMode, currentView, setCurrentView,
@@ -131,36 +133,89 @@ export default function Sidebar({
             </div>
           </div>
 
-          {/* ROLE SIMULATION */}
-          {(mobileMenuOpen || !isCollapsed) && (
-            <div className="flex flex-col gap-1 animate-fade-in">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-sidebar-foreground/60 px-1">Simulated Role</span>
+          {/* ROLE + LOGOUT */}
+          <div className="flex flex-col gap-1.5">
+            <TooltipPopover label={`Role: ${simulatedRole || "Admin"}`} isCollapsed={isCollapsed && !mobileMenuOpen} isDarkMode={isDarkMode}>
               <button
                 onClick={() => setShowRoleModal && setShowRoleModal(true)}
-                className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl bg-sidebar-accent/60 border border-sidebar-border text-sidebar-foreground text-xs font-semibold hover:bg-sidebar-accent transition-all cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-sidebar-accent/40 border border-sidebar-border hover:bg-sidebar-accent transition-all cursor-pointer text-left"
               >
-                <span className="truncate">{simulatedRole || "Admin"}</span>
-                <span className="text-[10px] font-bold uppercase tracking-wide bg-primary/10 text-primary px-2 py-0.5 rounded-md shrink-0">Switch</span>
+                <div className="size-8 flex items-center justify-center rounded-full bg-sidebar-accent border border-sidebar-border shrink-0">
+                  <ArrowLeftRight size={14} className="text-sidebar-foreground/80" />
+                </div>
+                <div className="overflow-hidden whitespace-nowrap flex-1 min-w-0 transition-[opacity,max-width] duration-300" style={{
+                  opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
+                  maxWidth: (mobileMenuOpen || !isCollapsed) ? '160px' : 0,
+                }}>
+                  <p className="text-xs font-extrabold m-0 text-sidebar-foreground truncate">Role: {simulatedRole || "Admin"}</p>
+                  <p className="text-[10px] font-semibold m-0 text-sidebar-foreground/60 truncate">Click to switch</p>
+                </div>
               </button>
-            </div>
-          )}
-
-          {/* LOGOUT BUTTON */}
-          {(mobileMenuOpen || !isCollapsed) && (
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 text-xs font-bold transition-all cursor-pointer animate-fade-in"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-              </svg>
-              Logout
-            </button>
-          )}
+            </TooltipPopover>
+            <TooltipPopover label="Logout" isCollapsed={isCollapsed && !mobileMenuOpen} isDarkMode={isDarkMode}>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-destructive/10 border border-destructive/20 hover:bg-destructive/20 transition-all cursor-pointer text-left"
+              >
+                <div className="size-8 flex items-center justify-center rounded-full bg-destructive/10 border border-destructive/20 shrink-0">
+                  <LogOut size={14} className="text-destructive" />
+                </div>
+                <div className="overflow-hidden whitespace-nowrap flex-1 min-w-0 transition-[opacity,max-width] duration-300" style={{
+                  opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
+                  maxWidth: (mobileMenuOpen || !isCollapsed) ? '160px' : 0,
+                }}>
+                  <p className="text-xs font-extrabold m-0 text-destructive truncate">Logout</p>
+                  <p className="text-[10px] font-semibold m-0 text-destructive/60 truncate">Sign out</p>
+                </div>
+              </button>
+            </TooltipPopover>
+          </div>
         </div>
       </aside>
+
+      {/* Role Switch Modal */}
+      <AlertDialog open={showRoleModal} onOpenChange={setShowRoleModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center justify-between">
+              <AlertDialogTitle>Switch Role</AlertDialogTitle>
+              <button onClick={() => setShowRoleModal(false)} className="size-8 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer" aria-label="Close">
+                <X size={16} />
+              </button>
+            </div>
+            <AlertDialogDescription>Choose a role to simulate. Permissions and visible modules will adjust accordingly.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex flex-col gap-2 py-2">
+            {[
+              { id: 'Admin', label: 'Admin', icon: Shield, desc: 'Full access to all modules' },
+              { id: 'HR Manager', label: 'HR Manager', icon: BadgeCheck, desc: 'Manage employees, attendance, announcements' },
+              { id: 'Payroll Manager', label: 'Payroll Manager', icon: Building2, desc: 'Manage payroll, expenses, reimbursements' },
+              { id: 'Employee', label: 'Employee', icon: UserIcon, desc: 'Self-service portal access' },
+            ].map(role => (
+              <button
+                key={role.id}
+                onClick={() => { setSimulatedRole(role.id); setShowRoleModal(false) }}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-semibold transition-all cursor-pointer border ${
+                  simulatedRole === role.id
+                    ? 'bg-primary/10 text-primary border-primary/30'
+                    : 'bg-muted/40 text-foreground border-border hover:bg-muted'
+                }`}
+              >
+                <div className="size-9 flex items-center justify-center rounded-lg bg-background border border-border shrink-0">
+                  <role.icon size={16} />
+                </div>
+                <div className="flex flex-col">
+                  <span>{role.label}</span>
+                  <span className="text-[11px] font-normal text-muted-foreground">{role.desc}</span>
+                </div>
+                {simulatedRole === role.id && (
+                  <span className="ml-auto text-[10px] uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">Active</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Scoped scrollbar styles */}
       <style>{`
