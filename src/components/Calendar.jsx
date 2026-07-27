@@ -264,12 +264,13 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
 
   return (
     <div className="fade-in p-4 md:p-6 lg:p-8 pb-6 sm:pb-8 lg:pb-10">
-      <div className="page-header">
-        <h1 className="page-title">
-          <CalendarIcon size={28} className="page-title-icon" />
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+          <CalendarIcon size={20} className="text-primary" />
           Calendar
         </h1>
       </div>
+      <hr className="border-border my-0" />
 
       <div className="grid gap-6 items-start" style={{ gridTemplateColumns: selectedDate ? '1fr 380px' : '1fr' }}>
         {renderCalendarGrid()}

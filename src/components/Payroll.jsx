@@ -564,14 +564,11 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
       
       {/* Header and Month Selector */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
-            <CreditCard size={20} className="text-primary" />
-            Payroll
-          </h1>
-          <p className="text-muted-foreground">Manage monthly compensation and payouts.</p>
-        </div>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+          <CreditCard size={20} className="text-primary" />
+          Payroll
+        </h1>
 
         <div ref={pickerRef} className="flex gap-2 items-center">
           {/* Month dropdown */}
@@ -613,6 +610,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
           </div>
         </div>
       </div>
+      <hr className="border-border my-0" />
 
       {!entries ? (
         <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed border-2 bg-muted/20">

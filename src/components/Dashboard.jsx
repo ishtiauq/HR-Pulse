@@ -180,6 +180,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
         </span>
       </div>
+      <hr className="border-border border-t my-0" />
 
       {/* Unified 12-Column Responsive & Adaptive Dashboard Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5 lg:gap-6 items-stretch">

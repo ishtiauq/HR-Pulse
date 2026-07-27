@@ -589,11 +589,11 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
   return (
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">System Settings</h1>
-          <p className="text-muted-foreground">Configure HR Pulse modules and preferences.</p>
-        </div>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+          <SettingsIcon size={20} className="text-primary" />
+          System Settings
+        </h1>
         <div className="flex gap-2">
           <Button variant="ghost" onClick={() => setShowResetModal(true)}>Reset Defaults</Button>
           <Button onClick={handleSave} disabled={isSaving || isOver100}>
@@ -602,6 +602,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           </Button>
         </div>
       </div>
+      <hr className="border-border my-0" />
 
       <div className="flex flex-col gap-4">
         {menuItems.map(item => {

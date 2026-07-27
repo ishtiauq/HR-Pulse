@@ -853,15 +853,13 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
 
   return (
     <div className="animate-fade-in pb-10 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <Monitor className="h-8 w-8 text-primary" />
-            Asset Management
-          </h1>
-          <p className="text-muted-foreground mt-1">Track, assign, and manage company assets.</p>
-        </div>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+          <Monitor size={20} className="text-primary" />
+          Asset Management
+        </h1>
       </div>
+      <hr className="border-border my-0" />
       
       <div className="flex gap-2 overflow-x-auto pb-2 border-b border-border w-full max-w-full">
         {['inventory', 'assignments', 'requests', 'maintenance'].map(view => (

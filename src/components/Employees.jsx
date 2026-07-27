@@ -379,11 +379,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       </Dialog>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground"><Users size={20} className="text-primary" />Employees</h1>
-          <p className="text-muted-foreground">Manage your team members and their information.</p>
-        </div>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground"><Users size={20} className="text-primary" />Employees</h1>
         <div className="flex gap-2 items-center">
           <input 
             id="csv-file-input" 
@@ -458,6 +455,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
           </Button>
         </div>
       </div>
+      <hr className="border-border my-0" />
 
       {/* Filters Toolbar */}
       <Card className="border-none shadow-sm bg-card">

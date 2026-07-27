@@ -77,9 +77,9 @@ export default function Announcements({ employees, announcements, setAnnouncemen
 
   return (
     <div className="fade-in pb-10">
-      <div className="page-header">
-        <h1 className="page-title">
-          <Megaphone size={28} className="page-title-icon" />
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+          <Megaphone size={20} className="text-primary" />
           Announcements
         </h1>
         <div className="flex gap-3">
@@ -89,6 +89,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
           </button>
         </div>
       </div>
+      <hr className="border-border my-0" />
 
       {activeTab === 'create' && (
         <div className="glass-card p-6 sm:p-8 lg:p-10 max-w-[800px] mx-auto">

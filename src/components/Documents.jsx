@@ -202,12 +202,13 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
 
   return (
     <div className="fade-in px-1 sm:px-0 pb-10">
-      <div className="page-header">
-        <h1 className="page-title">
-          <FileText size={28} className="page-title-icon" />
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+          <FileText size={20} className="text-primary" />
           Documents
         </h1>
       </div>
+      <hr className="border-border my-0" />
 
       {/* Upload Hero Card */}
       <div className="glass-card cursor-pointer text-center mb-6 flex flex-col items-center gap-3 p-6 sm:p-8 lg:p-10" onClick={openUploadModal} role="button" tabIndex={0} aria-label="Upload document"

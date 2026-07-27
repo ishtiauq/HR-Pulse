@@ -151,9 +151,9 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
     <div className="animate-fade-in flex flex-col gap-4 sm:gap-6 lg:gap-8">
       
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="page-title">
-          <Receipt size={28} className="page-title-icon" />
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+          <Receipt size={20} className="text-primary" />
           Expenses
         </h1>
         <div className="flex gap-3">
@@ -177,6 +177,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
           )}
         </div>
       </div>
+      <hr className="border-border my-0" />
 
       {/* Tabs Content */}
       {activeTab === 'submit' && (

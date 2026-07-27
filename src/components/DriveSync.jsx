@@ -95,12 +95,13 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
     <div className="animate-fade-in gap-6 sm:gap-8 lg:gap-10" style={{ display: 'flex', flexDirection: 'column', position: 'relative' }}>
       
       {/* Header */}
-      <div className="page-header">
-        <h1 className="page-title">
-          <Database size={28} className="page-title-icon" />
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+          <Database size={20} className="text-primary" />
           Google Drive Sync Management
         </h1>
       </div>
+      <hr className="border-border my-0" />
 
       {/* Connection Controller Card */}
       <div className="glass-card p-6 sm:p-8 lg:p-10" style={{
