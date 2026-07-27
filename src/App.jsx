@@ -22,6 +22,7 @@ import { useModal } from './services/useModal.js'
 import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, allNavItems } from './utils/helpers.js'
 import { encryptJson, decryptJson } from './services/crypto.js'
 import { useTheme } from './hooks/useTheme.js'
+import { useToast } from './hooks/useToast.js'
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -109,18 +110,7 @@ export default function App() {
     return false
   }
 
-  const [toasts, setToasts] = useState([])
-  const addToast = (message, type = 'success', action = null) => {
-    const id = Date.now() + Math.random()
-    setToasts(prev => [...prev.slice(-5), { id, message, type, action }])
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id))
-    }, 4000)
-  }
-
-  const removeToast = (id) => {
-    setToasts(prev => prev.filter(t => t.id !== id))
-  }
+  const { toasts, addToast, removeToast } = useToast()
 
   const [notifications, setNotifications] = useState([
     { id: 'notif-1', text: 'Your leave request was approved', read: false, time: '2 mins ago' },
