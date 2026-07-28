@@ -95,6 +95,8 @@ export default function App() {
     return (
       <EmployeePortal
         currentUser={{...user, role: user.role || 'Employee', department: user.department || 'Engineering'}}
+        themeMode={themeMode}
+        toggleTheme={toggleTheme}
         employees={appData.employees}
         attendance={appData.attendance}
         payroll={appData.payroll}

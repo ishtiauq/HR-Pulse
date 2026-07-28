@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, AlertTriangle, Upload } from 'lucide-react'
+import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, Sun, Moon, AlertTriangle, Upload } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
 import { Select, SelectItem } from "@/components/ui/select"
@@ -31,7 +31,9 @@ const getInitialsAvatar = (name) => {
 }
 
 export default function EmployeePortal({ 
-  currentUser, 
+  currentUser,
+  themeMode,
+  toggleTheme,
   employees, 
   attendance, 
   payroll, 
@@ -191,15 +193,21 @@ export default function EmployeePortal({
               )
             })}
           </nav>
-          {!currentUser.isEmployee && (
-            <Button 
-              variant="outline" 
-              className="mt-auto w-full justify-start text-muted-foreground"
-              onClick={() => setSimulatedRole('Admin')}
-            >
-              ← Back to Admin
+          <div className="mt-auto flex flex-col gap-2">
+            <Button variant="ghost" onClick={toggleTheme} className="w-full justify-start text-muted-foreground font-medium" title={`Theme: ${themeMode}`}>
+              {themeMode === 'system' ? <Monitor className="mr-2 h-4 w-4" /> : themeMode === 'light' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+              Theme: {themeMode.charAt(0).toUpperCase() + themeMode.slice(1)}
             </Button>
-          )}
+            {!currentUser.isEmployee && (
+              <Button 
+                variant="outline" 
+                className="w-full justify-start text-muted-foreground"
+                onClick={() => setSimulatedRole('Admin')}
+              >
+                ← Back to Admin
+              </Button>
+            )}
+          </div>
         </div>
       )}
 
@@ -231,15 +239,27 @@ export default function EmployeePortal({
         </div>
       )}
 
-      {isMobile && !currentUser.isEmployee && (
-        <Button 
-          variant="outline"
-          size="sm"
-          className="fixed top-3 right-3 z-[101] rounded-full shadow-sm bg-background/80 backdrop-blur-md"
-          onClick={() => setSimulatedRole('Admin')}
-        >
-          ← Admin
-        </Button>
+      {isMobile && (
+        <div className="fixed top-3 right-3 z-[101] flex gap-2">
+          <Button 
+            variant="outline"
+            size="icon"
+            className="rounded-full shadow-sm bg-background/80 backdrop-blur-md h-8 w-8 text-muted-foreground"
+            onClick={toggleTheme}
+          >
+            {themeMode === 'system' ? <Monitor size={14} /> : themeMode === 'light' ? <Sun size={14} /> : <Moon size={14} />}
+          </Button>
+          {!currentUser.isEmployee && (
+            <Button 
+              variant="outline"
+              size="sm"
+              className="rounded-full shadow-sm bg-background/80 backdrop-blur-md h-8"
+              onClick={() => setSimulatedRole('Admin')}
+            >
+              ← Admin
+            </Button>
+          )}
+        </div>
       )}
 
       {/* Punch Modal */}
@@ -400,7 +420,7 @@ function AttendanceView({
   addToast 
 }) {
   const currentMonth = formatMonthYear(new Date().toISOString().split('T')[0])
-  const [activeSubTab, setActiveSubTab] = useState('roster') // 'roster', 'swap', 'overtime'
+  const [activeSubTab, setActiveSubTab] = useState('roster') // 'roster', 'swap', 'overtime', 'offday'
 
   const today = new Date()
   const currentDay = today.getDay()
@@ -445,6 +465,23 @@ function AttendanceView({
     addToast('Shift swap request sent to HR for approval.', 'success')
   }
 
+  const [offdayCurrent, setOffdayCurrent] = useState('')
+  const [offdayNew, setOffdayNew] = useState('')
+  const [offdayReason, setOffdayReason] = useState('')
+  const [offdayType, setOffdayType] = useState('Temporary')
+
+  const handleRequestOffday = (e) => {
+    e.preventDefault()
+    if (!offdayCurrent || !offdayNew) return addToast('Please select both dates', 'warning')
+    
+    // In a real app this would go to HR approval. For now we just mock the request.
+    setOffdayCurrent('')
+    setOffdayNew('')
+    setOffdayReason('')
+    setOffdayType('Temporary')
+    addToast('Alternative offday request sent to HR for approval.', 'success')
+  }
+
   const [otDate, setOtDate] = useState('')
   const [otHours, setOtHours] = useState('')
   const [otReason, setOtReason] = useState('')
@@ -473,9 +510,10 @@ function AttendanceView({
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
       <h2 className="text-2xl font-bold m-0">My Attendance & Roster</h2>
       
-      <div className="flex gap-2 border-b border-border pb-3">
+      <div className="flex gap-2 border-b border-border pb-3 flex-wrap">
         <Button variant={activeSubTab === 'roster' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('roster')}>My Schedule</Button>
         <Button variant={activeSubTab === 'swap' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('swap')}>Request Swap</Button>
+        <Button variant={activeSubTab === 'offday' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('offday')}>Change Offday</Button>
         <Button variant={activeSubTab === 'overtime' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('overtime')}>Log Overtime</Button>
       </div>
 
@@ -544,6 +582,51 @@ function AttendanceView({
           </CardContent>
         </Card>
       )}
+
+      {activeSubTab === 'offday' && (
+        <Card className="max-w-[600px]">
+          <CardHeader>
+            <CardTitle>Request Alternative Offday</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleRequestOffday} className="flex flex-col gap-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">Change Type</label>
+                <Select value={offdayType} onChange={setOffdayType} placeholder="Select Change Type">
+                  <SelectItem id="Temporary">One-time Change (This Week Only)</SelectItem>
+                  <SelectItem id="Permanent">Permanent Change (From Now On)</SelectItem>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">{offdayType === 'Permanent' ? 'Current Offday' : 'Regular Offday (Working Day)'}</label>
+                  <Input type={offdayType === 'Permanent' ? 'text' : 'date'} required value={offdayCurrent} onChange={(e) => setOffdayCurrent(e.target.value)} placeholder={offdayType === 'Permanent' ? 'e.g. Friday' : ''} />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">Requested Offday</label>
+                  <Input type={offdayType === 'Permanent' ? 'text' : 'date'} required value={offdayNew} onChange={(e) => setOffdayNew(e.target.value)} placeholder={offdayType === 'Permanent' ? 'e.g. Sunday' : ''} />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">Reason</label>
+                <textarea 
+                  rows={3} 
+                  value={offdayReason} 
+                  onChange={(e) => setOffdayReason(e.target.value)} 
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" 
+                  placeholder="Why do you need to change your offday?" 
+                />
+              </div>
+
+              <Button type="submit" className="w-fit mt-2">Submit Request</Button>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
 
       {activeSubTab === 'overtime' && (
         <Card className="max-w-[600px]">
