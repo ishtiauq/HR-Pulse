@@ -74,11 +74,11 @@
 }
 
 .dark {
-  --background: hsl(0 0% 12%);
+  --background: hsl(0 0% 0%);
   --foreground: hsl(210 40% 98%);
-  --card: hsl(0 0% 12%);
+  --card: hsl(222.2 84% 4.9%);
   --card-foreground: hsl(210 40% 98%);
-  --popover: hsl(0 0% 12%);
+  --popover: hsl(222.2 84% 4.9%);
   --popover-foreground: hsl(210 40% 98%);
   --primary: hsl(217.2 91.2% 59.8%);
   --primary-foreground: hsl(222.2 47.4% 11.2%);

@@ -286,7 +286,7 @@ export default function App() {
 
       {/* Mobile Menu Drawer */}
       <div 
-        className={`fixed inset-0 z-50 bg-white/60 dark:bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${showMobileMenu ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-50 bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${showMobileMenu ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setShowMobileMenu(false)}
         aria-hidden={!showMobileMenu}
       />

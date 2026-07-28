@@ -14,7 +14,7 @@ export default function Sidebar({
       {/* Mobile fullscreen overlay backdrop */}
       {mobileMenuOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-white/60 dark:bg-black/60 backdrop-blur-sm lg:hidden animate-fade-in"
+          className="fixed inset-0 z-40 bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-sm lg:hidden animate-fade-in"
           onClick={() => setMobileMenuOpen(false)} 
         />
       )}
