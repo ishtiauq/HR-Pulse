@@ -101,6 +101,12 @@ export default function useAppData({ user, addToast }) {
     if (saved) return saved
     return [{ id: 'ann-1', title: 'Welcome to HR Pulse!', content: 'We are thrilled to roll out the new HR Pulse internal portal. Please take a moment to review your profile details and explore the new ESS features.', authorId: 'EMP-101', date: new Date().toISOString(), category: 'General', priority: 'Important', audience: 'all', attachments: [], reactions: { '\u{1F44D}': 0, '\u2764\uFE0F': 0, '\u{1F389}': 0 }, comments: [], readBy: [], poll: null }]
   })
+  const [tasks, setTasks] = useState(() => loadSaved('hr_pulse_tasks') || [
+    { id: 'task-1', title: 'Onboard new UI designer', description: 'Setup accounts and provide documentation', status: 'To Do', priority: 'High', assigneeIds: ['EMP-101'], dueDate: '2026-08-01', tags: ['Onboarding'], createdBy: 'EMP-100', updates: [] },
+    { id: 'task-2', title: 'Review Q3 Performance', description: 'Quarterly review for engineering team', status: 'In Progress', priority: 'Medium', assigneeIds: ['EMP-101'], dueDate: '2026-08-15', tags: ['Performance'], createdBy: 'EMP-100', updates: [] },
+    { id: 'task-3', title: 'Update Company Policy', description: 'Draft new remote work guidelines', status: 'Review', priority: 'Low', assigneeIds: ['EMP-101'], dueDate: '2026-07-30', tags: ['Policy'], createdBy: 'EMP-100', updates: [] },
+    { id: 'task-4', title: 'Process July Payroll', description: 'Run payroll for all active employees', status: 'Done', priority: 'High', assigneeIds: ['EMP-101'], dueDate: '2026-07-25', tags: ['Payroll'], createdBy: 'EMP-100', updates: [] }
+  ])
   const [assets, setAssets] = useState(() => loadSaved('hr_pulse_assets') || [{ id: 'AST-001', serialNumber: 'C02ZG001MD6M', name: 'MacBook Pro M3', category: 'Laptop', purchaseDate: '2025-01-15', purchasePrice: 2499, warrantyExpiry: '2028-01-14', usefulLife: 36, status: 'Available', assignedTo: null, assignmentDate: null, condition: 'New', maintenanceLogs: [] }, { id: 'AST-002', serialNumber: 'S24ULTRA-992', name: 'Samsung Galaxy S24 Ultra', category: 'Phone', purchaseDate: '2024-03-10', purchasePrice: 1199, warrantyExpiry: '2025-03-09', usefulLife: 24, status: 'Assigned', assignedTo: 'EMP-102', assignmentDate: '2024-03-15', condition: 'Good', maintenanceLogs: [] }])
   const [assetRequests, setAssetRequests] = useState(() => loadSaved('hr_pulse_asset_requests') || [])
   const [settings, setSettingsRaw] = useState(() => loadSaved('hr_pulse_settings') || { currency: '$', salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'HR Pulse Ltd.', email: 'hr@hrpulse.io', website: 'www.hrpulse.io', logo: '', logoX: 0, logoY: 0, logoZoom: 1 }, shiftTemplates: [{ id: 'st-1', name: 'Morning Shift', start: '09:00', end: '18:00', break: 60, color: '#3b82f6' }, { id: 'st-2', name: 'Evening Shift', start: '14:00', end: '23:00', break: 60, color: '#8b5cf6' }, { id: 'st-3', name: 'Night Shift', start: '22:00', end: '07:00', break: 60, color: '#1e293b' }, { id: 'st-4', name: 'Half-Day', start: '09:00', end: '13:00', break: 0, color: '#f59e0b' }], overtimeRules: { multiplierWeekday: 1.5, multiplierWeekend: 2.0 }, notifications: { syncAlerts: true, emailDigests: false } })
@@ -497,6 +503,14 @@ export default function useAppData({ user, addToast }) {
     setEvents((prev) => typeof updater === 'function' ? updater(prev) : updater)
   }
 
+  const handleSetTasks = (updater) => {
+    setTasks((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      localStorage.setItem('hr_pulse_tasks', JSON.stringify(next))
+      return next
+    })
+  }
+
   const handleSetDocuments = (updater) => {
     setDocuments((prev) => typeof updater === 'function' ? updater(prev) : updater)
   }
@@ -539,7 +553,7 @@ export default function useAppData({ user, addToast }) {
     notifications, showNotifications, setShowNotifications,
 
     /* Data */
-    employees, payroll, attendance, expenses, events, documents,
+    employees, payroll, attendance, expenses, events, documents, tasks,
     roster, setRoster, shiftSwaps, setShiftSwaps,
     overtimeClaims, setOvertimeClaims,
     announcements, setAnnouncements,
@@ -547,7 +561,7 @@ export default function useAppData({ user, addToast }) {
     settings, syncLogs,
 
     /* Functions */
-    handleSetEmployees, handleSetPayroll, handleSetSettings,
+    handleSetEmployees, handleSetPayroll, handleSetSettings, handleSetTasks,
     handleSetAttendance, handleSetExpenses, handleSetEvents, handleSetDocuments,
     handleAutoRepairDatabase, handleSync,
     addLog, addAuditLog, hasPermission,

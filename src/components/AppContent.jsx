@@ -9,6 +9,7 @@ import Documents from './Documents.jsx'
 import Assets from './Assets.jsx'
 import Settings from './Settings.jsx'
 import DriveSync from './DriveSync.jsx'
+import Tasks from './Tasks.jsx'
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AppContent({ currentView, setCurrentView, isAppLoading, hasPermission, simulatedRole, user, ...data }) {
@@ -119,6 +120,8 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       return <Documents documents={data.documents} setDocuments={data.handleSetDocuments} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} />
     case 'assets':
       return <Assets employees={data.employees} assets={data.assets} setAssets={data.setAssets} assetRequests={data.assetRequests} setAssetRequests={data.setAssetRequests} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} />
+    case 'tasks':
+      return <Tasks tasks={data.tasks} setTasks={data.handleSetTasks} employees={data.employees} currentUser={user} addToast={data.addToast} simulatedRole={simulatedRole} addLog={data.addLog} addNotification={data.addNotification} />
     case 'expenses':
       return <Expenses employees={data.employees} expenses={data.expenses} setExpenses={data.handleSetExpenses} settings={data.settings} addLog={data.addLog} addToast={data.addToast} addAuditLog={data.addAuditLog} simulatedRole={simulatedRole} />
     case 'settings':

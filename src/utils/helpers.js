@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Banknote, Clock, Receipt, Settings2, FolderOpen, Megaphone, CalendarDays, Laptop, CloudSync } from 'lucide-react'
+import { LayoutDashboard, Users, Banknote, Clock, Receipt, Settings2, FolderOpen, Megaphone, CalendarDays, Laptop, CloudSync, CheckSquare } from 'lucide-react'
 
 import { createElement } from 'react'
 
@@ -23,6 +23,7 @@ export function timestampArrayChanges(prev, next) {
 
 export const allNavItems = [
   { id: 'dashboard', label: 'Dashboard', icon: createElement(LayoutDashboard, { size: 18 }) },
+  { id: 'tasks', label: 'Tasks', icon: createElement(CheckSquare, { size: 18 }) },
   { id: 'announcements', label: 'Announcements', icon: createElement(Megaphone, { size: 18 }) },
   { id: 'calendar', label: 'Calendar', icon: createElement(CalendarDays, { size: 18 }) },
   { id: 'documents', label: 'Documents', icon: createElement(FolderOpen, { size: 18 }) },

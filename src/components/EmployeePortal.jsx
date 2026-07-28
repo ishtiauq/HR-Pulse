@@ -3,6 +3,13 @@ import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send,
 import { useModal } from '../services/useModal.js'
 import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
 import { Select, SelectItem } from "@/components/ui/select"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -105,7 +112,7 @@ export default function EmployeePortal({
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardView currentUser={currentUser} attendance={attendance} expenses={expenses} announcements={announcements} setActiveTab={setActiveTab} />
+        return <DashboardView currentUser={currentUser} attendance={attendance} expenses={expenses} announcements={announcements} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} />
       case 'attendance':
         return <AttendanceView 
                  currentUser={currentUser} 
@@ -159,67 +166,51 @@ export default function EmployeePortal({
   ]
 
   return (
-    <div className="flex h-full w-full overflow-hidden" style={{ background: 'var(--bg-primary)', flexDirection: isMobile ? 'column' : 'row' }}>
+    <div className={`flex h-full w-full overflow-hidden bg-background ${isMobile ? 'flex-col' : 'flex-row'}`}>
       
       {/* Sidebar (Desktop) */}
       {!isMobile && (
-        <div className="w-[250px] flex flex-col px-4 py-6" style={{ background: 'var(--bg-secondary)', borderRight: '1px solid var(--border-color)' }}>
+        <div className="w-[250px] flex flex-col px-4 py-6 bg-muted/20 border-r border-border">
           <div className="mb-8 px-3">
-            <h2 className="text-[1.4rem] font-extrabold m-0" style={{ color: 'var(--accent-primary)' }}>HR Pulse <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>ESS</span></h2>
+            <h2 className="text-2xl font-extrabold text-primary m-0">HR Pulse <span className="text-xs text-muted-foreground">ESS</span></h2>
           </div>
           <nav className="flex flex-col gap-2" role="tablist">
             {navItems.map(item => {
               const active = activeTab === item.id
               const Icon = item.icon
               return (
-                <button
+                <Button
                   key={item.id}
-                  role="tab"
-                  aria-selected={active}
+                  variant={active ? "secondary" : "ghost"}
+                  className={`w-full justify-start ${active ? 'bg-primary/10 text-primary font-semibold' : 'text-muted-foreground font-medium'}`}
                   onClick={() => setActiveTab(item.id)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(item.id) } }}
-                  className="flex items-center gap-3 p-2 sm:p-3 rounded-lg border-0 cursor-pointer text-left"
-                  style={{
-                    background: active ? 'var(--bg-tertiary)' : 'transparent',
-                    color: active ? '#ffffff' : 'var(--text-secondary)',
-                    fontWeight: active ? 600 : 500, transition: 'background-color 0.2s, color 0.2s'
-                  }}
-                  onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = 'var(--text-primary)' }}
-                  onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = 'var(--text-secondary)' }}
                 >
-                  <Icon size={18} style={{ color: active ? 'var(--accent-primary)' : 'inherit' }} />
+                  <Icon className={`mr-2 h-4 w-4 ${active ? 'text-primary' : ''}`} />
                   {item.label}
-                </button>
+                </Button>
               )
             })}
           </nav>
           {!currentUser.isEmployee && (
-            <button aria-label="Back to admin" onClick={() => setSimulatedRole('Admin')}
-              className="mt-auto flex items-center gap-2.5 p-3 rounded-lg cursor-pointer font-medium w-full text-left"
-              style={{
-                border: '1px solid var(--border-color)', background: 'transparent',
-                color: 'var(--text-secondary)', fontSize: '0.85rem',
-                transition: 'all 0.15s'
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.color = 'var(--accent-primary)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.color = 'var(--text-secondary)' }}>
+            <Button 
+              variant="outline" 
+              className="mt-auto w-full justify-start text-muted-foreground"
+              onClick={() => setSimulatedRole('Admin')}
+            >
               ← Back to Admin
-            </button>
+            </Button>
           )}
         </div>
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-20 sm:pb-8">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-20 sm:pb-8 bg-background">
         {renderContent()}
       </div>
 
       {/* Bottom Tab Bar (Mobile) */}
       {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 flex justify-around items-center px-2 py-3 z-[100]" style={{
-          background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-color)',
-          backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-        }}>
+        <div className="fixed bottom-0 left-0 right-0 flex justify-around items-center px-2 py-3 z-[100] bg-background/80 backdrop-blur-md border-t border-border">
           {navItems.map(item => {
             const active = activeTab === item.id
             const Icon = item.icon
@@ -230,14 +221,10 @@ export default function EmployeePortal({
                 aria-selected={active}
                 onClick={() => setActiveTab(item.id)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(item.id) } }}
-                className="flex flex-col items-center justify-center gap-1 border-0 cursor-pointer flex-1 min-h-[44px] p-1.5"
-                style={{
-                  background: 'transparent',
-                  color: active ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                }}
+                className={`flex flex-col items-center justify-center gap-1 border-0 cursor-pointer flex-1 min-h-[44px] p-1.5 bg-transparent ${active ? 'text-primary' : 'text-muted-foreground'}`}
               >
                 <Icon size={20} />
-                <span className="text-[0.65rem]" style={{ fontWeight: active ? 600 : 500 }}>{item.label}</span>
+                <span className={`text-[0.65rem] ${active ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
               </button>
             )
           })}
@@ -245,47 +232,49 @@ export default function EmployeePortal({
       )}
 
       {isMobile && !currentUser.isEmployee && (
-        <button onClick={() => setSimulatedRole('Admin')}
-          className="fixed top-3 right-3 z-[101] px-3.5 py-2 rounded-full cursor-pointer font-semibold"
-          style={{
-            border: '1px solid var(--border-color)',
-            background: 'var(--bg-secondary)', color: 'var(--text-secondary)',
-            fontSize: '0.78rem',
-            backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-            transition: 'all 0.15s', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-          }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.color = 'var(--accent-primary)' }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.color = 'var(--text-secondary)' }}>
+        <Button 
+          variant="outline"
+          size="sm"
+          className="fixed top-3 right-3 z-[101] rounded-full shadow-sm bg-background/80 backdrop-blur-md"
+          onClick={() => setSimulatedRole('Admin')}
+        >
           ← Admin
-        </button>
+        </Button>
       )}
 
-      {showPunchModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-[11000]" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }} onClick={() => setShowPunchModal(false)}>
-          <div className="glass-card p-6 w-[90%] max-w-[400px] flex flex-col gap-4" style={{ background: 'var(--bg-secondary)' }} onClick={e => e.stopPropagation()}>
-            <h3 className="m-0">Attendance Punch</h3>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Select punch type for today (<strong>{formatDate(new Date().toISOString().split('T')[0])}</strong>):</p>
+      {/* Punch Modal */}
+      <Dialog open={showPunchModal} onOpenChange={setShowPunchModal}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Attendance Punch</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              Select punch type for today (<strong>{formatDate(new Date().toISOString().split('T')[0])}</strong>):
+            </p>
             <div className="flex gap-3">
-              <button 
-                className={`btn flex-1 min-h-[44px] ${punchType === 'In' ? 'btn-primary' : 'btn-secondary'}`} 
+              <Button 
+                variant={punchType === 'In' ? 'default' : 'outline'}
+                className="flex-1" 
                 onClick={() => setPunchType('In')}
               >
                 Clock In
-              </button>
-              <button 
-                className={`btn flex-1 min-h-[44px] ${punchType === 'Out' ? 'btn-primary' : 'btn-secondary'}`} 
+              </Button>
+              <Button 
+                variant={punchType === 'Out' ? 'default' : 'outline'}
+                className="flex-1" 
                 onClick={() => setPunchType('Out')}
               >
                 Clock Out
-              </button>
-            </div>
-            <div className="flex justify-end gap-3 mt-3">
-              <button className="btn btn-secondary min-h-[44px]" onClick={() => setShowPunchModal(false)}>Cancel</button>
-              <button className="btn btn-primary min-h-[44px]" onClick={handlePunchSubmit}>Confirm Punch</button>
+              </Button>
             </div>
           </div>
-        </div>
-      )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPunchModal(false)}>Cancel</Button>
+            <Button onClick={handlePunchSubmit}>Confirm Punch</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -294,7 +283,7 @@ export default function EmployeePortal({
 // SUB-VIEWS
 // ----------------------------------------------------
 
-function DashboardView({ currentUser, attendance, expenses, announcements, setActiveTab }) {
+function DashboardView({ currentUser, attendance, expenses, announcements, setActiveTab, setShowPunchModal }) {
   const currentBalances = attendance?.balances?.[currentUser.id] || {
     annual: { limit: 20, used: 0 },
     sick: { limit: 14, used: 0 },
@@ -311,51 +300,59 @@ function DashboardView({ currentUser, attendance, expenses, announcements, setAc
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto">
-      <div className="glass-card p-6 flex items-center gap-5">
-        {getInitialsAvatar(currentUser.name)}
-        <div>
-          <h1 className="text-2xl m-0 mb-1" style={{ color: 'var(--text-primary)' }}>Welcome back, {currentUser.name}!</h1>
-          <p className="m-0 text-sm" style={{ color: 'var(--text-secondary)' }}>{currentUser.department} • {currentUser.role}</p>
-        </div>
+      <Card>
+        <CardContent className="p-6 flex items-center gap-5">
+          {getInitialsAvatar(currentUser.name)}
+          <div>
+            <h1 className="text-2xl font-bold m-0 mb-1">Welcome back, {currentUser.name}!</h1>
+            <p className="m-0 text-sm text-muted-foreground">{currentUser.department} • {currentUser.role}</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+        <Card>
+          <CardContent className="p-5 flex flex-col justify-center">
+            <h3 className="text-sm font-medium uppercase text-muted-foreground m-0 mb-2">Annual Leave Balance</h3>
+            <div className="text-3xl font-bold">
+              {currentBalances.annual.limit - currentBalances.annual.used} <span className="text-base font-normal text-muted-foreground">/ {currentBalances.annual.limit} days</span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-5 flex flex-col justify-center">
+            <h3 className="text-sm font-medium uppercase text-muted-foreground m-0 mb-2">Sick Leave Balance</h3>
+            <div className="text-3xl font-bold">
+              {currentBalances.sick.limit - currentBalances.sick.used} <span className="text-base font-normal text-muted-foreground">/ {currentBalances.sick.limit} days</span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-5 flex flex-col justify-center">
+            <h3 className="text-sm font-medium uppercase text-muted-foreground m-0 mb-2">Pending Reimbursements</h3>
+            <div className="text-3xl font-bold">
+              ${totalPending.toFixed(2)}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
-        <div className="glass-card stat-card p-5">
-          <h3 className="text-sm uppercase m-0 mb-2" style={{ color: 'var(--text-secondary)' }}>Annual Leave Balance</h3>
-          <div className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            {currentBalances.annual.limit - currentBalances.annual.used} <span className="text-base" style={{ color: 'var(--text-muted)' }}>/ {currentBalances.annual.limit} days</span>
-          </div>
-        </div>
-        <div className="glass-card stat-card p-5">
-          <h3 className="text-sm uppercase m-0 mb-2" style={{ color: 'var(--text-secondary)' }}>Sick Leave Balance</h3>
-          <div className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            {currentBalances.sick.limit - currentBalances.sick.used} <span className="text-base" style={{ color: 'var(--text-muted)' }}>/ {currentBalances.sick.limit} days</span>
-          </div>
-        </div>
-        <div className="glass-card stat-card p-5">
-          <h3 className="text-sm uppercase m-0 mb-2" style={{ color: 'var(--text-secondary)' }}>Pending Reimbursements</h3>
-          <div className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            ${totalPending.toFixed(2)}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-6 mt-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+      <div className="grid gap-6 mt-4 grid-cols-1 md:grid-cols-2">
         <div className="flex flex-col gap-4">
-          <h3 className="text-lg m-0" style={{ color: 'var(--text-primary)' }}>Quick Actions</h3>
-          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
-            <button className="btn btn-secondary p-4 flex flex-col gap-2 items-center" onClick={() => setActiveTab('leave')}>
-              <CalendarIcon size={24} style={{ color: 'var(--accent-primary)' }} />
-              Request Leave
-            </button>
-            <button className="btn btn-secondary p-4 flex flex-col gap-2 items-center" onClick={() => setActiveTab('payslips')}>
-              <Download size={24} style={{ color: 'var(--accent-success)' }} />
-              Download Payslip
-            </button>
-            <button className="btn btn-secondary p-4 flex flex-col gap-2 items-center" onClick={() => setShowPunchModal(true)}>
-              <Clock size={24} style={{ color: 'var(--accent-warning)' }} />
-              Mark Attendance
-            </button>
+          <h3 className="text-lg font-semibold m-0">Quick Actions</h3>
+          <div className="grid gap-4 grid-cols-2">
+            <Button variant="outline" className="h-28 flex flex-col gap-3 justify-center items-center" onClick={() => setActiveTab('leave')}>
+              <CalendarIcon size={28} className="text-blue-500" />
+              <span>Request Leave</span>
+            </Button>
+            <Button variant="outline" className="h-28 flex flex-col gap-3 justify-center items-center" onClick={() => setActiveTab('payslips')}>
+              <Download size={28} className="text-green-500" />
+              <span>Download Payslip</span>
+            </Button>
+            <Button variant="outline" className="h-28 flex flex-col gap-3 justify-center items-center col-span-2 sm:col-span-1" onClick={() => setShowPunchModal(true)}>
+              <Clock size={28} className="text-amber-500" />
+              <span>Mark Attendance</span>
+            </Button>
           </div>
         </div>
 
@@ -366,17 +363,20 @@ function DashboardView({ currentUser, attendance, expenses, announcements, setAc
           </div>
           <div className="flex flex-col gap-3">
             {recentAnnouncements.length === 0 ? (
-              <div className="glass-card p-6 text-center" style={{ color: 'var(--text-secondary)' }}>No new announcements</div>
+              <Card>
+                <CardContent className="p-6 text-center text-muted-foreground">No new announcements</CardContent>
+              </Card>
             ) : (
               recentAnnouncements.map(ann => (
-                <div key={ann.id} className="glass-card p-4 cursor-pointer" style={{ borderLeft: ann.priority === 'Urgent' ? '4px solid var(--accent-danger)' : 'none' }} onClick={() => setActiveTab('announcements')}>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-xs font-semibold" style={{ color: 'var(--accent-primary)' }}>{ann.category}</span>
-                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{formatDate(ann.date)}</span>
-                  </div>
-                  <h4 className="m-0 mb-1 text-base" style={{ color: 'var(--text-primary)' }}>{ann.title}</h4>
-                  <p className="m-0 text-sm truncate" style={{ color: 'var(--text-secondary)' }}>{ann.content}</p>
-                </div>
+                <Card key={ann.id} className={`cursor-pointer hover:bg-muted/50 transition-colors ${ann.priority === 'Urgent' ? 'border-l-4 border-l-red-500' : ''}`} onClick={() => setActiveTab('announcements')}>
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="font-semibold">{ann.title}</span>
+                      <span className="text-xs text-muted-foreground">{formatDateShort(ann.date)}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground m-0 line-clamp-2">{ann.content}</p>
+                  </CardContent>
+                </Card>
               ))
             )}
           </div>
@@ -402,7 +402,6 @@ function AttendanceView({
   const currentMonth = formatMonthYear(new Date().toISOString().split('T')[0])
   const [activeSubTab, setActiveSubTab] = useState('roster') // 'roster', 'swap', 'overtime'
 
-  // Generate current week dates
   const today = new Date()
   const currentDay = today.getDay()
   const diff = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1)
@@ -422,7 +421,6 @@ function AttendanceView({
     return { date, dateStr, template }
   })
 
-  // Swap Form States
   const [swapDate, setSwapDate] = useState('')
   const [swapColleague, setSwapColleague] = useState('')
   const [swapReason, setSwapReason] = useState('')
@@ -447,7 +445,6 @@ function AttendanceView({
     addToast('Shift swap request sent to HR for approval.', 'success')
   }
 
-  // Overtime Form States
   const [otDate, setOtDate] = useState('')
   const [otHours, setOtHours] = useState('')
   const [otReason, setOtReason] = useState('')
@@ -473,90 +470,114 @@ function AttendanceView({
   }
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto">
-      <h2 className="m-0">My Attendance & Roster</h2>
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
+      <h2 className="text-2xl font-bold m-0">My Attendance & Roster</h2>
       
-      <div className="flex gap-3 pb-3" style={{ borderBottom: '1px solid var(--border-color)' }}>
-        <button className={`tab-btn px-4 py-2 rounded-lg border-0 font-semibold cursor-pointer ${activeSubTab === 'roster' ? 'active' : ''}`} style={{ background: activeSubTab === 'roster' ? 'var(--bg-secondary)' : 'transparent', color: activeSubTab === 'roster' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveSubTab('roster')}>My Schedule</button>
-        <button className={`tab-btn px-4 py-2 rounded-lg border-0 font-semibold cursor-pointer ${activeSubTab === 'swap' ? 'active' : ''}`} style={{ background: activeSubTab === 'swap' ? 'var(--bg-secondary)' : 'transparent', color: activeSubTab === 'swap' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveSubTab('swap')}>Request Swap</button>
-        <button className={`tab-btn px-4 py-2 rounded-lg border-0 font-semibold cursor-pointer ${activeSubTab === 'overtime' ? 'active' : ''}`} style={{ background: activeSubTab === 'overtime' ? 'var(--bg-secondary)' : 'transparent', color: activeSubTab === 'overtime' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveSubTab('overtime')}>Log Overtime</button>
+      <div className="flex gap-2 border-b border-border pb-3">
+        <Button variant={activeSubTab === 'roster' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('roster')}>My Schedule</Button>
+        <Button variant={activeSubTab === 'swap' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('swap')}>Request Swap</Button>
+        <Button variant={activeSubTab === 'overtime' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('overtime')}>Log Overtime</Button>
       </div>
 
       {activeSubTab === 'roster' && (
-        <div className="glass-card p-6 flex flex-col gap-4">
-          <h3 className="m-0 text-lg">This Week ({currentMonth})</h3>
-          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}>
-            {myRoster.map(({ date, template }, i) => (
-              <div key={i} className="p-4 rounded-lg flex flex-col gap-2" style={{ 
-                border: `1px solid ${template ? template.color : 'var(--border-color)'}`,
-                background: template ? `${template.color}15` : 'var(--bg-secondary)',
-              }}>
-                <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{formatDateWithWeekday(date.toISOString().split('T')[0])}</div>
-                {template ? (
-                  <>
-                    <div className="font-bold" style={{ color: template.color }}>{template.name}</div>
-                    <div className="text-xs" style={{ color: 'var(--text-primary)' }}>{template.start} - {template.end}</div>
-                  </>
-                ) : (
-                  <div className="font-semibold" style={{ color: 'var(--text-muted)' }}>Off</div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>This Week ({currentMonth})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
+              {myRoster.map(({ date, template }, i) => (
+                <div key={i} className="p-4 rounded-lg flex flex-col gap-2 border" style={{ 
+                  borderColor: template ? template.color : 'hsl(var(--border))',
+                  backgroundColor: template ? `${template.color}15` : 'hsl(var(--muted))',
+                }}>
+                  <div className="text-sm font-medium text-muted-foreground">{formatDateWithWeekday(date.toISOString().split('T')[0])}</div>
+                  {template ? (
+                    <>
+                      <div className="font-bold" style={{ color: template.color }}>{template.name}</div>
+                      <div className="text-xs text-foreground">{template.start} - {template.end}</div>
+                    </>
+                  ) : (
+                    <div className="font-semibold text-muted-foreground">Off</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {activeSubTab === 'swap' && (
-        <div className="glass-card p-6 max-w-[600px]">
-          <h3 className="m-0 mb-5 text-lg">Request Shift Swap</h3>
-          <form onSubmit={handleRequestSwap} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Date to Swap</label>
-              <input type="date" required value={swapDate} onChange={(e) => setSwapDate(e.target.value)} aria-label="Swap date" className="px-3.5 py-2.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
-            </div>
-            
-            <Select label="Colleague to Swap With" value={swapColleague} onChange={setSwapColleague} placeholder="Select Colleague...">
-              {employees?.filter(e => e.id !== currentUser.id && e.department === currentUser.department).map(emp => (
-                <SelectItem key={emp.id} id={emp.id}>{emp.name}</SelectItem>
-              ))}
-            </Select>
+        <Card className="max-w-[600px]">
+          <CardHeader>
+            <CardTitle>Request Shift Swap</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleRequestSwap} className="flex flex-col gap-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Date to Swap</label>
+                <Input type="date" required value={swapDate} onChange={(e) => setSwapDate(e.target.value)} />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Colleague to Swap With</label>
+                <Select value={swapColleague} onChange={setSwapColleague} placeholder="Select Colleague...">
+                  {employees?.filter(e => e.id !== currentUser.id && e.department === currentUser.department).map(emp => (
+                    <SelectItem id={emp.id} key={emp.id}>{emp.name}</SelectItem>
+                  ))}
+                </Select>
+              </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Reason</label>
-              <textarea rows={3} value={swapReason} onChange={(e) => setSwapReason(e.target.value)} className="px-3.5 py-2.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="Why do you need to swap?" aria-label="Swap reason" />
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Reason</label>
+                <textarea 
+                  rows={3} 
+                  value={swapReason} 
+                  onChange={(e) => setSwapReason(e.target.value)} 
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" 
+                  placeholder="Why do you need to swap?" 
+                />
+              </div>
 
-            <button type="submit" className="btn btn-primary self-start mt-2">
-              Submit Request
-            </button>
-          </form>
-        </div>
+              <Button type="submit" className="w-fit mt-2">Submit Request</Button>
+            </form>
+          </CardContent>
+        </Card>
       )}
 
       {activeSubTab === 'overtime' && (
-        <div className="glass-card p-6 max-w-[600px]">
-          <h3 className="m-0 mb-5 text-lg">Log Overtime</h3>
-          <form onSubmit={handleClaimOvertime} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Date</label>
-              <input type="date" required value={otDate} onChange={(e) => setOtDate(e.target.value)} aria-label="Overtime date" className="px-3.5 py-2.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
-            </div>
-            
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Total Overtime Hours</label>
-              <input type="number" step="0.5" required value={otHours} onChange={(e) => setOtHours(e.target.value)} aria-label="Overtime hours" className="px-3.5 py-2.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="e.g. 2.5" />
-            </div>
+        <Card className="max-w-[600px]">
+          <CardHeader>
+            <CardTitle>Log Overtime</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleClaimOvertime} className="flex flex-col gap-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Date</label>
+                <Input type="date" required value={otDate} onChange={(e) => setOtDate(e.target.value)} />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Total Overtime Hours</label>
+                <Input type="number" step="0.5" required value={otHours} onChange={(e) => setOtHours(e.target.value)} placeholder="e.g. 2.5" />
+              </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Justification / Manager Name</label>
-              <textarea rows={3} required value={otReason} onChange={(e) => setOtReason(e.target.value)} aria-label="Overtime justification" className="px-3.5 py-2.5 rounded-lg" style={{ border: '1px solid var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} placeholder="Explain work done..." />
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Justification / Manager Name</label>
+                <textarea 
+                  rows={3} 
+                  required 
+                  value={otReason} 
+                  onChange={(e) => setOtReason(e.target.value)} 
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" 
+                  placeholder="Explain work done..." 
+                />
+              </div>
 
-            <button type="submit" className="btn btn-primary self-start mt-2">
-              Submit Overtime
-            </button>
-          </form>
-        </div>
+              <Button type="submit" className="w-fit mt-2">Submit Overtime</Button>
+            </form>
+          </CardContent>
+        </Card>
       )}
     </div>
   )
@@ -566,41 +587,43 @@ function PayslipsView({ currentUser, payroll, addToast }) {
   const myPayslips = (payroll?.history || []).filter(p => p.employeeId === currentUser.id)
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto">
-      <h2 className="m-0">My Payslips</h2>
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
+      <h2 className="text-2xl font-bold m-0">My Payslips</h2>
       
       {myPayslips.length === 0 ? (
-        <div className="glass-card p-10 text-center" style={{ color: 'var(--text-secondary)' }}>
-          No payslips available yet.
-        </div>
+        <Card>
+          <CardContent className="p-10 text-center text-muted-foreground">
+            No payslips available yet.
+          </CardContent>
+        </Card>
       ) : (
-        <div className="table-container">
-          <table className="w-full table-striped">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Gross Pay</th>
-                <th>Deductions</th>
-                <th>Net Pay</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
+        <div className="rounded-md border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Gross Pay</TableHead>
+                <TableHead>Deductions</TableHead>
+                <TableHead>Net Pay</TableHead>
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {myPayslips.map((slip, i) => (
-                <tr key={i}>
-                  <td>{slip.date}</td>
-                  <td>${slip.gross}</td>
-                  <td>${slip.deductions}</td>
-                  <td className="font-semibold" style={{ color: 'var(--accent-success)' }}>${slip.net}</td>
-                  <td>
-                    <button className="btn btn-secondary px-3 py-1.5 text-xs" onClick={() => addToast('Downloading PDF...', 'info')}>
-                      <Download size={14} className="inline mr-1" /> PDF
-                    </button>
-                  </td>
-                </tr>
+                <TableRow key={i}>
+                  <TableCell>{slip.date}</TableCell>
+                  <TableCell>${slip.gross}</TableCell>
+                  <TableCell>${slip.deductions}</TableCell>
+                  <TableCell className="font-semibold text-green-600 dark:text-green-400">${slip.net}</TableCell>
+                  <TableCell>
+                    <Button variant="outline" size="sm" onClick={() => addToast('Downloading PDF...', 'info')}>
+                      <Download className="h-4 w-4 mr-2" /> PDF
+                    </Button>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>
@@ -640,104 +663,139 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
   }
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto">
-      <h2 className="m-0">My Leave</h2>
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
+      <h2 className="text-2xl font-bold m-0">My Leave</h2>
       
-      <div className="glass-card p-6">
-        <h3 className="mt-0">Apply for Leave</h3>
-        <form onSubmit={handleApply} className="flex flex-col gap-4 max-w-[500px]">
-          <Select value={type} onChange={setType} placeholder="Leave type">
-            <SelectItem id="Annual">Annual</SelectItem>
-            <SelectItem id="Sick">Sick</SelectItem>
-            <SelectItem id="Casual">Casual</SelectItem>
-            <SelectItem id="Unpaid">Unpaid</SelectItem>
-          </Select>
-          <div className="flex gap-4">
-            <input type="date" className="form-input flex-1" value={startDate} onChange={e => setStartDate(e.target.value)} required aria-label="Leave start date" />
-            <input type="date" className="form-input flex-1" value={endDate} onChange={e => setEndDate(e.target.value)} required aria-label="Leave end date" />
-          </div>
-          <textarea className="form-input" placeholder="Reason / Handover notes" rows="3" value={reason} onChange={e => setReason(e.target.value)} required aria-label="Leave reason" />
-          
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Attach Receipt / Medical Certificate</label>
-            <div className="flex items-center gap-3">
-              <label 
-                className="btn btn-secondary m-0 px-4 py-2.5 inline-flex items-center gap-2 min-h-[44px] cursor-pointer text-sm"
-              >
-                <Upload size={16} /> 
-                <span>{receiptName ? 'Change Document' : 'Upload File'}</span>
-                <input 
-                  type="file" 
-                  accept="image/*,application/pdf" 
-                  className="hidden" 
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setReceiptName(file.name);
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setReceipt(reader.result);
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }} 
-                />
-              </label>
-              {receiptName && (
-                <span className="text-sm truncate max-w-[200px]" style={{ color: 'var(--text-secondary)' }}>
-                  {receiptName}
-                </span>
-              )}
+      <Card>
+        <CardHeader>
+          <CardTitle>Apply for Leave</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleApply} className="flex flex-col gap-5 max-w-[500px]">
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none">Leave type</label>
+              <Select value={type} onChange={setType} placeholder="Leave type">
+                <SelectItem id="Annual">Annual</SelectItem>
+                <SelectItem id="Sick">Sick</SelectItem>
+                <SelectItem id="Casual">Casual</SelectItem>
+                <SelectItem id="Unpaid">Unpaid</SelectItem>
+              </Select>
             </div>
+            
+            <div className="flex gap-4">
+              <div className="flex-1 space-y-2">
+                <label className="text-sm font-medium leading-none">Start Date</label>
+                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
+              </div>
+              <div className="flex-1 space-y-2">
+                <label className="text-sm font-medium leading-none">End Date</label>
+                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} required />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none">Reason / Handover notes</label>
+              <textarea 
+                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" 
+                placeholder="Reason / Handover notes" 
+                rows="3" 
+                value={reason} 
+                onChange={e => setReason(e.target.value)} 
+                required 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none">Attach Receipt / Medical Certificate</label>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" type="button" className="relative cursor-pointer overflow-hidden group">
+                  <Upload className="h-4 w-4 mr-2" /> 
+                  <span>{receiptName ? 'Change Document' : 'Upload File'}</span>
+                  <input 
+                    type="file" 
+                    accept="image/*,application/pdf" 
+                    className="absolute inset-0 opacity-0 cursor-pointer" 
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setReceiptName(file.name);
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setReceipt(reader.result);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }} 
+                  />
+                </Button>
+                {receiptName && (
+                  <span className="text-sm text-muted-foreground truncate max-w-[200px]">
+                    {receiptName}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <Button type="submit" className="w-fit mt-2">
+              <Send className="h-4 w-4 mr-2" /> Submit Request
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Application History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border bg-card overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Dates</TableHead>
+                  <TableHead>Reason</TableHead>
+                  <TableHead>Receipt</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {myLeaves.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                      No leave history found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  myLeaves.map(l => (
+                    <TableRow key={l.id}>
+                      <TableCell className="font-medium">{l.leaveType}</TableCell>
+                      <TableCell>{l.startDate} to {l.endDate}</TableCell>
+                      <TableCell className="max-w-[200px] truncate">{l.reason}</TableCell>
+                      <TableCell>
+                        {l.receipt ? (
+                          <Button variant="link" className="p-0 h-auto" asChild>
+                            <a href={l.receipt} target="_blank" rel="noreferrer">
+                              <FileText className="h-3.5 w-3.5 mr-1" /> View
+                            </a>
+                          </Button>
+                        ) : (
+                          <span className="text-muted-foreground">None</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={l.status === 'Approved' ? 'default' : l.status === 'Rejected' ? 'destructive' : 'secondary'} className={l.status === 'Approved' ? 'bg-green-500 hover:bg-green-600' : l.status === 'Pending' ? 'bg-amber-500 hover:bg-amber-600' : ''}>
+                          {l.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
-
-          <button type="submit" className="btn btn-primary self-start"><Send size={16} /> Submit Request</button>
-        </form>
-      </div>
-
-      <div className="glass-card p-6">
-        <h3 className="mt-0">Application History</h3>
-        <div className="table-container">
-          <table className="w-full table-striped w-full border-collapse">
-            <thead>
-              <tr className="text-left" style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <th className="p-3">Type</th>
-                <th className="p-3">Dates</th>
-                <th className="p-3">Reason</th>
-                <th className="p-3">Receipt</th>
-                <th className="p-3">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {myLeaves.map(l => (
-                <tr key={l.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td className="p-3">{l.leaveType}</td>
-                  <td className="p-3">{l.startDate} to {l.endDate}</td>
-                  <td className="p-3">{l.reason}</td>
-                  <td className="p-3">
-                    {l.receipt ? (
-                      <a href={l.receipt} target="_blank" rel="noreferrer" className="font-semibold inline-flex items-center gap-1 min-h-[44px]" style={{ color: 'var(--accent-primary)', textDecoration: 'underline' }}>
-                        <FileText size={14} /> View
-                      </a>
-                    ) : (
-                      <span style={{ color: 'var(--text-muted)' }}>None</span>
-                    )}
-                  </td>
-                  <td className="p-3">
-                    <span className="px-2 py-1 rounded text-xs font-semibold" style={{ 
-                      background: l.status === 'Approved' ? 'rgba(34, 197, 94, 0.2)' : l.status === 'Rejected' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(234, 179, 8, 0.2)',
-                      color: l.status === 'Approved' ? 'var(--accent-success)' : l.status === 'Rejected' ? 'var(--accent-danger)' : 'var(--accent-warning)'
-                    }}>
-                      {l.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {myLeaves.length === 0 && <tr><td colSpan="5" className="p-3 text-center" style={{ color: 'var(--text-secondary)' }}>No leave history found.</td></tr>}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
@@ -770,90 +828,97 @@ function ProfileView({ currentUser, pendingProfileEdits, setPendingProfileEdits,
   }
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[800px] mx-auto">
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[800px] mx-auto pb-10">
       <div className="flex justify-between items-center">
-        <h2 className="m-0">My Profile</h2>
+        <h2 className="text-2xl font-bold m-0">My Profile</h2>
         {!editMode && !hasPending && (
-          <button className="btn btn-secondary" onClick={() => setEditMode(true)}>Edit Details</button>
+          <Button variant="outline" onClick={() => setEditMode(true)}>Edit Details</Button>
         )}
       </div>
 
       {hasPending && (
-        <div className="p-4 rounded flex gap-3 items-center" style={{ background: 'rgba(234, 179, 8, 0.1)', borderLeft: '4px solid var(--accent-warning)', color: 'var(--text-primary)' }}>
-          <AlertCircle style={{ color: 'var(--accent-warning)' }} />
-          <span>You have pending profile updates waiting for HR approval.</span>
+        <div className="p-4 rounded-md flex gap-3 items-center bg-amber-500/10 border-l-4 border-l-amber-500 text-foreground">
+          <AlertCircle className="h-5 w-5 text-amber-500" />
+          <span className="text-sm font-medium">You have pending profile updates waiting for HR approval.</span>
         </div>
       )}
 
-      <div className="glass-card p-6 flex gap-6 items-start">
-        {getInitialsAvatar(currentUser.name)}
-        <div className="flex-1 grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Full Name</label>
-            <div className="font-medium">{currentUser.name}</div>
+      <Card>
+        <CardContent className="p-6 flex flex-col sm:flex-row gap-6 items-start">
+          <div className="mx-auto sm:mx-0">
+            {getInitialsAvatar(currentUser.name)}
           </div>
-          <div>
-            <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Employee ID</label>
-            <div className="font-medium">{currentUser.id}</div>
+          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase">Full Name</label>
+              <div className="font-medium text-lg">{currentUser.name}</div>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase">Employee ID</label>
+              <div className="font-medium text-lg">{currentUser.id}</div>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase">Department</label>
+              <div className="font-medium text-lg">{currentUser.department}</div>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase">Role</label>
+              <div className="font-medium text-lg">{currentUser.role}</div>
+            </div>
           </div>
-          <div>
-            <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Department</label>
-            <div className="font-medium">{currentUser.department}</div>
-          </div>
-          <div>
-            <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Role</label>
-            <div className="font-medium">{currentUser.role}</div>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="glass-card p-6">
-        <h3 className="mt-0 mb-5">Contact & Personal Information</h3>
-        
-        {editMode ? (
-          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Personal Email</label>
-              <input type="email" className="form-input" value={formData.personalEmail} onChange={e => setFormData(p => ({...p, personalEmail: e.target.value}))} aria-label="Personal email" />
+      <Card>
+        <CardHeader>
+          <CardTitle>Contact & Personal Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {editMode ? (
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">Personal Email</label>
+                <Input type="email" value={formData.personalEmail} onChange={e => setFormData(p => ({...p, personalEmail: e.target.value}))} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">Phone Number</label>
+                <Input type="tel" value={formData.phone} onChange={e => setFormData(p => ({...p, phone: e.target.value}))} />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-medium leading-none">Address</label>
+                <Input type="text" value={formData.address} onChange={e => setFormData(p => ({...p, address: e.target.value}))} />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-medium leading-none">Emergency Contact</label>
+                <Input type="text" value={formData.emergencyContact} onChange={e => setFormData(p => ({...p, emergencyContact: e.target.value}))} />
+              </div>
+              <div className="sm:col-span-2 flex gap-3 mt-4">
+                <Button type="submit">Submit for Approval</Button>
+                <Button type="button" variant="outline" onClick={() => setEditMode(false)}>Cancel</Button>
+              </div>
+            </form>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase">Personal Email</label>
+                <div className="font-medium">{currentUser.personalEmail || '-'}</div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase">Phone Number</label>
+                <div className="font-medium">{currentUser.phone || '-'}</div>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-xs font-semibold text-muted-foreground uppercase">Address</label>
+                <div className="font-medium">{currentUser.address || '-'}</div>
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-xs font-semibold text-muted-foreground uppercase">Emergency Contact</label>
+                <div className="font-medium">{currentUser.emergencyContact || '-'}</div>
+              </div>
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Phone Number</label>
-              <input type="tel" className="form-input" value={formData.phone} onChange={e => setFormData(p => ({...p, phone: e.target.value}))} aria-label="Phone number" />
-            </div>
-            <div className="flex flex-col gap-1 col-span-2">
-              <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Address</label>
-              <input type="text" className="form-input" value={formData.address} onChange={e => setFormData(p => ({...p, address: e.target.value}))} aria-label="Address" />
-            </div>
-            <div className="flex flex-col gap-1 col-span-2">
-              <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>Emergency Contact</label>
-              <input type="text" className="form-input" value={formData.emergencyContact} onChange={e => setFormData(p => ({...p, emergencyContact: e.target.value}))} aria-label="Emergency contact" />
-            </div>
-            <div className="col-span-2 flex gap-3 mt-2">
-              <button type="submit" className="btn btn-primary">Submit for Approval</button>
-              <button type="button" className="btn btn-secondary" onClick={() => setEditMode(false)}>Cancel</button>
-            </div>
-          </form>
-        ) : (
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Personal Email</label>
-              <div className="font-medium">{currentUser.personalEmail || '-'}</div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Phone Number</label>
-              <div className="font-medium">{currentUser.phone || '-'}</div>
-            </div>
-            <div className="col-span-2">
-              <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Address</label>
-              <div className="font-medium">{currentUser.address || '-'}</div>
-            </div>
-            <div className="col-span-2">
-              <label className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Emergency Contact</label>
-              <div className="font-medium">{currentUser.emergencyContact || '-'}</div>
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
@@ -863,6 +928,30 @@ function ProfileView({ currentUser, pendingProfileEdits, setPendingProfileEdits,
 // ----------------------------------------------------------------------
 function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnouncements, addToast }) {
   const [filter, setFilter] = useState('All')
+  const [activeCommentPost, setActiveCommentPost] = useState(null)
+  const [commentText, setCommentText] = useState('')
+
+  const handleAddComment = (e, postId) => {
+    e.preventDefault()
+    if (!commentText.trim()) return
+    
+    setAnnouncements(prev => prev.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          comments: [...(post.comments || []), {
+            id: `cmt-${Date.now()}`,
+            authorId: currentUser.id,
+            text: commentText,
+            date: new Date().toISOString()
+          }]
+        }
+      }
+      return post
+    }))
+    setCommentText('')
+    addToast('Comment added', 'success')
+  }
 
   const handleReaction = (postId, emoji) => {
     setAnnouncements(prev => prev.map(post => {
@@ -882,7 +971,6 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
   const handleVote = (postId, optionIndex) => {
     setAnnouncements(prev => prev.map(post => {
       if (post.id === postId && post.poll) {
-        // Prevent double voting
         const hasVoted = post.poll.options.some(o => o.votes.includes(currentUser.id))
         if (hasVoted) {
           addToast('You have already voted on this poll', 'warning')
@@ -900,7 +988,6 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
     }))
   }
 
-  // Mark as read when rendering (simplistic approach for now)
   useEffect(() => {
     setAnnouncements(prev => prev.map(post => {
       if (!post.readBy.includes(currentUser.id)) {
@@ -919,34 +1006,32 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
       return new Date(b.date) - new Date(a.date)
     })
 
-  const getPriorityColor = (p) => {
-    if (p === 'Urgent') return 'var(--accent-danger)'
-    if (p === 'Important') return 'var(--accent-warning)'
-    return 'var(--accent-primary)'
-  }
-
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[800px] mx-auto pb-10">
       <div className="flex justify-between items-center">
-        <h2 className="m-0 flex items-center gap-3">
-          <Megaphone size={24} color="var(--accent-primary)" />
+        <h2 className="text-2xl font-bold m-0 flex items-center gap-3">
+          <Megaphone className="h-6 w-6 text-primary" />
           Company Feed
         </h2>
-        <Select value={filter} onChange={setFilter} placeholder="All Categories">
-          <SelectItem id="All">All Categories</SelectItem>
-          <SelectItem id="General">General</SelectItem>
-          <SelectItem id="Policy Update">Policy Update</SelectItem>
-          <SelectItem id="Event">Event</SelectItem>
-          <SelectItem id="Achievement/Birthday/Work Anniversary">Celebrations</SelectItem>
-          <SelectItem id="Emergency">Emergency</SelectItem>
-        </Select>
+        <div className="w-[180px]">
+          <Select value={filter} onChange={setFilter} placeholder="All Categories">
+            <SelectItem id="All">All Categories</SelectItem>
+            <SelectItem id="General">General</SelectItem>
+            <SelectItem id="Policy Update">Policy Update</SelectItem>
+            <SelectItem id="Event">Event</SelectItem>
+            <SelectItem id="Achievement/Birthday/Work Anniversary">Celebrations</SelectItem>
+            <SelectItem id="Emergency">Emergency</SelectItem>
+          </Select>
+        </div>
       </div>
 
       <div className="flex flex-col gap-6">
         {visiblePosts.length === 0 ? (
-          <div className="glass-card p-10 text-center" style={{ color: 'var(--text-secondary)' }}>
-            No announcements found in this category.
-          </div>
+          <Card>
+            <CardContent className="p-10 text-center text-muted-foreground">
+              No announcements found in this category.
+            </CardContent>
+          </Card>
         ) : (
           visiblePosts.map(post => {
             const author = post.authorId === 'system' ? { name: 'System Auto-Post', avatar: '' } : employees.find(e => e.id === post.authorId) || { name: 'Unknown User' }
@@ -954,89 +1039,136 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
             const isUrgent = post.priority === 'Urgent'
 
             return (
-              <div key={post.id} className="glass-card p-6 relative" style={{ borderLeft: `4px solid ${getPriorityColor(post.priority)}` }}>
+              <Card key={post.id} className={`relative overflow-hidden ${isUrgent ? 'border-l-4 border-l-red-500' : ''}`}>
                 {isUrgent && (
-                  <div className="absolute top-3 right-3 px-2 py-1 rounded-xl text-[0.7rem] font-bold uppercase" style={{ background: 'var(--accent-danger)', color: '#fff' }}>
+                  <Badge variant="destructive" className="absolute top-4 right-4 uppercase text-[10px]">
                     Pinned
-                  </div>
+                  </Badge>
                 )}
-
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    {author.avatar ? (
-                      <img src={author.avatar} alt="" className="size-10 rounded-full object-cover" />
-                    ) : (
-                      <div className="size-10 rounded-full flex items-center justify-center" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
-                        <Megaphone size={20} />
+                
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        {author.avatar ? (
+                          <AvatarImage src={author.avatar} alt={author.name} />
+                        ) : null}
+                        <AvatarFallback className="bg-muted text-muted-foreground">
+                          <Megaphone className="h-5 w-5" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-semibold text-foreground">{author.name}</div>
+                        <div className="text-xs text-muted-foreground">{dateStr}</div>
                       </div>
-                    )}
-                    <div>
-                      <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{author.name}</div>
-                      <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{dateStr}</div>
                     </div>
+                    <Badge variant="secondary" className={isUrgent ? 'mr-16' : ''}>
+                      {post.category}
+                    </Badge>
                   </div>
-                  <span className="text-xs px-2 py-1 rounded" style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
-                    {post.category}
-                  </span>
-                </div>
 
-                <h3 className="m-0 mb-3 text-xl" style={{ color: 'var(--text-primary)' }}>{post.title}</h3>
-                <div className="text-sm" style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
-                  {post.content}
-                </div>
+                  <h3 className="m-0 mb-3 text-xl font-semibold">{post.title}</h3>
+                  <div className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                    {post.content}
+                  </div>
 
-                {post.poll && (
-                  <div className="mt-5 p-4 rounded-lg" style={{ background: 'var(--bg-secondary)' }}>
-                    <h4 className="m-0 mb-4 text-base" style={{ color: 'var(--text-primary)' }}>📊 {post.poll.question}</h4>
-                    <div className="flex flex-col gap-3">
-                      {post.poll.options.map((opt, i) => {
-                        const hasVoted = post.poll.options.some(o => o.votes.includes(currentUser.id))
-                        const iVoted = opt.votes.includes(currentUser.id)
-                        const totalVotes = post.poll.options.reduce((sum, o) => sum + o.votes.length, 0)
-                        const pct = totalVotes === 0 ? 0 : Math.round((opt.votes.length / totalVotes) * 100)
+                  {post.poll && (
+                    <div className="mt-5 p-4 rounded-lg bg-muted/50 border border-border">
+                      <h4 className="m-0 mb-4 text-base font-medium">📊 {post.poll.question}</h4>
+                      <div className="flex flex-col gap-3">
+                        {post.poll.options.map((opt, i) => {
+                          const hasVoted = post.poll.options.some(o => o.votes.includes(currentUser.id))
+                          const iVoted = opt.votes.includes(currentUser.id)
+                          const totalVotes = post.poll.options.reduce((sum, o) => sum + o.votes.length, 0)
+                          const pct = totalVotes === 0 ? 0 : Math.round((opt.votes.length / totalVotes) * 100)
 
-                        if (hasVoted) {
-                          return (
-                            <div key={i} className="flex items-center gap-3">
-                              <div className="flex-1 relative overflow-hidden rounded h-8" style={{ background: 'var(--bg-tertiary)' }}>
-                                <div className="absolute top-0 left-0 h-full" style={{ width: `${pct}%`, background: iVoted ? 'var(--accent-success)' : 'var(--accent-primary)', opacity: 0.2 }}></div>
-                                <div className="absolute inset-0 flex items-center px-3 text-sm" style={{ color: 'var(--text-primary)' }}>
-                                  {opt.text} {iVoted && ' (Your Vote)'}
+                          if (hasVoted) {
+                            return (
+                              <div key={i} className="flex items-center gap-3">
+                                <div className="flex-1 relative overflow-hidden rounded-md h-8 bg-muted border border-border/50">
+                                  <div className={`absolute top-0 left-0 h-full opacity-20 ${iVoted ? 'bg-green-500' : 'bg-primary'}`} style={{ width: `${pct}%` }}></div>
+                                  <div className="absolute inset-0 flex items-center px-3 text-sm font-medium">
+                                    {opt.text} {iVoted && ' (Your Vote)'}
+                                  </div>
                                 </div>
+                                <div className="w-10 text-sm text-right text-muted-foreground font-medium">{pct}%</div>
                               </div>
-                              <div className="w-10 text-sm text-right" style={{ color: 'var(--text-secondary)' }}>{pct}%</div>
-                            </div>
-                          )
-                        } else {
-                          return (
-                            <button key={i} className="btn btn-secondary text-left p-3 px-4" onClick={() => handleVote(post.id, i)}>
-                              {opt.text}
-                            </button>
-                          )
-                        }
-                      })}
+                            )
+                          } else {
+                            return (
+                              <Button key={i} variant="outline" className="justify-start px-4 h-10" onClick={() => handleVote(post.id, i)}>
+                                {opt.text}
+                              </Button>
+                            )
+                          }
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                <div className="flex items-center gap-4 mt-5 pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
-                  <button className="btn btn-secondary px-3 py-1.5 flex items-center gap-2 text-sm" onClick={() => handleReaction(post.id, '👍')}>
-                    <ThumbsUp size={16} /> {post.reactions['👍']}
-                  </button>
-                  <button className="btn btn-secondary px-3 py-1.5 flex items-center gap-2 text-sm" onClick={() => handleReaction(post.id, '❤️')}>
-                    <Heart size={16} /> {post.reactions['❤️']}
-                  </button>
-                  <button className="btn btn-secondary px-3 py-1.5 flex items-center gap-2 text-sm" onClick={() => handleReaction(post.id, '🎉')}>
-                    <PartyPopper size={16} /> {post.reactions['🎉']}
-                  </button>
-                  
-                  <div className="flex-1"></div>
-                  
-                  <button className="btn btn-secondary px-3 py-1.5 flex items-center gap-2 text-sm" onClick={() => addToast('Comments coming soon', 'info')}>
-                    <MessageSquare size={16} /> Comment
-                  </button>
-                </div>
-              </div>
+                  <div className="flex items-center gap-3 mt-6 pt-4 border-t border-border">
+                    <Button variant="outline" size="sm" className="gap-2 rounded-full h-8 px-3" onClick={() => handleReaction(post.id, '👍')}>
+                      <ThumbsUp className="h-3.5 w-3.5" /> {post.reactions['👍']}
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-2 rounded-full h-8 px-3" onClick={() => handleReaction(post.id, '❤️')}>
+                      <Heart className="h-3.5 w-3.5" /> {post.reactions['❤️']}
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-2 rounded-full h-8 px-3" onClick={() => handleReaction(post.id, '🎉')}>
+                      <PartyPopper className="h-3.5 w-3.5" /> {post.reactions['🎉']}
+                    </Button>
+                    
+                    <div className="flex-1"></div>
+                    
+                    <Button variant="ghost" size="sm" className={`gap-2 h-8 ${activeCommentPost === post.id ? 'bg-muted text-foreground' : 'text-muted-foreground'}`} onClick={() => setActiveCommentPost(activeCommentPost === post.id ? null : post.id)}>
+                      <MessageSquare className="h-4 w-4" /> Comment {post.comments?.length > 0 ? `(${post.comments.length})` : ''}
+                    </Button>
+                  </div>
+
+                  {/* Comments Section */}
+                  {(activeCommentPost === post.id || (post.comments && post.comments.length > 0)) && (
+                    <div className="mt-4 space-y-4 pt-4 border-t border-border">
+                      {/* Render comments */}
+                      {post.comments?.map(cmt => {
+                        const cAuthor = employees.find(e => e.id === cmt.authorId) || { name: 'Unknown User' }
+                        return (
+                          <div key={cmt.id} className="flex gap-3 text-sm">
+                            <Avatar className="h-8 w-8 mt-1">
+                              {cAuthor.avatar ? <AvatarImage src={cAuthor.avatar} /> : null}
+                              <AvatarFallback className="text-xs">{cAuthor.name[0]}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 bg-muted/50 rounded-lg p-3">
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="font-semibold">{cAuthor.name}</span>
+                                <span className="text-[10px] text-muted-foreground">{formatDateTime(cmt.date)}</span>
+                              </div>
+                              <p className="m-0 text-foreground">{cmt.text}</p>
+                            </div>
+                          </div>
+                        )
+                      })}
+                      
+                      {/* Comment Input */}
+                      {activeCommentPost === post.id && (
+                        <form onSubmit={(e) => handleAddComment(e, post.id)} className="flex gap-3 items-start mt-4">
+                          <Avatar className="h-8 w-8 mt-1">
+                            <AvatarFallback className="text-xs">{currentUser.name[0]}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 flex gap-2">
+                            <Input 
+                              placeholder="Write a comment..." 
+                              value={commentText}
+                              onChange={(e) => setCommentText(e.target.value)}
+                              className="flex-1"
+                              autoFocus
+                            />
+                            <Button type="submit" size="sm" disabled={!commentText.trim()}>Post</Button>
+                          </div>
+                        </form>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             )
           })
         )}
@@ -1109,17 +1241,17 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
   }
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[900px] mx-auto">
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[900px] mx-auto pb-10">
       <div className="flex justify-between items-center">
-        <h2 className="m-0 flex items-center gap-3">
-          <Monitor size={24} color="var(--accent-primary)" />
+        <h2 className="text-2xl font-bold m-0 flex items-center gap-3">
+          <Monitor className="h-6 w-6 text-primary" />
           My Assets
         </h2>
-        <div className="flex gap-2">
-          <button className="px-4 py-2 rounded-lg border-0 font-semibold cursor-pointer" style={{ background: activeTab === 'assigned' ? 'var(--bg-secondary)' : 'transparent', color: activeTab === 'assigned' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveTab('assigned')}>
+        <div className="flex gap-2 bg-muted p-1 rounded-lg">
+          <button className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'assigned' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('assigned')}>
             Assigned to Me
           </button>
-          <button className="px-4 py-2 rounded-lg border-0 font-semibold cursor-pointer" style={{ background: activeTab === 'request' ? 'var(--bg-secondary)' : 'transparent', color: activeTab === 'request' ? 'var(--text-primary)' : 'var(--text-secondary)' }} onClick={() => setActiveTab('request')}>
+          <button className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'request' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('request')}>
             Request Equipment
           </button>
         </div>
@@ -1128,96 +1260,131 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
       {activeTab === 'assigned' && (
         <div className="flex flex-col gap-4">
           {myAssets.length === 0 ? (
-            <div className="glass-card p-10 text-center" style={{ color: 'var(--text-secondary)' }}>
-              No assets are currently assigned to you.
-            </div>
+            <Card>
+              <CardContent className="p-10 text-center text-muted-foreground flex flex-col items-center justify-center">
+                <Monitor className="h-10 w-10 mb-3 opacity-20" />
+                No assets are currently assigned to you.
+              </CardContent>
+            </Card>
           ) : (
             myAssets.map(asset => (
-              <div key={asset.id} className="glass-card p-5 flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                  <div className="size-12 rounded-xl flex items-center justify-center" style={{ background: 'var(--bg-secondary)' }}>
-                    <Monitor size={24} color="var(--accent-primary)" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-lg">{asset.name}</div>
-                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{asset.category} · SN: {asset.serialNumber}</div>
-                    <div className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
-                      Assigned: {asset.assignmentDate} · Condition: {asset.condition}
+              <Card key={asset.id}>
+                <CardContent className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-xl flex items-center justify-center bg-primary/10">
+                      <Monitor className="h-6 w-6 text-primary" />
                     </div>
-                    {asset.warrantyExpiry && (
-                      <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Warranty until: {asset.warrantyExpiry}</div>
-                    )}
+                    <div>
+                      <div className="font-bold text-lg">{asset.name}</div>
+                      <div className="text-sm text-muted-foreground">{asset.category} &middot; SN: {asset.serialNumber}</div>
+                      <div className="text-xs mt-1 text-muted-foreground">
+                        Assigned: {asset.assignmentDate} &middot; Condition: {asset.condition}
+                      </div>
+                      {asset.warrantyExpiry && (
+                        <div className="text-xs text-muted-foreground">Warranty until: {asset.warrantyExpiry}</div>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-3">
-                  <button className="btn btn-secondary px-4 py-2 text-sm flex items-center gap-1.5" style={{ color: 'var(--accent-warning)' }} onClick={() => { setIssueAsset(asset); setShowIssueModal(true) }}>
-                    <AlertTriangle size={14} /> Report Issue
-                  </button>
-                  <button className="btn btn-secondary px-4 py-2 text-sm" onClick={() => handleRequestReturn(asset.id)}>
-                    Request Return
-                  </button>
-                </div>
-              </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="text-amber-500 border-amber-500/20 hover:bg-amber-500/10 hover:text-amber-600" onClick={() => { setIssueAsset(asset); setShowIssueModal(true) }}>
+                      <AlertTriangle className="h-4 w-4 mr-2" /> Report Issue
+                    </Button>
+                    <Button variant="outline" onClick={() => handleRequestReturn(asset.id)}>
+                      Request Return
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))
           )}
 
           {myRequests.length > 0 && (
-            <div className="mt-2">
-              <h4 className="m-0 mb-3" style={{ color: 'var(--text-secondary)' }}>My Past Requests</h4>
-              {myRequests.map(req => (
-                <div key={req.id} className="glass-card p-4 mb-3 flex justify-between items-center">
-                  <div>
-                    <span className="font-semibold">{req.category}</span>
-                    <span className="ml-2 text-sm" style={{ color: 'var(--text-secondary)' }}>"{req.justification}"</span>
-                  </div>
-                  <span className={`badge ${req.status === 'Approved' ? 'badge-success' : req.status === 'Rejected' ? 'badge-danger' : 'badge-warning'}`}>{req.status}</span>
-                </div>
-              ))}
+            <div className="mt-4">
+              <h4 className="text-lg font-semibold mb-3">My Past Requests</h4>
+              <div className="space-y-3">
+                {myRequests.map(req => (
+                  <Card key={req.id}>
+                    <CardContent className="p-4 flex justify-between items-center">
+                      <div>
+                        <span className="font-semibold">{req.category}</span>
+                        <span className="ml-2 text-sm text-muted-foreground truncate max-w-[200px] sm:max-w-[400px] inline-block align-bottom">&quot;{req.justification}&quot;</span>
+                      </div>
+                      <Badge variant={req.status === 'Approved' ? 'default' : req.status === 'Rejected' ? 'destructive' : 'secondary'} className={req.status === 'Approved' ? 'bg-green-500 hover:bg-green-600' : req.status === 'Pending' ? 'bg-amber-500 hover:bg-amber-600' : ''}>
+                        {req.status}
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           )}
         </div>
       )}
 
       {activeTab === 'request' && (
-        <div className="glass-card p-6">
-          <h3 className="m-0 mb-5">Request New Equipment</h3>
-          <form onSubmit={handleSubmitRequest} className="flex flex-col gap-4">
-            <Select label="Equipment Category" value={requestForm.category} onChange={(val) => setRequestForm(p => ({...p, category: val}))}>
-              <SelectItem id="Laptop">Laptop</SelectItem>
-              <SelectItem id="Phone">Phone</SelectItem>
-              <SelectItem id="Monitor">Monitor</SelectItem>
-              <SelectItem id="Peripherals">Peripherals</SelectItem>
-              <SelectItem id="Access Card">Access Card</SelectItem>
-            </Select>
-            <Select label="Urgency Level" value={requestForm.urgency} onChange={(val) => setRequestForm(p => ({...p, urgency: val}))}>
-              <SelectItem id="Low">Low</SelectItem>
-              <SelectItem id="Medium">Medium</SelectItem>
-              <SelectItem id="High">High</SelectItem>
-            </Select>
-            <div className="form-group">
-              <label>Justification</label>
-              <textarea required rows={4} className="form-input" placeholder="Explain why you need this equipment..." value={requestForm.justification} onChange={e => setRequestForm(p => ({...p, justification: e.target.value}))} />
-            </div>
-            <button type="submit" className="btn btn-primary self-start">Submit Request</button>
-          </form>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Request New Equipment</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmitRequest} className="flex flex-col gap-5 max-w-[500px]">
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">Equipment Category</label>
+                <Select value={requestForm.category} onChange={(val) => setRequestForm(p => ({...p, category: val}))} placeholder="Category">
+                  <SelectItem id="Laptop">Laptop</SelectItem>
+                  <SelectItem id="Phone">Phone</SelectItem>
+                  <SelectItem id="Monitor">Monitor</SelectItem>
+                  <SelectItem id="Peripherals">Peripherals</SelectItem>
+                  <SelectItem id="Access Card">Access Card</SelectItem>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">Urgency Level</label>
+                <Select value={requestForm.urgency} onChange={(val) => setRequestForm(p => ({...p, urgency: val}))} placeholder="Urgency">
+                  <SelectItem id="Low">Low</SelectItem>
+                  <SelectItem id="Medium">Medium</SelectItem>
+                  <SelectItem id="High">High</SelectItem>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">Justification</label>
+                <textarea 
+                  required 
+                  rows={4} 
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" 
+                  placeholder="Explain why you need this equipment..." 
+                  value={requestForm.justification} 
+                  onChange={e => setRequestForm(p => ({...p, justification: e.target.value}))} 
+                />
+              </div>
+              <Button type="submit" className="w-fit">Submit Request</Button>
+            </form>
+          </CardContent>
+        </Card>
       )}
 
       {/* Report Issue Modal */}
-      {showIssueModal && (
-        <div className="modal-overlay">
-          <div className="modal-content glass-card fade-in max-w-[500px] w-full">
-            <h3 className="mt-0">Report Issue: {issueAsset?.name}</h3>
-            <form onSubmit={handleReportIssue} className="flex flex-col gap-4">
-              <textarea required rows={5} className="form-input" placeholder="Describe the issue in detail..." value={issueText} onChange={e => setIssueText(e.target.value)} />
-              <div className="flex justify-end gap-3">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowIssueModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Submit Report</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <Dialog open={showIssueModal} onOpenChange={setShowIssueModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Report Issue: {issueAsset?.name}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleReportIssue} className="flex flex-col gap-5 pt-4">
+            <textarea 
+              required 
+              rows={5} 
+              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" 
+              placeholder="Describe the issue in detail..." 
+              value={issueText} 
+              onChange={e => setIssueText(e.target.value)} 
+            />
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowIssueModal(false)}>Cancel</Button>
+              <Button type="submit">Submit Report</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -644,7 +644,13 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                           variant="outline" 
                           size="sm" 
                           className="flex-1 h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200"
-                          onClick={(e) => { e.stopPropagation(); handleDeleteEmployee(emp.id, emp.name); }}
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            setConfirmDelete(() => () => {
+                              handleDeleteEmployee(emp.id, emp.name);
+                              setConfirmDelete(null);
+                            }); 
+                          }}
                         >
                           <Trash2 className="mr-1.5 h-3 w-3" /> Delete
                         </Button>
