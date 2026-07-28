@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, User, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, Sun, Moon, AlertTriangle, Upload, CheckSquare, CalendarDays, Menu } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
@@ -68,6 +68,25 @@ export default function EmployeePortal({
   const [showPunchModal, setShowPunchModal] = useState(false)
   useModal(() => setShowPunchModal(false))
   const [punchType, setPunchType] = useState('In')
+  
+  const [isScrollingDown, setIsScrollingDown] = useState(false)
+  const lastScrollY = useRef(0)
+
+  const handleScroll = (e) => {
+    if (!isMobile) return;
+    
+    const currentScrollY = e.target.scrollTop;
+    
+    if (currentScrollY < 50) {
+      setIsScrollingDown(false);
+    } else if (currentScrollY > lastScrollY.current + 5) {
+      setIsScrollingDown(true);
+    } else if (currentScrollY < lastScrollY.current - 5) {
+      setIsScrollingDown(false);
+    }
+    
+    lastScrollY.current = currentScrollY;
+  }
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
@@ -222,7 +241,7 @@ export default function EmployeePortal({
 
       {/* Mobile Header */}
       {isMobile && (
-        <div className="flex items-center justify-between px-4 py-3 bg-background border-b border-border z-40 sticky top-0 shrink-0">
+        <div className={`fixed top-0 left-0 right-0 flex items-center justify-between px-4 py-3 bg-background border-b border-border z-40 transition-transform duration-300 ease-in-out ${isScrollingDown && !showMobileMenu ? '-translate-y-full' : 'translate-y-0'}`}>
           <h2 className="text-xl font-extrabold text-primary m-0">HR Pulse <span className="text-[10px] text-muted-foreground">ESS</span></h2>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 rounded-full shrink-0">
@@ -237,14 +256,17 @@ export default function EmployeePortal({
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-20 sm:pb-8 bg-background">
+      <div 
+        className={`flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 ${isMobile ? 'pt-[72px] pb-20' : 'pb-8'} bg-background`}
+        onScroll={handleScroll}
+      >
         {renderContent()}
       </div>
 
       {/* Bottom Tab Bar (Mobile) */}
       {isMobile && (
         <div 
-          className="fixed bottom-0 left-0 right-0 z-[60] bg-background/90 backdrop-blur-md border-t border-border shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-safe overflow-x-auto no-scrollbar"
+          className={`fixed bottom-0 left-0 right-0 z-[60] bg-background/90 backdrop-blur-md border-t border-border shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-safe overflow-x-auto no-scrollbar transition-transform duration-300 ease-in-out ${isScrollingDown && !showMobileMenu ? 'translate-y-full' : 'translate-y-0'}`}
           style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
         >
           <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
@@ -263,11 +285,9 @@ export default function EmployeePortal({
                     setActiveTab(item.id)
                     setShowMobileMenu(false)
                   }}
-                  className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${active ? 'text-primary' : 'text-muted-foreground'}`}
+                  className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${active ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
                 >
-                  <div className={`flex items-center justify-center rounded-full p-2.5 transition-all duration-300 ${active ? 'bg-primary/15 scale-110 text-primary' : 'bg-transparent hover:bg-muted/50 hover:text-foreground'}`}>
-                    <Icon size={22} strokeWidth={active ? 2.5 : 2} />
-                  </div>
+                  <Icon size={24} strokeWidth={active ? 2.5 : 2} />
                 </button>
               )
             })}
@@ -278,11 +298,9 @@ export default function EmployeePortal({
               aria-label="Menu"
               title="Menu"
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${showMobileMenu ? 'text-primary' : 'text-muted-foreground'}`}
+              className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${showMobileMenu ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
             >
-              <div className={`flex items-center justify-center rounded-full p-2.5 transition-all duration-300 ${showMobileMenu ? 'bg-primary/15 scale-110 text-primary' : 'bg-transparent hover:bg-muted/50 hover:text-foreground'}`}>
-                <Menu size={22} strokeWidth={showMobileMenu ? 2.5 : 2} />
-              </div>
+              <Menu size={24} strokeWidth={showMobileMenu ? 2.5 : 2} />
             </button>
           </div>
         </div>
