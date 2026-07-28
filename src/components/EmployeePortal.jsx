@@ -15,6 +15,8 @@ import Calendar from './Calendar.jsx'
 import Announcements from './Announcements.jsx'
 import Expenses from './Expenses.jsx'
 import Documents from './Documents.jsx'
+import Sidebar from './layout/Sidebar.jsx'
+import Topbar from './layout/Topbar.jsx'
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -74,6 +76,7 @@ export default function EmployeePortal({
   const [activeTab, setActiveTab] = useState('dashboard') // dashboard, attendance, payslips, leave, profile
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true')
   const [showPunchModal, setShowPunchModal] = useState(false)
   useModal(() => setShowPunchModal(false))
   const [punchType, setPunchType] = useState('In')
@@ -199,179 +202,75 @@ export default function EmployeePortal({
   }
 
   const navItems = [
-    { id: 'dashboard', icon: Home, label: 'Dashboard' },
-    { id: 'my-tasks', icon: CheckSquare, label: 'Tasks' },
-    { id: 'events', icon: CalendarDays, label: 'Events' },
-    { id: 'announcements', icon: Megaphone, label: 'Feed' },
-    { id: 'my-assets', icon: Monitor, label: 'Assets' },
-    { id: 'attendance', icon: Clock, label: 'Attendance' },
-    { id: 'payslips', icon: FileText, label: 'Payslips' },
-    { id: 'expenses', icon: Receipt, label: 'Expenses' },
-    { id: 'documents', icon: FolderOpen, label: 'Documents' },
-    { id: 'leave', icon: CalendarIcon, label: 'Leave' },
-    { id: 'profile', icon: UserIcon, label: 'Profile' }
+    { id: 'dashboard', icon: <Home size={18} />, label: 'Dashboard' },
+    { id: 'my-tasks', icon: <CheckSquare size={18} />, label: 'Tasks' },
+    { id: 'events', icon: <CalendarDays size={18} />, label: 'Events' },
+    { id: 'announcements', icon: <Megaphone size={18} />, label: 'Feed' },
+    { id: 'my-assets', icon: <Monitor size={18} />, label: 'Assets' },
+    { id: 'attendance', icon: <Clock size={18} />, label: 'Attendance' },
+    { id: 'payslips', icon: <FileText size={18} />, label: 'Payslips' },
+    { id: 'expenses', icon: <Receipt size={18} />, label: 'Expenses' },
+    { id: 'documents', icon: <FolderOpen size={18} />, label: 'Documents' },
+    { id: 'leave', icon: <CalendarIcon size={18} />, label: 'Leave' },
+    { id: 'profile', icon: <UserIcon size={18} />, label: 'Profile' }
   ]
 
   return (
-    <div className={`flex h-full w-full overflow-hidden bg-background ${isMobile ? 'flex-col' : 'flex-row'}`}>
+    <div className="dashboard-root app-shell relative" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
       
-      {/* Sidebar (Desktop) */}
-      {!isMobile && (
-        <div className="w-[250px] flex flex-col px-4 py-6 bg-muted/20 border-r border-border">
-          <div className="mb-8 px-3">
-            <h2 className="text-2xl font-extrabold text-primary m-0">HR Pulse <span className="text-xs text-muted-foreground">ESS</span></h2>
-          </div>
-          <nav className="flex flex-col gap-2" role="tablist">
-            {navItems.map(item => {
-              const active = activeTab === item.id
-              const Icon = item.icon
-              return (
-                <Button
-                  key={item.id}
-                  variant={active ? "secondary" : "ghost"}
-                  className={`w-full justify-start ${active ? 'bg-primary/10 text-primary font-semibold' : 'text-muted-foreground font-medium'}`}
-                  onClick={() => setActiveTab(item.id)}
-                >
-                  <Icon className={`mr-2 h-4 w-4 ${active ? 'text-primary' : ''}`} />
-                  {item.label}
-                </Button>
-              )
-            })}
-          </nav>
-          <div className="mt-auto flex flex-col gap-2">
-            <Button variant="ghost" onClick={toggleTheme} className="w-full justify-start text-muted-foreground font-medium" title={`Theme: ${themeMode}`}>
-              {themeMode === 'light' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-              Theme: {themeMode.charAt(0).toUpperCase() + themeMode.slice(1)}
-            </Button>
-            {!currentUser.isEmployee && (
-              <Button 
-                variant="outline" 
-                className="w-full justify-start text-muted-foreground"
-                onClick={() => setSimulatedRole('Admin')}
-              >
-                ← Back to Admin
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
+      <Sidebar
+        visibleNavItems={navItems}
+        isCollapsed={isSidebarCollapsed}
+        isDarkMode={themeMode === 'dark'}
+        currentView={activeTab}
+        setCurrentView={setActiveTab}
+        mobileMenuOpen={showMobileMenu}
+        toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        user={currentUser}
+        simulatedRole={simulatedRole}
+        showRoleModal={false}
+        setShowRoleModal={() => {}}
+        handleLogout={() => {}}
+        setIsCollapsed={setIsSidebarCollapsed}
+        setSimulatedRole={setSimulatedRole}
+        setMobileMenuOpen={setShowMobileMenu}
+      />
 
-      {/* Mobile Header */}
-      {isMobile && (
-        <div className={`fixed top-0 left-0 right-0 flex items-center justify-between px-4 py-3 bg-background border-b border-border z-40 transition-transform duration-300 ease-in-out ${isScrollingDown && !showMobileMenu ? '-translate-y-full' : 'translate-y-0'}`}>
-          <h2 className="text-xl font-extrabold text-primary m-0">HR Pulse <span className="text-[10px] text-muted-foreground">ESS</span></h2>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 rounded-full shrink-0">
-              {themeMode === 'light' ? <Sun size={18} /> : <Moon size={18} />}
-            </Button>
-            <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-primary/20 shrink-0" onClick={() => setActiveTab('profile')}>
-              {currentUser?.avatar ? <AvatarImage src={currentUser.avatar} className="object-cover" /> : null}
-              <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold"><UserIcon size={14}/></AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-      )}
-
-      {/* Main Content Area */}
-      <div 
-        className={`flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 ${isMobile ? 'pt-[72px] pb-20' : 'pb-8'} bg-background`}
+      <main 
+        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw]`} 
+        style={{ scrollbarGutter: 'stable' }}
         onScroll={handleScroll}
       >
-        {renderContent()}
-      </div>
-
-      {/* Bottom Tab Bar (Mobile) */}
-      {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 z-[60] pointer-events-auto">
-          <nav 
-            className={`w-full h-12 sm:h-14 px-4 flex items-center justify-between sm:justify-evenly bg-background/80 backdrop-blur-xl saturate-150 text-foreground border-t border-border/50 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
-            style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
-          >
-            {navItems.filter(i => ['dashboard', 'my-tasks', 'announcements', 'attendance'].includes(i.id)).map(item => {
-              const active = activeTab === item.id
-              const Icon = item.icon
-              return (
-                <button
-                  key={item.id}
-                  role="tab"
-                  aria-label={item.label}
-                  title={item.label}
-                  aria-selected={active}
-                  onClick={() => {
-                    setActiveTab(item.id)
-                    setShowMobileMenu(false)
-                  }}
-                  className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${active ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
-                >
-                  <Icon size={24} strokeWidth={active ? 2.5 : 2} />
-                </button>
-              )
-            })}
-            
-            {/* Menu Toggle */}
-            <button
-              role="button"
-              aria-label="Menu"
-              title="Menu"
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${showMobileMenu ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              <Menu size={24} strokeWidth={showMobileMenu ? 2.5 : 2} />
-            </button>
-          </nav>
-        </div>
-      )}
-
-      {/* Mobile Menu Drawer (Custom implementation with smooth slide up/down) */}
-      {/* Backdrop */}
-      <div 
-        className={`fixed inset-0 z-50 bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-sm transition-opacity duration-300 ${showMobileMenu ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-        onClick={() => setShowMobileMenu(false)}
-        aria-hidden={!showMobileMenu}
-      />
-      
-      {/* Drawer Content */}
-      <div 
-        className={`fixed bottom-0 left-0 right-0 z-50 flex flex-col bg-popover rounded-t-2xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] border border-border/40 transition-transform duration-300 ease-in-out sm:w-[400px] sm:mx-auto max-h-[85vh] ${showMobileMenu ? 'translate-y-0' : 'translate-y-full'}`}
-        aria-hidden={!showMobileMenu}
-      >
-        <div className="px-5 py-4 border-b border-border/50 bg-muted/20 rounded-t-2xl shrink-0 flex items-center justify-between">
-          <h2 className="text-left text-lg font-bold text-foreground">Menu</h2>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground" onClick={() => setShowMobileMenu(false)}>
-            <XCircle size={18} />
-          </Button>
-        </div>
-        <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
-          {navItems.filter(i => !['dashboard', 'my-tasks', 'announcements', 'attendance', 'profile'].includes(i.id)).map(item => {
-            const Icon = item.icon
-            const active = activeTab === item.id
-            return (
-              <Button
-                key={item.id}
-                variant={active ? "secondary" : "ghost"}
-                className={`w-full justify-start py-6 rounded-xl transition-all ${active ? 'bg-primary/10 text-primary font-semibold shadow-sm' : 'text-foreground font-medium hover:bg-muted/60'}`}
-                onClick={() => { setActiveTab(item.id); setShowMobileMenu(false) }}
-              >
-                <Icon className={`mr-4 h-[22px] w-[22px] ${active ? 'text-primary' : 'text-muted-foreground/70'}`} />
-                <span className="text-base">{item.label}</span>
-              </Button>
-            )
-          })}
+        <div className="w-full max-w-[1600px] flex flex-col relative">
           
-          {!currentUser.isEmployee && (
-            <>
-              <div className="h-px bg-border/60 my-4 mx-2 shrink-0" />
-              <Button 
-                variant="outline" 
-                className="w-full justify-center text-muted-foreground py-6 rounded-xl hover:bg-muted/60 border-dashed shrink-0"
-                onClick={() => { setSimulatedRole('Admin'); setShowMobileMenu(false) }}
-              >
-                ← Back to Admin
-              </Button>
-            </>
-          )}
+          {/* Sticky Header Wrapper */}
+          <div className={`sticky top-0 z-40 w-full pt-6 md:pt-8 lg:pt-10 pb-6 md:pb-8 lg:pb-10 px-4 md:px-6 lg:px-8 transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+            <Topbar
+                isDarkMode={themeMode === 'dark'}
+                toggleSidebar={() => {
+                  if (isMobile) {
+                    setShowMobileMenu(true)
+                  } else {
+                    setIsSidebarCollapsed(!isSidebarCollapsed)
+                  }
+                }}
+                themeMode={themeMode}
+                toggleTheme={toggleTheme}
+                handleSync={() => {}} 
+                isSyncing={false}
+                driveConnected={false}
+                syncConflicts={[]}
+                setShowNotifications={() => {}}
+                markNotificationsRead={() => {}}
+                unreadCount={0}
+            />
+          </div>
+
+          <div className="w-full flex-1 px-4 md:px-6 lg:px-8">
+            {renderContent()}
+          </div>
         </div>
-      </div>
+      </main>
 
       {/* Punch Modal */}
       <Dialog open={showPunchModal} onOpenChange={setShowPunchModal}>
@@ -406,6 +305,47 @@ export default function EmployeePortal({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Bottom Tab Bar (Mobile) */}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 z-[60] pointer-events-auto">
+          <nav 
+            className={`w-full h-12 sm:h-14 px-4 flex items-center justify-between sm:justify-evenly bg-background/80 backdrop-blur-xl saturate-150 text-foreground border-t border-border/50 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
+            style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
+          >
+            {navItems.filter(i => ['dashboard', 'my-tasks', 'announcements', 'attendance'].includes(i.id)).map(item => {
+              const active = activeTab === item.id
+              return (
+                <button
+                  key={item.id}
+                  role="tab"
+                  aria-label={item.label}
+                  title={item.label}
+                  aria-selected={active}
+                  onClick={() => {
+                    setActiveTab(item.id)
+                    setShowMobileMenu(false)
+                  }}
+                  className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${active ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  <div className="flex items-center justify-center size-6">{item.icon}</div>
+                </button>
+              )
+            })}
+            
+            {/* Menu Toggle */}
+            <button
+              role="button"
+              aria-label="Menu"
+              title="Menu"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${showMobileMenu ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              <Menu size={24} strokeWidth={showMobileMenu ? 2.5 : 2} />
+            </button>
+          </nav>
+        </div>
+      )}
     </div>
   )
 }
