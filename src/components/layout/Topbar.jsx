@@ -7,15 +7,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
       
       {/* Left Section: Mobile Menu + Brand Pill */}
       <div className="flex items-center gap-1 min-[400px]:gap-3 sm:gap-4 shrink-0">
-        <Button
-          aria-label="Open menu"
-          variant="ghost"
-          size="icon"
-          className="md:hidden shrink-0 rounded-full size-8 min-[400px]:size-10"
-          onClick={toggleSidebar}
-        >
-          <Menu size={22} />
-        </Button>
+
 
         <div className="flex items-center gap-2 sm:gap-3 px-2 min-[400px]:px-3 py-1 sm:py-1.5 rounded-full bg-muted/40 border border-border/50">
           <div className="size-7 sm:size-9 rounded-full flex items-center justify-center shrink-0 bg-primary text-primary-foreground font-black text-[10px] sm:text-sm tracking-wider shadow-sm">

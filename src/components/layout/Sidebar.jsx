@@ -14,7 +14,7 @@ export default function Sidebar({
       {/* Mobile fullscreen overlay backdrop */}
       {mobileMenuOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden animate-fade-in"
+          className="fixed inset-0 z-40 bg-white/60 dark:bg-black/60 backdrop-blur-sm lg:hidden animate-fade-in"
           onClick={() => setMobileMenuOpen(false)} 
         />
       )}
@@ -25,11 +25,11 @@ export default function Sidebar({
           flex flex-col shrink-0 relative z-50 bg-sidebar text-sidebar-foreground
           transition-all duration-300 ease-in-out overflow-hidden
           ${mobileMenuOpen 
-            ? 'fixed inset-0 w-full max-w-full border-r-0 shadow-2xl h-full rounded-none' 
+            ? 'fixed inset-0 w-full max-w-full border-r-0 shadow-2xl h-[100dvh] rounded-none' 
             : 'hidden md:flex my-6 md:my-8 lg:my-10 ml-4 md:ml-6 lg:ml-8 rounded-2xl shadow-lg border border-sidebar-border h-[calc(100vh-3rem)] md:h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)]'}
         `}
         style={{
-          width: isCollapsed && !mobileMenuOpen ? '64px' : (mobileMenuOpen ? '100%' : 'max-content'),
+          width: isCollapsed && !mobileMenuOpen ? '64px' : (mobileMenuOpen ? '100%' : 'fit-content'),
         }}
       >
       
@@ -127,8 +127,8 @@ export default function Sidebar({
               opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
               maxWidth: (mobileMenuOpen || !isCollapsed) ? '300px' : 0,
             }}>
-              <p className="text-sm font-semibold m-0 text-sidebar-foreground break-words leading-tight">{user?.name || "Ishtiaq Rizve"}</p>
-              <p className="text-[11px] font-medium m-0 text-sidebar-foreground/70 break-words">{simulatedRole || user?.role || "Admin"}</p>
+              <p className="text-sm font-semibold m-0 text-sidebar-foreground whitespace-nowrap leading-tight">{user?.name || "Ishtiaq Rizve"}</p>
+              <p className="text-[11px] font-medium m-0 text-sidebar-foreground/70 whitespace-nowrap">{simulatedRole || user?.role || "Admin"}</p>
             </div>
           </div>
 

@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import Login from './components/Login.jsx'
 import EmployeePortal from './components/EmployeePortal.jsx'
 import Sidebar from './components/layout/Sidebar.jsx'
 import Topbar from './components/layout/Topbar.jsx'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Monitor, Sun, Moon, User as UserIcon, Menu, XCircle, LayoutDashboard, Users, Clock, Megaphone, ArrowLeftRight, LogOut } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import ToastContainer from './components/layout/ToastContainer.jsx'
 import CommandPalette from './components/layout/CommandPalette.jsx'
@@ -23,6 +26,10 @@ export default function App() {
   const appData = useAppData({ user, addToast })
 
   const [currentView, setCurrentView] = useState(() => localStorage.getItem('hr_pulse_current_view') || 'dashboard')
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const [isScrollingDown, setIsScrollingDown] = useState(false)
+  const lastScrollY = useRef(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true')
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null)
@@ -33,9 +40,21 @@ export default function App() {
     return () => clearTimeout(timer)
   }, [currentView])
 
+  const handleScroll = (e) => {
+    if (!isMobile) return;
+    const currentScrollY = e.target.scrollTop;
+    if (currentScrollY < 50) {
+      setIsScrollingDown(false);
+    } else if (currentScrollY > lastScrollY.current + 5) {
+      setIsScrollingDown(true);
+    } else if (currentScrollY < lastScrollY.current - 5) {
+      setIsScrollingDown(false);
+    }
+    lastScrollY.current = currentScrollY;
+  }
+
   useEffect(() => {
-    const handleResize = () => setMobileMenuOpen(false)
-    handleResize()
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
@@ -152,11 +171,18 @@ export default function App() {
         setSimulatedRole={appData.setSimulatedRole}
         setMobileMenuOpen={setMobileMenuOpen}
       />
-      <main className="content dashboard-content pb-12 flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw]" style={{ scrollbarGutter: 'stable' }}>
+
+
+
+      <main 
+        className={`content dashboard-content ${isMobile ? 'pb-24' : 'pb-12'} flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw]`} 
+        style={{ scrollbarGutter: 'stable' }}
+        onScroll={handleScroll}
+      >
         <div className="w-full max-w-[1600px] flex flex-col relative">
           
           {/* Sticky Header Wrapper */}
-          <div className="sticky top-0 z-40 w-full pt-6 md:pt-8 lg:pt-10 pb-6 md:pb-8 lg:pb-10 px-4 md:px-6 lg:px-8">
+          <div className={`sticky top-0 z-40 w-full pt-6 md:pt-8 lg:pt-10 pb-6 md:pb-8 lg:pb-10 px-4 md:px-6 lg:px-8 transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
             <Topbar
                 isDarkMode={isDarkMode}
                 toggleSidebar={toggleSidebar}
@@ -170,7 +196,7 @@ export default function App() {
                 markNotificationsRead={appData.markNotificationsRead}
                 unreadCount={unreadCount}
               />
-            </div>
+          </div>
 
           {/* Notification Panel */}
           {appData.showNotifications && (
@@ -215,6 +241,102 @@ export default function App() {
           </div>
         </div>
       </main>
+
+      {/* Bottom Tab Bar (Mobile) */}
+      {isMobile && (
+        <div 
+          className={`fixed bottom-0 left-0 right-0 z-[60] bg-background/90 backdrop-blur-md border-t border-border shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-safe overflow-x-auto no-scrollbar transition-transform duration-300 ease-in-out ${isScrollingDown && !showMobileMenu ? 'translate-y-full' : 'translate-y-0'}`}
+          style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
+        >
+          <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
+          <div className="flex items-center justify-between sm:justify-evenly min-w-full px-2 py-2 gap-1 mx-auto">
+            {visibleNavItems.filter(i => ['dashboard', 'employees', 'attendance', 'announcements'].includes(i.id)).map(item => {
+              const active = currentView === item.id
+              return (
+                <button
+                  key={item.id}
+                  role="tab"
+                  aria-label={item.label}
+                  title={item.label}
+                  aria-selected={active}
+                  onClick={() => {
+                    setCurrentView(item.id)
+                    setShowMobileMenu(false)
+                  }}
+                  className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${active ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  <div className="[&>svg]:w-6 [&>svg]:h-6">{item.icon}</div>
+                </button>
+              )
+            })}
+            
+            {/* Menu Toggle */}
+            <button
+              role="button"
+              aria-label="Menu"
+              title="Menu"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${showMobileMenu ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              <Menu size={24} strokeWidth={showMobileMenu ? 2.5 : 2} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Menu Drawer */}
+      <div 
+        className={`fixed inset-0 z-50 bg-white/60 dark:bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${showMobileMenu ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setShowMobileMenu(false)}
+        aria-hidden={!showMobileMenu}
+      />
+      
+      <div 
+        className={`fixed bottom-0 left-0 right-0 z-50 flex flex-col bg-popover rounded-t-2xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] border border-border/40 transition-transform duration-300 ease-in-out sm:w-[400px] sm:mx-auto max-h-[85vh] md:hidden ${showMobileMenu ? 'translate-y-0' : 'translate-y-full'}`}
+        aria-hidden={!showMobileMenu}
+      >
+        <div className="px-5 py-4 border-b border-border/50 bg-muted/20 rounded-t-2xl shrink-0 flex items-center justify-between">
+          <h2 className="text-left text-lg font-bold text-foreground">Menu</h2>
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground" onClick={() => setShowMobileMenu(false)}>
+            <XCircle size={18} />
+          </Button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
+          {visibleNavItems.filter(i => !['dashboard', 'employees', 'attendance', 'announcements'].includes(i.id)).map(item => {
+            const active = currentView === item.id
+            return (
+              <Button
+                key={item.id}
+                variant={active ? "secondary" : "ghost"}
+                className={`w-full justify-start py-6 rounded-xl transition-all ${active ? 'bg-primary/10 text-primary font-semibold shadow-sm' : 'text-foreground font-medium hover:bg-muted/60'}`}
+                onClick={() => { setCurrentView(item.id); setShowMobileMenu(false) }}
+              >
+                <div className={`mr-4 h-[22px] w-[22px] [&>svg]:w-[22px] [&>svg]:h-[22px] flex items-center justify-center ${active ? 'text-primary' : 'text-muted-foreground/70'}`}>{item.icon}</div>
+                <span className="text-base">{item.label}</span>
+              </Button>
+            )
+          })}
+          
+          <div className="h-px bg-border/60 my-4 mx-2 shrink-0" />
+          
+          <button 
+            className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white transition-colors cursor-pointer border-none shadow-sm"
+            onClick={() => { appData.setShowRoleModal(true); setShowMobileMenu(false) }}
+          >
+            <ArrowLeftRight size={20} />
+            <span className="font-semibold text-base">Switch Role</span>
+          </button>
+
+          <button 
+            className="btn-shimmer mt-2 w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer border-none shadow-sm"
+            onClick={() => { handleLogout(); setShowMobileMenu(false) }}
+          >
+            <LogOut size={20} />
+            <span className="font-semibold text-base">Logout</span>
+          </button>
+        </div>
+      </div>
+
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <CommandPalette
         showCommandPalette={showCommandPalette}

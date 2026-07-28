@@ -15,7 +15,7 @@ const DashboardWidget = ({
   children
 }) => {
   return (
-    <Card className={`flex flex-col p-0 ${useAccordion ? 'h-auto' : `h-full xl:col-span-4 ${cardClass}`}`}>
+    <Card className={`flex flex-col p-0 h-full xl:col-span-4 ${cardClass}`}>
       <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
         <div className="flex items-center gap-3">
           <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${iconClass}`}>
@@ -33,20 +33,11 @@ const DashboardWidget = ({
 }
 
 export default function Dashboard({ employees, driveConnected, onSync, attendance, setCurrentView, announcements, events, payroll, isSidebarCollapsed, simulatedRole, hasPermission }) {
-  const [isIpad, setIsIpad] = useState(false)
   const [expandedWidgets, setExpandedWidgets] = useState([])
   
-  useEffect(() => {
-    const checkIpad = () => setIsIpad(window.innerWidth >= 768 && window.innerWidth < 1024)
-    checkIpad()
-    window.addEventListener('resize', checkIpad)
-    return () => window.removeEventListener('resize', checkIpad)
-  }, [])
-
-  const useAccordion = isIpad && !isSidebarCollapsed
   const toggleWidget = (id) => setExpandedWidgets(prev => prev.includes(id) ? prev.filter(w => w !== id) : [...prev, id])
 
-  const wProps = { useAccordion, expandedWidgets, toggleWidget }
+  const wProps = { expandedWidgets, toggleWidget }
 
   const canViewEmployees = hasPermission ? hasPermission('employees') : true
   const canViewAttendance = hasPermission ? hasPermission('attendance') : true
@@ -239,7 +230,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       </div>
 
       {/* Unified Responsive & Adaptive Dashboard Grid */}
-      <div className={useAccordion ? "flex flex-col gap-4 w-full" : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5 lg:gap-6 items-stretch"}>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5 lg:gap-6 items-stretch">
         
         {/* Widget 1 — Employee Directory (Span 4) */}
         {canViewEmployees && (
@@ -337,7 +328,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
 
         {/* Attendance Details Dropdown (Span 12 Full Width) */}
         {showAttDropdown && canViewAttendance && (
-          <Card className="xl:col-span-12 overflow-hidden p-0">
+          <Card className="md:col-span-2 xl:col-span-12 overflow-hidden p-0">
             <div className="px-6 py-3.5 border-b border-border font-extrabold text-xs uppercase tracking-wider text-muted-foreground">
               Today's Attendance Roster Breakdowns
             </div>
