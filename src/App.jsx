@@ -249,7 +249,7 @@ export default function App() {
             className={`w-full h-12 sm:h-14 px-4 flex items-center justify-between sm:justify-evenly bg-background/80 backdrop-blur-xl saturate-150 text-foreground border-t border-border/50 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
             style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
           >
-            {visibleNavItems.filter(i => ['dashboard', 'employees', 'attendance', 'announcements'].includes(i.id)).map(item => {
+            {visibleNavItems.filter(i => ['dashboard', 'employees', 'attendance', 'tasks', 'announcements'].includes(i.id)).map(item => {
               const active = currentView === item.id
               return (
                 <button
@@ -301,7 +301,7 @@ export default function App() {
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
-          {visibleNavItems.filter(i => !['dashboard', 'employees', 'attendance', 'announcements'].includes(i.id)).map(item => {
+          {visibleNavItems.filter(i => !['dashboard', 'employees', 'attendance', 'tasks', 'announcements'].includes(i.id)).map(item => {
             const active = currentView === item.id
             return (
               <Button
