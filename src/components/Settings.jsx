@@ -626,13 +626,6 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           <Settings2 size={20} className="text-primary" />
           System Settings
         </h1>
-        <div className="flex gap-2">
-          <Button variant="ghost" onClick={() => setShowResetModal(true)}>Reset Defaults</Button>
-          <Button onClick={handleSave} disabled={isSaving || isOver100}>
-            {isSaving ? <Activity className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            {isSaving ? 'Saving...' : 'Save Settings'}
-          </Button>
-        </div>
       </div>
       <div className="border-t border-border border-headline" />
 
@@ -664,6 +657,16 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 <div className="overflow-hidden">
                   <div className="p-4 md:p-6 border-t border-border bg-muted/10 flex flex-col gap-6">
                     {isActive && renderSettingsContent(item.id)}
+                    
+                    {isActive && ['payroll', 'company', 'expenses', 'rosters', 'notifications'].includes(item.id) && (
+                      <div className="flex justify-end gap-3 pt-4 mt-2 border-t border-border/50">
+                        <Button variant="ghost" onClick={() => setShowResetModal(true)}>Reset Defaults</Button>
+                        <Button onClick={handleSave} disabled={isSaving || (item.id === 'payroll' && isOver100)}>
+                          {isSaving ? <Activity className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                          {isSaving ? 'Saving...' : 'Save Settings'}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

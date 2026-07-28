@@ -446,6 +446,35 @@ function DashboardView({ currentUser, attendance, expenses, announcements, tasks
         </CardContent>
       </Card>
 
+      {/* ANNOUNCEMENTS - MOVED TO TOP */}
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between items-center px-1">
+          <h3 className="text-lg font-semibold text-foreground m-0">Announcements</h3>
+          <button className="bg-transparent border-0 font-semibold cursor-pointer text-sm text-primary hover:text-primary/80 transition-colors" onClick={() => setActiveTab('announcements')}>View All</button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {recentAnnouncements.length === 0 ? (
+            <Card className="col-span-full">
+              <CardContent className="p-6 text-center text-muted-foreground">No new announcements</CardContent>
+            </Card>
+          ) : (
+            recentAnnouncements.map(ann => (
+              <Card key={ann.id} className={`cursor-pointer hover:bg-muted/50 transition-colors ${ann.priority === 'Urgent' ? 'border-l-4 border-l-red-500' : ''}`} onClick={() => setActiveTab('announcements')}>
+                <CardContent className="p-4 flex flex-col h-full justify-between">
+                  <div>
+                    <div className="flex justify-between items-start mb-2 gap-2">
+                      <span className="font-semibold leading-tight line-clamp-2">{ann.title}</span>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">{formatDateShort(ann.date)}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground m-0 break-words line-clamp-2">{ann.content}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
+
       <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('my-tasks')}>
           <CardContent className="p-5 flex flex-col justify-center">
@@ -499,49 +528,27 @@ function DashboardView({ currentUser, attendance, expenses, announcements, tasks
         </Card>
       </div>
 
-      <div className="grid gap-6 mt-4 grid-cols-1 md:grid-cols-2">
-        <div className="flex flex-col gap-4">
-          <h3 className="text-lg font-semibold m-0">Quick Actions</h3>
-          <div className="grid gap-4 grid-cols-2">
-            <Button variant="outline" className="h-28 flex flex-col gap-3 justify-center items-center" onClick={() => setActiveTab('leave')}>
-              <CalendarIcon size={28} className="text-blue-500" />
-              <span>Request Leave</span>
-            </Button>
-            <Button variant="outline" className="h-28 flex flex-col gap-3 justify-center items-center" onClick={() => setActiveTab('payslips')}>
-              <Download size={28} className="text-green-500" />
-              <span>Download Payslip</span>
-            </Button>
-            <Button variant="outline" className="h-28 flex flex-col gap-3 justify-center items-center col-span-2 sm:col-span-1" onClick={() => setShowPunchModal(true)}>
-              <Clock size={28} className="text-amber-500" />
-              <span>Mark Attendance</span>
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg m-0" style={{ color: 'var(--text-primary)' }}>Company Feed</h3>
-            <button className="bg-transparent border-0 font-semibold cursor-pointer text-sm" style={{ color: 'var(--accent-primary)' }} onClick={() => setActiveTab('announcements')}>View All</button>
-          </div>
-          <div className="flex flex-col gap-3">
-            {recentAnnouncements.length === 0 ? (
-              <Card>
-                <CardContent className="p-6 text-center text-muted-foreground">No new announcements</CardContent>
-              </Card>
-            ) : (
-              recentAnnouncements.map(ann => (
-                <Card key={ann.id} className={`cursor-pointer hover:bg-muted/50 transition-colors ${ann.priority === 'Urgent' ? 'border-l-4 border-l-red-500' : ''}`} onClick={() => setActiveTab('announcements')}>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-semibold">{ann.title}</span>
-                      <span className="text-xs text-muted-foreground">{formatDateShort(ann.date)}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground m-0 break-words">{ann.content}</p>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
+      <div className="mt-4 flex flex-col gap-4">
+        <h3 className="text-lg font-semibold m-0">Quick Actions</h3>
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+          <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer h-28 flex items-center justify-center group" onClick={() => setActiveTab('leave')}>
+            <CardContent className="p-0 flex flex-col gap-3 justify-center items-center">
+              <CalendarIcon size={28} className="text-blue-500 transition-transform group-hover:scale-110" />
+              <span className="text-sm font-medium">Request Leave</span>
+            </CardContent>
+          </Card>
+          <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer h-28 flex items-center justify-center group" onClick={() => setActiveTab('payslips')}>
+            <CardContent className="p-0 flex flex-col gap-3 justify-center items-center">
+              <Download size={28} className="text-green-500 transition-transform group-hover:scale-110" />
+              <span className="text-sm font-medium">Download Payslip</span>
+            </CardContent>
+          </Card>
+          <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer h-28 flex items-center justify-center col-span-2 sm:col-span-1 group" onClick={() => setShowPunchModal(true)}>
+            <CardContent className="p-0 flex flex-col gap-3 justify-center items-center">
+              <Clock size={28} className="text-amber-500 transition-transform group-hover:scale-110" />
+              <span className="text-sm font-medium">Mark Attendance</span>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
