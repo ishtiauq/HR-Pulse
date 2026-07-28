@@ -1,8 +1,9 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import jsPDF from 'jspdf'
-import { Banknote, Download, Search, X, PlusCircle, Calendar, Pencil, CheckSquare, Trash2, ChevronDown, Check } from 'lucide-react'
+import { Banknote, Download, Search, X, PlusCircle, Calendar, Pencil, CheckSquare, Trash2, ChevronDown, Check, User } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -744,7 +745,10 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <img src={emp.avatar} alt={emp.name} className="w-9 h-9 rounded-full object-cover shrink-0 ring-1 ring-border" />
+                            <Avatar className="w-9 h-9 shrink-0 ring-1 ring-border">
+                              {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+                              <AvatarFallback className="bg-primary/10 text-primary"><User size={18} /></AvatarFallback>
+                            </Avatar>
                             <div className="flex flex-col">
                               <span className="font-medium">{emp.name}</span>
                               <span className="text-xs text-muted-foreground">{emp.role}</span>
@@ -821,8 +825,11 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
           {selectedEmpLog && (
             <div className="flex flex-col gap-4">
               {/* Employee Info */}
-              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg border border-border">
-                <img src={selectedEmpLog.employee.avatar} alt={selectedEmpLog.employee.name} className="w-10 h-10 rounded-full object-cover shrink-0 ring-1 ring-border" />
+              <div className="flex items-center gap-4 py-4 px-2 border-b border-border/50">
+                <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
+                  {selectedEmpLog.employee.avatar ? <AvatarImage src={selectedEmpLog.employee.avatar} alt={selectedEmpLog.employee.name} className="object-cover" /> : null}
+                  <AvatarFallback className="bg-primary/10 text-primary"><User size={20} /></AvatarFallback>
+                </Avatar>
                 <div className="flex flex-col">
                   <span className="font-semibold text-sm">{selectedEmpLog.employee.name}</span>
                   <span className="text-xs text-muted-foreground">{selectedEmpLog.employee.role}</span>

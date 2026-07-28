@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, Sun, Moon, AlertTriangle, Upload } from 'lucide-react'
+import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, User, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, Sun, Moon, AlertTriangle, Upload, CheckSquare, CalendarDays } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
 import { Select, SelectItem } from "@/components/ui/select"
@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
+import Tasks from './Tasks.jsx'
+import Calendar from './Calendar.jsx'
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -152,15 +154,21 @@ export default function EmployeePortal({
                  setAssetRequests={setAssetRequests}
                  addToast={addToast}
                />
+      case 'my-tasks':
+        return <div className="max-w-[1200px] mx-auto w-full"><Tasks tasks={tasks} setTasks={setTasks} employees={employees} currentUser={currentUser} addToast={addToast} simulatedRole="Employee" addLog={addLog} /></div>
+      case 'events':
+        return <div className="max-w-[1200px] mx-auto w-full"><Calendar events={events} setEvents={setEvents} employees={employees} addLog={addLog} addToast={addToast} currentUser={currentUser} simulatedRole="Employee" /></div>
       default:
-        return <DashboardView currentUser={currentUser} attendance={attendance} expenses={expenses} announcements={announcements} setActiveTab={setActiveTab} />
+        return <DashboardView currentUser={currentUser} attendance={attendance} expenses={expenses} announcements={announcements} tasks={tasks} events={events} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} />
     }
   }
 
   const navItems = [
     { id: 'dashboard', icon: Home, label: 'Dashboard' },
+    { id: 'my-tasks', icon: CheckSquare, label: 'Tasks' },
+    { id: 'events', icon: CalendarDays, label: 'Events' },
     { id: 'announcements', icon: Megaphone, label: 'Feed' },
-    { id: 'my-assets', icon: Monitor, label: 'My Assets' },
+    { id: 'my-assets', icon: Monitor, label: 'Assets' },
     { id: 'attendance', icon: Clock, label: 'Attendance' },
     { id: 'payslips', icon: FileText, label: 'Payslips' },
     { id: 'leave', icon: CalendarIcon, label: 'Leave' },
@@ -303,7 +311,7 @@ export default function EmployeePortal({
 // SUB-VIEWS
 // ----------------------------------------------------
 
-function DashboardView({ currentUser, attendance, expenses, announcements, setActiveTab, setShowPunchModal }) {
+function DashboardView({ currentUser, attendance, expenses, announcements, tasks, events, setActiveTab, setShowPunchModal }) {
   const currentBalances = attendance?.balances?.[currentUser.id] || {
     annual: { limit: 20, used: 0 },
     sick: { limit: 14, used: 0 },
@@ -318,40 +326,74 @@ function DashboardView({ currentUser, attendance, expenses, announcements, setAc
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 3)
 
+  const myActiveTasks = tasks?.filter(t => t.assigneeIds?.includes(currentUser.id) && t.status !== 'Done') || []
+  
+  const todayDate = new Date().toISOString().split('T')[0]
+  const upcomingEvents = events?.filter(e => e.date >= todayDate).sort((a,b) => a.date.localeCompare(b.date)) || []
+  const nextEvent = upcomingEvents.length > 0 ? upcomingEvents[0] : null
+
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto">
-      <Card>
-        <CardContent className="p-6 flex items-center gap-5">
-          {getInitialsAvatar(currentUser.name)}
-          <div>
-            <h1 className="text-2xl font-bold m-0 mb-1">Welcome back, {currentUser.name}!</h1>
-            <p className="m-0 text-sm text-muted-foreground">{currentUser.department} • {currentUser.role}</p>
+    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1200px] mx-auto">
+      <Card className="bg-gradient-to-br from-primary/10 via-background to-background border-primary/20 shadow-sm">
+        <CardContent className="p-6 sm:p-8 flex items-center gap-5 sm:gap-6">
+          <div className="size-16 sm:size-20 bg-background rounded-full shadow-sm flex items-center justify-center p-1">
+            {getInitialsAvatar(currentUser.name)}
+          </div>
+          <div className="flex flex-col gap-1 sm:gap-1.5">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight m-0 text-foreground">Welcome back, {currentUser.name.split(' ')[0]}!</h1>
+            <p className="m-0 text-sm sm:text-base font-medium text-muted-foreground">{currentUser.role} • {currentUser.department}</p>
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-        <Card>
+      <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('my-tasks')}>
           <CardContent className="p-5 flex flex-col justify-center">
-            <h3 className="text-sm font-medium uppercase text-muted-foreground m-0 mb-2">Annual Leave Balance</h3>
-            <div className="text-3xl font-bold">
-              {currentBalances.annual.limit - currentBalances.annual.used} <span className="text-base font-normal text-muted-foreground">/ {currentBalances.annual.limit} days</span>
+            <div className="flex items-center gap-2 mb-2 text-primary">
+              <CheckSquare size={18} />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Active Tasks</h3>
+            </div>
+            <div className="text-3xl font-black tabular-nums text-foreground">
+              {myActiveTasks.length} <span className="text-sm font-semibold text-muted-foreground ml-1">tasks</span>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        
+        <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('events')}>
           <CardContent className="p-5 flex flex-col justify-center">
-            <h3 className="text-sm font-medium uppercase text-muted-foreground m-0 mb-2">Sick Leave Balance</h3>
-            <div className="text-3xl font-bold">
-              {currentBalances.sick.limit - currentBalances.sick.used} <span className="text-base font-normal text-muted-foreground">/ {currentBalances.sick.limit} days</span>
+            <div className="flex items-center gap-2 mb-2 text-emerald-500">
+              <CalendarDays size={18} />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Next Event</h3>
+            </div>
+            <div className="text-xl font-bold truncate text-foreground mb-1">
+              {nextEvent ? nextEvent.title : 'None Scheduled'}
+            </div>
+            <div className="text-sm font-medium text-muted-foreground">
+              {nextEvent ? formatDateShort(nextEvent.date) : 'Enjoy your time!'}
             </div>
           </CardContent>
         </Card>
-        <Card>
+        
+        <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('leave')}>
           <CardContent className="p-5 flex flex-col justify-center">
-            <h3 className="text-sm font-medium uppercase text-muted-foreground m-0 mb-2">Pending Reimbursements</h3>
-            <div className="text-3xl font-bold">
-              ${totalPending.toFixed(2)}
+            <div className="flex items-center gap-2 mb-2 text-blue-500">
+              <CalendarIcon size={18} />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Available Leave</h3>
+            </div>
+            <div className="text-3xl font-black tabular-nums text-foreground">
+              {currentBalances.annual.limit - currentBalances.annual.used + currentBalances.sick.limit - currentBalances.sick.used} <span className="text-sm font-semibold text-muted-foreground ml-1">days total</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('my-assets')}>
+          <CardContent className="p-5 flex flex-col justify-center">
+            <div className="flex items-center gap-2 mb-2 text-amber-500">
+              <Monitor size={18} />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Reimbursements</h3>
+            </div>
+            <div className="text-3xl font-black tabular-nums text-foreground">
+              ${totalPending.toFixed(2)} <span className="text-sm font-semibold text-muted-foreground ml-1">pending</span>
             </div>
           </CardContent>
         </Card>
@@ -1137,7 +1179,7 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
                           <AvatarImage src={author.avatar} alt={author.name} />
                         ) : null}
                         <AvatarFallback className="bg-muted text-muted-foreground">
-                          <Megaphone className="h-5 w-5" />
+                          <User className="h-5 w-5" />
                         </AvatarFallback>
                       </Avatar>
                       <div>
@@ -1217,7 +1259,7 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
                           <div key={cmt.id} className="flex gap-3 text-sm">
                             <Avatar className="h-8 w-8 mt-1">
                               {cAuthor.avatar ? <AvatarImage src={cAuthor.avatar} /> : null}
-                              <AvatarFallback className="text-xs">{cAuthor.name[0]}</AvatarFallback>
+                              <AvatarFallback className="text-xs bg-primary/10 text-primary flex items-center justify-center"><User size={16} /></AvatarFallback>
                             </Avatar>
                             <div className="flex-1 bg-muted/50 rounded-lg p-3">
                               <div className="flex justify-between items-center mb-1">
@@ -1234,7 +1276,8 @@ function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnou
                       {activeCommentPost === post.id && (
                         <form onSubmit={(e) => handleAddComment(e, post.id)} className="flex gap-3 items-start mt-4">
                           <Avatar className="h-8 w-8 mt-1">
-                            <AvatarFallback className="text-xs">{currentUser.name[0]}</AvatarFallback>
+                            {currentUser?.avatar ? <AvatarImage src={currentUser.avatar} /> : null}
+                            <AvatarFallback className="text-xs bg-primary/10 text-primary flex items-center justify-center"><User size={16} /></AvatarFallback>
                           </Avatar>
                           <div className="flex-1 flex gap-2">
                             <Input 

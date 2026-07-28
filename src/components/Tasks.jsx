@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Plus, Search, LayoutGrid, List, MoreVertical, Calendar as CalendarIcon, Edit, Trash2, CheckSquare, ChevronDown, MessageSquare, Send } from 'lucide-react'
+import { Plus, Search, LayoutGrid, List, MoreVertical, Calendar as CalendarIcon, Edit, Trash2, CheckSquare, ChevronDown, MessageSquare, Send, User } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { Select, SelectItem } from "@/components/ui/select"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function Tasks({ tasks = [], setTasks, employees = [], currentUser, addToast, simulatedRole, addLog, addNotification }) {
   const [activeStatusTab, setActiveStatusTab] = useState('To Do')
@@ -42,6 +43,9 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
   }
 
   const filteredTasks = tasks.filter(t => {
+    if (simulatedRole === 'Employee' && currentUser) {
+      if (!t.assigneeIds || !t.assigneeIds.includes(currentUser.id)) return false;
+    }
     const assignees = t.assigneeIds || []
     const matchesAssignee = filterAssignee === 'all' || 
                             (filterAssignee === 'unassigned' && assignees.length === 0) || 
@@ -205,9 +209,11 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
           
 
           
-          <Button onClick={() => openModal()} className="shadow-sm w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" /> Add Task
-          </Button>
+          {simulatedRole !== 'Employee' && (
+            <Button onClick={() => openModal()} className="shadow-sm w-full sm:w-auto">
+              <Plus className="h-4 w-4 mr-2" /> Add Task
+            </Button>
+          )}
         </div>
       </div>
 
@@ -250,13 +256,15 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                 <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded ${getPriorityColor(task.priority)}`}>
                   {task.priority}
                 </span>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={() => openModal(task)}>
-                    <Edit className="h-3.5 w-3.5" />
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openModal(task) }} className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10">
+                    <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-500" onClick={() => setTaskToDelete(task.id)}>
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                  {simulatedRole !== 'Employee' && (
+                    <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setTaskToDelete(task.id) }} className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
               
@@ -298,7 +306,10 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                 {assignees.length > 0 && (
                   <div className="flex -space-x-2">
                     {assignees.slice(0, 3).map((a, i) => (
-                      <img key={a.id} src={a.avatar} alt={a.name} className="h-7 w-7 rounded-full object-cover border-2 border-card relative" style={{ zIndex: 3 - i }} title={a.name} />
+                      <Avatar key={a.id} className="h-7 w-7 border-2 border-card relative" style={{ zIndex: 3 - i }} title={a.name}>
+                        {a.avatar ? <AvatarImage src={a.avatar} alt={a.name} className="object-cover" /> : null}
+                        <AvatarFallback className="bg-primary/10 text-primary"><User size={14} /></AvatarFallback>
+                      </Avatar>
                     ))}
                     {assignees.length > 3 && (
                       <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center text-[10px] font-medium border-2 border-card relative z-0">
@@ -443,7 +454,10 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                                   }}
                                   className="rounded border-border accent-primary h-4 w-4 shrink-0 transition-all"
                                 />
-                                <img src={emp.avatar} alt={emp.name} className="h-6 w-6 rounded-full object-cover shrink-0 ring-1 ring-border group-hover:ring-primary/50" />
+                                <Avatar className="h-6 w-6 shrink-0 ring-1 ring-border group-hover:ring-primary/50">
+                                  {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+                                  <AvatarFallback className="bg-primary/10 text-primary"><User size={12} /></AvatarFallback>
+                                </Avatar>
                                 <span className="truncate">{emp.name}</span>
                               </label>
                             ))}
@@ -474,9 +488,12 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                     taskForm.updates.map(update => {
                       const author = getAssignees([update.authorId])[0]
                       return (
-                        <div key={update.id} className="flex gap-3 bg-muted/30 p-3 rounded-lg border border-border/50">
-                          <img src={author?.avatar || `https://ui-avatars.com/api/?name=${author?.name||'U'}`} alt="Avatar" className="h-8 w-8 rounded-full object-cover shrink-0" />
-                          <div className="grid gap-1">
+                        <div key={update.id} className="flex gap-3 text-sm">
+                          <Avatar className="h-8 w-8 shrink-0">
+                            {author?.avatar ? <AvatarImage src={author.avatar} className="object-cover" /> : null}
+                            <AvatarFallback className="bg-primary/10 text-primary"><User size={16} /></AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 bg-muted/50 rounded-lg p-3">
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-semibold">{author?.name || 'Unknown'}</span>
                               <span className="text-xs text-muted-foreground">{new Date(update.timestamp).toLocaleString()}</span>
@@ -581,8 +598,13 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                                 }}
                                 className="rounded border-border accent-primary h-4 w-4 shrink-0 transition-all"
                               />
-                              <img src={emp.avatar} alt={emp.name} className="h-6 w-6 rounded-full object-cover shrink-0 ring-1 ring-border group-hover:ring-primary/50" />
-                              <span className="truncate">{emp.name}</span>
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-6 w-6 shrink-0 ring-1 ring-border group-hover:ring-primary/50">
+                                  {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+                                  <AvatarFallback className="bg-primary/10 text-primary"><User size={12} /></AvatarFallback>
+                                </Avatar>
+                                <span>{emp.name}</span>
+                              </div>
                             </label>
                           ))}
                         </div>

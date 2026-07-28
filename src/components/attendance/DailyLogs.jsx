@@ -1,9 +1,10 @@
 import { useAttendanceLogs } from '../../hooks/useAttendanceLogs.js'
 import { PILL_STYLES } from '../../services/attendance.js'
 import { formatDateShort } from '../../services/date.js'
-import { CalendarDays, ChevronLeft, ChevronRight, Plus, Check } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, Plus, Check, User } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 
 const z = (v) => v < 10 ? `0${v}` : `${v}`
@@ -87,8 +88,11 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                   return (
                     <TableRow key={emp.id}>
                       <TableCell className="w-[200px]">
-                        <div className="flex items-center gap-2.5">
-                          <img src={emp.avatar} alt="" className="size-7 rounded-full object-cover" />
+                        <div className="flex items-center gap-3 w-[250px]">
+                          <Avatar className="size-7 shrink-0">
+                            {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+                            <AvatarFallback className="bg-primary/10 text-primary"><User size={14} /></AvatarFallback>
+                          </Avatar>
                           <span className="text-sm font-medium text-foreground">{emp.name}</span>
                         </div>
                       </TableCell>

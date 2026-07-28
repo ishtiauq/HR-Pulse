@@ -168,9 +168,11 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
               <ChevronRight size={18} />
             </Button>
           </div>
-          <Button className="w-full sm:w-auto" onClick={() => openCreateModal(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`)}>
-            <Plus size={16} className="mr-1.5" /> Add Event
-          </Button>
+          {simulatedRole !== 'Employee' && (
+            <Button className="w-full sm:w-auto" onClick={() => openCreateModal(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`)}>
+              <Plus size={16} className="mr-1.5" /> Add Event
+            </Button>
+          )}
         </div>
 
         <div role="grid" aria-label="Calendar" className="grid grid-cols-7 gap-1 text-center">
@@ -261,7 +263,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                     )}
                   </div>
                   <div className="flex gap-1 shrink-0 w-full sm:w-auto justify-end mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-0 border-border/50">
-                    {!ev.isAuto && (
+                    {!ev.isAuto && simulatedRole !== 'Employee' && (
                       <>
                         <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditModal(ev)} aria-label="Edit event">
                           <Edit size={14} />

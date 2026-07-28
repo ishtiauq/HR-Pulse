@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature, Wrench, CheckCircle, BadgeCheck, MessageSquare, AlertCircle, Laptop, Smartphone, Speaker, Mouse, Key } from 'lucide-react'
+import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature, Wrench, CheckCircle, BadgeCheck, MessageSquare, AlertCircle, Laptop, Smartphone, Speaker, Mouse, Key, User } from 'lucide-react'
 import AdSlot from './AdSlot'
 import { useModal } from '../services/useModal.js'
 import jsPDF from 'jspdf'
@@ -291,7 +291,7 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
                   <TableCell>
                     {asset.status === 'Assigned' && emp ? (
                       <div className="flex items-center gap-3">
-                        {emp.avatar ? <img src={emp.avatar} alt="" className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" /> : <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs ring-2 ring-primary/20">{emp.name.charAt(0)}</div>}
+                        {emp.avatar ? <img src={emp.avatar} alt="" className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" /> : <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs ring-2 ring-primary/20"><User size={16} /></div>}
                         <div>
                           <div className="font-medium text-sm">{emp.name}</div>
                           <div className="text-[11px] text-muted-foreground">{emp.department}</div>

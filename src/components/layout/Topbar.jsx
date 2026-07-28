@@ -11,7 +11,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
           aria-label="Open menu"
           variant="ghost"
           size="icon"
-          className="lg:hidden shrink-0 rounded-full size-8 min-[400px]:size-10"
+          className="md:hidden shrink-0 rounded-full size-8 min-[400px]:size-10"
           onClick={toggleSidebar}
         >
           <Menu size={22} />

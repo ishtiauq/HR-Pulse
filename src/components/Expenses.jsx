@@ -1,6 +1,7 @@
 import { useState, useRef, useMemo } from 'react'
-import { Receipt, Plus, Upload, Check, X as XIcon, Clock, DollarSign, Filter, Search, Download, AlertTriangle, PieChart as PieChartIcon } from 'lucide-react'
+import { Receipt, Plus, Upload, Check, X as XIcon, Clock, DollarSign, Filter, Search, Download, AlertTriangle, PieChart as PieChartIcon, User } from 'lucide-react'
 import { Card, CardContent } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -286,7 +287,10 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                             <TableCell className="p-4"><input type="checkbox" checked={selectedExpenses.includes(exp.id)} onChange={() => handleToggleSelect(exp.id)} /></TableCell>
                             <TableCell className="p-4">
                               <div className="flex items-center gap-3">
-                                <img src={emp?.avatar || `https://ui-avatars.com/api/?name=${emp?.name}`} alt="" className="w-8 h-8 rounded-full object-cover" />
+                                <Avatar className="w-8 h-8 shrink-0">
+                                  {emp?.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+                                  <AvatarFallback className="bg-primary/10 text-primary"><User size={16} /></AvatarFallback>
+                                </Avatar>
                                 <div>
                                   <div className="font-semibold text-sm text-foreground">{emp?.name}</div>
                                   <div className="text-xs text-muted-foreground">{exp.id}</div>

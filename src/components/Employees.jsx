@@ -616,7 +616,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                         {emp.avatar && !imageErrors[emp.id] && (
                           <AvatarImage src={emp.avatar} alt={emp.name} style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} />
                         )}
-                        <AvatarFallback className="bg-muted/50 text-muted-foreground">
+                        <AvatarFallback className="bg-primary/10 text-primary">
                           <User size={20} />
                         </AvatarFallback>
                       </Avatar>
@@ -720,7 +720,9 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               <div className="flex flex-col items-center pt-4 pb-2">
                 <Avatar className="h-24 w-24 mb-4 border-2 border-primary/20 shadow-sm text-2xl">
                   <AvatarImage src={viewingEmployee.avatar} alt={viewingEmployee.name} style={{ transform: `translate(${viewingEmployee.photoX || 0}px, ${viewingEmployee.photoY || 0}px) scale(${viewingEmployee.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
-                  <AvatarFallback className="bg-primary/5 text-primary">{getAvatarFallback(viewingEmployee.name).initials}</AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    <User size={40} />
+                  </AvatarFallback>
                 </Avatar>
                 <h3 className="text-xl font-bold text-foreground text-center">{viewingEmployee.name}</h3>
                 <p className="text-sm text-muted-foreground text-center mt-1">{viewingEmployee.role}</p>

@@ -117,6 +117,10 @@ export default function App() {
         setAnnouncements={appData.setAnnouncements}
         assets={appData.assets}
         setAssets={appData.setAssets}
+        tasks={appData.tasks}
+        setTasks={appData.handleSetTasks}
+        events={appData.events}
+        setEvents={appData.handleSetEvents}
         assetRequests={appData.assetRequests}
         setAssetRequests={appData.setAssetRequests}
         settings={appData.settings}
@@ -205,6 +209,7 @@ export default function App() {
             simulatedRole={appData.simulatedRole}
             user={user}
             addToast={addToast}
+            isSidebarCollapsed={isCollapsed}
             {...appData}
           />
           </div>

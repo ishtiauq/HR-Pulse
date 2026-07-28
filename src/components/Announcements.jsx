@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Megaphone, Plus, Image as ImageIcon, FileText, Send, Calendar, Clock, Edit, Trash2, Users, AlertTriangle, MessageSquare, Heart, ThumbsUp, PartyPopper } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Megaphone, Plus, Image as ImageIcon, FileText, Send, Calendar, Clock, Edit, Trash2, Users, AlertTriangle, MessageSquare, Heart, ThumbsUp, PartyPopper, User } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { useConfirm } from '../hooks/useConfirm'
 import { Button } from "@/components/ui/button"
@@ -11,8 +11,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import AdSlot from './AdSlot'
 import { formatDateTime } from '../services/date.js'
 
-export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser }) {
+const HoverTooltip = ({ content, children, position = 'center' }) => {
+  if (!content) return children
+  return (
+    <div className="relative group/tooltip inline-flex items-center">
+      {children}
+      <div className={`absolute bottom-full mb-1 hidden group-hover/tooltip:block z-[999] w-max max-w-[250px] whitespace-normal bg-popover text-popover-foreground border border-border text-[10px] px-2.5 py-1.5 rounded-md shadow-lg pointer-events-none ${position === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
+        {content}
+      </div>
+    </div>
+  )
+}
+
+export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, simulatedRole }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [editingPostId, setEditingPostId] = useState(null)
 
   // Form States
   const [title, setTitle] = useState('')
@@ -25,7 +38,16 @@ export default function Announcements({ employees, announcements, setAnnouncemen
   const [pollQuestion, setPollQuestion] = useState('')
   const [pollOptions, setPollOptions] = useState(['', ''])
 
+  const [isAddingCategory, setIsAddingCategory] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+
   const [filterCategory, setFilterCategory] = useState('All')
+
+  // Comments State
+  const [expandedComments, setExpandedComments] = useState({})
+  const [commentInputs, setCommentInputs] = useState({})
+  const [editingComment, setEditingComment] = useState(null) // { postId, commentId, text }
+  const [editingReply, setEditingReply] = useState(null) // { postId, commentId, replyId, text }
 
   const { confirm, ConfirmDialog } = useConfirm()
 
@@ -40,28 +62,45 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     e.preventDefault()
     if (!title || !content) return addToast('Title and content are required', 'warning')
 
-    const newPost = {
-      id: `ann-${Date.now()}`,
-      title,
-      content,
-      authorId: currentUser.id,
-      date: new Date().toISOString(),
-      category,
-      priority,
-      audience,
-      attachments: [],
-      reactions: { '👍': 0, '❤️': 0, '🎉': 0 },
-      comments: [],
-      readBy: [],
-      poll: hasPoll && pollQuestion ? {
-        question: pollQuestion,
-        options: pollOptions.filter(o => o.trim() !== '').map(opt => ({ text: opt, votes: [] }))
-      } : null
+    if (editingPostId) {
+      setAnnouncements(prev => prev.map(p => {
+        if (p.id === editingPostId) {
+          return {
+            ...p,
+            title, content, category, priority, audience,
+            poll: hasPoll && pollQuestion ? {
+              question: pollQuestion,
+              options: pollOptions.filter(o => o.trim() !== '').map(opt => ({ text: opt, votes: [] }))
+            } : null
+          }
+        }
+        return p
+      }))
+      addToast('Announcement updated', 'success')
+      setEditingPostId(null)
+    } else {
+      const newPost = {
+        id: `ann-${Date.now()}`,
+        title,
+        content,
+        authorId: currentUser?.id || 'admin',
+        date: new Date().toISOString(),
+        category,
+        priority,
+        audience,
+        attachments: [],
+        reactions: { '👍': [], '❤️': [], '👎': [] },
+        comments: [],
+        readBy: [currentUser?.id || 'admin'],
+        poll: hasPoll && pollQuestion ? {
+          question: pollQuestion,
+          options: pollOptions.filter(o => o.trim() !== '').map(opt => ({ text: opt, votes: [] }))
+        } : null
+      }
+      setAnnouncements(prev => [newPost, ...prev])
+      addToast('Announcement published successfully!', 'success')
+      addLog('Announcement Created', `Title: ${title}`)
     }
-
-    setAnnouncements(prev => [newPost, ...prev])
-    addToast('Announcement published successfully!', 'success')
-    addLog('Announcement Created', `Title: ${title}`)
 
     setTitle('')
     setContent('')
@@ -74,11 +113,281 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     setIsDialogOpen(false)
   }
 
+  const handleEditPost = (post) => {
+    setEditingPostId(post.id)
+    setTitle(post.title)
+    setContent(post.content)
+    setCategory(post.category)
+    setPriority(post.priority)
+    setAudience(post.audience)
+    if (post.poll) {
+      setHasPoll(true)
+      setPollQuestion(post.poll.question)
+      setPollOptions(post.poll.options.map(o => o.text))
+    } else {
+      setHasPoll(false)
+      setPollQuestion('')
+      setPollOptions(['', ''])
+    }
+    setIsDialogOpen(true)
+  }
+
+  const handleCancelDialog = () => {
+    setIsDialogOpen(false)
+    setEditingPostId(null)
+    setTitle('')
+    setContent('')
+    setHasPoll(false)
+    setIsAddingCategory(false)
+    setNewCategoryName('')
+  }
+
   const handleDelete = async (id) => {
     const ok = await confirm('This announcement will be permanently removed.', 'Delete Announcement?', { destructive: true })
     if (!ok) return
     setAnnouncements(prev => prev.filter(a => a.id !== id))
     addToast('Announcement deleted', 'info')
+  }
+
+  const handleReaction = (postId, type) => {
+    const userId = currentUser?.id || 'admin'
+    setAnnouncements(prev => prev.map(p => {
+      if (p.id === postId) {
+        let newReactions = { ...p.reactions }
+        let wasAlreadyReacted = false
+
+        Object.keys(newReactions).forEach(t => {
+          let currentR = Array.isArray(newReactions[t]) ? newReactions[t] : (newReactions[t] > 0 ? [userId] : [])
+          if (currentR.includes(userId)) {
+            if (t === type) wasAlreadyReacted = true
+            newReactions[t] = currentR.filter(id => id !== userId)
+          } else {
+            newReactions[t] = currentR
+          }
+        })
+
+        if (!wasAlreadyReacted) {
+          newReactions[type] = [...(newReactions[type] || []), userId]
+        }
+
+        return { ...p, reactions: newReactions }
+      }
+      return p
+    }))
+  }
+
+  const toggleComments = (postId) => {
+    setExpandedComments(prev => ({ ...prev, [postId]: !prev[postId] }))
+  }
+
+  const handleAddComment = (postId) => {
+    const text = commentInputs[postId]?.trim()
+    if (!text) return
+
+    setAnnouncements(prev => prev.map(p => {
+      if (p.id === postId) {
+        return {
+          ...p,
+          comments: [...(p.comments || []), { 
+            id: `cmt-${Date.now()}`, 
+            authorId: currentUser?.id || 'admin',
+            authorName: currentUser?.name || 'System Admin', 
+            text, 
+            date: new Date().toISOString(),
+            reactions: { '👍': [], '❤️': [] },
+            replies: []
+          }]
+        }
+      }
+      return p
+    }))
+    
+    setCommentInputs(prev => ({ ...prev, [postId]: '' }))
+  }
+
+  const handleDeleteComment = async (postId, commentId) => {
+    const ok = await confirm('Delete this comment?', 'Delete Comment', { destructive: true })
+    if (!ok) return
+    setAnnouncements(prev => prev.map(p => {
+      if (p.id === postId) {
+        return {
+          ...p,
+          comments: p.comments.filter(c => c.id !== commentId)
+        }
+      }
+      return p
+    }))
+  }
+
+  const handleCommentReaction = (postId, commentId, type) => {
+    const userId = currentUser?.id || 'admin'
+    setAnnouncements(prev => prev.map(p => {
+      if (p.id === postId) {
+        return {
+          ...p,
+          comments: p.comments.map(c => {
+            if (c.id === commentId) {
+              let newReactions = { ...c.reactions }
+              let wasAlreadyReacted = false
+              
+              Object.keys(newReactions).forEach(t => {
+                let currentR = Array.isArray(newReactions[t]) ? newReactions[t] : []
+                if (currentR.includes(userId)) {
+                  if (t === type) wasAlreadyReacted = true
+                  newReactions[t] = currentR.filter(id => id !== userId)
+                }
+              })
+
+              if (!wasAlreadyReacted) {
+                newReactions[type] = [...(newReactions[type] || []), userId]
+              }
+              return { ...c, reactions: newReactions }
+            }
+            return c
+          })
+        }
+      }
+      return p
+    }))
+  }
+
+  const handleAddReply = (postId, commentId) => {
+    const replyKey = `${postId}-${commentId}`
+    const text = commentInputs[replyKey]?.trim()
+    if (!text) return
+
+    setAnnouncements(prev => prev.map(p => {
+      if (p.id === postId) {
+        return {
+          ...p,
+          comments: p.comments.map(c => {
+            if (c.id === commentId) {
+              return {
+                ...c,
+                replies: [...(c.replies || []), {
+                  id: `rep-${Date.now()}`,
+                  authorId: currentUser?.id || 'admin',
+                  authorName: currentUser?.name || 'System Admin',
+                  text,
+                  date: new Date().toISOString(),
+                  reactions: { '👍': [] }
+                }]
+              }
+            }
+            return c
+          })
+        }
+      }
+      return p
+    }))
+    setCommentInputs(prev => ({ ...prev, [replyKey]: '' }))
+  }
+
+  const handleReplyReaction = (postId, commentId, replyId, type) => {
+    const userId = currentUser?.id || 'admin'
+    setAnnouncements(prev => prev.map(p => {
+      if (p.id === postId) {
+        return {
+          ...p,
+          comments: p.comments.map(c => {
+            if (c.id === commentId) {
+              return {
+                ...c,
+                replies: c.replies.map(r => {
+                  if (r.id === replyId) {
+                    let newReactions = { ...r.reactions }
+                    let wasAlreadyReacted = false
+                    
+                    Object.keys(newReactions).forEach(t => {
+                      let currentR = Array.isArray(newReactions[t]) ? newReactions[t] : []
+                      if (currentR.includes(userId)) {
+                        if (t === type) wasAlreadyReacted = true
+                        newReactions[t] = currentR.filter(id => id !== userId)
+                      }
+                    })
+
+                    if (!wasAlreadyReacted) {
+                      newReactions[type] = [...(newReactions[type] || []), userId]
+                    }
+                    return { ...r, reactions: newReactions }
+                  }
+                  return r
+                })
+              }
+            }
+            return c
+          })
+        }
+      }
+      return p
+    }))
+  }
+
+  const handleDeleteReply = async (postId, commentId, replyId) => {
+    const ok = await confirm('Delete this reply?', 'Delete Reply', { destructive: true })
+    if (!ok) return
+    setAnnouncements(prev => prev.map(p => {
+      if (p.id === postId) {
+        return {
+          ...p,
+          comments: p.comments.map(c => {
+            if (c.id === commentId) {
+              return { ...c, replies: c.replies.filter(r => r.id !== replyId) }
+            }
+            return c
+          })
+        }
+      }
+      return p
+    }))
+  }
+
+  const handleSaveEditComment = (postId, commentId) => {
+    const text = editingComment?.text?.trim()
+    if (!text) return
+    setAnnouncements(prev => prev.map(p => {
+      if (p.id === postId) {
+        return {
+          ...p,
+          comments: p.comments.map(c => c.id === commentId ? { ...c, text } : c)
+        }
+      }
+      return p
+    }))
+    setEditingComment(null)
+  }
+
+  const handleSaveEditReply = (postId, commentId, replyId) => {
+    const text = editingReply?.text?.trim()
+    if (!text) return
+    setAnnouncements(prev => prev.map(p => {
+      if (p.id === postId) {
+        return {
+          ...p,
+          comments: p.comments.map(c => {
+            if (c.id === commentId) {
+              return {
+                ...c,
+                replies: c.replies.map(r => r.id === replyId ? { ...r, text } : r)
+              }
+            }
+            return c
+          })
+        }
+      }
+      return p
+    }))
+    setEditingReply(null)
+  }
+
+  const getReactionCount = (r) => Array.isArray(r) ? r.length : (r || 0)
+  const getReactionTitle = (r) => {
+    if (!Array.isArray(r) || r.length === 0) return ''
+    return 'By: ' + r.map(id => employees.find(e => e.id === id)?.name || id).join(', ')
+  }
+
+  const canModify = (authorId) => {
+    return currentUser?.id === authorId || simulatedRole === 'Admin'
   }
 
   const getPriorityBorder = (p) => {
@@ -93,7 +402,31 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     return 'outline'
   }
 
+  const allCategories = ['General', 'Policy Update', 'Event', 'Emergency']
+  const uniqueCategories = ['All', ...new Set([...allCategories, ...announcements.map(a => a.category).filter(Boolean)])]
+
   const filteredAnnouncements = announcements.filter(a => filterCategory === 'All' || a.category === filterCategory)
+
+  // Track unique views
+  useEffect(() => {
+    if (!currentUser || !currentUser.id) return
+    let updated = false
+    const newAnnouncements = announcements.map(a => {
+      const isVisible = filterCategory === 'All' || a.category === filterCategory
+      if (isVisible) {
+        const readByArray = Array.isArray(a.readBy) ? a.readBy : []
+        if (!readByArray.includes(currentUser.id)) {
+          updated = true
+          return { ...a, readBy: [...readByArray, currentUser.id] }
+        }
+      }
+      return a
+    })
+    
+    if (updated) {
+      setAnnouncements(newAnnouncements)
+    }
+  }, [filterCategory, currentUser, announcements, setAnnouncements])
 
   return (
     <div className="fade-in pb-10 max-w-5xl mx-auto">
@@ -104,16 +437,24 @@ export default function Announcements({ employees, announcements, setAnnouncemen
         </h1>
         
         <div className="flex gap-3">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            if (!open) handleCancelDialog()
+            else setIsDialogOpen(true)
+          }}>
             <DialogTrigger asChild>
-              <Button size="sm">
+              <Button size="sm" onClick={() => {
+                setEditingPostId(null)
+                setTitle('')
+                setContent('')
+                setHasPoll(false)
+              }}>
                 <Plus size={16} className="mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">New Post</span>
               </Button>
             </DialogTrigger>
           <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create Announcement</DialogTitle>
+              <DialogTitle>{editingPostId ? 'Edit Announcement' : 'Create Announcement'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6 mt-4">
               <div className="flex flex-col gap-2">
@@ -124,12 +465,30 @@ export default function Announcements({ employees, announcements, setAnnouncemen
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium text-foreground">Category</label>
-                  <Select value={category} onChange={setCategory}>
-                    <SelectItem id="General">General</SelectItem>
-                    <SelectItem id="Policy Update">Policy Update</SelectItem>
-                    <SelectItem id="Event">Event</SelectItem>
-                    <SelectItem id="Emergency">Emergency</SelectItem>
-                  </Select>
+                  {isAddingCategory ? (
+                    <div className="flex gap-2">
+                      <Input value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder="New category..." className="h-9 text-xs" />
+                      <Button type="button" size="sm" className="h-9 px-2" onClick={() => {
+                        if (newCategoryName.trim()) setCategory(newCategoryName.trim())
+                        setIsAddingCategory(false)
+                        setNewCategoryName('')
+                      }}>Add</Button>
+                      <Button type="button" variant="outline" size="sm" className="h-9 px-2" onClick={() => setIsAddingCategory(false)}>Cancel</Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <Select value={category} onChange={setCategory}>
+                          {uniqueCategories.filter(c => c !== 'All').map(c => (
+                            <SelectItem key={c} id={c}>{c}</SelectItem>
+                          ))}
+                        </Select>
+                      </div>
+                      <Button type="button" variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={() => setIsAddingCategory(true)}>
+                        <Plus size={16} />
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium text-foreground">Priority</label>
@@ -180,8 +539,8 @@ export default function Announcements({ employees, announcements, setAnnouncemen
               </div>
 
               <div className="flex justify-end gap-3 mt-4">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                <Button type="submit">Publish Announcement</Button>
+                <Button type="button" variant="outline" onClick={handleCancelDialog}>Cancel</Button>
+                <Button type="submit">{editingPostId ? 'Save Changes' : 'Publish Announcement'}</Button>
               </div>
             </form>
           </DialogContent>
@@ -191,7 +550,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
       <div className="border-t border-border mb-6" />
       
       <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-none">
-        {['All', 'General', 'Policy Update', 'Event', 'Emergency'].map(cat => (
+        {uniqueCategories.map(cat => (
           <Badge 
             key={cat} 
             variant={filterCategory === cat ? 'default' : 'secondary'}
@@ -222,8 +581,11 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                 <CardHeader className="pb-3 pt-5 flex flex-row items-start justify-between">
                   <div className="flex items-center gap-3.5">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={author.avatar} alt={author.name} />
-                      <AvatarFallback className="bg-primary/10 text-primary"><Megaphone size={18} /></AvatarFallback>
+                      {author.avatar ? (
+                        <AvatarImage src={author.avatar} alt={author.name} />
+                      ) : (
+                        <AvatarFallback className="bg-primary/10 text-primary font-medium"><User size={20} /></AvatarFallback>
+                      )}
                     </Avatar>
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
@@ -238,9 +600,16 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="hidden sm:inline-flex">{post.category}</Badge>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(post.id)} className="h-8 w-8 text-muted-foreground hover:text-destructive" aria-label="Delete post">
-                      <Trash2 size={14} />
-                    </Button>
+                    {canModify(post.authorId) && (
+                      <>
+                        <Button variant="ghost" size="icon" onClick={() => handleEditPost(post)} className="h-8 w-8 text-muted-foreground hover:text-foreground" aria-label="Edit post">
+                          <Edit size={14} />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(post.id)} className="h-8 w-8 text-muted-foreground hover:text-destructive" aria-label="Delete post">
+                          <Trash2 size={14} />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </CardHeader>
                 
@@ -279,23 +648,202 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                 
                 <CardFooter className="pt-3 pb-3 border-t flex flex-wrap justify-between items-center gap-3">
                   <div className="flex flex-wrap gap-1 -ml-2">
-                    <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                      👍 <span className="ml-1.5 text-xs font-medium">{post.reactions['👍']}</span>
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                      ❤️ <span className="ml-1.5 text-xs font-medium">{post.reactions['❤️']}</span>
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                      🎉 <span className="ml-1.5 text-xs font-medium">{post.reactions['🎉']}</span>
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8 px-2 ml-1 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                      <MessageSquare size={14} className="mr-1.5" /> <span className="text-xs font-medium">{post.comments.length}</span>
+                    <HoverTooltip content={getReactionTitle(post.reactions['👍'])}>
+                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, '👍')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                        👍 <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['👍'])}</span>
+                      </Button>
+                    </HoverTooltip>
+                    <HoverTooltip content={getReactionTitle(post.reactions['❤️'])}>
+                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, '❤️')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                        ❤️ <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['❤️'])}</span>
+                      </Button>
+                    </HoverTooltip>
+                    <HoverTooltip content={getReactionTitle(post.reactions['👎'])}>
+                      <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, '👎')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                        👎 <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['👎'])}</span>
+                      </Button>
+                    </HoverTooltip>
+                    <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)} className="h-8 px-2 ml-1 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                      <MessageSquare size={14} className="mr-1.5" /> <span className="text-xs font-medium">{(post.comments || []).length}</span>
                     </Button>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Users size={13} /> {post.readBy.length} views
-                  </div>
+                  <HoverTooltip content={getReactionTitle(post.readBy)} position="right">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground cursor-help transition-colors py-1">
+                      <Users size={13} /> {Array.isArray(post.readBy) ? post.readBy.length : 0} views
+                    </div>
+                  </HoverTooltip>
                 </CardFooter>
+
+                {expandedComments[post.id] && (
+                  <div className="border-t border-border bg-muted/10 p-4">
+                    <div className="flex flex-col gap-3 mb-4 max-h-[250px] overflow-y-auto pr-2">
+                      {!(post.comments && post.comments.length > 0) ? (
+                        <p className="text-xs text-muted-foreground text-center py-2">No comments yet. Be the first!</p>
+                      ) : (
+                        post.comments.map(comment => {
+                          const commentAuthor = employees.find(e => e.id === comment.authorId)
+                          return (
+                          <div key={comment.id} className="flex gap-3">
+                            <Avatar className="h-7 w-7 mt-0.5">
+                              {commentAuthor?.avatar ? (
+                                <AvatarImage src={commentAuthor.avatar} alt={comment.authorName} />
+                              ) : (
+                                <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-medium"><User size={14} /></AvatarFallback>
+                              )}
+                            </Avatar>
+                            <div className="flex-1 flex flex-col">
+                              <div className="bg-card border border-border/40 rounded-lg p-2.5 shadow-sm">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-xs font-bold">{comment.authorName}</span>
+                                  <span className="text-[10px] text-muted-foreground">{formatDateTime(comment.date)}</span>
+                                </div>
+                                {editingComment?.commentId === comment.id ? (
+                                  <div className="flex flex-col gap-2 mt-1">
+                                    <Input 
+                                      value={editingComment.text} 
+                                      onChange={(e) => setEditingComment({ ...editingComment, text: e.target.value })}
+                                      className="h-7 text-xs"
+                                    />
+                                    <div className="flex gap-2">
+                                      <Button size="sm" variant="outline" className="h-6 px-2 text-[10px]" onClick={() => setEditingComment(null)}>Cancel</Button>
+                                      <Button size="sm" className="h-6 px-2 text-[10px]" onClick={() => handleSaveEditComment(post.id, comment.id)}>Save</Button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-foreground/90">{comment.text}</p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3 mt-1 ml-1">
+                                <HoverTooltip content={getReactionTitle(comment.reactions?.['👍'])}>
+                                  <button onClick={() => handleCommentReaction(post.id, comment.id, '👍')} className="text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                                    👍 {getReactionCount(comment.reactions?.['👍'])}
+                                  </button>
+                                </HoverTooltip>
+                                <HoverTooltip content={getReactionTitle(comment.reactions?.['❤️'])}>
+                                  <button onClick={() => handleCommentReaction(post.id, comment.id, '❤️')} className="text-[10px] font-medium text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1">
+                                    ❤️ {getReactionCount(comment.reactions?.['❤️'])}
+                                  </button>
+                                </HoverTooltip>
+                                <HoverTooltip content={getReactionTitle(comment.reactions?.['👎'])}>
+                                  <button onClick={() => handleCommentReaction(post.id, comment.id, '👎')} className="text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                                    👎 {getReactionCount(comment.reactions?.['👎'])}
+                                  </button>
+                                </HoverTooltip>
+                                <button onClick={() => setExpandedComments(prev => ({ ...prev, [`reply-${comment.id}`]: !prev[`reply-${comment.id}`] }))} className="text-[10px] font-medium text-muted-foreground hover:text-primary transition-colors">
+                                  Reply
+                                </button>
+                                {canModify(comment.authorId) && (
+                                  <>
+                                    <button onClick={() => setEditingComment({ postId: post.id, commentId: comment.id, text: comment.text })} className="text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors ml-auto">
+                                      Edit
+                                    </button>
+                                    <button onClick={() => handleDeleteComment(post.id, comment.id)} className="text-[10px] font-medium text-muted-foreground hover:text-destructive transition-colors ml-2">
+                                      Delete
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                              
+                              {/* Nested Replies */}
+                              {((comment.replies && comment.replies.length > 0) || expandedComments[`reply-${comment.id}`]) && (
+                                <div className="flex flex-col gap-2 mt-2 ml-4 pl-3 border-l-2 border-border/50">
+                                  {comment.replies?.map(reply => {
+                                    const replyAuthor = employees.find(e => e.id === reply.authorId)
+                                    return (
+                                    <div key={reply.id} className="flex gap-2">
+                                      <Avatar className="h-5 w-5 mt-0.5">
+                                        {replyAuthor?.avatar ? (
+                                          <AvatarImage src={replyAuthor.avatar} alt={reply.authorName} />
+                                        ) : (
+                                          <AvatarFallback className="bg-primary/10 text-primary text-[8px] font-medium"><User size={12} /></AvatarFallback>
+                                        )}
+                                      </Avatar>
+                                      <div className="flex-1">
+                                        <div className="bg-muted/30 border border-border/30 rounded-md p-2">
+                                          <div className="flex items-center justify-between mb-0.5">
+                                            <span className="text-[10px] font-bold">{reply.authorName}</span>
+                                          </div>
+                                          {editingReply?.replyId === reply.id ? (
+                                            <div className="flex flex-col gap-1 mt-1">
+                                              <Input 
+                                                value={editingReply.text} 
+                                                onChange={(e) => setEditingReply({ ...editingReply, text: e.target.value })}
+                                                className="h-6 text-[10px]"
+                                              />
+                                              <div className="flex gap-1 mt-1">
+                                                <Button size="sm" variant="outline" className="h-5 px-1.5 text-[9px]" onClick={() => setEditingReply(null)}>Cancel</Button>
+                                                <Button size="sm" className="h-5 px-1.5 text-[9px]" onClick={() => handleSaveEditReply(post.id, comment.id, reply.id)}>Save</Button>
+                                              </div>
+                                            </div>
+                                          ) : (
+                                            <p className="text-[11px] text-foreground/80">{reply.text}</p>
+                                          )}
+                                        </div>
+                                        <div className="flex items-center gap-3 mt-0.5 ml-1">
+                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['👍'])}>
+                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, '👍')} className="text-[9px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                                              👍 {getReactionCount(reply.reactions?.['👍'])}
+                                            </button>
+                                          </HoverTooltip>
+                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['❤️'])}>
+                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, '❤️')} className="text-[9px] font-medium text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1">
+                                              ❤️ {getReactionCount(reply.reactions?.['❤️'])}
+                                            </button>
+                                          </HoverTooltip>
+                                          <HoverTooltip content={getReactionTitle(reply.reactions?.['👎'])}>
+                                            <button onClick={() => handleReplyReaction(post.id, comment.id, reply.id, '👎')} className="text-[9px] font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                                              👎 {getReactionCount(reply.reactions?.['👎'])}
+                                            </button>
+                                          </HoverTooltip>
+                                          {canModify(reply.authorId) && (
+                                            <>
+                                              <button onClick={() => setEditingReply({ postId: post.id, commentId: comment.id, replyId: reply.id, text: reply.text })} className="text-[9px] font-medium text-muted-foreground hover:text-foreground transition-colors ml-auto">
+                                                Edit
+                                              </button>
+                                              <button onClick={() => handleDeleteReply(post.id, comment.id, reply.id)} className="text-[9px] font-medium text-muted-foreground hover:text-destructive transition-colors ml-2">
+                                                Delete
+                                              </button>
+                                            </>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )})}
+                                  {expandedComments[`reply-${comment.id}`] && (
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <Input 
+                                        placeholder="Write a reply..." 
+                                        className="h-6 text-[11px]" 
+                                        value={commentInputs[`${post.id}-${comment.id}`] || ''}
+                                        onChange={(e) => setCommentInputs(prev => ({ ...prev, [`${post.id}-${comment.id}`]: e.target.value }))}
+                                        onKeyDown={(e) => { if (e.key === 'Enter') handleAddReply(post.id, comment.id) }}
+                                      />
+                                      <Button size="sm" className="h-6 px-2" onClick={() => handleAddReply(post.id, comment.id)}>
+                                        <Send size={10} />
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )})
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input 
+                        placeholder="Write a comment..." 
+                        className="h-8 text-xs" 
+                        value={commentInputs[post.id] || ''}
+                        onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleAddComment(post.id) }}
+                      />
+                      <Button size="sm" className="h-8 px-3" onClick={() => handleAddComment(post.id)}>
+                        <Send size={14} />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </Card>
             )
           })

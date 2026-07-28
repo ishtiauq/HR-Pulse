@@ -12,7 +12,7 @@ import DriveSync from './DriveSync.jsx'
 import Tasks from './Tasks.jsx'
 import { Skeleton } from "@/components/ui/skeleton"
 
-export default function AppContent({ currentView, setCurrentView, isAppLoading, hasPermission, simulatedRole, user, ...data }) {
+export default function AppContent({ currentView, setCurrentView, isAppLoading, hasPermission, simulatedRole, user, isSidebarCollapsed, ...data }) {
   const renderBreadcrumbs = () => {
     if (currentView === 'dashboard') return null
     return (
@@ -105,7 +105,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
 
   switch (currentView) {
     case 'dashboard':
-      return <Dashboard employees={data.employees} syncLogs={data.syncLogs} driveConnected={data.driveConnected} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} />
+      return <Dashboard employees={data.employees} syncLogs={data.syncLogs} driveConnected={data.driveConnected} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} simulatedRole={simulatedRole} hasPermission={hasPermission} />
     case 'employees':
       return <Employees employees={data.employees} setEmployees={data.handleSetEmployees} addLog={data.addLog} driveConnected={data.driveConnected} simulatedRole={simulatedRole} addAuditLog={data.addAuditLog} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} selectedEmployeeId={data.selectedEmployeeId} setSelectedEmployeeId={data.setSelectedEmployeeId} />
     case 'payroll':
@@ -129,6 +129,6 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
     case 'drive':
       return <DriveSync user={user} driveConnected={data.driveConnected} setDriveConnected={data.setDriveConnected} addLog={data.addLog} />
     default:
-      return <Dashboard employees={data.employees} syncLogs={data.syncLogs} driveConnected={data.driveConnected} addLog={data.addLog} attendance={data.attendance} setCurrentView={setCurrentView} onSync={data.handleSync} announcements={data.announcements} events={data.events} payroll={data.payroll} />
+      return <Dashboard employees={data.employees} syncLogs={data.syncLogs} driveConnected={data.driveConnected} addLog={data.addLog} attendance={data.attendance} setCurrentView={setCurrentView} onSync={data.handleSync} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} simulatedRole={simulatedRole} hasPermission={hasPermission} />
   }
 }
