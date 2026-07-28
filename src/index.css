@@ -46,7 +46,7 @@
 }
 
 :root {
-  --background: hsl(0 0% 100%);
+  --background: hsl(0 0% 93%);
   --foreground: hsl(210 20% 10%);
   --card: hsl(0 0% 100%);
   --card-foreground: hsl(210 20% 10%);
@@ -60,13 +60,13 @@
   --muted-foreground: hsl(210 10% 45%);
   --accent: hsl(210 25% 97%);
   --accent-foreground: hsl(210 20% 10%);
-  --destructive: hsl(0 84.2% 60.2%);
+  --destructive: hsl(210 10% 45%);
   --destructive-foreground: hsl(0 0% 100%);
   --border: hsl(210 15% 92%);
   --input: hsl(210 15% 92%);
   --ring: hsl(24.6 95% 53.1%);
   --radius: 0.75rem;
-  --sidebar: var(--background);
+  --sidebar: var(--card);
   --sidebar-foreground: var(--foreground);
   --sidebar-accent: var(--accent);
   --sidebar-accent-foreground: var(--accent-foreground);
@@ -88,8 +88,8 @@
   --muted-foreground: hsl(215 20.2% 65.1%);
   --accent: hsl(217.2 32.6% 17.5%);
   --accent-foreground: hsl(210 40% 98%);
-  --destructive: hsl(0 62.8% 30.6%);
-  --destructive-foreground: hsl(210 40% 98%);
+  --destructive: hsl(210 10% 30%);
+  --destructive-foreground: hsl(0 0% 100%);
   --border: hsl(217.2 32.6% 17.5%);
   --input: hsl(217.2 32.6% 17.5%);
   --ring: hsl(224.3 76.3% 48%);
@@ -143,9 +143,48 @@ html, body, #root {
 
 /* Global Glassmorphism for Cards, Modals, Popovers, and Sidebar */
 .bg-card, .bg-popover, .bg-sidebar {
-  background-color: color-mix(in srgb, var(--background) 70%, transparent) !important;
+  background-color: color-mix(in srgb, var(--card) 60%, transparent) !important;
   backdrop-filter: blur(24px) saturate(150%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
 }
+
+/* Global Monochrome Icons */
+svg.lucide {
+  filter: grayscale(100%) !important;
+}
+
+
+/* 
+  Global Neutralization of Tailwind Colors 
+  This forces all explicitly colored text, backgrounds, and borders to be monochrome,
+  while allowing theme colors (--primary, --background, etc.) to remain.
+*/
+
+/* Neutralize Text Colors */
+[class*="text-red-"], [class*="text-blue-"], [class*="text-green-"], [class*="text-emerald-"], 
+[class*="text-amber-"], [class*="text-yellow-"], [class*="text-orange-"], [class*="text-rose-"],
+[class*="text-indigo-"], [class*="text-cyan-"], [class*="text-teal-"], [class*="text-purple-"], 
+[class*="text-pink-"] {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Neutralize Background Colors */
+[class*="bg-red-"], [class*="bg-blue-"], [class*="bg-green-"], [class*="bg-emerald-"], 
+[class*="bg-amber-"], [class*="bg-yellow-"], [class*="bg-orange-"], [class*="bg-rose-"],
+[class*="bg-indigo-"], [class*="bg-cyan-"], [class*="bg-teal-"], [class*="bg-purple-"], 
+[class*="bg-pink-"], [class*="bg-primary/10"], [class*="bg-primary/5"], [class*="bg-destructive/10"], [class*="bg-destructive/5"] {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Neutralize Border Colors */
+[class*="border-red-"], [class*="border-blue-"], [class*="border-green-"], [class*="border-emerald-"], 
+[class*="border-amber-"], [class*="border-yellow-"], [class*="border-orange-"], [class*="border-rose-"],
+[class*="border-indigo-"], [class*="border-cyan-"], [class*="border-teal-"], [class*="border-purple-"], 
+[class*="border-pink-"] {
+  border-color: hsl(var(--border)) !important;
+}
+
+
 
 
