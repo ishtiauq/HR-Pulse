@@ -387,7 +387,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
   }
 
   const canModify = (authorId) => {
-    return currentUser?.id === authorId || simulatedRole === 'Admin'
+    return currentUser?.id === authorId || currentUser?.role === 'Admin'
   }
 
   const getPriorityBorder = (p) => {

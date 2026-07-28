@@ -44,7 +44,9 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
 
   const filteredTasks = tasks.filter(t => {
     if (simulatedRole === 'Employee' && currentUser) {
-      if (!t.assigneeIds || !t.assigneeIds.includes(currentUser.id)) return false;
+      const isAssignee = t.assigneeIds && t.assigneeIds.includes(currentUser.id);
+      const isCreator = t.createdBy === currentUser.id;
+      if (!isAssignee && !isCreator) return false;
     }
     const assignees = t.assigneeIds || []
     const matchesAssignee = filterAssignee === 'all' || 
@@ -178,6 +180,8 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
     return employees.filter(e => ids.includes(e.id))
   }
 
+  const canEditDetails = simulatedRole !== 'Employee' || !editingTask || editingTask.createdBy === currentUser?.id;
+
   return (
     <div className="w-full flex flex-col gap-6 animate-fade-in p-2 sm:p-4">
       {/* Header */}
@@ -208,12 +212,9 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
           </div>
           
 
-          
-          {simulatedRole !== 'Employee' && (
-            <Button onClick={() => openModal()} className="shadow-sm w-full sm:w-auto">
-              <Plus className="h-4 w-4 mr-2" /> Add Task
-            </Button>
-          )}
+          <Button onClick={() => openModal()} className="shadow-sm w-full sm:w-auto">
+            <Plus className="h-4 w-4 mr-2" /> Add Task
+          </Button>
         </div>
       </div>
 
@@ -260,7 +261,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                   <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openModal(task) }} className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10">
                     <Edit className="h-4 w-4" />
                   </Button>
-                  {simulatedRole !== 'Employee' && (
+                  {(simulatedRole !== 'Employee' || task.createdBy === currentUser?.id) && (
                     <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setTaskToDelete(task.id) }} className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -530,6 +531,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                   onChange={e => setTaskForm({...taskForm, title: e.target.value})} 
                   placeholder="e.g. Update user roles"
                   className="bg-background shadow-sm"
+                  disabled={!canEditDetails}
                 />
               </div>
               <div className="space-y-2">
@@ -539,6 +541,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                   value={taskForm.description} 
                   onChange={e => setTaskForm({...taskForm, description: e.target.value})}
                   placeholder="Details about the task..."
+                  disabled={!canEditDetails}
                 />
               </div>
               <div className="space-y-2">
@@ -548,6 +551,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                   onChange={e => setTaskForm({...taskForm, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean)})} 
                   placeholder="e.g. Frontend, Urgent, Bug"
                   className="bg-background shadow-sm"
+                  disabled={!canEditDetails}
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -559,7 +563,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Priority</label>
-                  <Select value={taskForm.priority} onChange={val => setTaskForm({...taskForm, priority: val})}>
+                  <Select value={taskForm.priority} onChange={val => setTaskForm({...taskForm, priority: val})} disabled={!canEditDetails}>
                     <SelectItem id="High">High</SelectItem>
                     <SelectItem id="Medium">Medium</SelectItem>
                     <SelectItem id="Low">Low</SelectItem>
@@ -573,7 +577,8 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                     <Button 
                       variant="outline" 
                       className="w-full justify-between font-normal bg-background shadow-sm h-9 px-3 py-2 text-sm"
-                      onClick={() => setShowAssigneesDropdown(!showAssigneesDropdown)}
+                      onClick={() => { if (canEditDetails) setShowAssigneesDropdown(!showAssigneesDropdown) }}
+                      disabled={!canEditDetails}
                     >
                       {taskForm.assigneeIds.length > 0 
                         ? <span className="flex items-center gap-2"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">{taskForm.assigneeIds.length}</span> selected</span>
@@ -619,6 +624,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                     value={taskForm.dueDate} 
                     onChange={e => setTaskForm({...taskForm, dueDate: e.target.value})} 
                     className="bg-background shadow-sm w-full"
+                    disabled={!canEditDetails}
                   />
                 </div>
               </div>

@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 import Tasks from './Tasks.jsx'
 import Calendar from './Calendar.jsx'
+import Announcements from './Announcements.jsx'
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -56,6 +57,10 @@ export default function EmployeePortal({
   setAnnouncements,
   assets,
   setAssets,
+  tasks,
+  setTasks,
+  events,
+  setEvents,
   assetRequests,
   setAssetRequests,
   settings,
@@ -152,12 +157,14 @@ export default function EmployeePortal({
                  addToast={addToast} 
                />
       case 'announcements':
-        return <AnnouncementsFeedView 
+        return <Announcements 
                  currentUser={currentUser} 
                  employees={employees} 
                  announcements={announcements} 
                  setAnnouncements={setAnnouncements} 
-                 addToast={addToast} 
+                 addToast={addToast}
+                 addLog={addLog}
+                 simulatedRole="Employee"
                />
       case 'payslips':
         return <PayslipsView currentUser={currentUser} payroll={payroll} addToast={addToast} />
@@ -1135,262 +1142,6 @@ function ProfileView({ currentUser, pendingProfileEdits, setPendingProfileEdits,
   )
 }
 
-// ----------------------------------------------------------------------
-// Announcements Feed View
-// ----------------------------------------------------------------------
-function AnnouncementsFeedView({ currentUser, employees, announcements, setAnnouncements, addToast }) {
-  const [filter, setFilter] = useState('All')
-  const [activeCommentPost, setActiveCommentPost] = useState(null)
-  const [commentText, setCommentText] = useState('')
-
-  const handleAddComment = (e, postId) => {
-    e.preventDefault()
-    if (!commentText.trim()) return
-    
-    setAnnouncements(prev => prev.map(post => {
-      if (post.id === postId) {
-        return {
-          ...post,
-          comments: [...(post.comments || []), {
-            id: `cmt-${Date.now()}`,
-            authorId: currentUser.id,
-            text: commentText,
-            date: new Date().toISOString()
-          }]
-        }
-      }
-      return post
-    }))
-    setCommentText('')
-    addToast('Comment added', 'success')
-  }
-
-  const handleReaction = (postId, emoji) => {
-    setAnnouncements(prev => prev.map(post => {
-      if (post.id === postId) {
-        return {
-          ...post,
-          reactions: {
-            ...post.reactions,
-            [emoji]: (post.reactions[emoji] || 0) + 1
-          }
-        }
-      }
-      return post
-    }))
-  }
-
-  const handleVote = (postId, optionIndex) => {
-    setAnnouncements(prev => prev.map(post => {
-      if (post.id === postId && post.poll) {
-        const hasVoted = post.poll.options.some(o => o.votes.includes(currentUser.id))
-        if (hasVoted) {
-          addToast('You have already voted on this poll', 'warning')
-          return post
-        }
-        
-        const newOptions = [...post.poll.options]
-        newOptions[optionIndex] = {
-          ...newOptions[optionIndex],
-          votes: [...newOptions[optionIndex].votes, currentUser.id]
-        }
-        return { ...post, poll: { ...post.poll, options: newOptions } }
-      }
-      return post
-    }))
-  }
-
-  useEffect(() => {
-    setAnnouncements(prev => prev.map(post => {
-      if (!post.readBy.includes(currentUser.id)) {
-        return { ...post, readBy: [...post.readBy, currentUser.id] }
-      }
-      return post
-    }))
-  }, [])
-
-  const visiblePosts = (announcements || [])
-    .filter(a => a.audience === 'all' || a.audience === currentUser.department)
-    .filter(a => filter === 'All' || a.category === filter)
-    .sort((a, b) => {
-      if (a.priority === 'Urgent' && b.priority !== 'Urgent') return -1
-      if (b.priority === 'Urgent' && a.priority !== 'Urgent') return 1
-      return new Date(b.date) - new Date(a.date)
-    })
-
-  return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[800px] mx-auto pb-10">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold m-0 flex items-center gap-3">
-          <Megaphone className="h-6 w-6 text-primary" />
-          Company Feed
-        </h2>
-        <div className="w-[180px]">
-          <Select value={filter} onChange={setFilter} placeholder="All Categories">
-            <SelectItem id="All">All Categories</SelectItem>
-            <SelectItem id="General">General</SelectItem>
-            <SelectItem id="Policy Update">Policy Update</SelectItem>
-            <SelectItem id="Event">Event</SelectItem>
-            <SelectItem id="Achievement/Birthday/Work Anniversary">Celebrations</SelectItem>
-            <SelectItem id="Emergency">Emergency</SelectItem>
-          </Select>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-6">
-        {visiblePosts.length === 0 ? (
-          <Card>
-            <CardContent className="p-10 text-center text-muted-foreground">
-              No announcements found in this category.
-            </CardContent>
-          </Card>
-        ) : (
-          visiblePosts.map(post => {
-            const author = post.authorId === 'system' ? { name: 'System Auto-Post', avatar: '' } : employees.find(e => e.id === post.authorId) || { name: 'Unknown User' }
-            const dateStr = formatDateTime(post.date)
-            const isUrgent = post.priority === 'Urgent'
-
-            return (
-              <Card key={post.id} className={`relative overflow-hidden ${isUrgent ? 'border-l-4 border-l-red-500' : ''}`}>
-                {isUrgent && (
-                  <Badge variant="destructive" className="absolute top-4 right-4 uppercase text-[10px]">
-                    Pinned
-                  </Badge>
-                )}
-                
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        {author.avatar ? (
-                          <AvatarImage src={author.avatar} alt={author.name} />
-                        ) : null}
-                        <AvatarFallback className="bg-muted text-muted-foreground">
-                          <User className="h-5 w-5" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-semibold text-foreground">{author.name}</div>
-                        <div className="text-xs text-muted-foreground">{dateStr}</div>
-                      </div>
-                    </div>
-                    <Badge variant="secondary" className={isUrgent ? 'mr-16' : ''}>
-                      {post.category}
-                    </Badge>
-                  </div>
-
-                  <h3 className="m-0 mb-3 text-xl font-semibold">{post.title}</h3>
-                  <div className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                    {post.content}
-                  </div>
-
-                  {post.poll && (
-                    <div className="mt-5 p-4 rounded-lg bg-muted/50 border border-border">
-                      <h4 className="m-0 mb-4 text-base font-medium">📊 {post.poll.question}</h4>
-                      <div className="flex flex-col gap-3">
-                        {post.poll.options.map((opt, i) => {
-                          const hasVoted = post.poll.options.some(o => o.votes.includes(currentUser.id))
-                          const iVoted = opt.votes.includes(currentUser.id)
-                          const totalVotes = post.poll.options.reduce((sum, o) => sum + o.votes.length, 0)
-                          const pct = totalVotes === 0 ? 0 : Math.round((opt.votes.length / totalVotes) * 100)
-
-                          if (hasVoted) {
-                            return (
-                              <div key={i} className="flex items-center gap-3">
-                                <div className="flex-1 relative overflow-hidden rounded-md h-8 bg-muted border border-border/50">
-                                  <div className={`absolute top-0 left-0 h-full opacity-20 ${iVoted ? 'bg-green-500' : 'bg-primary'}`} style={{ width: `${pct}%` }}></div>
-                                  <div className="absolute inset-0 flex items-center px-3 text-sm font-medium">
-                                    {opt.text} {iVoted && ' (Your Vote)'}
-                                  </div>
-                                </div>
-                                <div className="w-10 text-sm text-right text-muted-foreground font-medium">{pct}%</div>
-                              </div>
-                            )
-                          } else {
-                            return (
-                              <Button key={i} variant="outline" className="justify-start px-4 h-10" onClick={() => handleVote(post.id, i)}>
-                                {opt.text}
-                              </Button>
-                            )
-                          }
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-3 mt-6 pt-4 border-t border-border">
-                    <Button variant="outline" size="sm" className="gap-2 rounded-full h-8 px-3" onClick={() => handleReaction(post.id, '👍')}>
-                      <ThumbsUp className="h-3.5 w-3.5" /> {post.reactions['👍']}
-                    </Button>
-                    <Button variant="outline" size="sm" className="gap-2 rounded-full h-8 px-3" onClick={() => handleReaction(post.id, '❤️')}>
-                      <Heart className="h-3.5 w-3.5" /> {post.reactions['❤️']}
-                    </Button>
-                    <Button variant="outline" size="sm" className="gap-2 rounded-full h-8 px-3" onClick={() => handleReaction(post.id, '🎉')}>
-                      <PartyPopper className="h-3.5 w-3.5" /> {post.reactions['🎉']}
-                    </Button>
-                    
-                    <div className="flex-1"></div>
-                    
-                    <Button variant="ghost" size="sm" className={`gap-2 h-8 ${activeCommentPost === post.id ? 'bg-muted text-foreground' : 'text-muted-foreground'}`} onClick={() => setActiveCommentPost(activeCommentPost === post.id ? null : post.id)}>
-                      <MessageSquare className="h-4 w-4" /> Comment {post.comments?.length > 0 ? `(${post.comments.length})` : ''}
-                    </Button>
-                  </div>
-
-                  {/* Comments Section */}
-                  {(activeCommentPost === post.id || (post.comments && post.comments.length > 0)) && (
-                    <div className="mt-4 space-y-4 pt-4 border-t border-border">
-                      {/* Render comments */}
-                      {post.comments?.map(cmt => {
-                        const cAuthor = employees.find(e => e.id === cmt.authorId) || { name: 'Unknown User' }
-                        return (
-                          <div key={cmt.id} className="flex gap-3 text-sm">
-                            <Avatar className="h-8 w-8 mt-1">
-                              {cAuthor.avatar ? <AvatarImage src={cAuthor.avatar} /> : null}
-                              <AvatarFallback className="text-xs bg-primary/10 text-primary flex items-center justify-center"><User size={16} /></AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 bg-muted/50 rounded-lg p-3">
-                              <div className="flex justify-between items-center mb-1">
-                                <span className="font-semibold">{cAuthor.name}</span>
-                                <span className="text-[10px] text-muted-foreground">{formatDateTime(cmt.date)}</span>
-                              </div>
-                              <p className="m-0 text-foreground">{cmt.text}</p>
-                            </div>
-                          </div>
-                        )
-                      })}
-                      
-                      {/* Comment Input */}
-                      {activeCommentPost === post.id && (
-                        <form onSubmit={(e) => handleAddComment(e, post.id)} className="flex gap-3 items-start mt-4">
-                          <Avatar className="h-8 w-8 mt-1">
-                            {currentUser?.avatar ? <AvatarImage src={currentUser.avatar} /> : null}
-                            <AvatarFallback className="text-xs bg-primary/10 text-primary flex items-center justify-center"><User size={16} /></AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 flex gap-2">
-                            <Input 
-                              placeholder="Write a comment..." 
-                              value={commentText}
-                              onChange={(e) => setCommentText(e.target.value)}
-                              className="flex-1"
-                              autoFocus
-                            />
-                            <Button type="submit" size="sm" disabled={!commentText.trim()}>Post</Button>
-                          </div>
-                        </form>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )
-          })
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ----------------------------------------------------------------------
 // My Assets View (Employee)
 // ----------------------------------------------------------------------
 function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetRequests, addToast }) {
