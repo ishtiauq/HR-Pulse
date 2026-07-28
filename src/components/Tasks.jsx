@@ -7,7 +7,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { Select, SelectItem } from "@/components/ui/select"
 
 export default function Tasks({ tasks = [], setTasks, employees = [], currentUser, addToast, simulatedRole, addLog, addNotification }) {
-  const [view, setView] = useState('kanban')
+  const [activeStatusTab, setActiveStatusTab] = useState('To Do')
   const [search, setSearch] = useState('')
   const [showTaskModal, setShowTaskModal] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
@@ -203,24 +203,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
             </Select>
           </div>
           
-          <div className="flex-1 sm:flex-none flex items-center bg-background rounded-lg border border-border p-1 justify-center sm:justify-start">
-            <Button 
-              variant={view === 'kanban' ? 'secondary' : 'ghost'} 
-              size="sm"
-              onClick={() => setView('kanban')}
-              className="px-3 flex-1 sm:flex-none"
-            >
-              <LayoutGrid className="h-4 w-4 mr-2" /> Board
-            </Button>
-            <Button 
-              variant={view === 'list' ? 'secondary' : 'ghost'} 
-              size="sm"
-              onClick={() => setView('list')}
-              className="px-3 flex-1 sm:flex-none"
-            >
-              <List className="h-4 w-4 mr-2" /> List
-            </Button>
-          </div>
+
           
           <Button onClick={() => openModal()} className="shadow-sm w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" /> Add Task
@@ -228,174 +211,114 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
         </div>
       </div>
 
-      {/* Kanban Board View */}
-      {view === 'kanban' && (
-        <div className="flex overflow-x-auto pb-4 gap-6 w-full items-start">
-          {COLUMNS.map(col => (
+      {/* Status Tabs */}
+      <div className="w-full overflow-x-auto pb-2 hide-scrollbar">
+        <div className="flex w-max min-w-full sm:min-w-0 p-1.5 bg-muted/40 rounded-xl border border-border/60 gap-1.5">
+          {COLUMNS.map(col => {
+            const count = filteredTasks.filter(t => t.status === col).length;
+            const isActive = activeStatusTab === col;
+            return (
+              <button
+                key={col}
+                onClick={() => setActiveStatusTab(col)}
+                className={`flex-1 flex items-center justify-center gap-2.5 px-6 py-2.5 text-[0.9rem] font-medium rounded-lg whitespace-nowrap transition-all duration-200 ${
+                  isActive 
+                    ? 'bg-background text-foreground shadow-sm ring-1 ring-border/50' 
+                    : 'text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+                }`}
+              >
+                {col}
+                <span className={`flex items-center justify-center text-[11px] h-5 min-w-[22px] px-1.5 font-bold rounded-full transition-colors ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-muted-foreground/20 text-muted-foreground'}`}>
+                  {count}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Task Cards Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 items-start w-full mt-2">
+        {filteredTasks.filter(t => t.status === activeStatusTab).map(task => {
+          const assignees = getAssignees(task.assigneeIds)
+          return (
             <div 
-              key={col} 
-              className="flex flex-col gap-3 min-w-[260px] w-[260px] bg-muted/30 rounded-xl p-3 border border-border/50 h-fit"
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, col)}
+              key={task.id}
+              className="bg-card text-card-foreground rounded-xl border border-border p-4 sm:p-5 shadow-sm hover:border-primary/50 hover:shadow-md transition-all group flex flex-col h-full"
             >
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold flex items-center gap-2">
-                  {col} 
-                  <span className="bg-background text-xs px-2 py-0.5 rounded-full border border-border">
-                    {filteredTasks.filter(t => t.status === col).length}
-                  </span>
-                </h3>
+              <div className="flex justify-between items-start mb-2.5 sm:mb-3">
+                <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded ${getPriorityColor(task.priority)}`}>
+                  {task.priority}
+                </span>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={() => openModal(task)}>
+                    <Edit className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-500" onClick={() => setTaskToDelete(task.id)}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
               
-              <div className="flex flex-col gap-3 h-full overflow-y-auto">
-                {filteredTasks.filter(t => t.status === col).map(task => {
-                  const assignees = getAssignees(task.assigneeIds)
-                  return (
-                    <div 
-                      key={task.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, task.id)}
-                      title="Drag to move"
-                      className="bg-card text-card-foreground rounded-xl border border-border p-4 shadow-sm cursor-grab active:cursor-grabbing hover:border-primary hover:shadow-md transition-all group flex flex-col shrink-0 h-max"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded ${getPriorityColor(task.priority)}`}>
-                          {task.priority}
-                        </span>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground" onClick={() => openModal(task)}>
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-red-500" onClick={() => setTaskToDelete(task.id)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
+              <h4 className="font-semibold text-sm sm:text-base mb-1.5 sm:mb-2 leading-tight">{task.title}</h4>
+              <p className="text-xs sm:text-sm text-muted-foreground break-words mb-3 sm:mb-4 flex-1">{task.description}</p>
+              
+              <div className="mb-3 sm:mb-4 flex items-center gap-2">
+                <span className="text-xs font-medium text-muted-foreground shrink-0">Status:</span>
+                <Select value={task.status} onChange={(val) => {
+                  setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: val } : t))
+                  addLog(`Moved task to ${val}`, `Task ID: ${task.id}`)
+                }}>
+                  {COLUMNS.map(c => <SelectItem key={c} id={c}>{c}</SelectItem>)}
+                </Select>
+              </div>
+
+              {task.updates && task.updates.length > 0 && (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
+                  <MessageSquare className="h-3.5 w-3.5" />
+                  <span>{task.updates.length} updates</span>
+                </div>
+              )}
+              
+              {task.tags && task.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-3 sm:mb-4">
+                  {task.tags.map((tag, idx) => (
+                    <span key={idx} className="text-[10px] font-medium bg-secondary text-secondary-foreground px-2 py-0.5 rounded border border-border/50">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+              
+              <div className="flex items-center justify-between mt-auto pt-3 sm:pt-4 border-t border-border/50">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                  <CalendarIcon className="h-3.5 w-3.5" />
+                  {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No date'}
+                </div>
+                {assignees.length > 0 && (
+                  <div className="flex -space-x-2">
+                    {assignees.slice(0, 3).map((a, i) => (
+                      <img key={a.id} src={a.avatar} alt={a.name} className="h-7 w-7 rounded-full object-cover border-2 border-card relative" style={{ zIndex: 3 - i }} title={a.name} />
+                    ))}
+                    {assignees.length > 3 && (
+                      <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center text-[10px] font-medium border-2 border-card relative z-0">
+                        +{assignees.length - 3}
                       </div>
-                      <h4 className="font-medium text-sm mb-1">{task.title}</h4>
-                      <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{task.description}</p>
-                      
-                      {task.updates && task.updates.length > 0 && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
-                          <MessageSquare className="h-3 w-3" />
-                          <span>{task.updates.length}</span>
-                        </div>
-                      )}
-                      
-                      {task.tags && task.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {task.tags.map((tag, idx) => (
-                            <span key={idx} className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded border border-border/50">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center justify-between mt-auto">
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <CalendarIcon className="h-3 w-3" />
-                          {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No date'}
-                        </div>
-                        {assignees.length > 0 && (
-                          <div className="flex -space-x-2">
-                            {assignees.slice(0, 3).map((a, i) => (
-                              <img key={a.id} src={a.avatar} alt={a.name} className="h-6 w-6 rounded-full object-cover border border-card relative" style={{ zIndex: 3 - i }} title={a.name} />
-                            ))}
-                            {assignees.length > 3 && (
-                              <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-[10px] font-medium border border-card relative z-0">
-                                +{assignees.length - 3}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
-                {filteredTasks.filter(t => t.status === col).length === 0 && (
-                  <div className="flex-1 flex items-center justify-center border-2 border-dashed border-border rounded-lg p-4 text-center">
-                    <p className="text-sm text-muted-foreground">Drop tasks here</p>
+                    )}
                   </div>
                 )}
               </div>
             </div>
-          ))}
-        </div>
-      )}
-
-      {/* List View */}
-      {view === 'list' && (
-        <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-muted-foreground uppercase bg-muted/50 border-b border-border">
-                <tr>
-                  <th className="px-4 py-3">Task Name</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Priority</th>
-                  <th className="px-4 py-3">Assignee</th>
-                  <th className="px-4 py-3">Due Date</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTasks.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" className="px-4 py-8 text-center text-muted-foreground">No tasks found.</td>
-                  </tr>
-                ) : (
-                  filteredTasks.map(task => {
-                    const assignees = getAssignees(task.assigneeIds)
-                    return (
-                      <tr key={task.id} className="border-b border-border hover:bg-muted/20">
-                        <td className="px-4 py-3 font-medium">{task.title}</td>
-                        <td className="px-4 py-3">
-                          <Select value={task.status} onChange={(val) => setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: val } : t))}>
-                            {COLUMNS.map(c => <SelectItem key={c} id={c}>{c}</SelectItem>)}
-                          </Select>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded ${getPriorityColor(task.priority)}`}>
-                            {task.priority}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          {assignees.length > 0 ? (
-                            <div className="flex items-center gap-2">
-                              <div className="flex -space-x-2">
-                                {assignees.slice(0, 3).map((a, i) => (
-                                  <img key={a.id} src={a.avatar} alt={a.name} className="h-6 w-6 rounded-full object-cover border border-card relative" style={{ zIndex: 3 - i }} title={a.name} />
-                                ))}
-                                {assignees.length > 3 && (
-                                  <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-[10px] font-medium border border-card relative z-0">
-                                    +{assignees.length - 3}
-                                  </div>
-                                )}
-                              </div>
-                              <span className="text-sm truncate max-w-[120px]" title={assignees.map(a => a.name).join(', ')}>{assignees.map(a => a.name).join(', ')}</span>
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground">Unassigned</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '-'}</td>
-                        <td className="px-4 py-3 text-right">
-                          <Button variant="ghost" size="icon" onClick={() => openModal(task)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="text-red-500" onClick={() => setTaskToDelete(task.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </td>
-                      </tr>
-                    )
-                  })
-                )}
-              </tbody>
-            </table>
+          )
+        })}
+        {filteredTasks.filter(t => t.status === activeStatusTab).length === 0 && (
+          <div className="col-span-full flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-border rounded-xl">
+            <CheckSquare className="h-12 w-12 text-muted-foreground/30 mb-3" />
+            <h3 className="text-lg font-medium text-foreground">No tasks found</h3>
+            <p className="text-sm text-muted-foreground">There are no tasks in '{activeStatusTab}' status.</p>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Delete Confirmation Alert */}
       <AlertDialog open={!!taskToDelete} onOpenChange={(open) => !open && setTaskToDelete(null)}>
@@ -422,8 +345,8 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
           </DialogHeader>
           
           {editingTask ? (
-            <div className="w-full flex flex-col gap-4">
-              <div className="flex bg-muted/50 p-1 rounded-lg w-full">
+            <div className="w-full flex flex-col">
+              <div className="flex bg-muted/50 p-1 rounded-lg w-[calc(100%-3rem)] mx-auto mt-5">
                 <button
                   className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${activeTab === 'details' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                   onClick={() => setActiveTab('details')}
@@ -440,108 +363,110 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
               </div>
               
               {activeTab === 'details' && (
-              <div className="grid gap-4 py-2 max-h-[60vh] overflow-y-auto px-1">
-                <div className="grid gap-2">
-                  <label className="text-sm font-medium">Task Title *</label>
-              <Input 
-                value={taskForm.title} 
-                onChange={e => setTaskForm({...taskForm, title: e.target.value})} 
-                placeholder="e.g. Update user roles"
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Description</label>
-              <textarea 
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                value={taskForm.description} 
-                onChange={e => setTaskForm({...taskForm, description: e.target.value})}
-                placeholder="Details about the task..."
-              />
-            </div>
+              <div className="grid gap-5 py-5 max-h-[55vh] overflow-y-auto px-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Task Title <span className="text-destructive">*</span></label>
+                  <Input 
+                    value={taskForm.title} 
+                    onChange={e => setTaskForm({...taskForm, title: e.target.value})} 
+                    placeholder="e.g. Update user roles"
+                    className="bg-background shadow-sm"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Description</label>
+                  <textarea 
+                    className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 shadow-sm resize-y"
+                    value={taskForm.description} 
+                    onChange={e => setTaskForm({...taskForm, description: e.target.value})}
+                    placeholder="Details about the task..."
+                  />
+                </div>
 
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">Tags (comma separated)</label>
-              <Input 
-                value={(taskForm.tags || []).join(', ')} 
-                onChange={e => setTaskForm({...taskForm, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean)})} 
-                placeholder="e.g. Frontend, Urgent, Bug"
-              />
-            </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Tags (comma separated)</label>
+                  <Input 
+                    value={(taskForm.tags || []).join(', ')} 
+                    onChange={e => setTaskForm({...taskForm, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean)})} 
+                    placeholder="e.g. Frontend, Urgent, Bug"
+                    className="bg-background shadow-sm"
+                  />
+                </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <label className="text-sm font-medium">Status</label>
-                <Select value={taskForm.status} onChange={val => setTaskForm({...taskForm, status: val})}>
-                  {COLUMNS.map(c => <SelectItem key={c} id={c}>{c}</SelectItem>)}
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <label className="text-sm font-medium">Priority</label>
-                <Select value={taskForm.priority} onChange={val => setTaskForm({...taskForm, priority: val})}>
-                  <SelectItem id="High">High</SelectItem>
-                  <SelectItem id="Medium">Medium</SelectItem>
-                  <SelectItem id="Low">Low</SelectItem>
-                </Select>
-              </div>
-            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Status</label>
+                    <Select value={taskForm.status} onChange={val => setTaskForm({...taskForm, status: val})}>
+                      {COLUMNS.map(c => <SelectItem key={c} id={c}>{c}</SelectItem>)}
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Priority</label>
+                    <Select value={taskForm.priority} onChange={val => setTaskForm({...taskForm, priority: val})}>
+                      <SelectItem id="High">High</SelectItem>
+                      <SelectItem id="Medium">Medium</SelectItem>
+                      <SelectItem id="Low">Low</SelectItem>
+                    </Select>
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <label className="text-sm font-medium">Assignees</label>
-                <div className="relative">
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-between font-normal bg-background"
-                    onClick={() => setShowAssigneesDropdown(!showAssigneesDropdown)}
-                  >
-                    {taskForm.assigneeIds.length > 0 
-                      ? `${taskForm.assigneeIds.length} Assignee(s)` 
-                      : "Select Assignees..."}
-                    <ChevronDown className="h-4 w-4 opacity-50" />
-                  </Button>
-                  {showAssigneesDropdown && (
-                    <div className="absolute z-50 w-[200px] mt-1 bg-popover border border-border rounded-md shadow-md text-popover-foreground">
-                      <div className="px-2 py-1.5 text-sm font-semibold">Select Employees</div>
-                      <div className="h-px bg-border my-1" />
-                      <div className="max-h-[200px] overflow-y-auto p-1 flex flex-col">
-                        {employees.map(emp => (
-                          <label key={emp.id} className="flex items-center gap-2 text-sm p-2 hover:bg-accent rounded-sm cursor-pointer transition-colors">
-                            <input 
-                              type="checkbox" 
-                              checked={taskForm.assigneeIds.includes(emp.id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setTaskForm({...taskForm, assigneeIds: [...taskForm.assigneeIds, emp.id]})
-                                } else {
-                                  setTaskForm({...taskForm, assigneeIds: taskForm.assigneeIds.filter(id => id !== emp.id)})
-                                }
-                              }}
-                              className="rounded border-border accent-primary h-4 w-4"
-                            />
-                            <img src={emp.avatar} alt={emp.name} className="h-5 w-5 rounded-full object-cover" />
-                            {emp.name}
-                          </label>
-                        ))}
-                      </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Assignees</label>
+                    <div className="relative">
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-between font-normal bg-background shadow-sm h-9 px-3 py-2 text-sm"
+                        onClick={() => setShowAssigneesDropdown(!showAssigneesDropdown)}
+                      >
+                        {taskForm.assigneeIds.length > 0 
+                          ? <span className="flex items-center gap-2"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">{taskForm.assigneeIds.length}</span> selected</span>
+                          : <span className="text-muted-foreground">Select Assignees...</span>}
+                        <ChevronDown className="h-4 w-4 opacity-50" />
+                      </Button>
+                      {showAssigneesDropdown && (
+                        <div className="absolute bottom-full mb-1 z-50 w-full bg-popover border border-border rounded-md shadow-md text-popover-foreground">
+                          <div className="px-3 py-2 text-sm font-semibold bg-muted/40 border-b border-border">Select Employees</div>
+                          <div className="max-h-[180px] overflow-y-auto p-1.5 flex flex-col gap-0.5">
+                            {employees.map(emp => (
+                              <label key={emp.id} className="flex items-center gap-2.5 text-sm p-2 hover:bg-accent rounded-sm cursor-pointer transition-colors group">
+                                <input 
+                                  type="checkbox" 
+                                  checked={taskForm.assigneeIds.includes(emp.id)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setTaskForm({...taskForm, assigneeIds: [...taskForm.assigneeIds, emp.id]})
+                                    } else {
+                                      setTaskForm({...taskForm, assigneeIds: taskForm.assigneeIds.filter(id => id !== emp.id)})
+                                    }
+                                  }}
+                                  className="rounded border-border accent-primary h-4 w-4 shrink-0 transition-all"
+                                />
+                                <img src={emp.avatar} alt={emp.name} className="h-6 w-6 rounded-full object-cover shrink-0 ring-1 ring-border group-hover:ring-primary/50" />
+                                <span className="truncate">{emp.name}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Due Date</label>
+                    <Input 
+                      type="date" 
+                      value={taskForm.dueDate} 
+                      onChange={e => setTaskForm({...taskForm, dueDate: e.target.value})} 
+                      className="bg-background shadow-sm w-full"
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="grid gap-2">
-                <label className="text-sm font-medium">Due Date</label>
-                <Input 
-                  type="date" 
-                  value={taskForm.dueDate} 
-                  onChange={e => setTaskForm({...taskForm, dueDate: e.target.value})} 
-                />
-              </div>
-            </div>
-            </div>
               )}
               
               {activeTab === 'updates' && (
-              <div className="flex flex-col gap-4 py-2 h-[50vh]">
+              <div className="flex flex-col gap-4 py-4 h-[50vh] px-6">
                 <div className="flex-1 overflow-y-auto space-y-4 pr-2">
                   {taskForm.updates.length === 0 ? (
                     <div className="text-center text-sm text-muted-foreground mt-8">No updates yet. Be the first to add one!</div>
@@ -580,41 +505,43 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
               )}
             </div>
           ) : (
-            <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto px-1">
-              <div className="grid gap-2">
-                <label className="text-sm font-medium">Task Title *</label>
+            <div className="grid gap-5 py-5 max-h-[65vh] overflow-y-auto px-6">
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Task Title <span className="text-destructive">*</span></label>
                 <Input 
                   value={taskForm.title} 
                   onChange={e => setTaskForm({...taskForm, title: e.target.value})} 
                   placeholder="e.g. Update user roles"
+                  className="bg-background shadow-sm"
                 />
               </div>
-              <div className="grid gap-2">
-                <label className="text-sm font-medium">Description</label>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Description</label>
                 <textarea 
-                  className="flex min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 shadow-sm resize-y"
                   value={taskForm.description} 
                   onChange={e => setTaskForm({...taskForm, description: e.target.value})}
                   placeholder="Details about the task..."
                 />
               </div>
-              <div className="grid gap-2">
-                <label className="text-sm font-medium">Tags (comma separated)</label>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Tags (comma separated)</label>
                 <Input 
                   value={(taskForm.tags || []).join(', ')} 
                   onChange={e => setTaskForm({...taskForm, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean)})} 
                   placeholder="e.g. Frontend, Urgent, Bug"
+                  className="bg-background shadow-sm"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <label className="text-sm font-medium">Status</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Status</label>
                   <Select value={taskForm.status} onChange={val => setTaskForm({...taskForm, status: val})}>
                     {COLUMNS.map(c => <SelectItem key={c} id={c}>{c}</SelectItem>)}
                   </Select>
                 </div>
-                <div className="grid gap-2">
-                  <label className="text-sm font-medium">Priority</label>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Priority</label>
                   <Select value={taskForm.priority} onChange={val => setTaskForm({...taskForm, priority: val})}>
                     <SelectItem id="High">High</SelectItem>
                     <SelectItem id="Medium">Medium</SelectItem>
@@ -622,27 +549,26 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <label className="text-sm font-medium">Assignees</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Assignees</label>
                   <div className="relative">
                     <Button 
                       variant="outline" 
-                      className="w-full justify-between font-normal bg-background"
+                      className="w-full justify-between font-normal bg-background shadow-sm h-9 px-3 py-2 text-sm"
                       onClick={() => setShowAssigneesDropdown(!showAssigneesDropdown)}
                     >
                       {taskForm.assigneeIds.length > 0 
-                        ? `${taskForm.assigneeIds.length} Assignee(s)` 
-                        : "Select Assignees..."}
+                        ? <span className="flex items-center gap-2"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">{taskForm.assigneeIds.length}</span> selected</span>
+                        : <span className="text-muted-foreground">Select Assignees...</span>}
                       <ChevronDown className="h-4 w-4 opacity-50" />
                     </Button>
                     {showAssigneesDropdown && (
-                      <div className="absolute z-50 w-[200px] mt-1 bg-popover border border-border rounded-md shadow-md text-popover-foreground">
-                        <div className="px-2 py-1.5 text-sm font-semibold">Select Employees</div>
-                        <div className="h-px bg-border my-1" />
-                        <div className="max-h-[200px] overflow-y-auto p-1 flex flex-col">
+                      <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-md text-popover-foreground">
+                        <div className="px-3 py-2 text-sm font-semibold bg-muted/40 border-b border-border">Select Employees</div>
+                        <div className="max-h-[180px] overflow-y-auto p-1.5 flex flex-col gap-0.5">
                           {employees.map(emp => (
-                            <label key={emp.id} className="flex items-center gap-2 text-sm p-2 hover:bg-accent rounded-sm cursor-pointer transition-colors">
+                            <label key={emp.id} className="flex items-center gap-2.5 text-sm p-2 hover:bg-accent rounded-sm cursor-pointer transition-colors group">
                               <input 
                                 type="checkbox" 
                                 checked={taskForm.assigneeIds.includes(emp.id)}
@@ -653,10 +579,10 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                                     setTaskForm({...taskForm, assigneeIds: taskForm.assigneeIds.filter(id => id !== emp.id)})
                                   }
                                 }}
-                                className="rounded border-border accent-primary h-4 w-4"
+                                className="rounded border-border accent-primary h-4 w-4 shrink-0 transition-all"
                               />
-                              <img src={emp.avatar} alt={emp.name} className="h-5 w-5 rounded-full object-cover" />
-                              {emp.name}
+                              <img src={emp.avatar} alt={emp.name} className="h-6 w-6 rounded-full object-cover shrink-0 ring-1 ring-border group-hover:ring-primary/50" />
+                              <span className="truncate">{emp.name}</span>
                             </label>
                           ))}
                         </div>
@@ -664,19 +590,20 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                     )}
                   </div>
                 </div>
-                <div className="grid gap-2">
-                  <label className="text-sm font-medium">Due Date</label>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Due Date</label>
                   <Input 
                     type="date" 
                     value={taskForm.dueDate} 
                     onChange={e => setTaskForm({...taskForm, dueDate: e.target.value})} 
+                    className="bg-background shadow-sm w-full"
                   />
                 </div>
               </div>
             </div>
           )}
           
-          <DialogFooter>
+          <DialogFooter className="px-6 py-4 border-t border-border">
             <Button variant="outline" onClick={closeModal}>Cancel</Button>
             {(!editingTask || activeTab === 'details') && (
               <Button onClick={handleSaveTask}>Save Task</Button>

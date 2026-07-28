@@ -116,21 +116,39 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
     addToast('Event deleted', 'info')
   }
 
+  const birthdayEvents = (employees || [])
+    .filter(emp => emp.dob)
+    .map(emp => {
+      const dobDate = new Date(emp.dob)
+      const month = String(dobDate.getMonth() + 1).padStart(2, '0')
+      const day = String(dobDate.getDate()).padStart(2, '0')
+      return {
+        id: `bday-${emp.id}`,
+        title: `${emp.name}'s Birthday \u{1F382}`,
+        date: `${currentYear}-${month}-${day}`,
+        type: 'birthday',
+        description: `Wish ${emp.name} a happy birthday!`,
+        isAuto: true
+      }
+    })
+
+  const allEvents = [...events, ...birthdayEvents]
+
   const getEventsForDate = (day) => {
     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    return events.filter(ev => ev.date === dateStr)
+    return allEvents.filter(ev => ev.date === dateStr)
   }
 
   const getTypeInfo = (typeId) => EVENT_TYPES.find(t => t.id === typeId) || EVENT_TYPES[4]
 
-  const upcomingEvents = [...events]
+  const upcomingEvents = [...allEvents]
     .filter(ev => ev.date >= `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`)
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, 10)
 
   const filteredEvents = selectedDate
-    ? events.filter(ev => ev.date === selectedDate)
-    : events.filter(ev => {
+    ? allEvents.filter(ev => ev.date === selectedDate)
+    : allEvents.filter(ev => {
         const d = new Date(ev.date + 'T00:00:00')
         return d.getMonth() === currentMonth && d.getFullYear() === currentYear
       })
@@ -138,20 +156,20 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
   const renderCalendarGrid = () => (
     <Card>
       <CardContent className="p-5 sm:p-6">
-        <div className="flex justify-between items-center mb-5">
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="icon" onClick={prevMonth} aria-label="Previous month">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-5 gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button variant="outline" size="icon" className="size-8 sm:size-10" onClick={prevMonth} aria-label="Previous month">
               <ChevronLeft size={18} />
             </Button>
-            <h2 className="text-lg font-bold m-0 min-w-[180px] text-center text-foreground">
+            <h2 className="text-base sm:text-lg font-bold m-0 min-w-[140px] sm:min-w-[180px] text-center text-foreground">
               {MONTHS[currentMonth]} {currentYear}
             </h2>
-            <Button variant="outline" size="icon" onClick={nextMonth} aria-label="Next month">
+            <Button variant="outline" size="icon" className="size-8 sm:size-10" onClick={nextMonth} aria-label="Next month">
               <ChevronRight size={18} />
             </Button>
           </div>
-          <Button onClick={() => openCreateModal(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`)}>
-            <Plus size={16} /> Add Event
+          <Button className="w-full sm:w-auto" onClick={() => openCreateModal(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`)}>
+            <Plus size={16} className="mr-1.5" /> Add Event
           </Button>
         </div>
 
@@ -175,7 +193,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                 onClick={() => setSelectedDate(dateStr)}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedDate(dateStr) } }}
                 tabIndex={0}
-                className={`flex flex-col items-center gap-1 p-2 cursor-pointer min-h-[64px] rounded-lg transition-colors
+                className={`flex flex-col items-center gap-1 p-1 sm:p-2 cursor-pointer min-h-[48px] sm:min-h-[64px] rounded-lg transition-colors
                   ${isSelected ? 'bg-primary text-primary-foreground' : isToday ? 'bg-accent' : 'hover:bg-accent/50'}`}
                 style={{
                   border: isToday && !isSelected ? '1px solid hsl(var(--primary))' : 'none',
@@ -217,18 +235,18 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
               const typeInfo = getTypeInfo(ev.type)
               const TypeIcon = typeInfo.icon
               return (
-                <div key={ev.id} role="listitem" className="flex items-center gap-3 p-3 px-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                <div key={ev.id} role="listitem" className="flex items-start sm:items-center gap-3 p-3 px-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex-wrap sm:flex-nowrap">
                   <div className="flex items-center justify-center shrink-0 size-9 rounded-lg" style={{
                     background: `${typeInfo.color}20`, color: typeInfo.color,
                   }}>
                     <TypeIcon size={16} />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-[200px]">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-sm text-foreground">{ev.title}</span>
                       <Badge variant="outline" className="text-[10px] px-2 py-0.5" style={{ borderColor: typeInfo.color, color: typeInfo.color }}>{typeInfo.label}</Badge>
                     </div>
-                    <div className="flex items-center gap-3 mt-1">
+                    <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
                       <span className="text-xs flex items-center gap-1 text-muted-foreground">
                         <CalendarIcon size={12} /> {formatDate(ev.date)}
                       </span>
@@ -239,16 +257,20 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                       )}
                     </div>
                     {ev.description && (
-                      <p className="text-xs m-0 mt-1 text-muted-foreground">{ev.description}</p>
+                      <p className="text-xs m-0 mt-1.5 text-muted-foreground">{ev.description}</p>
                     )}
                   </div>
-                  <div className="flex gap-1 shrink-0">
-                    <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditModal(ev)} aria-label="Edit event">
-                      <Edit size={14} />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="size-8 text-destructive hover:text-destructive" onClick={() => handleDelete(ev.id)} aria-label="Delete event">
-                      <Trash2 size={14} />
-                    </Button>
+                  <div className="flex gap-1 shrink-0 w-full sm:w-auto justify-end mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-0 border-border/50">
+                    {!ev.isAuto && (
+                      <>
+                        <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditModal(ev)} aria-label="Edit event">
+                          <Edit size={14} />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="size-8 text-destructive hover:text-destructive" onClick={() => handleDelete(ev.id)} aria-label="Delete event">
+                          <Trash2 size={14} />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               )
@@ -269,7 +291,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
       </div>
       <div className="border-t border-border" />
 
-      <div className="grid gap-6 items-start" style={{ gridTemplateColumns: selectedDate ? '1fr 380px' : '1fr' }}>
+      <div className={`grid gap-6 items-start ${selectedDate ? 'grid-cols-1 xl:grid-cols-[1fr_380px]' : 'grid-cols-1'}`}>
         {renderCalendarGrid()}
         {selectedDate && renderEventList()}
       </div>
@@ -278,14 +300,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
         <div>{renderEventList()}</div>
       )}
 
-      <div className="flex gap-3 justify-end items-center">
-        {EVENT_TYPES.map(t => (
-          <div key={t.id} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <div className="w-2 h-2 rounded-full" style={{ background: t.color }} />
-            {t.label}
-          </div>
-        ))}
-      </div>
+
 
       <Dialog open={showEventModal} onOpenChange={(open) => { if (!open) { setShowEventModal(false); resetForm() } }}>
         <DialogContent className="sm:max-w-[480px]">

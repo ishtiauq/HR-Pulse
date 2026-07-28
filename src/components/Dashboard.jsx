@@ -379,7 +379,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                     <Megaphone size={16} />
                   </div>
                   <div className="flex-1 min-w-0 pr-2">
-                    <p className="m-0 text-xs font-bold text-foreground truncate">{ann.title}</p>
+                    <p className="m-0 text-xs font-bold text-foreground break-words">{ann.title}</p>
                     <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">
                       {getEmployeeName(ann.authorId)} &middot; {new Date(ann.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </p>
@@ -415,18 +415,18 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
               <p className="text-center my-auto text-xs text-muted-foreground">No payroll data found</p>
             ) : (
               <>
-                <div className="grid grid-cols-3 gap-3 p-3.5 rounded-lg bg-muted/40 border border-border/50">
+                <div className="grid grid-cols-2 xl:grid-cols-3 gap-3 p-3.5 rounded-lg bg-muted/40 border border-border/50">
                   <div>
                     <span className="block text-xs font-medium text-muted-foreground">Paid</span>
-                    <span className="text-2xl font-black tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5 block">{paidCount}</span>
+                    <span className="text-xl sm:text-2xl font-black tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5 block">{paidCount}</span>
                   </div>
                   <div>
                     <span className="block text-xs font-medium text-muted-foreground">Pending</span>
-                    <span className="text-2xl font-black tabular-nums text-amber-500 mt-0.5 block">{pendingCount}</span>
+                    <span className="text-xl sm:text-2xl font-black tabular-nums text-amber-500 mt-0.5 block">{pendingCount}</span>
                   </div>
-                  <div className="text-right">
+                  <div className="col-span-2 xl:col-span-1 xl:text-right border-t xl:border-t-0 border-border/50 pt-2 xl:pt-0 mt-1 xl:mt-0">
                     <span className="block text-xs font-medium text-muted-foreground">Total Payroll</span>
-                    <span className="text-2xl font-black tabular-nums text-foreground mt-0.5 block">${totalPayrollCost.toLocaleString()}</span>
+                    <span className="text-xl sm:text-2xl font-black tabular-nums text-foreground mt-0.5 block">${totalPayrollCost.toLocaleString()}</span>
                   </div>
                 </div>
                 <div className="mt-3 pt-3 flex justify-between items-center border-t border-border">
@@ -480,8 +480,8 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                     <CalendarIcon size={16} style={{ color: evt.type === 'holiday' ? '#10b981' : evt.type === 'birthday' ? '#f59e0b' : '#3b82f6' }} />
                   </div>
                   <div className="flex-1 min-w-0 pr-2">
-                    <p className="m-0 text-xs font-bold text-foreground truncate">{evt.title}</p>
-                    <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground truncate">
+                    <p className="m-0 text-xs font-bold text-foreground break-words">{evt.title}</p>
+                    <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground break-words">
                       {formatDate(evt.date)}{evt.time ? ` at ${evt.time}` : ''}
                     </p>
                   </div>
@@ -518,8 +518,8 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0 pr-2">
-                  <p className="m-0 text-xs font-bold text-foreground truncate">{log.action}</p>
-                  <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground truncate">{log.details}</p>
+                  <p className="m-0 text-xs font-bold text-foreground break-words">{log.action}</p>
+                  <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground break-words">{log.details}</p>
                 </div>
                 <Badge variant={log.status === 'success' ? 'success' : log.status === 'error' ? 'destructive' : 'warning'} className="uppercase text-[10px]">
                   {log.status === 'success' ? 'Synced' : log.status === 'error' ? 'Failed' : 'Pending'}
@@ -554,7 +554,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                   <div key={`${milestone.type}-${milestone.empName}`} className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/70 transition-colors">
                     <img src={milestone.avatar} alt={milestone.empName} className="w-8 h-8 rounded-full object-cover shrink-0" />
                     <div className="flex-1 min-w-0 pr-2">
-                      <p className="m-0 text-xs font-bold text-foreground truncate">{milestone.empName}</p>
+                      <p className="m-0 text-xs font-bold text-foreground break-words">{milestone.empName}</p>
                       <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">{milestone.label}</p>
                     </div>
                     <Badge variant="default" className="uppercase text-[10px]">

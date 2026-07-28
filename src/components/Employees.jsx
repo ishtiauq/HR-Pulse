@@ -382,7 +382,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground"><Users size={20} className="text-primary" />Employees</h1>
-        <div className="flex gap-2 items-center">
+        <div className="hidden lg:flex gap-2 items-center">
           <input 
             id="csv-file-input" 
             type="file" 
@@ -458,46 +458,66 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       </div>
       <div className="border-t border-border" />
 
+      {/* Mobile/Tablet Action Buttons */}
+      <div className="lg:hidden grid grid-cols-2 gap-3 mb-2">
+        <Button variant="outline" className="w-full" onClick={() => document.getElementById('csv-file-input').click()}>
+          <FileSpreadsheet className="mr-2 h-4 w-4" />
+          Import CSV
+        </Button>
+        <Button className="w-full" onClick={handleOpenAddForm}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Employee
+        </Button>
+      </div>
+
       {/* Filters Toolbar */}
-      <Card className="border-none shadow-sm bg-card">
-        <CardContent className="p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <Card className="shadow-sm overflow-hidden mb-6 border border-border">
+        <CardContent className="p-0 flex flex-col">
           
-          <div className="flex items-center gap-4 w-full md:w-auto flex-1">
-            <div className="flex items-center gap-2 pr-4 border-r border-border min-w-max">
+          {/* Top Container: Select All & Search */}
+          <div className="p-4 flex items-center gap-3 sm:gap-4 w-full">
+            <div className="flex items-center gap-2 pr-3 sm:pr-4 border-r border-border shrink-0">
               <input
                 type="checkbox"
                 checked={filteredEmployees.length > 0 && selectedIds.size === filteredEmployees.length}
                 onChange={toggleSelectAll}
-                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary"
               />
-              <span className="text-sm font-medium">Select All</span>
+              <span className="text-sm font-medium whitespace-nowrap">Select All</span>
             </div>
             
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search by name, role, email..."
-                className="pl-9 bg-muted/50 w-full"
+                className="pl-9 bg-muted/40 hover:bg-muted/60 focus:bg-background transition-colors w-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
 
-          <div className="flex gap-2 flex-wrap md:justify-end w-full md:w-auto">
-            {filterDepartments.map(dept => (
-              <Badge
-                key={dept}
-                variant={deptFilter === dept ? 'default' : 'secondary'}
-                className="cursor-pointer hover:bg-primary/80 transition-colors"
-                onClick={() => setDeptFilter(dept)}
-              >
-                {deptFilter === dept && <Check className="mr-1 h-3 w-3" />}
-                {dept}
-              </Badge>
-            ))}
+          <div className="border-t border-border" />
+
+          {/* Bottom Container: Departments */}
+          <div className="p-4 bg-muted/10 flex flex-col sm:flex-row sm:items-center gap-3 w-full">
+            <div className="text-sm font-medium text-muted-foreground shrink-0">Departments:</div>
+            <div className="flex gap-2 flex-wrap flex-1">
+              {filterDepartments.map(dept => (
+                <Badge
+                  key={dept}
+                  variant={deptFilter === dept ? 'default' : 'secondary'}
+                  className="cursor-pointer hover:bg-primary/80 transition-colors"
+                  onClick={() => setDeptFilter(dept)}
+                >
+                  {deptFilter === dept && <Check className="mr-1 h-3 w-3" />}
+                  {dept}
+                </Badge>
+              ))}
+            </div>
           </div>
+
         </CardContent>
       </Card>
 
@@ -547,7 +567,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
       {/* Selection Bar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 text-primary text-sm font-medium border border-primary/20">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 p-3 rounded-xl bg-primary/10 text-primary text-sm font-medium border border-primary/20">
           <Check className="h-4 w-4 shrink-0" />
           <span className="flex-1">{selectedIds.size} selected</span>
           <Button size="sm" variant="destructive" className="h-8" onClick={handleBulkDelete}>
@@ -570,7 +590,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
           <Button variant="outline" onClick={() => {setSearchTerm(''); setDeptFilter('All')}}>Clear Filters</Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
           {filteredEmployees.map(emp => {
             const isExpanded = expandedCardId === emp.id
             return (
@@ -601,8 +621,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col gap-0.5 min-w-0">
-                        <h4 className="font-bold text-base truncate leading-none mb-0.5">{emp.name}</h4>
-                        <span className="text-sm font-medium text-muted-foreground truncate">{emp.role}</span>
+                        <h4 className="font-bold text-base break-words leading-none mb-0.5">{emp.name}</h4>
+                        <span className="text-sm font-medium text-muted-foreground break-words">{emp.role}</span>
                       </div>
                     </div>
                     
@@ -611,39 +631,51 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                     </Badge>
                   </div>
                   {/* Expanded Content */}
-                  <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[300px] opacity-100 mt-3 pt-3 border-t border-border' : 'max-h-0 opacity-0'}`}>
-                    <div className="flex flex-col gap-2 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-3.5 w-3.5 shrink-0" />
-                        <span className="truncate font-medium">{emp.department}</span>
+                  <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[350px] opacity-100 mt-4 pt-4 border-t border-border' : 'max-h-0 opacity-0'}`}>
+                    <div className="flex flex-col gap-4">
+                      
+                      <div className="flex flex-col gap-2.5">
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Building2 className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" />
+                          <span className="break-words">{emp.department}</span>
+                        </div>
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Mail className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" />
+                          <span className="break-all">{emp.email}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-3.5 w-3.5 shrink-0" />
-                        <span className="truncate">{emp.email}</span>
+                      
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        <div className="flex-1 min-w-[85px] flex flex-col justify-center p-2.5 rounded-lg bg-muted/40 border border-border/50">
+                          <span className="text-muted-foreground font-medium mb-0.5">Emp ID</span>
+                          <span className="font-semibold text-foreground break-words">{emp.id}</span>
+                        </div>
+                        <div className="flex-1 min-w-[85px] flex flex-col justify-center p-2.5 rounded-lg bg-muted/40 border border-border/50">
+                          <span className="text-muted-foreground font-medium mb-0.5">Joined</span>
+                          <span className="font-semibold text-foreground break-words">{emp.joiningDate ? formatDate(emp.joiningDate) : 'N/A'}</span>
+                        </div>
+                        <div className="flex-1 min-w-[85px] flex flex-col justify-center p-2.5 rounded-lg bg-muted/40 border border-border/50">
+                          <span className="text-muted-foreground font-medium mb-0.5">DOB</span>
+                          <span className="font-semibold text-foreground break-words">{emp.dob ? formatDate(emp.dob) : 'N/A'}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between gap-2">
-                        <span>Born: {emp.dob ? formatDate(emp.dob) : 'N/A'}</span>
-                        <span>Joined: {emp.joiningDate ? formatDate(emp.joiningDate) : 'N/A'}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="font-mono text-[10px]">ID: {emp.id}</span>
-                      </div>
-                      <div className="flex gap-2 mt-2">
+
+                      <div className="flex gap-2">
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="flex-1 h-8 text-xs bg-muted/30"
+                          className="flex-1 h-8 text-xs font-medium bg-background hover:bg-muted"
                           onClick={(e) => {
                             e.stopPropagation(); 
                             setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
                           }}
                         >
-                          <Edit className="mr-1.5 h-3 w-3" /> Edit
+                          <Edit className="mr-1.5 h-3.5 w-3.5" /> Edit
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="flex-1 h-8 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200"
+                          className="flex-1 h-8 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
                           onClick={(e) => { 
                             e.stopPropagation(); 
                             setConfirmDelete(() => () => {
@@ -652,9 +684,10 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                             }); 
                           }}
                         >
-                          <Trash2 className="mr-1.5 h-3 w-3" /> Delete
+                          <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
                         </Button>
                       </div>
+                      
                     </div>
                   </div>
 

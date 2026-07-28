@@ -14,7 +14,7 @@ const Select = React.forwardRef(({ className, label, error, placeholder, childre
     >
       {label && <AriaLabel className="text-xs font-bold text-foreground">{label}</AriaLabel>}
       <AriaButton className="flex h-9 w-full items-center justify-between rounded-lg border border-input bg-background px-3 py-1 text-xs sm:text-sm shadow-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer">
-        <SelectValue className="text-left truncate">
+        <SelectValue className="text-left break-words">
           {({ defaultChildren, isPlaceholder }) =>
             isPlaceholder ? <span className="text-muted-foreground font-normal text-xs sm:text-sm">{placeholder || 'Select...'}</span> : defaultChildren
           }

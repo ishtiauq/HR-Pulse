@@ -394,7 +394,7 @@ function DashboardView({ currentUser, attendance, expenses, announcements, setAc
                       <span className="font-semibold">{ann.title}</span>
                       <span className="text-xs text-muted-foreground">{formatDateShort(ann.date)}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground m-0 line-clamp-2">{ann.content}</p>
+                    <p className="text-sm text-muted-foreground m-0 break-words">{ann.content}</p>
                   </CardContent>
                 </Card>
               ))
@@ -812,7 +812,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
                   />
                 </Button>
                 {receiptName && (
-                  <span className="text-sm text-muted-foreground truncate max-w-[200px]">
+                  <span className="text-sm text-muted-foreground break-words max-w-[200px]">
                     {receiptName}
                   </span>
                 )}
@@ -854,7 +854,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
                     <TableRow key={l.id}>
                       <TableCell className="font-medium">{l.leaveType}</TableCell>
                       <TableCell>{l.startDate} to {l.endDate}</TableCell>
-                      <TableCell className="max-w-[200px] truncate">{l.reason}</TableCell>
+                      <TableCell className="max-w-[200px] break-words">{l.reason}</TableCell>
                       <TableCell>
                         {l.receipt ? (
                           <Button variant="link" className="p-0 h-auto" asChild>
@@ -1390,7 +1390,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
                     <CardContent className="p-4 flex justify-between items-center">
                       <div>
                         <span className="font-semibold">{req.category}</span>
-                        <span className="ml-2 text-sm text-muted-foreground truncate max-w-[200px] sm:max-w-[400px] inline-block align-bottom">&quot;{req.justification}&quot;</span>
+                        <span className="ml-2 text-sm text-muted-foreground break-words max-w-[200px] sm:max-w-[400px] inline-block align-bottom">&quot;{req.justification}&quot;</span>
                       </div>
                       <Badge variant={req.status === 'Approved' ? 'default' : req.status === 'Rejected' ? 'destructive' : 'secondary'} className={req.status === 'Approved' ? 'bg-green-500 hover:bg-green-600' : req.status === 'Pending' ? 'bg-amber-500 hover:bg-amber-600' : ''}>
                         {req.status}

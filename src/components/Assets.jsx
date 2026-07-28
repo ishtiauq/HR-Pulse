@@ -444,7 +444,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
                 className={`flex flex-col p-4 border-b border-border text-left transition-colors hover:bg-muted/50 ${selectedAssetForMaint?.id === asset.id ? 'bg-primary/5 border-l-4 border-l-primary' : 'border-l-4 border-l-transparent'}`}
                 onClick={() => setSelectedAssetForMaint(asset)}>
                 <div className="flex justify-between w-full mb-1 items-center">
-                  <span className="font-semibold text-sm truncate pr-2 text-foreground">{asset.name}</span>
+                  <span className="font-semibold text-sm break-words pr-2 text-foreground">{asset.name}</span>
                   <span className="text-[10px] text-muted-foreground shrink-0 uppercase tracking-wider">{asset.id}</span>
                 </div>
                 <div className="flex justify-between w-full items-center mt-1">

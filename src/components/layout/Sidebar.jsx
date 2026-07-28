@@ -22,14 +22,14 @@ export default function Sidebar({
       <aside 
         aria-label="Sidebar navigation" 
         className={`
-          flex flex-col h-full shrink-0 relative z-50 bg-sidebar text-sidebar-foreground border-r border-sidebar-border
+          flex flex-col shrink-0 relative z-50 bg-sidebar text-sidebar-foreground
           transition-all duration-300 ease-in-out overflow-hidden
           ${mobileMenuOpen 
-            ? 'fixed inset-0 w-full max-w-full border-r-0' 
-            : 'hidden lg:flex'}
+            ? 'fixed inset-0 w-full max-w-full border-r-0 shadow-2xl h-full rounded-none' 
+            : 'hidden md:flex my-6 md:my-8 lg:my-10 ml-4 md:ml-6 lg:ml-8 rounded-2xl shadow-lg border border-sidebar-border h-[calc(100vh-3rem)] md:h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)]'}
         `}
         style={{
-          width: mobileMenuOpen ? '100%' : (isCollapsed ? '64px' : '200px'),
+          width: isCollapsed && !mobileMenuOpen ? '64px' : (mobileMenuOpen ? '100%' : 'max-content'),
         }}
       >
       
@@ -105,7 +105,7 @@ export default function Sidebar({
                   {/* Label: always visible on mobile, animated on desktop */}
                   <span className="text-sm font-medium leading-5 whitespace-nowrap transition-[opacity,max-width] duration-300 overflow-hidden" style={{
                     opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
-                    maxWidth: (mobileMenuOpen || !isCollapsed) ? '160px' : 0,
+                    maxWidth: (mobileMenuOpen || !isCollapsed) ? '300px' : 0,
                   }}>{item.label}</span>
                 </div>
               </TooltipPopover>
@@ -123,12 +123,12 @@ export default function Sidebar({
               className="rounded-full object-cover shrink-0 relative w-8 h-8 shadow-sm border border-sidebar-border/50" 
               alt={user?.name ? `${user.name}'s avatar` : "User avatar"} 
             />
-            <div className="overflow-hidden whitespace-nowrap flex-1 min-w-0 transition-[opacity,max-width] duration-300" style={{
+            <div className="overflow-hidden whitespace-nowrap flex-1 min-w-0 transition-[opacity,max-width] duration-300 pr-2" style={{
               opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
-              maxWidth: (mobileMenuOpen || !isCollapsed) ? '160px' : 0,
+              maxWidth: (mobileMenuOpen || !isCollapsed) ? '300px' : 0,
             }}>
-              <p className="text-sm font-semibold m-0 text-sidebar-foreground truncate leading-tight">{user?.name || "Ishtiaq Rizve"}</p>
-              <p className="text-[11px] font-medium m-0 text-sidebar-foreground/70 truncate">{simulatedRole || user?.role || "Admin"}</p>
+              <p className="text-sm font-semibold m-0 text-sidebar-foreground break-words leading-tight">{user?.name || "Ishtiaq Rizve"}</p>
+              <p className="text-[11px] font-medium m-0 text-sidebar-foreground/70 break-words">{simulatedRole || user?.role || "Admin"}</p>
             </div>
           </div>
 
@@ -141,9 +141,9 @@ export default function Sidebar({
               <div className="size-6 flex items-center justify-center shrink-0">
                 <ArrowLeftRight size={16} />
               </div>
-              <span className="truncate overflow-hidden transition-[opacity,max-width] duration-300 text-left font-medium text-xs" style={{
+              <span className="whitespace-nowrap overflow-hidden transition-[opacity,max-width] duration-300 text-left font-medium text-xs pr-2" style={{
                 opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
-                maxWidth: (mobileMenuOpen || !isCollapsed) ? '160px' : 0,
+                maxWidth: (mobileMenuOpen || !isCollapsed) ? '300px' : 0,
               }}>Switch Role</span>
             </button>
           </TooltipPopover>
@@ -156,9 +156,9 @@ export default function Sidebar({
               <div className="size-6 flex items-center justify-center shrink-0">
                 <LogOut size={16} />
               </div>
-              <span className="truncate overflow-hidden transition-[opacity,max-width] duration-300 text-left font-medium text-xs" style={{
+              <span className="whitespace-nowrap overflow-hidden transition-[opacity,max-width] duration-300 text-left font-medium text-xs pr-2" style={{
                 opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
-                maxWidth: (mobileMenuOpen || !isCollapsed) ? '160px' : 0,
+                maxWidth: (mobileMenuOpen || !isCollapsed) ? '300px' : 0,
               }}>Logout</span>
             </button>
           </TooltipPopover>

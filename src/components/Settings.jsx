@@ -481,7 +481,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm">{log.entity}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate" title={log.details}>{log.details}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[200px] break-words">{log.details}</TableCell>
                         <TableCell className="font-mono text-xs text-muted-foreground">{log.ip}</TableCell>
                       </TableRow>
                     ))
@@ -543,7 +543,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
             <CardDescription>Review and resolve data conflicts between local and remote databases.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="border border-border rounded-lg overflow-hidden">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block border border-border rounded-lg overflow-hidden">
               <Table>
                 <TableHeader className="bg-muted/50">
                   <TableRow>
@@ -563,8 +564,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                       <TableRow key={`${conflict.file}-${conflict.recordId}`}>
                         <TableCell className="font-medium">{conflict.file}</TableCell>
                         <TableCell>{conflict.recordId}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground max-w-[150px] truncate" title={JSON.stringify(conflict.localValue)}>{JSON.stringify(conflict.localValue)}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground max-w-[150px] truncate" title={JSON.stringify(conflict.remoteValue)}>{JSON.stringify(conflict.remoteValue)}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[150px] break-words">{JSON.stringify(conflict.localValue)}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[150px] break-words">{JSON.stringify(conflict.remoteValue)}</TableCell>
                         <TableCell className="text-xs">{conflict.resolution}</TableCell>
                         <TableCell className="text-center">
                           <Button variant="outline" size="sm" onClick={() => { setSyncConflicts(prev => prev.filter((_, idx) => idx !== i)); if (addToast) addToast("Conflict acknowledged", "success") }}>
@@ -576,6 +577,40 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                   )}
                 </TableBody>
               </Table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden flex flex-col gap-4">
+              {!syncConflicts || syncConflicts.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8 border border-border rounded-lg border-dashed">No sync conflicts detected.</div>
+              ) : (
+                syncConflicts.map((conflict, i) => (
+                  <div key={`${conflict.file}-${conflict.recordId}-mobile`} className="flex flex-col gap-3 p-4 bg-muted/20 border border-border rounded-lg">
+                    <div className="flex justify-between items-start gap-2">
+                      <div>
+                        <div className="font-semibold text-sm text-foreground">{conflict.file}</div>
+                        <div className="text-xs text-muted-foreground">ID: {conflict.recordId}</div>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] uppercase whitespace-nowrap">{conflict.resolution}</Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+                      <div className="bg-background rounded-md p-2.5 border border-border/50">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Local Value</span>
+                        <div className="text-xs break-words font-mono text-muted-foreground">{JSON.stringify(conflict.localValue)}</div>
+                      </div>
+                      <div className="bg-background rounded-md p-2.5 border border-border/50">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Remote Value</span>
+                        <div className="text-xs break-words font-mono text-muted-foreground">{JSON.stringify(conflict.remoteValue)}</div>
+                      </div>
+                    </div>
+                    
+                    <Button variant="outline" size="sm" className="w-full mt-1" onClick={() => { setSyncConflicts(prev => prev.filter((_, idx) => idx !== i)); if (addToast) addToast("Conflict acknowledged", "success") }}>
+                      Acknowledge
+                    </Button>
+                  </div>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>

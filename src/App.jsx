@@ -130,7 +130,7 @@ export default function App() {
   const unreadCount = appData.notifications.filter(n => !n.read).length
 
   return (
-    <div className="dashboard-root app-shell" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
+    <div className="dashboard-root app-shell" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
       <Sidebar
         visibleNavItems={visibleNavItems}
         isCollapsed={isCollapsed}
@@ -148,7 +148,7 @@ export default function App() {
         setSimulatedRole={appData.setSimulatedRole}
         setMobileMenuOpen={setMobileMenuOpen}
       />
-      <main className="content dashboard-content pb-12 flex-1 overflow-y-auto flex flex-col items-center" style={{ scrollbarGutter: 'stable' }}>
+      <main className="content dashboard-content pb-12 flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center max-w-[100vw]" style={{ scrollbarGutter: 'stable' }}>
         <div className="w-full max-w-[1600px] flex flex-col relative">
           
           {/* Sticky Header Wrapper */}

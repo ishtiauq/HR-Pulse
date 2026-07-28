@@ -139,7 +139,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             <Button
               onClick={async () => {
                 const ok = await confirm('Unsynced offline changes will be lost, and the app will reload.', 'Clear Local Cache?', { destructive: true, confirmText: 'Clear' })
@@ -173,31 +173,31 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
         </div>
       </Card>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Sync Mechanism Diagram */}
-        <Card>
-          <CardContent className="p-6 sm:p-8 lg:p-10 flex flex-col gap-5">
+        <Card className="flex flex-col">
+          <CardContent className="p-4 sm:p-6 lg:p-8 flex flex-col justify-center h-full gap-5">
             <h4 className="text-base text-foreground font-semibold">Data Synchronization Flow</h4>
 
-            <div className="py-5 flex items-center gap-3 w-full justify-between">
-              <div className="flex-1 min-w-[100px] rounded-xl border border-border bg-muted/10 text-center p-3 px-2">
+            <div className="py-2 sm:py-5 flex items-center justify-between gap-2 sm:gap-3 w-full">
+              <div className="flex-1 w-full max-w-[140px] rounded-xl border border-border bg-muted/10 text-center p-3 px-1 sm:px-2">
                 <HardDrive size={24} className="text-primary mx-auto mb-1.5" />
-                <span className="text-[0.8rem] block font-semibold text-foreground">Local Cache</span>
-                <span className="text-[0.7rem] text-muted-foreground block mb-0.5">{driveConnected ? '0 pending' : 'Offline queue'}</span>
-                <span className="text-[0.7rem] text-primary font-semibold">{cacheSize} MB</span>
+                <span className="text-[0.7rem] sm:text-[0.8rem] block font-semibold text-foreground">Local Cache</span>
+                <span className="text-[0.65rem] sm:text-[0.7rem] text-muted-foreground block mb-0.5">{driveConnected ? '0 pending' : 'Offline queue'}</span>
+                <span className="text-[0.65rem] sm:text-[0.7rem] text-primary font-semibold">{cacheSize} MB</span>
               </div>
 
-              <div className="flex flex-col items-center gap-0.5 w-[60px] shrink-0">
+              <div className="flex flex-col items-center gap-0.5 shrink-0 px-1 sm:px-3">
                 <ArrowLeftRight size={20} className={driveConnected ? 'text-emerald-500 animate-pulse' : 'text-muted-foreground'} />
-                <span className={`text-[0.7rem] font-semibold ${driveConnected ? 'text-emerald-500' : 'text-muted-foreground'}`}>
+                <span className={`text-[0.65rem] sm:text-[0.7rem] font-semibold ${driveConnected ? 'text-emerald-500' : 'text-muted-foreground'}`}>
                   {driveConnected ? 'Active' : 'Offline'}
                 </span>
               </div>
 
-              <div className="flex-1 min-w-[100px] rounded-xl border border-border bg-muted/10 text-center p-3 px-2">
+              <div className="flex-1 w-full max-w-[140px] rounded-xl border border-border bg-muted/10 text-center p-3 px-1 sm:px-2">
                 <CloudLightning size={24} className={`mx-auto mb-1.5 ${driveConnected ? 'text-emerald-500' : 'text-muted-foreground'}`} />
-                <span className="text-[0.8rem] block font-semibold text-foreground">Drive DB</span>
+                <span className="text-[0.7rem] sm:text-[0.8rem] block font-semibold text-foreground">Drive DB</span>
                 <span className="text-[0.7rem] text-muted-foreground">{driveConnected ? 'Synced' : 'Waiting'}</span>
               </div>
             </div>
@@ -205,8 +205,8 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
         </Card>
 
         {/* Database backup commands */}
-        <Card>
-          <CardContent className="p-6 sm:p-8 lg:p-10 flex flex-col justify-between gap-5">
+        <Card className="flex flex-col">
+          <CardContent className="p-4 sm:p-6 lg:p-8 flex flex-col h-full gap-5">
             <div>
               <h4 className="text-base text-foreground font-semibold mb-2">Manual Backup</h4>
               <p className="text-[0.8rem] text-muted-foreground">
@@ -214,7 +214,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 mt-auto">
               <Button
                 aria-label="Create backup now"
                 variant="default"
@@ -229,8 +229,8 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
         </Card>
 
         {/* Data Integrity Testing */}
-        <Card>
-          <CardContent className="p-6 sm:p-8 lg:p-10 flex flex-col justify-between gap-5">
+        <Card className="flex flex-col">
+          <CardContent className="p-4 sm:p-6 lg:p-8 flex flex-col h-full gap-5">
             <div>
               <h4 className="text-base text-destructive font-semibold mb-2 flex items-center gap-2">
                 <AlertCircle size={18} /> Data Integrity Testing
@@ -240,7 +240,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 mt-auto">
               <Button
                 aria-label="Simulate drive corruption"
                 variant="outline"
@@ -279,10 +279,8 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Backup Browser Widget */}
-      <Card>
+        {/* Backup Browser Widget */}
+        <Card className="flex flex-col">
         <CardContent className="p-6 sm:p-8 lg:p-10">
           <div className="flex justify-between items-center mb-4">
             <div>
@@ -293,9 +291,10 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
             </div>
           </div>
 
-          <div role="log" aria-live="polite" aria-label="Backup logs" className="overflow-x-auto">
+          {/* Desktop Table View */}
+          <div role="log" aria-live="polite" aria-label="Backup logs" className="hidden xl:block overflow-hidden border border-border rounded-lg mt-4">
             <Table>
-              <TableHeader>
+              <TableHeader className="bg-muted/50">
                 <TableRow>
                   <TableHead className="p-3">Backup Name</TableHead>
                   <TableHead className="p-3">Size</TableHead>
@@ -349,6 +348,48 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
               </TableBody>
             </Table>
           </div>
+
+          {/* Mobile Card View */}
+          <div role="log" aria-live="polite" aria-label="Backup logs" className="xl:hidden flex flex-col gap-4 mt-4">
+            {(!Array.isArray(backupsList) || backupsList.length === 0) ? (
+              <div className="text-center text-muted-foreground py-8 border border-border rounded-lg border-dashed">No backups found.</div>
+            ) : backupsList.map(f => (
+              <div key={`${f.id}-mobile`} className="flex flex-col gap-3 p-4 bg-muted/20 border border-border rounded-lg">
+                <div className="flex items-start gap-2">
+                  <FileJson size={18} className="text-muted-foreground shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm text-foreground break-words">{f.name}</div>
+                    <div className="text-xs text-muted-foreground mt-1 flex gap-2 flex-wrap">
+                      <span>Size: {f.size ? (parseInt(f.size) / 1024).toFixed(1) + ' KB' : 'Unknown'}</span>
+                      <span>•</span>
+                      <span>{formatDateTime(f.modifiedTime)}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2 mt-1">
+                  <Button
+                    aria-label="Download backup"
+                    variant="secondary"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => window.open(`https://drive.google.com/uc?export=download&id=${f.id}`, '_blank')}
+                  >
+                    <Download size={14} className="mr-2" /> Download
+                  </Button>
+                  <Button
+                    aria-label="Restore from this backup"
+                    variant="default"
+                    size="sm"
+                    className="flex-1 bg-amber-500 hover:bg-amber-600 text-white"
+                    onClick={() => setSelectedRestoreBackup(f)}
+                  >
+                    <RotateCcw size={14} className="mr-2" /> Restore
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
@@ -384,8 +425,10 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
         </DialogContent>
       </Dialog>
 
+      </div>
+
       {/* Info Warning Alert */}
-      <div className="p-4 flex justify-between items-center rounded-xl bg-indigo-500/5 border border-indigo-500/15">
+      <div className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-xl bg-indigo-500/5 border border-indigo-500/15">
         <div className="flex gap-3 items-start">
           <Info size={18} className="text-primary shrink-0 mt-0.5" />
           <div className="flex flex-col gap-1">
@@ -396,7 +439,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
             </span>
           </div>
         </div>
-        <Button variant="secondary" onClick={handleTestConnection} className="whitespace-nowrap">
+        <Button variant="secondary" onClick={handleTestConnection} className="whitespace-nowrap w-full sm:w-auto">
           Test Connection
         </Button>
       </div>

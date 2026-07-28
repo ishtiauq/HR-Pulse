@@ -576,7 +576,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
             <button onClick={() => { setMonthOpen(!monthOpen); setYearOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${monthOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
               <div className="flex items-center gap-2 overflow-hidden">
                 <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="truncate">{monthNames[currentMonth - 1]}</span>
+                <span className="break-words">{monthNames[currentMonth - 1]}</span>
               </div>
               <ChevronDown className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -594,7 +594,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
           {/* Year dropdown */}
           <div className="relative w-24 h-10">
             <button onClick={() => { setYearOpen(!yearOpen); setMonthOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${yearOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
-              <span className="truncate">{currentYear}</span>
+              <span className="break-words">{currentYear}</span>
               <ChevronDown className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${yearOpen ? 'rotate-180' : ''}`} />
             </button>
             {yearOpen && (
