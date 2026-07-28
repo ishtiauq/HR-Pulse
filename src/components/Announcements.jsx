@@ -431,7 +431,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
   return (
     <div className="fade-in pb-10 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Megaphone size={20} className="text-primary" />
           Announcements
         </h1>
@@ -547,7 +547,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
         </Dialog>
         </div>
       </div>
-      <div className="border-t border-border mb-6" />
+      <div className="border-t border-border border-headline mb-6" />
       
       <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-none">
         {uniqueCategories.map(cat => (

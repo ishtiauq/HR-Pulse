@@ -212,12 +212,12 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       
       {/* Page Title */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <LayoutDashboard size={20} className="text-primary" />
           Dashboard
         </h1>
       </div>
-      <div className="border-t border-border" />
+      <div className="border-t border-border border-headline" />
       
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-card p-5 sm:p-6 rounded-2xl border border-border shadow-sm bg-gradient-to-r from-card to-primary/5 gap-4">
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-3 text-foreground m-0">

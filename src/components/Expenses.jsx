@@ -159,7 +159,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
 
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Receipt size={20} className="text-primary" />
           Expenses
         </h1>

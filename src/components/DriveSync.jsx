@@ -102,12 +102,12 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <CloudSync size={20} className="text-primary" />
           Google Drive Sync Management
         </h1>
       </div>
-      <div className="border-t border-border" />
+      <div className="border-t border-border border-headline" />
 
       {/* Connection Controller Card */}
       <Card className={`p-6 sm:p-8 lg:p-10 ${driveConnected ? 'bg-emerald-500/5' : ''}`}>

@@ -183,7 +183,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
   return (
     <div className="fade-in px-1 sm:px-0 pb-10">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <FolderOpen size={20} className="text-primary" />
           Documents
         </h1>
@@ -192,7 +192,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
           <span className="hidden sm:inline">Upload</span>
         </Button>
       </div>
-      <div className="border-t border-border mb-6" />
+      <div className="border-t border-border border-headline mb-6" />
 
       <div className="relative flex items-center mb-3">
         <Search size={16} className="absolute left-3 text-muted-foreground" />

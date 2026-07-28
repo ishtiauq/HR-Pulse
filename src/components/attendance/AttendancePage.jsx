@@ -21,12 +21,12 @@ export default function AttendancePage({ employees, attendance, setAttendance, r
   return (
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Clock size={20} className="text-primary" />
           Attendance & Leaves
         </h1>
       </div>
-      <div className="border-t border-border" />
+      <div className="border-t border-border border-headline" />
 
       <ClockWidget employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />
 
