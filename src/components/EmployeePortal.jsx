@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, User, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, Sun, Moon, AlertTriangle, Upload, CheckSquare, CalendarDays } from 'lucide-react'
+import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, User, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, Sun, Moon, AlertTriangle, Upload, CheckSquare, CalendarDays, Menu } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
 import { Select, SelectItem } from "@/components/ui/select"
@@ -63,13 +63,14 @@ export default function EmployeePortal({
   setSimulatedRole
 }) {
   const [activeTab, setActiveTab] = useState('dashboard') // dashboard, attendance, payslips, leave, profile
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [showPunchModal, setShowPunchModal] = useState(false)
   useModal(() => setShowPunchModal(false))
   const [punchType, setPunchType] = useState('In')
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768)
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
@@ -219,6 +220,22 @@ export default function EmployeePortal({
         </div>
       )}
 
+      {/* Mobile Header */}
+      {isMobile && (
+        <div className="flex items-center justify-between px-4 py-3 bg-background border-b border-border z-40 sticky top-0 shrink-0">
+          <h2 className="text-xl font-extrabold text-primary m-0">HR Pulse <span className="text-[10px] text-muted-foreground">ESS</span></h2>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 rounded-full shrink-0">
+              {themeMode === 'system' ? <Monitor size={18} /> : themeMode === 'light' ? <Sun size={18} /> : <Moon size={18} />}
+            </Button>
+            <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-primary/20 shrink-0" onClick={() => setActiveTab('profile')}>
+              {currentUser?.avatar ? <AvatarImage src={currentUser.avatar} className="object-cover" /> : null}
+              <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold"><UserIcon size={14}/></AvatarFallback>
+            </Avatar>
+          </div>
+        </div>
+      )}
+
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-20 sm:pb-8 bg-background">
         {renderContent()}
@@ -226,49 +243,101 @@ export default function EmployeePortal({
 
       {/* Bottom Tab Bar (Mobile) */}
       {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 flex justify-around items-center px-2 py-3 z-[100] bg-background/80 backdrop-blur-md border-t border-border">
-          {navItems.map(item => {
-            const active = activeTab === item.id
-            const Icon = item.icon
-            return (
-              <button
-                key={item.id}
-                role="tab"
-                aria-selected={active}
-                onClick={() => setActiveTab(item.id)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab(item.id) } }}
-                className={`flex flex-col items-center justify-center gap-1 border-0 cursor-pointer flex-1 min-h-[44px] p-1.5 bg-transparent ${active ? 'text-primary' : 'text-muted-foreground'}`}
-              >
-                <Icon size={20} />
-                <span className={`text-[0.65rem] ${active ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
-              </button>
-            )
-          })}
+        <div 
+          className="fixed bottom-0 left-0 right-0 z-[60] bg-background/90 backdrop-blur-md border-t border-border shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-safe overflow-x-auto no-scrollbar"
+          style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
+        >
+          <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
+          <div className="flex items-center justify-between sm:justify-evenly min-w-full px-2 py-2 gap-1 mx-auto">
+            {navItems.filter(i => ['dashboard', 'my-tasks', 'announcements', 'attendance'].includes(i.id)).map(item => {
+              const active = activeTab === item.id
+              const Icon = item.icon
+              return (
+                <button
+                  key={item.id}
+                  role="tab"
+                  aria-label={item.label}
+                  title={item.label}
+                  aria-selected={active}
+                  onClick={() => {
+                    setActiveTab(item.id)
+                    setShowMobileMenu(false)
+                  }}
+                  className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${active ? 'text-primary' : 'text-muted-foreground'}`}
+                >
+                  <div className={`flex items-center justify-center rounded-full p-2.5 transition-all duration-300 ${active ? 'bg-primary/15 scale-110 text-primary' : 'bg-transparent hover:bg-muted/50 hover:text-foreground'}`}>
+                    <Icon size={22} strokeWidth={active ? 2.5 : 2} />
+                  </div>
+                </button>
+              )
+            })}
+            
+            {/* Menu Toggle */}
+            <button
+              role="button"
+              aria-label="Menu"
+              title="Menu"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${showMobileMenu ? 'text-primary' : 'text-muted-foreground'}`}
+            >
+              <div className={`flex items-center justify-center rounded-full p-2.5 transition-all duration-300 ${showMobileMenu ? 'bg-primary/15 scale-110 text-primary' : 'bg-transparent hover:bg-muted/50 hover:text-foreground'}`}>
+                <Menu size={22} strokeWidth={showMobileMenu ? 2.5 : 2} />
+              </div>
+            </button>
+          </div>
         </div>
       )}
 
-      {isMobile && (
-        <div className="fixed top-3 right-3 z-[101] flex gap-2">
-          <Button 
-            variant="outline"
-            size="icon"
-            className="rounded-full shadow-sm bg-background/80 backdrop-blur-md h-8 w-8 text-muted-foreground"
-            onClick={toggleTheme}
-          >
-            {themeMode === 'system' ? <Monitor size={14} /> : themeMode === 'light' ? <Sun size={14} /> : <Moon size={14} />}
+      {/* Mobile Menu Drawer (Custom implementation with smooth slide up/down) */}
+      {/* Backdrop */}
+      <div 
+        className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${showMobileMenu ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setShowMobileMenu(false)}
+        aria-hidden={!showMobileMenu}
+      />
+      
+      {/* Drawer Content */}
+      <div 
+        className={`fixed bottom-0 left-0 right-0 z-50 flex flex-col bg-popover rounded-t-2xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] border border-border/40 transition-transform duration-300 ease-in-out sm:w-[400px] sm:mx-auto max-h-[85vh] ${showMobileMenu ? 'translate-y-0' : 'translate-y-full'}`}
+        aria-hidden={!showMobileMenu}
+      >
+        <div className="px-5 py-4 border-b border-border/50 bg-muted/20 rounded-t-2xl shrink-0 flex items-center justify-between">
+          <h2 className="text-left text-lg font-bold text-foreground">Menu</h2>
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground" onClick={() => setShowMobileMenu(false)}>
+            <XCircle size={18} />
           </Button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
+          {navItems.filter(i => !['dashboard', 'my-tasks', 'announcements', 'attendance', 'profile'].includes(i.id)).map(item => {
+            const Icon = item.icon
+            const active = activeTab === item.id
+            return (
+              <Button
+                key={item.id}
+                variant={active ? "secondary" : "ghost"}
+                className={`w-full justify-start py-6 rounded-xl transition-all ${active ? 'bg-primary/10 text-primary font-semibold shadow-sm' : 'text-foreground font-medium hover:bg-muted/60'}`}
+                onClick={() => { setActiveTab(item.id); setShowMobileMenu(false) }}
+              >
+                <Icon className={`mr-4 h-[22px] w-[22px] ${active ? 'text-primary' : 'text-muted-foreground/70'}`} />
+                <span className="text-base">{item.label}</span>
+              </Button>
+            )
+          })}
+          
           {!currentUser.isEmployee && (
-            <Button 
-              variant="outline"
-              size="sm"
-              className="rounded-full shadow-sm bg-background/80 backdrop-blur-md h-8"
-              onClick={() => setSimulatedRole('Admin')}
-            >
-              ← Admin
-            </Button>
+            <>
+              <div className="h-px bg-border/60 my-4 mx-2 shrink-0" />
+              <Button 
+                variant="outline" 
+                className="w-full justify-center text-muted-foreground py-6 rounded-xl hover:bg-muted/60 border-dashed shrink-0"
+                onClick={() => { setSimulatedRole('Admin'); setShowMobileMenu(false) }}
+              >
+                ← Back to Admin
+              </Button>
+            </>
           )}
         </div>
-      )}
+      </div>
 
       {/* Punch Modal */}
       <Dialog open={showPunchModal} onOpenChange={setShowPunchModal}>
