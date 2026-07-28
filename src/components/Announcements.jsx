@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Megaphone, Plus, Image as ImageIcon, FileText, Send, Calendar, Clock, Edit, Trash2, Users, AlertTriangle, MessageSquare, Heart, ThumbsUp, PartyPopper, User } from 'lucide-react'
+import { Megaphone, Plus, Image as ImageIcon, FileText, Send, Calendar, Clock, Edit, Trash2, Users, AlertTriangle, MessageSquare, Heart, ThumbsUp, PartyPopper, User, Pencil, X } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { useConfirm } from '../hooks/useConfirm'
 import { Button } from "@/components/ui/button"
@@ -38,8 +38,10 @@ export default function Announcements({ employees, announcements, setAnnouncemen
   const [pollQuestion, setPollQuestion] = useState('')
   const [pollOptions, setPollOptions] = useState(['', ''])
 
-  const [isAddingCategory, setIsAddingCategory] = useState(false)
-  const [newCategoryName, setNewCategoryName] = useState('')
+  const [categories, setCategories] = useState(['General', 'Policy Update', 'Event', 'Emergency'])
+  const [showCategoryModal, setShowCategoryModal] = useState(false)
+  const [editingCategory, setEditingCategory] = useState(null)
+  const [catFormName, setCatFormName] = useState('')
 
   const [filterCategory, setFilterCategory] = useState('All')
 
@@ -113,6 +115,39 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     setIsDialogOpen(false)
   }
 
+  const handleSaveCategory = () => {
+    if (!catFormName.trim()) return addToast('Category name is required', 'warning')
+    if (editingCategory) {
+      setCategories(prev => prev.map(c => c === editingCategory ? catFormName.trim() : c))
+      setAnnouncements(prev => prev.map(a => a.category === editingCategory ? { ...a, category: catFormName.trim() } : a))
+      if (category === editingCategory) setCategory(catFormName.trim())
+      addToast('Category updated', 'success')
+    } else {
+      if (!categories.includes(catFormName.trim())) {
+        setCategories(prev => [...prev, catFormName.trim()])
+        addToast('Category added', 'success')
+      }
+    }
+    setShowCategoryModal(false)
+  }
+
+  const handleDeleteCategory = async (catName) => {
+    const docsInCategory = announcements.filter(a => a.category === catName)
+    let message = `Delete "${catName}" category?`
+    if (docsInCategory.length > 0) {
+      message = `"${catName}" has ${docsInCategory.length} announcement(s). They will be moved to "General". Delete anyway?`
+    }
+    const ok = await confirm(message, 'Delete Category?', { destructive: true })
+    if (!ok) return
+
+    setCategories(prev => prev.filter(c => c !== catName))
+    if (docsInCategory.length > 0) {
+      setAnnouncements(prev => prev.map(a => a.category === catName ? { ...a, category: 'General' } : a))
+    }
+    if (category === catName) setCategory('General')
+    addToast('Category deleted', 'info')
+  }
+
   const handleEditPost = (post) => {
     setEditingPostId(post.id)
     setTitle(post.title)
@@ -138,8 +173,9 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     setTitle('')
     setContent('')
     setHasPoll(false)
-    setIsAddingCategory(false)
-    setNewCategoryName('')
+    setShowCategoryModal(false)
+    setEditingCategory(null)
+    setCatFormName('')
   }
 
   const handleDelete = async (id) => {
@@ -402,8 +438,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     return 'outline'
   }
 
-  const allCategories = ['General', 'Policy Update', 'Event', 'Emergency']
-  const uniqueCategories = ['All', ...new Set([...allCategories, ...announcements.map(a => a.category).filter(Boolean)])]
+  const uniqueCategories = ['All', ...new Set([...categories, ...(announcements || []).map(a => a.category).filter(Boolean)])]
 
   const filteredAnnouncements = announcements.filter(a => filterCategory === 'All' || a.category === filterCategory)
 
@@ -442,7 +477,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
             else setIsDialogOpen(true)
           }}>
             <DialogTrigger asChild>
-              <Button size="sm" onClick={() => {
+              <Button size="sm" className="hidden sm:flex" onClick={() => {
                 setEditingPostId(null)
                 setTitle('')
                 setContent('')
@@ -465,18 +500,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium text-foreground">Category</label>
-                  {isAddingCategory ? (
-                    <div className="flex gap-2">
-                      <Input value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder="New category..." className="h-9 text-xs" />
-                      <Button type="button" size="sm" className="h-9 px-2" onClick={() => {
-                        if (newCategoryName.trim()) setCategory(newCategoryName.trim())
-                        setIsAddingCategory(false)
-                        setNewCategoryName('')
-                      }}>Add</Button>
-                      <Button type="button" variant="outline" size="sm" className="h-9 px-2" onClick={() => setIsAddingCategory(false)}>Cancel</Button>
-                    </div>
-                  ) : (
-                    <div className="flex gap-2">
+                    <div className="flex bg-muted/40 rounded-xl p-1 border border-border/50 focus-within:ring-0 focus-within:outline-none transition-all">
                       <div className="flex-1">
                         <Select value={category} onChange={setCategory}>
                           {uniqueCategories.filter(c => c !== 'All').map(c => (
@@ -484,11 +508,11 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                           ))}
                         </Select>
                       </div>
-                      <Button type="button" variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={() => setIsAddingCategory(true)}>
-                        <Plus size={16} />
-                      </Button>
+                      <button type="button" className="shrink-0 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border-none group/add h-10 px-4 rounded-lg flex items-center transition-all duration-300 ease-out overflow-hidden" onClick={() => { setEditingCategory(null); setCatFormName(''); setShowCategoryModal(true) }}>
+                        <Plus size={18} className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" />
+                        <span className="w-0 overflow-hidden whitespace-nowrap text-sm font-bold opacity-0 transition-all duration-300 ease-out group-hover/add:w-auto group-hover/add:opacity-100 group-hover/add:ml-2">Add</span>
+                      </button>
                     </div>
-                  )}
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium text-foreground">Priority</label>
@@ -849,6 +873,77 @@ export default function Announcements({ employees, announcements, setAnnouncemen
           })
         )}
       </div>
+      <Button
+        className="sm:hidden fixed bottom-[76px] right-8 h-14 w-14 rounded-full shadow-[0_4px_20px_rgba(249,115,22,0.4)] z-50 p-0 hover:scale-105 active:scale-95 transition-transform"
+        onClick={() => {
+          setEditingPostId(null)
+          setTitle('')
+          setContent('')
+          setHasPoll(false)
+          setIsDialogOpen(true)
+        }}
+      >
+        <Plus size={24} />
+      </Button>
+
+      {/* Category Management Modal */}
+      <Dialog open={showCategoryModal} onOpenChange={setShowCategoryModal}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader className="flex flex-row items-center justify-between border-b border-border pb-4 mb-4 space-y-0">
+            <DialogTitle>Manage Categories</DialogTitle>
+            <button className="rounded-full p-2 hover:bg-muted transition-colors" onClick={() => { setShowCategoryModal(false); setEditingCategory(null); setCatFormName('') }}>
+              <X size={16} />
+            </button>
+          </DialogHeader>
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[0.82rem] font-semibold text-muted-foreground">Categories</label>
+              <div className="flex flex-col gap-1.5 max-h-[240px] overflow-y-auto">
+                {categories.map(cat => (
+                  <div key={cat} className="flex items-center gap-2.5 p-2 px-3 rounded-lg bg-muted/30 border border-border">
+                    <span className="flex-1 text-[0.9rem] font-medium text-foreground">{cat}</span>
+                    <Button variant="ghost" size="icon-xs" aria-label="Edit category" onClick={() => { setEditingCategory(cat); setCatFormName(cat) }}>
+                      <Pencil size={14} />
+                    </Button>
+                    <Button variant="ghost" size="icon-xs" aria-label="Delete category" onClick={() => handleDeleteCategory(cat)}>
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <h3 className="m-0 mb-3 text-[0.95rem] font-semibold text-foreground">{editingCategory ? 'Edit Category' : 'Add New Category'}</h3>
+              <div className="flex flex-col gap-3">
+                <Input
+                  type="text"
+                  value={catFormName}
+                  onChange={e => setCatFormName(e.target.value)}
+                  aria-label="Category name"
+                  placeholder={editingCategory ? 'Category name' : 'e.g. Policy Update'}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSaveCategory();
+                    }
+                  }}
+                />
+                <div className="flex gap-2 justify-end">
+                  {editingCategory && (
+                    <Button variant="secondary" size="sm" onClick={() => { setEditingCategory(null); setCatFormName('') }}>
+                      Cancel
+                    </Button>
+                  )}
+                  <Button variant="default" size="sm" className="flex items-center gap-1.5" onClick={handleSaveCategory}>
+                    {editingCategory ? 'Save' : 'Add'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       <ConfirmDialog />
       <AdSlot />
     </div>

@@ -364,9 +364,9 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                         <Button variant="outline" className="flex-1 border-destructive text-destructive hover:bg-destructive/10" onClick={() => setRejectReasonModal({ open: true, id: exp.id, reason: '' })}>
                           <XIcon className="mr-2 h-4 w-4" /> Reject
                         </Button>
-                        <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => handleApprove(exp.id)}>
-                          <Check className="mr-2 h-4 w-4" /> Approve
-                        </Button>
+                        <button type="button" className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none" onClick={() => handleApprove(exp.id)}>
+                          <Check className="h-4 w-4" /> Approve
+                        </button>
                       </div>
                     </div>
                   </Card>

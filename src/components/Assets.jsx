@@ -42,46 +42,46 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
              <Monitor size={80} />
           </div>
           <CardContent className="p-5 flex flex-col gap-1 relative z-10">
-            <div className="flex items-center gap-2 text-primary font-medium mb-2">
-              <div className="p-1.5 bg-primary/10 rounded-md"><Monitor size={16} /></div> Total Assets
+            <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
+              <div className="p-1.5 bg-primary/10 rounded-md"><Monitor size={16} /></div> <span className="headline-gradient">Total Assets</span>
             </div>
-            <div className="text-3xl font-bold">{stats.total}</div>
+            <div className="text-4xl font-black tabular-nums text-foreground">{stats.total}</div>
           </CardContent>
         </Card>
         
-        <Card className="shadow-xs border-border bg-card hover:border-green-500/50 transition-all duration-300 group overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-green-600">
+        <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-primary">
              <CheckCircle size={80} />
           </div>
           <CardContent className="p-5 flex flex-col gap-1 relative z-10">
-            <div className="flex items-center gap-2 text-green-600 font-medium mb-2">
-              <div className="p-1.5 bg-green-500/10 rounded-md"><CheckCircle size={16} /></div> Available
+            <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
+              <div className="p-1.5 bg-primary/10 rounded-md"><CheckCircle size={16} /></div> <span className="headline-gradient">Available</span>
             </div>
-            <div className="text-3xl font-bold text-foreground">{stats.available}</div>
+            <div className="text-4xl font-black tabular-nums text-foreground">{stats.available}</div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-xs border-border bg-card hover:border-blue-500/50 transition-all duration-300 group overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-blue-600">
+        <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-primary">
              <BadgeCheck size={80} />
           </div>
           <CardContent className="p-5 flex flex-col gap-1 relative z-10">
-            <div className="flex items-center gap-2 text-blue-600 font-medium mb-2">
-              <div className="p-1.5 bg-blue-500/10 rounded-md"><BadgeCheck size={16} /></div> Assigned
+            <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
+              <div className="p-1.5 bg-primary/10 rounded-md"><BadgeCheck size={16} /></div> <span className="headline-gradient">Assigned</span>
             </div>
-            <div className="text-3xl font-bold text-foreground">{stats.assigned}</div>
+            <div className="text-4xl font-black tabular-nums text-foreground">{stats.assigned}</div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-xs border-border bg-card hover:border-orange-500/50 transition-all duration-300 group overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-orange-600">
+        <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-primary">
              <Wrench size={80} />
           </div>
           <CardContent className="p-5 flex flex-col gap-1 relative z-10">
-            <div className="flex items-center gap-2 text-orange-600 font-medium mb-2">
-              <div className="p-1.5 bg-orange-500/10 rounded-md"><Wrench size={16} /></div> Under Repair
+            <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
+              <div className="p-1.5 bg-primary/10 rounded-md"><Wrench size={16} /></div> <span className="headline-gradient">Under Repair</span>
             </div>
-            <div className="text-3xl font-bold text-foreground">{stats.underRepair}</div>
+            <div className="text-4xl font-black tabular-nums text-foreground">{stats.underRepair}</div>
           </CardContent>
         </Card>
       </div>
