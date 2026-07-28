@@ -178,7 +178,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
           onClick={() => setActiveTab('submit')}
           className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'submit' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
         >
-          <Plus size={16} /> New Claim
+          <Plus size={16} /> Claim
         </button>
         {!(canApprove || canReimburse) && (
           <button 

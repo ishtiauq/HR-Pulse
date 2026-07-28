@@ -570,48 +570,48 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
           <Banknote size={20} className="text-primary" />
           Payroll
         </h1>
-
-        <div ref={pickerRef} className="flex gap-2 items-center">
-          {/* Month dropdown */}
-          <div className="relative w-[140px] h-10">
-            <button onClick={() => { setMonthOpen(!monthOpen); setYearOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${monthOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
-              <div className="flex items-center gap-2 overflow-hidden">
-                <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="break-words">{monthNames[currentMonth - 1]}</span>
-              </div>
-              <ChevronDown className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {monthOpen && (
-              <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
-                {monthNames.map((name, i) => (
-                  <button key={name} onClick={() => { setSelectedMonth(`${currentYear}-${String(i + 1).padStart(2, '0')}`); setMonthOpen(false) }} 
-                    className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${i + 1 === currentMonth ? 'bg-accent text-accent-foreground font-semibold' : ''}`}>
-                    {name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          {/* Year dropdown */}
-          <div className="relative w-24 h-10">
-            <button onClick={() => { setYearOpen(!yearOpen); setMonthOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${yearOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
-              <span className="break-words">{currentYear}</span>
-              <ChevronDown className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${yearOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {yearOpen && (
-              <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
-                {yearOptions.map(y => (
-                  <button key={y} onClick={() => { setSelectedMonth(`${y}-${String(currentMonth).padStart(2, '0')}`); setYearOpen(false) }} 
-                    className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${y === currentYear ? 'bg-accent text-accent-foreground font-semibold' : ''}`}>
-                    {y}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+      </div>
+      <div className="border-t border-border border-headline mb-2" />
+      
+      <div ref={pickerRef} className="flex gap-2 items-center justify-end">
+        {/* Month dropdown */}
+        <div className="relative w-[140px] h-10">
+          <button onClick={() => { setMonthOpen(!monthOpen); setYearOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${monthOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
+            <div className="flex items-center gap-2 overflow-hidden">
+              <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="break-words">{monthNames[currentMonth - 1]}</span>
+            </div>
+            <ChevronDown className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} />
+          </button>
+          {monthOpen && (
+            <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
+              {monthNames.map((name, i) => (
+                <button key={name} onClick={() => { setSelectedMonth(`${currentYear}-${String(i + 1).padStart(2, '0')}`); setMonthOpen(false) }} 
+                  className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${i + 1 === currentMonth ? 'bg-accent text-accent-foreground font-semibold' : ''}`}>
+                  {name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* Year dropdown */}
+        <div className="relative w-24 h-10">
+          <button onClick={() => { setYearOpen(!yearOpen); setMonthOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${yearOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
+            <span className="break-words">{currentYear}</span>
+            <ChevronDown className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${yearOpen ? 'rotate-180' : ''}`} />
+          </button>
+          {yearOpen && (
+            <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
+              {yearOptions.map(y => (
+                <button key={y} onClick={() => { setSelectedMonth(`${y}-${String(currentMonth).padStart(2, '0')}`); setYearOpen(false) }} 
+                  className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${y === currentYear ? 'bg-accent text-accent-foreground font-semibold' : ''}`}>
+                  {y}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-      <div className="border-t border-border border-headline" />
 
       {!entries ? (
         <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed border-2 bg-muted/20">
@@ -628,7 +628,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
       ) : (
         <>
           {/* Stats Cards Row */}
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium uppercase text-muted-foreground tracking-wider">Total Payout Budget</CardTitle>
@@ -645,23 +645,6 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold font-mono">{currency}{averageSalary.toLocaleString()}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium uppercase text-muted-foreground tracking-wider">Disbursement Flow</CardTitle>
-                {paidCount < totalCount && (
-                  <Button variant="ghost" size="sm" className="h-auto p-0 text-xs font-semibold" onClick={handlePayAllPending} disabled={processingId === 'bulk-all' || simulatedRole === 'HR Manager'}>
-                    {processingId === 'bulk-all' ? 'Processing...' : 'Pay All Pending'}
-                  </Button>
-                )}
-              </CardHeader>
-              <CardContent>
-                <div className="text-sm text-muted-foreground mb-2">{paidCount} of {totalCount} Paid</div>
-                <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                  <div className="h-full bg-primary transition-all duration-500 ease-in-out" style={{ width: `${progressPercent}%` }} />
-                </div>
               </CardContent>
             </Card>
           </div>
