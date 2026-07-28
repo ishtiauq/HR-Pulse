@@ -352,78 +352,89 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
 
       {/* Upload / Edit Document Modal */}
       <Dialog open={showUploadModal} onOpenChange={(open) => { if (!open) { setShowUploadModal(false); resetForm() } }}>
-        <DialogContent className="sm:max-w-[520px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3">
-              <div className="flex items-center justify-center rounded-xl w-10 h-10 bg-primary/10 text-primary">
-                <Upload size={20} />
-              </div>
-              <div>
+        <DialogContent className="sm:max-w-[540px] bg-background/95 backdrop-blur-xl border-border/50 shadow-2xl overflow-hidden rounded-2xl p-0">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-rose-500 to-primary" />
+          <div className="p-6 sm:p-8">
+            <DialogHeader className="mb-6">
+              <DialogTitle className="flex items-center gap-4 text-xl sm:text-2xl font-bold">
+                <div className="flex items-center justify-center rounded-2xl w-12 h-12 bg-primary/10 text-primary shadow-inner">
+                  <Upload size={24} className="animate-pulse" />
+                </div>
                 <span>{editingDoc ? 'Edit Document' : 'Upload Document'}</span>
-                <p className="text-[0.8rem] text-muted-foreground font-normal mt-0.5">
-                  {editingDoc ? 'Update document details' : 'Add a new document to the repository'}
-                </p>
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSave} className="flex flex-col gap-6">
+              <div className="space-y-1.5 group">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-focus-within:text-primary transition-colors">Document Name *</label>
+                <Input type="text" required value={formName} onChange={e => setFormName(e.target.value)} placeholder="e.g. Employee Handbook 2026" aria-label="Document name" 
+                  className="rounded-xl bg-muted/40 border-border/50 focus-visible:ring-0 focus-visible:border-primary focus-visible:bg-primary/10 transition-all h-11" />
               </div>
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSave} className="flex flex-col gap-5">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[0.82rem] font-semibold text-muted-foreground">Document Name *</label>
-              <Input type="text" required value={formName} onChange={e => setFormName(e.target.value)} placeholder="e.g. Employee Handbook 2026" aria-label="Document name" />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[0.82rem] font-semibold text-muted-foreground">Category</label>
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <Select value={formCategory} onChange={setFormCategory}>
-                    {categories.map(cat => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </Select>
+
+              <div className="space-y-1.5 group">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-focus-within:text-primary transition-colors">Category</label>
+                <div className="flex bg-muted/40 rounded-xl p-1 border border-border/50 focus-within:ring-0 focus-within:border-primary focus-within:bg-primary/10 transition-all">
+                  <div className="flex-1">
+                    <Select value={formCategory} onChange={setFormCategory}>
+                      {categories.map(cat => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </Select>
+                  </div>
+                  <Button type="button" className="shrink-0 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border-none group/add h-10 px-4 rounded-lg flex items-center transition-all duration-300 ease-out overflow-hidden" onClick={() => { setEditingCategory(null); setCatFormName(''); setShowCategoryModal(true) }}>
+                    <Plus size={16} className="shrink-0" />
+                    <span className="w-0 opacity-0 group-hover/add:w-[85px] group-hover/add:opacity-100 group-hover/add:ml-2 overflow-hidden transition-all duration-300 ease-out whitespace-nowrap text-xs font-bold">
+                      Add New
+                    </span>
+                  </Button>
                 </div>
-                <Button type="button" variant="outline" size="icon" className="shrink-0 mt-[2px]" onClick={() => { setEditingCategory(null); setCatFormName(''); setShowCategoryModal(true) }} title="Manage Categories">
-                  <Plus size={16} />
-                </Button>
               </div>
-            </div>
-            {!editingDoc && (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[0.82rem] font-semibold text-muted-foreground">File</label>
-                <div onClick={() => fileInputRef.current?.click()}
-                  className={`rounded-xl text-center cursor-pointer p-6 sm:p-8 border-2 border-dashed transition-all ${formFile ? 'border-emerald-500 bg-emerald-500/5' : 'border-border bg-muted/30 hover:border-primary hover:bg-primary/5'}`}>
-                  {formFile ? (
-                    <>
-                      <div className="w-10 h-10 rounded-xl inline-flex items-center justify-center mb-2.5 bg-emerald-500/10 text-emerald-500">
-                        <FileText size={20} />
+
+              {!editingDoc && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">File</label>
+                  <div onClick={() => fileInputRef.current?.click()}
+                    className={`relative rounded-2xl text-center cursor-pointer p-8 sm:p-10 border-2 transition-all duration-300 ease-out overflow-hidden group/drop ${formFile ? 'border-emerald-500 bg-emerald-500/5 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'border-dashed border-border/60 bg-muted/20 hover:border-primary hover:bg-primary/5'}`}>
+                    
+                    {!formFile && <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover/drop:opacity-100 transition-opacity duration-500" />}
+
+                    {formFile ? (
+                      <div className="relative z-10 flex flex-col items-center animate-in zoom-in-95 duration-300">
+                        <div className="w-14 h-14 rounded-2xl inline-flex items-center justify-center mb-3 bg-emerald-500/15 text-emerald-500 shadow-sm ring-4 ring-emerald-500/10">
+                          <FileText size={28} />
+                        </div>
+                        <p className="m-0 text-[1rem] font-bold text-foreground mb-1 truncate max-w-[250px]">{formFile.name}</p>
+                        <p className="m-0 text-[0.8rem] text-emerald-600/80 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full">{formatFileSize(formFile.size)}</p>
                       </div>
-                      <p className="m-0 text-[0.9rem] font-semibold text-foreground">{formFile.name}</p>
-                      <p className="m-0 mt-1 text-[0.78rem] text-muted-foreground">{formatFileSize(formFile.size)}</p>
-                    </>
-                  ) : (
-                    <>
-                      <Upload size={isMobile ? 22 : 28} className="mb-2.5 opacity-60 text-muted-foreground mx-auto" />
-                      <p className="m-0 text-[0.9rem] text-muted-foreground"><span className="font-semibold text-primary">Click to browse</span> or drop a file</p>
-                      <p className="m-0 mt-1.5 text-[0.75rem] text-muted-foreground/60">PDF, Images, Spreadsheets — up to 10MB</p>
-                    </>
-                  )}
+                    ) : (
+                      <div className="relative z-10 flex flex-col items-center">
+                        <div className="w-14 h-14 rounded-2xl inline-flex items-center justify-center mb-4 bg-primary/10 text-primary shadow-sm group-hover/drop:scale-110 group-hover/drop:rotate-3 transition-transform duration-300">
+                          <Upload size={28} />
+                        </div>
+                        <p className="m-0 text-base text-foreground font-semibold mb-1 group-hover/drop:text-primary transition-colors">Click to browse or drop a file</p>
+                        <p className="m-0 text-xs text-muted-foreground font-medium">PDF, Images, Spreadsheets (Up to 10MB)</p>
+                      </div>
+                    )}
+                  </div>
+                  <input type="file" ref={fileInputRef} onChange={(e) => { const file = e.target.files[0]; if (file) setFormFile(file) }} className="hidden" />
                 </div>
-                <input type="file" ref={fileInputRef} onChange={(e) => { const file = e.target.files[0]; if (file) setFormFile(file) }} className="hidden" />
+              )}
+
+              <div className="space-y-1.5 group">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-focus-within:text-primary transition-colors">Description</label>
+                <textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={3} placeholder="Brief description (optional)" aria-label="Document description"
+                  className="flex w-full rounded-xl bg-muted/40 border border-border/50 px-4 py-3 text-sm font-medium text-foreground placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-0 focus-visible:border-primary focus-visible:bg-primary/10 transition-all resize-y" />
               </div>
-            )}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[0.82rem] font-semibold text-muted-foreground">Description</label>
-              <textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={3} placeholder="Brief description (optional)" aria-label="Document description"
-                className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-xs sm:text-sm font-medium shadow-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-y" />
-            </div>
-            <DialogFooter>
-              <Button variant="secondary" type="button" onClick={() => { setShowUploadModal(false); resetForm() }}>Cancel</Button>
-              <Button type="submit" className="flex items-center gap-1.5">
-                <Upload size={16} /> {editingDoc ? 'Update' : 'Upload'}
-              </Button>
-            </DialogFooter>
-          </form>
+
+              <DialogFooter className="mt-2 sm:justify-end border-t border-border/50 pt-5 -mx-6 sm:-mx-8 px-6 sm:px-8 bg-muted/10">
+                <Button variant="ghost" type="button" onClick={() => { setShowUploadModal(false); resetForm() }} className="font-semibold hover:bg-muted rounded-xl">Cancel</Button>
+                <Button type="submit" className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-rose-500 hover:opacity-90 text-white font-bold rounded-xl px-6 shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.6)] transition-all">
+                  <Upload size={18} /> {editingDoc ? 'Update Document' : 'Upload Document'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </div>
         </DialogContent>
       </Dialog>
 
