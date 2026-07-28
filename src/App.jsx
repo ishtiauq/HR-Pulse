@@ -147,6 +147,9 @@ export default function App() {
         setDocuments={appData.handleSetDocuments}
         simulatedRole={appData.simulatedRole}
         setSimulatedRole={appData.setSimulatedRole}
+        handleLogout={handleLogout}
+        showRoleModal={appData.showRoleModal}
+        setShowRoleModal={appData.setShowRoleModal}
       />
     )
   }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, User, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, Sun, Moon, AlertTriangle, Upload, CheckSquare, CalendarDays, Menu, Receipt, FolderOpen } from 'lucide-react'
+import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, User, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, Sun, Moon, AlertTriangle, Upload, CheckSquare, CalendarDays, Menu, Receipt, FolderOpen, ArrowLeftRight, LogOut } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
 import { Select, SelectItem } from "@/components/ui/select"
@@ -71,7 +71,10 @@ export default function EmployeePortal({
   setAssetRequests,
   settings,
   simulatedRole,
-  setSimulatedRole
+  setSimulatedRole,
+  handleLogout,
+  showRoleModal,
+  setShowRoleModal
 }) {
   const [activeTab, setActiveTab] = useState('dashboard') // dashboard, attendance, payslips, leave, profile
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
@@ -228,9 +231,9 @@ export default function EmployeePortal({
         toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         user={currentUser}
         simulatedRole={simulatedRole}
-        showRoleModal={false}
-        setShowRoleModal={() => {}}
-        handleLogout={() => {}}
+        showRoleModal={showRoleModal}
+        setShowRoleModal={setShowRoleModal}
+        handleLogout={handleLogout}
         setIsCollapsed={setIsSidebarCollapsed}
         setSimulatedRole={setSimulatedRole}
         setMobileMenuOpen={setShowMobileMenu}
@@ -313,7 +316,7 @@ export default function EmployeePortal({
             className={`w-full h-12 sm:h-14 px-4 flex items-center justify-between sm:justify-evenly bg-background/80 backdrop-blur-xl saturate-150 text-foreground border-t border-border/50 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
             style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
           >
-            {navItems.filter(i => ['dashboard', 'my-tasks', 'announcements', 'attendance'].includes(i.id)).map(item => {
+            {navItems.filter(i => ['dashboard', 'my-tasks', 'announcements', 'attendance', 'profile'].includes(i.id)).map(item => {
               const active = activeTab === item.id
               return (
                 <button
@@ -346,6 +349,60 @@ export default function EmployeePortal({
           </nav>
         </div>
       )}
+      {/* Mobile Menu Drawer */}
+      <div 
+        className={`fixed inset-0 z-50 bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${showMobileMenu ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setShowMobileMenu(false)}
+        aria-hidden={!showMobileMenu}
+      />
+      
+      <div 
+        className={`fixed bottom-0 left-0 right-0 z-50 flex flex-col bg-popover rounded-t-2xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] border border-border/40 transition-transform duration-300 ease-in-out sm:w-[400px] sm:mx-auto max-h-[85vh] md:hidden ${showMobileMenu ? 'translate-y-0' : 'translate-y-full'}`}
+        aria-hidden={!showMobileMenu}
+      >
+        <div className="px-5 py-4 border-b border-border/50 bg-muted/20 rounded-t-2xl shrink-0 flex items-center justify-between">
+          <h2 className="text-left text-lg font-bold text-foreground">Menu</h2>
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground" onClick={() => setShowMobileMenu(false)}>
+            <XCircle size={18} />
+          </Button>
+        </div>
+        <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
+          {navItems.filter(i => !['dashboard', 'my-tasks', 'announcements', 'attendance', 'profile'].includes(i.id)).map(item => {
+            const active = activeTab === item.id
+            return (
+              <Button
+                key={item.id}
+                variant={active ? "secondary" : "ghost"}
+                className={`w-full justify-start py-6 rounded-xl transition-all ${active ? 'bg-primary/10 text-primary font-semibold shadow-sm' : 'text-foreground font-medium hover:bg-muted/60'}`}
+                onClick={() => { setActiveTab(item.id); setShowMobileMenu(false) }}
+              >
+                <div className={`mr-4 h-[22px] w-[22px] [&>svg]:w-[22px] [&>svg]:h-[22px] flex items-center justify-center ${active ? 'text-primary' : 'text-muted-foreground/70'}`}>{item.icon}</div>
+                <span className="text-base">{item.label}</span>
+              </Button>
+            )
+          })}
+          
+          <div className="h-px bg-border/60 my-4 mx-2 shrink-0" />
+          
+          {!currentUser.isEmployee && (
+            <button 
+              className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white transition-colors cursor-pointer border-none shadow-sm mb-2"
+              onClick={() => { setShowRoleModal(true); setShowMobileMenu(false) }}
+            >
+              <ArrowLeftRight size={20} />
+              <span className="font-semibold text-base">Switch Role</span>
+            </button>
+          )}
+
+          <button 
+            className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer border-none shadow-sm"
+            onClick={() => { handleLogout(); setShowMobileMenu(false) }}
+          >
+            <LogOut size={20} />
+            <span className="font-semibold text-base">Logout</span>
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

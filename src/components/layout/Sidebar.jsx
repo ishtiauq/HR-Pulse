@@ -10,48 +10,18 @@ export default function Sidebar({
   setIsCollapsed, setSimulatedRole, setMobileMenuOpen
 }) {
   return (
-    <>
-      {/* Mobile fullscreen overlay backdrop */}
-      {mobileMenuOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-sm lg:hidden animate-fade-in"
-          onClick={() => setMobileMenuOpen(false)} 
-        />
-      )}
-
-      <aside 
+    <>      <aside 
         aria-label="Sidebar navigation" 
-        className={`
-          flex flex-col shrink-0 relative z-50 bg-sidebar text-sidebar-foreground
-          transition-all duration-300 ease-in-out overflow-hidden
-          ${mobileMenuOpen 
-            ? 'fixed inset-0 w-full max-w-full border-r-0 shadow-2xl h-[100dvh] rounded-none' 
-            : 'hidden md:flex my-6 md:my-8 lg:my-10 ml-4 md:ml-6 lg:ml-8 rounded-2xl shadow-lg border border-sidebar-border h-[calc(100vh-3rem)] md:h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)]'}
-        `}
+        className="hidden md:flex flex-col shrink-0 relative z-50 bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out overflow-hidden my-6 md:my-8 lg:my-10 ml-4 md:ml-6 lg:ml-8 rounded-2xl shadow-lg border border-sidebar-border h-[calc(100vh-3rem)] md:h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)]"
         style={{
-          width: isCollapsed && !mobileMenuOpen ? '64px' : (mobileMenuOpen ? '100%' : 'fit-content'),
+          width: isCollapsed ? '64px' : 'fit-content',
         }}
       >
       
         {/* HEADER SECTION */}
         <div className="shrink-0 p-3 pb-2 flex flex-col">
-          {/* Mobile: close button row */}
-          {mobileMenuOpen && (
-            <div className="flex items-center justify-between mb-3 px-1">
-              <span className="text-sm font-bold text-sidebar-foreground/80">Menu</span>
-              <button 
-                onClick={() => setMobileMenuOpen(false)}
-                className="size-9 flex items-center justify-center rounded-xl bg-sidebar-accent/50 text-sidebar-foreground border border-sidebar-border hover:bg-sidebar-accent transition-colors cursor-pointer"
-                aria-label="Close menu"
-              >
-                <X size={18} />
-              </button>
-            </div>
-          )}
-
           {/* Desktop: collapse toggle */}
-          {!mobileMenuOpen && (
-            <TooltipPopover label="Expand Sidebar" isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
+          <TooltipPopover label="Expand Sidebar" isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
               <button 
                 id="sidebar-toggle" 
                 aria-label="Toggle sidebar" 
@@ -75,7 +45,6 @@ export default function Sidebar({
                 }}>Collapse</span>
               </button>
             </TooltipPopover>
-          )}
         </div>
 
         {/* MIDDLE SCROLLABLE NAV AREA */}
@@ -86,7 +55,7 @@ export default function Sidebar({
           {visibleNavItems.map(item => {
             const isActive = currentView === item.id;
             return (
-              <TooltipPopover key={item.id} label={item.label} isCollapsed={isCollapsed && !mobileMenuOpen} isDarkMode={isDarkMode}>
+              <TooltipPopover key={item.id} label={item.label} isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
                 <div
                   role="button"
                   tabIndex={0}
@@ -94,8 +63,8 @@ export default function Sidebar({
                   className={`${isActive ? 'active bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm' : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'} flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer h-9 box-border transition-colors duration-200 relative no-underline shrink-0`}
                   data-active={isActive ? 'true' : 'false'}
                   data-label={item.label}
-                  onClick={() => { setCurrentView(item.id); setMobileMenuOpen(false) }}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCurrentView(item.id); setMobileMenuOpen(false); }}}
+                  onClick={() => { setCurrentView(item.id) }}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCurrentView(item.id); }}}
                 >
                   {/* Icon */}
                   <div className="size-6 flex items-center justify-center rounded-lg shrink-0">
@@ -104,8 +73,8 @@ export default function Sidebar({
                   
                   {/* Label: always visible on mobile, animated on desktop */}
                   <span className="text-sm font-medium leading-5 whitespace-nowrap transition-[opacity,max-width] duration-300 overflow-hidden" style={{
-                    opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
-                    maxWidth: (mobileMenuOpen || !isCollapsed) ? '300px' : 0,
+                    opacity: !isCollapsed ? 1 : 0,
+                    maxWidth: !isCollapsed ? '300px' : 0,
                   }}>{item.label}</span>
                 </div>
               </TooltipPopover>
@@ -124,8 +93,8 @@ export default function Sidebar({
               alt={user?.name ? `${user.name}'s avatar` : "User avatar"} 
             />
             <div className="overflow-hidden whitespace-nowrap flex-1 min-w-0 transition-[opacity,max-width] duration-300 pr-2" style={{
-              opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
-              maxWidth: (mobileMenuOpen || !isCollapsed) ? '300px' : 0,
+              opacity: !isCollapsed ? 1 : 0,
+              maxWidth: !isCollapsed ? '200px' : 0,
             }}>
               <p className="text-sm font-semibold m-0 text-sidebar-foreground whitespace-nowrap leading-tight">{user?.name || "Ishtiaq Rizve"}</p>
               <p className="text-[11px] font-medium m-0 text-sidebar-foreground/70 whitespace-nowrap">{simulatedRole || user?.role || "Admin"}</p>
@@ -133,7 +102,7 @@ export default function Sidebar({
           </div>
 
           {/* ACTION BUTTONS */}
-          <TooltipPopover label="Switch Role" isCollapsed={isCollapsed && !mobileMenuOpen} isDarkMode={isDarkMode}>
+          <TooltipPopover label="Switch Role" isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
             <button
               onClick={() => setShowRoleModal && setShowRoleModal(true)}
               className="btn-shimmer w-full flex items-center gap-3 px-3 rounded-md bg-[#2563eb] hover:bg-[#1d4ed8] text-white transition-colors cursor-pointer h-9 box-border border-none"
@@ -142,13 +111,13 @@ export default function Sidebar({
                 <ArrowLeftRight size={16} />
               </div>
               <span className="whitespace-nowrap overflow-hidden transition-[opacity,max-width] duration-300 text-left font-medium text-xs pr-2" style={{
-                opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
-                maxWidth: (mobileMenuOpen || !isCollapsed) ? '300px' : 0,
+                opacity: !isCollapsed ? 1 : 0,
+                maxWidth: !isCollapsed ? '300px' : 0,
               }}>Switch Role</span>
             </button>
           </TooltipPopover>
           
-          <TooltipPopover label="Logout" isCollapsed={isCollapsed && !mobileMenuOpen} isDarkMode={isDarkMode}>
+          <TooltipPopover label="Logout" isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
             <button
               onClick={handleLogout}
               className="btn-shimmer mt-1 w-full flex items-center gap-3 px-3 rounded-md bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer h-9 box-border border-none"
