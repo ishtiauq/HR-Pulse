@@ -273,11 +273,11 @@ export default function EmployeePortal({
       {/* Bottom Tab Bar (Mobile) */}
       {isMobile && (
         <div 
-          className={`fixed bottom-0 left-0 right-0 z-[60] bg-background/90 backdrop-blur-md border-t border-border shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-safe overflow-x-auto no-scrollbar transition-transform duration-300 ease-in-out ${isScrollingDown && !showMobileMenu ? 'translate-y-full' : 'translate-y-0'}`}
+          className={`fixed bottom-5 left-0 right-0 z-[60] w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-2 min-[400px]:px-4 bg-background/70 backdrop-blur-xl saturate-150 border border-border/50 rounded-full shadow-lg transition-all duration-300 ease-in-out ${isScrollingDown && !showMobileMenu ? 'translate-y-24 opacity-0' : 'translate-y-0 opacity-100'}`}
           style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
         >
           <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
-          <div className="flex items-center justify-between sm:justify-evenly min-w-full px-2 py-2 gap-1 mx-auto">
+          <div className="flex h-full items-center justify-between sm:justify-evenly min-w-full gap-1 mx-auto">
             {navItems.filter(i => ['dashboard', 'my-tasks', 'announcements', 'attendance'].includes(i.id)).map(item => {
               const active = activeTab === item.id
               const Icon = item.icon
