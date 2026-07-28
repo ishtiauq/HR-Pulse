@@ -25,7 +25,7 @@ export const allNavItems = [
   { id: 'dashboard', label: 'Dashboard', icon: createElement(LayoutDashboard, { size: 18 }) },
   { id: 'tasks', label: 'Tasks', icon: createElement(CheckSquare, { size: 18 }) },
   { id: 'announcements', label: 'Announcements', icon: createElement(Megaphone, { size: 18 }) },
-  { id: 'calendar', label: 'Calendar', icon: createElement(CalendarDays, { size: 18 }) },
+  { id: 'calendar', label: 'Events', icon: createElement(CalendarDays, { size: 18 }) },
   { id: 'documents', label: 'Documents', icon: createElement(FolderOpen, { size: 18 }) },
   { id: 'employees', label: 'Employees', icon: createElement(Users, { size: 18 }) },
   { id: 'payroll', label: 'Payroll', icon: createElement(Banknote, { size: 18 }) },

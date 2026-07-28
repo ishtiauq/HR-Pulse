@@ -288,7 +288,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
           <CalendarDays size={20} className="text-primary" />
-          Calendar
+          Events
         </h1>
       </div>
       <div className="border-t border-border" />

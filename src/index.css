@@ -47,24 +47,24 @@
 
 :root {
   --background: hsl(0 0% 100%);
-  --foreground: hsl(222.2 84% 4.9%);
+  --foreground: hsl(210 20% 10%);
   --card: hsl(0 0% 100%);
-  --card-foreground: hsl(222.2 84% 4.9%);
+  --card-foreground: hsl(210 20% 10%);
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(222.2 84% 4.9%);
-  --primary: hsl(221.2 83.2% 53.3%);
-  --primary-foreground: hsl(210 40% 98%);
-  --secondary: hsl(210 40% 96.1%);
-  --secondary-foreground: hsl(222.2 47.4% 11.2%);
-  --muted: hsl(210 40% 96.1%);
-  --muted-foreground: hsl(215.4 16.3% 46.9%);
-  --accent: hsl(210 40% 96.1%);
-  --accent-foreground: hsl(222.2 47.4% 11.2%);
+  --popover-foreground: hsl(210 20% 10%);
+  --primary: hsl(24.6 95% 53.1%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(210 25% 97%);
+  --secondary-foreground: hsl(210 20% 10%);
+  --muted: hsl(210 25% 97%);
+  --muted-foreground: hsl(210 10% 45%);
+  --accent: hsl(210 25% 97%);
+  --accent-foreground: hsl(210 20% 10%);
   --destructive: hsl(0 84.2% 60.2%);
-  --destructive-foreground: hsl(210 40% 98%);
-  --border: hsl(214.3 31.8% 91.4%);
-  --input: hsl(214.3 31.8% 91.4%);
-  --ring: hsl(221.2 83.2% 53.3%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(210 15% 92%);
+  --input: hsl(210 15% 92%);
+  --ring: hsl(24.6 95% 53.1%);
   --radius: 0.75rem;
   --sidebar: var(--background);
   --sidebar-foreground: var(--foreground);
@@ -80,8 +80,8 @@
   --card-foreground: hsl(210 40% 98%);
   --popover: hsl(222.2 84% 4.9%);
   --popover-foreground: hsl(210 40% 98%);
-  --primary: hsl(217.2 91.2% 59.8%);
-  --primary-foreground: hsl(222.2 47.4% 11.2%);
+  --primary: hsl(24.6 95% 53.1%);
+  --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(217.2 32.6% 17.5%);
   --secondary-foreground: hsl(210 40% 98%);
   --muted: hsl(217.2 32.6% 17.5%);
@@ -140,3 +140,12 @@ html, body, #root {
   from { width: 100%; }
   to   { width: 0%; }
 }
+
+/* Global Glassmorphism for Cards, Modals, Popovers, and Sidebar */
+.bg-card, .bg-popover, .bg-sidebar {
+  background-color: color-mix(in srgb, var(--background) 70%, transparent) !important;
+  backdrop-filter: blur(24px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+}
+
+

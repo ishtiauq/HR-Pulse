@@ -462,7 +462,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           title="Upcoming Events"
           icon={<CalendarIcon size={18} />}
           iconClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-          action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('calendar')} className="text-xs font-semibold h-7">Calendar</Button>}
+          action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('calendar')} className="text-xs font-semibold h-7">Events</Button>}
           contentClass="flex flex-col justify-start gap-2.5 pt-4"
           {...wProps}
         >

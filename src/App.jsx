@@ -153,7 +153,10 @@ export default function App() {
   const unreadCount = appData.notifications.filter(n => !n.read).length
 
   return (
-    <div className="dashboard-root app-shell" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
+    <div className="dashboard-root app-shell relative" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
+      
+
+
       <Sidebar
         visibleNavItems={visibleNavItems}
         isCollapsed={isCollapsed}
