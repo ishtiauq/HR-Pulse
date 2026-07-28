@@ -668,7 +668,12 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
 
           {/* Toolbar Filter Section */}
           <div className="flex justify-between items-center flex-wrap gap-4 mt-2">
-            <div className="relative flex-1 max-w-[350px]">
+            <div className="flex items-center gap-3 bg-muted/30 px-3 py-1.5 rounded-lg border border-border">
+              <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary" aria-label="Select all" checked={selectedRows.length === filteredEntries.length && filteredEntries.length > 0} onChange={toggleSelectAll} />
+              <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Select All</span>
+            </div>
+            
+            <div className="relative flex-1 min-w-[200px] max-w-[350px]">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search employee or role..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
             </div>
@@ -703,111 +708,87 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
             </div>
           )}
 
-          {/* Payroll Table */}
-          <div className="border border-border rounded-lg overflow-hidden bg-card">
-            <div className="relative overflow-auto" style={{ maxHeight: '600px' }} onScroll={handleScroll}>
-              <Table>
-                <TableHeader className="bg-muted/50 sticky top-0 z-10">
-                  <TableRow>
-                    <TableHead className="w-12 text-center">
-                      <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary" aria-label="Select all" checked={selectedRows.length === filteredEntries.length && filteredEntries.length > 0} onChange={toggleSelectAll} />
-                    </TableHead>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Salary Details</TableHead>
-                    <TableHead>Deductions (PF)</TableHead>
-                    <TableHead>Advanced</TableHead>
-                    <TableHead>Company Loan</TableHead>
-                    <TableHead>Net Payout</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-center">Edit</TableHead>
-                    <TableHead className="text-right">Execute</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paddingTop > 0 && <TableRow style={{ height: `${paddingTop}px` }}><TableCell colSpan={10} className="p-0 border-none" /></TableRow>}
-                  {visibleEntries.length === 0 && paddingTop === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">No employees found.</TableCell>
-                    </TableRow>
-                  )}
-                  {visibleEntries.map(entry => {
-                    const emp = entry.employee
-                    const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
-                    const netPay = entry.baseSalary + entry.allowance - entry.deductions - entry.advance - loanDeduction
-                    const isPaid = entry.status === 'Paid'
-                    const isProcessing = processingId === entry.employeeId
-                    const isSelected = selectedRows.includes(entry.employeeId)
+          {/* Universal Payroll Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {filteredEntries.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-lg bg-muted/20">No employees found.</div>
+            )}
+            {filteredEntries.map(entry => {
+              const emp = entry.employee
+              const loanDeduction = Math.min(entry.loan.remaining, entry.loan.installment)
+              const netPay = entry.baseSalary + entry.allowance - entry.deductions - entry.advance - loanDeduction
+              const isPaid = entry.status === 'Paid'
+              const isProcessing = processingId === entry.employeeId
+              const isSelected = selectedRows.includes(entry.employeeId)
 
-                    return (
-                      <TableRow key={entry.employeeId} className={`${isSelected ? 'bg-muted/50' : ''} h-[75px]`}>
-                        <TableCell className="text-center">
-                          <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary" aria-label={`Select ${emp.name}`} checked={isSelected} onChange={() => toggleRowSelection(entry.employeeId)} />
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-9 h-9 shrink-0 ring-1 ring-border">
-                              {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
-                              <AvatarFallback className="bg-primary/10 text-primary"><User size={18} /></AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                              <span className="font-medium">{emp.name}</span>
-                              <span className="text-xs text-muted-foreground">{emp.role}</span>
-                            </div>
+              return (
+                <Card key={entry.employeeId} className={`overflow-hidden transition-all ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''}`}>
+                  <div className="p-4 flex flex-col gap-4">
+                    {/* Header */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <input type="checkbox" className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary mt-1" aria-label={`Select ${emp.name}`} checked={isSelected} onChange={() => toggleRowSelection(entry.employeeId)} />
+                        <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
+                          {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+                          <AvatarFallback className="bg-primary/10 text-primary"><User size={20} /></AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-base leading-tight">{emp.name}</span>
+                          <span className="text-xs text-muted-foreground">{emp.role}</span>
+                        </div>
+                      </div>
+                      <Badge variant={isPaid ? 'default' : 'destructive'} className={`${isPaid ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'}`}>
+                        {entry.status}
+                      </Badge>
+                    </div>
+                    
+                    {/* Body: Salary Grid */}
+                    <div className="grid grid-cols-2 gap-3 bg-muted/30 p-3 rounded-lg text-sm border border-border/50">
+                      <div className="flex flex-col">
+                        <span className="text-muted-foreground text-xs font-medium">Gross Salary</span>
+                        <span className="font-mono font-medium">{currency}{entry.grossSalary.toLocaleString()}</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-muted-foreground text-xs font-medium">Deductions</span>
+                        <span className="font-mono font-medium text-red-500 dark:text-red-400">-{currency}{entry.deductions.toLocaleString()}</span>
+                      </div>
+                      {(entry.advance > 0 || entry.loan.total > 0) && (
+                        <>
+                          <div className="flex flex-col">
+                            <span className="text-muted-foreground text-xs font-medium">Advance/Loan</span>
+                            <span className="font-mono font-medium text-yellow-600 dark:text-yellow-500">-{currency}{(entry.advance + loanDeduction).toLocaleString()}</span>
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-0.5">
-                            <span className="font-medium font-mono text-sm">Gross: {currency}{entry.grossSalary.toLocaleString()}</span>
-                            <span className="text-xs text-muted-foreground font-mono">Base: {currency}{entry.baseSalary.toLocaleString()}</span>
+                          <div className="flex flex-col">
+                            <span className="text-muted-foreground text-xs font-medium">Loan Rem.</span>
+                            <span className="font-mono text-muted-foreground">{currency}{entry.loan.remaining}</span>
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-medium font-mono text-sm text-red-500 dark:text-red-400">-{currency}{entry.deductions.toLocaleString()}</span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-medium font-mono text-sm text-yellow-600 dark:text-yellow-500">{currency}{entry.advance}</span>
-                        </TableCell>
-                        <TableCell>
-                          {entry.loan.total > 0 ? (
-                            <div className="flex flex-col gap-0.5">
-                              <span className="font-medium font-mono text-sm text-red-500 dark:text-red-400">Inst: {currency}{loanDeduction}</span>
-                              <span className="text-xs text-muted-foreground font-mono">Rem: {currency}{entry.loan.remaining}</span>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">None</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-bold font-mono text-primary">{currency}{netPay.toLocaleString()}</span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={isPaid ? 'default' : 'destructive'} className={`${isPaid ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'}`}>
-                            {entry.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Button variant="ghost" size="icon" onClick={() => openCompensationModal(entry)} title="Edit Compensation">
-                            <Pencil className="h-4 w-4 text-blue-500" />
-                          </Button>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {!isPaid ? (
-                            <Button size="sm" onClick={() => handleExecutePayment(entry)} disabled={isProcessing || simulatedRole === 'HR Manager'} title={simulatedRole === 'HR Manager' ? "HR Managers cannot execute payroll" : "Execute Payment"}>
-                              {isProcessing ? '...' : 'Execute'}
-                            </Button>
-                          ) : (
-                            <Button variant="ghost" size="sm" onClick={() => generatePayslipReceipt(entry, entry.paymentDate)}>
-                              <Download className="mr-2 h-4 w-4" /> Payslip
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                  {paddingBottom > 0 && <TableRow style={{ height: `${paddingBottom}px` }}><TableCell colSpan={10} className="p-0 border-none" /></TableRow>}
-                </TableBody>
-              </Table>
-            </div>
+                        </>
+                      )}
+                      <div className="flex flex-col col-span-2 pt-2 mt-1 border-t border-border/50">
+                        <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Net Payout</span>
+                        <span className="font-mono font-bold text-primary text-lg">{currency}{netPay.toLocaleString()}</span>
+                      </div>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="flex items-center gap-2 pt-1">
+                      <Button variant="outline" className="flex-1" onClick={() => openCompensationModal(entry)}>
+                        <Pencil className="mr-2 h-4 w-4 text-blue-500" /> Edit
+                      </Button>
+                      {!isPaid ? (
+                        <Button className="flex-1" onClick={() => handleExecutePayment(entry)} disabled={isProcessing || simulatedRole === 'HR Manager'}>
+                          {isProcessing ? '...' : 'Execute'}
+                        </Button>
+                      ) : (
+                        <Button variant="secondary" className="flex-1" onClick={() => generatePayslipReceipt(entry, entry.paymentDate)}>
+                          <Download className="mr-2 h-4 w-4" /> Payslip
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              )
+            })}
           </div>
         </>
       )}

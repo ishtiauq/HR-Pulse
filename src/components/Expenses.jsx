@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from 'react'
-import { Receipt, Plus, Upload, Check, X as XIcon, Clock, DollarSign, Filter, Search, Download, AlertTriangle, PieChart as PieChartIcon, User } from 'lucide-react'
+import { Receipt, Plus, Upload, Check, X as XIcon, Clock, DollarSign, Filter, Search, Download, AlertTriangle, PieChart as PieChartIcon, User, History, List } from 'lucide-react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -16,11 +16,13 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
 
   // Employee Submission States
   const [category, setCategory] = useState('Travel')
+  const [customCategory, setCustomCategory] = useState('')
   const [amount, setAmount] = useState('')
   const [currency, setCurrency] = useState('USD')
   const [date, setDate] = useState('')
   const [description, setDescription] = useState('')
   const [receiptBase64, setReceiptBase64] = useState(null)
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
 
   // Manager Approval States
   const [selectedExpenses, setSelectedExpenses] = useState([])
@@ -55,7 +57,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
     const newExpense = {
       id: `EXP-${Date.now()}`,
       employeeId: 'EMP-101',
-      category,
+      category: category === 'Add New...' ? customCategory : category,
       amount: Number(amount),
       currency,
       usdAmount: Number(amount) * exchangeRates[currency],
@@ -68,29 +70,31 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
 
     setExpenses(prev => [newExpense, ...prev])
     addAuditLog('CREATE', 'Expense', `Submitted ${currency} ${amount} for ${category}`)
-    addToast('Expense submitted for approval.', 'success')
+    setShowSuccessDialog(true)
 
     setAmount('')
     setDescription('')
     setDate('')
     setReceiptBase64(null)
+    setCustomCategory('')
+    if (category === 'Add New...') setCategory('Travel')
   }
 
   const handleApprove = (id) => {
-    setExpenses(prev => prev.map(exp => exp.id === id ? { ...exp, status: 'Approved' } : exp))
+    setExpenses(prev => prev.map(exp => exp.id === id ? { ...exp, status: 'Approved', approvedBy: simulatedRole || 'Admin', actionDate: new Date().toISOString() } : exp))
     addToast('Expense approved.', 'success')
     addAuditLog('UPDATE', 'Expense', `Approved expense ${id}`)
   }
 
   const handleReject = () => {
-    setExpenses(prev => prev.map(exp => exp.id === rejectReasonModal.id ? { ...exp, status: 'Rejected', rejectReason: rejectReasonModal.reason } : exp))
+    setExpenses(prev => prev.map(exp => exp.id === rejectReasonModal.id ? { ...exp, status: 'Rejected', rejectReason: rejectReasonModal.reason, rejectedBy: simulatedRole || 'Admin', actionDate: new Date().toISOString() } : exp))
     addToast('Expense rejected.', 'success')
     addAuditLog('UPDATE', 'Expense', `Rejected expense ${rejectReasonModal.id}`)
     setRejectReasonModal({ open: false, id: null, reason: '' })
   }
 
   const handleBulkApprove = () => {
-    setExpenses(prev => prev.map(exp => selectedExpenses.includes(exp.id) ? { ...exp, status: 'Approved' } : exp))
+    setExpenses(prev => prev.map(exp => selectedExpenses.includes(exp.id) ? { ...exp, status: 'Approved', approvedBy: simulatedRole || 'Admin', actionDate: new Date().toISOString() } : exp))
     setSelectedExpenses([])
     addToast(`${selectedExpenses.length} expenses approved.`, 'success')
     addAuditLog('UPDATE', 'Expense', `Bulk approved ${selectedExpenses.length} expenses`)
@@ -103,7 +107,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
   const handleMarkReimbursed = (id) => {
     const ref = prompt("Enter bank transaction reference:")
     if (ref) {
-      setExpenses(prev => prev.map(exp => exp.id === id ? { ...exp, status: 'Reimbursed', transactionRef: ref } : exp))
+      setExpenses(prev => prev.map(exp => exp.id === id ? { ...exp, status: 'Reimbursed', transactionRef: ref, reimbursedBy: simulatedRole || 'Admin', actionDate: new Date().toISOString() } : exp))
       addToast('Expense marked as reimbursed.', 'success')
       addAuditLog('UPDATE', 'Expense', `Reimbursed expense ${id} (Ref: ${ref})`)
     }
@@ -135,6 +139,8 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
   // Derived Data
   const pendingQueue = expenses.filter(e => e.status === 'Pending')
   const approvedQueue = expenses.filter(e => e.status === 'Approved')
+  const myClaimsQueue = expenses.filter(e => e.employeeId === 'EMP-101')
+  const historyQueue = expenses.filter(e => e.status !== 'Pending')
 
   const pendingLiability = pendingQueue.reduce((acc, curr) => acc + (curr.usdAmount || (curr.amount * exchangeRates[curr.currency])), 0)
   const approvedLiability = approvedQueue.reduce((acc, curr) => acc + (curr.usdAmount || (curr.amount * exchangeRates[curr.currency])), 0)
@@ -163,90 +169,122 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
           <Receipt size={20} className="text-primary" />
           Expenses
         </h1>
-        <div className="flex gap-3">
-          <Button variant={activeTab === 'submit' ? 'default' : 'secondary'} size="sm" aria-label="Submit expense" onClick={() => setActiveTab('submit')}>
-            <Plus size={16} /> Submit
-          </Button>
-          {canApprove && (
-            <Button variant={activeTab === 'approve' ? 'default' : 'secondary'} size="sm" aria-label="Approvals" onClick={() => setActiveTab('approve')}>
-              <Clock size={16} /> Approvals
-              {pendingQueue.length > 0 && (
-                <Badge variant="destructive" className="ml-1">{pendingQueue.length}</Badge>
-              )}
-            </Button>
-          )}
-          {canReimburse && (
-            <Button variant={activeTab === 'finance' ? 'default' : 'secondary'} size="sm" aria-label="Finance" onClick={() => setActiveTab('finance')}>
-              <PieChartIcon size={16} /> Finance
-            </Button>
-          )}
-        </div>
       </div>
       <div className="border-t border-border border-headline" />
 
+      {/* Navigation Tabs */}
+      <div className="flex gap-2 bg-muted/20 p-1.5 rounded-lg border border-border w-fit">
+        <button 
+          onClick={() => setActiveTab('submit')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'submit' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
+        >
+          <Plus size={16} /> New Claim
+        </button>
+        {!(canApprove || canReimburse) && (
+          <button 
+            onClick={() => setActiveTab('my-claims')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'my-claims' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
+          >
+            <List size={16} /> My Claims
+          </button>
+        )}
+        {canApprove && (
+          <button 
+            onClick={() => setActiveTab('approve')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'approve' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
+          >
+            <Clock size={16} /> Approvals
+            {pendingQueue.length > 0 && <Badge variant="destructive" className="ml-1 px-1.5 py-0 min-w-[20px] h-5 flex items-center justify-center">{pendingQueue.length}</Badge>}
+          </button>
+        )}
+        {canReimburse && (
+          <button 
+            onClick={() => setActiveTab('finance')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'finance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
+          >
+            <PieChartIcon size={16} /> Finance
+          </button>
+        )}
+        {(canApprove || canReimburse) && (
+          <button 
+            onClick={() => setActiveTab('history')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'history' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
+          >
+            <History size={16} /> History
+          </button>
+        )}
+      </div>
+
       {/* Tabs Content */}
       {activeTab === 'submit' && (
-        <Card className="max-w-[600px]">
-          <CardContent className="p-8">
-            <h3 className="text-xl mb-6 flex items-center gap-2 text-foreground">
-              <Receipt size={20} className="text-primary" />
-              New Expense Claim
-            </h3>
-
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <div className="flex gap-4">
-                <div className="flex-1 flex flex-col gap-1.5">
-                  <Select label="Category" value={category} onChange={setCategory}>
-                    {expenseCategories.map(c => <SelectItem key={c} id={c}>{c}</SelectItem>)}
-                  </Select>
+        <div className="max-w-2xl mx-auto w-full">
+          {/* Input Form */}
+          <Card className="flex-1">
+            <CardContent className="p-6 sm:p-8">
+              <h3 className="text-xl mb-6 flex items-center gap-2 text-foreground">
+                <Receipt size={20} className="text-primary" />
+                Expense Details
+              </h3>
+              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                <div className="flex gap-4 flex-col sm:flex-row">
+                  <div className="flex-1 flex flex-col gap-1.5">
+                    <Select label="Category" value={category} onChange={setCategory}>
+                      {expenseCategories.map(c => <SelectItem key={c} id={c}>{c}</SelectItem>)}
+                      <SelectItem id="Add New...">+ Add New...</SelectItem>
+                    </Select>
+                    {category === 'Add New...' && (
+                      <Input 
+                        placeholder="Enter custom category" 
+                        value={customCategory} 
+                        onChange={e => setCustomCategory(e.target.value)} 
+                        className="mt-2"
+                        required 
+                        aria-label="Custom category"
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1 flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-muted-foreground">Date</label>
+                    <Input type="date" value={date} onChange={e => setDate(e.target.value)} required aria-label="Expense date" />
+                  </div>
                 </div>
-                <div className="flex-1 flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-muted-foreground">Date</label>
-                  <Input type="date" value={date} onChange={e => setDate(e.target.value)} required aria-label="Expense date" />
-                </div>
-              </div>
 
-              <div className="flex gap-4">
-                <div className="flex-[2] flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-muted-foreground">Amount</label>
-                  <Input type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} required placeholder="0.00" aria-label="Expense amount" />
+                <div className="flex gap-4 flex-col sm:flex-row">
+                  <div className="flex-[2] flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-muted-foreground">Amount</label>
+                    <Input type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} required placeholder="0.00" aria-label="Expense amount" />
+                  </div>
+                  <div className="flex-1 flex flex-col gap-1.5">
+                    <Select label="Currency" value={currency} onChange={setCurrency}>
+                      {currencies.map(c => <SelectItem key={c} id={c}>{c}</SelectItem>)}
+                    </Select>
+                  </div>
                 </div>
-                <div className="flex-1 flex flex-col gap-1.5">
-                  <Select label="Currency" value={currency} onChange={setCurrency}>
-                    {currencies.map(c => <SelectItem key={c} id={c}>{c}</SelectItem>)}
-                  </Select>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-muted-foreground">Description</label>
+                  <textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Briefly describe the expense..." rows={3} aria-label="Expense description" className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-xs sm:text-sm font-medium shadow-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-y" />
                 </div>
-              </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-muted-foreground">Description</label>
-                <textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Briefly describe the expense..." rows={3} aria-label="Expense description" className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-xs sm:text-sm font-medium shadow-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-y" />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-muted-foreground">Receipt (Image/PDF)</label>
-                <input type="file" accept="image/*,.pdf" ref={fileInputRef} onChange={handleReceiptUpload} className="hidden" />
-                <div
-                  onClick={() => fileInputRef.current.click()}
-                  className="p-6 sm:p-8 rounded-xl border-2 border-dashed border-border bg-muted/30 text-center cursor-pointer flex flex-col items-center gap-2 transition-colors hover:border-primary hover:bg-muted/50"
-                >
-                  {receiptBase64 ? (
-                    <img src={receiptBase64} alt="Receipt" className="max-h-[100px] rounded-lg object-contain" />
-                  ) : (
-                    <>
-                      <Upload size={24} className="text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Click to upload receipt</span>
-                    </>
-                  )}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-muted-foreground">Receipt (Image/PDF)</label>
+                  <input type="file" accept="image/*,.pdf" ref={fileInputRef} onChange={handleReceiptUpload} className="hidden" />
+                  <div
+                    onClick={() => fileInputRef.current.click()}
+                    className="p-6 sm:p-8 rounded-xl border-2 border-dashed border-border bg-muted/30 text-center cursor-pointer flex flex-col items-center gap-2 transition-colors hover:border-primary hover:bg-muted/50"
+                  >
+                    <Upload size={24} className="text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">{receiptBase64 ? 'Receipt uploaded. Click to change.' : 'Click to upload receipt'}</span>
+                  </div>
                 </div>
-              </div>
 
-              <Button type="submit" size="lg" className="mt-3 justify-center">
-                Submit for Approval
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                <Button type="submit" size="lg" className="mt-3 justify-center w-full">
+                  Submit for Approval
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {activeTab === 'approve' && canApprove && (
@@ -260,81 +298,82 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
             )}
           </div>
 
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="p-4"><input type="checkbox" aria-label="Select all" onChange={(e) => setSelectedExpenses(e.target.checked ? pendingQueue.map(q => q.id) : [])} checked={selectedExpenses.length === pendingQueue.length && pendingQueue.length > 0} /></TableHead>
-                      <TableHead className="p-4">Employee</TableHead>
-                      <TableHead className="p-4">Details</TableHead>
-                      <TableHead className="p-4">Amount</TableHead>
-                      <TableHead className="p-4">Receipt</TableHead>
-                      <TableHead className="p-4 text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pendingQueue.length === 0 ? (
-                      <TableRow><TableCell colSpan="6" className="p-8 text-center text-muted-foreground">No pending expenses.</TableCell></TableRow>
-                    ) : (
-                      pendingQueue.map(exp => {
-                        const emp = employees.find(e => e.id === exp.employeeId)
-                        const isOverLimit = policies[exp.category] && (exp.usdAmount || (exp.amount * exchangeRates[exp.currency])) > policies[exp.category]
+          <div className="flex items-center gap-3 bg-muted/30 px-3 py-1.5 rounded-lg border border-border w-fit mb-2">
+            <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary" aria-label="Select all" onChange={(e) => setSelectedExpenses(e.target.checked ? pendingQueue.map(q => q.id) : [])} checked={selectedExpenses.length === pendingQueue.length && pendingQueue.length > 0} />
+            <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Select All Pending</span>
+          </div>
 
-                        return (
-                          <TableRow key={exp.id}>
-                            <TableCell className="p-4"><input type="checkbox" checked={selectedExpenses.includes(exp.id)} onChange={() => handleToggleSelect(exp.id)} /></TableCell>
-                            <TableCell className="p-4">
-                              <div className="flex items-center gap-3">
-                                <Avatar className="w-8 h-8 shrink-0">
-                                  {emp?.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
-                                  <AvatarFallback className="bg-primary/10 text-primary"><User size={16} /></AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <div className="font-semibold text-sm text-foreground">{emp?.name}</div>
-                                  <div className="text-xs text-muted-foreground">{exp.id}</div>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="p-4">
-                              <div className="font-semibold text-[0.9rem] text-foreground">{exp.category}</div>
-                              <div className="text-[0.8rem] text-muted-foreground">{exp.date} • {exp.description}</div>
-                            </TableCell>
-                            <TableCell className="p-4">
-                              <div className="font-bold text-[0.95rem] text-foreground">{exp.currency} {exp.amount.toFixed(2)}</div>
-                              {isOverLimit && (
-                                <div className="flex items-center gap-1 text-amber-500 text-[0.75rem] mt-1">
-                                  <AlertTriangle size={12} /> Over limit (${policies[exp.category]})
-                                </div>
-                              )}
-                            </TableCell>
-                            <TableCell className="p-4">
-                              {exp.receipt ? (
-                                <img src={exp.receipt} alt="Receipt" className="w-10 h-10 rounded-md object-cover border border-border" />
-                              ) : (
-                                <span className="text-xs text-muted-foreground">None</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="p-4 text-right">
-                              <div className="flex gap-2 justify-end">
-                                <Button variant="ghost" size="icon-xs" aria-label="Approve" onClick={() => handleApprove(exp.id)} className="text-emerald-500 hover:text-emerald-600" title="Approve">
-                                  <Check size={16} />
-                                </Button>
-                                <Button variant="ghost" size="icon-xs" aria-label="Reject" onClick={() => setRejectReasonModal({ open: true, id: exp.id, reason: '' })} className="text-destructive hover:text-destructive" title="Reject">
-                                  <XIcon size={16} />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        )
-                      })
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {pendingQueue.length === 0 ? (
+              <div className="col-span-full p-8 text-center text-muted-foreground border border-dashed rounded-lg bg-muted/20">No pending expenses.</div>
+            ) : (
+              pendingQueue.map(exp => {
+                const emp = employees.find(e => e.id === exp.employeeId)
+                const isOverLimit = policies[exp.category] && (exp.usdAmount || (exp.amount * exchangeRates[exp.currency])) > policies[exp.category]
+                const isSelected = selectedExpenses.includes(exp.id)
+
+                return (
+                  <Card key={exp.id} className={`relative overflow-hidden transition-all ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''} ${isOverLimit ? 'border-destructive/50 shadow-[0_0_10px_rgba(239,68,68,0.1)]' : ''}`}>
+                    <div className="h-2 w-full bg-primary absolute top-0 left-0" />
+                    <div className="p-4 pt-5 flex flex-col gap-4">
+                      {/* Header */}
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <input type="checkbox" className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary mt-1" aria-label="Select expense" checked={isSelected} onChange={() => handleToggleSelect(exp.id)} />
+                          <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
+                            {emp?.avatar ? <AvatarImage src={emp.avatar} alt={emp?.name} className="object-cover" /> : null}
+                            <AvatarFallback className="bg-primary/10 text-primary"><User size={20} /></AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-base leading-tight">{emp?.name}</span>
+                            <span className="text-xs text-muted-foreground">{exp.id}</span>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className={isOverLimit ? 'border-destructive text-destructive' : 'bg-muted/50'}>
+                          {exp.category}
+                        </Badge>
+                      </div>
+
+                      {/* Body */}
+                      <div className="grid grid-cols-2 gap-3 bg-muted/20 p-3 rounded-lg text-sm border border-border/50">
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Amount</span>
+                          <span className={`font-mono text-lg font-bold ${isOverLimit ? 'text-destructive' : 'text-foreground'}`}>{exp.currency} {exp.amount.toLocaleString()}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Date</span>
+                          <span className="font-mono text-sm mt-1">{exp.date}</span>
+                        </div>
+                        <div className="col-span-2 text-xs text-muted-foreground italic">
+                          "{exp.description}"
+                        </div>
+                        {isOverLimit && (
+                          <div className="col-span-2 flex items-center gap-1.5 text-destructive text-xs font-medium bg-destructive/10 p-2 rounded border border-destructive/20 mt-1">
+                            <AlertTriangle size={14} /> Exceeds {exp.category} limit of ${policies[exp.category]}
+                          </div>
+                        )}
+                        {exp.receipt && (
+                          <div className="col-span-2 mt-2">
+                            <img src={exp.receipt} alt="Receipt" className="w-full h-24 object-cover rounded-md border border-border" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-2 pt-1">
+                        <Button variant="outline" className="flex-1 border-destructive text-destructive hover:bg-destructive/10" onClick={() => setRejectReasonModal({ open: true, id: exp.id, reason: '' })}>
+                          <XIcon className="mr-2 h-4 w-4" /> Reject
+                        </Button>
+                        <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => handleApprove(exp.id)}>
+                          <Check className="mr-2 h-4 w-4" /> Approve
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                )
+              })
+            )}
+          </div>
         </div>
       )}
 
@@ -379,50 +418,194 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
             </Button>
           </div>
 
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="p-4">Employee</TableHead>
-                      <TableHead className="p-4">Category</TableHead>
-                      <TableHead className="p-4">Amount</TableHead>
-                      <TableHead className="p-4">Status</TableHead>
-                      <TableHead className="p-4 text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {approvedQueue.length === 0 ? (
-                      <TableRow><TableCell colSpan="5" className="p-8 text-center text-muted-foreground">No approved expenses waiting for reimbursement.</TableCell></TableRow>
-                    ) : (
-                      approvedQueue.map(exp => {
-                        const emp = employees.find(e => e.id === exp.employeeId)
-                        return (
-                          <TableRow key={exp.id}>
-                            <TableCell className="p-4">
-                              <div className="font-semibold text-sm text-foreground">{emp?.name}</div>
-                              <div className="text-xs text-muted-foreground">{exp.id}</div>
-                            </TableCell>
-                            <TableCell className="p-4 text-sm text-foreground">{exp.category}</TableCell>
-                            <TableCell className="p-4 font-semibold text-foreground">{exp.currency} {exp.amount.toFixed(2)}</TableCell>
-                            <TableCell className="p-4">
-                              <Badge variant="outline" className="bg-primary/10 text-primary border-0">Approved</Badge>
-                            </TableCell>
-                            <TableCell className="p-4 text-right">
-                              <Button variant="default" size="sm" className="text-xs" onClick={() => handleMarkReimbursed(exp.id)}>
-                                Mark Reimbursed
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        )
-                      })
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {approvedQueue.length === 0 ? (
+              <div className="col-span-full p-8 text-center text-muted-foreground border border-dashed rounded-lg bg-muted/20">No approved expenses waiting for reimbursement.</div>
+            ) : (
+              approvedQueue.map(exp => {
+                const emp = employees.find(e => e.id === exp.employeeId)
+                return (
+                  <Card key={exp.id} className="relative overflow-hidden border-border/80 hover:border-primary/50 transition-colors">
+                    <div className="h-2 w-full bg-primary absolute top-0 left-0" />
+                    <div className="p-4 pt-5 flex flex-col gap-4">
+                      {/* Header */}
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
+                            {emp?.avatar ? <AvatarImage src={emp.avatar} alt={emp?.name} className="object-cover" /> : null}
+                            <AvatarFallback className="bg-primary/10 text-primary"><User size={20} /></AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-base leading-tight">{emp?.name}</span>
+                            <span className="text-xs text-muted-foreground">{exp.id}</span>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                          Approved
+                        </Badge>
+                      </div>
+
+                      {/* Body */}
+                      <div className="flex justify-between items-end bg-muted/20 p-3 rounded-lg text-sm border border-border/50">
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">{exp.category}</span>
+                          <span className="font-mono text-xl font-bold mt-0.5 text-foreground">{exp.currency} {exp.amount.toLocaleString()}</span>
+                        </div>
+                      </div>
+
+                      {/* Actions Track */}
+                      {(exp.approvedBy || exp.rejectedBy || exp.reimbursedBy) && (
+                        <div className="pt-1 flex flex-col gap-1 text-[11px] text-muted-foreground font-medium">
+                          {exp.approvedBy && <span>Approved by {exp.approvedBy}</span>}
+                          {exp.rejectedBy && <span className="text-destructive">Rejected by {exp.rejectedBy}</span>}
+                          {exp.reimbursedBy && <span className="text-blue-500">Reimbursed by {exp.reimbursedBy} {exp.transactionRef ? `(Ref: ${exp.transactionRef})` : ''}</span>}
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      <div className="pt-1">
+                        <Button variant="default" className="w-full" onClick={() => handleMarkReimbursed(exp.id)}>
+                          <DollarSign className="mr-2 h-4 w-4" /> Mark as Reimbursed
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                )
+              })
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'my-claims' && (
+        <div className="flex flex-col gap-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-xl font-semibold text-foreground flex items-center gap-2"><List size={20} className="text-primary"/> My Expense History</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {myClaimsQueue.length === 0 ? (
+              <div className="col-span-full p-8 text-center text-muted-foreground border border-dashed rounded-lg bg-muted/20">No claims submitted yet.</div>
+            ) : (
+              myClaimsQueue.map(exp => {
+                const isOverLimit = policies[exp.category] && (exp.usdAmount || (exp.amount * exchangeRates[exp.currency])) > policies[exp.category]
+                return (
+                  <Card key={exp.id} className={`relative overflow-hidden border-border/80 hover:border-primary/50 transition-colors ${isOverLimit ? 'border-destructive/50' : ''}`}>
+                    <div className="h-2 w-full bg-primary absolute top-0 left-0" />
+                    <div className="p-4 pt-5 flex flex-col gap-4">
+                      {/* Header */}
+                      <div className="flex items-start justify-between">
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-base leading-tight">{exp.category}</span>
+                          <span className="text-xs text-muted-foreground">{exp.id}</span>
+                        </div>
+                        <Badge variant="outline" className={exp.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : exp.status === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20' : exp.status === 'Reimbursed' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-muted/50'}>
+                          {exp.status}
+                        </Badge>
+                      </div>
+
+                      {/* Body */}
+                      <div className="grid grid-cols-2 gap-3 bg-muted/20 p-3 rounded-lg text-sm border border-border/50">
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Amount</span>
+                          <span className="font-mono text-lg font-bold text-foreground">{exp.currency} {exp.amount.toLocaleString()}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Date</span>
+                          <span className="font-mono text-sm mt-1">{exp.date}</span>
+                        </div>
+                        <div className="col-span-2 text-xs text-muted-foreground italic">
+                          "{exp.description}"
+                        </div>
+                        {exp.rejectReason && (
+                           <div className="col-span-2 mt-2 p-2 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded">
+                             <strong>Rejection Reason:</strong> {exp.rejectReason}
+                           </div>
+                        )}
+                      </div>
+                      
+                      {/* Actions Track */}
+                      {(exp.approvedBy || exp.rejectedBy || exp.reimbursedBy) && (
+                        <div className="pt-1 flex flex-col gap-1 text-[11px] text-muted-foreground font-medium">
+                          {exp.approvedBy && <span>Approved by {exp.approvedBy}</span>}
+                          {exp.rejectedBy && <span className="text-destructive">Rejected by {exp.rejectedBy}</span>}
+                          {exp.reimbursedBy && <span className="text-blue-500">Reimbursed by {exp.reimbursedBy} {exp.transactionRef ? `(Ref: ${exp.transactionRef})` : ''}</span>}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                )
+              })
+            )}
+          </div>
+        </div>
+      )}
+      
+      {activeTab === 'history' && (canApprove || canReimburse) && (
+        <div className="flex flex-col gap-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-xl font-semibold text-foreground flex items-center gap-2"><History size={20} className="text-primary"/> Company Expense History</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {historyQueue.length === 0 ? (
+              <div className="col-span-full p-8 text-center text-muted-foreground border border-dashed rounded-lg bg-muted/20">No historical expenses found.</div>
+            ) : (
+              historyQueue.map(exp => {
+                const emp = employees.find(e => e.id === exp.employeeId)
+                return (
+                  <Card key={exp.id} className="relative overflow-hidden border-border/80 hover:border-primary/50 transition-colors">
+                    <div className="h-2 w-full bg-primary absolute top-0 left-0" />
+                    <div className="p-4 pt-5 flex flex-col gap-4">
+                      {/* Header */}
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
+                            {emp?.avatar ? <AvatarImage src={emp.avatar} alt={emp?.name} className="object-cover" /> : null}
+                            <AvatarFallback className="bg-primary/10 text-primary"><User size={20} /></AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-base leading-tight">{emp?.name}</span>
+                            <span className="text-xs text-muted-foreground">{exp.id}</span>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className={exp.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : exp.status === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20' : exp.status === 'Reimbursed' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-muted/50'}>
+                          {exp.status}
+                        </Badge>
+                      </div>
+
+                      {/* Body */}
+                      <div className="grid grid-cols-2 gap-3 bg-muted/20 p-3 rounded-lg text-sm border border-border/50">
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">{exp.category}</span>
+                          <span className="font-mono text-xl font-bold mt-0.5 text-foreground">{exp.currency} {exp.amount.toLocaleString()}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Date</span>
+                          <span className="font-mono text-sm mt-1">{exp.date}</span>
+                        </div>
+                        <div className="col-span-2 text-xs text-muted-foreground italic">
+                          "{exp.description}"
+                        </div>
+                        {exp.rejectReason && (
+                           <div className="col-span-2 mt-2 p-2 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded">
+                             <strong>Rejection Reason:</strong> {exp.rejectReason}
+                           </div>
+                        )}
+                      </div>
+
+                      {/* Actions Track */}
+                      {(exp.approvedBy || exp.rejectedBy || exp.reimbursedBy) && (
+                        <div className="pt-1 flex flex-col gap-1 text-[11px] text-muted-foreground font-medium">
+                          {exp.approvedBy && <span>Approved by {exp.approvedBy}</span>}
+                          {exp.rejectedBy && <span className="text-destructive">Rejected by {exp.rejectedBy}</span>}
+                          {exp.reimbursedBy && <span className="text-blue-500">Reimbursed by {exp.reimbursedBy} {exp.transactionRef ? `(Ref: ${exp.transactionRef})` : ''}</span>}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                )
+              })
+            )}
+          </div>
         </div>
       )}
 
@@ -442,6 +625,31 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
           <DialogFooter>
             <Button variant="secondary" onClick={() => setRejectReasonModal({ open: false, id: null, reason: '' })}>Cancel</Button>
             <Button variant="destructive" onClick={handleReject}>Confirm Reject</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-[400px] text-center">
+          <DialogHeader className="flex flex-col items-center gap-2">
+            <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+              <Check size={24} className="text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <DialogTitle className="text-xl">Expense Submitted!</DialogTitle>
+          </DialogHeader>
+          <div className="py-2 text-muted-foreground text-sm">
+            Your expense claim has been successfully submitted and is now pending manager approval.
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2 mt-4 sm:space-x-0">
+            <Button variant="outline" className="w-full sm:flex-1" onClick={() => {
+              setShowSuccessDialog(false);
+              if (canApprove) setActiveTab('approve');
+            }}>
+              Close
+            </Button>
+            <Button variant="default" className="w-full sm:flex-1" onClick={() => setShowSuccessDialog(false)}>
+              Submit Another
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
