@@ -143,6 +143,8 @@ export default function App() {
         assetRequests={appData.assetRequests}
         setAssetRequests={appData.setAssetRequests}
         settings={appData.settings}
+        documents={appData.documents}
+        setDocuments={appData.handleSetDocuments}
         simulatedRole={appData.simulatedRole}
         setSimulatedRole={appData.setSimulatedRole}
       />

@@ -205,8 +205,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                 {dayEvents.length > 0 && (
                   <div className="flex gap-0.5 flex-wrap justify-center">
                     {dayEvents.slice(0, 3).map(ev => {
-                      const typeInfo = getTypeInfo(ev.type)
-                      return <div key={ev.id} className="w-1.5 h-1.5 rounded-full" style={{ background: typeInfo.color }} />
+                      return <div key={ev.id} className="w-1.5 h-1.5 rounded-full bg-muted-foreground" />
                     })}
                     {dayEvents.length > 3 && <span className="text-[0.6rem] text-muted-foreground">+{dayEvents.length - 3}</span>}
                   </div>
@@ -238,15 +237,13 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
               const TypeIcon = typeInfo.icon
               return (
                 <div key={ev.id} role="listitem" className="flex items-start sm:items-center gap-3 p-3 px-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex-wrap sm:flex-nowrap">
-                  <div className="flex items-center justify-center shrink-0 size-9 rounded-lg" style={{
-                    background: `${typeInfo.color}20`, color: typeInfo.color,
-                  }}>
+                  <div className="flex items-center justify-center shrink-0 size-9 rounded-lg text-muted-foreground">
                     <TypeIcon size={16} />
                   </div>
                   <div className="flex-1 min-w-[200px]">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-sm text-foreground">{ev.title}</span>
-                      <Badge variant="outline" className="text-[10px] px-2 py-0.5" style={{ borderColor: typeInfo.color, color: typeInfo.color }}>{typeInfo.label}</Badge>
+                      <Badge variant="outline" className="text-[10px] px-2 py-0.5 border-border text-muted-foreground">{typeInfo.label}</Badge>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
                       <span className="text-xs flex items-center gap-1 text-muted-foreground">

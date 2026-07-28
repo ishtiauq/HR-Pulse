@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, User, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, Sun, Moon, AlertTriangle, Upload, CheckSquare, CalendarDays, Menu, Receipt } from 'lucide-react'
+import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, User, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, Sun, Moon, AlertTriangle, Upload, CheckSquare, CalendarDays, Menu, Receipt, FolderOpen } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
 import { Select, SelectItem } from "@/components/ui/select"
@@ -14,6 +14,7 @@ import Tasks from './Tasks.jsx'
 import Calendar from './Calendar.jsx'
 import Announcements from './Announcements.jsx'
 import Expenses from './Expenses.jsx'
+import Documents from './Documents.jsx'
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -58,6 +59,8 @@ export default function EmployeePortal({
   setAnnouncements,
   assets,
   setAssets,
+  documents,
+  setDocuments,
   tasks,
   setTasks,
   events,
@@ -188,6 +191,8 @@ export default function EmployeePortal({
         return <div className="max-w-[1200px] mx-auto w-full"><Calendar events={events} setEvents={setEvents} employees={employees} addLog={addLog} addToast={addToast} currentUser={currentUser} simulatedRole="Employee" /></div>
       case 'expenses':
         return <div className="max-w-[1200px] mx-auto w-full"><Expenses employees={employees} expenses={expenses} setExpenses={setExpenses} settings={settings} addLog={addLog} addToast={addToast} addAuditLog={addLog} simulatedRole="Employee" /></div>
+      case 'documents':
+        return <div className="max-w-[1200px] mx-auto w-full"><Documents documents={documents} setDocuments={setDocuments} addLog={addLog} addToast={addToast} currentUser={currentUser} simulatedRole="Employee" /></div>
       default:
         return <DashboardView currentUser={currentUser} attendance={attendance} expenses={expenses} announcements={announcements} tasks={tasks} events={events} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} />
     }
@@ -202,6 +207,7 @@ export default function EmployeePortal({
     { id: 'attendance', icon: Clock, label: 'Attendance' },
     { id: 'payslips', icon: FileText, label: 'Payslips' },
     { id: 'expenses', icon: Receipt, label: 'Expenses' },
+    { id: 'documents', icon: FolderOpen, label: 'Documents' },
     { id: 'leave', icon: CalendarIcon, label: 'Leave' },
     { id: 'profile', icon: UserIcon, label: 'Profile' }
   ]

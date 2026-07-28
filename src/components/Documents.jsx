@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
-import { FileText, Search, Upload, Download, Trash2, X, Folder, FolderOpen, FileSpreadsheet, FileImage, FileArchive, File, Settings, Pencil, ChevronLeft, ChevronRight } from 'lucide-react'
+import { FileText, Search, Upload, Download, Trash2, X, Folder, FolderOpen, FileSpreadsheet, FileImage, FileArchive, File, Settings, Pencil, ChevronLeft, ChevronRight, Filter, Plus } from 'lucide-react'
 import { Card, CardContent } from "@/components/ui/card"
 import { useConfirm } from '../hooks/useConfirm'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Select, SelectItem } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 import AdSlot from './AdSlot'
 import { formatDate } from '../services/date.js'
 
@@ -34,9 +36,12 @@ const formatFileSize = (bytes) => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
-export default function Documents({ documents, setDocuments, addLog, addToast, currentUser }) {
+export default function Documents({ documents, setDocuments, addLog, addToast, currentUser, simulatedRole }) {
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [filterFormat, setFilterFormat] = useState('all')
+  const [filterDate, setFilterDate] = useState('all')
+  const [showFilters, setShowFilters] = useState(false)
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [editingDoc, setEditingDoc] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
@@ -130,6 +135,21 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
     resetForm()
   }
 
+  const handleDownload = (doc) => {
+    addToast(`Downloading ${doc.fileName}...`, 'info')
+    setTimeout(() => {
+      const blob = new Blob([`Dummy content for ${doc.name}`], { type: 'text/plain' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = doc.fileName
+      a.click()
+      window.URL.revokeObjectURL(url)
+      addToast(`${doc.fileName} downloaded`, 'success')
+      addLog('Document Downloaded', doc.name)
+    }, 1000)
+  }
+
   const handleDelete = async (id) => {
     const ok = await confirm('This document will be permanently removed.', 'Delete Document?', { destructive: true })
     if (!ok) return
@@ -177,7 +197,27 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
   const filteredDocs = documents.filter(d => {
     const matchSearch = !search || d.name.toLowerCase().includes(search.toLowerCase()) || (d.description || '').toLowerCase().includes(search.toLowerCase())
     const matchCategory = selectedCategory === 'all' || d.category === selectedCategory
-    return matchSearch && matchCategory
+    
+    let matchFormat = true
+    if (filterFormat !== 'all') {
+      const type = (d.fileType || '').toLowerCase()
+      if (filterFormat === 'pdf') matchFormat = type.includes('pdf')
+      if (filterFormat === 'excel') matchFormat = type.includes('sheet') || type.includes('excel') || type.includes('csv')
+      if (filterFormat === 'image') matchFormat = type.includes('image') || type.includes('png') || type.includes('jpg') || type.includes('jpeg')
+      if (filterFormat === 'archive') matchFormat = type.includes('zip') || type.includes('rar') || type.includes('tar')
+    }
+
+    let matchDate = true
+    if (filterDate !== 'all') {
+      const docDate = new Date(d.uploadedAt)
+      const now = new Date()
+      const diffDays = (now - docDate) / (1000 * 60 * 60 * 24)
+      if (filterDate === '7days') matchDate = diffDays <= 7
+      if (filterDate === '30days') matchDate = diffDays <= 30
+      if (filterDate === '90days') matchDate = diffDays <= 90
+    }
+
+    return matchSearch && matchCategory && matchFormat && matchDate
   })
 
   return (
@@ -187,70 +227,68 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
           <FolderOpen size={20} className="text-primary" />
           Documents
         </h1>
-        <Button variant="default" size="sm" onClick={() => { resetForm(); setShowUploadModal(true) }}>
-          <Upload size={16} className="mr-1 sm:mr-2" />
-          <span className="hidden sm:inline">Upload</span>
-        </Button>
       </div>
       <div className="border-t border-border border-headline mb-6" />
 
-      <div className="relative flex items-center mb-3">
-        <Search size={16} className="absolute left-3 text-muted-foreground" />
-        <Input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search documents..."
-          aria-label="Search documents"
-          className="w-full pl-9"
-        />
+      <div className="flex gap-2 mb-6">
+        <div className="relative flex-1 flex items-center">
+          <Search size={16} className="absolute left-3 text-muted-foreground" />
+          <Input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search documents..."
+            aria-label="Search documents"
+            className="w-full pl-9 bg-muted/40"
+          />
+        </div>
+        
+        <Button variant={showFilters ? "secondary" : "outline"} className="shrink-0 gap-2" onClick={() => setShowFilters(!showFilters)}>
+          <Filter size={16} />
+          <span className="hidden sm:inline">Filter</span>
+        </Button>
+
+        {!isMobile && (
+          <Button variant="default" className="shrink-0" onClick={() => { resetForm(); setShowUploadModal(true) }}>
+            <Upload size={16} className="mr-2" />
+            Upload
+          </Button>
+        )}
       </div>
 
-      <div className="flex gap-2 mb-5">
-        <Card className="flex-1 min-w-0">
-          <div className="relative flex-1 min-w-0 overflow-hidden flex items-center p-3 pl-1">
-            {canScrollLeft && (
-              <button onClick={() => scrollCategory(-1)}
-                className="absolute left-1 z-[3] flex items-center justify-center rounded-full cursor-pointer bg-muted text-foreground border-none shadow-sm w-7 h-7">
-                <ChevronLeft size={18} />
-              </button>
-            )}
-            <div ref={categoryScrollRef} className="flex gap-1.5 flex-nowrap overflow-hidden scroll-smooth flex-1 px-1">
-              <button onClick={() => setSelectedCategory('all')}
-                className={`shrink-0 px-3.5 py-1.5 rounded-full font-semibold text-[0.8rem] cursor-pointer border ${selectedCategory === 'all' ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted text-foreground border-border'}`}>
-                All
-              </button>
-              {categories.map(cat => {
-                const isActive = selectedCategory === cat.id
-                return (
-                  <div key={cat.id} className="relative flex items-center">
-                    <button onClick={() => setSelectedCategory(cat.id)}
-                      className="px-2 sm:px-3 py-1 sm:py-1.5 text-[0.8rem] font-semibold cursor-pointer rounded-full border transition-colors"
-                      style={{
-                        background: isActive ? cat.color : undefined,
-                        color: isActive ? '#fff' : undefined,
-                        borderColor: isActive ? cat.color : undefined,
-                      }}>
-                      {cat.label}
-                    </button>
-                  </div>
-                )
-              })}
+      {showFilters && (
+        <Card className="mb-6 p-4 bg-muted/20 border-border/50 shadow-sm animate-in fade-in slide-in-from-top-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-semibold text-muted-foreground ml-1">Category</span>
+              <Select value={selectedCategory} onChange={setSelectedCategory}>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.label}</SelectItem>)}
+              </Select>
             </div>
-            {canScrollRight && (
-              <button onClick={() => scrollCategory(1)}
-                className="absolute right-1 z-[3] flex items-center justify-center rounded-full cursor-pointer bg-muted text-foreground border-none shadow-sm w-7 h-7">
-                <ChevronRight size={18} />
-              </button>
-            )}
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-semibold text-muted-foreground ml-1">File Format</span>
+              <Select value={filterFormat} onChange={setFilterFormat}>
+                <SelectItem value="all">Any Format</SelectItem>
+                <SelectItem value="pdf">PDF Documents</SelectItem>
+                <SelectItem value="excel">Spreadsheets</SelectItem>
+                <SelectItem value="image">Images</SelectItem>
+                <SelectItem value="archive">Archives (ZIP)</SelectItem>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-semibold text-muted-foreground ml-1">Upload Date</span>
+              <Select value={filterDate} onChange={setFilterDate}>
+                <SelectItem value="all">Any Time</SelectItem>
+                <SelectItem value="7days">Last 7 Days</SelectItem>
+                <SelectItem value="30days">Last 30 Days</SelectItem>
+                <SelectItem value="90days">Last 3 Months</SelectItem>
+              </Select>
+            </div>
           </div>
         </Card>
-        <Card className="shrink-0 flex items-center p-3 px-4">
-          <Button variant="ghost" size="sm" onClick={() => { setEditingCategory(null); setCatFormName(''); setShowCategoryModal(true) }}>
-            <Settings size={14} /> Manage
-          </Button>
-        </Card>
-      </div>
+      )}
+
 
       {filteredDocs.length === 0 ? (
         <Card className="text-center p-8 sm:p-10 lg:p-12">
@@ -270,13 +308,13 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
               <Card key={doc.id} role="listitem" className="cursor-default hover:border-primary transition-colors">
                 <CardContent className={`p-3 sm:p-4 lg:p-5 flex ${isMobile ? 'flex-col items-stretch gap-3' : 'flex-row items-center gap-4'}`}>
                   <div className="flex items-center gap-3 w-full">
-                    <div className="flex items-center justify-center shrink-0 rounded-xl w-[38px] sm:w-11 h-[38px] sm:h-11" style={{ background: `${catInfo.color}15`, color: catInfo.color }}>
+                    <div className="flex items-center justify-center shrink-0 rounded-xl w-[38px] sm:w-11 h-[38px] sm:h-11 bg-muted/50 text-muted-foreground">
                       <Icon size={isMobile ? 18 : 20} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-[0.85rem] sm:text-[0.95rem] text-foreground">{doc.name}</span>
-                        <span className="text-[0.7rem] px-2 py-0.5 rounded-full font-semibold" style={{ background: `${catInfo.color}20`, color: catInfo.color }}>
+                        <span className="text-[0.7rem] px-2 py-0.5 rounded-full font-semibold border border-border text-muted-foreground bg-muted/20">
                           <CatIcon size={10} className="inline mr-0.5" />{catInfo.label}
                         </span>
                       </div>
@@ -291,15 +329,19 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                     </div>
                   </div>
                   <div className={`flex gap-1 ${isMobile ? 'justify-end border-t border-border pt-2.5' : ''}`}>
-                    <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-primary">
+                    <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-primary" onClick={() => handleDownload(doc)}>
                       <Download size={16} /> {isMobile ? 'Download' : ''}
                     </Button>
-                    <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-primary" onClick={() => { setEditingDoc(doc); setFormName(doc.name); setFormCategory(doc.category); setFormDescription(doc.description || ''); setFormFile(null); setShowUploadModal(true) }}>
-                      <Upload size={16} /> {isMobile ? 'Edit' : ''}
-                    </Button>
-                    <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-destructive" onClick={() => handleDelete(doc.id)}>
-                      <Trash2 size={16} /> {isMobile ? 'Delete' : ''}
-                    </Button>
+                    {(simulatedRole === 'Admin' || doc.uploadedBy === currentUser?.id) && (
+                      <>
+                        <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-primary" onClick={() => { setEditingDoc(doc); setFormName(doc.name); setFormCategory(doc.category); setFormDescription(doc.description || ''); setFormFile(null); setShowUploadModal(true) }}>
+                          <Pencil size={16} /> {isMobile ? 'Edit' : ''}
+                        </Button>
+                        <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-destructive" onClick={() => handleDelete(doc.id)}>
+                          <Trash2 size={16} /> {isMobile ? 'Delete' : ''}
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -331,22 +373,19 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-[0.82rem] font-semibold text-muted-foreground">Category</label>
-              <div className="flex gap-1.5 flex-wrap">
-                {categories.map(cat => {
-                  const isActive = formCategory === cat.id
-                  const Icon = cat.icon
-                  return (
-                    <button key={cat.id} type="button" onClick={() => setFormCategory(cat.id)}
-                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg font-semibold text-[0.8rem] cursor-pointer transition-colors"
-                      style={{
-                        border: isActive ? `2px solid ${cat.color}` : '1px solid hsl(var(--border))',
-                        background: isActive ? `${cat.color}18` : undefined,
-                        color: isActive ? cat.color : undefined,
-                      }}>
-                      <Icon size={14} /> {cat.label}
-                    </button>
-                  )
-                })}
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Select value={formCategory} onChange={setFormCategory}>
+                    {categories.map(cat => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </div>
+                <Button type="button" variant="outline" size="icon" className="shrink-0 mt-[2px]" onClick={() => { setEditingCategory(null); setCatFormName(''); setShowCategoryModal(true) }} title="Manage Categories">
+                  <Plus size={16} />
+                </Button>
               </div>
             </div>
             {!editingDoc && (
@@ -449,6 +488,14 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
           </div>
         </DialogContent>
       </Dialog>
+      {isMobile && (
+        <Button
+          className="fixed bottom-[76px] right-8 h-14 w-14 rounded-full shadow-[0_4px_20px_rgba(249,115,22,0.4)] z-50 p-0 hover:scale-105 active:scale-95 transition-transform"
+          onClick={() => { resetForm(); setShowUploadModal(true) }}
+        >
+          <Upload size={24} />
+        </Button>
+      )}
       <ConfirmDialog />
       <AdSlot />
     </div>
