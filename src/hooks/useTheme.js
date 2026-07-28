@@ -2,19 +2,15 @@ import { useState, useEffect } from 'react'
 
 export function useTheme() {
   const [themeMode, setThemeMode] = useState(() => {
-    return localStorage.getItem('hr_pulse_theme') || 'system'
+    const saved = localStorage.getItem('hr_pulse_theme')
+    if (saved === 'system') return 'light'
+    return saved || 'light'
   })
 
-  const isDarkMode = themeMode === 'system'
-    ? window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-    : themeMode === 'dark'
+  const isDarkMode = themeMode === 'dark'
 
   const toggleTheme = () => {
-    setThemeMode(prev => {
-      if (prev === 'system') return 'light'
-      if (prev === 'light') return 'dark'
-      return 'system'
-    })
+    setThemeMode(prev => prev === 'light' ? 'dark' : 'light')
   }
 
   useEffect(() => {

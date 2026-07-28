@@ -230,7 +230,7 @@ export default function EmployeePortal({
           </nav>
           <div className="mt-auto flex flex-col gap-2">
             <Button variant="ghost" onClick={toggleTheme} className="w-full justify-start text-muted-foreground font-medium" title={`Theme: ${themeMode}`}>
-              {themeMode === 'system' ? <Monitor className="mr-2 h-4 w-4" /> : themeMode === 'light' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+              {themeMode === 'light' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
               Theme: {themeMode.charAt(0).toUpperCase() + themeMode.slice(1)}
             </Button>
             {!currentUser.isEmployee && (
@@ -252,7 +252,7 @@ export default function EmployeePortal({
           <h2 className="text-xl font-extrabold text-primary m-0">HR Pulse <span className="text-[10px] text-muted-foreground">ESS</span></h2>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 rounded-full shrink-0">
-              {themeMode === 'system' ? <Monitor size={18} /> : themeMode === 'light' ? <Sun size={18} /> : <Moon size={18} />}
+              {themeMode === 'light' ? <Sun size={18} /> : <Moon size={18} />}
             </Button>
             <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-primary/20 shrink-0" onClick={() => setActiveTab('profile')}>
               {currentUser?.avatar ? <AvatarImage src={currentUser.avatar} className="object-cover" /> : null}

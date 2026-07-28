@@ -145,7 +145,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         <div className="flex items-center gap-2">
           <button onClick={toggleTheme} title={`Theme: ${themeMode}`} aria-label="Toggle theme"
             className="w-8 h-8 flex items-center justify-center bg-transparent border-none rounded-md text-[var(--md-bw-on-surface-variant)] cursor-pointer">
-            {themeMode === 'system' ? <Monitor size={16} /> : themeMode === 'light' ? <Sun size={16} /> : <Moon size={16} />}
+            {themeMode === 'light' ? <Sun size={16} /> : <Moon size={16} />}
           </button>
           <div className="login-topbar-badge">
             <Zap size={12} />

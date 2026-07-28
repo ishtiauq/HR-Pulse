@@ -1,5 +1,6 @@
 import { Monitor, Sun, Moon, Menu, Bell } from 'lucide-react'
 import { Button } from "@/components/ui/button"
+import hrPulseLogo from '../../Assets/hr-pulse-logo.svg'
 
 export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, setShowNotifications, markNotificationsRead, unreadCount }) {
   return (
@@ -9,13 +10,12 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
       <div className="flex items-center gap-1 min-[400px]:gap-3 sm:gap-4 shrink-0">
 
 
-        <div className="flex items-center gap-2 sm:gap-3 px-2 min-[400px]:px-3 py-1 sm:py-1.5 rounded-full bg-muted/40 border border-border/50">
-          <div className="size-7 sm:size-9 rounded-full flex items-center justify-center shrink-0 bg-primary text-primary-foreground font-black text-[10px] sm:text-sm tracking-wider shadow-sm">
-            HP
-          </div>
-          <span className="hidden min-[400px]:inline text-sm sm:text-base font-extrabold tracking-tight text-foreground whitespace-nowrap">
-            HR Pulse
-          </span>
+        <div className="flex items-center px-2 min-[400px]:px-3 py-1 sm:py-1.5 rounded-xl bg-transparent border-transparent">
+          <img 
+            src={hrPulseLogo} 
+            alt="HR Pulse Logo" 
+            className="h-8 sm:h-10 w-auto max-w-[140px] sm:max-w-[180px] object-contain shrink-0 drop-shadow-sm" 
+          />
         </div>
       </div>
 
@@ -42,7 +42,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
           title={`Theme: ${themeMode}`}
           className="rounded-full size-8 min-[400px]:size-9 sm:size-10 text-foreground hover:bg-muted shrink-0"
         >
-          {themeMode === 'system' ? <Monitor size={20} /> : themeMode === 'light' ? <Sun size={20} /> : <Moon size={20} />}
+          {themeMode === 'light' ? <Sun size={20} /> : <Moon size={20} />}
         </Button>
 
         {/* Notifications Button */}
