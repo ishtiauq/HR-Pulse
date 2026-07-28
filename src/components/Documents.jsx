@@ -352,10 +352,8 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
 
       {/* Upload / Edit Document Modal */}
       <Dialog open={showUploadModal} onOpenChange={(open) => { if (!open) { setShowUploadModal(false); resetForm() } }}>
-        <DialogContent className="sm:max-w-[540px] bg-background/95 backdrop-blur-xl border-border/50 shadow-2xl overflow-hidden rounded-2xl p-0">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-rose-500 to-primary" />
-          <div className="p-6 sm:p-8">
-            <DialogHeader className="mb-6">
+        <DialogContent className="sm:max-w-[540px]">
+          <DialogHeader className="mb-6">
               <DialogTitle className="flex items-center gap-4 text-xl sm:text-2xl font-bold">
                 <div className="flex items-center justify-center rounded-2xl w-12 h-12 bg-primary/10 text-primary shadow-inner">
                   <Upload size={24} className="animate-pulse" />
@@ -367,12 +365,12 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
               <div className="space-y-1.5 group">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-focus-within:text-primary transition-colors">Document Name *</label>
                 <Input type="text" required value={formName} onChange={e => setFormName(e.target.value)} placeholder="e.g. Employee Handbook 2026" aria-label="Document name" 
-                  className="rounded-xl bg-muted/40 border-border/50 focus-visible:ring-0 focus-visible:border-primary focus-visible:bg-primary/10 transition-all h-11" />
+                  className="rounded-xl bg-muted/40 border-border/50 focus-visible:ring-0 focus-visible:outline-none transition-all h-11" />
               </div>
 
-              <div className="space-y-1.5 group">
+              <div className="space-y-1.5 group shrink-0">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-focus-within:text-primary transition-colors">Category</label>
-                <div className="flex bg-muted/40 rounded-xl p-1 border border-border/50 focus-within:ring-0 focus-within:border-primary focus-within:bg-primary/10 transition-all">
+                <div className="flex bg-muted/40 rounded-xl p-1 border border-border/50 focus-within:ring-0 focus-within:outline-none transition-all">
                   <div className="flex-1">
                     <Select value={formCategory} onChange={setFormCategory}>
                       {categories.map(cat => (
@@ -382,12 +380,10 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                       ))}
                     </Select>
                   </div>
-                  <Button type="button" className="shrink-0 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border-none group/add h-10 px-4 rounded-lg flex items-center transition-all duration-300 ease-out overflow-hidden" onClick={() => { setEditingCategory(null); setCatFormName(''); setShowCategoryModal(true) }}>
-                    <Plus size={16} className="shrink-0" />
-                    <span className="w-0 opacity-0 group-hover/add:w-[85px] group-hover/add:opacity-100 group-hover/add:ml-2 overflow-hidden transition-all duration-300 ease-out whitespace-nowrap text-xs font-bold">
-                      Add New
-                    </span>
-                  </Button>
+                  <button type="button" className="shrink-0 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border-none group/add h-10 px-4 rounded-lg flex items-center transition-all duration-300 ease-out overflow-hidden" onClick={() => { setEditingCategory(null); setCatFormName(''); setShowCategoryModal(true) }}>
+                    <Plus size={18} className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" />
+                    <span className="w-0 overflow-hidden whitespace-nowrap text-sm font-bold opacity-0 transition-all duration-300 ease-out group-hover/add:w-auto group-hover/add:opacity-100 group-hover/add:ml-2">Add</span>
+                  </button>
                 </div>
               </div>
 
@@ -421,20 +417,20 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                 </div>
               )}
 
-              <div className="space-y-1.5 group">
+              <div className="space-y-1.5 group shrink-0">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-focus-within:text-primary transition-colors">Description</label>
                 <textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={3} placeholder="Brief description (optional)" aria-label="Document description"
-                  className="flex w-full rounded-xl bg-muted/40 border border-border/50 px-4 py-3 text-sm font-medium text-foreground placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-0 focus-visible:border-primary focus-visible:bg-primary/10 transition-all resize-y" />
+                  className="flex w-full rounded-xl bg-muted/40 border border-border/50 px-4 py-3 text-sm font-medium text-foreground placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-0 transition-all resize-y" />
               </div>
 
-              <DialogFooter className="mt-2 sm:justify-end border-t border-border/50 pt-5 -mx-6 sm:-mx-8 px-6 sm:px-8 bg-muted/10">
-                <Button variant="ghost" type="button" onClick={() => { setShowUploadModal(false); resetForm() }} className="font-semibold hover:bg-muted rounded-xl">Cancel</Button>
-                <Button type="submit" className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-rose-500 hover:opacity-90 text-white font-bold rounded-xl px-6 shadow-[0_4px_14px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.6)] transition-all">
-                  <Upload size={18} /> {editingDoc ? 'Update Document' : 'Upload Document'}
+              <DialogFooter>
+                <Button variant="ghost" type="button" onClick={() => { setShowUploadModal(false); resetForm() }}>Cancel</Button>
+                <Button type="submit">
+                  <Upload size={18} className="mr-2" /> 
+                  {editingDoc ? 'Update Document' : 'Upload Document'}
                 </Button>
               </DialogFooter>
             </form>
-          </div>
         </DialogContent>
       </Dialog>
 

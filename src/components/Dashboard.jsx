@@ -475,7 +475,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
               >
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: evt.type === 'holiday' ? 'rgba(16, 185, 129, 0.12)' : evt.type === 'birthday' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(59, 130, 246, 0.12)' }}
                 >
                   <CalendarIcon size={16} style={{ color: evt.type === 'holiday' ? '#10b981' : evt.type === 'birthday' ? '#f59e0b' : '#3b82f6' }} />
                 </div>

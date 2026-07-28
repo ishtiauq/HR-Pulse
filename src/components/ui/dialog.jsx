@@ -28,12 +28,13 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
     <AriaModal
       ref={ref}
       className={cn(
-        "w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-popover text-popover-foreground p-6 shadow-xl backdrop-blur-xl transition-all duration-200 data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95",
+        "w-full max-w-lg max-h-[95vh] flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-background/95 text-popover-foreground shadow-2xl backdrop-blur-xl transition-all duration-200 data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95 p-0",
         className
       )}
       {...props}
     >
-      <AriaDialog className="outline-none focus:outline-none flex flex-col gap-4">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-rose-500 to-primary z-10" />
+      <AriaDialog className="outline-none focus:outline-none flex flex-col w-full h-full p-6 sm:p-8 overflow-y-auto">
         {children}
       </AriaDialog>
     </AriaModal>
@@ -42,12 +43,12 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
 DialogContent.displayName = "DialogContent"
 
 const DialogHeader = ({ className, ...props }) => (
-  <div className={cn("flex flex-col space-y-1.5 text-left pb-2 border-b border-border", className)} {...props} />
+  <div className={cn("flex flex-col space-y-1.5 text-left pb-4 shrink-0", className)} {...props} />
 )
 DialogHeader.displayName = "DialogHeader"
 
 const DialogFooter = ({ className, ...props }) => (
-  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-3 border-t border-border", className)} {...props} />
+  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-5 border-t border-border/50 mt-2 shrink-0 pb-2 sm:pb-0", className)} {...props} />
 )
 DialogFooter.displayName = "DialogFooter"
 
