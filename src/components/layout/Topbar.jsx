@@ -25,12 +25,11 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
         {/* Sync Status Button */}
         <Button
           variant="outline"
-          size="sm"
           onClick={handleSync}
           disabled={isSyncing}
-          className="h-8 sm:h-9 rounded-full px-2 min-[400px]:px-3.5 sm:px-4 text-[10px] sm:text-xs font-semibold gap-1.5 sm:gap-2 shrink-0"
+          className="h-8 w-8 p-0 sm:w-auto sm:h-9 sm:px-4 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-semibold gap-1.5 sm:gap-2 shrink-0"
         >
-          <span className={`size-2 rounded-full inline-block ${isSyncing ? 'bg-amber-500 animate-spin' : (!driveConnected || syncConflicts.length > 0) ? 'bg-destructive' : 'bg-emerald-500'}`}></span>
+          <span className={`size-2 rounded-full shrink-0 ${isSyncing ? 'bg-amber-500 animate-spin' : (!driveConnected || syncConflicts.length > 0) ? 'bg-destructive' : 'bg-emerald-500'}`}></span>
           <span className="hidden sm:inline">{isSyncing ? 'Syncing...' : (!driveConnected || syncConflicts.length > 0) ? 'Not Synced' : 'Synced'}</span>
         </Button>
 
