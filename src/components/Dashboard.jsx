@@ -25,7 +25,7 @@ const DashboardWidget = ({
         </div>
         {action}
       </CardHeader>
-      <CardContent className={`flex-1 ${contentClass} py-4 pt-0`}>
+      <CardContent className={`flex-1 ${contentClass} p-4`}>
         {children}
       </CardContent>
     </Card>
