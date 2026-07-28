@@ -62,8 +62,8 @@
   --accent-foreground: hsl(210 20% 10%);
   --destructive: hsl(210 10% 45%);
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(210 15% 92%);
-  --input: hsl(210 15% 92%);
+  --border: hsl(210 15% 90%);
+  --input: hsl(210 15% 90%);
   --ring: hsl(24.6 95% 53.1%);
   --radius: 0.75rem;
   --sidebar: var(--card);
@@ -146,6 +146,14 @@ html, body, #root {
   background-color: color-mix(in srgb, var(--card) 60%, transparent) !important;
   backdrop-filter: blur(24px) saturate(150%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+}
+
+/* Headline Separator Utility */
+.border-headline {
+  border-color: hsl(210 15% 80%) !important;
+}
+.dark .border-headline {
+  border-color: hsl(210 15% 25%) !important;
 }
 
 /* Global Monochrome Icons */

@@ -611,7 +611,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
           </div>
         </div>
       </div>
-      <div className="border-t border-border" />
+      <div className="border-t border-border border-headline" />
 
       {!entries ? (
         <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed border-2 bg-muted/20">

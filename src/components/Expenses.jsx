@@ -182,7 +182,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
           )}
         </div>
       </div>
-      <div className="border-t border-border" />
+      <div className="border-t border-border border-headline" />
 
       {/* Tabs Content */}
       {activeTab === 'submit' && (

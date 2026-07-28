@@ -634,7 +634,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           </Button>
         </div>
       </div>
-      <div className="border-t border-border" />
+      <div className="border-t border-border border-headline" />
 
       <div className="flex flex-col gap-4">
         {menuItems.map(item => {

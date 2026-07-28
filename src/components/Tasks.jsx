@@ -185,7 +185,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
   return (
     <div className="w-full flex flex-col gap-6 animate-fade-in p-2 sm:p-4">
       {/* Header */}
-      <div className="flex flex-col pb-4 border-b border-border mb-2">
+      <div className="flex flex-col pb-4 border-b border-border border-headline mb-2">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 text-foreground">
           <CheckSquare size={20} className="text-primary" /> Tasks
         </h1>

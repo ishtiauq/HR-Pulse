@@ -498,7 +498,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
             </div>
           </div>
 
-          <div className="border-t border-border" />
+          <div className="border-t border-border border-headline" />
 
           {/* Bottom Container: Departments */}
           <div className="p-4 bg-muted/10 flex flex-col sm:flex-row sm:items-center gap-3 w-full">
