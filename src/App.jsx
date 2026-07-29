@@ -272,7 +272,7 @@ export default function App() {
                   }}
                   className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${active ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
                 >
-                  <div className="[&>svg]:w-6 [&>svg]:h-6">{item.icon}</div>
+                  <div className="flex items-center justify-center size-6">{item.icon}</div>
                 </button>
               )
             })}
