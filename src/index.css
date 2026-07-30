@@ -150,7 +150,8 @@ html, body, #root {
     border: 1px solid rgba(0, 0, 0, 0.1) !important;
     box-shadow: 
       inset 0 1px 1px rgba(255, 255, 255, 0.5),
-      0 8px 32px rgba(0, 0, 0, 0.05) !important;
+      0 2px 8px rgba(0, 0, 0, 0.04), 
+      0 4px 24px rgba(0, 0, 0, 0.06) !important;
     border-radius: 1rem !important; /* rounded-2xl */
     isolation: isolate;
     will-change: transform, backdrop-filter;
@@ -161,7 +162,8 @@ html, body, #root {
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     box-shadow: 
       inset 0 1px 1px rgba(255, 255, 255, 0.05),
-      0 8px 32px rgba(0, 0, 0, 0.4) !important;
+      0 2px 8px rgba(0, 0, 0, 0.1), 
+      0 4px 24px rgba(0, 0, 0, 0.2) !important;
   }
 }
 
@@ -284,12 +286,14 @@ svg.lucide {
   transform: translateY(-2px);
   box-shadow: 
     inset 0 1px 1px rgba(255, 255, 255, 0.6),
-    0 12px 40px rgba(0, 0, 0, 0.1) !important;
+    0 4px 12px rgba(0, 0, 0, 0.06), 
+    0 8px 32px rgba(0, 0, 0, 0.08) !important;
 }
 .dark .bg-card:hover {
   box-shadow: 
     inset 0 1px 1px rgba(255, 255, 255, 0.1),
-    0 12px 40px rgba(0, 0, 0, 0.5) !important;
+    0 4px 12px rgba(0, 0, 0, 0.15), 
+    0 8px 32px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* 3. Global Button Polish (Pill Shape & Hover Scale) */
