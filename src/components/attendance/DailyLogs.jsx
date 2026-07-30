@@ -99,41 +99,43 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-4 xl:gap-6 bg-muted/30 p-2 sm:px-4 rounded-2xl border border-border/30">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 xl:gap-6 bg-muted/30 p-3 sm:px-4 rounded-2xl border border-border/30 w-full xl:w-auto">
+                  <div className="grid grid-cols-[1fr_24px_1fr] items-center w-full sm:flex sm:w-auto gap-2 sm:gap-4">
                     <button
                       onClick={() => setActivePicker({ empId: emp.id, field: 'checkIn', current: log.checkIn })}
-                      className="relative group w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-2 hover:border-primary hover:text-primary transition-all shadow-sm"
+                      className="relative group w-full sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 sm:gap-2 hover:border-primary hover:text-primary transition-all shadow-sm"
                     >
-                      <Clock size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
-                      {log.checkIn}
+                      <Clock size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                      <span className="truncate">{log.checkIn}</span>
                     </button>
                     
-                    <span className="text-muted-foreground/50 font-bold px-1">→</span>
+                    <span className="text-muted-foreground/50 font-bold flex justify-center w-full">→</span>
                     
                     <button
                       onClick={() => setActivePicker({ empId: emp.id, field: 'checkOut', current: log.checkOut })}
-                      className="relative group w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-2 hover:border-primary hover:text-primary transition-all shadow-sm"
+                      className="relative group w-full sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 sm:gap-2 hover:border-primary hover:text-primary transition-all shadow-sm"
                     >
-                      <Clock size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
-                      {log.checkOut}
+                      <Clock size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                      <span className="truncate">{log.checkOut}</span>
                     </button>
                   </div>
 
                   <div className="h-8 w-px bg-border hidden sm:block"></div>
                   
-                  <div className="flex items-center gap-4 ml-auto sm:ml-0 min-w-[150px] justify-between">
-                    <div className="flex flex-col items-end min-w-[50px]">
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Total</span>
-                      <span className="text-sm font-bold text-foreground tabular-nums">{log.hours} <span className="text-xs text-muted-foreground font-medium">hrs</span></span>
+                  <div className="grid grid-cols-[1fr_24px_1fr] items-center w-full sm:flex sm:w-auto gap-2 sm:gap-4">
+                    <div className="relative w-full sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 shadow-sm">
+                      <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Total:</span>
+                      <span className="text-foreground tabular-nums truncate">{log.hours}<span className="text-[10px] opacity-50 ml-0.5">h</span></span>
                     </div>
 
-                    <div className="relative">
+                    <div className="h-6 w-px bg-border sm:hidden flex justify-center mx-auto"></div>
+
+                    <div className="relative w-full sm:w-[125px]">
                       <button role="status" onClick={(e) => { e.stopPropagation(); setOpenStatusEmp(v => v === emp.id ? null : emp.id) }}
-                        className="inline-flex items-center justify-between min-w-[95px] h-9 rounded-full px-4 text-xs font-bold shadow-sm hover:scale-[1.02] transition-transform cursor-pointer"
+                        className="inline-flex w-full items-center justify-center sm:justify-between h-10 rounded-xl px-2 sm:px-4 text-[11px] sm:text-xs font-bold shadow-sm hover:scale-[1.02] transition-transform cursor-pointer"
                         style={{ background: ps.bg, color: ps.color, border: 'none' }}>
-                        {log.status}
-                        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className="opacity-70 ml-2"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <span className="truncate">{log.status}</span>
+                        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className="opacity-70 ml-1 sm:ml-2 shrink-0"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       </button>
                       {openStatusEmp === emp.id && (
                         <div onClick={e => e.stopPropagation()}
