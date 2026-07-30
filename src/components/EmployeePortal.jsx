@@ -74,7 +74,12 @@ export default function EmployeePortal({
   setSimulatedRole,
   handleLogout,
   showRoleModal,
-  setShowRoleModal
+  setShowRoleModal,
+  showNotifications,
+  setShowNotifications,
+  notifications,
+  markNotificationsRead,
+  clearNotifications
 }) {
   const [activeTab, setActiveTab] = useState('dashboard') // dashboard, attendance, payslips, leave, profile
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
@@ -196,7 +201,7 @@ export default function EmployeePortal({
       case 'events':
         return <div className="max-w-[1200px] mx-auto w-full"><Calendar events={events} setEvents={setEvents} employees={employees} addLog={addLog} addToast={addToast} currentUser={currentUser} simulatedRole="Employee" /></div>
       case 'expenses':
-        return <div className="max-w-[1200px] mx-auto w-full"><Expenses employees={employees} expenses={expenses} setExpenses={setExpenses} settings={settings} addLog={addLog} addToast={addToast} addAuditLog={addLog} simulatedRole="Employee" /></div>
+        return <div className="max-w-[1200px] mx-auto w-full"><Expenses employees={employees} expenses={expenses} setExpenses={setExpenses} settings={settings} addLog={addLog} addToast={addToast} addAuditLog={addLog} simulatedRole="Employee" currentUser={currentUser} /></div>
       case 'documents':
         return <div className="max-w-[1200px] mx-auto w-full"><Documents documents={documents} setDocuments={setDocuments} addLog={addLog} addToast={addToast} currentUser={currentUser} simulatedRole="Employee" /></div>
       default:
@@ -263,9 +268,12 @@ export default function EmployeePortal({
                 isSyncing={false}
                 driveConnected={false}
                 syncConflicts={[]}
-                setShowNotifications={() => {}}
-                markNotificationsRead={() => {}}
-                unreadCount={0}
+                setShowNotifications={setShowNotifications}
+                markNotificationsRead={markNotificationsRead}
+                unreadCount={notifications ? notifications.filter(n => !n.read).length : 0}
+                showNotifications={showNotifications}
+                notifications={notifications}
+                clearNotifications={clearNotifications}
             />
           </div>
 

@@ -11,7 +11,7 @@ import { Select, SelectItem } from "@/components/ui/select"
 import AdSlot from './AdSlot'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
-export default function Expenses({ employees, expenses, setExpenses, settings, addLog, addToast, addAuditLog, simulatedRole }) {
+export default function Expenses({ employees, expenses, setExpenses, settings, addLog, addToast, addAuditLog, simulatedRole, currentUser }) {
   const [activeTab, setActiveTab] = useState('submit')
 
   // Employee Submission States
@@ -56,7 +56,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
 
     const newExpense = {
       id: `EXP-${Date.now()}`,
-      employeeId: 'EMP-101',
+      employeeId: currentUser?.employeeId || currentUser?.id || 'SYS-ADMIN',
       category: category === 'Add New...' ? customCategory : category,
       amount: Number(amount),
       currency,
@@ -139,7 +139,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
   // Derived Data
   const pendingQueue = expenses.filter(e => e.status === 'Pending')
   const approvedQueue = expenses.filter(e => e.status === 'Approved')
-  const myClaimsQueue = expenses.filter(e => e.employeeId === 'EMP-101')
+  const myClaimsQueue = expenses.filter(e => e.employeeId === (currentUser?.employeeId || currentUser?.id || 'SYS-ADMIN'))
   const historyQueue = expenses.filter(e => e.status !== 'Pending')
 
   const pendingLiability = pendingQueue.reduce((acc, curr) => acc + (curr.usdAmount || (curr.amount * exchangeRates[curr.currency])), 0)

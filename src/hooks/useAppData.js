@@ -56,10 +56,7 @@ export default function useAppData({ user, addToast }) {
   }
 
   /* ─── Notifications ─── */
-  const [notifications, setNotifications] = useState([
-    { id: 'notif-1', text: 'Your leave request was approved', read: false, time: '2 mins ago' },
-    { id: 'notif-2', text: 'New leave request from Sarah Rahman', read: false, time: '1 hour ago' }
-  ])
+  const [notifications, setNotifications] = useState([])
   const [showNotifications, setShowNotifications] = useState(false)
 
   const addNotification = (text) => {
@@ -68,6 +65,10 @@ export default function useAppData({ user, addToast }) {
 
   const markNotificationsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+  }
+
+  const clearNotifications = () => {
+    setNotifications([])
   }
 
   /* ─── Data state initialisers ─── */
@@ -80,37 +81,27 @@ export default function useAppData({ user, addToast }) {
   const [employees, setEmployeesRaw] = useState(() => {
     const plain = localStorage.getItem(EMPLOYEES_STORAGE_KEY + '_plain')
     if (plain) { try { const p = JSON.parse(plain); if (Array.isArray(p) && p.length > 0) return p } catch (e) {} }
-    return [
-      { id: 'EMP-101', name: 'Ishtiauq Ahmed', role: 'HR Manager', department: 'Human Resources', status: 'Active', email: 'ishtiauq@gmail.com', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200', dob: '1992-04-18', joiningDate: '2021-08-01', cvFileName: 'Ishtiauq_CV.pdf', nidFileName: 'Ishtiauq_Passport.pdf' },
-      { id: 'EMP-102', name: 'Sarah Rahman', role: 'Lead Frontend Developer', department: 'Engineering', status: 'Active', email: 'sarah.r@hrpulse.io', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200', dob: '1995-07-30', joiningDate: '2023-01-15', cvFileName: 'Sarah_Frontend_CV.pdf', nidFileName: 'Sarah_NID.jpg' },
-      { id: 'EMP-103', name: 'Nafis Chowdhury', role: 'Senior Product Designer', department: 'Design', status: 'Active', email: 'nafis.c@hrpulse.io', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200', dob: '1994-07-25', joiningDate: '2023-06-01', cvFileName: 'Nafis_Design_Portfolio.pdf', nidFileName: 'Nafis_Passport.pdf' },
-      { id: 'EMP-104', name: 'Tanvir Hasan', role: 'QA Automation Engineer', department: 'Engineering', status: 'On Leave', email: 'tanvir.h@hrpulse.io', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200', dob: '1993-12-05', joiningDate: '2024-02-10', cvFileName: 'Tanvir_QA_Resume.pdf', nidFileName: 'Tanvir_NID.jpg' }
-    ]
+    return []
   })
-  const [payroll, setPayrollRaw] = useState(() => loadSaved('hr_pulse_payroll') || { '2026-07': [{ employeeId: 'EMP-101', grossSalary: 3200, status: 'Paid', paymentDate: 'July 15, 2026', advance: 0, loan: { total: 0, installment: 0, remaining: 0 } }, { employeeId: 'EMP-102', grossSalary: 4500, status: 'Pending', paymentDate: '', advance: 150, loan: { total: 1000, installment: 100, remaining: 900 } }, { employeeId: 'EMP-103', grossSalary: 4000, status: 'Pending', paymentDate: '', advance: 0, loan: { total: 0, installment: 0, remaining: 0 } }, { employeeId: 'EMP-104', grossSalary: 5200, status: 'Pending', paymentDate: '', advance: 0, loan: { total: 0, installment: 0, remaining: 0 } }] })
+  const [payroll, setPayrollRaw] = useState(() => loadSaved('hr_pulse_payroll') || {})
 
-  const [attendance, setAttendanceRaw] = useState(() => loadSaved('hr_pulse_attendance') || { leaves: [], dailyLogs: { '2026-07-17': { 'EMP-101': { checkIn: '09:00 AM', checkOut: '06:00 PM', hours: '9.0', status: 'Present' }, 'EMP-102': { checkIn: '09:15 AM', checkOut: '06:00 PM', hours: '8.7', status: 'Present' }, 'EMP-103': { checkIn: '', checkOut: '', hours: '0.0', status: 'Absent' }, 'EMP-104': { checkIn: '', checkOut: '', hours: '0.0', status: 'On Leave' } } }, balances: {} })
-  const [expenses, setExpensesRaw] = useState(() => loadSaved('hr_pulse_expenses') || [{ id: 'EXP-101', employeeId: 'EMP-101', category: 'Medical', amount: 120, currency: '$', date: '2026-07-15', description: 'Annual checkup', status: 'Pending', receipt: null }, { id: 'EXP-102', employeeId: 'EMP-102', category: 'Office Supplies', amount: 45, currency: '$', date: '2026-07-16', description: 'Mechanical keyboard', status: 'Approved', receipt: null }])
-  const [events, setEvents] = useState(() => loadSaved('hr_pulse_events') || [{ id: 'evt-1', title: 'Company Town Hall', date: '2026-07-20', time: '14:00', type: 'meeting', description: 'Quarterly all-hands meeting', createdBy: 'EMP-101', createdAt: new Date().toISOString() }, { id: 'evt-2', title: 'Independence Day', date: '2026-08-15', time: '', type: 'holiday', description: 'National holiday', createdBy: 'EMP-101', createdAt: new Date().toISOString() }, { id: 'evt-3', title: "Sarah's Birthday", date: '2026-07-30', time: '', type: 'birthday', description: '', createdBy: 'EMP-101', createdAt: new Date().toISOString() }])
-  const [documents, setDocuments] = useState(() => loadSaved('hr_pulse_documents') || [{ id: 'doc-1', name: 'Employee Handbook 2026', category: 'hr-docs', description: 'Official company policies and procedures handbook', fileName: 'Employee_Handbook_2026.pdf', fileSize: 2450000, fileType: 'application/pdf', uploadedBy: 'EMP-101', uploadedAt: new Date().toISOString() }])
+  const [attendance, setAttendanceRaw] = useState(() => loadSaved('hr_pulse_attendance') || { leaves: [], dailyLogs: {}, balances: {} })
+  const [expenses, setExpensesRaw] = useState(() => loadSaved('hr_pulse_expenses') || [])
+  const [events, setEvents] = useState(() => loadSaved('hr_pulse_events') || [])
+  const [documents, setDocuments] = useState(() => loadSaved('hr_pulse_documents') || [])
   const [roster, setRoster] = useState(() => loadSaved('hr_pulse_roster') || [])
   const [shiftSwaps, setShiftSwaps] = useState(() => loadSaved('hr_pulse_shift_swaps') || [])
   const [overtimeClaims, setOvertimeClaims] = useState(() => loadSaved('hr_pulse_overtime_claims') || [])
   const [announcements, setAnnouncements] = useState(() => {
     const saved = loadSaved('hr_pulse_announcements')
     if (saved) return saved
-    return [{ id: 'ann-1', title: 'Welcome to HR Pulse!', content: 'We are thrilled to roll out the new HR Pulse internal portal. Please take a moment to review your profile details and explore the new ESS features.', authorId: 'EMP-101', date: new Date().toISOString(), category: 'General', priority: 'Important', audience: 'all', attachments: [], reactions: { '\u{1F44D}': 0, '\u2764\uFE0F': 0, '\u{1F389}': 0 }, comments: [], readBy: [], poll: null }]
+    return []
   })
-  const [tasks, setTasks] = useState(() => loadSaved('hr_pulse_tasks') || [
-    { id: 'task-1', title: 'Onboard new UI designer', description: 'Setup accounts and provide documentation', status: 'To Do', priority: 'High', assigneeIds: ['EMP-101'], dueDate: '2026-08-01', tags: ['Onboarding'], createdBy: 'EMP-100', updates: [] },
-    { id: 'task-2', title: 'Review Q3 Performance', description: 'Quarterly review for engineering team', status: 'In Progress', priority: 'Medium', assigneeIds: ['EMP-101'], dueDate: '2026-08-15', tags: ['Performance'], createdBy: 'EMP-100', updates: [] },
-    { id: 'task-3', title: 'Update Company Policy', description: 'Draft new remote work guidelines', status: 'Review', priority: 'Low', assigneeIds: ['EMP-101'], dueDate: '2026-07-30', tags: ['Policy'], createdBy: 'EMP-100', updates: [] },
-    { id: 'task-4', title: 'Process July Payroll', description: 'Run payroll for all active employees', status: 'Done', priority: 'High', assigneeIds: ['EMP-101'], dueDate: '2026-07-25', tags: ['Payroll'], createdBy: 'EMP-100', updates: [] }
-  ])
-  const [assets, setAssets] = useState(() => loadSaved('hr_pulse_assets') || [{ id: 'AST-001', serialNumber: 'C02ZG001MD6M', name: 'MacBook Pro M3', category: 'Laptop', purchaseDate: '2025-01-15', purchasePrice: 2499, warrantyExpiry: '2028-01-14', usefulLife: 36, status: 'Available', assignedTo: null, assignmentDate: null, condition: 'New', maintenanceLogs: [] }, { id: 'AST-002', serialNumber: 'S24ULTRA-992', name: 'Samsung Galaxy S24 Ultra', category: 'Phone', purchaseDate: '2024-03-10', purchasePrice: 1199, warrantyExpiry: '2025-03-09', usefulLife: 24, status: 'Assigned', assignedTo: 'EMP-102', assignmentDate: '2024-03-15', condition: 'Good', maintenanceLogs: [] }])
+  const [tasks, setTasks] = useState(() => loadSaved('hr_pulse_tasks') || [])
+  const [assets, setAssets] = useState(() => loadSaved('hr_pulse_assets') || [])
   const [assetRequests, setAssetRequests] = useState(() => loadSaved('hr_pulse_asset_requests') || [])
   const [settings, setSettingsRaw] = useState(() => loadSaved('hr_pulse_settings') || { currency: '$', salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'HR Pulse Ltd.', email: 'hr@hrpulse.io', website: 'www.hrpulse.io', logo: '', logoX: 0, logoY: 0, logoZoom: 1 }, shiftTemplates: [{ id: 'st-1', name: 'Morning Shift', start: '09:00', end: '18:00', break: 60, color: '#3b82f6' }, { id: 'st-2', name: 'Evening Shift', start: '14:00', end: '23:00', break: 60, color: '#8b5cf6' }, { id: 'st-3', name: 'Night Shift', start: '22:00', end: '07:00', break: 60, color: '#1e293b' }, { id: 'st-4', name: 'Half-Day', start: '09:00', end: '13:00', break: 0, color: '#f59e0b' }], overtimeRules: { multiplierWeekday: 1.5, multiplierWeekend: 2.0 }, notifications: { syncAlerts: true, emailDigests: false } })
-  const [syncLogs, setSyncLogs] = useState(() => loadSaved('hr_pulse_sync_logs') || [{ id: 'log-1', action: 'Synced employee_list.json', status: 'success', timestamp: '2 mins ago', details: '4 records updated' }, { id: 'log-2', action: 'Uploaded payslip_july.pdf', status: 'success', timestamp: '1 hour ago', details: 'Document saved to /HR-Pulse-DB/Documents/' }, { id: 'log-3', action: 'Auto-Backup DB', status: 'success', timestamp: '4 hours ago', details: 'Google Drive backup completed successfully' }])
+  const [syncLogs, setSyncLogs] = useState(() => loadSaved('hr_pulse_sync_logs') || [])
 
   /* ─── addLog ─── */
   const addLog = (action, details, status = 'success') => {
@@ -279,12 +270,7 @@ export default function useAppData({ user, addToast }) {
           setMetaManifest(meta)
         }
 
-        const defaultContent = [
-          { id: 'EMP-101', name: 'Ishtiauq Ahmed', role: 'HR Manager', department: 'Human Resources', status: 'Active', email: 'ishtiauq@gmail.com', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200' },
-          { id: 'EMP-102', name: 'Sarah Rahman', role: 'Lead Frontend Developer', department: 'Engineering', status: 'Active', email: 'sarah.r@hrpulse.io', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200' },
-          { id: 'EMP-103', name: 'Nafis Chowdhury', role: 'Senior Product Designer', department: 'Design', status: 'Active', email: 'nafis.c@hrpulse.io', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200' },
-          { id: 'EMP-104', name: 'Tanvir Hasan', role: 'QA Automation Engineer', department: 'Engineering', status: 'On Leave', email: 'tanvir.h@hrpulse.io', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200' }
-        ]
+        const defaultContent = []
 
         let empData = await readTable('employees', user.token, bgSyncCallback)
         if (!empData) {
@@ -299,7 +285,7 @@ export default function useAppData({ user, addToast }) {
         }
         setEmployeesRaw(empData)
 
-        const defaultPayroll = { '2026-07': [{ employeeId: 'EMP-101', grossSalary: 3200, status: 'Paid', paymentDate: 'July 15, 2026', advance: 0, loan: { total: 0, installment: 0, remaining: 0 } }, { employeeId: 'EMP-102', grossSalary: 4500, status: 'Pending', paymentDate: '', advance: 150, loan: { total: 1000, installment: 100, remaining: 900 } }, { employeeId: 'EMP-103', grossSalary: 4000, status: 'Pending', paymentDate: '', advance: 0, loan: { total: 0, installment: 0, remaining: 0 } }, { employeeId: 'EMP-104', grossSalary: 5200, status: 'Pending', paymentDate: '', advance: 0, loan: { total: 0, installment: 0, remaining: 0 } }] }
+        const defaultPayroll = {}
         let payrollData = await readTable('payroll', user.token, bgSyncCallback)
         if (!payrollData) {
           const saved = localStorage.getItem('hr_pulse_payroll')
@@ -320,9 +306,9 @@ export default function useAppData({ user, addToast }) {
         }
         setSettingsRaw(settingsData)
 
-        const defaultLeaves = [{ id: 'REQ-101', employeeId: 'EMP-102', leaveType: 'Sick Leave', startDate: '2026-07-10', endDate: '2026-07-12', days: 3, reason: 'Flu symptoms', status: 'Approved' }, { id: 'REQ-102', employeeId: 'EMP-104', leaveType: 'Annual Leave', startDate: '2026-07-20', endDate: '2026-07-25', days: 6, reason: 'Family vacation', status: 'Pending' }]
-        const defaultBalances = { 'EMP-101': { sick: { used: 0, limit: 14 }, casual: { used: 0, limit: 10 }, annual: { used: 0, limit: 20 } }, 'EMP-102': { sick: { used: 3, limit: 14 }, casual: { used: 0, limit: 10 }, annual: { used: 0, limit: 20 } }, 'EMP-103': { sick: { used: 0, limit: 14 }, casual: { used: 0, limit: 10 }, annual: { used: 0, limit: 20 } }, 'EMP-104': { sick: { used: 0, limit: 14 }, casual: { used: 0, limit: 10 }, annual: { used: 0, limit: 20 } } }
-        const defaultLogs = { '2026-07-16': { 'EMP-101': { status: 'Present', checkIn: '09:00 AM', checkOut: '06:00 PM', hours: '9.0' }, 'EMP-102': { status: 'Present', checkIn: '08:50 AM', checkOut: '06:10 PM', hours: '9.3' }, 'EMP-103': { status: 'Late', checkIn: '09:30 AM', checkOut: '06:00 PM', hours: '8.5' }, 'EMP-104': { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' } } }
+        const defaultLeaves = []
+        const defaultBalances = {}
+        const defaultLogs = {}
 
         let leavesData = await readTable('leave_requests', user.token, bgSyncCallback)
         let balancesData = await readTable('leave_balances', user.token, bgSyncCallback)
@@ -565,6 +551,6 @@ export default function useAppData({ user, addToast }) {
     handleSetAttendance, handleSetExpenses, handleSetEvents, handleSetDocuments,
     handleAutoRepairDatabase, handleSync,
     addLog, addAuditLog, hasPermission,
-    addNotification, markNotificationsRead,
+    addNotification, markNotificationsRead, clearNotifications,
   }
 }

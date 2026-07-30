@@ -24,9 +24,9 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
       setTimeout(() => {
         setIsLoading(false)
         const simulatedUser = {
-          name: 'Ishtiauq Ahmed (Simulated)',
-          email: 'ishtiauq@gmail.com',
-          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+          name: 'System Admin',
+          email: 'admin@company.com',
+          avatar: '',
           role: 'HR Manager',
           isSimulated: true,
           token: 'mock-token-12345'

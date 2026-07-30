@@ -123,7 +123,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
     case 'tasks':
       return <Tasks tasks={data.tasks} setTasks={data.handleSetTasks} employees={data.employees} currentUser={user} addToast={data.addToast} simulatedRole={simulatedRole} addLog={data.addLog} addNotification={data.addNotification} />
     case 'expenses':
-      return <Expenses employees={data.employees} expenses={data.expenses} setExpenses={data.handleSetExpenses} settings={data.settings} addLog={data.addLog} addToast={data.addToast} addAuditLog={data.addAuditLog} simulatedRole={simulatedRole} />
+      return <Expenses employees={data.employees} expenses={data.expenses} setExpenses={data.handleSetExpenses} settings={data.settings} addLog={data.addLog} addToast={data.addToast} addAuditLog={data.addAuditLog} simulatedRole={simulatedRole} currentUser={user} />
     case 'settings':
       return <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} simulatedRole={simulatedRole} syncConflicts={data.syncConflicts} setSyncConflicts={data.setSyncConflicts} />
     case 'drive':

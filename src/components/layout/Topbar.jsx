@@ -2,7 +2,9 @@ import { Monitor, Sun, Moon, Menu, Bell } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import hrPulseLogo from '../../Assets/hr-pulse-logo.svg'
 
-export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, setShowNotifications, markNotificationsRead, unreadCount }) {
+import { Badge } from "@/components/ui/badge"
+
+export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications }) {
   return (
     <header aria-label="Top bar" className="topbar w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-2 min-[400px]:px-4 flex items-center justify-between rounded-full bg-background/50 backdrop-blur-lg saturate-150 text-foreground border border-border/50 shadow-sm transition-all duration-300 overflow-hidden">
       
@@ -61,6 +63,59 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
               </span>
             )}
           </Button>
+
+          {showNotifications && (
+            <>
+              {/* Click-away overlay */}
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }}
+              />
+              <div
+                role="dialog"
+                aria-label="Notifications"
+                className="absolute top-[calc(100%+0.75rem)] right-0 w-[300px] sm:w-[340px] rounded-2xl z-50 overflow-hidden bg-popover text-popover-foreground border border-border shadow-xl backdrop-blur-xl animate-in fade-in-0 zoom-in-95 p-0"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-3.5 px-4 flex justify-between items-center border-b border-border bg-muted/30">
+                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-foreground m-0">Notifications</h3>
+                  <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
+                    {notifications.length} Total
+                  </Badge>
+                </div>
+                <div className="max-h-[280px] overflow-y-auto p-1">
+                  {notifications.length === 0 ? (
+                    <div className="p-6 text-center text-xs text-muted-foreground italic">No new notifications</div>
+                  ) : (
+                    notifications.map(n => (
+                      <div role="listitem" key={n.id} className="p-3 px-3.5 rounded-xl hover:bg-muted/60 transition-colors cursor-pointer my-0.5">
+                        <p className="text-xs m-0 leading-relaxed text-foreground" style={{ fontWeight: n.read ? 400 : 600 }}>{n.text}</p>
+                        <span className="text-[10px] font-medium block mt-1 text-muted-foreground">{n.time}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div className="p-2 px-3 border-t border-border bg-muted/10 flex justify-between items-center">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={(e) => { e.stopPropagation(); if(clearNotifications) clearNotifications(); }} 
+                    className="text-xs h-7 text-muted-foreground hover:text-destructive"
+                  >
+                    Clear All
+                  </Button>
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }} 
+                    className="text-xs h-7"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
       </div>

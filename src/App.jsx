@@ -150,6 +150,11 @@ export default function App() {
         handleLogout={handleLogout}
         showRoleModal={appData.showRoleModal}
         setShowRoleModal={appData.setShowRoleModal}
+        showNotifications={appData.showNotifications}
+        setShowNotifications={appData.setShowNotifications}
+        notifications={appData.notifications}
+        markNotificationsRead={appData.markNotificationsRead}
+        clearNotifications={appData.clearNotifications}
       />
     )
   }
@@ -203,36 +208,11 @@ export default function App() {
                 setShowNotifications={appData.setShowNotifications}
                 markNotificationsRead={appData.markNotificationsRead}
                 unreadCount={unreadCount}
+                showNotifications={appData.showNotifications}
+                notifications={appData.notifications}
+                clearNotifications={appData.clearNotifications}
               />
           </div>
-
-          {/* Notification Panel */}
-          {appData.showNotifications && (
-            <div
-              role="dialog"
-              aria-label="Notifications"
-              className="fixed top-[calc(64px+2rem)] right-4 md:right-6 lg:right-8 w-[300px] sm:w-[340px] rounded-2xl z-50 overflow-hidden bg-popover text-popover-foreground border border-border shadow-xl backdrop-blur-xl animate-in fade-in-0 zoom-in-95 p-0"
-            >
-              <div className="p-3.5 px-4 flex justify-between items-center border-b border-border bg-muted/30">
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-foreground m-0">Notifications</h3>
-                <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
-                  {appData.notifications.length} Total
-                </Badge>
-              </div>
-              <div className="max-h-[280px] overflow-y-auto p-1">
-                {appData.notifications.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-muted-foreground italic">No new notifications</div>
-                ) : (
-                  appData.notifications.map(n => (
-                    <div role="listitem" key={n.id} className="p-3 px-3.5 rounded-xl hover:bg-muted/60 transition-colors cursor-pointer my-0.5">
-                      <p className="text-xs m-0 leading-relaxed text-foreground" style={{ fontWeight: n.read ? 400 : 600 }}>{n.text}</p>
-                      <span className="text-[10px] font-medium block mt-1 text-muted-foreground">{n.time}</span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
 
           <div className="w-full flex-1 px-4 md:px-6 lg:px-8">
             <AppContent
