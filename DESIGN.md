@@ -52,13 +52,13 @@ Inspired by macOS 27, this design leverages translucent backgrounds, vibrant gra
 
 ### 3. Component Styling
 
-#### Cards (.glass-card)
-- Background: `rgba(255, 255, 255, 0.4)`
-- Backdrop Filter: `blur(20px) saturate(150%)`
-- Border: `1px solid rgba(255, 255, 255, 0.6)`
+#### Cards, Modals, Popovers, and Sidebar (Liquid Glass)
+- Background: `color-mix(in srgb, var(--card) 45%, transparent)`
+- Backdrop Filter: `blur(20px) saturate(120%)` (True Gaussian blur algorithm for high-quality distortion)
+- Border: `1px solid color-mix(in srgb, var(--foreground) 10%, transparent)`
 - Border Radius: `16px`
-- Box Shadow: `0 8px 32px 0 rgba(31, 38, 135, 0.07)`
-- Inner Highlight (pseudo-element for extra 3D effect): Top border `1px solid rgba(255, 255, 255, 0.9)`
+- Box Shadow (Depth): `0 8px 32px color-mix(in srgb, var(--foreground) 5%, transparent)`
+- Inner Highlight (Liquidity): `inset 0 1px 1px color-mix(in srgb, var(--background) 40%, transparent)`
 
 #### Buttons (.mac-btn)
 - **Primary Buttons**:

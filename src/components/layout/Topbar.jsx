@@ -2,11 +2,33 @@ import { Monitor, Sun, Moon, Menu, Bell } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import hrPulseLogo from '../../Assets/hr-pulse-logo.svg'
 
+import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { Badge } from "@/components/ui/badge"
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications }) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const buttonRef = useRef(null)
+  const [modalPos, setModalPos] = useState({ top: 0, right: 0 })
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  useEffect(() => {
+    if (showNotifications && !isMobile && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setModalPos({
+        top: rect.bottom + 12,
+        right: window.innerWidth - rect.right
+      })
+    }
+  }, [showNotifications, isMobile])
+
   return (
-    <header aria-label="Top bar" className="topbar w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-2 min-[400px]:px-4 flex items-center justify-between rounded-full bg-background/50 backdrop-blur-lg saturate-150 text-foreground border border-border/50 shadow-sm transition-all duration-300 overflow-hidden">
+    <header aria-label="Top bar" className="topbar w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-2 min-[400px]:px-4 flex items-center justify-between rounded-full bg-background/50 backdrop-blur-lg saturate-150 text-foreground border border-border/50 shadow-sm transition-all duration-300">
       
       {/* Left Section: Mobile Menu + Brand Pill */}
       <div className="flex items-center gap-1 min-[400px]:gap-3 sm:gap-4 shrink-0">
@@ -49,6 +71,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
         {/* Notifications Button */}
         <div className="relative">
           <Button
+            ref={buttonRef}
             variant="ghost"
             size="icon"
             onClick={() => { setShowNotifications(prev => !prev); markNotificationsRead() }}
@@ -64,7 +87,54 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
             )}
           </Button>
 
-          {showNotifications && (
+          {showNotifications && isMobile && (
+            <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
+              <DialogContent className="sm:max-w-[425px] p-0">
+                <DialogHeader className="p-4 px-6 border-b border-border bg-muted/30 pb-4">
+                  <div className="flex justify-between items-center w-full">
+                    <DialogTitle className="text-sm">Notifications</DialogTitle>
+                    <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
+                      {notifications.length} Total
+                    </Badge>
+                  </div>
+                </DialogHeader>
+                <div className="max-h-[60vh] overflow-y-auto p-2">
+                  {notifications.length === 0 ? (
+                    <div className="p-8 text-center text-sm text-muted-foreground italic">No new notifications</div>
+                  ) : (
+                    notifications.map(n => (
+                      <div role="listitem" key={n.id} className="p-3 px-4 rounded-xl hover:bg-muted/60 transition-colors cursor-pointer my-1 border border-transparent hover:border-border/50">
+                        <p className="text-sm m-0 leading-relaxed text-foreground" style={{ fontWeight: n.read ? 400 : 600 }}>{n.text}</p>
+                        <span className="text-[11px] font-medium block mt-1.5 text-muted-foreground">{n.time}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <DialogFooter className="p-3 px-6 bg-muted/10 pb-3">
+                  <div className="flex justify-between items-center w-full">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={(e) => { e.stopPropagation(); if(clearNotifications) clearNotifications(); }} 
+                      className="text-xs text-muted-foreground hover:text-destructive"
+                    >
+                      Clear All
+                    </Button>
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }} 
+                      className="text-xs"
+                    >
+                      Close
+                    </Button>
+                  </div>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          {showNotifications && !isMobile && createPortal(
             <>
               {/* Click-away overlay */}
               <div 
@@ -74,47 +144,52 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
               <div
                 role="dialog"
                 aria-label="Notifications"
-                className="absolute top-[calc(100%+0.75rem)] right-0 w-[300px] sm:w-[340px] rounded-2xl z-50 overflow-hidden bg-popover text-popover-foreground border border-border shadow-xl backdrop-blur-xl animate-in fade-in-0 zoom-in-95 p-0"
+                className="fixed flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-background/95 text-popover-foreground shadow-2xl backdrop-blur-xl animate-in fade-in-0 zoom-in-95 p-0 z-50"
+                style={{ top: `${modalPos.top}px`, right: `${modalPos.right}px`, width: '380px' }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="p-3.5 px-4 flex justify-between items-center border-b border-border bg-muted/30">
-                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-foreground m-0">Notifications</h3>
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-rose-500 to-primary z-10" />
+                <div className="p-4 px-6 flex justify-between items-center border-b border-border/50 bg-muted/20 relative z-20">
+                  <h2 className="text-lg font-extrabold tracking-tight text-foreground leading-none">Notifications</h2>
                   <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
                     {notifications.length} Total
                   </Badge>
                 </div>
-                <div className="max-h-[280px] overflow-y-auto p-1">
+                <div className="max-h-[350px] overflow-y-auto p-2">
                   {notifications.length === 0 ? (
-                    <div className="p-6 text-center text-xs text-muted-foreground italic">No new notifications</div>
+                    <div className="p-8 text-center text-sm text-muted-foreground italic">No new notifications</div>
                   ) : (
                     notifications.map(n => (
-                      <div role="listitem" key={n.id} className="p-3 px-3.5 rounded-xl hover:bg-muted/60 transition-colors cursor-pointer my-0.5">
-                        <p className="text-xs m-0 leading-relaxed text-foreground" style={{ fontWeight: n.read ? 400 : 600 }}>{n.text}</p>
-                        <span className="text-[10px] font-medium block mt-1 text-muted-foreground">{n.time}</span>
+                      <div role="listitem" key={n.id} className="p-3 px-4 rounded-xl hover:bg-muted/60 transition-colors cursor-pointer my-1 border border-transparent hover:border-border/50">
+                        <p className="text-sm m-0 leading-relaxed text-foreground" style={{ fontWeight: n.read ? 400 : 600 }}>{n.text}</p>
+                        <span className="text-[11px] font-medium block mt-1.5 text-muted-foreground">{n.time}</span>
                       </div>
                     ))
                   )}
                 </div>
-                <div className="p-2 px-3 border-t border-border bg-muted/10 flex justify-between items-center">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={(e) => { e.stopPropagation(); if(clearNotifications) clearNotifications(); }} 
-                    className="text-xs h-7 text-muted-foreground hover:text-destructive"
-                  >
-                    Clear All
-                  </Button>
-                  <Button 
-                    variant="secondary" 
-                    size="sm" 
-                    onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }} 
-                    className="text-xs h-7"
-                  >
-                    Close
-                  </Button>
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4 px-6 border-t border-border/50 mt-2 shrink-0 pb-4 bg-muted/5 relative z-20">
+                  <div className="flex justify-between items-center w-full">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={(e) => { e.stopPropagation(); if(clearNotifications) clearNotifications(); }} 
+                      className="text-xs text-muted-foreground hover:text-destructive"
+                    >
+                      Clear All
+                    </Button>
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }} 
+                      className="text-xs"
+                    >
+                      Close
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </>
+            </>,
+            document.body
           )}
         </div>
 
