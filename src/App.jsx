@@ -113,7 +113,7 @@ export default function App() {
   if (appData.simulatedRole === 'Teammate' || user.isEmployee) {
     return (
       <EmployeePortal
-        currentUser={{...user, role: user.role || 'Teammate', department: user.department || 'Engineering'}}
+        currentUser={{...user, id: user.id || user.employeeId || 'simulated-admin-id', role: user.role || 'Teammate', department: user.department || 'Engineering'}}
         themeMode={themeMode}
         toggleTheme={toggleTheme}
         employees={appData.employees}

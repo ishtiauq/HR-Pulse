@@ -1,9 +1,19 @@
 import { useState, useRef, useEffect } from 'react'
-import { Save, Settings2, DollarSign, Sliders, Info, Percent, Building2, Bell, Globe, Mail, Plus, Trash2, Upload, Activity, X, ShieldCheck, List, FileSpreadsheet, Download, Receipt, CalendarClock, Check, ChevronDown } from 'lucide-react'
+import { Save, Settings2, DollarSign, Sliders, Info, Percent, Building2, Bell, Globe, Mail, Plus, Trash2, Upload, Activity, X, ShieldCheck, List, FileSpreadsheet, Download, Receipt, CalendarClock, Check, ChevronDown, MapPin, Search } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDateTime } from '../services/date.js'
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
 
+// Fix default leaflet icon issue
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,6 +25,25 @@ import { Select, SelectItem } from "@/components/ui/select"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 
 
+
+function LocationMarker({ position, setPosition }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (position && position.lat && position.lng) {
+      map.flyTo(position, map.getZoom());
+    }
+  }, [position.lat, position.lng, map]);
+
+  useMapEvents({
+    click(e) {
+      setPosition({ lat: e.latlng.lat, lng: e.latlng.lng })
+    },
+  })
+  return position === null ? null : (
+    <Marker position={position}></Marker>
+  )
+}
 
 export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, simulatedRole, syncConflicts, setSyncConflicts }) {
   const [activeSubmenu, setActiveSubmenu] = useState(() => localStorage.getItem('hr_pulse_settings_tab') || null)
@@ -44,6 +73,31 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const [logoX, setLogoX] = useState(settings.company?.logoX || 0)
   const [logoY, setLogoY] = useState(settings.company?.logoY || 0)
   const [logoZoom, setLogoZoom] = useState(settings.company?.logoZoom || 1)
+  
+  const [officeLocation, setOfficeLocation] = useState(settings.officeLocation || { lat: 23.8103, lng: 90.4125, radius: 100 })
+  const [mapSearchQuery, setMapSearchQuery] = useState('')
+  const [isMapSearching, setIsMapSearching] = useState(false)
+
+  const handleMapSearch = async (e) => {
+    if (e) e.preventDefault();
+    if (!mapSearchQuery.trim()) return;
+    setIsMapSearching(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(mapSearchQuery)}`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        setOfficeLocation({ ...officeLocation, lat, lng: lon });
+      } else {
+        if (addToast) addToast('Location not found. Try a different search term.', 'error');
+      }
+    } catch (err) {
+      if (addToast) addToast('Error searching for location.', 'error');
+    } finally {
+      setIsMapSearching(false);
+    }
+  }
 
   const [showLogoModal, setShowLogoModal] = useState(false)
   useModal(() => setShowLogoModal(false))
@@ -116,7 +170,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     Promise.resolve().then(() => {
       setSettings({
         ...settings,
-        currency, salaryStructure, expensePolicies, shiftTemplates, overtimeRules,
+        currency, salaryStructure, expensePolicies, shiftTemplates, overtimeRules, officeLocation,
         company: { ...settings.company, name: companyName, email: companyEmail, website: companyWebsite, logo, logoX, logoY, logoZoom },
         notifications: { syncAlerts, emailDigests }
       })
@@ -152,6 +206,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const menuItems = [
     { id: 'payroll', icon: Sliders, label: 'Payroll Settings' },
     { id: 'company', icon: Building2, label: 'Company Profile' },
+    { id: 'attendance', icon: MapPin, label: 'Attendance Location' },
     { id: 'expenses', icon: Receipt, label: 'Expense Policies' },
     { id: 'rosters', icon: CalendarClock, label: 'Rosters & Shifts' },
     { id: 'notifications', icon: Bell, label: 'Notifications' },
@@ -328,6 +383,66 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 <input type="checkbox" checked={item.val} onChange={e => item.set(e.target.checked)} className="h-4 w-4 rounded accent-primary cursor-pointer shrink-0 ml-4" />
               </div>
             ))}
+          </CardContent>
+        </Card>
+      )
+      case 'attendance': return (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-muted-foreground" />
+              <CardTitle className="text-lg">Office Location Settings</CardTitle>
+            </div>
+            <CardDescription>Set the central GPS coordinates and check-in radius for your office.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Latitude</label>
+                <Input type="number" step="any" value={officeLocation.lat} onChange={e => setOfficeLocation({...officeLocation, lat: parseFloat(e.target.value)})} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Longitude</label>
+                <Input type="number" step="any" value={officeLocation.lng} onChange={e => setOfficeLocation({...officeLocation, lng: parseFloat(e.target.value)})} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Radius (meters)</label>
+                <Input type="number" value={officeLocation.radius} onChange={e => setOfficeLocation({...officeLocation, radius: parseInt(e.target.value, 10)})} />
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-2 mt-2">
+              <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Interactive Map Picker</label>
+              
+              <form onSubmit={handleMapSearch} className="flex gap-2 mb-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Search for a city, building, or address..." 
+                    className="pl-9"
+                    value={mapSearchQuery}
+                    onChange={(e) => setMapSearchQuery(e.target.value)}
+                  />
+                </div>
+                <Button type="submit" disabled={isMapSearching} variant="secondary">
+                  {isMapSearching ? <Activity className="h-4 w-4 animate-spin" /> : 'Search'}
+                </Button>
+              </form>
+
+              <div className="h-[400px] w-full rounded-xl overflow-hidden border border-border shadow-sm z-0 relative" style={{ zIndex: 0 }}>
+                <MapContainer center={[officeLocation.lat, officeLocation.lng]} zoom={15} scrollWheelZoom={true} style={{ height: '100%', width: '100%', zIndex: 0 }}>
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <LocationMarker 
+                    position={{lat: officeLocation.lat, lng: officeLocation.lng}} 
+                    setPosition={(pos) => setOfficeLocation({...officeLocation, lat: pos.lat, lng: pos.lng})} 
+                  />
+                </MapContainer>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 text-center">Click anywhere on the map to set your office location pin.</p>
+            </div>
           </CardContent>
         </Card>
       )
@@ -658,7 +773,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                   <div className="p-4 md:p-6 border-t border-border bg-muted/10 flex flex-col gap-6">
                     {isActive && renderSettingsContent(item.id)}
                     
-                    {isActive && ['payroll', 'company', 'expenses', 'rosters', 'notifications'].includes(item.id) && (
+                    {isActive && ['payroll', 'company', 'attendance', 'expenses', 'rosters', 'notifications'].includes(item.id) && (
                       <div className="flex justify-end gap-3 pt-4 mt-2 border-t border-border/50">
                         <Button variant="ghost" onClick={() => setShowResetModal(true)}>Reset Defaults</Button>
                         <Button onClick={handleSave} disabled={isSaving || (item.id === 'payroll' && isOver100)}>

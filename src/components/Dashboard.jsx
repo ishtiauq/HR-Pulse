@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { formatDateShort } from '../services/date.js'
+import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
 
 const DashboardWidget = ({ 
   id, title, icon, action, 
@@ -32,7 +33,7 @@ const DashboardWidget = ({
   )
 }
 
-export default function Dashboard({ employees, driveConnected, onSync, attendance, setCurrentView, announcements, events, payroll, isSidebarCollapsed, simulatedRole, hasPermission, tasks = [], documents = [], assets = [] }) {
+export default function Dashboard({ employees, driveConnected, onSync, attendance, setAttendance, currentUser, addToast, setCurrentView, announcements, events, payroll, isSidebarCollapsed, simulatedRole, hasPermission, tasks = [], documents = [], assets = [], settings }) {
   const [expandedWidgets, setExpandedWidgets] = useState([])
   
   const toggleWidget = (id) => setExpandedWidgets(prev => prev.includes(id) ? prev.filter(w => w !== id) : [...prev, id])
@@ -215,13 +216,23 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
   const recentAnnouncements = (announcements || []).slice(0, 3)
 
   return (
-    <div className="flex-1 flex flex-col gap-6 sm:gap-8">
+    <div className="animate-fade-in flex flex-col gap-4 sm:gap-6 lg:gap-8">
       
+      {simulatedRole === 'Teammate' && currentUser && (
+        <GeoCheckInWidget 
+          currentUser={currentUser} 
+          attendance={attendance} 
+          setAttendance={setAttendance} 
+          addToast={addToast} 
+          settings={settings}
+        />
+      )}
+
       {/* Page Title */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <LayoutDashboard size={20} className="text-primary" />
-          Dashboard
+          Dashboard Overview
         </h1>
       </div>
       <div className="border-t border-border border-headline" />

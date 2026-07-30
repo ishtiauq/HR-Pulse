@@ -18,6 +18,8 @@ import Expenses from './Expenses.jsx'
 import Documents from './Documents.jsx'
 import Sidebar from './layout/Sidebar.jsx'
 import Topbar from './layout/Topbar.jsx'
+import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
+import AttendancePage from './attendance/AttendancePage.jsx'
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -157,7 +159,7 @@ export default function EmployeePortal({
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardView currentUser={currentUser} attendance={attendance} expenses={expenses} announcements={announcements} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} />
+        return <DashboardView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} expenses={expenses} announcements={announcements} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} settings={settings} />
       case 'attendance':
         return <AttendanceView 
                  currentUser={currentUser} 
@@ -206,7 +208,25 @@ export default function EmployeePortal({
       case 'documents':
         return <div className="max-w-[1200px] mx-auto w-full"><Documents documents={documents} setDocuments={setDocuments} addLog={addLog} addToast={addToast} currentUser={currentUser} simulatedRole="Teammate" /></div>
       default:
-        return <DashboardView currentUser={currentUser} attendance={attendance} expenses={expenses} announcements={announcements} tasks={tasks} events={events} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} />
+        return <DashboardView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} expenses={expenses} announcements={announcements} tasks={tasks} events={events} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} settings={settings} />
+      case 'team_attendance':
+        return (
+          <AttendancePage 
+            employees={employees} 
+            attendance={attendance} 
+            setAttendance={setAttendance} 
+            roster={roster} 
+            setRoster={setRoster} 
+            shiftSwaps={shiftSwaps} 
+            setShiftSwaps={setShiftSwaps} 
+            shiftTemplates={shiftTemplates} 
+            overtimeClaims={overtimeClaims} 
+            setOvertimeClaims={setOvertimeClaims} 
+            addLog={addLog} 
+            addToast={addToast} 
+            simulatedRole={currentUser.role} 
+          />
+        )
     }
   }
 
@@ -217,6 +237,7 @@ export default function EmployeePortal({
     { id: 'announcements', icon: <Megaphone size={18} />, label: 'Feed' },
     { id: 'my-assets', icon: <Monitor size={18} />, label: 'Assets' },
     { id: 'attendance', icon: <Clock size={18} />, label: 'Attendance' },
+    ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <CheckCircle2 size={18} />, label: 'Team Attendance' }] : []),
     { id: 'payslips', icon: <FileText size={18} />, label: 'Payslips' },
     { id: 'expenses', icon: <Receipt size={18} />, label: 'Expenses' },
     { id: 'documents', icon: <FolderOpen size={18} />, label: 'Documents' },
@@ -420,7 +441,7 @@ export default function EmployeePortal({
 // SUB-VIEWS
 // ----------------------------------------------------
 
-function DashboardView({ currentUser, attendance, expenses, announcements, tasks, events, setActiveTab, setShowPunchModal }) {
+function DashboardView({ currentUser, attendance, setAttendance, addToast, expenses, announcements, tasks, events, setActiveTab, setShowPunchModal, settings }) {
   const currentBalances = attendance?.balances?.[currentUser.id] || {
     annual: { limit: 20, used: 0 },
     sick: { limit: 14, used: 0 },
@@ -454,6 +475,14 @@ function DashboardView({ currentUser, attendance, expenses, announcements, tasks
           </div>
         </CardContent>
       </Card>
+
+      <GeoCheckInWidget 
+        currentUser={currentUser} 
+        attendance={attendance} 
+        setAttendance={setAttendance} 
+        addToast={addToast} 
+        settings={settings}
+      />
 
       {/* ANNOUNCEMENTS - MOVED TO TOP */}
       <div className="flex flex-col gap-4">

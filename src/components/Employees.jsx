@@ -956,6 +956,18 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                     <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
                       <input 
                         type="checkbox" 
+                        checked={newPermissions.includes('manage_attendance')} 
+                        onChange={(e) => {
+                          if (e.target.checked) setNewPermissions(prev => [...prev, 'manage_attendance'])
+                          else setNewPermissions(prev => prev.filter(p => p !== 'manage_attendance'))
+                        }} 
+                        className="rounded border-input text-primary focus:ring-primary w-4 h-4"
+                      />
+                      Manage Attendance & Leaves
+                    </label>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
+                      <input 
+                        type="checkbox" 
                         checked={newPermissions.includes('assets')} 
                         onChange={(e) => {
                           if (e.target.checked) setNewPermissions(prev => [...prev, 'assets'])
