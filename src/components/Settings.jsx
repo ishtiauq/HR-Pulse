@@ -757,6 +757,201 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
       {/* Delete Component Alert */}
       <AlertDialog open={!!componentToDelete} onOpenChange={(open) => !open && setComponentToDelete(null)}>
+                        <TableCell className="font-medium">{conflict.file}</TableCell>
+                        <TableCell>{conflict.recordId}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[150px] break-words">{JSON.stringify(conflict.localValue)}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[150px] break-words">{JSON.stringify(conflict.remoteValue)}</TableCell>
+                        <TableCell className="text-xs">{conflict.resolution}</TableCell>
+                        <TableCell className="text-center">
+                          <Button variant="outline" size="sm" onClick={() => { setSyncConflicts(prev => prev.filter((_, idx) => idx !== i)); if (addToast) addToast("Conflict acknowledged", "success") }}>
+                            Acknowledge
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden flex flex-col gap-4">
+              {!syncConflicts || syncConflicts.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8 border border-border rounded-lg border-dashed">No sync conflicts detected.</div>
+              ) : (
+                syncConflicts.map((conflict, i) => (
+                  <div key={`${conflict.file}-${conflict.recordId}-mobile`} className="flex flex-col gap-3 p-4 bg-muted/20 border border-border rounded-lg">
+                    <div className="flex justify-between items-start gap-2">
+                      <div>
+                        <div className="font-semibold text-sm text-foreground">{conflict.file}</div>
+                        <div className="text-xs text-muted-foreground">ID: {conflict.recordId}</div>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] uppercase whitespace-nowrap">{conflict.resolution}</Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+                      <div className="bg-background rounded-md p-2.5 border border-border/50">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Local Value</span>
+                        <div className="text-xs break-words font-mono text-muted-foreground">{JSON.stringify(conflict.localValue)}</div>
+                      </div>
+                      <div className="bg-background rounded-md p-2.5 border border-border/50">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Remote Value</span>
+                        <div className="text-xs break-words font-mono text-muted-foreground">{JSON.stringify(conflict.remoteValue)}</div>
+                      </div>
+                    </div>
+                    
+                    <Button variant="outline" size="sm" className="w-full mt-1" onClick={() => { setSyncConflicts(prev => prev.filter((_, idx) => idx !== i)); if (addToast) addToast("Conflict acknowledged", "success") }}>
+                      Acknowledge
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )
+      default: return null
+    }
+  }
+
+  return (
+    <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+          <Settings2 size={20} className="text-primary" />
+          System Settings
+        </h1>
+      </div>
+      <div className="border-t border-border border-headline" />
+
+      <div className="flex flex-col gap-4">
+        {menuItems.map(item => {
+          const Icon = item.icon
+          const isActive = activeSubmenu === item.id && panelOpen
+          return (
+            <Card key={item.id} className={`overflow-hidden transition-all duration-200 shadow-xs border-border ${isActive ? 'ring-1 ring-primary/20' : ''}`}>
+              <button 
+                onClick={() => setTab(item.id)}
+                className="w-full flex items-center justify-between p-4 md:p-5 bg-card hover:bg-muted/50 transition-colors border-0 outline-none cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-muted text-muted-foreground'}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <span className={`font-semibold text-base transition-colors ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    {item.label}
+                  </span>
+                  {item.badge > 0 && (
+                    <Badge variant={isActive ? 'default' : 'secondary'} className="ml-2">{item.badge}</Badge>
+                  )}
+                </div>
+                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform duration-300 ${isActive ? 'rotate-180' : ''}`} />
+              </button>
+              
+              <div className={`grid transition-all duration-300 ease-in-out ${isActive ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                <div className="overflow-hidden">
+                  <div className="p-4 md:p-6 border-t border-border bg-muted/10 flex flex-col gap-6">
+                    {isActive && renderSettingsContent(item.id)}
+                    
+                    {isActive && ['payroll', 'company', 'expenses', 'rosters', 'notifications'].includes(item.id) && (
+                      <div className="flex justify-end gap-3 pt-4 mt-2 border-t border-border/50">
+                        <Button variant="ghost" onClick={() => setShowResetModal(true)}>Reset Defaults</Button>
+                        <Button onClick={handleSave} disabled={isSaving || (item.id === 'payroll' && isOver100)}>
+                          {isSaving ? <Activity className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                          {isSaving ? 'Saving...' : 'Save Settings'}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )
+        })}
+      </div>
+
+      <AdSlot type="horizontal" className="mt-4" />
+
+      {/* Logo Editor Modal */}
+      <Dialog open={showLogoModal} onOpenChange={setShowLogoModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Brand Logo</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-6 py-4">
+            <p className="text-sm text-muted-foreground text-center">Drag the image to reposition it, or use the slider below to zoom.</p>
+            <div role="img" aria-label="Logo preview" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onPointerLeave={handlePointerUp}
+              className="w-32 h-32 rounded-2xl bg-muted border border-border flex items-center justify-center overflow-hidden relative cursor-grab active:cursor-grabbing touch-none">
+              {logo ? <img src={logo} alt="" draggable="false" className="w-full h-full object-cover pointer-events-none" style={{ transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)` }} />
+                : <Activity className="h-8 w-8 text-muted-foreground/50" />}
+            </div>
+            <div className="w-full flex items-center gap-3">
+              <span className="text-xs font-medium text-muted-foreground">Zoom</span>
+              <input type="range" min="0.5" max="3" step="0.05" value={logoZoom} onChange={e => setLogoZoom(parseFloat(e.target.value))} className="flex-1 accent-primary" />
+            </div>
+            <div className="flex gap-3 w-full">
+              <Button variant="outline" className="flex-1" onClick={triggerFileInput}>
+                <Upload className="mr-2 h-4 w-4" /> Replace
+              </Button>
+              <Button variant="outline" className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200" onClick={handleRemoveLogo}>
+                <Trash2 className="mr-2 h-4 w-4" /> Remove
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button className="w-full" onClick={() => setShowLogoModal(false)}>
+              <Check className="mr-2 h-4 w-4" /> Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Modal */}
+      <AlertDialog open={showResetModal} onOpenChange={setShowResetModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset Settings?</AlertDialogTitle>
+            <AlertDialogDescription>This will reset all settings in the active tab to their default values.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowResetModal(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setShowResetModal(false); if (addToast) addToast('Settings reset to defaults', 'info') }}>Reset Defaults</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Add Component Modal */}
+      <Dialog open={showAddComponentModal} onOpenChange={setShowAddComponentModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Salary Component</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold">Component Name</label>
+              <Input placeholder="e.g. House Rent" value={newCompName} onChange={(e) => setNewCompName(e.target.value)} />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold">Type</label>
+              <Select value={newCompType} onChange={setNewCompType}>
+                <SelectItem id="earning">Earning</SelectItem>
+                <SelectItem id="deduction">Deduction</SelectItem>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold">Percentage (%)</label>
+              <Input type="number" min="0" max="100" placeholder="e.g. 10" value={newCompPercent} onChange={(e) => setNewCompPercent(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddComponentModal(false)}>Cancel</Button>
+            <Button onClick={saveNewComponent} disabled={!newCompName.trim() || !newCompPercent}>Add Component</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Component Alert */}
+      <AlertDialog open={!!componentToDelete} onOpenChange={(open) => !open && setComponentToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -769,7 +964,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 handleRemoveComponent(componentToDelete)
                 setComponentToDelete(null)
               }
-            }} className="bg-red-600 hover:bg-red-700 text-white">Delete</AlertDialogAction>
+            }}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

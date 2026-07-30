@@ -28,12 +28,13 @@ const AlertDialogContent = React.forwardRef(({ className, children, ...props }, 
     <AriaModal
       ref={ref}
       className={cn(
-        "w-full max-w-md overflow-hidden rounded-2xl border border-border bg-popover text-popover-foreground p-6 shadow-xl backdrop-blur-xl transition-all duration-200 data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95",
+        "w-full max-w-md flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-background/95 text-popover-foreground shadow-2xl backdrop-blur-xl transition-all duration-200 data-[entering]:animate-in data-[entering]:zoom-in-95 data-[exiting]:animate-out data-[exiting]:zoom-out-95 p-0",
         className
       )}
       {...props}
     >
-      <AriaDialog className="outline-none focus:outline-none flex flex-col gap-4">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-rose-500 to-primary z-10" />
+      <AriaDialog className="outline-none focus:outline-none flex flex-col w-full h-full p-6 sm:p-8 gap-4 overflow-y-auto">
         {children}
       </AriaDialog>
     </AriaModal>
@@ -61,7 +62,7 @@ const AlertDialogDescription = React.forwardRef(({ className, ...props }, ref) =
 ))
 AlertDialogDescription.displayName = "AlertDialogDescription"
 
-const AlertDialogAction = ({ className, variant = 'default', ...props }) => (
+const AlertDialogAction = ({ className, variant = 'destructive', ...props }) => (
   <Button variant={variant} className={cn(className)} {...props} />
 )
 

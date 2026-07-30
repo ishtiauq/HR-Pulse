@@ -345,7 +345,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
             <AlertDialogAction onClick={() => {
               handleDeleteTask(taskToDelete);
               setTaskToDelete(null);
-            }} className="bg-red-600 hover:bg-red-700 text-white">Delete</AlertDialogAction>
+            }}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
