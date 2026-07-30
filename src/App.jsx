@@ -110,10 +110,10 @@ export default function App() {
     return <Login onLogin={handleLogin} themeMode={themeMode} toggleTheme={toggleTheme} />
   }
 
-  if (appData.simulatedRole === 'Employee' || user.isEmployee) {
+  if (appData.simulatedRole === 'Teammate' || user.isEmployee) {
     return (
       <EmployeePortal
-        currentUser={{...user, role: user.role || 'Employee', department: user.department || 'Engineering'}}
+        currentUser={{...user, role: user.role || 'Teammate', department: user.department || 'Engineering'}}
         themeMode={themeMode}
         toggleTheme={toggleTheme}
         employees={appData.employees}

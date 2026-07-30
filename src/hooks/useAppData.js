@@ -42,15 +42,14 @@ export default function useAppData({ user, addToast }) {
   }
 
   const hasPermission = (resource) => {
-    if (simulatedRole === 'Admin') return true
-    if (simulatedRole === 'Employee') {
-      return ['dashboard', 'attendance', 'expenses', 'calendar'].includes(resource)
-    }
-    if (simulatedRole === 'Payroll Manager') {
-      return ['dashboard', 'employees', 'payroll', 'expenses', 'calendar', 'documents'].includes(resource)
-    }
-    if (simulatedRole === 'HR Manager') {
-      return ['dashboard', 'employees', 'attendance', 'payroll', 'expenses', 'calendar', 'documents'].includes(resource)
+    const currentRole = user?.isSimulated ? simulatedRole : (user?.role || 'Teammate')
+    if (currentRole === 'Admin') return true
+    
+    // For Teammates, base permissions + custom permissions
+    if (currentRole === 'Teammate') {
+      const basePerms = ['dashboard', 'attendance', 'expenses', 'calendar', 'tasks']
+      const customPerms = user?.permissions || []
+      return basePerms.includes(resource) || customPerms.includes(resource)
     }
     return false
   }

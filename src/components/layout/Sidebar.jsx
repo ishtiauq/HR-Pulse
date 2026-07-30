@@ -149,9 +149,7 @@ export default function Sidebar({
           <div className="flex flex-col gap-2 py-2">
             {[
               { id: 'Admin', label: 'Admin', icon: Shield, desc: 'Full access to all modules' },
-              { id: 'HR Manager', label: 'HR Manager', icon: BadgeCheck, desc: 'Manage employees, attendance, announcements' },
-              { id: 'Payroll Manager', label: 'Payroll Manager', icon: Building2, desc: 'Manage payroll, expenses, reimbursements' },
-              { id: 'Employee', label: 'Employee', icon: UserIcon, desc: 'Self-service portal access' },
+              { id: 'Teammate', label: 'Teammate', icon: UserIcon, desc: 'Self-service portal access and tasks' },
             ].map(role => (
               <button
                 key={role.id}

@@ -169,7 +169,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
               <ChevronRight size={18} />
             </Button>
           </div>
-          {simulatedRole !== 'Employee' && (
+          {(simulatedRole === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
             <Button className="w-full sm:w-auto" onClick={() => openCreateModal(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`)}>
               <Plus size={16} className="mr-1.5" /> Add Event
             </Button>
@@ -260,8 +260,8 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                       <p className="text-xs m-0 mt-1.5 text-muted-foreground">{ev.description}</p>
                     )}
                   </div>
-                  <div className="flex gap-1 shrink-0 w-full sm:w-auto justify-end mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-0 border-border/50">
-                    {!ev.isAuto && simulatedRole !== 'Employee' && (
+                  <div className="flex items-center gap-1">
+                    {!ev.isAuto && (simulatedRole === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
                       <>
                         <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditModal(ev)} aria-label="Edit event">
                           <Edit size={14} />

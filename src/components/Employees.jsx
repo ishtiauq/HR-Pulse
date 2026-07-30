@@ -70,7 +70,9 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
   // Form states
   const [newEmpId, setNewEmpId] = useState('')
   const [newName, setNewName] = useState('')
-  const [newRole, setNewRole] = useState('')
+  const [newRole, setNewRole] = useState('Teammate')
+  const [newDesignation, setNewDesignation] = useState('')
+  const [newPermissions, setNewPermissions] = useState([])
   const [newDept, setNewDept] = useState('Engineering')
   const [newEmail, setNewEmail] = useState('')
   const [newStatus, setNewStatus] = useState('Active')
@@ -128,7 +130,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
   const handleSaveEmployee = async (e) => {
     e.preventDefault()
-    if (!newEmpId || !newName || !newRole || !newEmail) return
+    if (!newEmpId || !newName || !newRole || !newEmail || !newDesignation) return
 
     const finalDept = isCustomDept ? customDept.trim() : newDept
     if (!finalDept) return
@@ -157,6 +159,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
         id: newEmpId,
         name: newName,
         role: newRole,
+        designation: newDesignation,
+        permissions: newPermissions,
         department: finalDept,
         status: newStatus,
         email: newEmail,
@@ -185,6 +189,8 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
         id: newEmpId,
         name: newName,
         role: newRole,
+        designation: newDesignation,
+        permissions: newPermissions,
         department: finalDept,
         status: newStatus,
         email: newEmail,
@@ -216,7 +222,9 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
   const handleCloseForm = () => {
     setNewEmpId('')
     setNewName('')
-    setNewRole('')
+    setNewRole('Teammate')
+    setNewDesignation('')
+    setNewPermissions([])
     setNewDept('Engineering')
     setNewEmail('')
     setNewStatus('Active')
@@ -623,7 +631,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                       </Avatar>
                       <div className="flex flex-col gap-0.5 min-w-0">
                         <h4 className="font-bold text-base break-words leading-none mb-0.5">{emp.name}</h4>
-                        <span className="text-sm font-medium text-muted-foreground break-words">{emp.role}</span>
+                        <span className="text-sm font-medium text-muted-foreground break-words">{emp.designation || emp.role}</span>
                       </div>
                     </div>
                     
@@ -668,7 +676,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                           className="flex-1 h-8 text-xs font-medium bg-background hover:bg-muted"
                           onClick={(e) => {
                             e.stopPropagation(); 
-                            setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
+                            setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role || 'Teammate'); setNewDesignation(emp.designation || emp.role || ''); setNewPermissions(emp.permissions || []); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
                           }}
                         >
                           <Edit className="mr-1.5 h-3.5 w-3.5" /> Edit
@@ -726,7 +734,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                   </AvatarFallback>
                 </Avatar>
                 <h3 className="text-xl font-bold text-foreground text-center">{viewingEmployee.name}</h3>
-                <p className="text-sm text-muted-foreground text-center mt-1">{viewingEmployee.role}</p>
+                <p className="text-sm text-muted-foreground text-center mt-1">{viewingEmployee.designation || viewingEmployee.role}</p>
                 <Badge variant={viewingEmployee.status === 'Active' ? 'default' : 'secondary'} className="mt-3">
                   {viewingEmployee.status}
                 </Badge>
@@ -758,7 +766,9 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                   setEditingEmployee(viewingEmployee);
                   setNewEmpId(viewingEmployee.id);
                   setNewName(viewingEmployee.name);
-                  setNewRole(viewingEmployee.role);
+                  setNewRole(viewingEmployee.role || 'Teammate');
+                  setNewDesignation(viewingEmployee.designation || viewingEmployee.role || '');
+                  setNewPermissions(viewingEmployee.permissions || []);
                   setNewDept(viewingEmployee.department);
                   setNewEmail(viewingEmployee.email);
                   setNewStatus(viewingEmployee.status);
@@ -879,8 +889,85 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Job Title</label>
-                <Input required value={newRole} onChange={(e) => setNewRole(e.target.value)} />
+                <Input required value={newDesignation} onChange={(e) => setNewDesignation(e.target.value)} placeholder="e.g. Software Engineer" />
               </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">System Access Role</label>
+                <Select value={newRole} onChange={(val) => { setNewRole(val); if(val === 'Admin') setNewPermissions([]); }}>
+                  <SelectItem id="Teammate">Teammate</SelectItem>
+                  <SelectItem id="Admin">Admin</SelectItem>
+                </Select>
+              </div>
+
+              {newRole === 'Teammate' && (
+                <div className="flex flex-col gap-2 md:col-span-2 mt-2 bg-muted/30 p-4 rounded-xl border border-border">
+                  <label className="text-sm font-bold text-foreground">Special Access Permissions</label>
+                  <p className="text-xs text-muted-foreground mb-3">Teammates can only see basic modules (Dashboard, Tasks, Calendar, Expenses). Select below to give them extra access to Admin modules.</p>
+                  <div className="flex flex-wrap gap-4">
+                    <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
+                      <input 
+                        type="checkbox" 
+                        checked={newPermissions.includes('payroll')} 
+                        onChange={(e) => {
+                          if (e.target.checked) setNewPermissions(prev => [...prev, 'payroll'])
+                          else setNewPermissions(prev => prev.filter(p => p !== 'payroll'))
+                        }} 
+                        className="rounded border-input text-primary focus:ring-primary w-4 h-4"
+                      />
+                      Payroll Module
+                    </label>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
+                      <input 
+                        type="checkbox" 
+                        checked={newPermissions.includes('employees')} 
+                        onChange={(e) => {
+                          if (e.target.checked) setNewPermissions(prev => [...prev, 'employees'])
+                          else setNewPermissions(prev => prev.filter(p => p !== 'employees'))
+                        }} 
+                        className="rounded border-input text-primary focus:ring-primary w-4 h-4"
+                      />
+                      Employee Directory
+                    </label>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
+                      <input 
+                        type="checkbox" 
+                        checked={newPermissions.includes('approve_expenses')} 
+                        onChange={(e) => {
+                          if (e.target.checked) setNewPermissions(prev => [...prev, 'approve_expenses'])
+                          else setNewPermissions(prev => prev.filter(p => p !== 'approve_expenses'))
+                        }} 
+                        className="rounded border-input text-primary focus:ring-primary w-4 h-4"
+                      />
+                      Expense Approver
+                    </label>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
+                      <input 
+                        type="checkbox" 
+                        checked={newPermissions.includes('approve_leaves')} 
+                        onChange={(e) => {
+                          if (e.target.checked) setNewPermissions(prev => [...prev, 'approve_leaves'])
+                          else setNewPermissions(prev => prev.filter(p => p !== 'approve_leaves'))
+                        }} 
+                        className="rounded border-input text-primary focus:ring-primary w-4 h-4"
+                      />
+                      Leave Approver
+                    </label>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer hover:text-primary transition-colors">
+                      <input 
+                        type="checkbox" 
+                        checked={newPermissions.includes('assets')} 
+                        onChange={(e) => {
+                          if (e.target.checked) setNewPermissions(prev => [...prev, 'assets'])
+                          else setNewPermissions(prev => prev.filter(p => p !== 'assets'))
+                        }} 
+                        className="rounded border-input text-primary focus:ring-primary w-4 h-4"
+                      />
+                      Asset Management
+                    </label>
+                  </div>
+                </div>
+              )}
               
               <div className="flex flex-col gap-2">
                 <Select label="Department" value={isCustomDept ? 'NEW' : newDept} onChange={(val) => {

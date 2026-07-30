@@ -310,7 +310,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
   }
 
   const handleBulkExecute = () => {
-    if (simulatedRole === 'HR Manager') return;
+    // If user has payroll access, they can recalculate
     if (selectedRows.length === 0) return
     const entriesToPay = entries.filter(e => selectedRows.includes(e.employeeId) && e.status === 'Pending')
     if (entriesToPay.length === 0) return
@@ -684,7 +684,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
               </div>
               <div className="flex gap-2 items-center">
                 <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/20" onClick={() => setSelectedRows([])}>Cancel</Button>
-                <Button variant="secondary" size="sm" onClick={handleBulkExecute} disabled={processingId === 'bulk-selected' || simulatedRole === 'HR Manager'}>
+                <Button variant="secondary" size="sm" onClick={handleBulkExecute} disabled={processingId === 'bulk-selected'}>
                   {processingId === 'bulk-selected' ? 'Processing...' : 'Execute Selected'}
                 </Button>
               </div>
@@ -759,7 +759,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
                         <Pencil className="mr-2 h-4 w-4 text-blue-500" /> Edit
                       </Button>
                       {!isPaid ? (
-                        <Button className="flex-1" onClick={() => handleExecutePayment(entry)} disabled={isProcessing || simulatedRole === 'HR Manager'}>
+                        <Button className="flex-1" onClick={() => handleExecutePayment(entry)} disabled={isProcessing}>
                           {isProcessing ? '...' : 'Execute'}
                         </Button>
                       ) : (

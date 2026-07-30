@@ -180,7 +180,7 @@ export default function EmployeePortal({
                  setAnnouncements={setAnnouncements} 
                  addToast={addToast}
                  addLog={addLog}
-                 simulatedRole="Employee"
+                 simulatedRole="Teammate"
                />
       case 'payslips':
         return <PayslipsView currentUser={currentUser} payroll={payroll} addToast={addToast} />
@@ -198,13 +198,13 @@ export default function EmployeePortal({
                  addToast={addToast}
                />
       case 'my-tasks':
-        return <div className="max-w-[1200px] mx-auto w-full"><Tasks tasks={tasks} setTasks={setTasks} employees={employees} currentUser={currentUser} addToast={addToast} simulatedRole="Employee" addLog={addLog} /></div>
+        return <div className="max-w-[1200px] mx-auto w-full"><Tasks tasks={tasks} setTasks={setTasks} employees={employees} currentUser={currentUser} addToast={addToast} simulatedRole="Teammate" addLog={addLog} /></div>
       case 'events':
-        return <div className="max-w-[1200px] mx-auto w-full"><Calendar events={events} setEvents={setEvents} employees={employees} addLog={addLog} addToast={addToast} currentUser={currentUser} simulatedRole="Employee" /></div>
+        return <div className="max-w-[1200px] mx-auto w-full"><Calendar events={events} setEvents={setEvents} employees={employees} addLog={addLog} addToast={addToast} currentUser={currentUser} simulatedRole="Teammate" /></div>
       case 'expenses':
-        return <div className="max-w-[1200px] mx-auto w-full"><Expenses employees={employees} expenses={expenses} setExpenses={setExpenses} settings={settings} addLog={addLog} addToast={addToast} addAuditLog={addLog} simulatedRole="Employee" currentUser={currentUser} /></div>
+        return <div className="max-w-[1200px] mx-auto w-full"><Expenses employees={employees} expenses={expenses} setExpenses={setExpenses} settings={settings} addLog={addLog} addToast={addToast} addAuditLog={addLog} simulatedRole="Teammate" currentUser={currentUser} /></div>
       case 'documents':
-        return <div className="max-w-[1200px] mx-auto w-full"><Documents documents={documents} setDocuments={setDocuments} addLog={addLog} addToast={addToast} currentUser={currentUser} simulatedRole="Employee" /></div>
+        return <div className="max-w-[1200px] mx-auto w-full"><Documents documents={documents} setDocuments={setDocuments} addLog={addLog} addToast={addToast} currentUser={currentUser} simulatedRole="Teammate" /></div>
       default:
         return <DashboardView currentUser={currentUser} attendance={attendance} expenses={expenses} announcements={announcements} tasks={tasks} events={events} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} />
     }

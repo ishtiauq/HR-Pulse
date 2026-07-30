@@ -140,7 +140,11 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
   // Derived Data
   const pendingQueue = expenses.filter(e => e.status === 'Pending')
   const approvedQueue = expenses.filter(e => e.status === 'Approved')
-  const myClaimsQueue = expenses.filter(e => e.employeeId === (currentUser?.employeeId || currentUser?.id || 'SYS-ADMIN'))
+  // Expense Approvers or Admins can see all expenses in the queue. Regular Teammates see only their own.
+  const canApprove = simulatedRole === 'Admin' || currentUser?.permissions?.includes('approve_expenses')
+  const canReimburse = simulatedRole === 'Admin' || currentUser?.permissions?.includes('approve_expenses')
+  
+  const myClaimsQueue = canApprove ? expenses : expenses.filter(e => e.employeeId === (currentUser?.employeeId || currentUser?.id || 'SYS-ADMIN'))
   const historyQueue = expenses.filter(e => e.status !== 'Pending')
 
   const pendingLiability = pendingQueue.reduce((acc, curr) => acc + (curr.usdAmount || (curr.amount * exchangeRates[curr.currency])), 0)
@@ -158,8 +162,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
 
   const policies = settings.expensePolicies || {}
 
-  const canApprove = ['Admin', 'HR Manager'].includes(simulatedRole)
-  const canReimburse = ['Admin', 'Payroll Manager'].includes(simulatedRole)
+
 
   return (
     <div className="animate-fade-in flex flex-col gap-4 sm:gap-6 lg:gap-8">

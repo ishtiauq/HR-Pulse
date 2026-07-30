@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Megaphone, Calendar as CalendarIcon, CreditCard, ChevronDown, LayoutDashboard, Gift, Award, Users, Activity, User } from 'lucide-react'
+import { Megaphone, Calendar as CalendarIcon, CreditCard, ChevronDown, LayoutDashboard, Gift, Award, Users, Activity, User, CheckSquare, FileText, Monitor } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -32,7 +32,7 @@ const DashboardWidget = ({
   )
 }
 
-export default function Dashboard({ employees, driveConnected, onSync, attendance, setCurrentView, announcements, events, payroll, isSidebarCollapsed, simulatedRole, hasPermission }) {
+export default function Dashboard({ employees, driveConnected, onSync, attendance, setCurrentView, announcements, events, payroll, isSidebarCollapsed, simulatedRole, hasPermission, tasks = [], documents = [], assets = [] }) {
   const [expandedWidgets, setExpandedWidgets] = useState([])
   
   const toggleWidget = (id) => setExpandedWidgets(prev => prev.includes(id) ? prev.filter(w => w !== id) : [...prev, id])
@@ -45,6 +45,9 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
   const canViewCalendar = hasPermission ? hasPermission('calendar') : true
   const canViewAnnouncements = hasPermission ? hasPermission('announcements') : true
   const canViewDrive = hasPermission ? hasPermission('drive') : true
+  const canViewTasks = hasPermission ? hasPermission('tasks') : true
+  const canViewDocuments = hasPermission ? hasPermission('documents') : true
+  const canViewAssets = hasPermission ? hasPermission('assets') : true
 
   const [totalEmployees, setTotalEmployees] = useState(0)
   const [activeCount, setActiveCount] = useState(0)
@@ -200,6 +203,10 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
   }
 
+  const pendingTasksCount = tasks.filter(t => t.status !== 'Done').length
+  const recentDocuments = documents.slice(0, 3)
+  const availableAssetsCount = assets.filter(a => a.status === 'Available').length
+
   const upcomingEvents = (events || [])
     .filter(e => new Date(e.date) >= new Date('2026-07-17'))
     .sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -222,7 +229,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-card p-5 sm:p-6 rounded-2xl border border-border shadow-sm bg-gradient-to-r from-card to-primary/5 gap-4">
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-3 text-foreground m-0">
           <Activity size={24} className="text-primary shrink-0" />
-          {simulatedRole === 'Admin' ? 'Admin Overview' : 'Manager Overview'}
+          Admin Overview
         </h2>
         <span className="text-sm font-semibold text-foreground bg-muted/80 px-4 py-2 rounded-md border border-border/50 shrink-0">
           {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
@@ -560,7 +567,111 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         </DashboardWidget>
         )}
 
-      </div>
+      {/* 8. TASKS WIDGET */}
+      {canViewTasks && (
+        <DashboardWidget
+          id="tasks-widget"
+          title="Tasks Overview"
+          icon={<CheckSquare size={18} />}
+          iconClass="bg-orange-500/10 text-orange-500"
+          {...wProps}
+          action={
+            <Button variant="ghost" size="sm" onClick={() => setCurrentView('tasks')} className="text-orange-500 hover:text-orange-600 hover:bg-orange-500/10 -mr-2">
+              View All
+            </Button>
+          }
+        >
+          <div className="flex flex-col h-full justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <span className="text-3xl font-black text-foreground">{pendingTasksCount}</span>
+              <span className="text-sm font-medium text-muted-foreground">Pending Tasks</span>
+            </div>
+            {tasks.filter(t => t.status !== 'Done').slice(0, 2).map((t, i) => (
+              <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30 border border-border">
+                <div className="w-2 h-2 rounded-full bg-orange-500 shrink-0" />
+                <p className="text-sm font-medium text-foreground truncate flex-1">{t.title}</p>
+                <Badge variant="outline" className="text-[10px] shrink-0">{t.status}</Badge>
+              </div>
+            ))}
+            {pendingTasksCount === 0 && (
+              <p className="text-sm text-muted-foreground italic">No pending tasks! Great job.</p>
+            )}
+          </div>
+        </DashboardWidget>
+      )}
+
+      {/* 9. DOCUMENTS WIDGET */}
+      {canViewDocuments && (
+        <DashboardWidget
+          id="documents-widget"
+          title="Recent Documents"
+          icon={<FileText size={18} />}
+          iconClass="bg-blue-500/10 text-blue-500"
+          {...wProps}
+          action={
+            <Button variant="ghost" size="sm" onClick={() => setCurrentView('documents')} className="text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 -mr-2">
+              View All
+            </Button>
+          }
+        >
+          <div className="flex flex-col h-full gap-3">
+            {recentDocuments.length > 0 ? recentDocuments.map((doc, i) => (
+              <div key={i} className="flex flex-col gap-1 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-bold text-foreground truncate pr-2">{doc.name}</span>
+                  <Badge variant="secondary" className="text-[10px] shrink-0">{doc.category || 'Doc'}</Badge>
+                </div>
+                <span className="text-[11px] text-muted-foreground">Updated {formatDateShort(doc.uploadDate || doc.date || new Date().toISOString())}</span>
+              </div>
+            )) : (
+              <div className="flex-1 flex items-center justify-center">
+                <p className="text-sm text-muted-foreground italic text-center">No documents found.</p>
+              </div>
+            )}
+          </div>
+        </DashboardWidget>
+      )}
+
+      {/* 10. ASSETS WIDGET */}
+      {canViewAssets && (
+        <DashboardWidget
+          id="assets-widget"
+          title="Asset Inventory"
+          icon={<Monitor size={18} />}
+          iconClass="bg-teal-500/10 text-teal-500"
+          {...wProps}
+          action={
+            <Button variant="ghost" size="sm" onClick={() => setCurrentView('assets')} className="text-teal-500 hover:text-teal-600 hover:bg-teal-500/10 -mr-2">
+              Manage
+            </Button>
+          }
+        >
+          <div className="flex flex-col h-full justify-between gap-4">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-teal-500/5 border border-teal-500/10">
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold text-teal-600/80 uppercase tracking-wider mb-1">Total Assets</span>
+                <span className="text-2xl font-black text-foreground">{assets.length}</span>
+              </div>
+              <Monitor className="text-teal-500/30 w-10 h-10" />
+            </div>
+            
+            <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border">
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Available</span>
+                <span className="text-xl font-bold text-foreground">{availableAssetsCount}</span>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Assigned</span>
+                <span className="text-xl font-bold text-foreground">{assets.length - availableAssetsCount}</span>
+              </div>
+            </div>
+          </div>
+        </DashboardWidget>
+      )}
+
+      {/* SPACER for bottom padding */}
+      <div className="h-8 col-span-full"></div>
+    </div>
     </div>
   )
 }

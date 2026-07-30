@@ -44,7 +44,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
   }
 
   const filteredTasks = tasks.filter(t => {
-    if (simulatedRole === 'Employee' && currentUser) {
+    if (simulatedRole === 'Teammate' && currentUser) {
       const isAssignee = t.assigneeIds && t.assigneeIds.includes(currentUser.id);
       const isCreator = t.createdBy === currentUser.id;
       if (!isAssignee && !isCreator) return false;
@@ -181,7 +181,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
     return employees.filter(e => ids.includes(e.id))
   }
 
-  const canEditDetails = simulatedRole !== 'Employee' || !editingTask || editingTask.createdBy === currentUser?.id;
+  const canEditDetails = simulatedRole !== 'Teammate' || !editingTask || editingTask.createdBy === currentUser?.id;
 
   return (
     <div className="w-full flex flex-col gap-6 animate-fade-in p-2 sm:p-4">
@@ -262,7 +262,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                   <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openModal(task) }} className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10">
                     <Edit className="h-4 w-4" />
                   </Button>
-                  {(simulatedRole !== 'Employee' || task.createdBy === currentUser?.id) && (
+                  {(simulatedRole !== 'Teammate' || task.createdBy === currentUser?.id) && (
                     <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setTaskToDelete(task.id) }} className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
                       <Trash2 className="h-4 w-4" />
                     </Button>
