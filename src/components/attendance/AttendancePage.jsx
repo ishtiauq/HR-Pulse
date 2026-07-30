@@ -30,23 +30,25 @@ export default function AttendancePage({ employees, attendance, setAttendance, r
 
       <ClockWidget employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />
 
-      <div role="tablist" aria-label="Attendance sections" className="flex gap-2 flex-wrap">
-        {tabs.map(t => {
-          const Icon = t.icon
-          return (
-            <Button
-              key={t.id}
-              role="tab"
-              aria-selected={tab === t.id}
-              variant={tab === t.id ? 'default' : 'outline'}
-              size="sm"
-              className="rounded-full"
-              onClick={() => setTab(t.id)}
-            >
-              <Icon size={15} /> {t.label}
-            </Button>
-          )
-        })}
+      <div className="bg-card p-2 sm:p-2.5 rounded-[1.25rem] border border-border/50 shadow-sm overflow-x-auto overflow-y-hidden no-scrollbar">
+        <div role="tablist" aria-label="Attendance sections" className="flex gap-2 w-max">
+          {tabs.map(t => {
+            const Icon = t.icon
+            return (
+              <Button
+                key={t.id}
+                role="tab"
+                aria-selected={tab === t.id}
+                variant={tab === t.id ? 'default' : 'ghost'}
+                size="sm"
+                className={`rounded-full px-4 ${tab !== t.id ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+                onClick={() => setTab(t.id)}
+              >
+                <Icon size={15} /> {t.label}
+              </Button>
+            )
+          })}
+        </div>
       </div>
 
       {tab === 'daily' && <DailyLogs employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />}
