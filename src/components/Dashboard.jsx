@@ -245,7 +245,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <div className="flex flex-col items-center gap-1.5">
             <span className="text-4xl font-black tabular-nums text-foreground">{activeCount}</span>
             <Badge variant="success" className="gap-1.5 py-1 px-3">
-              <span className="sync-dot sync-blink w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span className="sync-dot sync-blink w-2 h-2 rounded-full bg-status-success"></span>
               Active
             </Badge>
           </div>
@@ -253,7 +253,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <div className="flex flex-col items-center gap-1.5">
             <span className="text-4xl font-black tabular-nums text-foreground">{inactiveCount}</span>
             <Badge variant="destructive" className="gap-1.5 py-1 px-3">
-              <span className="sync-dot w-2 h-2 rounded-full bg-destructive"></span>
+              <span className="sync-dot w-2 h-2 rounded-full bg-status-error"></span>
               Inactive
             </Badge>
           </div>

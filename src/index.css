@@ -236,6 +236,20 @@ svg.lucide {
   border-color: hsl(var(--border)) !important;
 }
 
+/* Custom Status Colors (Bypass Neutralization) */
+.bg-status-success { background-color: #10b981 !important; color: white !important; }
+.bg-status-warning { background-color: #f59e0b !important; color: white !important; }
+.bg-status-error { background-color: #ef4444 !important; color: white !important; }
+
+/* Custom Sharp Blink Animation */
+@keyframes sharpBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.animate-blink {
+  animation: sharpBlink 1s step-start infinite !important;
+}
+
 /* ==============================================================
    UI/UX POLISH & ENHANCEMENTS (Liquid Glass Global Extension)
    ============================================================== */

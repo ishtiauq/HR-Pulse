@@ -113,11 +113,11 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
       <Card className={`p-6 sm:p-8 lg:p-10 ${driveConnected ? 'bg-emerald-500/5' : ''}`}>
         <div className="flex justify-between items-center flex-wrap gap-6">
           <div className="flex gap-5 items-center">
-            <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center ${driveConnected ? 'bg-emerald-500/10 text-emerald-500 shadow-[0_4px_20px_rgba(16,185,129,0.2)]' : 'bg-destructive/10 text-destructive'}`}>
+            <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center ${driveConnected ? 'bg-status-success/10 text-emerald-500 shadow-[0_4px_20px_rgba(16,185,129,0.2)]' : 'bg-status-error/10 text-destructive'}`}>
               {driveConnected && (
                 <>
-                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
-                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-status-success animate-ping" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-status-success" />
                 </>
               )}
               {driveConnected ? <CloudLightning size={28} /> : <CloudOff size={28} />}
