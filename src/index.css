@@ -150,6 +150,22 @@ html, body, #root {
   box-shadow: 
     inset 0 1px 1px color-mix(in srgb, var(--background) 40%, transparent),
     0 8px 32px color-mix(in srgb, var(--foreground) 5%, transparent) !important;
+  border-radius: 1rem !important; /* rounded-2xl */
+}
+
+/* Ensure glassmorphism modals clip their inner content (like calendar grids) properly to keep corners round, but allow vertical scrolling for long content */
+[role="dialog"], [role="alertdialog"], [role="alert"] {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+/* Fix nested backdrop-filter bug (Webkit/iOS) by making nested dialogs solid */
+[role="dialog"] [role="dialog"], 
+[role="alertdialog"] [role="dialog"],
+[role="dialog"] [role="alertdialog"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--card) !important;
 }
 
 /* Headline Separator Utility */
