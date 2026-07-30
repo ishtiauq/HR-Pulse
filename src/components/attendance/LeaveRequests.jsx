@@ -1,18 +1,33 @@
+import { useState } from 'react'
 import { useLeaves } from '../../hooks/useLeaves.js'
 import { formatDateShort } from '../../services/date.js'
-import { Check, X, CalendarDays } from 'lucide-react'
+import { Check, X, CalendarDays, AlertTriangle } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 
 export default function LeaveRequests({ employees, attendance, setAttendance, addToast }) {
   const { leaves, pendingLeaves, historyLeaves, balances, approveLeave, rejectLeave, pendingCount } = useLeaves(attendance, setAttendance, addToast)
+
+  const [pendingAction, setPendingAction] = useState(null) // { id, action: 'approve' | 'reject', empName }
 
   const STATUS = {
     Approved: { bg: '#28a745', color: '#fff' },
     Rejected: { bg: '#dc3545', color: '#fff' },
     Pending: { bg: '#ffc107', color: '#121212' },
+  }
+
+  const handleConfirmAction = () => {
+    if (pendingAction) {
+      if (pendingAction.action === 'approve') {
+        approveLeave(pendingAction.id)
+      } else {
+        rejectLeave(pendingAction.id)
+      }
+      setPendingAction(null)
+    }
   }
 
   return (
@@ -51,11 +66,11 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
                       <TableCell><span className="text-xs text-muted-foreground block max-w-[200px] break-words">{l.reason || '—'}</span></TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
-                          <Button size="sm" variant="default" onClick={() => approveLeave(l.id)}>
-                            <Check size={13} /> Approve
+                          <Button size="sm" variant="default" onClick={() => setPendingAction({ id: l.id, action: 'approve', empName: emp?.name || l.employeeId })}>
+                            <Check size={13} className="mr-1" /> Approve
                           </Button>
-                          <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => rejectLeave(l.id)}>
-                            <X size={13} /> Reject
+                          <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => setPendingAction({ id: l.id, action: 'reject', empName: emp?.name || l.employeeId })}>
+                            <X size={13} className="mr-1" /> Reject
                           </Button>
                         </div>
                       </TableCell>
@@ -99,6 +114,30 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
           </>
         )}
       </CardContent>
+
+      <AlertDialog open={!!pendingAction} onOpenChange={(open) => !open && setPendingAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              {pendingAction?.action === 'approve' ? 'Approve' : 'Reject'} Leave Request?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to {pendingAction?.action} the leave request for <strong>{pendingAction?.empName}</strong>?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingAction(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmAction} 
+              variant={pendingAction?.action === 'approve' ? 'default' : 'destructive'}
+              className={pendingAction?.action === 'approve' ? '!bg-[#10b981] hover:!bg-[#059669] !text-white border-0 shadow-md' : 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }

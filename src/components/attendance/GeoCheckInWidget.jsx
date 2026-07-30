@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
-import { MapPin, Clock, ShieldCheck, ShieldAlert, Zap, Loader2 } from 'lucide-react'
+import { MapPin, Clock, ShieldCheck, ShieldAlert, Zap, Loader2, PartyPopper, CheckCircle2 } from 'lucide-react'
 import { toLocal, parseMin, fmtH } from '../../services/attendance.js'
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 
 // Haversine formula to calculate distance between two coordinates in meters
 function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
@@ -37,6 +39,9 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
   const [isLoadingLoc, setIsLoadingLoc] = useState(false)
   const [bypassGps, setBypassGps] = useState(false)
   
+  // Success Message State
+  const [successMsg, setSuccessMsg] = useState(null)
+  
   // Ensure current user is valid
   const empId = currentUser?.employeeId || currentUser?.id
   const empName = currentUser?.name || 'Teammate'
@@ -53,6 +58,16 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
   
   const canCheckIn = empId && empLog.checkIn === '--'
   const canCheckOut = empId && empLog.checkIn !== '--' && empLog.checkOut === '--'
+
+  const showSuccessOverlay = (type, time, hoursWorked = null) => {
+    setSuccessMsg({ type, time, hoursWorked })
+    // Only auto-close if it's a Check-in
+    if (type === 'Check-in') {
+      setTimeout(() => {
+        setSuccessMsg(null)
+      }, 4000)
+    }
+  }
 
   const executeActionWithLocation = (actionCallback) => {
     if (bypassGps) {
@@ -113,7 +128,7 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
           }
         }
       }))
-      addToast?.('Successfully checked in!', 'success')
+      showSuccessOverlay('Check-in', now)
     })
   }
 
@@ -138,16 +153,49 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
           }
         }
       }))
-      addToast?.('Successfully checked out!', 'success')
+      showSuccessOverlay('Check-out', now, h)
     })
   }
 
   if (!empId) return null
 
   return (
-    <Card className="col-span-full xl:col-span-12 border-primary/20 bg-card overflow-hidden shadow-sm mb-6">
-      <CardHeader className="bg-primary/5 pb-4 border-b border-border">
-        <div className="flex items-center justify-between">
+    <>
+      <Dialog open={!!successMsg} onOpenChange={(open) => { if (!open) setSuccessMsg(null) }}>
+        <DialogContent className="max-w-[400px] border-border/50 bg-popover shadow-lg flex flex-col items-center justify-center p-8 gap-4 rounded-[1rem] outline-none">
+          <DialogTitle className="sr-only">Check In Successful</DialogTitle>
+          <div className="size-24 rounded-full bg-primary/10 flex items-center justify-center animate-bounce mt-4 shadow-inner">
+            {successMsg?.type === 'Check-in' ? (
+              <PartyPopper className="text-primary" size={48} />
+            ) : (
+              <CheckCircle2 className="text-primary" size={48} />
+            )}
+          </div>
+          <h2 className="text-3xl font-black headline-gradient text-center">
+            {successMsg?.type} Successful!
+          </h2>
+          <div className="text-center flex flex-col gap-2 w-full mt-2">
+            <div className="bg-muted/30 py-3 rounded-lg border border-border flex flex-col items-center justify-center">
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Time Recorded</span>
+              <span className="text-foreground font-mono text-xl font-bold">{successMsg?.time}</span>
+            </div>
+            
+            {successMsg?.hoursWorked && (
+              <div className="bg-primary/5 py-3 rounded-lg border border-primary/20 flex flex-col items-center justify-center mt-2">
+                <span className="text-xs text-primary/70 uppercase tracking-wider font-semibold mb-1">Total Hours Today</span>
+                <span className="text-primary font-mono text-xl font-bold">{successMsg.hoursWorked} <span className="text-sm">hrs</span></span>
+              </div>
+            )}
+          </div>
+          <Button onClick={() => setSuccessMsg(null)} className="w-full mt-4 rounded-full h-11 text-base font-semibold shadow-sm">
+            Done
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      <Card className="col-span-full xl:col-span-12 border-primary/20 bg-card overflow-hidden shadow-sm mb-6">
+        <CardHeader className="bg-primary/5 pb-4 border-b border-border">
+          <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-md bg-primary/10 text-primary">
               <MapPin size={20} />
@@ -254,5 +302,6 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
         </div>
       </CardContent>
     </Card>
+    </>
   )
 }

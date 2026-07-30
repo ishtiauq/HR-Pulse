@@ -187,7 +187,7 @@ export default function EmployeePortal({
       case 'payslips':
         return <PayslipsView currentUser={currentUser} payroll={payroll} addToast={addToast} />
       case 'leave':
-        return <LeaveView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} addLog={addLog} />
+        return <LeaveView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} addLog={addLog} settings={settings} />
       case 'profile':
         return <ProfileView currentUser={currentUser} pendingProfileEdits={pendingProfileEdits} setPendingProfileEdits={setPendingProfileEdits} addToast={addToast} addLog={addLog} />
       case 'my-assets':
@@ -225,6 +225,7 @@ export default function EmployeePortal({
             addLog={addLog} 
             addToast={addToast} 
             simulatedRole={currentUser.role} 
+            settings={settings}
           />
         )
     }
@@ -607,7 +608,7 @@ function AttendanceView({
   addToast 
 }) {
   const currentMonth = formatMonthYear(new Date().toISOString().split('T')[0])
-  const [activeSubTab, setActiveSubTab] = useState('roster') // 'roster', 'swap', 'overtime', 'offday'
+  const [activeSubTab, setActiveSubTab] = useState('history') // 'history', 'roster', 'swap', 'overtime', 'offday'
 
   const today = new Date()
   const currentDay = today.getDay()
@@ -698,11 +699,64 @@ function AttendanceView({
       <h2 className="text-2xl font-bold m-0">My Attendance & Roster</h2>
       
       <div className="flex gap-2 border-b border-border pb-3 flex-wrap">
+        <Button variant={activeSubTab === 'history' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('history')}>My Logs</Button>
         <Button variant={activeSubTab === 'roster' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('roster')}>My Schedule</Button>
         <Button variant={activeSubTab === 'swap' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('swap')}>Request Swap</Button>
         <Button variant={activeSubTab === 'offday' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('offday')}>Change Offday</Button>
         <Button variant={activeSubTab === 'overtime' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('overtime')}>Log Overtime</Button>
       </div>
+
+      {activeSubTab === 'history' && (() => {
+        const myHistory = Object.entries(attendance?.dailyLogs || {})
+          .filter(([date, logs]) => logs[currentUser.id])
+          .map(([date, logs]) => ({ date, log: logs[currentUser.id] }))
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .slice(0, 30) // last 30 days
+        
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>My Attendance Logs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border bg-card overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Check In</TableHead>
+                      <TableHead>Check Out</TableHead>
+                      <TableHead>Total Hrs</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {myHistory.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                          No recent logs found.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      myHistory.map(({ date, log }) => (
+                        <TableRow key={date}>
+                          <TableCell className="font-medium">{new Date(date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</TableCell>
+                          <TableCell>{log.checkIn}</TableCell>
+                          <TableCell>{log.checkOut}</TableCell>
+                          <TableCell>{log.hours}</TableCell>
+                          <TableCell>
+                            <Badge variant={log.status === 'Present' ? 'default' : 'secondary'}>{log.status}</Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )
+      })()}
 
       {activeSubTab === 'roster' && (
         <Card>
@@ -898,10 +952,14 @@ function PayslipsView({ currentUser, payroll, addToast }) {
   )
 }
 
-function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog }) {
+function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, settings }) {
   const myLeaves = (attendance?.leaves || []).filter(l => l.employeeId === currentUser.id)
   
-  const [type, setType] = useState('Annual')
+  const defaultPolicies = settings?.leavePolicies || { Annual: 14, Sick: 7, Casual: 3, Unpaid: 0 }
+  const myBalance = attendance?.leaveBalances?.[currentUser.id] || defaultPolicies
+  const leaveTypes = Object.keys(defaultPolicies)
+  
+  const [type, setType] = useState(leaveTypes[0] || 'Annual')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [reason, setReason] = useState('')
@@ -934,6 +992,17 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
       <h2 className="text-2xl font-bold m-0">My Leave</h2>
       
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {Object.entries(myBalance).map(([lType, days]) => (
+           <Card key={lType} className="bg-primary/5 border-primary/20 shadow-sm">
+             <CardContent className="p-4 flex flex-col items-center justify-center">
+                <div className="text-xs font-bold text-primary/70 uppercase tracking-wider mb-1">{lType}</div>
+                <div className="text-3xl font-black text-primary tabular-nums">{days} <span className="text-sm text-primary/50">days</span></div>
+             </CardContent>
+           </Card>
+        ))}
+      </div>
+      
       <Card>
         <CardHeader>
           <CardTitle>Apply for Leave</CardTitle>
@@ -943,10 +1012,9 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none">Leave type</label>
               <Select value={type} onChange={setType} placeholder="Leave type">
-                <SelectItem id="Annual">Annual</SelectItem>
-                <SelectItem id="Sick">Sick</SelectItem>
-                <SelectItem id="Casual">Casual</SelectItem>
-                <SelectItem id="Unpaid">Unpaid</SelectItem>
+                {leaveTypes.map(t => (
+                  <SelectItem key={t} id={t}>{t}</SelectItem>
+                ))}
               </Select>
             </div>
             

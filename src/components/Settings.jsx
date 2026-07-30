@@ -66,6 +66,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const [currency, setCurrency] = useState(settings.currency || '৳')
   const [salaryStructure, setSalaryStructure] = useState(settings.salaryStructure || [])
   const [expensePolicies, setExpensePolicies] = useState(settings.expensePolicies || { Travel: 500, Meals: 50, 'Office Supplies': 100, Medical: 200, Other: 50 })
+  const [leavePolicies, setLeavePolicies] = useState(settings.leavePolicies || { Annual: 14, Sick: 7, Casual: 3, Unpaid: 0 })
   const [companyName, setCompanyName] = useState(settings.company?.name || 'HR Pulse Ltd.')
   const [companyEmail, setCompanyEmail] = useState(settings.company?.email || 'hr@hrpulse.io')
   const [companyWebsite, setCompanyWebsite] = useState(settings.company?.website || 'www.hrpulse.io')
@@ -112,6 +113,8 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   useModal(() => setShowResetModal(false))
   const [componentToDelete, setComponentToDelete] = useState(null)
   useModal(() => setComponentToDelete(null))
+  const [leaveTypeToDelete, setLeaveTypeToDelete] = useState(null)
+  useModal(() => setLeaveTypeToDelete(null))
 
   const [showAddComponentModal, setShowAddComponentModal] = useState(false)
   const [newCompName, setNewCompName] = useState('')
@@ -123,6 +126,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     if (settings.currency && settings.currency !== currency) setCurrency(settings.currency)
     if (settings.salaryStructure) setSalaryStructure(settings.salaryStructure)
     if (settings.expensePolicies) setExpensePolicies(settings.expensePolicies)
+    if (settings.leavePolicies) setLeavePolicies(settings.leavePolicies)
     if (settings.company?.name) setCompanyName(settings.company.name)
     if (settings.company?.email) setCompanyEmail(settings.company.email)
     if (settings.company?.website) setCompanyWebsite(settings.company.website)
@@ -170,7 +174,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     Promise.resolve().then(() => {
       setSettings({
         ...settings,
-        currency, salaryStructure, expensePolicies, shiftTemplates, overtimeRules, officeLocation,
+        currency, salaryStructure, expensePolicies, leavePolicies, shiftTemplates, overtimeRules, officeLocation,
         company: { ...settings.company, name: companyName, email: companyEmail, website: companyWebsite, logo, logoX, logoY, logoZoom },
         notifications: { syncAlerts, emailDigests }
       })
@@ -206,7 +210,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const menuItems = [
     { id: 'payroll', icon: Sliders, label: 'Payroll Settings' },
     { id: 'company', icon: Building2, label: 'Company Profile' },
-    { id: 'attendance', icon: MapPin, label: 'Attendance Location' },
+    { id: 'attendance', icon: MapPin, label: 'Attendance & Leaves' },
     { id: 'expenses', icon: Receipt, label: 'Expense Policies' },
     { id: 'rosters', icon: CalendarClock, label: 'Rosters & Shifts' },
     { id: 'notifications', icon: Bell, label: 'Notifications' },
@@ -387,64 +391,122 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         </Card>
       )
       case 'attendance': return (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-muted-foreground" />
-              <CardTitle className="text-lg">Office Location Settings</CardTitle>
-            </div>
-            <CardDescription>Set the central GPS coordinates and check-in radius for your office.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Latitude</label>
-                <Input type="number" step="any" value={officeLocation.lat} onChange={e => setOfficeLocation({...officeLocation, lat: parseFloat(e.target.value)})} />
+        <div className="flex flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-muted-foreground" />
+                <CardTitle className="text-lg">Office Location Settings</CardTitle>
               </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Longitude</label>
-                <Input type="number" step="any" value={officeLocation.lng} onChange={e => setOfficeLocation({...officeLocation, lng: parseFloat(e.target.value)})} />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Radius (meters)</label>
-                <Input type="number" value={officeLocation.radius} onChange={e => setOfficeLocation({...officeLocation, radius: parseInt(e.target.value, 10)})} />
-              </div>
-            </div>
-            
-            <div className="flex flex-col gap-2 mt-2">
-              <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Interactive Map Picker</label>
-              
-              <form onSubmit={handleMapSearch} className="flex gap-2 mb-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search for a city, building, or address..." 
-                    className="pl-9"
-                    value={mapSearchQuery}
-                    onChange={(e) => setMapSearchQuery(e.target.value)}
-                  />
+              <CardDescription>Set the central GPS coordinates and check-in radius for your office.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Latitude</label>
+                  <Input type="number" step="any" value={officeLocation.lat} onChange={e => setOfficeLocation({...officeLocation, lat: parseFloat(e.target.value)})} />
                 </div>
-                <Button type="submit" disabled={isMapSearching} variant="secondary">
-                  {isMapSearching ? <Activity className="h-4 w-4 animate-spin" /> : 'Search'}
-                </Button>
-              </form>
-
-              <div className="h-[400px] w-full rounded-xl overflow-hidden border border-border shadow-sm z-0 relative" style={{ zIndex: 0 }}>
-                <MapContainer center={[officeLocation.lat, officeLocation.lng]} zoom={15} scrollWheelZoom={true} style={{ height: '100%', width: '100%', zIndex: 0 }}>
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <LocationMarker 
-                    position={{lat: officeLocation.lat, lng: officeLocation.lng}} 
-                    setPosition={(pos) => setOfficeLocation({...officeLocation, lat: pos.lat, lng: pos.lng})} 
-                  />
-                </MapContainer>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Longitude</label>
+                  <Input type="number" step="any" value={officeLocation.lng} onChange={e => setOfficeLocation({...officeLocation, lng: parseFloat(e.target.value)})} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Radius (meters)</label>
+                  <Input type="number" value={officeLocation.radius} onChange={e => setOfficeLocation({...officeLocation, radius: parseInt(e.target.value, 10)})} />
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-1 text-center">Click anywhere on the map to set your office location pin.</p>
-            </div>
-          </CardContent>
-        </Card>
+              
+              <div className="flex flex-col gap-2 mt-2">
+                <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Interactive Map Picker</label>
+                
+                <form onSubmit={handleMapSearch} className="flex gap-2 mb-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="Search for a city, building, or address..." 
+                      className="pl-9"
+                      value={mapSearchQuery}
+                      onChange={(e) => setMapSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  <Button type="submit" disabled={isMapSearching} variant="secondary">
+                    {isMapSearching ? <Activity className="h-4 w-4 animate-spin" /> : 'Search'}
+                  </Button>
+                </form>
+
+                <div className="h-[400px] w-full rounded-xl overflow-hidden border border-border shadow-sm z-0 relative" style={{ zIndex: 0 }}>
+                  <MapContainer center={[officeLocation.lat, officeLocation.lng]} zoom={15} scrollWheelZoom={true} style={{ height: '100%', width: '100%', zIndex: 0 }}>
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <LocationMarker 
+                      position={{lat: officeLocation.lat, lng: officeLocation.lng}} 
+                      setPosition={(pos) => setOfficeLocation({...officeLocation, lat: pos.lat, lng: pos.lng})} 
+                    />
+                  </MapContainer>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 text-center">Click anywhere on the map to set your office location pin.</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CalendarClock className="h-5 w-5 text-muted-foreground" />
+                <CardTitle className="text-lg">Leave Types & Balances</CardTitle>
+              </div>
+              <CardDescription>Determine what leaves the company provides and the default yearly allowance for each.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {Object.entries(leavePolicies).map(([type, days]) => (
+                  <div key={type} className="flex items-center gap-4 bg-muted/30 p-3 rounded-xl border border-border">
+                    <Input 
+                      className="flex-1 font-semibold" 
+                      value={type} 
+                      onChange={e => {
+                        const newPolicies = { ...leavePolicies }
+                        const oldDays = newPolicies[type]
+                        delete newPolicies[type]
+                        newPolicies[e.target.value] = oldDays
+                        setLeavePolicies(newPolicies)
+                      }}
+                      placeholder="Leave Name (e.g. Annual)"
+                    />
+                    <div className="flex items-center gap-2">
+                      <Input 
+                        type="number" 
+                        className="w-[100px]" 
+                        value={days} 
+                        onChange={e => setLeavePolicies({ ...leavePolicies, [type]: parseInt(e.target.value, 10) || 0 })}
+                        placeholder="Days"
+                      />
+                      <span className="text-sm text-muted-foreground">days</span>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10" 
+                      onClick={() => setLeaveTypeToDelete(type)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-2 border-dashed border-2 hover:border-primary hover:text-primary transition-colors bg-transparent"
+                  onClick={() => setLeavePolicies({ ...leavePolicies, [`New Leave ${Date.now()}`]: 0 })}
+                >
+                  <Plus className="mr-2 h-4 w-4" /> Add Leave Type
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )
       case 'expenses': return (
         <Card>
@@ -885,6 +947,28 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 setComponentToDelete(null)
               }
             }}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Leave Type Modal */}
+      <AlertDialog open={!!leaveTypeToDelete} onOpenChange={(open) => !open && setLeaveTypeToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Leave Type?</AlertDialogTitle>
+            <AlertDialogDescription>Are you sure you want to delete the <strong>{leaveTypeToDelete}</strong> leave type? This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setLeaveTypeToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (leaveTypeToDelete) {
+                const newPolicies = { ...leavePolicies }
+                delete newPolicies[leaveTypeToDelete]
+                setLeavePolicies(newPolicies)
+                if (addToast) addToast(`Deleted ${leaveTypeToDelete} leave`, "success")
+              }
+              setLeaveTypeToDelete(null)
+            }} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

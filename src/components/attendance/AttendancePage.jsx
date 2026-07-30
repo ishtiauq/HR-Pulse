@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Clock, CalendarDays, ArrowUpDown, Cpu } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import ClockWidget from './ClockWidget.jsx'
 import DailyLogs from './DailyLogs.jsx'
 import LeaveRequests from './LeaveRequests.jsx'
 import LeaveBalanceCard from './LeaveBalanceCard.jsx'
@@ -9,7 +8,24 @@ import RosterPlanner from './RosterPlanner.jsx'
 import ShiftSwaps from './ShiftSwaps.jsx'
 import OvertimeClaims from './OvertimeClaims.jsx'
 
-export default function AttendancePage({ employees, attendance, setAttendance, roster, setRoster, shiftSwaps, setShiftSwaps, shiftTemplates, overtimeClaims, setOvertimeClaims, addLog, addToast, addNotification, simulatedRole, addAuditLog }) {
+export default function AttendancePage({ 
+  employees, 
+  attendance, 
+  setAttendance, 
+  roster, 
+  setRoster, 
+  shiftSwaps, 
+  setShiftSwaps, 
+  shiftTemplates, 
+  overtimeClaims, 
+  setOvertimeClaims, 
+  addLog, 
+  addToast, 
+  addNotification, 
+  simulatedRole, 
+  addAuditLog,
+  settings 
+}) {
   const [tab, setTab] = useState('daily')
   const tabs = [
     { id: 'daily', label: 'Daily Logs', icon: Clock },
@@ -27,8 +43,6 @@ export default function AttendancePage({ employees, attendance, setAttendance, r
         </h1>
       </div>
       <div className="border-t border-border border-headline" />
-
-      <ClockWidget employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />
 
       <div className="bg-card p-2 sm:p-2.5 rounded-[1.25rem] border border-border/50 shadow-sm overflow-x-auto overflow-y-hidden no-scrollbar">
         <div role="tablist" aria-label="Attendance sections" className="flex gap-2 w-max">
@@ -53,9 +67,16 @@ export default function AttendancePage({ employees, attendance, setAttendance, r
 
       {tab === 'daily' && <DailyLogs employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />}
       {tab === 'leave' && (
-        <div className="flex flex-col gap-5">
-          <LeaveRequests employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />
-          <LeaveBalanceCard employees={employees} balances={attendance.balances || {}} />
+        <div className="grid gap-6">
+          <LeaveBalanceCard employees={employees} balances={attendance.leaveBalances || {}} settings={settings} />
+          <LeaveRequests 
+            leaves={attendance.leaves} 
+            employees={employees} 
+            setAttendance={setAttendance}
+            addLog={addLog}
+            addToast={addToast}
+            settings={settings}
+          />
         </div>
       )}
       {tab === 'roster' && (
