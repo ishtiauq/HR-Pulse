@@ -6,6 +6,7 @@ import { Select, SelectItem } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DatePicker } from "@/components/ui/date-picker"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -710,8 +711,7 @@ function AttendanceView({
           <CardContent>
             <form onSubmit={handleRequestSwap} className="flex flex-col gap-5">
               <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Date to Swap</label>
-                <Input type="date" required value={swapDate} onChange={(e) => setSwapDate(e.target.value)} />
+                <DatePicker label="Date to Swap" required value={swapDate} onChange={(e) => setSwapDate(e.target.value)} />
               </div>
               
               <div className="space-y-2">
@@ -793,8 +793,7 @@ function AttendanceView({
           <CardContent>
             <form onSubmit={handleClaimOvertime} className="flex flex-col gap-5">
               <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Date</label>
-                <Input type="date" required value={otDate} onChange={(e) => setOtDate(e.target.value)} />
+                <DatePicker label="Date" required value={otDate} onChange={(e) => setOtDate(e.target.value)} />
               </div>
               
               <div className="space-y-2">
@@ -922,15 +921,9 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog })
               </Select>
             </div>
             
-            <div className="flex gap-4">
-              <div className="flex-1 space-y-2">
-                <label className="text-sm font-medium leading-none">Start Date</label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
-              </div>
-              <div className="flex-1 space-y-2">
-                <label className="text-sm font-medium leading-none">End Date</label>
-                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} required />
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              <DatePicker label="Start Date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
+              <DatePicker label="End Date" value={endDate} onChange={e => setEndDate(e.target.value)} required />
             </div>
             
             <div className="space-y-2">

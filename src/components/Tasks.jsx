@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Plus, Search, LayoutGrid, List, MoreVertical, Calendar as CalendarIcon, Edit, Trash2, CheckSquare, ChevronDown, MessageSquare, Send, User } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DatePicker } from "@/components/ui/date-picker"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { Select, SelectItem } from "@/components/ui/select"
@@ -468,9 +469,8 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Due Date</label>
-                    <Input 
-                      type="date" 
+                    <DatePicker 
+                      label="Due Date"
                       value={taskForm.dueDate} 
                       onChange={e => setTaskForm({...taskForm, dueDate: e.target.value})} 
                       className="bg-background shadow-sm w-full"
@@ -618,13 +618,12 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Due Date</label>
-                  <Input 
-                    type="date" 
+                  <DatePicker 
+                    label="Due Date"
                     value={taskForm.dueDate} 
                     onChange={e => setTaskForm({...taskForm, dueDate: e.target.value})} 
                     className="bg-background shadow-sm w-full"
-                    disabled={!canEditDetails}
+                    isDisabled={!canEditDetails}
                   />
                 </div>
               </div>

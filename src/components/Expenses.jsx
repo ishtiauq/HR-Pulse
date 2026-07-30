@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DatePicker } from "@/components/ui/date-picker"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
@@ -244,8 +245,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                     )}
                   </div>
                   <div className="flex-1 flex flex-col gap-1.5">
-                    <label className="text-sm font-semibold text-muted-foreground">Date</label>
-                    <Input type="date" value={date} onChange={e => setDate(e.target.value)} required aria-label="Expense date" />
+                    <DatePicker label="Date" value={date} onChange={e => setDate(e.target.value)} required />
                   </div>
                 </div>
 

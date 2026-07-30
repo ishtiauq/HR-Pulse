@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Badge } from "@/components/ui/badge"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { Select, SelectItem } from "@/components/ui/select"
+import { DatePicker } from "@/components/ui/date-picker"
 
 const categoryIcons = {
   'Laptop': <Laptop className="w-4 h-4" />,
@@ -491,9 +492,8 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
               <CardContent className="pt-6">
                 <form onSubmit={handleAddMaintenance} className="flex flex-col gap-5">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-medium">Maintenance Date</label>
-                      <Input type="date" required value={maintForm.date} onChange={e => setMaintForm(p => ({...p, date: e.target.value}))} />
+                    <div className="flex flex-col gap-1.5 w-full">
+                      <DatePicker label="Maintenance Date" required value={maintForm.date} onChange={(e) => setMaintForm(p => ({...p, date: e.target.value}))} />
                     </div>
                     <div className="flex flex-col gap-2">
                       <label className="text-sm font-medium">Repair Cost ($)</label>
@@ -583,10 +583,7 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
               <label className="text-sm font-medium">Serial Number / IMEI</label>
               <Input type="text" required placeholder="SN12345678" value={newAsset.serialNumber} onChange={e => setNewAsset(p => ({...p, serialNumber: e.target.value}))} />
             </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium">Purchase Date</label>
-              <Input type="date" required value={newAsset.purchaseDate} onChange={e => setNewAsset(p => ({...p, purchaseDate: e.target.value}))} />
-            </div>
+            <DatePicker label="Purchase Date" required value={newAsset.purchaseDate} onChange={(e) => setNewAsset(p => ({...p, purchaseDate: e.target.value}))} />
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">Purchase Price ($)</label>
               <Input type="number" required placeholder="0.00" value={newAsset.purchasePrice} onChange={e => setNewAsset(p => ({...p, purchasePrice: e.target.value}))} />
@@ -595,10 +592,7 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
               <label className="text-sm font-medium">Useful Life (Months)</label>
               <Input type="number" required placeholder="36" value={newAsset.usefulLife} onChange={e => setNewAsset(p => ({...p, usefulLife: e.target.value}))} />
             </div>
-            <div className="flex flex-col gap-2 sm:col-span-2">
-              <label className="text-sm font-medium">Warranty Expiry Date</label>
-              <Input type="date" required value={newAsset.warrantyExpiry} onChange={e => setNewAsset(p => ({...p, warrantyExpiry: e.target.value}))} />
-            </div>
+            <DatePicker label="Warranty Expiry" required value={newAsset.warrantyExpiry} onChange={(e) => setNewAsset(p => ({...p, warrantyExpiry: e.target.value}))} />
           </div>
           
           <DialogFooter className="mt-4">

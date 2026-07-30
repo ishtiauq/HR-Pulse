@@ -7,6 +7,7 @@ import { formatDateTime } from '../services/date.js'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DatePicker } from "@/components/ui/date-picker"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
@@ -433,8 +434,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           <CardContent className="flex flex-col gap-4">
             <div className="flex flex-wrap items-end gap-4 p-4 bg-muted/40 border border-border rounded-lg">
               <div className="flex-1 min-w-[140px] flex flex-col gap-2">
-                <label className="text-xs font-medium text-muted-foreground uppercase">Date</label>
-                <Input type="date" value={auditFilterDate} onChange={e => setAuditFilterDate(e.target.value)} />
+                <DatePicker label="Date" value={auditFilterDate} onChange={e => setAuditFilterDate(e.target.value)} />
               </div>
               <div className="flex-1 min-w-[140px] flex flex-col gap-2">
                 <Select label="ACTION TYPE" value={auditFilterAction} onChange={setAuditFilterAction}>

@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectItem } from "@/components/ui/select"
+import { DatePicker } from "@/components/ui/date-picker"
 
 
 
@@ -882,18 +883,13 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               </div>
               
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Department</label>
-                <select
-                  value={isCustomDept ? 'NEW' : newDept}
-                  onChange={(e) => {
-                    if (e.target.value === 'NEW') { setIsCustomDept(true); } 
-                    else { setIsCustomDept(false); setNewDept(e.target.value); }
-                  }}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                >
-                  {activeDepts.map(d => <option key={d} value={d}>{d}</option>)}
-                  <option value="NEW">+ Add New Department...</option>
-                </select>
+                <Select label="Department" value={isCustomDept ? 'NEW' : newDept} onChange={(val) => {
+                    if (val === 'NEW') { setIsCustomDept(true); } 
+                    else { setIsCustomDept(false); setNewDept(val); }
+                  }}>
+                  {activeDepts.map(d => <SelectItem key={d} id={d}>{d}</SelectItem>)}
+                  <SelectItem id="NEW">+ Add New Department...</SelectItem>
+                </Select>
                 {isCustomDept && (
                   <Input required placeholder="New dept name..." value={customDept} onChange={(e) => setCustomDept(e.target.value)} className="mt-1" />
                 )}
@@ -909,15 +905,9 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                 <Input type="text" placeholder={editingEmployee ? "Leave blank" : "Set password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Date of Birth</label>
-                <Input type="date" value={newDob} onChange={(e) => setNewDob(e.target.value)} />
-              </div>
+              <DatePicker label="Date of Birth" value={newDob} onChange={(e) => setNewDob(e.target.value)} />
 
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Joining Date</label>
-                <Input type="date" value={newJoiningDate} onChange={(e) => setNewJoiningDate(e.target.value)} />
-              </div>
+              <DatePicker label="Joining Date" value={newJoiningDate} onChange={(e) => setNewJoiningDate(e.target.value)} />
 
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Upload CV</label>
