@@ -144,7 +144,7 @@ html, body, #root {
 /* Global Glassmorphism for Cards, Modals, Popovers, and Sidebar (Liquid Glass) */
 @layer components {
   .bg-card, .bg-popover, .bg-sidebar, [role="dialog"], [role="alertdialog"], [role="alert"], .topbar, .bottom-bar, .glass-panel {
-    background: rgba(255, 255, 255, 0.55) !important;
+    background: rgba(255, 255, 255, 0.75) !important;
     backdrop-filter: blur(24px) saturate(120%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(120%) !important;
     border: 1px solid rgba(0, 0, 0, 0.1) !important;
@@ -157,7 +157,7 @@ html, body, #root {
   }
 
   .dark .bg-card, .dark .bg-popover, .dark .bg-sidebar, .dark [role="dialog"], .dark [role="alertdialog"], .dark [role="alert"], .dark .topbar, .dark .bottom-bar, .dark .glass-panel {
-    background: rgba(15, 15, 20, 0.65) !important;
+    background: rgba(15, 15, 20, 0.85) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     box-shadow: 
       inset 0 1px 1px rgba(255, 255, 255, 0.05),
@@ -234,6 +234,75 @@ svg.lucide {
 [class*="border-indigo-"], [class*="border-cyan-"], [class*="border-teal-"], [class*="border-purple-"], 
 [class*="border-pink-"] {
   border-color: hsl(var(--border)) !important;
+}
+
+/* ==============================================================
+   UI/UX POLISH & ENHANCEMENTS (Liquid Glass Global Extension)
+   ============================================================== */
+
+/* 1. Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.3);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.5);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 100, 0.3);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 100, 100, 0.5);
+}
+
+/* 2. Card Micro-animations (Hover Lift & Glow) */
+.bg-card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.bg-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    0 12px 40px rgba(0, 0, 0, 0.1) !important;
+}
+.dark .bg-card:hover {
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.1),
+    0 12px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 3. Global Button Polish (Pill Shape & Hover Scale) */
+button, .bg-primary, .bg-secondary, .bg-destructive {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+button:active {
+  transform: scale(0.96) !important;
+}
+.bg-primary {
+  border-radius: 9999px !important; /* Smooth pill shape */
+  box-shadow: 0 4px 15px -3px rgba(240, 90, 20, 0.4) !important; /* Premium glow using theme primary approx */
+}
+.bg-primary:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 20px -3px rgba(240, 90, 20, 0.6) !important;
+}
+
+/* 4. Glass Inputs & Smooth Focus Rings */
+input, select, textarea, .border-input {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-radius: 0.75rem !important; /* Rounded inputs */
+}
+input:focus, select:focus, textarea:focus, .focus-within\:ring-2:focus-within {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(240, 90, 20, 0.3) !important; /* Animated Focus Glow */
+  border-color: var(--primary) !important;
 }
 
 
