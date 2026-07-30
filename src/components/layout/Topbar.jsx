@@ -53,7 +53,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
           disabled={isSyncing}
           className="h-8 w-8 p-0 sm:w-auto sm:h-9 sm:px-4 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-semibold gap-1.5 sm:gap-2 shrink-0"
         >
-          <span className={`size-2 rounded-full shrink-0 ${isSyncing ? 'bg-amber-500 animate-spin' : (!driveConnected || syncConflicts.length > 0) ? 'bg-destructive' : 'bg-emerald-500'}`}></span>
+          <span className={`w-2 h-2 min-w-[8px] min-h-[8px] block rounded-full shrink-0 shadow-[0_0_8px_rgba(0,0,0,0.5)] ${isSyncing ? 'bg-amber-500 animate-spin' : (!driveConnected || syncConflicts.length > 0) ? 'bg-destructive animate-pulse' : 'bg-emerald-500 animate-pulse'}`}></span>
           <span className="hidden sm:inline">{isSyncing ? 'Syncing...' : (!driveConnected || syncConflicts.length > 0) ? 'Not Synced' : 'Synced'}</span>
         </Button>
 
