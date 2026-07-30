@@ -449,27 +449,27 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         .mesh-orb {
           position: absolute;
           border-radius: 50%;
-          filter: blur(80px);
-          opacity: 0.5;
-          z-index: -10;
+          filter: blur(100px);
+          opacity: 0.8;
+          z-index: -5;
           animation: float 10s infinite ease-in-out alternate;
         }
         .orb-1 {
-          width: 400px; height: 400px;
-          background: rgba(234, 88, 12, 0.15); /* Orange tint */
-          top: -10%; left: -5%;
+          width: 500px; height: 500px;
+          background: rgba(234, 88, 12, 0.6); /* Vibrant Orange */
+          top: -10%; left: -10%;
           animation-delay: 0s;
         }
         .orb-2 {
-          width: 500px; height: 500px;
-          background: rgba(79, 70, 229, 0.12); /* Indigo tint */
+          width: 600px; height: 600px;
+          background: rgba(79, 70, 229, 0.5); /* Vibrant Indigo */
           bottom: -20%; right: -10%;
           animation-delay: -3s;
         }
         .orb-3 {
-          width: 300px; height: 300px;
-          background: rgba(5, 150, 105, 0.1); /* Emerald tint */
-          top: 30%; left: 50%;
+          width: 400px; height: 400px;
+          background: rgba(5, 150, 105, 0.5); /* Vibrant Emerald */
+          top: 40%; left: 40%;
           transform: translateX(-50%);
           animation-delay: -6s;
         }
