@@ -17,3 +17,4 @@ Whenever building new components or updating existing ones in this project, you 
 4. **Modals/Popovers**: Nested popovers are fixed globally, and standard modals are given a `1rem` radius. Always use Shadcn `Dialog` or React Aria Components `Popover`/`Modal`.
 5. **No Placeholders/Mockups**: The UI should remain clean, without dummy text unless requested.
 6. **No Custom Colors**: Rely on semantic variables (`bg-primary`, `text-muted-foreground`, etc.). The global system neutralizes hardcoded Tailwind colors.
+7. **Subtle Shadows**: Use Shadcn's default tight shadow depth (`shadow-sm`) globally for cards and containers. Avoid large, diffuse drop-shadows. This is handled globally in `src/index.css`.
