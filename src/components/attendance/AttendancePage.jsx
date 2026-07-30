@@ -70,6 +70,7 @@ export default function AttendancePage({
         <div className="grid gap-6">
           <LeaveBalanceCard employees={employees} balances={attendance.leaveBalances || {}} settings={settings} />
           <LeaveRequests 
+            attendance={attendance}
             leaves={attendance.leaves} 
             employees={employees} 
             setAttendance={setAttendance}
