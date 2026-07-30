@@ -103,34 +103,34 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                   <div className="grid grid-cols-[1fr_24px_1fr] items-center w-full sm:flex sm:w-auto gap-2 sm:gap-4">
                     <button
                       onClick={() => setActivePicker({ empId: emp.id, field: 'checkIn', current: log.checkIn })}
-                      className="relative group w-full sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 sm:gap-2 hover:border-primary hover:text-primary transition-all shadow-sm"
+                      className="relative group w-full sm:flex-none sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 sm:gap-2 hover:border-primary hover:text-primary transition-all shadow-sm"
                     >
                       <Clock size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                       <span className="truncate">{log.checkIn}</span>
                     </button>
                     
-                    <span className="text-muted-foreground/50 font-bold flex justify-center w-full">→</span>
+                    <span className="text-muted-foreground/80 font-bold flex justify-center w-full sm:w-auto shrink-0">→</span>
                     
                     <button
                       onClick={() => setActivePicker({ empId: emp.id, field: 'checkOut', current: log.checkOut })}
-                      className="relative group w-full sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 sm:gap-2 hover:border-primary hover:text-primary transition-all shadow-sm"
+                      className="relative group w-full sm:flex-none sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 sm:gap-2 hover:border-primary hover:text-primary transition-all shadow-sm"
                     >
                       <Clock size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                       <span className="truncate">{log.checkOut}</span>
                     </button>
                   </div>
 
-                  <div className="h-8 w-px bg-border hidden sm:block"></div>
+                  <div className="h-8 w-px bg-muted-foreground/30 hidden sm:block"></div>
                   
                   <div className="grid grid-cols-[1fr_24px_1fr] items-center w-full sm:flex sm:w-auto gap-2 sm:gap-4">
-                    <div className="relative w-full sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 shadow-sm">
+                    <div className="relative w-full sm:flex-none sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 shadow-sm">
                       <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Total:</span>
                       <span className="text-foreground tabular-nums truncate">{log.hours}<span className="text-[10px] opacity-50 ml-0.5">h</span></span>
                     </div>
 
-                    <div className="h-6 w-px bg-border sm:hidden flex justify-center mx-auto"></div>
+                    <div className="h-6 w-px bg-muted-foreground/30 sm:hidden flex justify-center mx-auto shrink-0"></div>
 
-                    <div className="relative w-full sm:w-[125px]">
+                    <div className="relative w-full sm:flex-none sm:w-[125px]">
                       <button role="status" onClick={(e) => { e.stopPropagation(); setOpenStatusEmp(v => v === emp.id ? null : emp.id) }}
                         className="inline-flex w-full items-center justify-center sm:justify-between h-10 rounded-xl px-2 sm:px-4 text-[11px] sm:text-xs font-bold shadow-sm hover:scale-[1.02] transition-transform cursor-pointer"
                         style={{ background: ps.bg, color: ps.color, border: 'none' }}>
