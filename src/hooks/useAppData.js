@@ -19,6 +19,7 @@ export default function useAppData({ user, addToast }) {
   const [metaManifest, setMetaManifest] = useState(null)
   const [isAppLoading, setIsAppLoading] = useState(true)
   const syncRef = useRef(null)
+  const syncedForUser = useRef(null)
 
   /* ─── UI state ─── */
   const [simulatedRole, setSimulatedRole] = useState('Admin')
@@ -364,6 +365,9 @@ export default function useAppData({ user, addToast }) {
       }
     }
     syncRef.current = syncDatabase
+    const userKey = user?.id || user?.employeeId || 'user'
+    if (syncedForUser.current === userKey) return
+    syncedForUser.current = userKey
     syncDatabase()
   }, [user])
 
