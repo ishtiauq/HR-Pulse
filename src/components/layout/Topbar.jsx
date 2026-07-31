@@ -36,7 +36,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
             <img 
               src={hrPulseLogo} 
               alt="HR Pulse Logo" 
-              className="h-9 w-auto max-w-[160px] object-contain shrink-0 drop-shadow-sm dark:invert" 
+              className="block h-9 w-auto max-w-[160px] object-contain shrink-0 drop-shadow-sm dark:invert" 
             />
           </div>
           <div className="flex items-center gap-1 shrink-0">
@@ -49,7 +49,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                 aria-label="Profile"
                 className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0 !border-transparent"
               >
-                <UserRound size={22} />
+                <UserRound size={22} className="size-[22px]" />
               </Button>
             )}
             {showThemeToggle && (
@@ -61,7 +61,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                 aria-label="Toggle theme"
                 className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0 !border-transparent"
               >
-                {themeMode === 'light' ? <Sun size={22} /> : <Moon size={22} />}
+                {themeMode === 'light' ? <Sun size={22} className="size-[22px]" /> : <Moon size={22} className="size-[22px]" />}
               </Button>
             )}
           </div>
