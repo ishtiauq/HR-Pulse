@@ -47,7 +47,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                 onClick={onProfileClick}
                 title="Profile"
                 aria-label="Profile"
-                className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0"
+                className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0 !border-transparent"
               >
                 <UserRound size={22} />
               </Button>
@@ -59,7 +59,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                 onClick={toggleTheme}
                 title={`Theme: ${themeMode}`}
                 aria-label="Toggle theme"
-                className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0"
+                className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0 !border-transparent"
               >
                 {themeMode === 'light' ? <Sun size={22} /> : <Moon size={22} />}
               </Button>
