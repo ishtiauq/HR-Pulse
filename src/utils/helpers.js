@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Banknote, Clock, Receipt, Settings2, FolderOpen, Megaphone, CalendarDays, Laptop, CloudSync, CheckSquare } from 'lucide-react'
+import { LayoutDashboard, Users, User, Banknote, Clock, Receipt, Settings2, FolderOpen, Megaphone, CalendarDays, Laptop, CloudSync, CheckSquare } from 'lucide-react'
 
 import { createElement } from 'react'
 
@@ -34,4 +34,5 @@ export const allNavItems = [
   { id: 'assets', label: 'Assets', icon: createElement(Laptop, { size: 18 }) },
   { id: 'settings', label: 'Settings', icon: createElement(Settings2, { size: 18 }) },
   { id: 'drive', label: 'Drive Sync', icon: createElement(CloudSync, { size: 18 }) },
+  { id: 'profile', label: 'Profile', icon: createElement(User, { size: 18 }) },
 ]

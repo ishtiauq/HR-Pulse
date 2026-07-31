@@ -4,9 +4,10 @@ import Login from './components/Login.jsx'
 import EmployeePortal from './components/EmployeePortal.jsx'
 import Sidebar from './components/layout/Sidebar.jsx'
 import Topbar from './components/layout/Topbar.jsx'
+import MobileTabButton from './components/layout/MobileTabButton.jsx'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Monitor, Sun, Moon, User as UserIcon, Menu, XCircle, LayoutDashboard, Users, Clock, Megaphone, ArrowLeftRight, LogOut } from 'lucide-react'
+import { Monitor, Sun, Moon, User as UserIcon, Menu, XCircle, LayoutDashboard, Users, Clock, Megaphone, ArrowLeftRight, LogOut, Bell, Home } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import ToastContainer from './components/layout/ToastContainer.jsx'
 import CommandPalette from './components/layout/CommandPalette.jsx'
@@ -195,7 +196,7 @@ export default function App() {
         <div className="w-full max-w-[1600px] flex flex-col relative">
           
           {/* Sticky Header Wrapper */}
-          <div className={`sticky top-0 z-40 w-full pt-6 md:pt-8 lg:pt-10 pb-6 md:pb-8 lg:pb-10 px-4 md:px-6 lg:px-8 transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <div className={`sticky top-0 z-40 w-full pt-0 md:pt-8 lg:pt-10 pb-6 md:pb-8 lg:pb-10 px-0 md:px-6 lg:px-8 transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
             <Topbar
                 isDarkMode={isDarkMode}
                 toggleSidebar={toggleSidebar}
@@ -211,6 +212,7 @@ export default function App() {
                 showNotifications={appData.showNotifications}
                 notifications={appData.notifications}
                 clearNotifications={appData.clearNotifications}
+                onProfileClick={() => setCurrentView('profile')}
               />
           </div>
 
@@ -230,43 +232,44 @@ export default function App() {
         </div>
       </main>
 
-      {/* Bottom Tab Bar (Mobile) */}
+      {/* Bottom Tab Bar (Mobile) — Floating Pill */}
       {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 z-[60] pointer-events-auto">
-          <nav 
-            className={`bottom-bar w-full h-12 sm:h-14 px-4 flex items-center justify-between sm:justify-evenly bg-background/80 backdrop-blur-xl saturate-150 text-foreground border-t border-border/50 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
-            style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
-          >
-            {visibleNavItems.filter(i => ['dashboard', 'employees', 'attendance', 'tasks', 'announcements'].includes(i.id)).map(item => {
-              const active = currentView === item.id
-              return (
-                <button
-                  key={item.id}
-                  role="tab"
-                  aria-label={item.label}
-                  title={item.label}
-                  aria-selected={active}
-                  onClick={() => {
-                    setCurrentView(item.id)
-                    setShowMobileMenu(false)
-                  }}
-                  className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${active ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
-                >
-                  <div className="flex items-center justify-center size-6">{item.icon}</div>
-                </button>
-              )
-            })}
-            
-            {/* Menu Toggle */}
-            <button
-              role="button"
-              aria-label="Menu"
-              title="Menu"
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${showMobileMenu ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
+        <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-full max-w-md flex items-center justify-around px-2 h-16 text-foreground shadow-lg shadow-black/5 transition-all duration-300" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+            <MobileTabButton
+              active={currentView === 'dashboard'}
+              label="Home"
+              onClick={() => { setCurrentView('dashboard'); setShowMobileMenu(false) }}
             >
-              <Menu size={24} strokeWidth={showMobileMenu ? 2.5 : 2} />
-            </button>
+              <Home size={22} />
+            </MobileTabButton>
+            <MobileTabButton
+              active={currentView === 'announcements'}
+              label="Announcements"
+              onClick={() => { setCurrentView('announcements'); setShowMobileMenu(false) }}
+            >
+              <Megaphone size={22} />
+            </MobileTabButton>
+            <MobileTabButton
+              active={false}
+              label="Notifications"
+              onClick={() => { appData.setShowNotifications(true); appData.markNotificationsRead() }}
+              badge={unreadCount > 0 ? (
+                <span className="absolute top-1.5 right-1.5 flex size-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                  <span className="relative inline-flex rounded-full size-3 bg-destructive"></span>
+                </span>
+              ) : null}
+            >
+              <Bell size={22} />
+            </MobileTabButton>
+            <MobileTabButton
+              active={showMobileMenu}
+              label="Menu"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+            >
+              <Menu size={22} />
+            </MobileTabButton>
           </nav>
         </div>
       )}
@@ -289,7 +292,7 @@ export default function App() {
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
-          {visibleNavItems.filter(i => !['dashboard', 'employees', 'attendance', 'tasks', 'announcements'].includes(i.id)).map(item => {
+          {visibleNavItems.filter(i => !['dashboard', 'announcements'].includes(i.id)).map(item => {
             const active = currentView === item.id
             return (
               <Button

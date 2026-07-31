@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
-import { MapPin, Clock, ShieldCheck, ShieldAlert, Zap, Loader2, PartyPopper, CheckCircle2 } from 'lucide-react'
+import { MapPin, Clock, CalendarCheck2, ShieldCheck, ShieldAlert, Loader2, PartyPopper, CheckCircle2 } from 'lucide-react'
 import { toLocal, parseMin, fmtH } from '../../services/attendance.js'
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 
@@ -37,14 +36,12 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
   const [distance, setDistance] = useState(null)
   const [locError, setLocError] = useState(null)
   const [isLoadingLoc, setIsLoadingLoc] = useState(false)
-  const [bypassGps, setBypassGps] = useState(false)
   
   // Success Message State
   const [successMsg, setSuccessMsg] = useState(null)
   
   // Ensure current user is valid
   const empId = currentUser?.employeeId || currentUser?.id
-  const empName = currentUser?.name || 'Teammate'
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
@@ -56,8 +53,29 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
 
   const timeStr = currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })
   
-  const canCheckIn = empId && empLog.checkIn === '--'
+  const nowMins = parseMin(currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }))
+
+  const minutesSince = (t) => {
+    const tm = parseMin(t)
+    if (tm === null || nowMins === null) return null
+    let d = nowMins - tm
+    if (d < 0) d += 1440
+    return d
+  }
+
+  const cooldownPassed = empLog.checkOut !== '--' && minutesSince(empLog.checkOut) !== null && minutesSince(empLog.checkOut) >= 30
+
+  const canCheckIn = empId && (empLog.checkIn === '--' || cooldownPassed)
   const canCheckOut = empId && empLog.checkIn !== '--' && empLog.checkOut === '--'
+
+  const elapsed = (() => {
+    if (empLog.checkIn === '--' || empLog.checkOut !== '--') return null
+    const d = minutesSince(empLog.checkIn)
+    if (d === null) return null
+    return `${Math.floor(d / 60)}h ${String(d % 60).padStart(2, '0')}m`
+  })()
+
+  const cooldownRemaining = empLog.checkOut !== '--' && !cooldownPassed ? Math.max(0, 30 - (minutesSince(empLog.checkOut) ?? 0)) : 0
 
   const showSuccessOverlay = (type, time, hoursWorked = null) => {
     setSuccessMsg({ type, time, hoursWorked })
@@ -70,11 +88,6 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
   }
 
   const executeActionWithLocation = (actionCallback) => {
-    if (bypassGps) {
-      actionCallback();
-      return;
-    }
-
     if (!navigator.geolocation) {
       setLocError('Geolocation is not supported by your browser')
       addToast?.('Geolocation is not supported by your browser', 'error')
@@ -122,8 +135,8 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
             [empId]: {
               status: 'Present',
               checkIn: now,
-              checkOut: empLog?.checkOut || '--',
-              hours: empLog?.hours || '0.0'
+              checkOut: '--',
+              hours: '0.0'
             }
           }
         }
@@ -162,32 +175,32 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
   return (
     <>
       <Dialog open={!!successMsg} onOpenChange={(open) => { if (!open) setSuccessMsg(null) }}>
-        <DialogContent className="max-w-[400px] border-border/50 bg-popover shadow-lg flex flex-col items-center justify-center p-8 gap-4 rounded-[1rem] outline-none">
+        <DialogContent className="max-w-[400px] border-border/50 bg-popover shadow-lg flex flex-col items-center justify-center p-5 sm:p-8 gap-4 rounded-[1rem] outline-none">
           <DialogTitle className="sr-only">Check In Successful</DialogTitle>
-          <div className="size-24 rounded-full bg-primary/10 flex items-center justify-center animate-bounce mt-4 shadow-inner">
+          <div className="size-16 sm:size-24 rounded-full bg-primary/10 flex items-center justify-center animate-bounce mt-2 sm:mt-4 shadow-inner">
             {successMsg?.type === 'Check-in' ? (
-              <PartyPopper className="text-primary" size={48} />
+              <PartyPopper className="text-primary" size={40} />
             ) : (
-              <CheckCircle2 className="text-primary" size={48} />
+              <CheckCircle2 className="text-primary" size={40} />
             )}
           </div>
-          <h2 className="text-3xl font-black headline-gradient text-center">
+          <h2 className="text-2xl sm:text-3xl font-black headline-gradient text-center">
             {successMsg?.type} Successful!
           </h2>
-          <div className="text-center flex flex-col gap-2 w-full mt-2">
-            <div className="bg-muted/30 py-3 rounded-lg border border-border flex flex-col items-center justify-center">
+          <div className="text-center flex flex-col sm:flex-row sm:flex-nowrap gap-2 w-full mt-1 sm:mt-2">
+            <div className="bg-muted/30 py-3 rounded-lg border border-border flex flex-col items-center justify-center flex-1">
               <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Time Recorded</span>
-              <span className="text-foreground font-mono text-xl font-bold">{successMsg?.time}</span>
+              <span className="text-foreground font-mono text-lg sm:text-xl font-bold">{successMsg?.time}</span>
             </div>
             
             {successMsg?.hoursWorked && (
-              <div className="bg-primary/5 py-3 rounded-lg border border-primary/20 flex flex-col items-center justify-center mt-2">
+              <div className="bg-primary/5 py-3 rounded-lg border border-primary/20 flex flex-col items-center justify-center flex-1">
                 <span className="text-xs text-primary/70 uppercase tracking-wider font-semibold mb-1">Total Hours Today</span>
-                <span className="text-primary font-mono text-xl font-bold">{successMsg.hoursWorked} <span className="text-sm">hrs</span></span>
+                <span className="text-primary font-mono text-lg sm:text-xl font-bold">{successMsg.hoursWorked} <span className="text-sm">hrs</span></span>
               </div>
             )}
           </div>
-          <Button onClick={() => setSuccessMsg(null)} className="w-full mt-4 rounded-full h-11 text-base font-semibold shadow-sm">
+          <Button onClick={() => setSuccessMsg(null)} className="w-full mt-2 sm:mt-4 rounded-full h-11 text-base font-semibold shadow-sm">
             Done
           </Button>
         </DialogContent>
@@ -195,25 +208,26 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
 
       <Card className="col-span-full xl:col-span-12 border-primary/20 bg-card overflow-hidden shadow-sm mb-6">
         <CardHeader className="bg-primary/5 pb-4 border-b border-border">
-          <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-md bg-primary/10 text-primary">
-              <MapPin size={20} />
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-md bg-primary/10 text-primary shrink-0">
+              <CalendarCheck2 size={20} />
             </div>
-            <div>
-              <CardTitle className="text-lg font-bold m-0">Self-Service Check-In</CardTitle>
-              <p className="text-xs text-muted-foreground m-0 mt-0.5">Welcome back, {empName}</p>
-            </div>
+            <CardTitle className="text-lg sm:text-xl font-extrabold m-0 truncate">Mark Attendance</CardTitle>
           </div>
-          <div className="text-right">
-            <div className="text-2xl font-black tabular-nums tracking-tight font-mono headline-gradient">{timeStr}</div>
-            <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</div>
-          </div>
-        </div>
-      </CardHeader>
+        </CardHeader>
       
-      <CardContent className="p-5 flex flex-col md:flex-row gap-6 items-center justify-between">
-        <div className="flex-1 flex flex-col gap-2">
+      <CardContent className="p-4 sm:p-5 flex flex-col gap-5">
+        <div className="flex flex-col items-center gap-1 text-center">
+          <div className="text-2xl sm:text-3xl font-black tabular-nums tracking-tight font-mono headline-gradient" aria-live="polite">{timeStr}</div>
+          <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</div>
+          {elapsed && (
+            <div className="mt-1 flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-full px-4 py-2">
+              <span className="text-xs uppercase tracking-wider font-semibold text-primary/70">Working time</span>
+              <span className="font-mono text-base font-bold text-primary">{elapsed}</span>
+            </div>
+          )}
+        </div>
+        <div className="flex-1 flex flex-col gap-2 min-w-0">
           {isLoadingLoc ? (
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <Loader2 className="animate-spin" size={16} />
@@ -227,7 +241,7 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
           ) : distance !== null ? (
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
-                {distance <= maxDistance || bypassGps ? (
+                {distance <= maxDistance ? (
                   <ShieldCheck size={18} className="text-green-500" />
                 ) : (
                   <ShieldAlert size={18} className="text-destructive" />
@@ -247,58 +261,33 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
                 Location pending
               </div>
               <p className="text-xs text-muted-foreground m-0">
-                Click Check In / Out to verify your location.
+                Click Check In to verify your location.
               </p>
             </div>
           )}
-
-          <div className="mt-2 flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className={`h-7 text-[10px] uppercase tracking-wider rounded-full ${bypassGps ? 'bg-orange-500/10 text-orange-500 border-orange-500/50' : 'text-muted-foreground'}`}
-              onClick={() => setBypassGps(!bypassGps)}
-            >
-              <Zap size={12} className="mr-1" /> Bypass GPS (Test)
-            </Button>
-          </div>
         </div>
 
-        <div className="flex flex-col items-end gap-3 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="flex flex-col text-right">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Status</span>
-              <Badge variant={empLog.status === 'Present' ? 'default' : 'secondary'} className="mt-1">
-                {empLog.status}
-              </Badge>
+        <div className="flex flex-col gap-3 w-full">
+          {canCheckIn || canCheckOut ? (
+            <Button
+              onClick={canCheckIn ? handleCheckIn : handleCheckOut}
+              disabled={(!canCheckIn && !canCheckOut) || isLoadingLoc}
+              className={`w-full sm:w-auto px-3 lg:px-10 h-12 rounded-full text-sm sm:text-base font-semibold flex items-center justify-center gap-2 shadow-sm mx-auto ${canCheckIn ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/30'}`}
+            >
+              <Clock size={18} className="shrink-0" />
+              {isLoadingLoc ? 'Verifying...' : canCheckIn ? 'Check In' : 'Check Out'}
+            </Button>
+          ) : (
+            <div className="flex flex-col items-center gap-1 text-center">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <CheckCircle2 size={18} className="text-green-500" />
+                Checked out
+              </div>
+              <span className="text-xs text-muted-foreground">
+                Check In available in {cooldownRemaining} min
+              </span>
             </div>
-            
-            <div className="h-10 w-px bg-border mx-1"></div>
-
-            <Button
-              onClick={handleCheckIn}
-              disabled={!canCheckIn || isLoadingLoc}
-              className="rounded-full px-6 h-10 shadow-md"
-              style={{ background: canCheckIn && !isLoadingLoc ? '#28a745' : undefined }}
-            >
-              <Clock size={16} className="mr-2" /> {isLoadingLoc ? 'Verifying...' : 'Check In'}
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={handleCheckOut}
-              disabled={!canCheckOut || isLoadingLoc}
-              className="rounded-full px-6 h-10 border-destructive text-destructive hover:bg-destructive/10"
-            >
-              {isLoadingLoc ? 'Verifying...' : 'Check Out'}
-            </Button>
-          </div>
-          
-          <div className="flex gap-4 text-xs font-medium text-muted-foreground">
-            <span>In: {empLog.checkIn}</span>
-            <span>Out: {empLog.checkOut}</span>
-            <span>Hrs: {empLog.hours}</span>
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>

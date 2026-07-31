@@ -47,7 +47,7 @@ export default function useAppData({ user, addToast }) {
     
     // For Teammates, base permissions + custom permissions
     if (currentRole === 'Teammate') {
-      const basePerms = ['dashboard', 'attendance', 'expenses', 'calendar', 'tasks']
+      const basePerms = ['dashboard', 'attendance', 'expenses', 'calendar', 'tasks', 'profile']
       const customPerms = user?.permissions || []
       return basePerms.includes(resource) || customPerms.includes(resource)
     }

@@ -10,6 +10,7 @@ import Assets from './Assets.jsx'
 import Settings from './Settings.jsx'
 import DriveSync from './DriveSync.jsx'
 import Tasks from './Tasks.jsx'
+import ProfileView from './ProfileView.jsx'
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AppContent({ currentView, setCurrentView, isAppLoading, hasPermission, simulatedRole, user, isSidebarCollapsed, ...data }) {
@@ -20,7 +21,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
         <span className="breadcrumb-item" onClick={() => setCurrentView('dashboard')}>Dashboard</span>
         <span>/</span>
         <span className="breadcrumb-current" style={{ textTransform: 'capitalize' }}>
-          {currentView === 'drive' ? 'Google Drive Sync' : currentView}
+          {currentView === 'drive' ? 'Google Drive Sync' : currentView === 'profile' ? 'My Profile' : currentView}
         </span>
       </div>
     )
@@ -84,7 +85,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
     }
     const layoutKey = currentView === 'dashboard' ? 'dashboard'
       : currentView === 'employees' ? 'employees'
-      : (currentView === 'settings' || currentView === 'drive') ? 'settings'
+      : (currentView === 'settings' || currentView === 'drive' || currentView === 'profile') ? 'settings'
       : 'table'
     return skeletonLayouts[layoutKey]
   }
@@ -126,6 +127,8 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       return <Expenses employees={data.employees} expenses={data.expenses} setExpenses={data.handleSetExpenses} settings={data.settings} addLog={data.addLog} addToast={data.addToast} addAuditLog={data.addAuditLog} simulatedRole={simulatedRole} currentUser={user} />
     case 'settings':
       return <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} simulatedRole={simulatedRole} syncConflicts={data.syncConflicts} setSyncConflicts={data.setSyncConflicts} />
+    case 'profile':
+      return <ProfileView currentUser={user} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} addLog={data.addLog} />
     case 'drive':
       return <DriveSync user={user} driveConnected={data.driveConnected} setDriveConnected={data.setDriveConnected} addLog={data.addLog} />
     default:

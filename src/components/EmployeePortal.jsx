@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, User, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, Sun, Moon, AlertTriangle, Upload, CheckSquare, CalendarDays, Menu, Receipt, FolderOpen, ArrowLeftRight, LogOut } from 'lucide-react'
+import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, User, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, Sun, Moon, AlertTriangle, Upload, CheckSquare, CalendarDays, Menu, Receipt, FolderOpen, ArrowLeftRight, LogOut, LogIn, X, Bell } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
+import { parseMin } from '../services/attendance.js'
 import { Select, SelectItem } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -18,6 +19,8 @@ import Expenses from './Expenses.jsx'
 import Documents from './Documents.jsx'
 import Sidebar from './layout/Sidebar.jsx'
 import Topbar from './layout/Topbar.jsx'
+import MobileTabButton from './layout/MobileTabButton.jsx'
+import ProfileView from './ProfileView.jsx'
 import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
 import AttendancePage from './attendance/AttendancePage.jsx'
 
@@ -90,7 +93,28 @@ export default function EmployeePortal({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true')
   const [showPunchModal, setShowPunchModal] = useState(false)
   useModal(() => setShowPunchModal(false))
-  const [punchType, setPunchType] = useState('In')
+  const [punchClock, setPunchClock] = useState(new Date())
+
+  useEffect(() => {
+    if (!showPunchModal) return
+    const timer = setInterval(() => setPunchClock(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [showPunchModal])
+
+  const punchToday = new Date().toISOString().split('T')[0]
+  const punchLog = attendance?.dailyLogs?.[punchToday]?.[currentUser?.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
+  const isPunchedIn = punchLog.checkIn !== '--'
+  const isPunchedOut = punchLog.checkOut !== '--'
+
+  const punchElapsed = (() => {
+    if (!isPunchedIn || isPunchedOut) return null
+    const ci = parseMin(punchLog.checkIn)
+    const now = parseMin(punchClock.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }))
+    if (ci === null || now === null) return null
+    let d = now - ci
+    if (d < 0) d += 1440
+    return `${Math.floor(d / 60)}h ${String(d % 60).padStart(2, '0')}m`
+  })()
   
   const [isScrollingDown, setIsScrollingDown] = useState(false)
   const lastScrollY = useRef(0)
@@ -125,14 +149,23 @@ export default function EmployeePortal({
     const myLog = todayLogs[currentUser.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
     
     let updatedLog = { ...myLog }
-    if (punchType === 'In') {
+    let action = 'in'
+    if (myLog.checkIn === '--') {
       updatedLog.status = 'Present'
       updatedLog.checkIn = nowTime
-    } else {
+    } else if (myLog.checkOut === '--') {
+      action = 'out'
       updatedLog.checkOut = nowTime
-      if (updatedLog.checkIn !== '--') {
-        updatedLog.hours = '9.0'
+      const ci = parseMin(myLog.checkIn)
+      const co = parseMin(nowTime)
+      if (ci !== null && co !== null) {
+        let d = co - ci; if (d < 0) d += 1440
+        updatedLog.hours = (d / 60).toFixed(1)
       }
+    } else {
+      addToast('You have already completed check in and check out for today.', 'info')
+      setShowPunchModal(false)
+      return
     }
     
     const newLogs = {
@@ -149,7 +182,7 @@ export default function EmployeePortal({
     }))
     
     setShowPunchModal(false)
-    addToast(`Successfully clocked ${punchType.toLowerCase()} at ${nowTime}.`, 'success')
+    addToast(`Successfully clocked ${action === 'in' ? 'in' : 'out'} at ${nowTime}.`, 'success')
   }
 
   if (!currentUser) {
@@ -275,7 +308,7 @@ export default function EmployeePortal({
         <div className="w-full max-w-[1600px] flex flex-col relative">
           
           {/* Sticky Header Wrapper */}
-          <div className={`sticky top-0 z-40 w-full pt-6 md:pt-8 lg:pt-10 pb-6 md:pb-8 lg:pb-10 px-4 md:px-6 lg:px-8 transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <div className={`sticky top-0 z-40 w-full pt-0 md:pt-8 lg:pt-10 pb-6 md:pb-8 lg:pb-10 px-0 md:px-6 lg:px-8 transition-transform duration-300 ease-in-out ${isMobile && isScrollingDown && !showMobileMenu ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
             <Topbar
                 isDarkMode={themeMode === 'dark'}
                 toggleSidebar={() => {
@@ -297,6 +330,7 @@ export default function EmployeePortal({
                 showNotifications={showNotifications}
                 notifications={notifications}
                 clearNotifications={clearNotifications}
+                onProfileClick={() => setActiveTab('profile')}
             />
           </div>
 
@@ -308,75 +342,93 @@ export default function EmployeePortal({
 
       {/* Punch Modal */}
       <Dialog open={showPunchModal} onOpenChange={setShowPunchModal}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-[380px] p-5 sm:p-6">
           <DialogHeader>
-            <DialogTitle>Attendance Punch</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-sm text-muted-foreground mb-4">
-              Select punch type for today (<strong>{formatDate(new Date().toISOString().split('T')[0])}</strong>):
-            </p>
-            <div className="flex gap-3">
-              <Button 
-                variant={punchType === 'In' ? 'default' : 'outline'}
-                className="flex-1" 
-                onClick={() => setPunchType('In')}
-              >
-                Clock In
-              </Button>
-              <Button 
-                variant={punchType === 'Out' ? 'default' : 'outline'}
-                className="flex-1" 
-                onClick={() => setPunchType('Out')}
-              >
-                Clock Out
-              </Button>
+            <div className="flex items-center justify-between">
+              <DialogTitle>Mark Attendance</DialogTitle>
+              <button onClick={() => setShowPunchModal(false)} className="size-8 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer" aria-label="Close">
+                <X size={16} />
+              </button>
             </div>
+          </DialogHeader>
+
+          <div className="flex flex-col items-center gap-2 py-3 text-center">
+            <div className={`size-16 rounded-full flex items-center justify-center ${isPunchedIn ? 'bg-emerald-500/10 text-emerald-600' : 'bg-primary/10 text-primary'}`}>
+              {isPunchedIn ? <LogIn size={28} /> : <Clock size={28} />}
+            </div>
+            <div className="text-3xl sm:text-4xl font-black tabular-nums tracking-tight text-foreground" aria-live="polite">
+              {punchClock.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+            </div>
+            <div className="text-xs sm:text-sm font-medium text-muted-foreground">
+              {formatDate(new Date().toISOString().split('T')[0])}
+            </div>
+            {punchElapsed && (
+              <div className="mt-1 flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-full px-4 py-1.5">
+                <span className="text-[11px] uppercase tracking-wider font-semibold text-primary/70">Working time</span>
+                <span className="font-mono text-sm font-bold text-primary">{punchElapsed}</span>
+              </div>
+            )}
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPunchModal(false)}>Cancel</Button>
-            <Button onClick={handlePunchSubmit}>Confirm Punch</Button>
-          </DialogFooter>
+
+          <div className="pt-2 pb-1">
+            {isPunchedOut ? (
+              <div className="flex flex-col items-center gap-2 py-3">
+                <div className="size-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                  <CheckCircle2 size={20} />
+                </div>
+                <p className="text-sm font-semibold text-foreground">Today's attendance completed</p>
+                <p className="text-xs text-muted-foreground">In: {punchLog.checkIn} • Out: {punchLog.checkOut} • {punchLog.hours}h</p>
+              </div>
+            ) : (
+              <Button
+                onClick={handlePunchSubmit}
+                className={`w-full h-14 rounded-2xl text-base font-semibold flex items-center justify-center gap-2 ${!isPunchedIn ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/30'}`}
+              >
+                {isPunchedIn ? <><LogOut size={18} /> Check Out</> : <><LogIn size={18} /> Check In</>}
+              </Button>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
-      {/* Bottom Tab Bar (Mobile) */}
+      {/* Bottom Tab Bar (Mobile) — Floating Pill */}
       {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 z-[60] pointer-events-auto">
-          <nav 
-            className={`w-full h-12 sm:h-14 px-4 flex items-center justify-between sm:justify-evenly bg-background/80 backdrop-blur-xl saturate-150 text-foreground border-t border-border/50 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}
-            style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
-          >
-            {navItems.filter(i => ['dashboard', 'my-tasks', 'announcements', 'attendance', 'profile'].includes(i.id)).map(item => {
-              const active = activeTab === item.id
-              return (
-                <button
-                  key={item.id}
-                  role="tab"
-                  aria-label={item.label}
-                  title={item.label}
-                  aria-selected={active}
-                  onClick={() => {
-                    setActiveTab(item.id)
-                    setShowMobileMenu(false)
-                  }}
-                  className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${active ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
-                >
-                  <div className="flex items-center justify-center size-6">{item.icon}</div>
-                </button>
-              )
-            })}
-            
-            {/* Menu Toggle */}
-            <button
-              role="button"
-              aria-label="Menu"
-              title="Menu"
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className={`flex-shrink-0 flex items-center justify-center border-0 cursor-pointer w-[44px] h-[44px] transition-all bg-transparent outline-none select-none tap-highlight-transparent ${showMobileMenu ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
+        <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+          <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-full max-w-md flex items-center justify-around px-2 h-16 text-foreground shadow-lg shadow-black/5 transition-all duration-300" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+            <MobileTabButton
+              active={activeTab === 'dashboard'}
+              label="Home"
+              onClick={() => { setActiveTab('dashboard'); setShowMobileMenu(false) }}
             >
-              <Menu size={24} strokeWidth={showMobileMenu ? 2.5 : 2} />
-            </button>
+              <Home size={22} />
+            </MobileTabButton>
+            <MobileTabButton
+              active={activeTab === 'announcements'}
+              label="Announcements"
+              onClick={() => { setActiveTab('announcements'); setShowMobileMenu(false) }}
+            >
+              <Megaphone size={22} />
+            </MobileTabButton>
+            <MobileTabButton
+              active={false}
+              label="Notifications"
+              onClick={() => { setShowNotifications(true); markNotificationsRead() }}
+              badge={(notifications || []).filter(n => !n.read).length > 0 ? (
+                <span className="absolute top-1.5 right-1.5 flex size-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                  <span className="relative inline-flex rounded-full size-3 bg-destructive"></span>
+                </span>
+              ) : null}
+            >
+              <Bell size={22} />
+            </MobileTabButton>
+            <MobileTabButton
+              active={showMobileMenu}
+              label="Menu"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+            >
+              <Menu size={22} />
+            </MobileTabButton>
           </nav>
         </div>
       )}
@@ -398,7 +450,7 @@ export default function EmployeePortal({
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
-          {navItems.filter(i => !['dashboard', 'my-tasks', 'announcements', 'attendance', 'profile'].includes(i.id)).map(item => {
+          {navItems.filter(i => !['dashboard', 'announcements'].includes(i.id)).map(item => {
             const active = activeTab === item.id
             return (
               <Button
@@ -580,12 +632,6 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
             <CardContent className="p-0 flex flex-col gap-3 justify-center items-center">
               <Download size={28} className="text-green-500 transition-transform group-hover:scale-110" />
               <span className="text-sm font-medium">Download Payslip</span>
-            </CardContent>
-          </Card>
-          <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer h-28 flex items-center justify-center col-span-2 sm:col-span-1 group" onClick={() => setShowPunchModal(true)}>
-            <CardContent className="p-0 flex flex-col gap-3 justify-center items-center">
-              <Clock size={28} className="text-amber-500 transition-transform group-hover:scale-110" />
-              <span className="text-sm font-medium">Mark Attendance</span>
             </CardContent>
           </Card>
         </div>
@@ -1124,129 +1170,6 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
               </TableBody>
             </Table>
           </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-function ProfileView({ currentUser, pendingProfileEdits, setPendingProfileEdits, addToast, addLog }) {
-  const [editMode, setEditMode] = useState(false)
-  const [formData, setFormData] = useState({
-    personalEmail: currentUser.personalEmail || '',
-    phone: currentUser.phone || '',
-    address: currentUser.address || '',
-    emergencyContact: currentUser.emergencyContact || ''
-  })
-
-  const hasPending = pendingProfileEdits?.some(e => e.employeeId === currentUser.id)
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    if (hasPending) return addToast('You already have a pending edit request.', 'warning')
-    
-    setPendingProfileEdits(prev => [...(prev || []), {
-      id: `edit-${Date.now()}`,
-      employeeId: currentUser.id,
-      timestamp: new Date().toISOString(),
-      changes: formData
-    }])
-
-    setEditMode(false)
-    addToast('Profile update submitted for HR review.', 'success')
-    addLog('Profile Edit Requested', `${currentUser.name} requested to update their profile info.`, 'info')
-  }
-
-  return (
-    <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[800px] mx-auto pb-10">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold m-0">My Profile</h2>
-        {!editMode && !hasPending && (
-          <Button variant="outline" onClick={() => setEditMode(true)}>Edit Details</Button>
-        )}
-      </div>
-
-      {hasPending && (
-        <div className="p-4 rounded-md flex gap-3 items-center bg-amber-500/10 border-l-4 border-l-amber-500 text-foreground">
-          <AlertCircle className="h-5 w-5 text-amber-500" />
-          <span className="text-sm font-medium">You have pending profile updates waiting for HR approval.</span>
-        </div>
-      )}
-
-      <Card>
-        <CardContent className="p-6 flex flex-col sm:flex-row gap-6 items-start">
-          <div className="mx-auto sm:mx-0">
-            {getInitialsAvatar(currentUser.name)}
-          </div>
-          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase">Full Name</label>
-              <div className="font-medium text-lg">{currentUser.name}</div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase">Employee ID</label>
-              <div className="font-medium text-lg">{currentUser.id}</div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase">Department</label>
-              <div className="font-medium text-lg">{currentUser.department}</div>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase">Role</label>
-              <div className="font-medium text-lg">{currentUser.role}</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Contact & Personal Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {editMode ? (
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">Personal Email</label>
-                <Input type="email" value={formData.personalEmail} onChange={e => setFormData(p => ({...p, personalEmail: e.target.value}))} />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none">Phone Number</label>
-                <Input type="tel" value={formData.phone} onChange={e => setFormData(p => ({...p, phone: e.target.value}))} />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <label className="text-sm font-medium leading-none">Address</label>
-                <Input type="text" value={formData.address} onChange={e => setFormData(p => ({...p, address: e.target.value}))} />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <label className="text-sm font-medium leading-none">Emergency Contact</label>
-                <Input type="text" value={formData.emergencyContact} onChange={e => setFormData(p => ({...p, emergencyContact: e.target.value}))} />
-              </div>
-              <div className="sm:col-span-2 flex gap-3 mt-4">
-                <Button type="submit">Submit for Approval</Button>
-                <Button type="button" variant="outline" onClick={() => setEditMode(false)}>Cancel</Button>
-              </div>
-            </form>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase">Personal Email</label>
-                <div className="font-medium">{currentUser.personalEmail || '-'}</div>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase">Phone Number</label>
-                <div className="font-medium">{currentUser.phone || '-'}</div>
-              </div>
-              <div className="sm:col-span-2">
-                <label className="text-xs font-semibold text-muted-foreground uppercase">Address</label>
-                <div className="font-medium">{currentUser.address || '-'}</div>
-              </div>
-              <div className="sm:col-span-2">
-                <label className="text-xs font-semibold text-muted-foreground uppercase">Emergency Contact</label>
-                <div className="font-medium">{currentUser.emergencyContact || '-'}</div>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
