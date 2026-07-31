@@ -13,7 +13,7 @@ import Tasks from './Tasks.jsx'
 import ProfileView from './ProfileView.jsx'
 import { Skeleton } from "@/components/ui/skeleton"
 
-export default function AppContent({ currentView, setCurrentView, isAppLoading, hasPermission, simulatedRole, user, isSidebarCollapsed, ...data }) {
+export default function AppContent({ currentView, setCurrentView, isAppLoading, hasPermission, simulatedRole, user, isSidebarCollapsed, themeMode, toggleTheme, ...data }) {
   const renderBreadcrumbs = () => {
     if (currentView === 'dashboard') return null
     return (
@@ -126,7 +126,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
     case 'expenses':
       return <Expenses employees={data.employees} expenses={data.expenses} setExpenses={data.handleSetExpenses} settings={data.settings} addLog={data.addLog} addToast={data.addToast} addAuditLog={data.addAuditLog} simulatedRole={simulatedRole} currentUser={user} />
     case 'settings':
-      return <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} simulatedRole={simulatedRole} syncConflicts={data.syncConflicts} setSyncConflicts={data.setSyncConflicts} />
+      return <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} simulatedRole={simulatedRole} syncConflicts={data.syncConflicts} setSyncConflicts={data.setSyncConflicts} themeMode={themeMode} toggleTheme={toggleTheme} />
     case 'profile':
       return <ProfileView currentUser={user} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} addLog={data.addLog} />
     case 'drive':

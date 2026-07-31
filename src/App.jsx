@@ -213,6 +213,7 @@ export default function App() {
                 notifications={appData.notifications}
                 clearNotifications={appData.clearNotifications}
                 onProfileClick={() => setCurrentView('profile')}
+                showThemeToggle={false}
               />
           </div>
 
@@ -225,6 +226,8 @@ export default function App() {
             simulatedRole={appData.simulatedRole}
             user={user}
             addToast={addToast}
+            themeMode={themeMode}
+            toggleTheme={toggleTheme}
             isSidebarCollapsed={isCollapsed}
             {...appData}
           />

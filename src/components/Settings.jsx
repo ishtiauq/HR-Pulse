@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Save, Settings2, DollarSign, Sliders, Info, Percent, Building2, Bell, Globe, Mail, Plus, Trash2, Upload, Activity, X, ShieldCheck, List, FileSpreadsheet, Download, Receipt, CalendarClock, Check, ChevronDown, MapPin, Search } from 'lucide-react'
+import { Save, Settings2, DollarSign, Sliders, Info, Percent, Building2, Bell, Globe, Mail, Plus, Trash2, Upload, Activity, X, ShieldCheck, List, FileSpreadsheet, Download, Receipt, CalendarClock, Check, ChevronDown, MapPin, Search, Sun, Moon } from 'lucide-react'
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDateTime } from '../services/date.js'
@@ -45,7 +45,7 @@ function LocationMarker({ position, setPosition }) {
   )
 }
 
-export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, simulatedRole, syncConflicts, setSyncConflicts }) {
+export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, simulatedRole, syncConflicts, setSyncConflicts, themeMode, toggleTheme }) {
   const [activeSubmenu, setActiveSubmenu] = useState(() => localStorage.getItem('hr_pulse_settings_tab') || null)
   const [panelOpen, setPanelOpen] = useState(false)
   const setTab = (id) => {
@@ -208,6 +208,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const handleRemoveLogo = () => { setLogo(''); setLogoX(0); setLogoY(0); setLogoZoom(1); setShowLogoModal(false) }
 
   const menuItems = [
+    { id: 'theme', icon: Sun, label: 'Appearance & Theme' },
     { id: 'payroll', icon: Sliders, label: 'Payroll Settings' },
     { id: 'company', icon: Building2, label: 'Company Profile' },
     { id: 'attendance', icon: MapPin, label: 'Attendance & Leaves' },
@@ -238,6 +239,36 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
   const renderSettingsContent = (id) => {
     switch (id) {
+      case 'theme': return (
+        <div className="flex flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                {themeMode === 'dark' ? <Moon className="h-5 w-5 text-muted-foreground" /> : <Sun className="h-5 w-5 text-muted-foreground" />}
+                <CardTitle className="text-lg">Theme</CardTitle>
+              </div>
+              <CardDescription>Choose between light and dark mode for the entire application.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex bg-muted rounded-lg p-1 max-w-[280px]">
+                <button
+                  onClick={() => { if (themeMode !== 'light') toggleTheme() }}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md transition-all cursor-pointer border-0 ${themeMode === 'light' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  <Sun size={16} /> Light
+                </button>
+                <button
+                  onClick={() => { if (themeMode !== 'dark') toggleTheme() }}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md transition-all cursor-pointer border-0 ${themeMode === 'dark' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  <Moon size={16} /> Dark
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">Applies instantly across all portals.</p>
+            </CardContent>
+          </Card>
+        </div>
+      )
       case 'payroll': return (
         <div className="flex flex-col gap-6">
           <Card>

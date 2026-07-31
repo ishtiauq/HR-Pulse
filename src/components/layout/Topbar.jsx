@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications, onProfileClick }) {
+export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications, onProfileClick, showThemeToggle = true }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const buttonRef = useRef(null)
   const [modalPos, setModalPos] = useState({ top: 0, right: 0 })
@@ -36,7 +36,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
             <img 
               src={hrPulseLogo} 
               alt="HR Pulse Logo" 
-              className="h-7 w-auto max-w-[130px] object-contain shrink-0 drop-shadow-sm dark:invert" 
+              className="h-9 w-auto max-w-[160px] object-contain shrink-0 drop-shadow-sm dark:invert" 
             />
           </div>
           <div className="flex items-center gap-1 shrink-0">
@@ -47,21 +47,23 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                 onClick={onProfileClick}
                 title="Profile"
                 aria-label="Profile"
-                className="rounded-full size-9 text-foreground hover:bg-muted shrink-0"
+                className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0"
               >
-                <UserRound size={20} />
+                <UserRound size={22} />
               </Button>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              title={`Theme: ${themeMode}`}
-              aria-label="Toggle theme"
-              className="rounded-full size-9 text-foreground hover:bg-muted shrink-0"
-            >
-              {themeMode === 'light' ? <Sun size={20} /> : <Moon size={20} />}
-            </Button>
+            {showThemeToggle && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                title={`Theme: ${themeMode}`}
+                aria-label="Toggle theme"
+                className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0"
+              >
+                {themeMode === 'light' ? <Sun size={22} /> : <Moon size={22} />}
+              </Button>
+            )}
           </div>
         </header>
       ) : (
@@ -95,15 +97,17 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
             </Button>
 
             {/* Theme Toggle Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              title={`Theme: ${themeMode}`}
-              className="rounded-full size-8 min-[400px]:size-9 sm:size-10 text-foreground hover:bg-muted shrink-0"
-            >
-              {themeMode === 'light' ? <Sun size={20} /> : <Moon size={20} />}
-            </Button>
+            {showThemeToggle && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                title={`Theme: ${themeMode}`}
+                className="rounded-full size-8 min-[400px]:size-9 sm:size-10 text-foreground hover:bg-muted shrink-0"
+              >
+                {themeMode === 'light' ? <Sun size={20} /> : <Moon size={20} />}
+              </Button>
+            )}
 
             {/* Notifications Button (Desktop) */}
             <div className="relative">
