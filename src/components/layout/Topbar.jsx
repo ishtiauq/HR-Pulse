@@ -52,18 +52,6 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                 <Icon name="person" size={22} className="size-[22px]" />
               </Button>
             )}
-            {showThemeToggle && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTheme}
-                title={`Theme: ${themeMode}`}
-                aria-label="Toggle theme"
-                className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0 !border-transparent"
-              >
-                {themeMode === 'light' ? <Icon name="light_mode" size={22} className="size-[22px]" /> : <Icon name="dark_mode" size={22} className="size-[22px]" />}
-              </Button>
-            )}
           </div>
         </header>
       ) : (
