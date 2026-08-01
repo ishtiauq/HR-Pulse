@@ -467,7 +467,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     <div className="fade-in pb-10 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="campaign" size={20} className="text-primary" />
+          <Icon name="rss_feed" size={20} className="text-primary" />
           Announcements
         </h1>
         
@@ -590,7 +590,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
         {filteredAnnouncements.length === 0 ? (
           <Card className="border-dashed border-2 bg-muted/10">
             <CardContent className="p-12 text-center flex flex-col items-center gap-3 text-muted-foreground">
-              <Icon name="campaign" size={40} className="text-muted-foreground/50" />
+              <Icon name="rss_feed" size={40} className="text-muted-foreground/50" />
               <p>No announcements found in this category.</p>
             </CardContent>
           </Card>

@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DatePicker } from "@/components/ui/date-picker"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
@@ -67,6 +67,8 @@ export default function EmployeePortal({
   setAnnouncements,
   assets,
   setAssets,
+  assetCategories,
+  setAssetCategories,
   documents,
   setDocuments,
   tasks,
@@ -230,6 +232,8 @@ export default function EmployeePortal({
                  setAssets={setAssets}
                  assetRequests={assetRequests}
                  setAssetRequests={setAssetRequests}
+                 assetCategories={assetCategories}
+                 setAssetCategories={setAssetCategories}
                  addToast={addToast}
                />
       case 'my-tasks':
@@ -268,12 +272,12 @@ export default function EmployeePortal({
     { id: 'dashboard', icon: <Icon name="home" size={18} />, label: 'Dashboard' },
     { id: 'my-tasks', icon: <Icon name="check_box" size={18} />, label: 'Tasks' },
     { id: 'events', icon: <Icon name="calendar_month" size={18} />, label: 'Events' },
-    { id: 'announcements', icon: <Icon name="campaign" size={18} />, label: 'Feed' },
+    { id: 'announcements', icon: <Icon name="rss_feed" size={18} />, label: 'Feed' },
     { id: 'my-assets', icon: <Icon name="monitor" size={18} />, label: 'Assets' },
     { id: 'attendance', icon: <Icon name="schedule" size={18} />, label: 'Attendance' },
     ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <Icon name="check_circle" size={18} />, label: 'Team Attendance' }] : []),
-    { id: 'payslips', icon: <Icon name="description" size={18} />, label: 'Payslips' },
-    { id: 'expenses', icon: <Icon name="receipt_long" size={18} />, label: 'Expenses' },
+    { id: 'payslips', icon: <Icon name="account_balance" size={18} />, label: 'Payslips' },
+    { id: 'expenses', icon: <Icon name="wallet" size={18} />, label: 'Expenses' },
     { id: 'documents', icon: <Icon name="folder_open" size={18} />, label: 'Documents' },
     { id: 'leave', icon: <Icon name="calendar_month" size={18} />, label: 'Leave' },
     { id: 'profile', icon: <Icon name="person" size={18} />, label: 'Profile' }
@@ -331,6 +335,7 @@ export default function EmployeePortal({
                 notifications={notifications}
                 clearNotifications={clearNotifications}
                 onProfileClick={() => setActiveTab('profile')}
+                user={currentUser}
             />
           </div>
 
@@ -407,7 +412,7 @@ export default function EmployeePortal({
               label="Announcements"
               onClick={() => { setActiveTab('announcements'); setShowMobileMenu(false) }}
             >
-              <Icon name="campaign" size={22} />
+              <Icon name="rss_feed" size={22} />
             </MobileTabButton>
             <MobileTabButton
               active={false}
@@ -420,7 +425,7 @@ export default function EmployeePortal({
                 </span>
               ) : null}
             >
-              <Icon name="notifications" size={22} />
+              <Icon name="notifications_active" size={22} />
             </MobileTabButton>
             <MobileTabButton
               active={showMobileMenu}
@@ -450,7 +455,7 @@ export default function EmployeePortal({
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
-          {navItems.filter(i => !['dashboard', 'announcements'].includes(i.id)).map(item => {
+          {navItems.filter(i => !['dashboard', 'announcements', 'profile'].includes(i.id)).map(item => {
             const active = activeTab === item.id
             return (
               <Button
@@ -1178,15 +1183,35 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
 
 // My Assets View (Employee)
 // ----------------------------------------------------------------------
-function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetRequests, addToast }) {
-  const [activeTab, setActiveTab] = useState('assigned') // 'assigned', 'request'
-  const [requestForm, setRequestForm] = useState({ category: 'Laptop', justification: '', urgency: 'Medium' })
+function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetRequests, addToast, assetCategories, setAssetCategories }) {
+  const [activeTab, setActiveTab] = useState('assigned') // 'assigned', 'request', 'maintenance'
+  const [requestForm, setRequestForm] = useState({ name: '', category: 'Laptop', justification: '', urgency: 'Medium' })
+  const [showCategoryModal, setShowCategoryModal] = useState(false)
+  const [catFormName, setCatFormName] = useState('')
+  const [maintenanceForm, setMaintenanceForm] = useState({ assetId: '', urgency: 'Medium', description: '' })
   const [showIssueModal, setShowIssueModal] = useState(false)
   const [issueAsset, setIssueAsset] = useState(null)
   const [issueText, setIssueText] = useState('')
+  const [successDialog, setSuccessDialog] = useState(null) // 'equipment' | 'maintenance' | null
 
   const myAssets = (assets || []).filter(a => a.assignedTo === currentUser.id && a.status === 'Assigned')
   const myRequests = (assetRequests || []).filter(r => r.employeeId === currentUser.id)
+
+  const allCategories = [...new Set([...(assetCategories || []), ...(assets || []).map(a => a.category).filter(Boolean)])]
+
+  const handleSaveCategory = () => {
+    const name = catFormName.trim()
+    if (!name) return addToast('Category name is required', 'warning')
+    if (!allCategories.includes(name)) {
+      setAssetCategories(prev => [...prev, name])
+      setRequestForm(p => ({ ...p, category: name }))
+      addToast('Category added', 'success')
+    } else {
+      addToast('Category already exists', 'warning')
+    }
+    setCatFormName('')
+    setShowCategoryModal(false)
+  }
 
   const handleReportIssue = (e) => {
     e.preventDefault()
@@ -1227,6 +1252,8 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
     const newReq = {
       id: `AREQ-${Date.now()}`,
       employeeId: currentUser.id,
+      type: 'equipment',
+      name: requestForm.name,
       category: requestForm.category,
       justification: requestForm.justification,
       urgency: requestForm.urgency,
@@ -1234,8 +1261,30 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
       date: new Date().toISOString()
     }
     setAssetRequests(prev => [newReq, ...prev])
-    setRequestForm({ category: 'Laptop', justification: '', urgency: 'Medium' })
+    setRequestForm({ name: '', category: 'Laptop', justification: '', urgency: 'Medium' })
+    setSuccessDialog('equipment')
     addToast('Asset request submitted to IT/HR', 'success')
+  }
+
+  const handleSubmitMaintenanceRequest = (e) => {
+    e.preventDefault()
+    const asset = (assets || []).find(a => a.id === maintenanceForm.assetId)
+    const newReq = {
+      id: `MREQ-${Date.now()}`,
+      employeeId: currentUser.id,
+      type: 'maintenance',
+      assetId: maintenanceForm.assetId,
+      assetName: asset?.name || '',
+      category: asset?.category || 'Maintenance',
+      justification: maintenanceForm.description,
+      urgency: maintenanceForm.urgency,
+      status: 'Pending',
+      date: new Date().toISOString()
+    }
+    setAssetRequests(prev => [newReq, ...prev])
+    setMaintenanceForm({ assetId: '', urgency: 'Medium', description: '' })
+    setSuccessDialog('maintenance')
+    addToast('Maintenance request submitted to IT/HR', 'success')
   }
 
   return (
@@ -1251,6 +1300,9 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
           </button>
           <button className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'request' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('request')}>
             Request Equipment
+          </button>
+          <button className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'maintenance' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('maintenance')}>
+            Maintenance Request
           </button>
         </div>
       </div>
@@ -1327,14 +1379,30 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
           <CardContent>
             <form onSubmit={handleSubmitRequest} className="flex flex-col gap-5 max-w-[500px]">
               <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">Equipment Name / Model</label>
+                <Input
+                  type="text"
+                  required
+                  placeholder="e.g. MacBook Pro 14-inch, iPhone 15..."
+                  value={requestForm.name}
+                  onChange={e => setRequestForm(p => ({...p, name: e.target.value}))}
+                />
+              </div>
+              <div className="space-y-2">
                 <label className="text-sm font-medium leading-none">Equipment Category</label>
-                <Select value={requestForm.category} onChange={(val) => setRequestForm(p => ({...p, category: val}))} placeholder="Category">
-                  <SelectItem id="Laptop">Laptop</SelectItem>
-                  <SelectItem id="Phone">Phone</SelectItem>
-                  <SelectItem id="Monitor">Monitor</SelectItem>
-                  <SelectItem id="Peripherals">Peripherals</SelectItem>
-                  <SelectItem id="Access Card">Access Card</SelectItem>
-                </Select>
+                <div className="flex bg-muted/40 rounded-xl p-1 border border-border/50 focus-within:ring-0 focus-within:outline-none transition-all">
+                  <div className="flex-1">
+                    <Select value={requestForm.category || null} onChange={(val) => setRequestForm(p => ({...p, category: val}))} placeholder="Category">
+                      {allCategories.map(cat => (
+                        <SelectItem key={cat} id={cat}>{cat}</SelectItem>
+                      ))}
+                    </Select>
+                  </div>
+                  <button type="button" className="shrink-0 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border-none group/add h-10 px-4 rounded-lg flex items-center transition-all duration-300 ease-out overflow-hidden" onClick={() => { setCatFormName(''); setShowCategoryModal(true) }}>
+                    <Icon name="add" size={18} className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" />
+                    <span className="w-0 overflow-hidden whitespace-nowrap text-sm font-bold opacity-0 transition-all duration-300 ease-out group-hover/add:w-auto group-hover/add:opacity-100 group-hover/add:ml-2">Add</span>
+                  </button>
+                </div>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none">Urgency Level</label>
@@ -1361,6 +1429,53 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
         </Card>
       )}
 
+      {activeTab === 'maintenance' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Request Equipment Maintenance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {myAssets.length === 0 ? (
+              <div className="p-10 text-center text-muted-foreground flex flex-col items-center justify-center">
+                <Icon name="build" size={40} className="h-10 w-10 mb-3 opacity-20" />
+                No assets are currently assigned to you, so there is nothing to request maintenance for.
+              </div>
+            ) : (
+              <form onSubmit={handleSubmitMaintenanceRequest} className="flex flex-col gap-5 max-w-[500px]">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">Asset</label>
+                  <Select value={maintenanceForm.assetId} onChange={(val) => setMaintenanceForm(p => ({...p, assetId: val}))} placeholder="Select an assigned asset">
+                    {myAssets.map(asset => (
+                      <SelectItem key={asset.id} id={asset.id}>{asset.name} (SN: {asset.serialNumber})</SelectItem>
+                    ))}
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">Urgency Level</label>
+                  <Select value={maintenanceForm.urgency} onChange={(val) => setMaintenanceForm(p => ({...p, urgency: val}))} placeholder="Urgency">
+                    <SelectItem id="Low">Low</SelectItem>
+                    <SelectItem id="Medium">Medium</SelectItem>
+                    <SelectItem id="High">High</SelectItem>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">Describe the Problem</label>
+                  <textarea 
+                    required 
+                    rows={4} 
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" 
+                    placeholder="e.g. Battery drains quickly, screen flickering, keyboard not working..." 
+                    value={maintenanceForm.description} 
+                    onChange={e => setMaintenanceForm(p => ({...p, description: e.target.value}))} 
+                  />
+                </div>
+                <Button type="submit" className="w-fit">Submit Maintenance Request</Button>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Report Issue Modal */}
       <Dialog open={showIssueModal} onOpenChange={setShowIssueModal}>
         <DialogContent className="sm:max-w-[425px]">
@@ -1381,6 +1496,85 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
               <Button type="submit">Submit Report</Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Request Submitted Success Dialog */}
+      <Dialog open={!!successDialog} onOpenChange={(open) => { if (!open) setSuccessDialog(null) }}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <div className="flex flex-col items-center gap-3 pt-4 text-center">
+              <div className="size-16 rounded-full bg-green-500/10 text-green-600 flex items-center justify-center">
+                <Icon name="check_circle" size={36} />
+              </div>
+              <DialogTitle className="text-xl">Request Submitted</DialogTitle>
+              <DialogDescription className="text-sm max-w-[280px]">
+                {successDialog === 'maintenance'
+                  ? 'Your maintenance request has been sent to IT/HR. They will follow up shortly.'
+                  : 'Your equipment request has been sent to IT/HR. You will be notified once it is approved.'}
+              </DialogDescription>
+            </div>
+          </DialogHeader>
+          <DialogFooter className="justify-center sm:justify-center">
+            <Button
+              variant="default"
+              className="flex-1"
+              onClick={() => setSuccessDialog(null)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Category Management Modal */}
+      <Dialog open={showCategoryModal} onOpenChange={setShowCategoryModal}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader className="flex flex-row items-center justify-between border-b border-border pb-4 mb-4 space-y-0">
+            <DialogTitle>Manage Categories</DialogTitle>
+            <button className="rounded-full p-2 hover:bg-muted transition-colors" onClick={() => { setShowCategoryModal(false); setCatFormName('') }}>
+              <Icon name="close" size={16} />
+            </button>
+          </DialogHeader>
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[0.82rem] font-semibold text-muted-foreground">Categories</label>
+              <div className="flex flex-col gap-1.5 max-h-[240px] overflow-y-auto">
+                {allCategories.map(cat => (
+                  <div key={cat} className={`flex items-center gap-2 p-2 px-3 rounded-lg bg-muted/30 border ${requestForm.category === cat ? 'border-primary/40' : 'border-border'}`}>
+                    <button type="button" className="flex-1 text-[0.9rem] font-medium text-foreground text-left" onClick={() => { setRequestForm(p => ({...p, category: cat})); setShowCategoryModal(false) }}>
+                      {cat}
+                    </button>
+                    {requestForm.category === cat && <Icon name="check" size={16} className="text-primary shrink-0" />}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <h3 className="m-0 mb-3 text-[0.95rem] font-semibold text-foreground">Add New Category</h3>
+              <div className="flex flex-col gap-3">
+                <Input
+                  type="text"
+                  value={catFormName}
+                  onChange={e => setCatFormName(e.target.value)}
+                  aria-label="Category name"
+                  placeholder="e.g. Printer"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSaveCategory();
+                    }
+                  }}
+                />
+                <div className="flex gap-2 justify-end">
+                  <Button variant="default" size="sm" className="flex items-center gap-1.5" onClick={handleSaveCategory}>
+                    <Icon name="add" size={14} /> Add
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

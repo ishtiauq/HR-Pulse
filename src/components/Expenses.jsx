@@ -170,7 +170,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="receipt_long" size={20} className="text-primary" />
+          <Icon name="wallet" size={20} className="text-primary" />
           Expenses
         </h1>
       </div>
@@ -226,7 +226,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
           <Card className="flex-1">
             <CardContent className="p-6 sm:p-8">
               <h3 className="text-xl mb-6 flex items-center gap-2 text-foreground">
-                <Icon name="receipt_long" size={20} className="text-primary" />
+                <Icon name="wallet" size={20} className="text-primary" />
                 Expense Details
               </h3>
               <form onSubmit={handleSubmit} className="flex flex-col gap-5">

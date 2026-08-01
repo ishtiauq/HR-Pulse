@@ -23,84 +23,47 @@ const categoryIcons = {
   'Access Card': <Icon name="key" size={16} className="w-4 h-4" />
 }
 
-function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filterCategory, setFilterCategory, alerts, showAddModal, setShowAddModal, newAsset, setNewAsset, handleAddAsset, triggerFileInput, fileInputRef, handleImportCSV, addToast }) {
+function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filterCategory, setFilterCategory, alerts, showAddModal, setShowAddModal, newAsset, setNewAsset, handleAddAsset, triggerFileInput, fileInputRef, handleImportCSV, addToast, assetCategories, onOpenCategoryManager }) {
   const [detailAsset, setDetailAsset] = useState(null)
+  const [metricModal, setMetricModal] = useState(null)
+  const [expanded, setExpanded] = useState({})
 
-  const categories = [
-    { label: 'Laptops', key: 'Laptop' },
-    { label: 'Phones', key: 'Phone' },
-    { label: 'Monitors', key: 'Monitor' },
-    { label: 'Peripherals', key: 'Peripherals' },
-    { label: 'Access Cards', key: 'Access Card' },
+  const categories = (assetCategories || []).map(cat => ({ label: cat + 's', key: cat }))
+
+  const metrics = [
+    { key: 'total', label: 'Total Assets', icon: 'monitor', count: stats.total, filter: () => true },
+    { key: 'available', label: 'Available', icon: 'check_circle', count: stats.available, filter: (a) => a.status === 'Available' },
+    { key: 'assigned', label: 'Assigned', icon: 'verified', count: stats.assigned, filter: (a) => a.status === 'Assigned' },
+    { key: 'underRepair', label: 'Under Repair', icon: 'build', count: stats.underRepair, filter: (a) => a.status === 'Under Repair' },
   ]
+
+  const toggleCategory = (key) => setExpanded(prev => ({ ...prev, [key]: !prev[key] }))
+
+  const categoryGroups = (filterCategory === 'All' ? categories : categories.filter(c => c.key === filterCategory))
+    .map(cat => ({
+      ...cat,
+      items: filteredAssets.filter(a => a.category === cat.key)
+    }))
+    .filter(g => g.items.length > 0 || g.key === filterCategory)
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Integrated Dashboard Metrics - Creative Touch */}
+      {/* Integrated Dashboard Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500">
-             <Icon name="monitor" size={80} />
-          </div>
-          <CardContent className="p-5 flex flex-col gap-1 relative z-10">
-            <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
-              <div className="p-1.5 bg-primary/10 rounded-md"><Icon name="monitor" size={16} /></div> <span className="headline-gradient">Total Assets</span>
-            </div>
-            <div className="text-4xl font-black tabular-nums text-foreground">{stats.total}</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-primary">
-             <Icon name="check_circle" size={80} />
-          </div>
-          <CardContent className="p-5 flex flex-col gap-1 relative z-10">
-            <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
-              <div className="p-1.5 bg-primary/10 rounded-md"><Icon name="check_circle" size={16} /></div> <span className="headline-gradient">Available</span>
-            </div>
-            <div className="text-4xl font-black tabular-nums text-foreground">{stats.available}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-primary">
-             <Icon name="verified" size={80} />
-          </div>
-          <CardContent className="p-5 flex flex-col gap-1 relative z-10">
-            <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
-              <div className="p-1.5 bg-primary/10 rounded-md"><Icon name="verified" size={16} /></div> <span className="headline-gradient">Assigned</span>
-            </div>
-            <div className="text-4xl font-black tabular-nums text-foreground">{stats.assigned}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-primary">
-             <Icon name="build" size={80} />
-          </div>
-          <CardContent className="p-5 flex flex-col gap-1 relative z-10">
-            <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
-              <div className="p-1.5 bg-primary/10 rounded-md"><Icon name="build" size={16} /></div> <span className="headline-gradient">Under Repair</span>
-            </div>
-            <div className="text-4xl font-black tabular-nums text-foreground">{stats.underRepair}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="flex flex-wrap gap-2">
-           <Button variant={filterCategory === 'All' ? 'default' : 'outline'} size="sm" onClick={() => setFilterCategory('All')} className="rounded-full h-8 px-4 text-xs">
-             All Assets
-           </Button>
-           {categories.map(cat => {
-             const count = assets.filter(a => a.category === cat.key).length
-             return (
-               <Button key={cat.key} variant={filterCategory === cat.key ? 'default' : 'outline'} size="sm" onClick={() => setFilterCategory(cat.key)} className="rounded-full h-8 px-4 text-xs flex items-center gap-1.5">
-                 {categoryIcons[cat.key]} {cat.label} <span className="opacity-50 ml-1">({count})</span>
-               </Button>
-             )
-           })}
-        </div>
+        {metrics.map(m => (
+          <Card
+            key={m.key}
+            onClick={() => setMetricModal(m.key)}
+            className="shadow-xs border-border bg-card hover:border-primary/50 hover:shadow-md transition-all duration-300 cursor-pointer"
+          >
+            <CardContent className="p-4 flex flex-col gap-1">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-semibold uppercase tracking-wider">
+                <Icon name={m.icon} size={14} className="text-primary shrink-0" /> {m.label}
+              </div>
+              <div className="text-2xl font-extrabold tabular-nums text-foreground">{m.count}</div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       <Card className="shadow-xs border-border bg-card overflow-hidden">
@@ -120,69 +83,220 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
           </div>
         </div>
 
-        <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow>
-              <TableHead>Asset ID / Serial</TableHead>
-              <TableHead>Asset Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Financials</TableHead>
-              <TableHead>Warranty</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredAssets.map(asset => (
-              <TableRow key={asset.id} onClick={() => setDetailAsset(asset)} className="cursor-pointer hover:bg-muted/50 transition-colors">
-                <TableCell>
-                  <div className="font-semibold">{asset.id}</div>
-                  <div className="text-[11px] text-muted-foreground uppercase tracking-wider font-mono">SN: {asset.serialNumber}</div>
-                </TableCell>
-                <TableCell className="font-medium text-foreground">{asset.name}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                    {categoryIcons[asset.category] || <Icon name="monitor" size={16} className="w-4 h-4" />}
-                    <span>{asset.category}</span>
+        {/* Accordion header row */}
+        <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-3">
+          <button
+            className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors"
+            onClick={() => {
+              const allOpen = Object.keys(expanded).length > 0 && Object.values(expanded).every(Boolean)
+              setExpanded(categories.reduce((acc, c) => ({ ...acc, [c.key]: !allOpen }), {}))
+            }}
+          >
+            <Icon name="category" size={18} className="text-primary" />
+            All Assets
+            <span className="text-xs text-muted-foreground font-normal">({filteredAssets.length})</span>
+          </button>
+          <Button variant="ghost" size="sm" onClick={onOpenCategoryManager} className="rounded-full h-8 px-3 text-xs flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+            <Icon name="tune" size={14} /> Manage Category
+          </Button>
+        </div>
+
+        {/* Accordions grouped by category */}
+        <div className="divide-y divide-border">
+          {categoryGroups.map(group => {
+            const isOpen = !!expanded[group.key]
+            return (
+              <div key={group.key}>
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted/40 transition-colors"
+                  onClick={() => toggleCategory(group.key)}
+                >
+                  <Icon name={isOpen ? 'expand_more' : 'chevron_right'} size={20} className="text-muted-foreground shrink-0 transition-transform" />
+                  <span className="p-1.5 bg-primary/10 rounded-md text-primary flex items-center justify-center">
+                    {categoryIcons[group.key] || <Icon name="monitor" size={16} />}
+                  </span>
+                  <span className="flex-1 font-semibold text-foreground">{group.label}</span>
+                  <Badge variant="secondary" className="text-xs">{group.items.length} {group.items.length === 1 ? 'asset' : 'assets'}</Badge>
+                </button>
+
+                {isOpen && (
+                  <div className="px-4 pb-5 animate-fade-in">
+                    {group.items.length === 0 ? (
+                      <div className="text-center text-muted-foreground py-8 border border-border border-dashed rounded-lg">
+                        No assets in this category.
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                        {group.items.map(asset => (
+                          <AssetCard
+                            key={asset.id}
+                            asset={asset}
+                            alert={alerts.find(a => a.id === asset.id)}
+                            onClick={() => setDetailAsset(asset)}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </TableCell>
-                <TableCell>
-                  <div className="font-medium">${asset.purchasePrice}</div>
-                  <div className="text-xs text-muted-foreground">{asset.purchaseDate}</div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1.5 font-medium text-sm">
-                    {asset.warrantyExpiry}
-                    {alerts.find(a => a.id === asset.id) && <Icon name="warning" size={16} className="h-4 w-4 text-orange-500 drop-shadow-sm" />}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge className={
-                    asset.status === 'Available' ? 'bg-green-500/10 text-green-700 hover:bg-green-500/20 dark:text-green-400 border border-green-500/20' :
-                    asset.status === 'Assigned' ? 'bg-blue-500/10 text-blue-700 hover:bg-blue-500/20 dark:text-blue-400 border border-blue-500/20' :
-                    asset.status === 'Under Repair' ? 'bg-orange-500/10 text-orange-700 hover:bg-orange-500/20 dark:text-orange-400 border border-orange-500/20' : 'bg-red-500/10 text-red-700 hover:bg-red-500/20 dark:text-red-400 border border-red-500/20'
-                  }>{asset.status}</Badge>
-                </TableCell>
-              </TableRow>
-            ))}
-            {filteredAssets.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center p-12">
-                  <div className="flex flex-col items-center justify-center text-muted-foreground">
-                    <Icon name="search" size={40} className="h-10 w-10 mb-3 opacity-20" />
-                    <p className="text-base font-medium text-foreground">No assets found</p>
-                    <p className="text-sm mt-1">Try adjusting your search query or filters.</p>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+                )}
+              </div>
+            )
+          })}
+          {categoryGroups.length === 0 && (
+            <div className="p-12 text-center text-muted-foreground flex flex-col items-center justify-center">
+              <Icon name="search" size={40} className="h-10 w-10 mb-3 opacity-20" />
+              <p className="text-base font-medium text-foreground">No assets found</p>
+              <p className="text-sm mt-1">Try adjusting your search query or filters.</p>
+            </div>
+          )}
+        </div>
       </Card>
 
       {detailAsset && (
         <DetailModal asset={detailAsset} onClose={() => setDetailAsset(null)} />
       )}
+
+      {metricModal && (
+        <MetricBreakdownModal
+          metricKey={metricModal}
+          metrics={metrics}
+          assets={assets || []}
+          onClose={() => setMetricModal(null)}
+        />
+      )}
     </div>
+  )
+}
+
+function AssetCard({ asset, alert, onClick }) {
+  const statusClass = {
+    'Available': 'bg-green-500/10 text-green-700 border-green-500/20 dark:text-green-400',
+    'Assigned': 'bg-blue-500/10 text-blue-700 border-blue-500/20 dark:text-blue-400',
+    'Under Repair': 'bg-orange-500/10 text-orange-700 border-orange-500/20 dark:text-orange-400',
+  }
+  return (
+    <Card
+      onClick={onClick}
+      className="shadow-xs border-border bg-card hover:border-primary/50 hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden"
+    >
+      <div className="h-1 w-full bg-gradient-to-r from-primary/60 to-primary/20" />
+      <CardContent className="p-4 flex flex-col gap-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="font-bold text-foreground text-sm truncate">{asset.name}</div>
+            <div className="text-[11px] text-muted-foreground font-mono mt-0.5">{asset.id} • SN: {asset.serialNumber}</div>
+          </div>
+          <Badge className={`shrink-0 border ${statusClass[asset.status] || 'bg-red-500/10 text-red-700 border-red-500/20 dark:text-red-400'}`}>
+            {asset.status}
+          </Badge>
+        </div>
+
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          {categoryIcons[asset.category] || <Icon name="monitor" size={14} />}
+          <span>{asset.category}</span>
+          <span className="opacity-50">•</span>
+          <span>Condition: {asset.condition || '—'}</span>
+        </div>
+
+        <div className="flex items-center justify-between pt-2 border-t border-border/60">
+          <div>
+            <div className="text-[11px] text-muted-foreground uppercase tracking-wider">Purchase Price</div>
+            <div className="font-semibold text-sm text-foreground">${asset.purchasePrice}</div>
+          </div>
+          <div className="text-right">
+            <div className="text-[11px] text-muted-foreground uppercase tracking-wider flex items-center justify-end gap-1">
+              Warranty {alert && <Icon name="warning" size={14} className="text-orange-500" />}
+            </div>
+            <div className="font-medium text-sm text-foreground">{asset.warrantyExpiry || '—'}</div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function MetricBreakdownModal({ metricKey, metrics, assets, onClose }) {
+  useModal(onClose)
+
+  const metric = metrics.find(m => m.key === metricKey) || metrics[0]
+  const list = assets.filter(metric.filter)
+
+  const byCategory = list.reduce((acc, a) => {
+    acc[a.category] = (acc[a.category] || 0) + 1
+    return acc
+  }, {})
+  const totalValue = list.reduce((sum, a) => sum + (parseFloat(a.purchasePrice) || 0), 0)
+
+  return (
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[720px] p-0 overflow-hidden">
+        <div className="bg-muted/30 p-5 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Icon name={metric.icon} size={20} className="text-primary" />
+            <DialogTitle className="text-lg">{metric.label}</DialogTitle>
+            <DialogDescription className="text-sm ml-1">
+              {list.length} {list.length === 1 ? 'asset' : 'assets'}
+            </DialogDescription>
+          </div>
+          <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border max-h-[60vh] overflow-y-auto">
+          {/* Left half: asset list */}
+          <div className="p-5 min-w-0">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Asset List</h4>
+            {list.length === 0 ? (
+              <div className="text-center text-muted-foreground py-10 border border-border border-dashed rounded-lg">
+                No assets in this category.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {list.map(a => (
+                  <div key={a.id} className="p-3 rounded-lg border border-border bg-card flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="font-medium text-sm truncate">{a.name}</div>
+                      <div className="text-[11px] text-muted-foreground font-mono">{a.id} • {a.serialNumber}</div>
+                    </div>
+                    <Badge variant="outline" className="shrink-0 text-xs">{a.category}</Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right half: summary */}
+          <div className="p-5 min-w-0">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Summary</h4>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/40">
+                <span className="text-sm text-muted-foreground">Total Count</span>
+                <span className="text-lg font-extrabold tabular-nums">{list.length}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/40">
+                <span className="text-sm text-muted-foreground">Total Purchase Value</span>
+                <span className="text-lg font-extrabold tabular-nums">${totalValue.toLocaleString()}</span>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/40">
+                <span className="text-sm text-muted-foreground">By Category</span>
+                <div className="mt-2 flex flex-col gap-1.5">
+                  {Object.keys(byCategory).length === 0 && (
+                    <span className="text-xs text-muted-foreground">No data</span>
+                  )}
+                  {Object.entries(byCategory).sort((a, b) => b[1] - a[1]).map(([cat, n]) => (
+                    <div key={cat} className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-1.5">
+                        {categoryIcons[cat] || <Icon name="monitor" size={14} className="text-muted-foreground" />} {cat}
+                      </span>
+                      <span className="font-semibold tabular-nums">{n}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -398,9 +512,13 @@ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-3 flex-wrap">
                     <span className="font-semibold text-base">{emp.name}</span>
-                    <span className="text-muted-foreground text-sm">requested a</span>
+                    <span className="text-muted-foreground text-sm">{req.type === 'maintenance' ? 'requested maintenance for' : 'requested a'}</span>
                     <span className="font-bold text-primary flex items-center gap-1">
-                       {categoryIcons[req.category]} {req.category}
+                       {req.type === 'maintenance' ? (
+                         <><Icon name="build" size={16} /> {req.assetName || req.category}</>
+                       ) : (
+                         <>{categoryIcons[req.category]} {req.name || req.category}</>
+                       )}
                     </span>
                     <Badge variant="outline" className={req.urgency === 'High' ? 'text-red-500 border-red-200 bg-red-50 dark:bg-red-950/30 ml-2' : req.urgency === 'Medium' ? 'text-orange-500 border-orange-200 bg-orange-50 dark:bg-orange-950/30 ml-2' : 'text-blue-500 border-blue-200 bg-blue-50 dark:bg-blue-950/30 ml-2'}>
                       {req.urgency} Priority
@@ -555,8 +673,28 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
   )
 }
 
-function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, handleAddAsset }) {
+function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, handleAddAsset, existingCategories, setAssetCategories }) {
   useModal(() => setShowAddModal(false))
+
+  const [showNewCategory, setShowNewCategory] = useState(false)
+
+  const allCategories = [...new Set([...(existingCategories || [])])]
+
+  const handleCategoryChange = (val) => {
+    if (val === '__new__') {
+      setShowNewCategory(true)
+      setNewAsset(p => ({ ...p, category: '' }))
+    } else {
+      setShowNewCategory(false)
+      setNewAsset(p => ({ ...p, category: val }))
+    }
+  }
+
+  const handleAddCategory = (e) => {
+    if (!newAsset.category.trim()) return
+    setAssetCategories(prev => [...new Set([...prev, newAsset.category.trim()])])
+    setShowNewCategory(false)
+  }
 
   return (
     <Dialog open={true} onOpenChange={(open) => !open && setShowAddModal(false)}>
@@ -572,13 +710,29 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
               <label className="text-sm font-medium">Asset Name</label>
               <Input type="text" required placeholder="e.g. MacBook Pro M3" value={newAsset.name} onChange={e => setNewAsset(p => ({...p, name: e.target.value}))} />
             </div>
-            <Select label="Category" value={newAsset.category} onChange={(val) => setNewAsset(p => ({...p, category: val}))}>
-              <SelectItem id="Laptop">Laptop</SelectItem>
-              <SelectItem id="Phone">Phone</SelectItem>
-              <SelectItem id="Monitor">Monitor</SelectItem>
-              <SelectItem id="Peripherals">Peripherals</SelectItem>
-              <SelectItem id="Access Card">Access Card</SelectItem>
-            </Select>
+            <div className="flex flex-col gap-2">
+              <Select label="Category" value={newAsset.category || null} onChange={handleCategoryChange}>
+                {allCategories.map(cat => (
+                  <SelectItem key={cat} id={cat}>{cat}</SelectItem>
+                ))}
+                <SelectItem id="__new__">+ New Category...</SelectItem>
+              </Select>
+              {showNewCategory && (
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    required
+                    autoFocus
+                    placeholder="e.g. Printer"
+                    value={newAsset.category}
+                    onChange={e => setNewAsset(p => ({...p, category: e.target.value}))}
+                  />
+                  <Button type="button" size="sm" onClick={handleAddCategory}>
+                    <Icon name="add" size={14} />
+                  </Button>
+                </div>
+              )}
+            </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">Serial Number / IMEI</label>
               <Input type="text" required placeholder="SN12345678" value={newAsset.serialNumber} onChange={e => setNewAsset(p => ({...p, serialNumber: e.target.value}))} />
@@ -590,9 +744,9 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">Useful Life (Months)</label>
-              <Input type="number" required placeholder="36" value={newAsset.usefulLife} onChange={e => setNewAsset(p => ({...p, usefulLife: e.target.value}))} />
+              <Input type="number" placeholder="36" value={newAsset.usefulLife} onChange={e => setNewAsset(p => ({...p, usefulLife: e.target.value}))} />
             </div>
-            <DatePicker label="Warranty Expiry" required value={newAsset.warrantyExpiry} onChange={(e) => setNewAsset(p => ({...p, warrantyExpiry: e.target.value}))} />
+            <DatePicker label="Warranty Expiry" value={newAsset.warrantyExpiry} onChange={(e) => setNewAsset(p => ({...p, warrantyExpiry: e.target.value}))} />
           </div>
           
           <DialogFooter className="mt-4">
@@ -605,7 +759,7 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
   )
 }
 
-export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, addLog, addToast, currentUser, simulatedRole }) {
+export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, assetCategories, setAssetCategories, addLog, addToast, currentUser, simulatedRole }) {
   // SETTING DEFAULT TO INVENTORY AS DASHBOARD IS REMOVED
   const [activeView, setActiveView] = useState('inventory')
   const [search, setSearch] = useState('')
@@ -628,6 +782,31 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
   const [showAddModal, setShowAddModal] = useState(false)
   useModal(() => setShowAddModal(false))
   const [newAsset, setNewAsset] = useState({ name: '', category: 'Laptop', serialNumber: '', purchaseDate: '', purchasePrice: '', warrantyExpiry: '', usefulLife: 36, condition: 'New' })
+
+  const [showCategoryManager, setShowCategoryManager] = useState(false)
+  const [categoryManagerState, setCategoryManagerState] = useState({ editing: null, deleteConfirm: null })
+
+  const handleSaveCategoryEdit = (oldName, newName) => {
+    const name = (newName || '').trim()
+    if (!name) return addToast('Category name is required', 'warning')
+    if (oldName === name) { setCategoryManagerState({ editing: null, deleteConfirm: null }); return }
+    if ((assetCategories || []).includes(name)) return addToast('Category already exists', 'warning')
+    setAssetCategories(prev => prev.map(c => c === oldName ? name : c))
+    setAssets(prev => prev.map(a => a.category === oldName ? { ...a, category: name } : a))
+    setFilterCategory(prev => prev === oldName ? name : prev)
+    setCategoryManagerState({ editing: null, deleteConfirm: null })
+    addToast(`Category renamed to "${name}"`, 'success')
+    addLog(`Category "${oldName}" renamed to "${name}"`)
+  }
+
+  const handleDeleteCategory = (catName) => {
+    setAssetCategories(prev => prev.filter(c => c !== catName))
+    setAssets(prev => prev.map(a => a.category === catName ? { ...a, category: 'Uncategorized' } : a))
+    setFilterCategory(prev => prev === catName ? 'All' : prev)
+    setCategoryManagerState({ editing: null, deleteConfirm: null })
+    addToast(`Category "${catName}" deleted. Assets moved to Uncategorized.`, 'info')
+    addLog(`Category "${catName}" deleted, assets moved to Uncategorized`, 'warning')
+  }
 
   const handleAddAsset = (e) => {
     e.preventDefault()
@@ -822,6 +1001,8 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     underRepair: assets?.filter(a => a.status === 'Under Repair').length || 0,
   }
 
+  const existingCategories = assetCategories || []
+
   const filteredAssets = (assets || []).filter(a => {
     const matchesSearch = a.name.toLowerCase().includes(search.toLowerCase()) || a.serialNumber.toLowerCase().includes(search.toLowerCase())
     const matchesCat = filterCategory === 'All' ? true : a.category === filterCategory
@@ -831,7 +1012,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
   const renderView = () => {
     switch (activeView) {
       case 'inventory':
-        return <AssetInventory stats={stats} assets={assets || []} filteredAssets={filteredAssets} search={search} setSearch={setSearch} filterCategory={filterCategory} setFilterCategory={setFilterCategory} alerts={alerts} showAddModal={showAddModal} setShowAddModal={setShowAddModal} newAsset={newAsset} setNewAsset={setNewAsset} handleAddAsset={handleAddAsset} triggerFileInput={triggerFileInput} fileInputRef={fileInputRef} handleImportCSV={handleImportCSV} addToast={addToast} />
+        return <AssetInventory stats={stats} assets={assets || []} filteredAssets={filteredAssets} search={search} setSearch={setSearch} filterCategory={filterCategory} setFilterCategory={setFilterCategory} alerts={alerts} showAddModal={showAddModal} setShowAddModal={setShowAddModal} newAsset={newAsset} setNewAsset={setNewAsset} handleAddAsset={handleAddAsset} triggerFileInput={triggerFileInput} fileInputRef={fileInputRef} handleImportCSV={handleImportCSV} addToast={addToast} assetCategories={assetCategories} onOpenCategoryManager={() => setShowCategoryManager(true)} />
       case 'assignments':
         return <AssetAssignments assets={assets} employees={employees} assignForm={assignForm} setAssignForm={setAssignForm} setAssignTarget={setAssignTarget} assignTarget={assignTarget} showAssignModal={showAssignModal} setShowAssignModal={setShowAssignModal} handleAssignAsset={handleAssignAsset} handleReturnAsset={handleReturnAsset} generateAgreementPDF={generateAgreementPDF} />
       case 'requests':
@@ -839,7 +1020,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       case 'maintenance':
         return <AssetMaintenance assets={assets} selectedAssetForMaint={selectedAssetForMaint} setSelectedAssetForMaint={setSelectedAssetForMaint} maintForm={maintForm} setMaintForm={setMaintForm} handleAddMaintenance={handleAddMaintenance} calculateBookValue={calculateBookValue} />
       default:
-        return <AssetInventory stats={stats} assets={assets || []} filteredAssets={filteredAssets} search={search} setSearch={setSearch} filterCategory={filterCategory} setFilterCategory={setFilterCategory} alerts={alerts} showAddModal={showAddModal} setShowAddModal={setShowAddModal} newAsset={newAsset} setNewAsset={setNewAsset} handleAddAsset={handleAddAsset} triggerFileInput={triggerFileInput} fileInputRef={fileInputRef} handleImportCSV={handleImportCSV} addToast={addToast} />
+        return <AssetInventory stats={stats} assets={assets || []} filteredAssets={filteredAssets} search={search} setSearch={setSearch} filterCategory={filterCategory} setFilterCategory={setFilterCategory} alerts={alerts} showAddModal={showAddModal} setShowAddModal={setShowAddModal} newAsset={newAsset} setNewAsset={setNewAsset} handleAddAsset={handleAddAsset} triggerFileInput={triggerFileInput} fileInputRef={fileInputRef} handleImportCSV={handleImportCSV} addToast={addToast} assetCategories={assetCategories} onOpenCategoryManager={() => setShowCategoryManager(true)} />
     }
   }
 
@@ -853,21 +1034,32 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       </div>
       <div className="border-t border-border border-headline" />
       
-      <div className="flex gap-2 overflow-x-auto pb-2 border-b border-border w-full max-w-full">
-        {['inventory', 'assignments', 'requests', 'maintenance'].map(view => (
-          <button
-            key={view}
-            onClick={() => setActiveView(view)}
-            className={`px-4 py-2 font-medium text-sm transition-colors relative whitespace-nowrap outline-none ${activeView === view ? 'text-primary border-b-2 border-primary -mb-[1px]' : 'text-muted-foreground hover:text-foreground'}`}
-          >
-            {view.charAt(0).toUpperCase() + view.slice(1)}
-            {view === 'requests' && assetRequests?.filter(r => r.status === 'Pending').length > 0 && (
-              <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                {assetRequests.filter(r => r.status === 'Pending').length}
-              </span>
-            )}
-          </button>
-        ))}
+      <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
+        <div role="tablist" aria-label="Asset management sections" className="grid grid-cols-2 sm:flex gap-2">
+          {[
+            { id: 'inventory', label: 'Inventory', icon: <Icon name="inventory_2" size={16} /> },
+            { id: 'assignments', label: 'Assignments', icon: <Icon name="assignment_ind" size={16} /> },
+            { id: 'requests', label: 'Requests', icon: <Icon name="request_quote" size={16} /> },
+            { id: 'maintenance', label: 'Maintenance', icon: <Icon name="build" size={16} /> },
+          ].map(view => (
+            <Button
+              key={view.id}
+              role="tab"
+              aria-selected={activeView === view.id}
+              variant={activeView === view.id ? 'default' : 'ghost'}
+              size="sm"
+              className={`rounded-full px-4 relative w-full sm:w-auto justify-center ${activeView !== view.id ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+              onClick={() => setActiveView(view.id)}
+            >
+              {view.icon} {view.label}
+              {view.id === 'requests' && assetRequests?.filter(r => r.status === 'Pending').length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.15rem] text-center">
+                  {assetRequests.filter(r => r.status === 'Pending').length}
+                </span>
+              )}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {alerts.length > 0 && activeView === 'inventory' && (
@@ -880,10 +1072,104 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       {renderView()}
 
       {showAddModal && (
-        <AddAssetModal showAddModal={showAddModal} setShowAddModal={setShowAddModal} newAsset={newAsset} setNewAsset={setNewAsset} handleAddAsset={handleAddAsset} />
+        <AddAssetModal showAddModal={showAddModal} setShowAddModal={setShowAddModal} newAsset={newAsset} setNewAsset={setNewAsset} handleAddAsset={handleAddAsset} existingCategories={existingCategories} setAssetCategories={setAssetCategories} />
+      )}
+
+      {showCategoryManager && (
+        <CategoryManagerModal
+          assetCategories={assetCategories}
+          assets={assets || []}
+          onClose={() => setShowCategoryManager(false)}
+          onEdit={handleSaveCategoryEdit}
+          onDelete={handleDeleteCategory}
+          managerState={categoryManagerState}
+          setManagerState={setCategoryManagerState}
+        />
       )}
 
       <AdSlot className="mt-8" type="horizontal" />
     </div>
+  )
+}
+
+function CategoryManagerModal({ assetCategories, assets, onClose, onEdit, onDelete, managerState, setManagerState }) {
+  useModal(onClose)
+  const [editValue, setEditValue] = useState('')
+
+  const openEdit = (cat) => {
+    setManagerState({ editing: cat, deleteConfirm: null })
+    setEditValue(cat)
+  }
+
+  const submitEdit = () => {
+    onEdit(managerState.editing, editValue)
+  }
+
+  return (
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[480px]">
+        <DialogHeader className="flex flex-row items-center justify-between border-b border-border pb-4 mb-4 space-y-0">
+          <DialogTitle>Manage Asset Categories</DialogTitle>
+          <button className="rounded-full p-2 hover:bg-muted transition-colors" onClick={onClose}>
+            <Icon name="close" size={16} />
+          </button>
+        </DialogHeader>
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[0.82rem] font-semibold text-muted-foreground">Categories</label>
+            <div className="flex flex-col gap-1.5 max-h-[280px] overflow-y-auto">
+              {(assetCategories || []).map(cat => (
+                <div key={cat} className="flex items-center gap-2 p-2 px-3 rounded-lg bg-muted/30 border border-border">
+                  <span className="flex-1 text-[0.9rem] font-medium text-foreground">{cat}</span>
+                  <span className="text-[11px] text-muted-foreground">{assets.filter(a => a.category === cat).length} asset(s)</span>
+                  <Button variant="ghost" size="icon-xs" aria-label="Edit category" onClick={() => openEdit(cat)}>
+                    <Icon name="edit" size={14} />
+                  </Button>
+                  <Button variant="ghost" size="icon-xs" aria-label="Delete category" onClick={() => setManagerState({ editing: null, deleteConfirm: cat })}>
+                    <Icon name="delete" size={14} className="text-destructive" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {managerState.editing && (
+            <div className="border-t border-border pt-4">
+              <h3 className="m-0 mb-3 text-[0.95rem] font-semibold text-foreground">Edit Category</h3>
+              <div className="flex flex-col gap-3">
+                <Input
+                  type="text"
+                  value={editValue}
+                  onChange={e => setEditValue(e.target.value)}
+                  aria-label="Category name"
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submitEdit() } }}
+                />
+                <div className="flex gap-2 justify-end">
+                  <Button variant="secondary" size="sm" onClick={() => setManagerState({ editing: null, deleteConfirm: null })}>Cancel</Button>
+                  <Button variant="default" size="sm" className="flex items-center gap-1.5" onClick={submitEdit}>
+                    <Icon name="check" size={14} /> Save
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {managerState.deleteConfirm && (
+            <div className="border-t border-border pt-4">
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex items-start gap-2">
+                <Icon name="warning" size={16} className="text-destructive mt-0.5 shrink-0" />
+                <p className="text-sm text-foreground">
+                  Delete "<strong>{managerState.deleteConfirm}</strong>"? Assets in this category will be moved to <strong>Uncategorized</strong>.
+                </p>
+              </div>
+              <div className="flex gap-2 justify-end mt-3">
+                <Button variant="secondary" size="sm" onClick={() => setManagerState({ editing: null, deleteConfirm: null })}>Cancel</Button>
+                <Button variant="destructive" size="sm" onClick={() => onDelete(managerState.deleteConfirm)}>Delete</Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

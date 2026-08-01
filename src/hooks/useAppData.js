@@ -100,6 +100,7 @@ export default function useAppData({ user, addToast }) {
   const [tasks, setTasks] = useState(() => loadSaved('hr_pulse_tasks') || [])
   const [assets, setAssets] = useState(() => loadSaved('hr_pulse_assets') || [])
   const [assetRequests, setAssetRequests] = useState(() => loadSaved('hr_pulse_asset_requests') || [])
+  const [assetCategories, setAssetCategories] = useState(() => loadSaved('hr_pulse_asset_categories') || ['Laptop', 'Phone', 'Monitor', 'Peripherals', 'Access Card'])
   const [settings, setSettingsRaw] = useState(() => loadSaved('hr_pulse_settings') || { currency: '৳', officeLocation: { lat: 23.8103, lng: 90.4125, radius: 100 }, salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'HR Pulse Ltd.', email: 'hr@hrpulse.io', website: 'www.hrpulse.io', logo: '', logoX: 0, logoY: 0, logoZoom: 1 }, shiftTemplates: [{ id: 'st-1', name: 'Morning Shift', start: '09:00', end: '18:00', break: 60, color: '#3b82f6' }, { id: 'st-2', name: 'Evening Shift', start: '14:00', end: '23:00', break: 60, color: '#8b5cf6' }, { id: 'st-3', name: 'Night Shift', start: '22:00', end: '07:00', break: 60, color: '#1e293b' }, { id: 'st-4', name: 'Half-Day', start: '09:00', end: '13:00', break: 0, color: '#f59e0b' }], overtimeRules: { multiplierWeekday: 1.5, multiplierWeekend: 2.0 }, notifications: { syncAlerts: true, emailDigests: false } })
   const [syncLogs, setSyncLogs] = useState(() => loadSaved('hr_pulse_sync_logs') || [])
 
@@ -153,6 +154,7 @@ export default function useAppData({ user, addToast }) {
     { key: 'hr_pulse_announcements', val: announcements },
     { key: 'hr_pulse_assets', val: assets },
     { key: 'hr_pulse_asset_requests', val: assetRequests },
+    { key: 'hr_pulse_asset_categories', val: assetCategories },
     { key: 'hr_pulse_events', val: events },
     { key: 'hr_pulse_documents', val: documents },
   ]
@@ -546,7 +548,7 @@ export default function useAppData({ user, addToast }) {
     roster, setRoster, shiftSwaps, setShiftSwaps,
     overtimeClaims, setOvertimeClaims,
     announcements, setAnnouncements,
-    assets, setAssets, assetRequests, setAssetRequests,
+    assets, setAssets, assetRequests, setAssetRequests, assetCategories, setAssetCategories,
     settings, syncLogs,
 
     /* Functions */

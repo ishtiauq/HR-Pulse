@@ -209,12 +209,12 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
 
   const menuItems = [
     { id: 'theme', icon: <Icon name="light_mode" size={20} />, label: 'Appearance & Theme' },
-    { id: 'payroll', icon: <Icon name="tune" size={20} />, label: 'Payroll Settings' },
+    { id: 'payroll', icon: <Icon name="account_balance" size={20} />, label: 'Payroll Settings' },
     { id: 'company', icon: <Icon name="apartment" size={20} />, label: 'Company Profile' },
     { id: 'attendance', icon: <Icon name="pin_drop" size={20} />, label: 'Attendance & Leaves' },
-    { id: 'expenses', icon: <Icon name="receipt_long" size={20} />, label: 'Expense Policies' },
+    { id: 'expenses', icon: <Icon name="wallet" size={20} />, label: 'Expense Policies' },
     { id: 'rosters', icon: <Icon name="calendar_clock" size={20} />, label: 'Rosters & Shifts' },
-    { id: 'notifications', icon: <Icon name="notifications" size={20} />, label: 'Notifications' },
+    { id: 'notifications', icon: <Icon name="notifications_active" size={20} />, label: 'Notifications' },
     { id: 'audit', icon: <Icon name="list" size={20} />, label: 'Audit Logs' },
     { id: 'security', icon: <Icon name="verified_user" size={20} />, label: 'Security' },
     { id: 'sync', icon: <Icon name="monitoring" size={20} />, label: 'Sync Conflicts', badge: syncConflicts?.length },
@@ -400,7 +400,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Icon name="notifications" size={20} className="h-5 w-5 text-muted-foreground" />
+              <Icon name="notifications_active" size={20} className="h-5 w-5 text-muted-foreground" />
               <CardTitle className="text-lg">Notification Preferences</CardTitle>
             </div>
             <CardDescription>Enable alerts, sync logs alerts, or background notification parameters.</CardDescription>
@@ -543,7 +543,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Icon name="receipt_long" size={20} className="h-5 w-5 text-muted-foreground" />
+              <Icon name="wallet" size={20} className="h-5 w-5 text-muted-foreground" />
               <CardTitle className="text-lg">Expense Policies</CardTitle>
             </div>
             <CardDescription>Set maximum reimbursement limits per category.</CardDescription>

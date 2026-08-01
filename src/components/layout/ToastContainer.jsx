@@ -10,7 +10,7 @@ export default function ToastContainer({ toasts, removeToast }) {
           style={{ animation: 'slideIn 0.3s ease-out' }}
         >
           <div className="flex items-start gap-3 flex-1 w-full">
-            <Icon name="notifications" size={18} className="shrink-0 mt-0.5 text-muted-foreground" />
+            <Icon name="notifications_active" size={18} className="shrink-0 mt-0.5 text-muted-foreground" />
             <p className="flex-1 text-sm font-medium leading-relaxed">
               {toast.message}
             </p>

@@ -6,14 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import AdSlot from './AdSlot'
-import { getLocalCacheSizeMB, clearLocalCache } from '../services/db.js'
+import { clearLocalCache } from '../services/db.js'
 import { createBackup, listBackups, restoreBackup } from '../services/googleDrive.js'
 import { formatDateTime } from '../services/date.js'
 
 export default function DriveSync({ user, driveConnected, setDriveConnected, addLog, addToast }) {
-  const [timeSinceSync, setTimeSinceSync] = useState(2)
-  const [timeUntilSync, setTimeUntilSync] = useState(13)
-  const [cacheSize, setCacheSize] = useState('0.00')
   const [isClearing, setIsClearing] = useState(false)
 
   const { confirm, ConfirmDialog } = useConfirm()
@@ -24,12 +21,6 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
   const [selectedRestoreBackup, setSelectedRestoreBackup] = useState(null)
 
   useEffect(() => {
-    const fetchCacheSize = async () => {
-      const size = await getLocalCacheSizeMB()
-      setCacheSize(size)
-    }
-    fetchCacheSize()
-
     const loadBackups = async () => {
       if (driveConnected && user?.token) {
         try {
@@ -41,13 +32,6 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
       }
     }
     loadBackups()
-
-    const timer = setInterval(() => {
-      setTimeSinceSync(prev => prev < 15 ? prev + 1 : 0)
-      setTimeUntilSync(prev => prev > 0 ? prev - 1 : 15)
-      fetchCacheSize()
-    }, 60000)
-    return () => clearInterval(timer)
   }, [driveConnected, user])
 
   const handleToggleConnection = () => {
@@ -58,13 +42,6 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
     } else {
       addLog('Google Drive Connection Paused', 'Local storage offline, cloud sync suspended', 'warning')
     }
-  }
-
-  const handleTestConnection = () => {
-    addToast('Pinging Google Drive API...', 'info')
-    setTimeout(() => {
-      addToast('Success: Read/Write access verified in /HR-Pulse-DB/', 'success')
-    }, 1000)
   }
 
   const handleCreateBackup = async () => {
@@ -110,14 +87,14 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
       <div className="border-t border-border border-headline" />
 
       {/* Connection Controller Card */}
-      <Card className={`p-6 sm:p-8 lg:p-10 ${driveConnected ? 'bg-emerald-500/5' : ''}`}>
-        <div className="flex justify-between items-center flex-wrap gap-6">
+      <Card className={`overflow-hidden ${driveConnected ? 'border-primary/40' : ''}`}>
+        <div className="flex justify-between items-center flex-wrap gap-6 p-6 sm:p-8 lg:p-10">
           <div className="flex gap-5 items-center">
-            <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center ${driveConnected ? 'bg-status-success/10 text-emerald-500 shadow-[0_4px_20px_rgba(16,185,129,0.2)]' : 'bg-status-error/10 text-destructive'}`}>
+            <div className={`relative size-14 rounded-2xl flex items-center justify-center shadow-sm ${driveConnected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
               {driveConnected && (
                 <>
-                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-status-success animate-ping" />
-                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-status-success" />
+                  <span className="absolute -top-1 -right-1 size-3 rounded-full bg-status-success animate-ping" />
+                  <span className="absolute -top-1 -right-1 size-3 rounded-full bg-status-success" />
                 </>
               )}
               {driveConnected ? <Icon name="bolt" size={28} /> : <Icon name="cloud_off" size={28} />}
@@ -126,15 +103,10 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
               <h3 className="text-xl flex items-center gap-2 text-foreground">
                 {driveConnected ? 'Sync Tunnel Active' : 'Sync Tunnel Paused'}
               </h3>
-              <div className="text-muted-foreground text-[0.85rem] mt-1 flex gap-4 flex-wrap">
-                {driveConnected ? (
-                  <>
-                    <span className="flex items-center gap-1"><Icon name="refresh" size={14} /> Last Synced: {timeSinceSync} minutes ago</span>
-                    <span className="flex items-center gap-1"><Icon name="swap_horiz" size={14} /> Next sync in {timeUntilSync} minutes</span>
-                  </>
-                ) : (
-                  'Local database is working offline. Operations will be buffered until connection resumes.'
-                )}
+              <div className="text-muted-foreground text-[0.85rem] mt-1">
+                {driveConnected
+                  ? 'Database tables are synced with the /HR-Pulse-DB/ folder on Google Drive.'
+                  : 'Local database is working offline. Operations will be buffered until connection resumes.'}
               </div>
             </div>
           </div>
@@ -156,7 +128,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
               disabled={isClearing}
               variant="outline"
               aria-label="Clear local cache and resync"
-              className="border-destructive text-destructive hover:text-destructive font-semibold"
+              className="border-destructive/40 text-destructive hover:text-destructive font-semibold"
             >
               <Icon name="delete" size={16} />
               {isClearing ? 'Clearing...' : 'Clear Local Cache & Resync'}
@@ -165,8 +137,9 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
               onClick={handleToggleConnection}
               aria-label={driveConnected ? 'Pause cloud connection' : 'Establish cloud connection'}
               variant={driveConnected ? 'outline' : 'default'}
-              className={driveConnected ? 'border-amber-500 text-amber-500 hover:text-amber-600 font-semibold' : 'font-semibold'}
+              className={driveConnected ? 'border-primary/40 text-primary font-semibold' : 'font-semibold'}
             >
+              <Icon name="swap_horiz" size={16} />
               {driveConnected ? 'Pause Cloud Connection' : 'Establish Cloud Connection'}
             </Button>
           </div>
@@ -174,35 +147,6 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* Sync Mechanism Diagram */}
-        <Card className="flex flex-col">
-          <CardContent className="p-4 sm:p-6 lg:p-8 flex flex-col justify-center h-full gap-5">
-            <h4 className="text-base text-foreground font-semibold">Data Synchronization Flow</h4>
-
-            <div className="py-2 sm:py-5 flex items-center justify-between gap-2 sm:gap-3 w-full">
-              <div className="flex-1 w-full max-w-[140px] rounded-xl border border-border bg-muted/10 text-center p-3 px-1 sm:px-2">
-                <Icon name="storage" size={24} className="text-primary mx-auto mb-1.5" />
-                <span className="text-[0.7rem] sm:text-[0.8rem] block font-semibold text-foreground">Local Cache</span>
-                <span className="text-[0.65rem] sm:text-[0.7rem] text-muted-foreground block mb-0.5">{driveConnected ? '0 pending' : 'Offline queue'}</span>
-                <span className="text-[0.65rem] sm:text-[0.7rem] text-primary font-semibold">{cacheSize} MB</span>
-              </div>
-
-              <div className="flex flex-col items-center gap-0.5 shrink-0 px-1 sm:px-3">
-                <Icon name="swap_horiz" size={20} className={driveConnected ? 'text-emerald-500 animate-pulse' : 'text-muted-foreground'} />
-                <span className={`text-[0.65rem] sm:text-[0.7rem] font-semibold ${driveConnected ? 'text-emerald-500' : 'text-muted-foreground'}`}>
-                  {driveConnected ? 'Active' : 'Offline'}
-                </span>
-              </div>
-
-              <div className="flex-1 w-full max-w-[140px] rounded-xl border border-border bg-muted/10 text-center p-3 px-1 sm:px-2">
-                <Icon name="bolt" size={24} className={`mx-auto mb-1.5 ${driveConnected ? 'text-emerald-500' : 'text-muted-foreground'}`} />
-                <span className="text-[0.7rem] sm:text-[0.8rem] block font-semibold text-foreground">Drive DB</span>
-                <span className="text-[0.7rem] text-muted-foreground">{driveConnected ? 'Synced' : 'Waiting'}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Database backup commands */}
         <Card className="flex flex-col">
@@ -228,57 +172,8 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
           </CardContent>
         </Card>
 
-        {/* Data Integrity Testing */}
-        <Card className="flex flex-col">
-          <CardContent className="p-4 sm:p-6 lg:p-8 flex flex-col h-full gap-5">
-            <div>
-              <h4 className="text-base text-destructive font-semibold mb-2 flex items-center gap-2">
-                <Icon name="error" size={18} /> Data Integrity Testing
-              </h4>
-              <p className="text-[0.8rem] text-muted-foreground">
-                Simulate cloud database corruption by writing duplicate IDs to `employees.json` in your Google Drive. Reloading the app will trigger validation alerts and backup recovery flows.
-              </p>
-            </div>
+      </div>
 
-            <div className="flex gap-3 mt-auto">
-              <Button
-                aria-label="Simulate drive corruption"
-                variant="outline"
-                className="flex-1 justify-center border-destructive text-destructive hover:text-destructive"
-                onClick={() => {
-                  const MOCK_DRIVE_KEY = 'hr_pulse_mock_drive_files';
-                  const driveRaw = localStorage.getItem(MOCK_DRIVE_KEY);
-                  if (driveRaw) {
-                    try {
-                      const drive = JSON.parse(driveRaw);
-                      if (drive['employees']) {
-                        const employees = drive['employees'].content;
-                        if (Array.isArray(employees) && employees.length > 0) {
-                          const duplicate = { ...employees[0], name: employees[0].name + " (Duplicate)" };
-                          employees.push(duplicate);
-                          drive['employees'].content = employees;
-                          drive['employees'].modifiedTime = new Date().toISOString();
-                          localStorage.setItem(MOCK_DRIVE_KEY, JSON.stringify(drive));
-                          alert('Corruption simulated successfully! Please reload the page to trigger the integrity validator.');
-                        } else {
-                          alert('Mock drive has no employees to duplicate. Please load data first.');
-                        }
-                      } else {
-                        alert('Employees table not found in mock drive. Please sync first.');
-                      }
-                    } catch (e) {
-                      alert('Error writing corruption: ' + e.message);
-                    }
-                  } else {
-                    alert('No mock drive found in localStorage. Please log in as a simulated user first.');
-                  }
-                }}
-              >
-                Simulate Drive Corruption
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
         {/* Backup Browser Widget */}
         <Card className="flex flex-col">
         <CardContent className="p-6 sm:p-8 lg:p-10">
@@ -424,25 +319,6 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      </div>
-
-      {/* Info Warning Alert */}
-      <div className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-xl bg-indigo-500/5 border border-indigo-500/15">
-        <div className="flex gap-3 items-start">
-          <Icon name="info" size={18} className="text-primary shrink-0 mt-0.5" />
-          <div className="flex flex-col gap-1">
-            <span className="text-[0.85rem] font-semibold text-foreground">Authentication Note</span>
-            <span className="text-[0.8rem] text-muted-foreground leading-relaxed max-w-[800px]">
-              This application uses standard OAuth2 authentication to establish read/write access to its private App Data folder on Google Drive.
-              The database files are stored securely and cannot be read by other tools.
-            </span>
-          </div>
-        </div>
-        <Button variant="secondary" onClick={handleTestConnection} className="whitespace-nowrap w-full sm:w-auto">
-          Test Connection
-        </Button>
-      </div>
 
       <ConfirmDialog />
       <AdSlot />

@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications, onProfileClick, showThemeToggle = true }) {
+export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications, onProfileClick, showThemeToggle = true, user }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const buttonRef = useRef(null)
   const [modalPos, setModalPos] = useState({ top: 0, right: 0 })
@@ -41,16 +41,18 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
           </div>
           <div className="flex items-center gap-1 shrink-0">
             {onProfileClick && (
-              <Button
-                variant="ghost"
-                size="icon"
+              <button
                 onClick={onProfileClick}
                 title="Profile"
                 aria-label="Profile"
-                className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0 !border-transparent"
+                className="rounded-full size-10 sm:size-11 p-0 overflow-hidden shrink-0 !border-transparent cursor-pointer bg-transparent hover:opacity-80 transition-opacity"
               >
-                <Icon name="person" size={22} className="size-[22px]" />
-              </Button>
+                <img
+                  src={user?.avatar || "https://i.pravatar.cc/150?u=a042581f4e29026704d"}
+                  alt={user?.name ? `${user.name}'s profile` : "Profile"}
+                  className="w-full h-full object-cover rounded-full border border-border/50 shadow-sm"
+                />
+              </button>
             )}
           </div>
         </header>
@@ -107,7 +109,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                 className="rounded-full size-8 min-[400px]:size-9 sm:size-10 text-foreground hover:bg-muted relative shrink-0"
                 id="notification-trigger"
               >
-                <Icon name="notifications" size={20} />
+                <Icon name="notifications_active" size={20} />
                 {unreadCount > 0 && (
                   <span className="absolute top-1.5 right-1.5 flex size-3">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>

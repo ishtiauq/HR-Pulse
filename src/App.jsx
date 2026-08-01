@@ -137,6 +137,8 @@ export default function App() {
         setAnnouncements={appData.setAnnouncements}
         assets={appData.assets}
         setAssets={appData.setAssets}
+        assetCategories={appData.assetCategories}
+        setAssetCategories={appData.setAssetCategories}
         tasks={appData.tasks}
         setTasks={appData.handleSetTasks}
         events={appData.events}
@@ -213,7 +215,7 @@ export default function App() {
                 notifications={appData.notifications}
                 clearNotifications={appData.clearNotifications}
                 onProfileClick={() => setCurrentView('profile')}
-                showThemeToggle={false}
+                user={user}
               />
           </div>
 
@@ -251,7 +253,7 @@ export default function App() {
               label="Announcements"
               onClick={() => { setCurrentView('announcements'); setShowMobileMenu(false) }}
             >
-              <Icon name="campaign" size={22} />
+              <Icon name="rss_feed" size={22} />
             </MobileTabButton>
             <MobileTabButton
               active={false}
@@ -264,7 +266,7 @@ export default function App() {
                 </span>
               ) : null}
             >
-              <Icon name="notifications" size={22} />
+              <Icon name="notifications_active" size={22} />
             </MobileTabButton>
             <MobileTabButton
               active={showMobileMenu}
@@ -295,7 +297,7 @@ export default function App() {
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
-          {visibleNavItems.filter(i => !['dashboard', 'announcements'].includes(i.id)).map(item => {
+          {visibleNavItems.filter(i => !['dashboard', 'announcements', 'profile'].includes(i.id)).map(item => {
             const active = currentView === item.id
             return (
               <Button

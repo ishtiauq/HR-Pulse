@@ -236,40 +236,42 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
             {filteredEvents.map(ev => {
               const typeInfo = getTypeInfo(ev.type)
               return (
-                <div key={ev.id} role="listitem" className="flex items-start sm:items-center gap-3 p-3 px-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex-wrap sm:flex-nowrap">
+                <div key={ev.id} role="listitem" className="flex items-start gap-3 p-3 px-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                   <div className="flex items-center justify-center shrink-0 size-9 rounded-lg text-muted-foreground">
                     {typeInfo.icon}
                   </div>
-                  <div className="flex-1 min-w-[200px]">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-sm text-foreground">{ev.title}</span>
-                      <Badge variant="outline" className="text-[10px] px-2 py-0.5 border-border text-muted-foreground">{typeInfo.label}</Badge>
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
-                      <span className="text-xs flex items-center gap-1 text-muted-foreground">
-                        <Icon name="calendar_month" size={12} /> {formatDate(ev.date)}
-                      </span>
-                      {ev.time && (
-                        <span className="text-xs flex items-center gap-1 text-muted-foreground">
-                          <Icon name="schedule" size={12} /> {ev.time}
-                        </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-sm text-foreground">{ev.title}</span>
+                          <Badge variant="outline" className="text-[10px] px-2 py-0.5 border-border text-muted-foreground">{typeInfo.label}</Badge>
+                        </div>
+                        <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
+                          <span className="text-xs flex items-center gap-1 text-muted-foreground">
+                            <Icon name="calendar_month" size={12} /> {formatDate(ev.date)}
+                          </span>
+                          {ev.time && (
+                            <span className="text-xs flex items-center gap-1 text-muted-foreground">
+                              <Icon name="schedule" size={12} /> {ev.time}
+                            </span>
+                          )}
+                        </div>
+                        {ev.description && (
+                          <p className="text-xs m-0 mt-1.5 text-muted-foreground">{ev.description}</p>
+                        )}
+                      </div>
+                      {!ev.isAuto && (simulatedRole === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
+                        <div className="flex items-center gap-1 shrink-0 -mr-1">
+                          <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditModal(ev)} aria-label="Edit event">
+                            <Icon name="edit" size={14} />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="size-8 text-destructive hover:text-destructive" onClick={() => handleDelete(ev.id)} aria-label="Delete event">
+                            <Icon name="delete" size={14} />
+                          </Button>
+                        </div>
                       )}
                     </div>
-                    {ev.description && (
-                      <p className="text-xs m-0 mt-1.5 text-muted-foreground">{ev.description}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {!ev.isAuto && (simulatedRole === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
-                      <>
-                        <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditModal(ev)} aria-label="Edit event">
-                          <Icon name="edit" size={14} />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="size-8 text-destructive hover:text-destructive" onClick={() => handleDelete(ev.id)} aria-label="Delete event">
-                          <Icon name="delete" size={14} />
-                        </Button>
-                      </>
-                    )}
                   </div>
                 </div>
               )

@@ -52,7 +52,7 @@ export default function Sidebar({
           aria-label="Main navigation" 
           className="sidebar-nav-scroll flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-2"
         >
-          {visibleNavItems.map(item => {
+          {visibleNavItems.filter(item => item.id !== 'profile').map(item => {
             const isActive = currentView === item.id;
             return (
               <TooltipPopover key={item.id} label={item.label} isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
@@ -86,7 +86,12 @@ export default function Sidebar({
         <div className="shrink-0 p-3 pt-4 flex flex-col gap-1 border-t border-sidebar-border bg-sidebar/80">
           
           {/* USER PROFILE */}
-          <div className="flex items-center gap-3 mb-2 px-2">
+          <button
+            onClick={() => setCurrentView && setCurrentView('profile')}
+            className="flex items-center gap-3 mb-2 px-2 py-1.5 rounded-lg hover:bg-sidebar-accent/50 transition-colors cursor-pointer text-left border border-transparent hover:border-sidebar-border/50 w-full bg-transparent"
+            title={user?.name || "Ishtiaq Rizve"}
+            aria-label="Open profile"
+          >
             <img 
               src={user?.avatar || "https://i.pravatar.cc/150?u=a042581f4e29026704d"} 
               className="rounded-full object-cover shrink-0 relative w-8 h-8 shadow-sm border border-sidebar-border/50" 
@@ -99,7 +104,7 @@ export default function Sidebar({
               <p className="text-sm font-semibold m-0 text-sidebar-foreground whitespace-nowrap leading-tight">{user?.name || "Ishtiaq Rizve"}</p>
               <p className="text-[11px] font-medium m-0 text-sidebar-foreground/70 whitespace-nowrap">{simulatedRole || user?.role || "Admin"}</p>
             </div>
-          </div>
+          </button>
 
           {/* ACTION BUTTONS */}
           <TooltipPopover label="Switch Role" isCollapsed={isCollapsed} isDarkMode={isDarkMode}>

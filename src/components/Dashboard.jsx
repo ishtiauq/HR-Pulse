@@ -397,7 +397,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <DashboardWidget
           id="w4"
           title="Announcements"
-          icon={<Icon name="campaign" size={18} />}
+          icon={<Icon name="rss_feed" size={18} />}
           iconClass="bg-amber-500/10 text-amber-500"
           cardClass="xl:col-span-6"
           action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('announcements')} className="text-xs font-semibold h-7">View All</Button>}
@@ -414,7 +414,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 onClick={() => setCurrentView && setCurrentView('announcements')}
               >
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-500/10 text-amber-500 shrink-0">
-                  <Icon name="campaign" size={16} />
+                  <Icon name="rss_feed" size={16} />
                 </div>
                 <div className="flex-1 min-w-0 pr-2">
                   <p className="m-0 text-xs font-bold text-foreground break-words">{ann.title}</p>
@@ -438,7 +438,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <DashboardWidget
           id="w5"
           title="Payroll Summary"
-          icon={<Icon name="credit_card" size={18} />}
+          icon={<Icon name="account_balance" size={18} />}
           cardClass="xl:col-span-6"
           action={currentPayrollMonth && <Badge variant="secondary" className="px-3 py-1 h-7">{currentPayrollMonth}</Badge>}
           contentClass="flex flex-col justify-between pt-4"
