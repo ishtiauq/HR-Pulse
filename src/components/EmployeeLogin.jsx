@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LogIn, ArrowLeft, Shield, Activity, Lock, Eye, EyeOff, Users } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { verifyPassword } from '../services/crypto.js'
 
 export default function EmployeeLogin({ onLogin, onBack }) {
@@ -62,7 +62,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
     <div className="welcome-screen-wrapper p-4 sm:p-6 lg:p-10">
       <div className="welcome-brand">
         <div className="welcome-logo-box">
-          <Activity size={24} color="#fff" />
+          <Icon name="monitoring" size={24} className="text-white" />
         </div>
         <div>
           <span className="welcome-title">HR Pulse</span>
@@ -73,7 +73,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
       <div className="welcome-center-content">
         <button onClick={onBack} className="btn btn-outline flex items-center gap-1.5 mb-6 px-4 py-2 rounded-lg bg-transparent cursor-pointer"
           style={{ border: '1px solid var(--color-md-sys-outline-variant)', color: 'var(--text-secondary)', font: "500 13px 'Roboto'" }}>
-          <ArrowLeft size={16} />
+          <Icon name="arrow_back" size={16} />
           Back to HR Manager Login
         </button>
 
@@ -142,7 +142,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
                 className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-1"
                 style={{ color: 'var(--text-secondary)' }}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <Icon name="visibility_off" size={18} /> : <Icon name="visibility" size={18} />}
               </button>
             </div>
           </div>
@@ -153,7 +153,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
             className="connect-btn w-full justify-center mb-4 px-5 sm:px-6 py-3 sm:py-3.5"
           >
             {isLoading ? 'Signing in...' : 'Sign In'}
-            {!isLoading && <LogIn size={16} />}
+            {!isLoading && <Icon name="login" size={16} />}
           </button>
 
           <button
@@ -161,7 +161,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
             onClick={onBack}
             className="btn btn-outline w-full justify-center flex items-center gap-1.5"
           >
-            <ArrowLeft size={16} />
+            <Icon name="arrow_back" size={16} />
             Back to HR Manager Login
           </button>
         </form>

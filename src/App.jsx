@@ -7,7 +7,7 @@ import Topbar from './components/layout/Topbar.jsx'
 import MobileTabButton from './components/layout/MobileTabButton.jsx'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Monitor, Sun, Moon, User as UserIcon, Menu, XCircle, LayoutDashboard, Users, Clock, Megaphone, ArrowLeftRight, LogOut, Bell, Home } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { Badge } from '@/components/ui/badge'
 import ToastContainer from './components/layout/ToastContainer.jsx'
 import CommandPalette from './components/layout/CommandPalette.jsx'
@@ -244,14 +244,14 @@ export default function App() {
               label="Home"
               onClick={() => { setCurrentView('dashboard'); setShowMobileMenu(false) }}
             >
-              <Home size={22} />
+              <Icon name="home" size={22} />
             </MobileTabButton>
             <MobileTabButton
               active={currentView === 'announcements'}
               label="Announcements"
               onClick={() => { setCurrentView('announcements'); setShowMobileMenu(false) }}
             >
-              <Megaphone size={22} />
+              <Icon name="campaign" size={22} />
             </MobileTabButton>
             <MobileTabButton
               active={false}
@@ -264,14 +264,14 @@ export default function App() {
                 </span>
               ) : null}
             >
-              <Bell size={22} />
+              <Icon name="notifications" size={22} />
             </MobileTabButton>
             <MobileTabButton
               active={showMobileMenu}
               label="Menu"
               onClick={() => setShowMobileMenu(!showMobileMenu)}
             >
-              <Menu size={22} />
+              <Icon name="menu" size={22} />
             </MobileTabButton>
           </nav>
         </div>
@@ -291,7 +291,7 @@ export default function App() {
         <div className="px-5 py-4 border-b border-border/50 bg-muted/20 rounded-t-2xl shrink-0 flex items-center justify-between">
           <h2 className="text-left text-lg font-bold text-foreground">Menu</h2>
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground" onClick={() => setShowMobileMenu(false)}>
-            <XCircle size={18} />
+            <Icon name="cancel" size={18} />
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
@@ -316,7 +316,7 @@ export default function App() {
             className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white transition-colors cursor-pointer border-none shadow-sm"
             onClick={() => { appData.setShowRoleModal(true); setShowMobileMenu(false) }}
           >
-            <ArrowLeftRight size={20} />
+            <Icon name="swap_horiz" size={20} />
             <span className="font-semibold text-base">Switch Role</span>
           </button>
 
@@ -324,7 +324,7 @@ export default function App() {
             className="btn-shimmer mt-2 w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer border-none shadow-sm"
             onClick={() => { handleLogout(); setShowMobileMenu(false) }}
           >
-            <LogOut size={20} />
+            <Icon name="logout" size={20} />
             <span className="font-semibold text-base">Logout</span>
           </button>
         </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, User, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, Sun, Moon, AlertTriangle, Upload, CheckSquare, CalendarDays, Menu, Receipt, FolderOpen, ArrowLeftRight, LogOut, LogIn, X, Bell } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { useModal } from '../services/useModal.js'
 import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
 import { parseMin } from '../services/attendance.js'
@@ -265,18 +265,18 @@ export default function EmployeePortal({
   }
 
   const navItems = [
-    { id: 'dashboard', icon: <Home size={18} />, label: 'Dashboard' },
-    { id: 'my-tasks', icon: <CheckSquare size={18} />, label: 'Tasks' },
-    { id: 'events', icon: <CalendarDays size={18} />, label: 'Events' },
-    { id: 'announcements', icon: <Megaphone size={18} />, label: 'Feed' },
-    { id: 'my-assets', icon: <Monitor size={18} />, label: 'Assets' },
-    { id: 'attendance', icon: <Clock size={18} />, label: 'Attendance' },
-    ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <CheckCircle2 size={18} />, label: 'Team Attendance' }] : []),
-    { id: 'payslips', icon: <FileText size={18} />, label: 'Payslips' },
-    { id: 'expenses', icon: <Receipt size={18} />, label: 'Expenses' },
-    { id: 'documents', icon: <FolderOpen size={18} />, label: 'Documents' },
-    { id: 'leave', icon: <CalendarIcon size={18} />, label: 'Leave' },
-    { id: 'profile', icon: <UserIcon size={18} />, label: 'Profile' }
+    { id: 'dashboard', icon: <Icon name="home" size={18} />, label: 'Dashboard' },
+    { id: 'my-tasks', icon: <Icon name="check_box" size={18} />, label: 'Tasks' },
+    { id: 'events', icon: <Icon name="calendar_month" size={18} />, label: 'Events' },
+    { id: 'announcements', icon: <Icon name="campaign" size={18} />, label: 'Feed' },
+    { id: 'my-assets', icon: <Icon name="monitor" size={18} />, label: 'Assets' },
+    { id: 'attendance', icon: <Icon name="schedule" size={18} />, label: 'Attendance' },
+    ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <Icon name="check_circle" size={18} />, label: 'Team Attendance' }] : []),
+    { id: 'payslips', icon: <Icon name="description" size={18} />, label: 'Payslips' },
+    { id: 'expenses', icon: <Icon name="receipt_long" size={18} />, label: 'Expenses' },
+    { id: 'documents', icon: <Icon name="folder_open" size={18} />, label: 'Documents' },
+    { id: 'leave', icon: <Icon name="calendar_month" size={18} />, label: 'Leave' },
+    { id: 'profile', icon: <Icon name="person" size={18} />, label: 'Profile' }
   ]
 
   return (
@@ -347,14 +347,14 @@ export default function EmployeePortal({
             <div className="flex items-center justify-between">
               <DialogTitle>Mark Attendance</DialogTitle>
               <button onClick={() => setShowPunchModal(false)} className="size-8 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer" aria-label="Close">
-                <X size={16} />
+                <Icon name="close" size={16} />
               </button>
             </div>
           </DialogHeader>
 
           <div className="flex flex-col items-center gap-2 py-3 text-center">
             <div className={`size-16 rounded-full flex items-center justify-center ${isPunchedIn ? 'bg-emerald-500/10 text-emerald-600' : 'bg-primary/10 text-primary'}`}>
-              {isPunchedIn ? <LogIn size={28} /> : <Clock size={28} />}
+              {isPunchedIn ? <Icon name="login" size={28} /> : <Icon name="schedule" size={28} />}
             </div>
             <div className="text-3xl sm:text-4xl font-black tabular-nums tracking-tight text-foreground" aria-live="polite">
               {punchClock.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
@@ -374,7 +374,7 @@ export default function EmployeePortal({
             {isPunchedOut ? (
               <div className="flex flex-col items-center gap-2 py-3">
                 <div className="size-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                  <CheckCircle2 size={20} />
+                  <Icon name="check_circle" size={20} />
                 </div>
                 <p className="text-sm font-semibold text-foreground">Today's attendance completed</p>
                 <p className="text-xs text-muted-foreground">In: {punchLog.checkIn} • Out: {punchLog.checkOut} • {punchLog.hours}h</p>
@@ -384,7 +384,7 @@ export default function EmployeePortal({
                 onClick={handlePunchSubmit}
                 className={`w-full h-14 rounded-2xl text-base font-semibold flex items-center justify-center gap-2 ${!isPunchedIn ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/30'}`}
               >
-                {isPunchedIn ? <><LogOut size={18} /> Check Out</> : <><LogIn size={18} /> Check In</>}
+                {isPunchedIn ? <><Icon name="logout" size={18} /> Check Out</> : <><Icon name="login" size={18} /> Check In</>}
               </Button>
             )}
           </div>
@@ -400,14 +400,14 @@ export default function EmployeePortal({
               label="Home"
               onClick={() => { setActiveTab('dashboard'); setShowMobileMenu(false) }}
             >
-              <Home size={22} />
+              <Icon name="home" size={22} />
             </MobileTabButton>
             <MobileTabButton
               active={activeTab === 'announcements'}
               label="Announcements"
               onClick={() => { setActiveTab('announcements'); setShowMobileMenu(false) }}
             >
-              <Megaphone size={22} />
+              <Icon name="campaign" size={22} />
             </MobileTabButton>
             <MobileTabButton
               active={false}
@@ -420,14 +420,14 @@ export default function EmployeePortal({
                 </span>
               ) : null}
             >
-              <Bell size={22} />
+              <Icon name="notifications" size={22} />
             </MobileTabButton>
             <MobileTabButton
               active={showMobileMenu}
               label="Menu"
               onClick={() => setShowMobileMenu(!showMobileMenu)}
             >
-              <Menu size={22} />
+              <Icon name="menu" size={22} />
             </MobileTabButton>
           </nav>
         </div>
@@ -446,7 +446,7 @@ export default function EmployeePortal({
         <div className="px-5 py-4 border-b border-border/50 bg-muted/20 rounded-t-2xl shrink-0 flex items-center justify-between">
           <h2 className="text-left text-lg font-bold text-foreground">Menu</h2>
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground" onClick={() => setShowMobileMenu(false)}>
-            <XCircle size={18} />
+            <Icon name="cancel" size={18} />
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
@@ -472,7 +472,7 @@ export default function EmployeePortal({
               className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white transition-colors cursor-pointer border-none shadow-sm mb-2"
               onClick={() => { setShowRoleModal(true); setShowMobileMenu(false) }}
             >
-              <ArrowLeftRight size={20} />
+              <Icon name="swap_horiz" size={20} />
               <span className="font-semibold text-base">Switch Role</span>
             </button>
           )}
@@ -481,7 +481,7 @@ export default function EmployeePortal({
             className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer border-none shadow-sm"
             onClick={() => { handleLogout(); setShowMobileMenu(false) }}
           >
-            <LogOut size={20} />
+            <Icon name="logout" size={20} />
             <span className="font-semibold text-base">Logout</span>
           </button>
         </div>
@@ -570,7 +570,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
         <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('my-tasks')}>
           <CardContent className="p-5 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-2 text-primary">
-              <CheckSquare size={18} />
+              <Icon name="check_box" size={18} />
               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Active Tasks</h3>
             </div>
             <div className="text-3xl font-black tabular-nums text-foreground">
@@ -582,7 +582,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
         <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('events')}>
           <CardContent className="p-5 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-2 text-emerald-500">
-              <CalendarDays size={18} />
+              <Icon name="calendar_month" size={18} />
               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Next Event</h3>
             </div>
             <div className="text-xl font-bold truncate text-foreground mb-1">
@@ -597,7 +597,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
         <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('leave')}>
           <CardContent className="p-5 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-2 text-blue-500">
-              <CalendarIcon size={18} />
+              <Icon name="calendar_month" size={18} />
               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Available Leave</h3>
             </div>
             <div className="text-3xl font-black tabular-nums text-foreground">
@@ -609,7 +609,7 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
         <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('my-assets')}>
           <CardContent className="p-5 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-2 text-amber-500">
-              <Monitor size={18} />
+              <Icon name="monitor" size={18} />
               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Reimbursements</h3>
             </div>
             <div className="text-3xl font-black tabular-nums text-foreground">
@@ -624,13 +624,13 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
         <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
           <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer h-28 flex items-center justify-center group" onClick={() => setActiveTab('leave')}>
             <CardContent className="p-0 flex flex-col gap-3 justify-center items-center">
-              <CalendarIcon size={28} className="text-blue-500 transition-transform group-hover:scale-110" />
+              <Icon name="calendar_month" size={28} className="text-blue-500 transition-transform group-hover:scale-110" />
               <span className="text-sm font-medium">Request Leave</span>
             </CardContent>
           </Card>
           <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer h-28 flex items-center justify-center group" onClick={() => setActiveTab('payslips')}>
             <CardContent className="p-0 flex flex-col gap-3 justify-center items-center">
-              <Download size={28} className="text-green-500 transition-transform group-hover:scale-110" />
+              <Icon name="download" size={28} className="text-green-500 transition-transform group-hover:scale-110" />
               <span className="text-sm font-medium">Download Payslip</span>
             </CardContent>
           </Card>
@@ -985,7 +985,7 @@ function PayslipsView({ currentUser, payroll, addToast }) {
                   <TableCell className="font-semibold text-green-600 dark:text-green-400">${slip.net}</TableCell>
                   <TableCell>
                     <Button variant="outline" size="sm" onClick={() => addToast('Downloading PDF...', 'info')}>
-                      <Download className="h-4 w-4 mr-2" /> PDF
+                      <Icon name="download" size={16} className="h-4 w-4 mr-2" /> PDF
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -1085,7 +1085,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
               <label className="text-sm font-medium leading-none">Attach Receipt / Medical Certificate</label>
               <div className="flex items-center gap-3">
                 <Button variant="outline" type="button" className="relative cursor-pointer overflow-hidden group">
-                  <Upload className="h-4 w-4 mr-2" /> 
+                  <Icon name="upload" size={16} className="h-4 w-4 mr-2" /> 
                   <span>{receiptName ? 'Change Document' : 'Upload File'}</span>
                   <input 
                     type="file" 
@@ -1113,7 +1113,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
             </div>
 
             <Button type="submit" className="w-fit mt-2">
-              <Send className="h-4 w-4 mr-2" /> Submit Request
+              <Icon name="send" size={16} className="h-4 w-4 mr-2" /> Submit Request
             </Button>
           </form>
         </CardContent>
@@ -1152,7 +1152,7 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
                         {l.receipt ? (
                           <Button variant="link" className="p-0 h-auto" asChild>
                             <a href={l.receipt} target="_blank" rel="noreferrer">
-                              <FileText className="h-3.5 w-3.5 mr-1" /> View
+                              <Icon name="description" size={14} className="h-3.5 w-3.5 mr-1" /> View
                             </a>
                           </Button>
                         ) : (
@@ -1242,7 +1242,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[900px] mx-auto pb-10">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold m-0 flex items-center gap-3">
-          <Monitor className="h-6 w-6 text-primary" />
+          <Icon name="monitor" size={24} className="h-6 w-6 text-primary" />
           My Assets
         </h2>
         <div className="flex gap-2 bg-muted p-1 rounded-lg">
@@ -1260,7 +1260,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
           {myAssets.length === 0 ? (
             <Card>
               <CardContent className="p-10 text-center text-muted-foreground flex flex-col items-center justify-center">
-                <Monitor className="h-10 w-10 mb-3 opacity-20" />
+                <Icon name="monitor" size={40} className="h-10 w-10 mb-3 opacity-20" />
                 No assets are currently assigned to you.
               </CardContent>
             </Card>
@@ -1270,7 +1270,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
                 <CardContent className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-xl flex items-center justify-center bg-primary/10">
-                      <Monitor className="h-6 w-6 text-primary" />
+                      <Icon name="monitor" size={24} className="h-6 w-6 text-primary" />
                     </div>
                     <div>
                       <div className="font-bold text-lg">{asset.name}</div>
@@ -1285,7 +1285,7 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" className="text-amber-500 border-amber-500/20 hover:bg-amber-500/10 hover:text-amber-600" onClick={() => { setIssueAsset(asset); setShowIssueModal(true) }}>
-                      <AlertTriangle className="h-4 w-4 mr-2" /> Report Issue
+                      <Icon name="warning" size={16} className="h-4 w-4 mr-2" /> Report Issue
                     </Button>
                     <Button variant="outline" onClick={() => handleRequestReturn(asset.id)}>
                       Request Return

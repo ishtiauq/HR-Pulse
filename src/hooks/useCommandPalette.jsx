@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { clearLocalCache } from '../services/db.js'
 import { createBackup } from '../services/googleDrive.js'
-import { User, History, Moon, Sun, Trash2, HardDrive, LayoutDashboard, Settings as SettingsIcon, FileText } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { useConfirm } from './useConfirm'
 
 export function useCommandPalette({ user, employees, themeMode, toggleTheme, setCurrentView, addToast, setSelectedEmployeeId }) {
@@ -143,16 +143,16 @@ export function useCommandPalette({ user, employees, themeMode, toggleTheme, set
   }
 
   const getCategoryIcon = (category, id) => {
-    if (category === 'Employees') return <User size={16} />
-    if (category === 'Recent Actions') return <History size={16} />
-    if (id.includes('darkmode')) return themeMode === 'light' ? <Moon size={16} /> : <Sun size={16} />
-    if (id.includes('clearcache')) return <Trash2 size={16} />
-    if (id.includes('backup')) return <HardDrive size={16} />
-    if (id.includes('dashboard')) return <LayoutDashboard size={16} />
-    if (id.includes('settings')) return <SettingsIcon size={16} />
-    if (id.includes('drive')) return <HardDrive size={16} />
-    if (id.includes('employees')) return <User size={16} />
-    return <FileText size={16} />
+    if (category === 'Employees') return <Icon name="person" size={16} />
+    if (category === 'Recent Actions') return <Icon name="history" size={16} />
+    if (id.includes('darkmode')) return themeMode === 'light' ? <Icon name="dark_mode" size={16} /> : <Icon name="light_mode" size={16} />
+    if (id.includes('clearcache')) return <Icon name="delete" size={16} />
+    if (id.includes('backup')) return <Icon name="storage" size={16} />
+    if (id.includes('dashboard')) return <Icon name="dashboard" size={16} />
+    if (id.includes('settings')) return <Icon name="settings" size={16} />
+    if (id.includes('drive')) return <Icon name="storage" size={16} />
+    if (id.includes('employees')) return <Icon name="person" size={16} />
+    return <Icon name="description" size={16} />
   }
 
   return {

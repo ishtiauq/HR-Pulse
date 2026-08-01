@@ -1,9 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Shield, User, ArrowRight, Cloud, 
-  Eye, EyeOff, Activity, Moon, Sun
-} from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { fetchUserProfile } from '../services/googleDrive.js'
 import { verifyPassword } from '../services/crypto.js'
 
@@ -153,7 +150,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
             className="flex items-center gap-3"
           >
             <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold shadow-lg">
-              <Activity size={24} />
+              <Icon name="monitoring" size={24} />
             </div>
             <span className="font-extrabold text-xl tracking-tight">HR Pulse</span>
           </motion.div>
@@ -170,7 +167,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
               onClick={toggleTheme} 
               className="w-10 h-10 rounded-full flex items-center justify-center border border-border bg-card/50 backdrop-blur-md shadow-sm hover:bg-muted transition-colors"
             >
-              {themeMode === 'light' ? <Sun size={18} /> : <Moon size={18} />}
+              {themeMode === 'light' ? <Icon name="light_mode" size={18} /> : <Icon name="dark_mode" size={18} />}
             </button>
           </motion.div>
         </div>
@@ -206,7 +203,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  <Shield size={16} /> Workspace Admin
+                  <Icon name="shield" size={16} /> Workspace Admin
                 </button>
                 <button
                   onClick={() => setRole('employee')}
@@ -216,7 +213,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  <User size={16} /> Teammate
+                  <Icon name="person" size={16} /> Teammate
                 </button>
               </div>
 
@@ -232,7 +229,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                     <div className="flex flex-col gap-5">
                       <div className="text-center mb-2">
                         <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 border border-primary/20">
-                          <Shield size={32} className="text-primary" />
+                          <Icon name="shield" size={32} className="text-primary" />
                         </div>
                         <h3 className="font-bold text-lg">Admin Access</h3>
                         <p className="text-xs text-muted-foreground mt-1">Manage payroll, attendance, and organization settings securely via Google Drive.</p>
@@ -244,12 +241,12 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                       >
                         {isLoading ? (
                           <div className="flex items-center gap-2">
-                            <Cloud size={18} className="animate-pulse" />
+                            <Icon name="cloud" size={18} className="animate-pulse" />
                             Connecting Workspace...
                           </div>
                         ) : (
                           <>
-                            <Cloud size={20} /> Secure Drive Connect
+                            <Icon name="cloud" size={20} /> Secure Drive Connect
                           </>
                         )}
                       </button>
@@ -283,7 +280,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
                           >
-                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            {showPassword ? <Icon name="visibility_off" size={18} /> : <Icon name="visibility" size={18} />}
                           </button>
                         </div>
                       </div>
@@ -292,7 +289,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                         disabled={isLoading}
                         className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
                       >
-                        {isLoading ? 'Signing In...' : 'Access Portal'} <ArrowRight size={18} />
+                        {isLoading ? 'Signing In...' : 'Access Portal'} <Icon name="arrow_forward" size={18} />
                       </button>
                     </form>
                   )}
@@ -313,7 +310,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
             className="p-8 max-w-sm w-full animate-fade-in"
           >
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 border border-primary/20">
-              <Shield size={24} className="text-primary" />
+              <Icon name="shield" size={24} className="text-primary" />
             </div>
             <h3 className="text-xl font-bold mb-2">Connect Google Drive</h3>
             <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
