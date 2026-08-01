@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Megaphone, Calendar as CalendarIcon, CreditCard, ChevronDown, LayoutDashboard, Gift, Award, Users, Activity, User, CheckSquare, FileText, Monitor } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -231,7 +231,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       {/* Page Title */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <LayoutDashboard size={20} className="text-primary" />
+          <Icon name="dashboard" size={20} className="text-primary" />
           Dashboard Overview
         </h1>
       </div>
@@ -239,7 +239,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-card p-5 sm:p-6 rounded-2xl border border-border shadow-sm bg-gradient-to-r from-card to-primary/5 gap-4">
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-3 text-foreground m-0">
-          <Activity size={24} className="text-primary shrink-0" />
+          <Icon name="monitoring" size={24} className="text-primary shrink-0" />
           Admin Overview
         </h2>
         <span className="text-sm font-semibold text-foreground bg-muted/80 px-4 py-2 rounded-md border border-border/50 shrink-0">
@@ -255,7 +255,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <DashboardWidget
           id="w1"
           title="Employee Directory"
-          icon={<Users size={18} />}
+          icon={<Icon name="group" size={18} />}
           action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('employees')} className="text-xs font-semibold h-7">View All</Button>}
           contentClass="flex items-center justify-around py-4"
           {...wProps}
@@ -283,7 +283,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <DashboardWidget
           id="w2"
           title="Today's Attendance"
-          icon={<Users size={18} />}
+          icon={<Icon name="group" size={18} />}
           iconClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
           action={<Button variant="outline" size="sm" onClick={() => setShowAttDropdown(!showAttDropdown)} className="text-xs font-semibold h-7">{showAttDropdown ? 'Hide' : 'Details'}</Button>}
           contentClass="flex flex-col justify-between pt-4"
@@ -326,7 +326,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <DashboardWidget
           id="w3"
           title="Drive Connection"
-          icon={<svg className="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19a4.5 4.5 0 0 0 0-9 4.4 4.4 0 0 0-.8.1 7 7 0 1 0-11 5.9"></path></svg>}
+          icon={<Icon name="cloud" size={18} />}
           action={<Badge variant={driveConnected ? "outline" : "destructive"}>{driveConnected ? 'Synced' : 'Error'}</Badge>}
           contentClass="flex flex-col justify-between pt-4"
           {...wProps}
@@ -375,7 +375,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                         <div key={emp.id} className="flex items-center gap-3.5 py-2 border-b border-border/40 last:border-none">
                           <Avatar className="w-8 h-8 shrink-0">
                             {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
-                            <AvatarFallback className="bg-primary/10 text-primary"><User size={16} /></AvatarFallback>
+                            <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={16} /></AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
                             <span className="block text-xs font-extrabold text-foreground">{emp.name}</span>
@@ -397,7 +397,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <DashboardWidget
           id="w4"
           title="Announcements"
-          icon={<Megaphone size={18} />}
+          icon={<Icon name="campaign" size={18} />}
           iconClass="bg-amber-500/10 text-amber-500"
           cardClass="xl:col-span-6"
           action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('announcements')} className="text-xs font-semibold h-7">View All</Button>}
@@ -414,7 +414,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 onClick={() => setCurrentView && setCurrentView('announcements')}
               >
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-500/10 text-amber-500 shrink-0">
-                  <Megaphone size={16} />
+                  <Icon name="campaign" size={16} />
                 </div>
                 <div className="flex-1 min-w-0 pr-2">
                   <p className="m-0 text-xs font-bold text-foreground break-words">{ann.title}</p>
@@ -438,7 +438,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <DashboardWidget
           id="w5"
           title="Payroll Summary"
-          icon={<CreditCard size={18} />}
+          icon={<Icon name="credit_card" size={18} />}
           cardClass="xl:col-span-6"
           action={currentPayrollMonth && <Badge variant="secondary" className="px-3 py-1 h-7">{currentPayrollMonth}</Badge>}
           contentClass="flex flex-col justify-between pt-4"
@@ -476,7 +476,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <DashboardWidget
           id="w6"
           title="Upcoming Events"
-          icon={<CalendarIcon size={18} />}
+          icon={<Icon name="calendar_month" size={18} />}
           iconClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
           action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('calendar')} className="text-xs font-semibold h-7">Events</Button>}
           contentClass="flex flex-col justify-start gap-2.5 pt-4"
@@ -494,7 +494,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                 >
-                  <CalendarIcon size={16} style={{ color: evt.type === 'holiday' ? '#10b981' : evt.type === 'birthday' ? '#f59e0b' : '#3b82f6' }} />
+                  <Icon name="calendar_month" size={16} style={{ color: evt.type === 'holiday' ? '#10b981' : evt.type === 'birthday' ? '#f59e0b' : '#3b82f6' }} />
                 </div>
                 <div className="flex-1 min-w-0 pr-2">
                   <p className="m-0 text-xs font-bold text-foreground break-words">{evt.title}</p>
@@ -516,7 +516,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <DashboardWidget
           id="w7"
           title="Drive Sync Logs"
-          icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>}
+          icon={<Icon name="trending_up" size={18} />}
           action={<Badge variant="success">Live</Badge>}
           contentClass="flex flex-col justify-start gap-2.5 pt-4"
           {...wProps}
@@ -524,9 +524,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           {syncLogs.map((log) => (
             <div key={log.id} className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-muted text-muted-foreground shrink-0 border border-border/40">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
-                </svg>
+                <Icon name="download" size={15} />
               </div>
               <div className="flex-1 min-w-0 pr-2">
                 <p className="m-0 text-xs font-bold text-foreground break-words">{log.action}</p>
@@ -545,7 +543,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           <DashboardWidget
           id="w8"
           title="Upcoming Milestones"
-          icon={<Award size={18} />}
+          icon={<Icon name="workspace_premium" size={18} />}
           iconClass="bg-amber-500/10 text-amber-500"
           action={<Badge variant="secondary" className="px-3 py-1">30 Days</Badge>}
           contentClass="flex flex-col justify-start pt-4"
@@ -553,7 +551,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         >
           {upcomingMilestones.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-5">
-              <Gift size={34} className="text-muted-foreground/40 mb-2" />
+              <Icon name="redeem" size={34} className="text-muted-foreground/40 mb-2" />
               <p className="m-0 text-xs font-medium text-muted-foreground max-w-[200px] leading-relaxed">No birthdays or work anniversaries in the next 30 days.</p>
             </div>
           ) : (
@@ -562,7 +560,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 <div key={i} className="flex gap-4 p-4 border rounded-xl bg-card hover:shadow-md transition-shadow">
                   <Avatar className="w-8 h-8 shrink-0">
                     {milestone.avatar ? <AvatarImage src={milestone.avatar} alt={milestone.empName} className="object-cover" /> : null}
-                    <AvatarFallback className="bg-primary/10 text-primary"><User size={16} /></AvatarFallback>
+                    <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={16} /></AvatarFallback>
                   </Avatar>
                   <div className="flex-1 flex flex-col gap-1">
                     <p className="m-0 text-xs font-bold text-foreground break-words">{milestone.empName}</p>
@@ -583,7 +581,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         <DashboardWidget
           id="tasks-widget"
           title="Tasks Overview"
-          icon={<CheckSquare size={18} />}
+          icon={<Icon name="check_box" size={18} />}
           iconClass="bg-orange-500/10 text-orange-500"
           {...wProps}
           action={
@@ -616,7 +614,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         <DashboardWidget
           id="documents-widget"
           title="Recent Documents"
-          icon={<FileText size={18} />}
+          icon={<Icon name="description" size={18} />}
           iconClass="bg-blue-500/10 text-blue-500"
           {...wProps}
           action={
@@ -648,7 +646,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         <DashboardWidget
           id="assets-widget"
           title="Asset Inventory"
-          icon={<Monitor size={18} />}
+          icon={<Icon name="monitor" size={18} />}
           iconClass="bg-teal-500/10 text-teal-500"
           {...wProps}
           action={
@@ -663,7 +661,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 <span className="text-xs font-semibold text-teal-600/80 uppercase tracking-wider mb-1">Total Assets</span>
                 <span className="text-2xl font-black text-foreground">{assets.length}</span>
               </div>
-              <Monitor className="text-teal-500/30 w-10 h-10" />
+              <Icon name="monitor" size={40} className="text-teal-500/30" />
             </div>
             
             <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border">

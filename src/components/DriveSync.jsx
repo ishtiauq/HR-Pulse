@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CloudSync, HardDrive, CloudOff, CloudLightning, ArrowLeftRight, Download, Info, FileJson, AlertCircle, RefreshCw, X, Trash2, Shield, RotateCcw } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { Card, CardContent } from "@/components/ui/card"
 import { useConfirm } from '../hooks/useConfirm'
 import { Button } from "@/components/ui/button"
@@ -103,7 +103,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <CloudSync size={20} className="text-primary" />
+          <Icon name="cloud_sync" size={20} className="text-primary" />
           Google Drive Sync Management
         </h1>
       </div>
@@ -120,7 +120,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
                   <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-status-success" />
                 </>
               )}
-              {driveConnected ? <CloudLightning size={28} /> : <CloudOff size={28} />}
+              {driveConnected ? <Icon name="bolt" size={28} /> : <Icon name="cloud_off" size={28} />}
             </div>
             <div role="status" aria-live="polite">
               <h3 className="text-xl flex items-center gap-2 text-foreground">
@@ -129,8 +129,8 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
               <div className="text-muted-foreground text-[0.85rem] mt-1 flex gap-4 flex-wrap">
                 {driveConnected ? (
                   <>
-                    <span className="flex items-center gap-1"><RefreshCw size={14} /> Last Synced: {timeSinceSync} minutes ago</span>
-                    <span className="flex items-center gap-1"><ArrowLeftRight size={14} /> Next sync in {timeUntilSync} minutes</span>
+                    <span className="flex items-center gap-1"><Icon name="refresh" size={14} /> Last Synced: {timeSinceSync} minutes ago</span>
+                    <span className="flex items-center gap-1"><Icon name="swap_horiz" size={14} /> Next sync in {timeUntilSync} minutes</span>
                   </>
                 ) : (
                   'Local database is working offline. Operations will be buffered until connection resumes.'
@@ -158,7 +158,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
               aria-label="Clear local cache and resync"
               className="border-destructive text-destructive hover:text-destructive font-semibold"
             >
-              <Trash2 size={16} />
+              <Icon name="delete" size={16} />
               {isClearing ? 'Clearing...' : 'Clear Local Cache & Resync'}
             </Button>
             <Button
@@ -182,21 +182,21 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
 
             <div className="py-2 sm:py-5 flex items-center justify-between gap-2 sm:gap-3 w-full">
               <div className="flex-1 w-full max-w-[140px] rounded-xl border border-border bg-muted/10 text-center p-3 px-1 sm:px-2">
-                <HardDrive size={24} className="text-primary mx-auto mb-1.5" />
+                <Icon name="storage" size={24} className="text-primary mx-auto mb-1.5" />
                 <span className="text-[0.7rem] sm:text-[0.8rem] block font-semibold text-foreground">Local Cache</span>
                 <span className="text-[0.65rem] sm:text-[0.7rem] text-muted-foreground block mb-0.5">{driveConnected ? '0 pending' : 'Offline queue'}</span>
                 <span className="text-[0.65rem] sm:text-[0.7rem] text-primary font-semibold">{cacheSize} MB</span>
               </div>
 
               <div className="flex flex-col items-center gap-0.5 shrink-0 px-1 sm:px-3">
-                <ArrowLeftRight size={20} className={driveConnected ? 'text-emerald-500 animate-pulse' : 'text-muted-foreground'} />
+                <Icon name="swap_horiz" size={20} className={driveConnected ? 'text-emerald-500 animate-pulse' : 'text-muted-foreground'} />
                 <span className={`text-[0.65rem] sm:text-[0.7rem] font-semibold ${driveConnected ? 'text-emerald-500' : 'text-muted-foreground'}`}>
                   {driveConnected ? 'Active' : 'Offline'}
                 </span>
               </div>
 
               <div className="flex-1 w-full max-w-[140px] rounded-xl border border-border bg-muted/10 text-center p-3 px-1 sm:px-2">
-                <CloudLightning size={24} className={`mx-auto mb-1.5 ${driveConnected ? 'text-emerald-500' : 'text-muted-foreground'}`} />
+                <Icon name="bolt" size={24} className={`mx-auto mb-1.5 ${driveConnected ? 'text-emerald-500' : 'text-muted-foreground'}`} />
                 <span className="text-[0.7rem] sm:text-[0.8rem] block font-semibold text-foreground">Drive DB</span>
                 <span className="text-[0.7rem] text-muted-foreground">{driveConnected ? 'Synced' : 'Waiting'}</span>
               </div>
@@ -222,7 +222,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
                 onClick={handleCreateBackup}
                 disabled={isBackingUp || !driveConnected}
               >
-                <Download size={16} /> {isBackingUp ? 'Creating Backup...' : 'Create Backup Now'}
+                <Icon name="download" size={16} /> {isBackingUp ? 'Creating Backup...' : 'Create Backup Now'}
               </Button>
             </div>
           </CardContent>
@@ -233,7 +233,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
           <CardContent className="p-4 sm:p-6 lg:p-8 flex flex-col h-full gap-5">
             <div>
               <h4 className="text-base text-destructive font-semibold mb-2 flex items-center gap-2">
-                <AlertCircle size={18} /> Data Integrity Testing
+                <Icon name="error" size={18} /> Data Integrity Testing
               </h4>
               <p className="text-[0.8rem] text-muted-foreground">
                 Simulate cloud database corruption by writing duplicate IDs to `employees.json` in your Google Drive. Reloading the app will trigger validation alerts and backup recovery flows.
@@ -285,7 +285,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
           <div className="flex justify-between items-center mb-4">
             <div>
               <h4 className="text-[1.1rem] font-bold flex items-center gap-2 text-foreground">
-                <Shield size={20} className="text-primary" /> Database Backups (/_backups/)
+                <Icon name="shield" size={20} className="text-primary" /> Database Backups (/_backups/)
               </h4>
               <p className="text-[0.8rem] text-muted-foreground mt-1">Automated backups are retained for 7 days + 4 weeks</p>
             </div>
@@ -311,7 +311,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
                   <TableRow key={f.id}>
                     <TableCell className="p-3 font-medium">
                       <span className="flex items-center gap-2">
-                        <FileJson size={16} className="text-muted-foreground shrink-0" /> {f.name}
+                        <Icon name="data_object" size={16} className="text-muted-foreground shrink-0" /> {f.name}
                       </span>
                     </TableCell>
                     <TableCell className="p-3 text-[0.85rem] text-muted-foreground">
@@ -329,7 +329,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
                           onClick={() => window.open(`https://drive.google.com/uc?export=download&id=${f.id}`, '_blank')}
                           title="Download Backup"
                         >
-                          <Download size={14} />
+                          <Icon name="download" size={14} />
                         </Button>
                         <Button
                           aria-label="Restore from this backup"
@@ -339,7 +339,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
                           onClick={() => setSelectedRestoreBackup(f)}
                           title="Restore from this backup"
                         >
-                          <RotateCcw size={14} />
+                          <Icon name="restart_alt" size={14} />
                         </Button>
                       </div>
                     </TableCell>
@@ -356,7 +356,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
             ) : backupsList.map(f => (
               <div key={`${f.id}-mobile`} className="flex flex-col gap-3 p-4 bg-muted/20 border border-border rounded-lg">
                 <div className="flex items-start gap-2">
-                  <FileJson size={18} className="text-muted-foreground shrink-0 mt-0.5" />
+                  <Icon name="data_object" size={18} className="text-muted-foreground shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <div className="font-semibold text-sm text-foreground break-words">{f.name}</div>
                     <div className="text-xs text-muted-foreground mt-1 flex gap-2 flex-wrap">
@@ -375,7 +375,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
                     className="flex-1"
                     onClick={() => window.open(`https://drive.google.com/uc?export=download&id=${f.id}`, '_blank')}
                   >
-                    <Download size={14} className="mr-2" /> Download
+                    <Icon name="download" size={14} className="mr-2" /> Download
                   </Button>
                   <Button
                     aria-label="Restore from this backup"
@@ -384,7 +384,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
                     className="flex-1 bg-amber-500 hover:bg-amber-600 text-white"
                     onClick={() => setSelectedRestoreBackup(f)}
                   >
-                    <RotateCcw size={14} className="mr-2" /> Restore
+                    <Icon name="restart_alt" size={14} className="mr-2" /> Restore
                   </Button>
                 </div>
               </div>
@@ -398,7 +398,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-amber-500">
-              <AlertCircle size={24} /> Confirm Restore
+              <Icon name="error" size={24} /> Confirm Restore
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4">
@@ -430,7 +430,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
       {/* Info Warning Alert */}
       <div className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-xl bg-indigo-500/5 border border-indigo-500/15">
         <div className="flex gap-3 items-start">
-          <Info size={18} className="text-primary shrink-0 mt-0.5" />
+          <Icon name="info" size={18} className="text-primary shrink-0 mt-0.5" />
           <div className="flex flex-col gap-1">
             <span className="text-[0.85rem] font-semibold text-foreground">Authentication Note</span>
             <span className="text-[0.8rem] text-muted-foreground leading-relaxed max-w-[800px]">

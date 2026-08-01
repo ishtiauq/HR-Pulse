@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { FileText, Search, Upload, Download, Trash2, X, Folder, FolderOpen, FileSpreadsheet, FileImage, FileArchive, File, Settings, Pencil, ChevronLeft, ChevronRight, Filter, Plus } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { Card, CardContent } from "@/components/ui/card"
 import { useConfirm } from '../hooks/useConfirm'
 import { Button } from "@/components/ui/button"
@@ -12,21 +12,21 @@ import { formatDate } from '../services/date.js'
 
 const BLUE = '#3b82f6'
 const defaultCategories = [
-  { id: 'hr-docs', label: 'HR Documents', icon: Folder, color: BLUE },
-  { id: 'policies', label: 'Policies', icon: FileText, color: BLUE },
-  { id: 'forms', label: 'Forms', icon: FileText, color: BLUE },
-  { id: 'training', label: 'Training', icon: FileArchive, color: BLUE },
-  { id: 'other', label: 'Other', icon: File, color: BLUE },
+  { id: 'hr-docs', label: 'HR Documents', icon: <Icon name="folder" size={10} className="inline mr-0.5" />, color: BLUE },
+  { id: 'policies', label: 'Policies', icon: <Icon name="description" size={10} className="inline mr-0.5" />, color: BLUE },
+  { id: 'forms', label: 'Forms', icon: <Icon name="description" size={10} className="inline mr-0.5" />, color: BLUE },
+  { id: 'training', label: 'Training', icon: <Icon name="folder_zip" size={10} className="inline mr-0.5" />, color: BLUE },
+  { id: 'other', label: 'Other', icon: <Icon name="description" size={10} className="inline mr-0.5" />, color: BLUE },
 ]
 
 const getFileIcon = (type) => {
-  if (!type) return File
+  if (!type) return 'description'
   const t = type.toLowerCase()
-  if (t.includes('pdf')) return FileText
-  if (t.includes('sheet') || t.includes('excel') || t.includes('xls') || t.includes('csv')) return FileSpreadsheet
-  if (t.includes('image') || t.includes('png') || t.includes('jpg') || t.includes('jpeg') || t.includes('gif')) return FileImage
-  if (t.includes('zip') || t.includes('rar') || t.includes('tar') || t.includes('gz')) return FileArchive
-  return File
+  if (t.includes('pdf')) return 'description'
+  if (t.includes('sheet') || t.includes('excel') || t.includes('xls') || t.includes('csv')) return 'table_chart'
+  if (t.includes('image') || t.includes('png') || t.includes('jpg') || t.includes('jpeg') || t.includes('gif')) return 'image'
+  if (t.includes('zip') || t.includes('rar') || t.includes('tar') || t.includes('gz')) return 'folder_zip'
+  return 'description'
 }
 
 const formatFileSize = (bytes) => {
@@ -165,7 +165,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
       ))
       addToast('Category updated', 'success')
     } else {
-      setCategories(prev => [...prev, { id: `cat-${Date.now()}`, label: catFormName.trim(), icon: File, color: BLUE }])
+      setCategories(prev => [...prev, { id: `cat-${Date.now()}`, label: catFormName.trim(), icon: <Icon name="description" size={10} className="inline mr-0.5" />, color: BLUE }])
       addToast('Category added', 'success')
     }
     setShowCategoryModal(false)
@@ -224,7 +224,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
     <div className="fade-in px-1 sm:px-0 pb-10">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <FolderOpen size={20} className="text-primary" />
+          <Icon name="folder_open" size={20} className="text-primary" />
           Documents
         </h1>
       </div>
@@ -232,7 +232,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
 
       <div className="flex gap-2 mb-6">
         <div className="relative flex-1 flex items-center">
-          <Search size={16} className="absolute left-3 text-muted-foreground" />
+          <Icon name="search" size={16} className="absolute left-3 text-muted-foreground" />
           <Input
             type="text"
             value={search}
@@ -244,13 +244,13 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
         </div>
         
         <Button variant={showFilters ? "secondary" : "outline"} className="shrink-0 gap-2" onClick={() => setShowFilters(!showFilters)}>
-          <Filter size={16} />
+          <Icon name="filter_list" size={16} />
           <span className="hidden sm:inline">Filter</span>
         </Button>
 
         {!isMobile && (
           <Button variant="default" className="shrink-0" onClick={() => { resetForm(); setShowUploadModal(true) }}>
-            <Upload size={16} className="mr-2" />
+            <Icon name="upload" size={16} className="mr-2" />
             Upload
           </Button>
         )}
@@ -292,7 +292,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
 
       {filteredDocs.length === 0 ? (
         <Card className="text-center p-8 sm:p-10 lg:p-12">
-          <FileText size={48} className="mb-4 opacity-50 text-muted-foreground mx-auto" />
+          <Icon name="description" size={48} className="mb-4 opacity-50 text-muted-foreground mx-auto" />
           <h3 className="m-0 mb-2 text-muted-foreground">No documents found</h3>
           <p className="m-0 text-[0.9rem] text-muted-foreground/60">
             {search || selectedCategory !== 'all' ? 'Try a different search or filter' : 'Upload your first document to get started'}
@@ -302,20 +302,19 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
         <div role="list" className="flex flex-col gap-2">
           {filteredDocs.map(doc => {
             const catInfo = getCategoryInfo(doc.category)
-            const Icon = getFileIcon(doc.fileType)
-            const CatIcon = catInfo.icon
+            const fileIcon = getFileIcon(doc.fileType)
             return (
               <Card key={doc.id} role="listitem" className="cursor-default hover:border-primary transition-colors">
                 <CardContent className={`p-3 sm:p-4 lg:p-5 flex ${isMobile ? 'flex-col items-stretch gap-3' : 'flex-row items-center gap-4'}`}>
                   <div className="flex items-center gap-3 w-full">
                     <div className="flex items-center justify-center shrink-0 rounded-xl w-[38px] sm:w-11 h-[38px] sm:h-11 bg-muted/50 text-muted-foreground">
-                      <Icon size={isMobile ? 18 : 20} />
+                      <Icon name={fileIcon} size={isMobile ? 18 : 20} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-[0.85rem] sm:text-[0.95rem] text-foreground">{doc.name}</span>
                         <span className="text-[0.7rem] px-2 py-0.5 rounded-full font-semibold border border-border text-muted-foreground bg-muted/20">
-                          <CatIcon size={10} className="inline mr-0.5" />{catInfo.label}
+                          {catInfo.icon}{catInfo.label}
                         </span>
                       </div>
                       <div className="flex items-center gap-3 mt-1 flex-wrap">
@@ -330,15 +329,15 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                   </div>
                   <div className={`flex gap-1 ${isMobile ? 'justify-end border-t border-border pt-2.5' : ''}`}>
                     <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-primary" onClick={() => handleDownload(doc)}>
-                      <Download size={16} /> {isMobile ? 'Download' : ''}
+                      <Icon name="download" size={16} /> {isMobile ? 'Download' : ''}
                     </Button>
                     {(simulatedRole === 'Admin' || doc.uploadedBy === currentUser?.id) && (
                       <>
                         <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-primary" onClick={() => { setEditingDoc(doc); setFormName(doc.name); setFormCategory(doc.category); setFormDescription(doc.description || ''); setFormFile(null); setShowUploadModal(true) }}>
-                          <Pencil size={16} /> {isMobile ? 'Edit' : ''}
+                          <Icon name="edit" size={16} /> {isMobile ? 'Edit' : ''}
                         </Button>
                         <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-destructive" onClick={() => handleDelete(doc.id)}>
-                          <Trash2 size={16} /> {isMobile ? 'Delete' : ''}
+                          <Icon name="delete" size={16} /> {isMobile ? 'Delete' : ''}
                         </Button>
                       </>
                     )}
@@ -356,7 +355,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
           <DialogHeader className="mb-6">
               <DialogTitle className="flex items-center gap-4 text-xl sm:text-2xl font-bold">
                 <div className="flex items-center justify-center rounded-2xl w-12 h-12 bg-primary/10 text-primary shadow-inner">
-                  <Upload size={24} className="animate-pulse" />
+                  <Icon name="upload" size={24} className="animate-pulse" />
                 </div>
                 <span>{editingDoc ? 'Edit Document' : 'Upload Document'}</span>
               </DialogTitle>
@@ -381,7 +380,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                     </Select>
                   </div>
                   <button type="button" className="shrink-0 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border-none group/add h-10 px-4 rounded-lg flex items-center transition-all duration-300 ease-out overflow-hidden" onClick={() => { setEditingCategory(null); setCatFormName(''); setShowCategoryModal(true) }}>
-                    <Plus size={18} className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" />
+                    <Icon name="add" size={18} className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" />
                     <span className="w-0 overflow-hidden whitespace-nowrap text-sm font-bold opacity-0 transition-all duration-300 ease-out group-hover/add:w-auto group-hover/add:opacity-100 group-hover/add:ml-2">Add</span>
                   </button>
                 </div>
@@ -398,7 +397,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                     {formFile ? (
                       <div className="relative z-10 flex flex-col items-center animate-in zoom-in-95 duration-300">
                         <div className="w-14 h-14 rounded-2xl inline-flex items-center justify-center mb-3 bg-emerald-500/15 text-emerald-500 shadow-sm ring-4 ring-emerald-500/10">
-                          <FileText size={28} />
+                          <Icon name="description" size={28} />
                         </div>
                         <p className="m-0 text-[1rem] font-bold text-foreground mb-1 truncate max-w-[250px]">{formFile.name}</p>
                         <p className="m-0 text-[0.8rem] text-emerald-600/80 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full">{formatFileSize(formFile.size)}</p>
@@ -406,7 +405,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                     ) : (
                       <div className="relative z-10 flex flex-col items-center">
                         <div className="w-14 h-14 rounded-2xl inline-flex items-center justify-center mb-4 bg-primary/10 text-primary shadow-sm group-hover/drop:scale-110 group-hover/drop:rotate-3 transition-transform duration-300">
-                          <Upload size={28} />
+                          <Icon name="upload" size={28} />
                         </div>
                         <p className="m-0 text-base text-foreground font-semibold mb-1 group-hover/drop:text-primary transition-colors">Click to browse or drop a file</p>
                         <p className="m-0 text-xs text-muted-foreground font-medium">PDF, Images, Spreadsheets (Up to 10MB)</p>
@@ -426,7 +425,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
               <DialogFooter>
                 <Button variant="ghost" type="button" onClick={() => { setShowUploadModal(false); resetForm() }}>Cancel</Button>
                 <Button type="submit">
-                  <Upload size={18} className="mr-2" /> 
+                  <Icon name="upload" size={18} className="mr-2" /> 
                   {editingDoc ? 'Update Document' : 'Upload Document'}
                 </Button>
               </DialogFooter>
@@ -441,7 +440,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
             <DialogTitle>Manage Categories</DialogTitle>
             <button type="button" onClick={() => setShowCategoryModal(false)}
               className="absolute right-0 top-0 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer border-none">
-              <X size={16} />
+              <Icon name="close" size={16} />
             </button>
           </DialogHeader>
           <div className="flex flex-col gap-5">
@@ -453,10 +452,10 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                   <div key={cat.id} className="flex items-center gap-2.5 p-2 px-3 rounded-lg bg-muted/30 border border-border">
                     <span className="flex-1 text-[0.9rem] font-medium text-foreground">{cat.label}</span>
                     <Button variant="ghost" size="icon-xs" aria-label="Edit category" onClick={() => { setEditingCategory(cat); setCatFormName(cat.label) }}>
-                      <Pencil size={14} />
+                      <Icon name="edit" size={14} />
                     </Button>
                     <Button variant="ghost" size="icon-xs" aria-label="Delete category" onClick={() => handleDeleteCategory(cat.id)}>
-                      <Trash2 size={14} />
+                      <Icon name="delete" size={14} />
                     </Button>
                   </div>
                 ))}
@@ -500,7 +499,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
           className="fixed bottom-[76px] right-8 h-14 w-14 rounded-full shadow-[0_4px_20px_rgba(249,115,22,0.4)] z-50 p-0 hover:scale-105 active:scale-95 transition-transform"
           onClick={() => { resetForm(); setShowUploadModal(true) }}
         >
-          <Upload size={24} />
+          <Icon name="upload" size={24} />
         </Button>
       )}
       <ConfirmDialog />

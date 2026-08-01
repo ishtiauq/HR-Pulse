@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useModal } from '../services/useModal.js'
-import { Calendar as CalendarIcon, CalendarDays, Plus, Edit, Trash2, ChevronLeft, ChevronRight, FileText, Users, Gift, AlertTriangle, Clock, X } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { useConfirm } from '../hooks/useConfirm'
 import AdSlot from './AdSlot'
 import { formatDate } from '../services/date.js'
@@ -11,11 +11,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { DatePicker } from "@/components/ui/date-picker"
 
 const EVENT_TYPES = [
-  { id: 'meeting', label: 'Meeting', icon: Users, color: '#3b82f6' },
-  { id: 'holiday', label: 'Holiday', icon: CalendarIcon, color: '#10b981' },
-  { id: 'birthday', label: 'Birthday', icon: Gift, color: '#f59e0b' },
-  { id: 'deadline', label: 'Deadline', icon: AlertTriangle, color: '#ef4444' },
-  { id: 'other', label: 'Other', icon: FileText, color: '#8b5cf6' },
+  { id: 'meeting', label: 'Meeting', icon: <Icon name="group" size={14} />, color: '#3b82f6' },
+  { id: 'holiday', label: 'Holiday', icon: <Icon name="calendar_month" size={14} />, color: '#10b981' },
+  { id: 'birthday', label: 'Birthday', icon: <Icon name="redeem" size={14} />, color: '#f59e0b' },
+  { id: 'deadline', label: 'Deadline', icon: <Icon name="warning" size={14} />, color: '#ef4444' },
+  { id: 'other', label: 'Other', icon: <Icon name="description" size={14} />, color: '#8b5cf6' },
 ]
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -160,18 +160,18 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
         <div className="flex flex-col sm:flex-row justify-between items-center mb-5 gap-4">
           <div className="flex items-center gap-2 sm:gap-3">
             <Button variant="outline" size="icon" className="size-8 sm:size-10" onClick={prevMonth} aria-label="Previous month">
-              <ChevronLeft size={18} />
+              <Icon name="chevron_left" size={18} />
             </Button>
             <h2 className="text-base sm:text-lg font-bold m-0 min-w-[140px] sm:min-w-[180px] text-center text-foreground">
               {MONTHS[currentMonth]} {currentYear}
             </h2>
             <Button variant="outline" size="icon" className="size-8 sm:size-10" onClick={nextMonth} aria-label="Next month">
-              <ChevronRight size={18} />
+              <Icon name="chevron_right" size={18} />
             </Button>
           </div>
           {(simulatedRole === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
             <Button className="w-full sm:w-auto" onClick={() => openCreateModal(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`)}>
-              <Plus size={16} className="mr-1.5" /> Add Event
+              <Icon name="add" size={16} className="mr-1.5" /> Add Event
             </Button>
           )}
         </div>
@@ -223,7 +223,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
     <Card>
       <CardContent className="p-5 sm:p-6">
         <h3 className="text-lg font-bold m-0 mb-4 flex items-center gap-2 text-foreground">
-          <CalendarIcon size={18} className="text-primary" />
+          <Icon name="calendar_month" size={18} className="text-primary" />
           {selectedDate ? `Events on ${formatDate(selectedDate)}` : "This Month's Events"}
         </h3>
 
@@ -235,11 +235,10 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
           <div role="list" className="flex flex-col gap-2">
             {filteredEvents.map(ev => {
               const typeInfo = getTypeInfo(ev.type)
-              const TypeIcon = typeInfo.icon
               return (
                 <div key={ev.id} role="listitem" className="flex items-start sm:items-center gap-3 p-3 px-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex-wrap sm:flex-nowrap">
                   <div className="flex items-center justify-center shrink-0 size-9 rounded-lg text-muted-foreground">
-                    <TypeIcon size={16} />
+                    {typeInfo.icon}
                   </div>
                   <div className="flex-1 min-w-[200px]">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -248,11 +247,11 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
                       <span className="text-xs flex items-center gap-1 text-muted-foreground">
-                        <CalendarIcon size={12} /> {formatDate(ev.date)}
+                        <Icon name="calendar_month" size={12} /> {formatDate(ev.date)}
                       </span>
                       {ev.time && (
                         <span className="text-xs flex items-center gap-1 text-muted-foreground">
-                          <Clock size={12} /> {ev.time}
+                          <Icon name="schedule" size={12} /> {ev.time}
                         </span>
                       )}
                     </div>
@@ -264,10 +263,10 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                     {!ev.isAuto && (simulatedRole === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
                       <>
                         <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditModal(ev)} aria-label="Edit event">
-                          <Edit size={14} />
+                          <Icon name="edit" size={14} />
                         </Button>
                         <Button variant="ghost" size="icon" className="size-8 text-destructive hover:text-destructive" onClick={() => handleDelete(ev.id)} aria-label="Delete event">
-                          <Trash2 size={14} />
+                          <Icon name="delete" size={14} />
                         </Button>
                       </>
                     )}
@@ -285,7 +284,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <CalendarDays size={20} className="text-primary" />
+          <Icon name="calendar_month" size={20} className="text-primary" />
           Events
         </h1>
       </div>
@@ -325,7 +324,6 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
               <label className="text-sm font-semibold text-muted-foreground">Type</label>
               <div className="flex gap-2 flex-wrap">
                 {EVENT_TYPES.map(t => {
-                  const Icon = t.icon
                   const isActive = formType === t.id
                   return (
                     <button key={t.id} type="button" onClick={() => setFormType(t.id)}
@@ -335,7 +333,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                         background: isActive ? `${t.color}15` : undefined,
                         color: isActive ? t.color : undefined,
                       }}>
-                      <Icon size={14} /> {t.label}
+                      {t.icon} {t.label}
                     </button>
                   )
                 })}
