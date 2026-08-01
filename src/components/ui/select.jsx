@@ -1,6 +1,6 @@
 import React from "react"
 import { Select as AriaSelect, Label as AriaLabel, Button as AriaButton, SelectValue, Popover as AriaPopover, ListBox as AriaListBox, ListBoxItem as AriaListBoxItem } from "react-aria-components"
-import { ChevronDown } from "lucide-react"
+import Icon from "./Icon.jsx"
 import { cn } from "@/lib/utils"
 
 const Select = React.forwardRef(({ className, label, error, placeholder, children, value, onValueChange, onChange, ...props }, ref) => {
@@ -19,7 +19,7 @@ const Select = React.forwardRef(({ className, label, error, placeholder, childre
             isPlaceholder ? <span className="text-muted-foreground font-normal text-xs sm:text-sm">{placeholder || 'Select...'}</span> : defaultChildren
           }
         </SelectValue>
-        <ChevronDown size={16} className="shrink-0 text-muted-foreground opacity-50" />
+        <Icon name="keyboard_arrow_down" size={16} className="shrink-0 text-muted-foreground opacity-50" />
       </AriaButton>
       <AriaPopover className="z-50 w-[--trigger-width] rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md">
         <AriaListBox className="outline-none max-h-60 overflow-y-auto">

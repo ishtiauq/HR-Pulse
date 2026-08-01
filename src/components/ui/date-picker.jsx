@@ -1,6 +1,6 @@
 import React from 'react'
 import { DatePicker as AriaDatePicker, Group, DateInput, DateSegment, Dialog, Popover as AriaPopover, Button as AriaButton } from 'react-aria-components'
-import { CalendarIcon } from 'lucide-react'
+import Icon from "./Icon.jsx"
 import { Calendar } from './calendar'
 import { parseDate } from '@internationalized/date'
 import { cn } from '@/lib/utils'
@@ -30,7 +30,7 @@ export function DatePicker({ label, value, onChange, className, required, ...pro
           )}
         </DateInput>
         <AriaButton className="pr-3 pl-2 h-full flex items-center justify-center outline-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-          <CalendarIcon size={16} />
+          <Icon name="calendar_month" size={16} />
         </AriaButton>
       </Group>
       <AriaPopover className="z-50 animate-in fade-in-0 zoom-in-95 origin-top" offset={8}>
