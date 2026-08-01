@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Megaphone, Plus, Image as ImageIcon, FileText, Send, Calendar, Clock, Edit, Trash2, Users, AlertTriangle, MessageSquare, Heart, ThumbsUp, PartyPopper, User, Pencil, X } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { useConfirm } from '../hooks/useConfirm'
 import { Button } from "@/components/ui/button"
@@ -467,7 +467,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     <div className="fade-in pb-10 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Megaphone size={20} className="text-primary" />
+          <Icon name="campaign" size={20} className="text-primary" />
           Announcements
         </h1>
         
@@ -483,7 +483,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                 setContent('')
                 setHasPoll(false)
               }}>
-                <Plus size={16} className="mr-1 sm:mr-2" />
+                <Icon name="add" size={16} className="mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">New Post</span>
               </Button>
             </DialogTrigger>
@@ -509,7 +509,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                         </Select>
                       </div>
                       <button type="button" className="shrink-0 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border-none group/add h-10 px-4 rounded-lg flex items-center transition-all duration-300 ease-out overflow-hidden" onClick={() => { setEditingCategory(null); setCatFormName(''); setShowCategoryModal(true) }}>
-                        <Plus size={18} className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" />
+                        <Icon name="add" size={18} className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" />
                         <span className="w-0 overflow-hidden whitespace-nowrap text-sm font-bold opacity-0 transition-all duration-300 ease-out group-hover/add:w-auto group-hover/add:opacity-100 group-hover/add:ml-2">Add</span>
                       </button>
                     </div>
@@ -541,7 +541,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
               <div className="flex flex-col gap-4 p-4 rounded-lg border border-dashed bg-muted/50">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-foreground flex items-center gap-2">
-                    <AlertTriangle size={16} className="text-muted-foreground" /> Attach Poll (Optional)
+                    <Icon name="warning" size={16} className="text-muted-foreground" /> Attach Poll (Optional)
                   </span>
                   <button type="button" role="switch" aria-checked={hasPoll} onClick={() => setHasPoll(!hasPoll)}
                     className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${hasPoll ? 'bg-primary' : 'bg-input'}`}>
@@ -556,7 +556,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                       <Input key={i} aria-label={`Poll option ${i + 1}`} type="text" value={opt} onChange={(e) => handlePollOptionChange(i, e.target.value)} placeholder={`Option ${i + 1}`} />
                     ))}
                     <Button type="button" variant="outline" size="sm" onClick={handleAddPollOption} className="self-start mt-1">
-                      <Plus size={14} className="mr-1" /> Add Option
+                      <Icon name="add" size={14} className="mr-1" /> Add Option
                     </Button>
                   </div>
                 )}
@@ -590,7 +590,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
         {filteredAnnouncements.length === 0 ? (
           <Card className="border-dashed border-2 bg-muted/10">
             <CardContent className="p-12 text-center flex flex-col items-center gap-3 text-muted-foreground">
-              <Megaphone size={40} className="text-muted-foreground/50" />
+              <Icon name="campaign" size={40} className="text-muted-foreground/50" />
               <p>No announcements found in this category.</p>
             </CardContent>
           </Card>
@@ -608,7 +608,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                       {author.avatar ? (
                         <AvatarImage src={author.avatar} alt={author.name} />
                       ) : (
-                        <AvatarFallback className="bg-primary/10 text-primary font-medium"><User size={20} /></AvatarFallback>
+                        <AvatarFallback className="bg-primary/10 text-primary font-medium"><Icon name="person" size={20} /></AvatarFallback>
                       )}
                     </Avatar>
                     <div className="flex flex-col gap-1">
@@ -627,10 +627,10 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                     {canModify(post.authorId) && (
                       <>
                         <Button variant="ghost" size="icon" onClick={() => handleEditPost(post)} className="h-8 w-8 text-muted-foreground hover:text-foreground" aria-label="Edit post">
-                          <Edit size={14} />
+                          <Icon name="edit" size={14} />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => handleDelete(post.id)} className="h-8 w-8 text-muted-foreground hover:text-destructive" aria-label="Delete post">
-                          <Trash2 size={14} />
+                          <Icon name="delete" size={14} />
                         </Button>
                       </>
                     )}
@@ -688,12 +688,12 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                       </Button>
                     </HoverTooltip>
                     <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)} className="h-8 px-2 ml-1 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                      <MessageSquare size={14} className="mr-1.5" /> <span className="text-xs font-medium">{(post.comments || []).length}</span>
+                      <Icon name="chat" size={14} className="mr-1.5" /> <span className="text-xs font-medium">{(post.comments || []).length}</span>
                     </Button>
                   </div>
                   <HoverTooltip content={getReactionTitle(post.readBy)} position="right">
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground cursor-help transition-colors py-1">
-                      <Users size={13} /> {Array.isArray(post.readBy) ? post.readBy.length : 0} views
+                      <Icon name="group" size={13} /> {Array.isArray(post.readBy) ? post.readBy.length : 0} views
                     </div>
                   </HoverTooltip>
                 </CardFooter>
@@ -712,7 +712,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                               {commentAuthor?.avatar ? (
                                 <AvatarImage src={commentAuthor.avatar} alt={comment.authorName} />
                               ) : (
-                                <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-medium"><User size={14} /></AvatarFallback>
+                                <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-medium"><Icon name="person" size={14} /></AvatarFallback>
                               )}
                             </Avatar>
                             <div className="flex-1 flex flex-col">
@@ -779,7 +779,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                                         {replyAuthor?.avatar ? (
                                           <AvatarImage src={replyAuthor.avatar} alt={reply.authorName} />
                                         ) : (
-                                          <AvatarFallback className="bg-primary/10 text-primary text-[8px] font-medium"><User size={12} /></AvatarFallback>
+                                          <AvatarFallback className="bg-primary/10 text-primary text-[8px] font-medium"><Icon name="person" size={12} /></AvatarFallback>
                                         )}
                                       </Avatar>
                                       <div className="flex-1">
@@ -843,7 +843,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                                         onKeyDown={(e) => { if (e.key === 'Enter') handleAddReply(post.id, comment.id) }}
                                       />
                                       <Button size="sm" className="h-6 px-2" onClick={() => handleAddReply(post.id, comment.id)}>
-                                        <Send size={10} />
+                                        <Icon name="send" size={10} />
                                       </Button>
                                     </div>
                                   )}
@@ -863,7 +863,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                         onKeyDown={(e) => { if (e.key === 'Enter') handleAddComment(post.id) }}
                       />
                       <Button size="sm" className="h-8 px-3" onClick={() => handleAddComment(post.id)}>
-                        <Send size={14} />
+                        <Icon name="send" size={14} />
                       </Button>
                     </div>
                   </div>
@@ -883,7 +883,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
           setIsDialogOpen(true)
         }}
       >
-        <Plus size={24} />
+        <Icon name="add" size={24} />
       </Button>
 
       {/* Category Management Modal */}
@@ -892,7 +892,7 @@ export default function Announcements({ employees, announcements, setAnnouncemen
           <DialogHeader className="flex flex-row items-center justify-between border-b border-border pb-4 mb-4 space-y-0">
             <DialogTitle>Manage Categories</DialogTitle>
             <button className="rounded-full p-2 hover:bg-muted transition-colors" onClick={() => { setShowCategoryModal(false); setEditingCategory(null); setCatFormName('') }}>
-              <X size={16} />
+              <Icon name="close" size={16} />
             </button>
           </DialogHeader>
           <div className="flex flex-col gap-5">
@@ -903,10 +903,10 @@ export default function Announcements({ employees, announcements, setAnnouncemen
                   <div key={cat} className="flex items-center gap-2.5 p-2 px-3 rounded-lg bg-muted/30 border border-border">
                     <span className="flex-1 text-[0.9rem] font-medium text-foreground">{cat}</span>
                     <Button variant="ghost" size="icon-xs" aria-label="Edit category" onClick={() => { setEditingCategory(cat); setCatFormName(cat) }}>
-                      <Pencil size={14} />
+                      <Icon name="edit" size={14} />
                     </Button>
                     <Button variant="ghost" size="icon-xs" aria-label="Delete category" onClick={() => handleDeleteCategory(cat)}>
-                      <Trash2 size={14} />
+                      <Icon name="delete" size={14} />
                     </Button>
                   </div>
                 ))}

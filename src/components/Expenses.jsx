@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from 'react'
-import { Receipt, Plus, Upload, Check, X as XIcon, Clock, DollarSign, Filter, Search, Download, AlertTriangle, PieChart as PieChartIcon, User, History, List } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -170,7 +170,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Receipt size={20} className="text-primary" />
+          <Icon name="receipt_long" size={20} className="text-primary" />
           Expenses
         </h1>
       </div>
@@ -182,14 +182,14 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
           onClick={() => setActiveTab('submit')}
           className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'submit' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
         >
-          <Plus size={16} /> Claim
+          <Icon name="add" size={16} /> Claim
         </button>
         {!(canApprove || canReimburse) && (
           <button 
             onClick={() => setActiveTab('my-claims')}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'my-claims' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
           >
-            <List size={16} /> My Claims
+            <Icon name="list" size={16} /> My Claims
           </button>
         )}
         {canApprove && (
@@ -197,7 +197,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
             onClick={() => setActiveTab('approve')}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'approve' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
           >
-            <Clock size={16} /> Approvals
+            <Icon name="schedule" size={16} /> Approvals
             {pendingQueue.length > 0 && <Badge variant="destructive" className="ml-1 px-1.5 py-0 min-w-[20px] h-5 flex items-center justify-center">{pendingQueue.length}</Badge>}
           </button>
         )}
@@ -206,7 +206,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
             onClick={() => setActiveTab('finance')}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'finance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
           >
-            <PieChartIcon size={16} /> Finance
+            <Icon name="pie_chart" size={16} /> Finance
           </button>
         )}
         {(canApprove || canReimburse) && (
@@ -214,7 +214,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
             onClick={() => setActiveTab('history')}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'history' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
           >
-            <History size={16} /> History
+            <Icon name="history" size={16} /> History
           </button>
         )}
       </div>
@@ -226,7 +226,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
           <Card className="flex-1">
             <CardContent className="p-6 sm:p-8">
               <h3 className="text-xl mb-6 flex items-center gap-2 text-foreground">
-                <Receipt size={20} className="text-primary" />
+                <Icon name="receipt_long" size={20} className="text-primary" />
                 Expense Details
               </h3>
               <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -276,7 +276,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                     onClick={() => fileInputRef.current.click()}
                     className="p-6 sm:p-8 rounded-xl border-2 border-dashed border-border bg-muted/30 text-center cursor-pointer flex flex-col items-center gap-2 transition-colors hover:border-primary hover:bg-muted/50"
                   >
-                    <Upload size={24} className="text-muted-foreground" />
+                    <Icon name="upload" size={24} className="text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">{receiptBase64 ? 'Receipt uploaded. Click to change.' : 'Click to upload receipt'}</span>
                   </div>
                 </div>
@@ -296,7 +296,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
             <h3 className="text-xl font-semibold text-foreground">Approval Queue</h3>
             {selectedExpenses.length > 0 && (
               <Button variant="default" size="sm" onClick={handleBulkApprove}>
-                <Check size={16} /> Bulk Approve ({selectedExpenses.length})
+                <Icon name="check" size={16} /> Bulk Approve ({selectedExpenses.length})
               </Button>
             )}
           </div>
@@ -325,7 +325,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                           <input type="checkbox" className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary mt-1" aria-label="Select expense" checked={isSelected} onChange={() => handleToggleSelect(exp.id)} />
                           <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
                             {emp?.avatar ? <AvatarImage src={emp.avatar} alt={emp?.name} className="object-cover" /> : null}
-                            <AvatarFallback className="bg-primary/10 text-primary"><User size={20} /></AvatarFallback>
+                            <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={20} /></AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col">
                             <span className="font-semibold text-base leading-tight">{emp?.name}</span>
@@ -352,7 +352,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                         </div>
                         {isOverLimit && (
                           <div className="col-span-2 flex items-center gap-1.5 text-destructive text-xs font-medium bg-destructive/10 p-2 rounded border border-destructive/20 mt-1">
-                            <AlertTriangle size={14} /> Exceeds {exp.category} limit of ${policies[exp.category]}
+                            <Icon name="warning" size={14} /> Exceeds {exp.category} limit of ${policies[exp.category]}
                           </div>
                         )}
                         {exp.receipt && (
@@ -365,10 +365,10 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                       {/* Actions */}
                       <div className="flex items-center gap-2 pt-1">
                         <Button variant="outline" className="flex-1 border-destructive text-destructive hover:bg-destructive/10" onClick={() => setRejectReasonModal({ open: true, id: exp.id, reason: '' })}>
-                          <XIcon className="mr-2 h-4 w-4" /> Reject
+                          <Icon name="close" className="mr-2 h-4 w-4" /> Reject
                         </Button>
                         <button type="button" className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none" onClick={() => handleApprove(exp.id)}>
-                          <Check className="h-4 w-4" /> Approve
+                          <Icon name="check" className="h-4 w-4" /> Approve
                         </button>
                       </div>
                     </div>
@@ -388,7 +388,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
               <CardContent className="p-6 flex flex-col justify-center">
                 <h3 className="text-sm mb-2 text-muted-foreground">Pending Liability</h3>
                 <div className="text-4xl font-bold flex items-center gap-2 text-amber-500">
-                  <DollarSign size={32} />
+                  <Icon name="attach_money" size={32} />
                   {pendingLiability.toFixed(2)}
                 </div>
                 <p className="text-xs mt-2 text-muted-foreground">Total pending reimbursements (in USD)</p>
@@ -417,7 +417,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-semibold text-foreground">Ready for Reimbursement</h3>
             <Button variant="secondary" size="sm" onClick={exportCSV}>
-              <Download size={16} /> Export CSV
+              <Icon name="download" size={16} /> Export CSV
             </Button>
           </div>
 
@@ -436,7 +436,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                         <div className="flex items-center gap-3">
                           <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
                             {emp?.avatar ? <AvatarImage src={emp.avatar} alt={emp?.name} className="object-cover" /> : null}
-                            <AvatarFallback className="bg-primary/10 text-primary"><User size={20} /></AvatarFallback>
+                            <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={20} /></AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col">
                             <span className="font-semibold text-base leading-tight">{emp?.name}</span>
@@ -468,7 +468,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                       {/* Actions */}
                       <div className="pt-1">
                         <Button variant="default" className="w-full" onClick={() => handleMarkReimbursed(exp.id)}>
-                          <DollarSign className="mr-2 h-4 w-4" /> Mark as Reimbursed
+                          <Icon name="attach_money" className="mr-2 h-4 w-4" /> Mark as Reimbursed
                         </Button>
                       </div>
                     </div>
@@ -483,7 +483,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
       {activeTab === 'my-claims' && (
         <div className="flex flex-col gap-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold text-foreground flex items-center gap-2"><List size={20} className="text-primary"/> My Expense History</h3>
+            <h3 className="text-xl font-semibold text-foreground flex items-center gap-2"><Icon name="list" size={20} className="text-primary"/> My Expense History</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {myClaimsQueue.length === 0 ? (
@@ -546,7 +546,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
       {activeTab === 'history' && (canApprove || canReimburse) && (
         <div className="flex flex-col gap-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold text-foreground flex items-center gap-2"><History size={20} className="text-primary"/> Company Expense History</h3>
+            <h3 className="text-xl font-semibold text-foreground flex items-center gap-2"><Icon name="history" size={20} className="text-primary"/> Company Expense History</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {historyQueue.length === 0 ? (
@@ -563,7 +563,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                         <div className="flex items-center gap-3">
                           <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
                             {emp?.avatar ? <AvatarImage src={emp.avatar} alt={emp?.name} className="object-cover" /> : null}
-                            <AvatarFallback className="bg-primary/10 text-primary"><User size={20} /></AvatarFallback>
+                            <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={20} /></AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col">
                             <span className="font-semibold text-base leading-tight">{emp?.name}</span>
@@ -636,7 +636,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
         <DialogContent className="sm:max-w-[400px] text-center">
           <DialogHeader className="flex flex-col items-center gap-2">
             <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
-              <Check size={24} className="text-emerald-600 dark:text-emerald-400" />
+              <Icon name="check" size={24} className="text-emerald-600 dark:text-emerald-400" />
             </div>
             <DialogTitle className="text-xl">Expense Submitted!</DialogTitle>
           </DialogHeader>

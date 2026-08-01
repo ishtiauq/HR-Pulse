@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Users, Mail, Eye, ChevronDown, Download, Building2, User } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
@@ -390,7 +390,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient"><Users size={20} className="text-primary" />Employees</h1>
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient"><Icon name="group" size={20} className="text-primary" />Employees</h1>
         <div className="hidden lg:flex gap-2 items-center">
           <input 
             id="csv-file-input" 
@@ -456,11 +456,11 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
             }}
           />
           <Button variant="outline" onClick={() => document.getElementById('csv-file-input').click()}>
-            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            <Icon name="table_chart" className="mr-2 h-4 w-4" />
             Import CSV
           </Button>
           <Button onClick={handleOpenAddForm}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Icon name="add" className="mr-2 h-4 w-4" />
             Add Employee
           </Button>
         </div>
@@ -470,11 +470,11 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       {/* Mobile/Tablet Action Buttons */}
       <div className="lg:hidden grid grid-cols-2 gap-3 mb-2">
         <Button variant="outline" className="w-full" onClick={() => document.getElementById('csv-file-input').click()}>
-          <FileSpreadsheet className="mr-2 h-4 w-4" />
+          <Icon name="table_chart" className="mr-2 h-4 w-4" />
           Import CSV
         </Button>
         <Button className="w-full" onClick={handleOpenAddForm}>
-          <Plus className="mr-2 h-4 w-4" />
+          <Icon name="add" className="mr-2 h-4 w-4" />
           Add Employee
         </Button>
       </div>
@@ -496,7 +496,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
             </div>
             
             <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Icon name="search" className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search by name, role, email..."
@@ -520,7 +520,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                   className="cursor-pointer hover:bg-primary/80 transition-colors"
                   onClick={() => setDeptFilter(dept)}
                 >
-                  {deptFilter === dept && <Check className="mr-1 h-3 w-3" />}
+                  {deptFilter === dept && <Icon name="check" className="mr-1 h-3 w-3" />}
                   {dept}
                 </Badge>
               ))}
@@ -535,7 +535,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
         <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2 text-blue-700 dark:text-blue-400">
-              <AlertCircle className="h-5 w-5" />
+              <Icon name="error" className="h-5 w-5" />
               Pending Profile Update Requests ({pendingProfileEdits.length})
             </CardTitle>
           </CardHeader>
@@ -561,10 +561,10 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <Button size="sm" onClick={() => handleApproveProfileEdit(editReq.id)}>
-                      <Check className="mr-1 h-3.5 w-3.5" /> Approve
+                      <Icon name="check" className="mr-1 h-3.5 w-3.5" /> Approve
                     </Button>
                     <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleRejectProfileEdit(editReq.id)}>
-                      <X className="mr-1 h-3.5 w-3.5" /> Reject
+                      <Icon name="close" className="mr-1 h-3.5 w-3.5" /> Reject
                     </Button>
                   </div>
                 </div>
@@ -577,16 +577,16 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       {/* Selection Bar */}
       {selectedIds.size > 0 && (
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 p-3 rounded-xl bg-primary/10 text-primary text-sm font-medium border border-primary/20">
-          <Check className="h-4 w-4 shrink-0" />
+          <Icon name="check" className="h-4 w-4 shrink-0" />
           <span className="flex-1">{selectedIds.size} selected</span>
           <Button size="sm" variant="destructive" className="h-8" onClick={handleBulkDelete}>
-            <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete ({selectedIds.size})
+            <Icon name="delete" className="mr-1 h-3.5 w-3.5" /> Delete ({selectedIds.size})
           </Button>
           <Button size="sm" variant="default" className="h-8" onClick={handleDownloadSelected}>
-            <Download className="mr-1 h-3.5 w-3.5" /> Download CSV
+            <Icon name="download" className="mr-1 h-3.5 w-3.5" /> Download CSV
           </Button>
           <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-primary/20 hover:text-primary rounded-full" onClick={clearSelection}>
-            <X className="h-4 w-4" />
+            <Icon name="close" className="h-4 w-4" />
           </Button>
         </div>
       )}
@@ -594,7 +594,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       {/* Directory Grid */}
       {filteredEmployees.length === 0 ? (
         <div className="text-center py-20 flex flex-col items-center">
-          <Users className="h-16 w-16 mb-4 text-muted-foreground/50" />
+          <Icon name="group" className="h-16 w-16 mb-4 text-muted-foreground/50" />
           <h3 className="text-xl font-medium text-foreground mb-4">No employees found</h3>
           <Button variant="outline" onClick={() => {setSearchTerm(''); setDeptFilter('All')}}>Clear Filters</Button>
         </div>
@@ -626,7 +626,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                           <AvatarImage src={emp.avatar} alt={emp.name} style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} />
                         )}
                         <AvatarFallback className="bg-primary/10 text-primary">
-                          <User size={20} />
+                          <Icon name="person" size={20} />
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col gap-0.5 min-w-0">
@@ -645,11 +645,11 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                       
                       <div className="flex flex-col gap-2.5">
                         <div className="flex items-center text-sm text-muted-foreground">
-                          <Building2 className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" />
+                          <Icon name="apartment" className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" />
                           <span className="break-words">{emp.department}</span>
                         </div>
                         <div className="flex items-center text-sm text-muted-foreground">
-                          <Mail className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" />
+                          <Icon name="mail" className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" />
                           <span className="break-all">{emp.email}</span>
                         </div>
                       </div>
@@ -679,7 +679,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                             setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role || 'Teammate'); setNewDesignation(emp.designation || emp.role || ''); setNewPermissions(emp.permissions || []); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
                           }}
                         >
-                          <Edit className="mr-1.5 h-3.5 w-3.5" /> Edit
+                          <Icon name="edit" className="mr-1.5 h-3.5 w-3.5" /> Edit
                         </Button>
                         <Button 
                           variant="outline" 
@@ -693,7 +693,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                             }); 
                           }}
                         >
-                          <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
+                          <Icon name="delete" className="mr-1.5 h-3.5 w-3.5" /> Delete
                         </Button>
                       </div>
                       
@@ -711,7 +711,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                         setExpandedCardId(prev => prev === emp.id ? null : emp.id);
                       }}
                     >
-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                      <Icon name="keyboard_arrow_down" className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
                     </Button>
                   </div>
                 </CardContent>
@@ -730,7 +730,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                 <Avatar className="h-24 w-24 mb-4 border-2 border-primary/20 shadow-sm text-2xl">
                   <AvatarImage src={viewingEmployee.avatar} alt={viewingEmployee.name} style={{ transform: `translate(${viewingEmployee.photoX || 0}px, ${viewingEmployee.photoY || 0}px) scale(${viewingEmployee.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
                   <AvatarFallback className="bg-primary/10 text-primary">
-                    <User size={40} />
+                    <Icon name="person" size={40} />
                   </AvatarFallback>
                 </Avatar>
                 <h3 className="text-xl font-bold text-foreground text-center">{viewingEmployee.name}</h3>
@@ -784,7 +784,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                   setCustomDept('');
                   setShowAddForm(true);
                 }}>
-                  <Edit className="mr-2 h-4 w-4" /> Edit Profile
+                  <Icon name="edit" className="mr-2 h-4 w-4" /> Edit Profile
                 </Button>
               </DialogFooter>
             </>
@@ -797,7 +797,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {editingEmployee ? <Edit className="h-5 w-5 text-primary" /> : <UserPlus className="h-5 w-5 text-primary" />}
+              {editingEmployee ? <Icon name="edit" className="h-5 w-5 text-primary" /> : <Icon name="person_add" className="h-5 w-5 text-primary" />}
               {editingEmployee ? 'Edit Employee Profile' : 'New Employee Record'}
             </DialogTitle>
           </DialogHeader>
@@ -1011,7 +1011,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Upload CV</label>
                 <Button type="button" variant="outline" className="w-full justify-start" onClick={() => document.getElementById('cv-file-input').click()}>
-                  <FileSpreadsheet className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <Icon name="table_chart" className="mr-2 h-4 w-4 text-muted-foreground" />
                   {newCvFileName ? (newCvFileName.length > 15 ? newCvFileName.substring(0, 15) + '...' : newCvFileName) : 'Upload Document'}
                 </Button>
                 <input id="cv-file-input" type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={(e) => e.target.files && setNewCvFileName(e.target.files[0].name)} />

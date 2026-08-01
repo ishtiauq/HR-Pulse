@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature, Wrench, CheckCircle, BadgeCheck, MessageSquare, AlertCircle, Laptop, Smartphone, Speaker, Mouse, Key, User } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import AdSlot from './AdSlot'
 import { useModal } from '../services/useModal.js'
 import jsPDF from 'jspdf'
@@ -16,11 +16,11 @@ import { Select, SelectItem } from "@/components/ui/select"
 import { DatePicker } from "@/components/ui/date-picker"
 
 const categoryIcons = {
-  'Laptop': <Laptop className="w-4 h-4" />,
-  'Phone': <Smartphone className="w-4 h-4" />,
-  'Monitor': <Monitor className="w-4 h-4" />,
-  'Peripherals': <Mouse className="w-4 h-4" />,
-  'Access Card': <Key className="w-4 h-4" />
+  'Laptop': <Icon name="laptop_windows" className="w-4 h-4" />,
+  'Phone': <Icon name="mobile" className="w-4 h-4" />,
+  'Monitor': <Icon name="monitor" className="w-4 h-4" />,
+  'Peripherals': <Icon name="mouse" className="w-4 h-4" />,
+  'Access Card': <Icon name="key" className="w-4 h-4" />
 }
 
 function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filterCategory, setFilterCategory, alerts, showAddModal, setShowAddModal, newAsset, setNewAsset, handleAddAsset, triggerFileInput, fileInputRef, handleImportCSV, addToast }) {
@@ -40,11 +40,11 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500">
-             <Monitor size={80} />
+             <Icon name="monitor" size={80} />
           </div>
           <CardContent className="p-5 flex flex-col gap-1 relative z-10">
             <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
-              <div className="p-1.5 bg-primary/10 rounded-md"><Monitor size={16} /></div> <span className="headline-gradient">Total Assets</span>
+              <div className="p-1.5 bg-primary/10 rounded-md"><Icon name="monitor" size={16} /></div> <span className="headline-gradient">Total Assets</span>
             </div>
             <div className="text-4xl font-black tabular-nums text-foreground">{stats.total}</div>
           </CardContent>
@@ -52,11 +52,11 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
         
         <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-primary">
-             <CheckCircle size={80} />
+             <Icon name="check_circle" size={80} />
           </div>
           <CardContent className="p-5 flex flex-col gap-1 relative z-10">
             <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
-              <div className="p-1.5 bg-primary/10 rounded-md"><CheckCircle size={16} /></div> <span className="headline-gradient">Available</span>
+              <div className="p-1.5 bg-primary/10 rounded-md"><Icon name="check_circle" size={16} /></div> <span className="headline-gradient">Available</span>
             </div>
             <div className="text-4xl font-black tabular-nums text-foreground">{stats.available}</div>
           </CardContent>
@@ -64,11 +64,11 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
 
         <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-primary">
-             <BadgeCheck size={80} />
+             <Icon name="verified" size={80} />
           </div>
           <CardContent className="p-5 flex flex-col gap-1 relative z-10">
             <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
-              <div className="p-1.5 bg-primary/10 rounded-md"><BadgeCheck size={16} /></div> <span className="headline-gradient">Assigned</span>
+              <div className="p-1.5 bg-primary/10 rounded-md"><Icon name="verified" size={16} /></div> <span className="headline-gradient">Assigned</span>
             </div>
             <div className="text-4xl font-black tabular-nums text-foreground">{stats.assigned}</div>
           </CardContent>
@@ -76,11 +76,11 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
 
         <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-primary">
-             <Wrench size={80} />
+             <Icon name="build" size={80} />
           </div>
           <CardContent className="p-5 flex flex-col gap-1 relative z-10">
             <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
-              <div className="p-1.5 bg-primary/10 rounded-md"><Wrench size={16} /></div> <span className="headline-gradient">Under Repair</span>
+              <div className="p-1.5 bg-primary/10 rounded-md"><Icon name="build" size={16} /></div> <span className="headline-gradient">Under Repair</span>
             </div>
             <div className="text-4xl font-black tabular-nums text-foreground">{stats.underRepair}</div>
           </CardContent>
@@ -106,16 +106,16 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
       <Card className="shadow-xs border-border bg-card overflow-hidden">
         <div className="p-4 border-b border-border flex flex-wrap gap-4 items-center justify-between bg-muted/20">
           <div className="relative flex-1 min-w-[280px] max-w-md">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Icon name="search" className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input type="text" placeholder="Search by name or serial number..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 bg-background border-input shadow-sm" />
           </div>
           <div className="flex gap-3">
             <Button variant="outline" onClick={triggerFileInput} className="shadow-sm">
-              <Upload className="mr-2 h-4 w-4" /> Import CSV
+              <Icon name="upload" className="mr-2 h-4 w-4" /> Import CSV
             </Button>
             <input type="file" ref={fileInputRef} onChange={handleImportCSV} accept=".csv" className="hidden" />
             <Button onClick={() => setShowAddModal(true)} className="shadow-sm shadow-primary/20">
-              <Plus className="mr-2 h-4 w-4" /> Add Asset
+              <Icon name="add" className="mr-2 h-4 w-4" /> Add Asset
             </Button>
           </div>
         </div>
@@ -141,7 +141,7 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
                 <TableCell className="font-medium text-foreground">{asset.name}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                    {categoryIcons[asset.category] || <Monitor className="w-4 h-4" />}
+                    {categoryIcons[asset.category] || <Icon name="monitor" className="w-4 h-4" />}
                     <span>{asset.category}</span>
                   </div>
                 </TableCell>
@@ -152,7 +152,7 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
                 <TableCell>
                   <div className="flex items-center gap-1.5 font-medium text-sm">
                     {asset.warrantyExpiry}
-                    {alerts.find(a => a.id === asset.id) && <AlertTriangle className="h-4 w-4 text-orange-500 drop-shadow-sm" />}
+                    {alerts.find(a => a.id === asset.id) && <Icon name="warning" className="h-4 w-4 text-orange-500 drop-shadow-sm" />}
                   </div>
                 </TableCell>
                 <TableCell>
@@ -168,7 +168,7 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
               <TableRow>
                 <TableCell colSpan={6} className="text-center p-12">
                   <div className="flex flex-col items-center justify-center text-muted-foreground">
-                    <Search className="h-10 w-10 mb-3 opacity-20" />
+                    <Icon name="search" className="h-10 w-10 mb-3 opacity-20" />
                     <p className="text-base font-medium text-foreground">No assets found</p>
                     <p className="text-sm mt-1">Try adjusting your search query or filters.</p>
                   </div>
@@ -214,7 +214,7 @@ function DetailModal({ asset, onClose }) {
         
         <div className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-6">
-            <div><div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Category</div><div className="flex items-center gap-1.5 text-sm">{categoryIcons[asset.category] || <Monitor className="w-3 h-3"/>} {asset.category}</div></div>
+            <div><div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Category</div><div className="flex items-center gap-1.5 text-sm">{categoryIcons[asset.category] || <Icon name="monitor" className="w-3 h-3"/>} {asset.category}</div></div>
             <div><div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Condition</div><div className="font-medium text-sm">{asset.condition}</div></div>
             <div><div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Purchase Date</div><div className="font-medium text-sm">{asset.purchaseDate}</div></div>
             
@@ -292,7 +292,7 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
                   <TableCell>
                     {asset.status === 'Assigned' && emp ? (
                       <div className="flex items-center gap-3">
-                        {emp.avatar ? <img src={emp.avatar} alt="" className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" /> : <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs ring-2 ring-primary/20"><User size={16} /></div>}
+                        {emp.avatar ? <img src={emp.avatar} alt="" className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" /> : <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs ring-2 ring-primary/20"><Icon name="person" size={16} /></div>}
                         <div>
                           <div className="font-medium text-sm">{emp.name}</div>
                           <div className="text-[11px] text-muted-foreground">{emp.department}</div>
@@ -312,7 +312,7 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
                     ) : (
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" onClick={() => generateAgreementPDF(asset, emp, asset.condition)}>
-                          <FileSignature className="h-4 w-4 mr-2" /> Agreement
+                          <Icon name="edit_document" className="h-4 w-4 mr-2" /> Agreement
                         </Button>
                         <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-900/20" onClick={() => handleReturnAsset(asset.id)}>
                           Return
@@ -362,7 +362,7 @@ function AssignAssetModal({ showAssignModal, setShowAssignModal, assignTarget, a
           </div>
           
           <div className="p-3 bg-blue-500/10 text-blue-700 dark:text-blue-400 rounded-lg text-xs flex items-start gap-2 border border-blue-500/20 mt-2">
-            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+            <Icon name="error" className="h-4 w-4 mt-0.5 shrink-0" />
             <p>An official Asset Assignment Agreement PDF will be auto-generated and downloaded upon assignment.</p>
           </div>
           
@@ -383,7 +383,7 @@ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
         <Card className="shadow-xs border-border border-dashed bg-card/50">
           <CardContent className="p-16 flex flex-col items-center justify-center text-center">
             <div className="p-4 bg-muted rounded-full mb-4">
-               <MessageSquare className="h-10 w-10 text-muted-foreground opacity-50" />
+               <Icon name="chat" className="h-10 w-10 text-muted-foreground opacity-50" />
             </div>
             <h3 className="text-lg font-semibold text-foreground">No Pending Requests</h3>
             <p className="text-sm text-muted-foreground mt-1 max-w-sm">There are currently no open asset requests from employees. When employees request new equipment, it will appear here.</p>
@@ -471,7 +471,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
             <Card className="shadow-xs border-border bg-gradient-to-br from-card to-muted/20">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
-                  <TrendingDown className="h-6 w-6 text-primary" />
+                  <Icon name="trending_down" className="h-6 w-6 text-primary" />
                   <h3 className="text-lg font-bold">Depreciation & Value</h3>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -486,7 +486,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
             <Card className="shadow-xs border-border">
               <CardHeader className="pb-4 border-b border-border bg-muted/10">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <PenTool className="h-5 w-5 text-orange-500" /> Log New Maintenance
+                  <Icon name="draw" className="h-5 w-5 text-orange-500" /> Log New Maintenance
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
@@ -516,7 +516,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
                 {selectedAssetForMaint.maintenanceLogs?.length > 0 && (
                   <div className="mt-10">
                     <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                      <Wrench className="h-4 w-4" /> Repair History Log
+                      <Icon name="build" className="h-4 w-4" /> Repair History Log
                     </h4>
                     <div className="flex flex-col gap-3">
                       {selectedAssetForMaint.maintenanceLogs.map(log => (
@@ -543,7 +543,7 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
           <Card className="shadow-xs border-border border-dashed bg-card/50 h-full min-h-[400px] flex items-center justify-center">
             <CardContent className="flex flex-col items-center text-center p-6">
               <div className="p-4 bg-muted rounded-full mb-4">
-                 <Wrench className="h-10 w-10 text-muted-foreground opacity-50" />
+                 <Icon name="build" className="h-10 w-10 text-muted-foreground opacity-50" />
               </div>
               <h3 className="text-lg font-semibold text-foreground">No Asset Selected</h3>
               <p className="text-sm text-muted-foreground mt-1 max-w-[250px]">Select an asset from the list on the left to view depreciation details and log maintenance.</p>
@@ -847,7 +847,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     <div className="animate-fade-in pb-10 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Laptop size={20} className="text-primary" />
+          <Icon name="laptop_windows" size={20} className="text-primary" />
           Asset Management
         </h1>
       </div>
@@ -872,7 +872,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
 
       {alerts.length > 0 && activeView === 'inventory' && (
         <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-900 text-orange-800 dark:text-orange-200 p-4 rounded-xl flex items-center gap-3">
-          <AlertTriangle className="h-5 w-5 shrink-0" />
+          <Icon name="warning" className="h-5 w-5 shrink-0" />
           <span><strong>Alert:</strong> {alerts.length} asset(s) have warranties expiring within 30 days</span>
         </div>
       )}
