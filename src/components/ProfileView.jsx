@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertCircle } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -59,7 +59,7 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
 
       {hasPending && (
         <div className="p-4 rounded-md flex gap-3 items-center bg-amber-500/10 border-l-4 border-l-amber-500 text-foreground">
-          <AlertCircle className="h-5 w-5 text-amber-500" />
+          <Icon name="error" size={20} className="h-5 w-5 text-amber-500" />
           <span className="text-sm font-medium">You have pending profile updates waiting for HR approval.</span>
         </div>
       )}

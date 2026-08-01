@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Search, LayoutGrid, List, MoreVertical, Calendar as CalendarIcon, Edit, Trash2, CheckSquare, ChevronDown, MessageSquare, Send, User } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DatePicker } from "@/components/ui/date-picker"
@@ -188,13 +188,13 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
       {/* Header */}
       <div className="flex flex-col pb-4 border-b border-border border-headline mb-2">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <CheckSquare size={20} className="text-primary" /> Tasks
+          <Icon name="check_box" size={20} className="text-primary" /> Tasks
         </h1>
       </div>
       
       <div className="flex flex-wrap gap-4 mb-4 items-center w-full justify-between">
         <div className="relative flex-auto min-w-[250px] lg:max-w-md w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Icon name="search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="Search tasks or assignees..." 
             value={search}
@@ -214,7 +214,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
           
 
           <Button onClick={() => openModal()} className="shadow-sm w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" /> Add Task
+            <Icon name="add" size={16} className="h-4 w-4 mr-2" /> Add Task
           </Button>
         </div>
       </div>
@@ -260,11 +260,11 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                 </span>
                 <div className="flex gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                   <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openModal(task) }} className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10">
-                    <Edit className="h-4 w-4" />
+                    <Icon name="edit" size={16} className="h-4 w-4" />
                   </Button>
                   {(simulatedRole !== 'Teammate' || task.createdBy === currentUser?.id) && (
                     <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setTaskToDelete(task.id) }} className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
-                      <Trash2 className="h-4 w-4" />
+                      <Icon name="delete" size={16} className="h-4 w-4" />
                     </Button>
                   )}
                 </div>
@@ -285,7 +285,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
 
               {task.updates && task.updates.length > 0 && (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
-                  <MessageSquare className="h-3.5 w-3.5" />
+                  <Icon name="chat" size={14} className="h-3.5 w-3.5" />
                   <span>{task.updates.length} updates</span>
                 </div>
               )}
@@ -302,7 +302,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
               
               <div className="flex items-center justify-between mt-auto pt-3 sm:pt-4 border-t border-border/50">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-                  <CalendarIcon className="h-3.5 w-3.5" />
+                  <Icon name="calendar_month" size={14} className="h-3.5 w-3.5" />
                   {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No date'}
                 </div>
                 {assignees.length > 0 && (
@@ -310,7 +310,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                     {assignees.slice(0, 3).map((a, i) => (
                       <Avatar key={a.id} className="h-7 w-7 border-2 border-card relative" style={{ zIndex: 3 - i }} title={a.name}>
                         {a.avatar ? <AvatarImage src={a.avatar} alt={a.name} className="object-cover" /> : null}
-                        <AvatarFallback className="bg-primary/10 text-primary"><User size={14} /></AvatarFallback>
+                        <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={14} /></AvatarFallback>
                       </Avatar>
                     ))}
                     {assignees.length > 3 && (
@@ -326,7 +326,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
         })}
         {filteredTasks.filter(t => t.status === activeStatusTab).length === 0 && (
           <div className="col-span-full flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-border rounded-xl">
-            <CheckSquare className="h-12 w-12 text-muted-foreground/30 mb-3" />
+            <Icon name="check_box" size={48} className="h-12 w-12 text-muted-foreground/30 mb-3" />
             <h3 className="text-lg font-medium text-foreground">No tasks found</h3>
             <p className="text-sm text-muted-foreground">There are no tasks in '{activeStatusTab}' status.</p>
           </div>
@@ -436,7 +436,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                         {taskForm.assigneeIds.length > 0 
                           ? <span className="flex items-center gap-2"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">{taskForm.assigneeIds.length}</span> selected</span>
                           : <span className="text-muted-foreground">Select Assignees...</span>}
-                        <ChevronDown className="h-4 w-4 opacity-50" />
+                        <Icon name="keyboard_arrow_down" size={16} className="h-4 w-4 opacity-50" />
                       </Button>
                       {showAssigneesDropdown && (
                         <div className="absolute bottom-full mb-1 z-50 w-full bg-popover border border-border rounded-md shadow-md text-popover-foreground">
@@ -458,7 +458,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                                 />
                                 <Avatar className="h-6 w-6 shrink-0 ring-1 ring-border group-hover:ring-primary/50">
                                   {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
-                                  <AvatarFallback className="bg-primary/10 text-primary"><User size={12} /></AvatarFallback>
+                                  <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={12} /></AvatarFallback>
                                 </Avatar>
                                 <span className="truncate">{emp.name}</span>
                               </label>
@@ -492,7 +492,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                         <div key={update.id} className="flex gap-3 text-sm">
                           <Avatar className="h-8 w-8 shrink-0">
                             {author?.avatar ? <AvatarImage src={author.avatar} className="object-cover" /> : null}
-                            <AvatarFallback className="bg-primary/10 text-primary"><User size={16} /></AvatarFallback>
+                            <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={16} /></AvatarFallback>
                           </Avatar>
                           <div className="flex-1 bg-muted/50 rounded-lg p-3">
                             <div className="flex items-center gap-2">
@@ -517,7 +517,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                       }}
                     />
                   </div>
-                  <Button onClick={handleAddUpdate} size="icon"><Send className="h-4 w-4" /></Button>
+                  <Button onClick={handleAddUpdate} size="icon"><Icon name="send" size={16} className="h-4 w-4" /></Button>
                 </div>
               </div>
               )}
@@ -583,7 +583,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                       {taskForm.assigneeIds.length > 0 
                         ? <span className="flex items-center gap-2"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">{taskForm.assigneeIds.length}</span> selected</span>
                         : <span className="text-muted-foreground">Select Assignees...</span>}
-                      <ChevronDown className="h-4 w-4 opacity-50" />
+                      <Icon name="keyboard_arrow_down" size={16} className="h-4 w-4 opacity-50" />
                     </Button>
                     {showAssigneesDropdown && (
                       <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-md text-popover-foreground">
@@ -606,7 +606,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
                               <div className="flex items-center gap-2">
                                 <Avatar className="h-6 w-6 shrink-0 ring-1 ring-border group-hover:ring-primary/50">
                                   {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
-                                  <AvatarFallback className="bg-primary/10 text-primary"><User size={12} /></AvatarFallback>
+                                  <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={12} /></AvatarFallback>
                                 </Avatar>
                                 <span>{emp.name}</span>
                               </div>
