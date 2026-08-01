@@ -1,0 +1,1567 @@
+ src/components/Announcements.jsx | 40 +++++++++++++-------------
+ src/components/Assets.jsx        | 62 ++++++++++++++++++++--------------------
+ src/components/Employees.jsx     | 52 ++++++++++++++++-----------------
+ src/components/Expenses.jsx      | 44 ++++++++++++++--------------
+ 4 files changed, 99 insertions(+), 99 deletions(-)
+diff --git a/src/components/Announcements.jsx b/src/components/Announcements.jsx
+index 15768a3..767ab0d 100644
+--- a/src/components/Announcements.jsx
++++ b/src/components/Announcements.jsx
+@@ -1,12 +1,12 @@
+ import { useState, useEffect } from 'react'
+-import { Megaphone, Plus, Image as ImageIcon, FileText, Send, Calendar, Clock, Edit, Trash2, Users, AlertTriangle, MessageSquare, Heart, ThumbsUp, PartyPopper, User, Pencil, X } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
+ import { useConfirm } from '../hooks/useConfirm'
+ import { Button } from "@/components/ui/button"
+ import { Input } from "@/components/ui/input"
+ import { Badge } from "@/components/ui/badge"
+ import { Select, SelectItem } from "@/components/ui/select"
+ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+ import AdSlot from './AdSlot'
+ import { formatDateTime } from '../services/date.js'
+@@ -460,37 +460,37 @@ export default function Announcements({ employees, announcements, setAnnouncemen
+     
+     if (updated) {
+       setAnnouncements(newAnnouncements)
+     }
+   }, [filterCategory, currentUser, announcements, setAnnouncements])
+ 
+   return (
+     <div className="fade-in pb-10 max-w-5xl mx-auto">
+       <div className="flex items-center justify-between mb-4">
+         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+-          <Megaphone size={20} className="text-primary" />
++          <Icon name="campaign" size={20} className="text-primary" />
+           Announcements
+         </h1>
+         
+         <div className="flex gap-3">
+           <Dialog open={isDialogOpen} onOpenChange={(open) => {
+             if (!open) handleCancelDialog()
+             else setIsDialogOpen(true)
+           }}>
+             <DialogTrigger asChild>
+               <Button size="sm" className="hidden sm:flex" onClick={() => {
+                 setEditingPostId(null)
+                 setTitle('')
+                 setContent('')
+                 setHasPoll(false)
+               }}>
+-                <Plus size={16} className="mr-1 sm:mr-2" />
++                <Icon name="add" size={16} className="mr-1 sm:mr-2" />
+                 <span className="hidden sm:inline">New Post</span>
+               </Button>
+             </DialogTrigger>
+           <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+             <DialogHeader>
+               <DialogTitle>{editingPostId ? 'Edit Announcement' : 'Create Announcement'}</DialogTitle>
+             </DialogHeader>
+             <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6 mt-4">
+               <div className="flex flex-col gap-2">
+                 <label className="text-sm font-medium text-foreground">Title</label>
+@@ -502,21 +502,21 @@ export default function Announcements({ employees, announcements, setAnnouncemen
+                   <label className="text-sm font-medium text-foreground">Category</label>
+                     <div className="flex bg-muted/40 rounded-xl p-1 border border-border/50 focus-within:ring-0 focus-within:outline-none transition-all">
+                       <div className="flex-1">
+                         <Select value={category} onChange={setCategory}>
+                           {uniqueCategories.filter(c => c !== 'All').map(c => (
+                             <SelectItem key={c} id={c}>{c}</SelectItem>
+                           ))}
+                         </Select>
+                       </div>
+                       <button type="button" className="shrink-0 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border-none group/add h-10 px-4 rounded-lg flex items-center transition-all duration-300 ease-out overflow-hidden" onClick={() => { setEditingCategory(null); setCatFormName(''); setShowCategoryModal(true) }}>
+-                        <Plus size={18} className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" />
++                        <Icon name="add" size={18} className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" />
+                         <span className="w-0 overflow-hidden whitespace-nowrap text-sm font-bold opacity-0 transition-all duration-300 ease-out group-hover/add:w-auto group-hover/add:opacity-100 group-hover/add:ml-2">Add</span>
+                       </button>
+                     </div>
+                 </div>
+                 <div className="flex flex-col gap-2">
+                   <label className="text-sm font-medium text-foreground">Priority</label>
+                   <Select value={priority} onChange={setPriority}>
+                     <SelectItem id="Normal">Normal</SelectItem>
+                     <SelectItem id="Important">Important</SelectItem>
+                     <SelectItem id="Urgent">Urgent</SelectItem>
+@@ -534,36 +534,36 @@ export default function Announcements({ employees, announcements, setAnnouncemen
+               </div>
+ 
+               <div className="flex flex-col gap-2">
+                 <label className="text-sm font-medium text-foreground">Message Content</label>
+                 <textarea required rows={6} value={content} onChange={(e) => setContent(e.target.value)} className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-y" placeholder="Type your message here..." />
+               </div>
+ 
+               <div className="flex flex-col gap-4 p-4 rounded-lg border border-dashed bg-muted/50">
+                 <div className="flex justify-between items-center">
+                   <span className="text-sm font-medium text-foreground flex items-center gap-2">
+-                    <AlertTriangle size={16} className="text-muted-foreground" /> Attach Poll (Optional)
++                    <Icon name="warning" size={16} className="text-muted-foreground" /> Attach Poll (Optional)
+                   </span>
+                   <button type="button" role="switch" aria-checked={hasPoll} onClick={() => setHasPoll(!hasPoll)}
+                     className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${hasPoll ? 'bg-primary' : 'bg-input'}`}>
+                     <span className={`pointer-events-none block h-4 w-4 rounded-full bg-background shadow-lg ring-0 transition-transform ${hasPoll ? 'translate-x-4' : 'translate-x-0'}`} />
+                   </button>
+                 </div>
+ 
+                 {hasPoll && (
+                   <div className="flex flex-col gap-3 pt-2">
+                     <Input aria-label="Poll question" type="text" value={pollQuestion} onChange={(e) => setPollQuestion(e.target.value)} placeholder="Poll Question..." />
+                     {pollOptions.map((opt, i) => (
+                       <Input key={i} aria-label={`Poll option ${i + 1}`} type="text" value={opt} onChange={(e) => handlePollOptionChange(i, e.target.value)} placeholder={`Option ${i + 1}`} />
+                     ))}
+                     <Button type="button" variant="outline" size="sm" onClick={handleAddPollOption} className="self-start mt-1">
+-                      <Plus size={14} className="mr-1" /> Add Option
++                      <Icon name="add" size={14} className="mr-1" /> Add Option
+                     </Button>
+                   </div>
+                 )}
+               </div>
+ 
+               <div className="flex justify-end gap-3 mt-4">
+                 <Button type="button" variant="outline" onClick={handleCancelDialog}>Cancel</Button>
+                 <Button type="submit">{editingPostId ? 'Save Changes' : 'Publish Announcement'}</Button>
+               </div>
+             </form>
+@@ -583,61 +583,61 @@ export default function Announcements({ employees, announcements, setAnnouncemen
+           >
+             {cat}
+           </Badge>
+         ))}
+       </div>
+ 
+       <div className="flex flex-col gap-4 sm:gap-6">
+         {filteredAnnouncements.length === 0 ? (
+           <Card className="border-dashed border-2 bg-muted/10">
+             <CardContent className="p-12 text-center flex flex-col items-center gap-3 text-muted-foreground">
+-              <Megaphone size={40} className="text-muted-foreground/50" />
++              <Icon name="campaign" size={40} className="text-muted-foreground/50" />
+               <p>No announcements found in this category.</p>
+             </CardContent>
+           </Card>
+         ) : (
+           filteredAnnouncements.map(post => {
+             const author = post.authorId === 'system' ? { name: 'System Auto-Post', avatar: '' } : employees.find(e => e.id === post.authorId) || { name: 'Unknown User' }
+             const dateStr = formatDateTime(post.date)
+             const isUrgent = post.priority === 'Urgent'
+ 
+             return (
+               <Card key={post.id} className="overflow-hidden mb-4 shadow-sm hover:shadow-md transition-shadow">
+                 <CardHeader className="pb-3 pt-5 flex flex-row items-start justify-between">
+                   <div className="flex items-center gap-3.5">
+                     <Avatar className="h-10 w-10">
+                       {author.avatar ? (
+                         <AvatarImage src={author.avatar} alt={author.name} />
+                       ) : (
+-                        <AvatarFallback className="bg-primary/10 text-primary font-medium"><User size={20} /></AvatarFallback>
++                        <AvatarFallback className="bg-primary/10 text-primary font-medium"><Icon name="person" size={20} /></AvatarFallback>
+                       )}
+                     </Avatar>
+                     <div className="flex flex-col gap-1">
+                       <div className="flex items-center gap-2">
+                         <span className="font-semibold text-sm leading-none">{author.name}</span>
+                         {isUrgent && <Badge variant="destructive" className="h-5 px-1.5 text-[10px] uppercase animate-pulse tracking-wider">Pinned</Badge>}
+                         {post.priority !== 'Normal' && <Badge variant={getPriorityBadgeVariant(post.priority)} className="h-5 px-1.5 text-[10px] uppercase tracking-wider">{post.priority}</Badge>}
+                       </div>
+                       <span className="text-xs text-muted-foreground">
+                         {dateStr} &bull; {post.audience === 'all' ? 'All Employees' : post.audience}
+                       </span>
+                     </div>
+                   </div>
+                   <div className="flex items-center gap-2">
+                     <Badge variant="outline" className="hidden sm:inline-flex">{post.category}</Badge>
+                     {canModify(post.authorId) && (
+                       <>
+                         <Button variant="ghost" size="icon" onClick={() => handleEditPost(post)} className="h-8 w-8 text-muted-foreground hover:text-foreground" aria-label="Edit post">
+-                          <Edit size={14} />
++                          <Icon name="edit" size={14} />
+                         </Button>
+                         <Button variant="ghost" size="icon" onClick={() => handleDelete(post.id)} className="h-8 w-8 text-muted-foreground hover:text-destructive" aria-label="Delete post">
+-                          <Trash2 size={14} />
++                          <Icon name="delete" size={14} />
+                         </Button>
+                       </>
+                     )}
+                   </div>
+                 </CardHeader>
+                 
+                 <CardContent className="pb-5">
+                   <h3 className="text-lg font-semibold tracking-tight text-foreground mb-2">{post.title}</h3>
+                   <div className="whitespace-pre-wrap leading-relaxed text-sm text-foreground/90">
+                     {post.content}
+@@ -681,45 +681,45 @@ export default function Announcements({ employees, announcements, setAnnouncemen
+                       <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, '❤️')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                         ❤️ <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['❤️'])}</span>
+                       </Button>
+                     </HoverTooltip>
+                     <HoverTooltip content={getReactionTitle(post.reactions['👎'])}>
+                       <Button variant="ghost" size="sm" onClick={() => handleReaction(post.id, '👎')} className="h-8 px-2 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                         👎 <span className="ml-1.5 text-xs font-medium">{getReactionCount(post.reactions['👎'])}</span>
+                       </Button>
+                     </HoverTooltip>
+                     <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)} className="h-8 px-2 ml-1 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+-                      <MessageSquare size={14} className="mr-1.5" /> <span className="text-xs font-medium">{(post.comments || []).length}</span>
++                      <Icon name="chat" size={14} className="mr-1.5" /> <span className="text-xs font-medium">{(post.comments || []).length}</span>
+                     </Button>
+                   </div>
+                   <HoverTooltip content={getReactionTitle(post.readBy)} position="right">
+                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground cursor-help transition-colors py-1">
+-                      <Users size={13} /> {Array.isArray(post.readBy) ? post.readBy.length : 0} views
++                      <Icon name="group" size={13} /> {Array.isArray(post.readBy) ? post.readBy.length : 0} views
+                     </div>
+                   </HoverTooltip>
+                 </CardFooter>
+ 
+                 {expandedComments[post.id] && (
+                   <div className="border-t border-border bg-muted/10 p-4">
+                     <div className="flex flex-col gap-3 mb-4 max-h-[250px] overflow-y-auto pr-2">
+                       {!(post.comments && post.comments.length > 0) ? (
+                         <p className="text-xs text-muted-foreground text-center py-2">No comments yet. Be the first!</p>
+                       ) : (
+                         post.comments.map(comment => {
+                           const commentAuthor = employees.find(e => e.id === comment.authorId)
+                           return (
+                           <div key={comment.id} className="flex gap-3">
+                             <Avatar className="h-7 w-7 mt-0.5">
+                               {commentAuthor?.avatar ? (
+                                 <AvatarImage src={commentAuthor.avatar} alt={comment.authorName} />
+                               ) : (
+-                                <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-medium"><User size={14} /></AvatarFallback>
++                                <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-medium"><Icon name="person" size={14} /></AvatarFallback>
+                               )}
+                             </Avatar>
+                             <div className="flex-1 flex flex-col">
+                               <div className="bg-card border border-border/40 rounded-lg p-2.5 shadow-sm">
+                                 <div className="flex items-center justify-between mb-1">
+                                   <span className="text-xs font-bold">{comment.authorName}</span>
+                                   <span className="text-[10px] text-muted-foreground">{formatDateTime(comment.date)}</span>
+                                 </div>
+                                 {editingComment?.commentId === comment.id ? (
+                                   <div className="flex flex-col gap-2 mt-1">
+@@ -772,21 +772,21 @@ export default function Announcements({ employees, announcements, setAnnouncemen
+                               {((comment.replies && comment.replies.length > 0) || expandedComments[`reply-${comment.id}`]) && (
+                                 <div className="flex flex-col gap-2 mt-2 ml-4 pl-3 border-l-2 border-border/50">
+                                   {comment.replies?.map(reply => {
+                                     const replyAuthor = employees.find(e => e.id === reply.authorId)
+                                     return (
+                                     <div key={reply.id} className="flex gap-2">
+                                       <Avatar className="h-5 w-5 mt-0.5">
+                                         {replyAuthor?.avatar ? (
+                                           <AvatarImage src={replyAuthor.avatar} alt={reply.authorName} />
+                                         ) : (
+-                                          <AvatarFallback className="bg-primary/10 text-primary text-[8px] font-medium"><User size={12} /></AvatarFallback>
++                                          <AvatarFallback className="bg-primary/10 text-primary text-[8px] font-medium"><Icon name="person" size={12} /></AvatarFallback>
+                                         )}
+                                       </Avatar>
+                                       <div className="flex-1">
+                                         <div className="bg-muted/30 border border-border/30 rounded-md p-2">
+                                           <div className="flex items-center justify-between mb-0.5">
+                                             <span className="text-[10px] font-bold">{reply.authorName}</span>
+                                           </div>
+                                           {editingReply?.replyId === reply.id ? (
+                                             <div className="flex flex-col gap-1 mt-1">
+                                               <Input 
+@@ -836,84 +836,84 @@ export default function Announcements({ employees, announcements, setAnnouncemen
+                                   {expandedComments[`reply-${comment.id}`] && (
+                                     <div className="flex items-center gap-2 mt-1">
+                                       <Input 
+                                         placeholder="Write a reply..." 
+                                         className="h-6 text-[11px]" 
+                                         value={commentInputs[`${post.id}-${comment.id}`] || ''}
+                                         onChange={(e) => setCommentInputs(prev => ({ ...prev, [`${post.id}-${comment.id}`]: e.target.value }))}
+                                         onKeyDown={(e) => { if (e.key === 'Enter') handleAddReply(post.id, comment.id) }}
+                                       />
+                                       <Button size="sm" className="h-6 px-2" onClick={() => handleAddReply(post.id, comment.id)}>
+-                                        <Send size={10} />
++                                        <Icon name="send" size={10} />
+                                       </Button>
+                                     </div>
+                                   )}
+                                 </div>
+                               )}
+                             </div>
+                           </div>
+                         )})
+                       )}
+                     </div>
+                     <div className="flex items-center gap-2">
+                       <Input 
+                         placeholder="Write a comment..." 
+                         className="h-8 text-xs" 
+                         value={commentInputs[post.id] || ''}
+                         onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
+                         onKeyDown={(e) => { if (e.key === 'Enter') handleAddComment(post.id) }}
+                       />
+                       <Button size="sm" className="h-8 px-3" onClick={() => handleAddComment(post.id)}>
+-                        <Send size={14} />
++                        <Icon name="send" size={14} />
+                       </Button>
+                     </div>
+                   </div>
+                 )}
+               </Card>
+             )
+           })
+         )}
+       </div>
+       <Button
+         className="sm:hidden fixed bottom-[76px] right-8 h-14 w-14 rounded-full shadow-[0_4px_20px_rgba(249,115,22,0.4)] z-50 p-0 hover:scale-105 active:scale-95 transition-transform"
+         onClick={() => {
+           setEditingPostId(null)
+           setTitle('')
+           setContent('')
+           setHasPoll(false)
+           setIsDialogOpen(true)
+         }}
+       >
+-        <Plus size={24} />
++        <Icon name="add" size={24} />
+       </Button>
+ 
+       {/* Category Management Modal */}
+       <Dialog open={showCategoryModal} onOpenChange={setShowCategoryModal}>
+         <DialogContent className="sm:max-w-[480px]">
+           <DialogHeader className="flex flex-row items-center justify-between border-b border-border pb-4 mb-4 space-y-0">
+             <DialogTitle>Manage Categories</DialogTitle>
+             <button className="rounded-full p-2 hover:bg-muted transition-colors" onClick={() => { setShowCategoryModal(false); setEditingCategory(null); setCatFormName('') }}>
+-              <X size={16} />
++              <Icon name="close" size={16} />
+             </button>
+           </DialogHeader>
+           <div className="flex flex-col gap-5">
+             <div className="flex flex-col gap-1.5">
+               <label className="text-[0.82rem] font-semibold text-muted-foreground">Categories</label>
+               <div className="flex flex-col gap-1.5 max-h-[240px] overflow-y-auto">
+                 {categories.map(cat => (
+                   <div key={cat} className="flex items-center gap-2.5 p-2 px-3 rounded-lg bg-muted/30 border border-border">
+                     <span className="flex-1 text-[0.9rem] font-medium text-foreground">{cat}</span>
+                     <Button variant="ghost" size="icon-xs" aria-label="Edit category" onClick={() => { setEditingCategory(cat); setCatFormName(cat) }}>
+-                      <Pencil size={14} />
++                      <Icon name="edit" size={14} />
+                     </Button>
+                     <Button variant="ghost" size="icon-xs" aria-label="Delete category" onClick={() => handleDeleteCategory(cat)}>
+-                      <Trash2 size={14} />
++                      <Icon name="delete" size={14} />
+                     </Button>
+                   </div>
+                 ))}
+               </div>
+             </div>
+ 
+             <div className="border-t border-border pt-4">
+               <h3 className="m-0 mb-3 text-[0.95rem] font-semibold text-foreground">{editingCategory ? 'Edit Category' : 'Add New Category'}</h3>
+               <div className="flex flex-col gap-3">
+                 <Input
+diff --git a/src/components/Assets.jsx b/src/components/Assets.jsx
+index 25c7d7d..8274fd6 100644
+--- a/src/components/Assets.jsx
++++ b/src/components/Assets.jsx
+@@ -1,93 +1,93 @@
+ import { useState, useRef, useEffect } from 'react'
+-import { Monitor, Plus, Search, AlertTriangle, PenTool, TrendingDown, Upload, FileSignature, Wrench, CheckCircle, BadgeCheck, MessageSquare, AlertCircle, Laptop, Smartphone, Speaker, Mouse, Key, User } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import AdSlot from './AdSlot'
+ import { useModal } from '../services/useModal.js'
+ import jsPDF from 'jspdf'
+ import autoTable from 'jspdf-autotable'
+ import { formatDate } from '../services/date.js'
+ 
+ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+ import { Button } from "@/components/ui/button"
+ import { Input } from "@/components/ui/input"
+ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
+ import { Badge } from "@/components/ui/badge"
+ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+ import { Select, SelectItem } from "@/components/ui/select"
+ import { DatePicker } from "@/components/ui/date-picker"
+ 
+ const categoryIcons = {
+-  'Laptop': <Laptop className="w-4 h-4" />,
+-  'Phone': <Smartphone className="w-4 h-4" />,
+-  'Monitor': <Monitor className="w-4 h-4" />,
+-  'Peripherals': <Mouse className="w-4 h-4" />,
+-  'Access Card': <Key className="w-4 h-4" />
++  'Laptop': <Icon name="laptop_windows" className="w-4 h-4" />,
++  'Phone': <Icon name="mobile" className="w-4 h-4" />,
++  'Monitor': <Icon name="monitor" className="w-4 h-4" />,
++  'Peripherals': <Icon name="mouse" className="w-4 h-4" />,
++  'Access Card': <Icon name="key" className="w-4 h-4" />
+ }
+ 
+ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filterCategory, setFilterCategory, alerts, showAddModal, setShowAddModal, newAsset, setNewAsset, handleAddAsset, triggerFileInput, fileInputRef, handleImportCSV, addToast }) {
+   const [detailAsset, setDetailAsset] = useState(null)
+ 
+   const categories = [
+     { label: 'Laptops', key: 'Laptop' },
+     { label: 'Phones', key: 'Phone' },
+     { label: 'Monitors', key: 'Monitor' },
+     { label: 'Peripherals', key: 'Peripherals' },
+     { label: 'Access Cards', key: 'Access Card' },
+   ]
+ 
+   return (
+     <div className="flex flex-col gap-6">
+       {/* Integrated Dashboard Metrics - Creative Touch */}
+       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+         <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
+           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500">
+-             <Monitor size={80} />
++             <Icon name="monitor" size={80} />
+           </div>
+           <CardContent className="p-5 flex flex-col gap-1 relative z-10">
+             <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
+-              <div className="p-1.5 bg-primary/10 rounded-md"><Monitor size={16} /></div> <span className="headline-gradient">Total Assets</span>
++              <div className="p-1.5 bg-primary/10 rounded-md"><Icon name="monitor" size={16} /></div> <span className="headline-gradient">Total Assets</span>
+             </div>
+             <div className="text-4xl font-black tabular-nums text-foreground">{stats.total}</div>
+           </CardContent>
+         </Card>
+         
+         <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
+           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-primary">
+-             <CheckCircle size={80} />
++             <Icon name="check_circle" size={80} />
+           </div>
+           <CardContent className="p-5 flex flex-col gap-1 relative z-10">
+             <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
+-              <div className="p-1.5 bg-primary/10 rounded-md"><CheckCircle size={16} /></div> <span className="headline-gradient">Available</span>
++              <div className="p-1.5 bg-primary/10 rounded-md"><Icon name="check_circle" size={16} /></div> <span className="headline-gradient">Available</span>
+             </div>
+             <div className="text-4xl font-black tabular-nums text-foreground">{stats.available}</div>
+           </CardContent>
+         </Card>
+ 
+         <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
+           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-primary">
+-             <BadgeCheck size={80} />
++             <Icon name="verified" size={80} />
+           </div>
+           <CardContent className="p-5 flex flex-col gap-1 relative z-10">
+             <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
+-              <div className="p-1.5 bg-primary/10 rounded-md"><BadgeCheck size={16} /></div> <span className="headline-gradient">Assigned</span>
++              <div className="p-1.5 bg-primary/10 rounded-md"><Icon name="verified" size={16} /></div> <span className="headline-gradient">Assigned</span>
+             </div>
+             <div className="text-4xl font-black tabular-nums text-foreground">{stats.assigned}</div>
+           </CardContent>
+         </Card>
+ 
+         <Card className="shadow-xs border-border bg-card hover:border-primary/50 transition-all duration-300 group overflow-hidden relative">
+           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all duration-500 text-primary">
+-             <Wrench size={80} />
++             <Icon name="build" size={80} />
+           </div>
+           <CardContent className="p-5 flex flex-col gap-1 relative z-10">
+             <div className="flex items-center gap-2 text-primary text-base font-extrabold mb-2">
+-              <div className="p-1.5 bg-primary/10 rounded-md"><Wrench size={16} /></div> <span className="headline-gradient">Under Repair</span>
++              <div className="p-1.5 bg-primary/10 rounded-md"><Icon name="build" size={16} /></div> <span className="headline-gradient">Under Repair</span>
+             </div>
+             <div className="text-4xl font-black tabular-nums text-foreground">{stats.underRepair}</div>
+           </CardContent>
+         </Card>
+       </div>
+ 
+       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+         <div className="flex flex-wrap gap-2">
+            <Button variant={filterCategory === 'All' ? 'default' : 'outline'} size="sm" onClick={() => setFilterCategory('All')} className="rounded-full h-8 px-4 text-xs">
+              All Assets
+@@ -99,30 +99,30 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
+                  {categoryIcons[cat.key]} {cat.label} <span className="opacity-50 ml-1">({count})</span>
+                </Button>
+              )
+            })}
+         </div>
+       </div>
+ 
+       <Card className="shadow-xs border-border bg-card overflow-hidden">
+         <div className="p-4 border-b border-border flex flex-wrap gap-4 items-center justify-between bg-muted/20">
+           <div className="relative flex-1 min-w-[280px] max-w-md">
+-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
++            <Icon name="search" className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+             <Input type="text" placeholder="Search by name or serial number..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 bg-background border-input shadow-sm" />
+           </div>
+           <div className="flex gap-3">
+             <Button variant="outline" onClick={triggerFileInput} className="shadow-sm">
+-              <Upload className="mr-2 h-4 w-4" /> Import CSV
++              <Icon name="upload" className="mr-2 h-4 w-4" /> Import CSV
+             </Button>
+             <input type="file" ref={fileInputRef} onChange={handleImportCSV} accept=".csv" className="hidden" />
+             <Button onClick={() => setShowAddModal(true)} className="shadow-sm shadow-primary/20">
+-              <Plus className="mr-2 h-4 w-4" /> Add Asset
++              <Icon name="add" className="mr-2 h-4 w-4" /> Add Asset
+             </Button>
+           </div>
+         </div>
+ 
+         <Table>
+           <TableHeader className="bg-muted/50">
+             <TableRow>
+               <TableHead>Asset ID / Serial</TableHead>
+               <TableHead>Asset Name</TableHead>
+               <TableHead>Category</TableHead>
+@@ -134,48 +134,48 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
+           <TableBody>
+             {filteredAssets.map(asset => (
+               <TableRow key={asset.id} onClick={() => setDetailAsset(asset)} className="cursor-pointer hover:bg-muted/50 transition-colors">
+                 <TableCell>
+                   <div className="font-semibold">{asset.id}</div>
+                   <div className="text-[11px] text-muted-foreground uppercase tracking-wider font-mono">SN: {asset.serialNumber}</div>
+                 </TableCell>
+                 <TableCell className="font-medium text-foreground">{asset.name}</TableCell>
+                 <TableCell>
+                   <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+-                    {categoryIcons[asset.category] || <Monitor className="w-4 h-4" />}
++                    {categoryIcons[asset.category] || <Icon name="monitor" className="w-4 h-4" />}
+                     <span>{asset.category}</span>
+                   </div>
+                 </TableCell>
+                 <TableCell>
+                   <div className="font-medium">${asset.purchasePrice}</div>
+                   <div className="text-xs text-muted-foreground">{asset.purchaseDate}</div>
+                 </TableCell>
+                 <TableCell>
+                   <div className="flex items-center gap-1.5 font-medium text-sm">
+                     {asset.warrantyExpiry}
+-                    {alerts.find(a => a.id === asset.id) && <AlertTriangle className="h-4 w-4 text-orange-500 drop-shadow-sm" />}
++                    {alerts.find(a => a.id === asset.id) && <Icon name="warning" className="h-4 w-4 text-orange-500 drop-shadow-sm" />}
+                   </div>
+                 </TableCell>
+                 <TableCell>
+                   <Badge className={
+                     asset.status === 'Available' ? 'bg-green-500/10 text-green-700 hover:bg-green-500/20 dark:text-green-400 border border-green-500/20' :
+                     asset.status === 'Assigned' ? 'bg-blue-500/10 text-blue-700 hover:bg-blue-500/20 dark:text-blue-400 border border-blue-500/20' :
+                     asset.status === 'Under Repair' ? 'bg-orange-500/10 text-orange-700 hover:bg-orange-500/20 dark:text-orange-400 border border-orange-500/20' : 'bg-red-500/10 text-red-700 hover:bg-red-500/20 dark:text-red-400 border border-red-500/20'
+                   }>{asset.status}</Badge>
+                 </TableCell>
+               </TableRow>
+             ))}
+             {filteredAssets.length === 0 && (
+               <TableRow>
+                 <TableCell colSpan={6} className="text-center p-12">
+                   <div className="flex flex-col items-center justify-center text-muted-foreground">
+-                    <Search className="h-10 w-10 mb-3 opacity-20" />
++                    <Icon name="search" className="h-10 w-10 mb-3 opacity-20" />
+                     <p className="text-base font-medium text-foreground">No assets found</p>
+                     <p className="text-sm mt-1">Try adjusting your search query or filters.</p>
+                   </div>
+                 </TableCell>
+               </TableRow>
+             )}
+           </TableBody>
+         </Table>
+       </Card>
+ 
+@@ -207,21 +207,21 @@ function DetailModal({ asset, onClose }) {
+             <div>
+               <DialogTitle className="text-2xl mb-1">{asset.name}</DialogTitle>
+               <DialogDescription className="text-sm">Asset ID: {asset.id} &nbsp;•&nbsp; SN: {asset.serialNumber}</DialogDescription>
+             </div>
+             <Badge className={asset.status === 'Available' ? 'bg-green-500' : asset.status === 'Assigned' ? 'bg-blue-500' : 'bg-orange-500'}>{asset.status}</Badge>
+           </div>
+         </div>
+         
+         <div className="p-6">
+           <div className="grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-6">
+-            <div><div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Category</div><div className="flex items-center gap-1.5 text-sm">{categoryIcons[asset.category] || <Monitor className="w-3 h-3"/>} {asset.category}</div></div>
++            <div><div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Category</div><div className="flex items-center gap-1.5 text-sm">{categoryIcons[asset.category] || <Icon name="monitor" className="w-3 h-3"/>} {asset.category}</div></div>
+             <div><div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Condition</div><div className="font-medium text-sm">{asset.condition}</div></div>
+             <div><div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Purchase Date</div><div className="font-medium text-sm">{asset.purchaseDate}</div></div>
+             
+             <div><div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Purchase Price</div><div className="font-medium text-sm">${asset.purchasePrice}</div></div>
+             <div className="col-span-2 md:col-span-1">
+               <div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Current Book Value</div>
+               <div className="font-bold text-green-600 bg-green-500/10 inline-block px-2 py-0.5 rounded text-sm">${calculateBookValue(asset)}</div>
+             </div>
+             
+             <div><div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1 font-semibold">Useful Life</div><div className="font-medium text-sm">{asset.usefulLife} months</div></div>
+@@ -285,41 +285,41 @@ function AssetAssignments({ assets, employees, assignForm, setAssignForm, setAss
+               const emp = asset.assignedTo ? employees.find(e => e.id === asset.assignedTo) : null
+               return (
+                 <TableRow key={asset.id} className="hover:bg-muted/30">
+                   <TableCell>
+                     <div className="font-semibold text-sm">{asset.name}</div>
+                     <div className="text-xs text-muted-foreground uppercase tracking-wider">{asset.id}</div>
+                   </TableCell>
+                   <TableCell>
+                     {asset.status === 'Assigned' && emp ? (
+                       <div className="flex items-center gap-3">
+-                        {emp.avatar ? <img src={emp.avatar} alt="" className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" /> : <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs ring-2 ring-primary/20"><User size={16} /></div>}
++                        {emp.avatar ? <img src={emp.avatar} alt="" className="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" /> : <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs ring-2 ring-primary/20"><Icon name="person" size={16} /></div>}
+                         <div>
+                           <div className="font-medium text-sm">{emp.name}</div>
+                           <div className="text-[11px] text-muted-foreground">{emp.department}</div>
+                         </div>
+                       </div>
+                     ) : (
+                       <Badge className="bg-green-500/10 text-green-700 border-green-500/20 hover:bg-green-500/20 dark:text-green-400">Available In Inventory</Badge>
+                     )}
+                   </TableCell>
+                   <TableCell className="text-sm">{asset.assignmentDate || <span className="text-muted-foreground/50">—</span>}</TableCell>
+                   <TableCell className="text-sm">{asset.condition || <span className="text-muted-foreground/50">—</span>}</TableCell>
+                   <TableCell>
+                     {asset.status === 'Available' ? (
+                       <Button size="sm" onClick={() => { setAssignTarget(asset); setShowAssignModal(true) }} className="shadow-sm">
+                         Assign Asset
+                       </Button>
+                     ) : (
+                       <div className="flex gap-2">
+                         <Button variant="outline" size="sm" onClick={() => generateAgreementPDF(asset, emp, asset.condition)}>
+-                          <FileSignature className="h-4 w-4 mr-2" /> Agreement
++                          <Icon name="edit_document" className="h-4 w-4 mr-2" /> Agreement
+                         </Button>
+                         <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 hover:bg-orange-50 dark:hover:bg-orange-900/20" onClick={() => handleReturnAsset(asset.id)}>
+                           Return
+                         </Button>
+                       </div>
+                     )}
+                   </TableCell>
+                 </TableRow>
+               )
+             })}
+@@ -355,42 +355,42 @@ function AssignAssetModal({ showAssignModal, setShowAssignModal, assignTarget, a
+             {employees.map(emp => (
+               <SelectItem key={emp.id} id={emp.id}>{emp.name} ({emp.department})</SelectItem>
+             ))}
+           </Select>
+           <div className="flex flex-col gap-2">
+             <label className="text-sm font-medium">Condition Notes</label>
+             <Input type="text" value={assignForm.notes} onChange={e => setAssignForm(p => ({...p, notes: e.target.value}))} />
+           </div>
+           
+           <div className="p-3 bg-blue-500/10 text-blue-700 dark:text-blue-400 rounded-lg text-xs flex items-start gap-2 border border-blue-500/20 mt-2">
+-            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
++            <Icon name="error" className="h-4 w-4 mt-0.5 shrink-0" />
+             <p>An official Asset Assignment Agreement PDF will be auto-generated and downloaded upon assignment.</p>
+           </div>
+           
+           <DialogFooter className="mt-4">
+             <Button type="button" variant="outline" onClick={() => setShowAssignModal(false)}>Cancel</Button>
+             <Button type="submit">Confirm Assignment</Button>
+           </DialogFooter>
+         </form>
+       </DialogContent>
+     </Dialog>
+   )
+ }
+ 
+ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
+   return (
+     <div className="flex flex-col gap-4">
+       {assetRequests.length === 0 ? (
+         <Card className="shadow-xs border-border border-dashed bg-card/50">
+           <CardContent className="p-16 flex flex-col items-center justify-center text-center">
+             <div className="p-4 bg-muted rounded-full mb-4">
+-               <MessageSquare className="h-10 w-10 text-muted-foreground opacity-50" />
++               <Icon name="chat" className="h-10 w-10 text-muted-foreground opacity-50" />
+             </div>
+             <h3 className="text-lg font-semibold text-foreground">No Pending Requests</h3>
+             <p className="text-sm text-muted-foreground mt-1 max-w-sm">There are currently no open asset requests from employees. When employees request new equipment, it will appear here.</p>
+           </CardContent>
+         </Card>
+       ) : (
+         assetRequests.map(req => {
+           const emp = employees.find(e => e.id === req.employeeId) || { name: 'Unknown' }
+           return (
+             <Card key={req.id} className="shadow-xs border-border transition-all hover:shadow-md hover:border-primary/20">
+@@ -464,36 +464,36 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
+           </div>
+         </CardContent>
+       </Card>
+ 
+       <div className="flex flex-col gap-6">
+         {selectedAssetForMaint ? (
+           <>
+             <Card className="shadow-xs border-border bg-gradient-to-br from-card to-muted/20">
+               <CardContent className="p-6">
+                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
+-                  <TrendingDown className="h-6 w-6 text-primary" />
++                  <Icon name="trending_down" className="h-6 w-6 text-primary" />
+                   <h3 className="text-lg font-bold">Depreciation & Value</h3>
+                 </div>
+                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                   <div><div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Purchase Price</div><div className="text-2xl font-bold text-foreground">${selectedAssetForMaint.purchasePrice}</div></div>
+                   <div><div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Book Value</div><div className="text-2xl font-bold text-green-600">${calculateBookValue(selectedAssetForMaint)}</div></div>
+                   <div><div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Useful Life</div><div className="font-medium text-lg mt-1">{selectedAssetForMaint.usefulLife} <span className="text-sm text-muted-foreground">months</span></div></div>
+                   <div><div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Condition</div><div className="font-medium text-lg mt-1">{selectedAssetForMaint.condition}</div></div>
+                 </div>
+               </CardContent>
+             </Card>
+ 
+             <Card className="shadow-xs border-border">
+               <CardHeader className="pb-4 border-b border-border bg-muted/10">
+                 <CardTitle className="text-base flex items-center gap-2">
+-                  <PenTool className="h-5 w-5 text-orange-500" /> Log New Maintenance
++                  <Icon name="draw" className="h-5 w-5 text-orange-500" /> Log New Maintenance
+                 </CardTitle>
+               </CardHeader>
+               <CardContent className="pt-6">
+                 <form onSubmit={handleAddMaintenance} className="flex flex-col gap-5">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                     <div className="flex flex-col gap-1.5 w-full">
+                       <DatePicker label="Maintenance Date" required value={maintForm.date} onChange={(e) => setMaintForm(p => ({...p, date: e.target.value}))} />
+                     </div>
+                     <div className="flex flex-col gap-2">
+                       <label className="text-sm font-medium">Repair Cost ($)</label>
+@@ -509,21 +509,21 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
+                     <textarea required rows={3} placeholder="Describe what is being repaired..." className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" value={maintForm.issue} onChange={e => setMaintForm(p => ({...p, issue: e.target.value}))} />
+                   </div>
+                   <div className="flex justify-start mt-2">
+                     <Button type="submit" className="bg-orange-600 hover:bg-orange-700 text-white shadow-md">Submit Log & Mark as Under Repair</Button>
+                   </div>
+                 </form>
+ 
+                 {selectedAssetForMaint.maintenanceLogs?.length > 0 && (
+                   <div className="mt-10">
+                     <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+-                      <Wrench className="h-4 w-4" /> Repair History Log
++                      <Icon name="build" className="h-4 w-4" /> Repair History Log
+                     </h4>
+                     <div className="flex flex-col gap-3">
+                       {selectedAssetForMaint.maintenanceLogs.map(log => (
+                         <div key={log.id} className="p-4 rounded-xl border border-border bg-muted/20 text-sm hover:bg-muted/40 transition-colors">
+                           <div className="flex justify-between items-center mb-2">
+                             <span className="font-semibold text-base">{log.vendor}</span>
+                             <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50 dark:bg-red-950/30">${log.cost}</Badge>
+                           </div>
+                           <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground font-mono">
+                             <span>{log.date}</span>
+@@ -536,21 +536,21 @@ function AssetMaintenance({ assets, selectedAssetForMaint, setSelectedAssetForMa
+                     </div>
+                   </div>
+                 )}
+               </CardContent>
+             </Card>
+           </>
+         ) : (
+           <Card className="shadow-xs border-border border-dashed bg-card/50 h-full min-h-[400px] flex items-center justify-center">
+             <CardContent className="flex flex-col items-center text-center p-6">
+               <div className="p-4 bg-muted rounded-full mb-4">
+-                 <Wrench className="h-10 w-10 text-muted-foreground opacity-50" />
++                 <Icon name="build" className="h-10 w-10 text-muted-foreground opacity-50" />
+               </div>
+               <h3 className="text-lg font-semibold text-foreground">No Asset Selected</h3>
+               <p className="text-sm text-muted-foreground mt-1 max-w-[250px]">Select an asset from the list on the left to view depreciation details and log maintenance.</p>
+             </CardContent>
+           </Card>
+         )}
+       </div>
+     </div>
+   )
+ }
+@@ -840,21 +840,21 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
+         return <AssetMaintenance assets={assets} selectedAssetForMaint={selectedAssetForMaint} setSelectedAssetForMaint={setSelectedAssetForMaint} maintForm={maintForm} setMaintForm={setMaintForm} handleAddMaintenance={handleAddMaintenance} calculateBookValue={calculateBookValue} />
+       default:
+         return <AssetInventory stats={stats} assets={assets || []} filteredAssets={filteredAssets} search={search} setSearch={setSearch} filterCategory={filterCategory} setFilterCategory={setFilterCategory} alerts={alerts} showAddModal={showAddModal} setShowAddModal={setShowAddModal} newAsset={newAsset} setNewAsset={setNewAsset} handleAddAsset={handleAddAsset} triggerFileInput={triggerFileInput} fileInputRef={fileInputRef} handleImportCSV={handleImportCSV} addToast={addToast} />
+     }
+   }
+ 
+   return (
+     <div className="animate-fade-in pb-10 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
+       <div className="flex items-center justify-between">
+         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+-          <Laptop size={20} className="text-primary" />
++          <Icon name="laptop_windows" size={20} className="text-primary" />
+           Asset Management
+         </h1>
+       </div>
+       <div className="border-t border-border border-headline" />
+       
+       <div className="flex gap-2 overflow-x-auto pb-2 border-b border-border w-full max-w-full">
+         {['inventory', 'assignments', 'requests', 'maintenance'].map(view => (
+           <button
+             key={view}
+             onClick={() => setActiveView(view)}
+@@ -865,21 +865,21 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
+               <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                 {assetRequests.filter(r => r.status === 'Pending').length}
+               </span>
+             )}
+           </button>
+         ))}
+       </div>
+ 
+       {alerts.length > 0 && activeView === 'inventory' && (
+         <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-900 text-orange-800 dark:text-orange-200 p-4 rounded-xl flex items-center gap-3">
+-          <AlertTriangle className="h-5 w-5 shrink-0" />
++          <Icon name="warning" className="h-5 w-5 shrink-0" />
+           <span><strong>Alert:</strong> {alerts.length} asset(s) have warranties expiring within 30 days</span>
+         </div>
+       )}
+ 
+       {renderView()}
+ 
+       {showAddModal && (
+         <AddAssetModal showAddModal={showAddModal} setShowAddModal={setShowAddModal} newAsset={newAsset} setNewAsset={setNewAsset} handleAddAsset={handleAddAsset} />
+       )}
+ 
+diff --git a/src/components/Employees.jsx b/src/components/Employees.jsx
+index 9d74379..7ea4151 100644
+--- a/src/components/Employees.jsx
++++ b/src/components/Employees.jsx
+@@ -1,12 +1,12 @@
+ import { useState, useEffect } from 'react'
+-import { Plus, Search, Trash2, UserPlus, X, Edit, Check, AlertCircle, FileSpreadsheet, Users, Mail, Eye, ChevronDown, Download, Building2, User } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { useModal } from '../services/useModal.js'
+ import AdSlot from './AdSlot.jsx'
+ import { formatDate } from '../services/date.js'
+ import { hashPassword } from '../services/crypto.js'
+ 
+ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+ import { Button } from "@/components/ui/button"
+ import { Input } from "@/components/ui/input"
+ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
+ import { Badge } from "@/components/ui/badge"
+@@ -383,21 +383,21 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
+           </div>
+           <DialogFooter>
+             <Button variant="outline" onClick={() => setConfirmDelete(null)}>Cancel</Button>
+             <Button variant="destructive" onClick={() => { if(confirmDelete) confirmDelete(); }}>Delete</Button>
+           </DialogFooter>
+         </DialogContent>
+       </Dialog>
+ 
+       {/* Header */}
+       <div className="flex items-center justify-between">
+-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient"><Users size={20} className="text-primary" />Employees</h1>
++        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient"><Icon name="group" size={20} className="text-primary" />Employees</h1>
+         <div className="hidden lg:flex gap-2 items-center">
+           <input 
+             id="csv-file-input" 
+             type="file" 
+             accept=".csv" 
+             className="hidden" 
+             onChange={(e) => {
+               const file = e.target.files?.[0];
+               if (file) {
+                 const reader = new FileReader();
+@@ -449,39 +449,39 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
+                     }
+                   } catch (err) {
+                     addToast('Failed to parse CSV file: ' + err.message, 'danger');
+                   }
+                 };
+                 reader.readAsText(file);
+               }
+             }}
+           />
+           <Button variant="outline" onClick={() => document.getElementById('csv-file-input').click()}>
+-            <FileSpreadsheet className="mr-2 h-4 w-4" />
++            <Icon name="table_chart" className="mr-2 h-4 w-4" />
+             Import CSV
+           </Button>
+           <Button onClick={handleOpenAddForm}>
+-            <Plus className="mr-2 h-4 w-4" />
++            <Icon name="add" className="mr-2 h-4 w-4" />
+             Add Employee
+           </Button>
+         </div>
+       </div>
+       <div className="border-t border-border" />
+ 
+       {/* Mobile/Tablet Action Buttons */}
+       <div className="lg:hidden grid grid-cols-2 gap-3 mb-2">
+         <Button variant="outline" className="w-full" onClick={() => document.getElementById('csv-file-input').click()}>
+-          <FileSpreadsheet className="mr-2 h-4 w-4" />
++          <Icon name="table_chart" className="mr-2 h-4 w-4" />
+           Import CSV
+         </Button>
+         <Button className="w-full" onClick={handleOpenAddForm}>
+-          <Plus className="mr-2 h-4 w-4" />
++          <Icon name="add" className="mr-2 h-4 w-4" />
+           Add Employee
+         </Button>
+       </div>
+ 
+       {/* Filters Toolbar */}
+       <Card className="shadow-sm overflow-hidden mb-6 border border-border">
+         <CardContent className="p-0 flex flex-col">
+           
+           {/* Top Container: Select All & Search */}
+           <div className="p-4 flex items-center gap-3 sm:gap-4 w-full">
+@@ -489,21 +489,21 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
+               <input
+                 type="checkbox"
+                 checked={filteredEmployees.length > 0 && selectedIds.size === filteredEmployees.length}
+                 onChange={toggleSelectAll}
+                 className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary"
+               />
+               <span className="text-sm font-medium whitespace-nowrap">Select All</span>
+             </div>
+             
+             <div className="relative flex-1">
+-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
++              <Icon name="search" className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+               <Input
+                 type="text"
+                 placeholder="Search by name, role, email..."
+                 className="pl-9 bg-muted/40 hover:bg-muted/60 focus:bg-background transition-colors w-full"
+                 value={searchTerm}
+                 onChange={(e) => setSearchTerm(e.target.value)}
+               />
+             </div>
+           </div>
+ 
+@@ -513,36 +513,36 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
+           <div className="p-4 bg-muted/10 flex flex-col sm:flex-row sm:items-center gap-3 w-full">
+             <div className="text-sm font-medium text-muted-foreground shrink-0">Departments:</div>
+             <div className="flex gap-2 flex-wrap flex-1">
+               {filterDepartments.map(dept => (
+                 <Badge
+                   key={dept}
+                   variant={deptFilter === dept ? 'default' : 'secondary'}
+                   className="cursor-pointer hover:bg-primary/80 transition-colors"
+                   onClick={() => setDeptFilter(dept)}
+                 >
+-                  {deptFilter === dept && <Check className="mr-1 h-3 w-3" />}
++                  {deptFilter === dept && <Icon name="check" className="mr-1 h-3 w-3" />}
+                   {dept}
+                 </Badge>
+               ))}
+             </div>
+           </div>
+ 
+         </CardContent>
+       </Card>
+ 
+       {/* Pending Profile Updates Queue */}
+       {pendingProfileEdits && pendingProfileEdits.length > 0 && (
+         <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800">
+           <CardHeader className="pb-2">
+             <CardTitle className="text-base flex items-center gap-2 text-blue-700 dark:text-blue-400">
+-              <AlertCircle className="h-5 w-5" />
++              <Icon name="error" className="h-5 w-5" />
+               Pending Profile Update Requests ({pendingProfileEdits.length})
+             </CardTitle>
+           </CardHeader>
+           <CardContent className="flex flex-col gap-3">
+             {pendingProfileEdits.map(editReq => {
+               const emp = employees.find(e => e.id === editReq.employeeId)
+               return (
+                 <div key={editReq.id} className="flex justify-between items-center p-3 rounded-lg bg-background border border-border shadow-sm flex-wrap gap-3">
+                   <div className="flex flex-col gap-1.5 min-w-0 flex-1">
+                     <div className="flex items-center gap-2">
+@@ -554,54 +554,54 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
+                         val ? (
+                           <Badge variant="outline" key={key} className="bg-muted/50 font-normal">
+                             <strong className="mr-1 font-medium">{key}: </strong> {val}
+                           </Badge>
+                         ) : null
+                       ))}
+                     </div>
+                   </div>
+                   <div className="flex gap-2 shrink-0">
+                     <Button size="sm" onClick={() => handleApproveProfileEdit(editReq.id)}>
+-                      <Check className="mr-1 h-3.5 w-3.5" /> Approve
++                      <Icon name="check" className="mr-1 h-3.5 w-3.5" /> Approve
+                     </Button>
+                     <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleRejectProfileEdit(editReq.id)}>
+-                      <X className="mr-1 h-3.5 w-3.5" /> Reject
++                      <Icon name="close" className="mr-1 h-3.5 w-3.5" /> Reject
+                     </Button>
+                   </div>
+                 </div>
+               )
+             })}
+           </CardContent>
+         </Card>
+       )}
+ 
+       {/* Selection Bar */}
+       {selectedIds.size > 0 && (
+         <div className="flex flex-wrap items-center gap-2 sm:gap-3 p-3 rounded-xl bg-primary/10 text-primary text-sm font-medium border border-primary/20">
+-          <Check className="h-4 w-4 shrink-0" />
++          <Icon name="check" className="h-4 w-4 shrink-0" />
+           <span className="flex-1">{selectedIds.size} selected</span>
+           <Button size="sm" variant="destructive" className="h-8" onClick={handleBulkDelete}>
+-            <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete ({selectedIds.size})
++            <Icon name="delete" className="mr-1 h-3.5 w-3.5" /> Delete ({selectedIds.size})
+           </Button>
+           <Button size="sm" variant="default" className="h-8" onClick={handleDownloadSelected}>
+-            <Download className="mr-1 h-3.5 w-3.5" /> Download CSV
++            <Icon name="download" className="mr-1 h-3.5 w-3.5" /> Download CSV
+           </Button>
+           <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-primary/20 hover:text-primary rounded-full" onClick={clearSelection}>
+-            <X className="h-4 w-4" />
++            <Icon name="close" className="h-4 w-4" />
+           </Button>
+         </div>
+       )}
+ 
+       {/* Directory Grid */}
+       {filteredEmployees.length === 0 ? (
+         <div className="text-center py-20 flex flex-col items-center">
+-          <Users className="h-16 w-16 mb-4 text-muted-foreground/50" />
++          <Icon name="group" className="h-16 w-16 mb-4 text-muted-foreground/50" />
+           <h3 className="text-xl font-medium text-foreground mb-4">No employees found</h3>
+           <Button variant="outline" onClick={() => {setSearchTerm(''); setDeptFilter('All')}}>Clear Filters</Button>
+         </div>
+       ) : (
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
+           {filteredEmployees.map(emp => {
+             const isExpanded = expandedCardId === emp.id
+             return (
+               <Card key={emp.id} className="relative overflow-visible group hover:border-primary/50 transition-colors cursor-pointer" onClick={() => setViewingEmployee(emp)}>
+                 
+@@ -619,44 +619,44 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
+                 </div>
+ 
+                 <CardContent className="p-5">
+                   <div className="flex items-start justify-between gap-3">
+                     <div className="flex items-center gap-3 min-w-0">
+                       <Avatar className={`h-12 w-12 border shadow-sm transition-all duration-300 ${emp.status !== 'Active' ? 'grayscale opacity-70' : ''}`}>
+                         {emp.avatar && !imageErrors[emp.id] && (
+                           <AvatarImage src={emp.avatar} alt={emp.name} style={{ transform: `translate(${emp.photoX || 0}px, ${emp.photoY || 0}px) scale(${emp.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [emp.id]: true}))} />
+                         )}
+                         <AvatarFallback className="bg-primary/10 text-primary">
+-                          <User size={20} />
++                          <Icon name="person" size={20} />
+                         </AvatarFallback>
+                       </Avatar>
+                       <div className="flex flex-col gap-0.5 min-w-0">
+                         <h4 className="font-bold text-base break-words leading-none mb-0.5">{emp.name}</h4>
+                         <span className="text-sm font-medium text-muted-foreground break-words">{emp.designation || emp.role}</span>
+                       </div>
+                     </div>
+                     
+                     <Badge variant={emp.status === 'Active' ? 'default' : emp.status === 'On Leave' ? 'secondary' : 'destructive'} className={`shrink-0 text-[10px] h-5 ${emp.status==='Active'?'bg-green-500/10 text-green-700 hover:bg-green-500/20 border-green-500/20':''}`}>
+                       {emp.status}
+                     </Badge>
+                   </div>
+                   {/* Expanded Content */}
+                   <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[350px] opacity-100 mt-4 pt-4 border-t border-border' : 'max-h-0 opacity-0'}`}>
+                     <div className="flex flex-col gap-4">
+                       
+                       <div className="flex flex-col gap-2.5">
+                         <div className="flex items-center text-sm text-muted-foreground">
+-                          <Building2 className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" />
++                          <Icon name="apartment" className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" />
+                           <span className="break-words">{emp.department}</span>
+                         </div>
+                         <div className="flex items-center text-sm text-muted-foreground">
+-                          <Mail className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" />
++                          <Icon name="mail" className="mr-2 h-4 w-4 shrink-0 text-muted-foreground/70" />
+                           <span className="break-all">{emp.email}</span>
+                         </div>
+                       </div>
+                       
+                       <div className="flex flex-wrap gap-2 text-xs">
+                         <div className="flex-1 min-w-[85px] flex flex-col justify-center p-2.5 rounded-lg bg-muted/40 border border-border/50">
+                           <span className="text-muted-foreground font-medium mb-0.5">Emp ID</span>
+                           <span className="font-semibold text-foreground break-words">{emp.id}</span>
+                         </div>
+                         <div className="flex-1 min-w-[85px] flex flex-col justify-center p-2.5 rounded-lg bg-muted/40 border border-border/50">
+@@ -672,72 +672,72 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
+                       <div className="flex gap-2">
+                         <Button 
+                           variant="outline" 
+                           size="sm" 
+                           className="flex-1 h-8 text-xs font-medium bg-background hover:bg-muted"
+                           onClick={(e) => {
+                             e.stopPropagation(); 
+                             setEditingEmployee(emp); setNewEmpId(emp.id); setNewName(emp.name); setNewRole(emp.role || 'Teammate'); setNewDesignation(emp.designation || emp.role || ''); setNewPermissions(emp.permissions || []); setNewDept(emp.department); setNewEmail(emp.email); setNewStatus(emp.status); setNewDob(emp.dob || ''); setNewJoiningDate(emp.joiningDate || ''); setNewCvFileName(emp.cvFileName || ''); setNewNidFileName(emp.nidFileName || ''); setNewAvatar(emp.avatar || ''); setPhotoX(emp.photoX || 0); setPhotoY(emp.photoY || 0); setPhotoZoom(emp.photoZoom || 1); setIsCustomDept(false); setCustomDept(''); setShowAddForm(true);
+                           }}
+                         >
+-                          <Edit className="mr-1.5 h-3.5 w-3.5" /> Edit
++                          <Icon name="edit" className="mr-1.5 h-3.5 w-3.5" /> Edit
+                         </Button>
+                         <Button 
+                           variant="outline" 
+                           size="sm" 
+                           className="flex-1 h-8 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                           onClick={(e) => { 
+                             e.stopPropagation(); 
+                             setConfirmDelete(() => () => {
+                               handleDeleteEmployee(emp.id, emp.name);
+                               setConfirmDelete(null);
+                             }); 
+                           }}
+                         >
+-                          <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
++                          <Icon name="delete" className="mr-1.5 h-3.5 w-3.5" /> Delete
+                         </Button>
+                       </div>
+                       
+                     </div>
+                   </div>
+ 
+                   {/* Expand Toggle — always at the bottom of the card */}
+                   <div className="flex justify-center mt-2">
+                     <Button 
+                       variant="ghost" 
+                       size="icon" 
+                       className="h-6 w-full hover:bg-muted/50 rounded-md"
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         setExpandedCardId(prev => prev === emp.id ? null : emp.id);
+                       }}
+                     >
+-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
++                      <Icon name="keyboard_arrow_down" className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                     </Button>
+                   </div>
+                 </CardContent>
+               </Card>
+             )
+           })}
+         </div>
+       )}
+ 
+       {/* Employee Detail Modal */}
+       <Dialog open={!!viewingEmployee} onOpenChange={(open) => { if(!open) setViewingEmployee(null) }}>
+         <DialogContent className="sm:max-w-md">
+           {viewingEmployee && (
+             <>
+               <div className="flex flex-col items-center pt-4 pb-2">
+                 <Avatar className="h-24 w-24 mb-4 border-2 border-primary/20 shadow-sm text-2xl">
+                   <AvatarImage src={viewingEmployee.avatar} alt={viewingEmployee.name} style={{ transform: `translate(${viewingEmployee.photoX || 0}px, ${viewingEmployee.photoY || 0}px) scale(${viewingEmployee.photoZoom || 1})`, transformOrigin: 'center' }} onError={() => setImageErrors(prev => ({...prev, [viewingEmployee.id]: true}))} />
+                   <AvatarFallback className="bg-primary/10 text-primary">
+-                    <User size={40} />
++                    <Icon name="person" size={40} />
+                   </AvatarFallback>
+                 </Avatar>
+                 <h3 className="text-xl font-bold text-foreground text-center">{viewingEmployee.name}</h3>
+                 <p className="text-sm text-muted-foreground text-center mt-1">{viewingEmployee.designation || viewingEmployee.role}</p>
+                 <Badge variant={viewingEmployee.status === 'Active' ? 'default' : 'secondary'} className="mt-3">
+                   {viewingEmployee.status}
+                 </Badge>
+               </div>
+               
+               <div className="grid gap-4 py-4 px-2">
+@@ -777,34 +777,34 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
+                   setNewCvFileName(viewingEmployee.cvFileName || '');
+                   setNewNidFileName(viewingEmployee.nidFileName || '');
+                   setNewAvatar(viewingEmployee.avatar || '');
+                   setPhotoX(viewingEmployee.photoX || 0);
+                   setPhotoY(viewingEmployee.photoY || 0);
+                   setPhotoZoom(viewingEmployee.photoZoom || 1);
+                   setIsCustomDept(false);
+                   setCustomDept('');
+                   setShowAddForm(true);
+                 }}>
+-                  <Edit className="mr-2 h-4 w-4" /> Edit Profile
++                  <Icon name="edit" className="mr-2 h-4 w-4" /> Edit Profile
+                 </Button>
+               </DialogFooter>
+             </>
+           )}
+         </DialogContent>
+       </Dialog>
+ 
+       {/* Form Dialog */}
+       <Dialog open={showAddForm} onOpenChange={handleCloseForm}>
+         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+           <DialogHeader>
+             <DialogTitle className="flex items-center gap-2">
+-              {editingEmployee ? <Edit className="h-5 w-5 text-primary" /> : <UserPlus className="h-5 w-5 text-primary" />}
++              {editingEmployee ? <Icon name="edit" className="h-5 w-5 text-primary" /> : <Icon name="person_add" className="h-5 w-5 text-primary" />}
+               {editingEmployee ? 'Edit Employee Profile' : 'New Employee Record'}
+             </DialogTitle>
+           </DialogHeader>
+ 
+           <form onSubmit={handleSaveEmployee} className="flex flex-col gap-6 py-4">
+             
+             {/* HD Profile Photo Upload */}
+             <div className="p-4 rounded-xl border border-dashed bg-muted/20">
+               <label className="text-sm font-medium mb-3 block">Profile Photo & Framing</label>
+               <div className="flex gap-4 items-center">
+@@ -1004,21 +1004,21 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
+                 <Input type="text" placeholder={editingEmployee ? "Leave blank" : "Set password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+               </div>
+ 
+               <DatePicker label="Date of Birth" value={newDob} onChange={(e) => setNewDob(e.target.value)} />
+ 
+               <DatePicker label="Joining Date" value={newJoiningDate} onChange={(e) => setNewJoiningDate(e.target.value)} />
+ 
+               <div className="flex flex-col gap-2">
+                 <label className="text-sm font-medium">Upload CV</label>
+                 <Button type="button" variant="outline" className="w-full justify-start" onClick={() => document.getElementById('cv-file-input').click()}>
+-                  <FileSpreadsheet className="mr-2 h-4 w-4 text-muted-foreground" />
++                  <Icon name="table_chart" className="mr-2 h-4 w-4 text-muted-foreground" />
+                   {newCvFileName ? (newCvFileName.length > 15 ? newCvFileName.substring(0, 15) + '...' : newCvFileName) : 'Upload Document'}
+                 </Button>
+                 <input id="cv-file-input" type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={(e) => e.target.files && setNewCvFileName(e.target.files[0].name)} />
+               </div>
+ 
+               <Select label="Employment Status" value={newStatus} onChange={setNewStatus}>
+                 <SelectItem id="Active">Active</SelectItem>
+                 <SelectItem id="On Leave">On Leave</SelectItem>
+                 <SelectItem id="Inactive">Inactive</SelectItem>
+               </Select>
+diff --git a/src/components/Expenses.jsx b/src/components/Expenses.jsx
+index d3c22a7..2c4402f 100644
+--- a/src/components/Expenses.jsx
++++ b/src/components/Expenses.jsx
+@@ -1,12 +1,12 @@
+ import { useState, useRef, useMemo } from 'react'
+-import { Receipt, Plus, Upload, Check, X as XIcon, Clock, DollarSign, Filter, Search, Download, AlertTriangle, PieChart as PieChartIcon, User, History, List } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Card, CardContent } from "@/components/ui/card"
+ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+ import { Button } from "@/components/ui/button"
+ import { Input } from "@/components/ui/input"
+ import { DatePicker } from "@/components/ui/date-picker"
+ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+ import { Badge } from "@/components/ui/badge"
+ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+ import { Select, SelectItem } from "@/components/ui/select"
+ import AdSlot from './AdSlot'
+@@ -163,77 +163,77 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
+   const policies = settings.expensePolicies || {}
+ 
+ 
+ 
+   return (
+     <div className="animate-fade-in flex flex-col gap-4 sm:gap-6 lg:gap-8">
+ 
+       {/* Header */}
+       <div className="flex justify-between items-center">
+         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+-          <Receipt size={20} className="text-primary" />
++          <Icon name="receipt_long" size={20} className="text-primary" />
+           Expenses
+         </h1>
+       </div>
+       <div className="border-t border-border border-headline" />
+ 
+       {/* Navigation Tabs */}
+       <div className="flex gap-2 bg-muted/20 p-1.5 rounded-lg border border-border w-fit">
+         <button 
+           onClick={() => setActiveTab('submit')}
+           className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'submit' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
+         >
+-          <Plus size={16} /> Claim
++          <Icon name="add" size={16} /> Claim
+         </button>
+         {!(canApprove || canReimburse) && (
+           <button 
+             onClick={() => setActiveTab('my-claims')}
+             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'my-claims' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
+           >
+-            <List size={16} /> My Claims
++            <Icon name="list" size={16} /> My Claims
+           </button>
+         )}
+         {canApprove && (
+           <button 
+             onClick={() => setActiveTab('approve')}
+             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'approve' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
+           >
+-            <Clock size={16} /> Approvals
++            <Icon name="schedule" size={16} /> Approvals
+             {pendingQueue.length > 0 && <Badge variant="destructive" className="ml-1 px-1.5 py-0 min-w-[20px] h-5 flex items-center justify-center">{pendingQueue.length}</Badge>}
+           </button>
+         )}
+         {canReimburse && (
+           <button 
+             onClick={() => setActiveTab('finance')}
+             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'finance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
+           >
+-            <PieChartIcon size={16} /> Finance
++            <Icon name="pie_chart" size={16} /> Finance
+           </button>
+         )}
+         {(canApprove || canReimburse) && (
+           <button 
+             onClick={() => setActiveTab('history')}
+             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'history' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
+           >
+-            <History size={16} /> History
++            <Icon name="history" size={16} /> History
+           </button>
+         )}
+       </div>
+ 
+       {/* Tabs Content */}
+       {activeTab === 'submit' && (
+         <div className="max-w-2xl mx-auto w-full">
+           {/* Input Form */}
+           <Card className="flex-1">
+             <CardContent className="p-6 sm:p-8">
+               <h3 className="text-xl mb-6 flex items-center gap-2 text-foreground">
+-                <Receipt size={20} className="text-primary" />
++                <Icon name="receipt_long" size={20} className="text-primary" />
+                 Expense Details
+               </h3>
+               <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                 <div className="flex gap-4 flex-col sm:flex-row">
+                   <div className="flex-1 flex flex-col gap-1.5">
+                     <Select label="Category" value={category} onChange={setCategory}>
+                       {expenseCategories.map(c => <SelectItem key={c} id={c}>{c}</SelectItem>)}
+                       <SelectItem id="Add New...">+ Add New...</SelectItem>
+                     </Select>
+                     {category === 'Add New...' && (
+@@ -269,41 +269,41 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
+                   <textarea value={description} onChange={e => setDescription(e.target.value)} required placeholder="Briefly describe the expense..." rows={3} aria-label="Expense description" className="flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-xs sm:text-sm font-medium shadow-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-y" />
+                 </div>
+ 
+                 <div className="flex flex-col gap-1.5">
+                   <label className="text-sm font-semibold text-muted-foreground">Receipt (Image/PDF)</label>
+                   <input type="file" accept="image/*,.pdf" ref={fileInputRef} onChange={handleReceiptUpload} className="hidden" />
+                   <div
+                     onClick={() => fileInputRef.current.click()}
+                     className="p-6 sm:p-8 rounded-xl border-2 border-dashed border-border bg-muted/30 text-center cursor-pointer flex flex-col items-center gap-2 transition-colors hover:border-primary hover:bg-muted/50"
+                   >
+-                    <Upload size={24} className="text-muted-foreground" />
++                    <Icon name="upload" size={24} className="text-muted-foreground" />
+                     <span className="text-sm text-muted-foreground">{receiptBase64 ? 'Receipt uploaded. Click to change.' : 'Click to upload receipt'}</span>
+                   </div>
+                 </div>
+ 
+                 <Button type="submit" size="lg" className="mt-3 justify-center w-full">
+                   Submit for Approval
+                 </Button>
+               </form>
+             </CardContent>
+           </Card>
+         </div>
+       )}
+ 
+       {activeTab === 'approve' && canApprove && (
+         <div className="flex flex-col gap-6">
+           <div className="flex justify-between items-center">
+             <h3 className="text-xl font-semibold text-foreground">Approval Queue</h3>
+             {selectedExpenses.length > 0 && (
+               <Button variant="default" size="sm" onClick={handleBulkApprove}>
+-                <Check size={16} /> Bulk Approve ({selectedExpenses.length})
++                <Icon name="check" size={16} /> Bulk Approve ({selectedExpenses.length})
+               </Button>
+             )}
+           </div>
+ 
+           <div className="flex items-center gap-3 bg-muted/30 px-3 py-1.5 rounded-lg border border-border w-fit mb-2">
+             <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary" aria-label="Select all" onChange={(e) => setSelectedExpenses(e.target.checked ? pendingQueue.map(q => q.id) : [])} checked={selectedExpenses.length === pendingQueue.length && pendingQueue.length > 0} />
+             <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Select All Pending</span>
+           </div>
+ 
+           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+@@ -318,21 +318,21 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
+                 return (
+                   <Card key={exp.id} className={`relative overflow-hidden transition-all ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''} ${isOverLimit ? 'border-destructive/50 shadow-[0_0_10px_rgba(239,68,68,0.1)]' : ''}`}>
+                     <div className="h-2 w-full bg-primary absolute top-0 left-0" />
+                     <div className="p-4 pt-5 flex flex-col gap-4">
+                       {/* Header */}
+                       <div className="flex items-start justify-between">
+                         <div className="flex items-center gap-3">
+                           <input type="checkbox" className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary mt-1" aria-label="Select expense" checked={isSelected} onChange={() => handleToggleSelect(exp.id)} />
+                           <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
+                             {emp?.avatar ? <AvatarImage src={emp.avatar} alt={emp?.name} className="object-cover" /> : null}
+-                            <AvatarFallback className="bg-primary/10 text-primary"><User size={20} /></AvatarFallback>
++                            <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={20} /></AvatarFallback>
+                           </Avatar>
+                           <div className="flex flex-col">
+                             <span className="font-semibold text-base leading-tight">{emp?.name}</span>
+                             <span className="text-xs text-muted-foreground">{exp.id}</span>
+                           </div>
+                         </div>
+                         <Badge variant="outline" className={isOverLimit ? 'border-destructive text-destructive' : 'bg-muted/50'}>
+                           {exp.category}
+                         </Badge>
+                       </div>
+@@ -345,57 +345,57 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
+                         </div>
+                         <div className="flex flex-col">
+                           <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Date</span>
+                           <span className="font-mono text-sm mt-1">{exp.date}</span>
+                         </div>
+                         <div className="col-span-2 text-xs text-muted-foreground italic">
+                           "{exp.description}"
+                         </div>
+                         {isOverLimit && (
+                           <div className="col-span-2 flex items-center gap-1.5 text-destructive text-xs font-medium bg-destructive/10 p-2 rounded border border-destructive/20 mt-1">
+-                            <AlertTriangle size={14} /> Exceeds {exp.category} limit of ${policies[exp.category]}
++                            <Icon name="warning" size={14} /> Exceeds {exp.category} limit of ${policies[exp.category]}
+                           </div>
+                         )}
+                         {exp.receipt && (
+                           <div className="col-span-2 mt-2">
+                             <img src={exp.receipt} alt="Receipt" className="w-full h-24 object-cover rounded-md border border-border" />
+                           </div>
+                         )}
+                       </div>
+ 
+                       {/* Actions */}
+                       <div className="flex items-center gap-2 pt-1">
+                         <Button variant="outline" className="flex-1 border-destructive text-destructive hover:bg-destructive/10" onClick={() => setRejectReasonModal({ open: true, id: exp.id, reason: '' })}>
+-                          <XIcon className="mr-2 h-4 w-4" /> Reject
++                          <Icon name="close" className="mr-2 h-4 w-4" /> Reject
+                         </Button>
+                         <button type="button" className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none" onClick={() => handleApprove(exp.id)}>
+-                          <Check className="h-4 w-4" /> Approve
++                          <Icon name="check" className="h-4 w-4" /> Approve
+                         </button>
+                       </div>
+                     </div>
+                   </Card>
+                 )
+               })
+             )}
+           </div>
+         </div>
+       )}
+ 
+       {activeTab === 'finance' && canReimburse && (
+         <div className="flex flex-col gap-6">
+           {/* Finance Metrics */}
+           <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">
+             <Card>
+               <CardContent className="p-6 flex flex-col justify-center">
+                 <h3 className="text-sm mb-2 text-muted-foreground">Pending Liability</h3>
+                 <div className="text-4xl font-bold flex items-center gap-2 text-amber-500">
+-                  <DollarSign size={32} />
++                  <Icon name="attach_money" size={32} />
+                   {pendingLiability.toFixed(2)}
+                 </div>
+                 <p className="text-xs mt-2 text-muted-foreground">Total pending reimbursements (in USD)</p>
+               </CardContent>
+             </Card>
+ 
+             <Card>
+               <CardContent className="p-5 sm:p-6 lg:p-8">
+                 <h3 className="text-base mb-4 text-foreground font-semibold">Expenses by Category</h3>
+                 <div className="h-[200px]">
+@@ -410,40 +410,40 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
+                   </ResponsiveContainer>
+                 </div>
+               </CardContent>
+             </Card>
+           </div>
+ 
+           {/* Approved & Waiting for Reimbursement Table */}
+           <div className="flex justify-between items-center">
+             <h3 className="text-xl font-semibold text-foreground">Ready for Reimbursement</h3>
+             <Button variant="secondary" size="sm" onClick={exportCSV}>
+-              <Download size={16} /> Export CSV
++              <Icon name="download" size={16} /> Export CSV
+             </Button>
+           </div>
+ 
+           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+             {approvedQueue.length === 0 ? (
+               <div className="col-span-full p-8 text-center text-muted-foreground border border-dashed rounded-lg bg-muted/20">No approved expenses waiting for reimbursement.</div>
+             ) : (
+               approvedQueue.map(exp => {
+                 const emp = employees.find(e => e.id === exp.employeeId)
+                 return (
+                   <Card key={exp.id} className="relative overflow-hidden border-border/80 hover:border-primary/50 transition-colors">
+                     <div className="h-2 w-full bg-primary absolute top-0 left-0" />
+                     <div className="p-4 pt-5 flex flex-col gap-4">
+                       {/* Header */}
+                       <div className="flex items-start justify-between">
+                         <div className="flex items-center gap-3">
+                           <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
+                             {emp?.avatar ? <AvatarImage src={emp.avatar} alt={emp?.name} className="object-cover" /> : null}
+-                            <AvatarFallback className="bg-primary/10 text-primary"><User size={20} /></AvatarFallback>
++                            <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={20} /></AvatarFallback>
+                           </Avatar>
+                           <div className="flex flex-col">
+                             <span className="font-semibold text-base leading-tight">{emp?.name}</span>
+                             <span className="text-xs text-muted-foreground">{exp.id}</span>
+                           </div>
+                         </div>
+                         <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                           Approved
+                         </Badge>
+                       </div>
+@@ -461,36 +461,36 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
+                         <div className="pt-1 flex flex-col gap-1 text-[11px] text-muted-foreground font-medium">
+                           {exp.approvedBy && <span>Approved by {exp.approvedBy}</span>}
+                           {exp.rejectedBy && <span className="text-destructive">Rejected by {exp.rejectedBy}</span>}
+                           {exp.reimbursedBy && <span className="text-blue-500">Reimbursed by {exp.reimbursedBy} {exp.transactionRef ? `(Ref: ${exp.transactionRef})` : ''}</span>}
+                         </div>
+                       )}
+ 
+                       {/* Actions */}
+                       <div className="pt-1">
+                         <Button variant="default" className="w-full" onClick={() => handleMarkReimbursed(exp.id)}>
+-                          <DollarSign className="mr-2 h-4 w-4" /> Mark as Reimbursed
++                          <Icon name="attach_money" className="mr-2 h-4 w-4" /> Mark as Reimbursed
+                         </Button>
+                       </div>
+                     </div>
+                   </Card>
+                 )
+               })
+             )}
+           </div>
+         </div>
+       )}
+ 
+       {activeTab === 'my-claims' && (
+         <div className="flex flex-col gap-6">
+           <div className="flex justify-between items-center">
+-            <h3 className="text-xl font-semibold text-foreground flex items-center gap-2"><List size={20} className="text-primary"/> My Expense History</h3>
++            <h3 className="text-xl font-semibold text-foreground flex items-center gap-2"><Icon name="list" size={20} className="text-primary"/> My Expense History</h3>
+           </div>
+           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+             {myClaimsQueue.length === 0 ? (
+               <div className="col-span-full p-8 text-center text-muted-foreground border border-dashed rounded-lg bg-muted/20">No claims submitted yet.</div>
+             ) : (
+               myClaimsQueue.map(exp => {
+                 const isOverLimit = policies[exp.category] && (exp.usdAmount || (exp.amount * exchangeRates[exp.currency])) > policies[exp.category]
+                 return (
+                   <Card key={exp.id} className={`relative overflow-hidden border-border/80 hover:border-primary/50 transition-colors ${isOverLimit ? 'border-destructive/50' : ''}`}>
+                     <div className="h-2 w-full bg-primary absolute top-0 left-0" />
+@@ -539,38 +539,38 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
+                 )
+               })
+             )}
+           </div>
+         </div>
+       )}
+       
+       {activeTab === 'history' && (canApprove || canReimburse) && (
+         <div className="flex flex-col gap-6">
+           <div className="flex justify-between items-center">
+-            <h3 className="text-xl font-semibold text-foreground flex items-center gap-2"><History size={20} className="text-primary"/> Company Expense History</h3>
++            <h3 className="text-xl font-semibold text-foreground flex items-center gap-2"><Icon name="history" size={20} className="text-primary"/> Company Expense History</h3>
+           </div>
+           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+             {historyQueue.length === 0 ? (
+               <div className="col-span-full p-8 text-center text-muted-foreground border border-dashed rounded-lg bg-muted/20">No historical expenses found.</div>
+             ) : (
+               historyQueue.map(exp => {
+                 const emp = employees.find(e => e.id === exp.employeeId)
+                 return (
+                   <Card key={exp.id} className="relative overflow-hidden border-border/80 hover:border-primary/50 transition-colors">
+                     <div className="h-2 w-full bg-primary absolute top-0 left-0" />
+                     <div className="p-4 pt-5 flex flex-col gap-4">
+                       {/* Header */}
+                       <div className="flex items-start justify-between">
+                         <div className="flex items-center gap-3">
+                           <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
+                             {emp?.avatar ? <AvatarImage src={emp.avatar} alt={emp?.name} className="object-cover" /> : null}
+-                            <AvatarFallback className="bg-primary/10 text-primary"><User size={20} /></AvatarFallback>
++                            <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={20} /></AvatarFallback>
+                           </Avatar>
+                           <div className="flex flex-col">
+                             <span className="font-semibold text-base leading-tight">{emp?.name}</span>
+                             <span className="text-xs text-muted-foreground">{exp.id}</span>
+                           </div>
+                         </div>
+                         <Badge variant="outline" className={exp.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : exp.status === 'Rejected' ? 'bg-destructive/10 text-destructive border-destructive/20' : exp.status === 'Reimbursed' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-muted/50'}>
+                           {exp.status}
+                         </Badge>
+                       </div>
+@@ -629,21 +629,21 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
+             <Button variant="secondary" onClick={() => setRejectReasonModal({ open: false, id: null, reason: '' })}>Cancel</Button>
+             <Button variant="destructive" onClick={handleReject}>Confirm Reject</Button>
+           </DialogFooter>
+         </DialogContent>
+       </Dialog>
+       {/* Success Dialog */}
+       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+         <DialogContent className="sm:max-w-[400px] text-center">
+           <DialogHeader className="flex flex-col items-center gap-2">
+             <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+-              <Check size={24} className="text-emerald-600 dark:text-emerald-400" />
++              <Icon name="check" size={24} className="text-emerald-600 dark:text-emerald-400" />
+             </div>
+             <DialogTitle className="text-xl">Expense Submitted!</DialogTitle>
+           </DialogHeader>
+           <div className="py-2 text-muted-foreground text-sm">
+             Your expense claim has been successfully submitted and is now pending manager approval.
+           </div>
+           <DialogFooter className="flex-col sm:flex-row gap-2 mt-4 sm:space-x-0">
+             <Button variant="outline" className="w-full sm:flex-1" onClick={() => {
+               setShowSuccessDialog(false);
+               if (canApprove) setActiveTab('approve');

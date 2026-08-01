@@ -1,0 +1,324 @@
+ src/components/layout/CommandPalette.jsx |  4 ++--
+ src/components/layout/Sidebar.jsx        | 14 +++++++-------
+ src/components/layout/ToastContainer.jsx |  6 +++---
+ src/components/layout/Topbar.jsx         | 10 +++++-----
+ src/utils/helpers.js                     | 29 ++++++++++++++---------------
+ 5 files changed, 31 insertions(+), 32 deletions(-)
+diff --git a/src/components/layout/CommandPalette.jsx b/src/components/layout/CommandPalette.jsx
+index 3f5e668..56a5c80 100644
+--- a/src/components/layout/CommandPalette.jsx
++++ b/src/components/layout/CommandPalette.jsx
+@@ -1,20 +1,20 @@
+-import { Search } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ 
+ export default function CommandPalette({ showCommandPalette, setShowCommandPalette, commandSearch, setCommandSearch, paletteIndex, setPaletteIndex, filteredItems, selectPaletteItem, getCategoryIcon }) {
+   return (
+     <>
+       {showCommandPalette && (
+         <div className="command-palette-overlay" role="dialog" aria-modal="true" aria-label="Command palette" onClick={(e) => { if (e.target === e.currentTarget) setShowCommandPalette(false) }}>
+           <div className="command-palette">
+             <div className="command-palette-search-wrapper p-3 sm:p-4">
+-              <Search size={18} style={{ color: 'var(--color-md-sys-on-surface-variant)' }} />
++              <Icon name="search" size={18} style={{ color: 'var(--color-md-sys-on-surface-variant)' }} />
+               <input
+                 autoFocus
+                 className="command-palette-input px-3 py-2 sm:px-4 sm:py-2.5"
+                 type="text"
+                 aria-label="Search commands"
+                 placeholder="Type a command or search..."
+                 value={commandSearch}
+                 onChange={(e) => {
+                   setCommandSearch(e.target.value)
+                   setPaletteIndex(0)
+diff --git a/src/components/layout/Sidebar.jsx b/src/components/layout/Sidebar.jsx
+index 90e359e..316cad2 100644
+--- a/src/components/layout/Sidebar.jsx
++++ b/src/components/layout/Sidebar.jsx
+@@ -1,12 +1,12 @@
+ import TooltipPopover from '../TooltipPopover.jsx'
+-import { X, Shield, User as UserIcon, BadgeCheck, Building2, LogOut, ArrowLeftRight } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Button } from "@/components/ui/button"
+ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription } from "@/components/ui/alert-dialog"
+ 
+ export default function Sidebar({
+   visibleNavItems, isCollapsed, isDarkMode, currentView, setCurrentView,
+   mobileMenuOpen, toggleSidebar, user, simulatedRole,
+   showRoleModal, setShowRoleModal, handleLogout,
+   setIsCollapsed, setSimulatedRole, setMobileMenuOpen
+ }) {
+   return (
+@@ -101,74 +101,74 @@ export default function Sidebar({
+             </div>
+           </div>
+ 
+           {/* ACTION BUTTONS */}
+           <TooltipPopover label="Switch Role" isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
+             <button
+               onClick={() => setShowRoleModal && setShowRoleModal(true)}
+               className="btn-shimmer w-full flex items-center gap-3 px-3 rounded-md bg-[#2563eb] hover:bg-[#1d4ed8] text-white transition-colors cursor-pointer h-9 box-border border-none"
+             >
+               <div className="size-6 flex items-center justify-center shrink-0">
+-                <ArrowLeftRight size={16} />
++                <Icon name="swap_horiz" size={16} />
+               </div>
+               <span className="whitespace-nowrap overflow-hidden transition-[opacity,max-width] duration-300 text-left font-medium text-xs pr-2" style={{
+                 opacity: !isCollapsed ? 1 : 0,
+                 maxWidth: !isCollapsed ? '300px' : 0,
+               }}>Switch Role</span>
+             </button>
+           </TooltipPopover>
+           
+           <TooltipPopover label="Logout" isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
+             <button
+               onClick={handleLogout}
+               className="btn-shimmer mt-1 w-full flex items-center gap-3 px-3 rounded-md bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer h-9 box-border border-none"
+             >
+               <div className="size-6 flex items-center justify-center shrink-0">
+-                <LogOut size={16} />
++                <Icon name="logout" size={16} />
+               </div>
+               <span className="whitespace-nowrap overflow-hidden transition-[opacity,max-width] duration-300 text-left font-medium text-xs pr-2" style={{
+                 opacity: (mobileMenuOpen || !isCollapsed) ? 1 : 0,
+                 maxWidth: (mobileMenuOpen || !isCollapsed) ? '300px' : 0,
+               }}>Logout</span>
+             </button>
+           </TooltipPopover>
+         </div>
+       </aside>
+ 
+       {/* Role Switch Modal */}
+       <AlertDialog open={showRoleModal} onOpenChange={setShowRoleModal}>
+         <AlertDialogContent>
+           <AlertDialogHeader>
+             <div className="flex items-center justify-between">
+               <AlertDialogTitle>Switch Role</AlertDialogTitle>
+               <button onClick={() => setShowRoleModal(false)} className="size-8 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer" aria-label="Close">
+-                <X size={16} />
++                <Icon name="close" size={16} />
+               </button>
+             </div>
+             <AlertDialogDescription>Choose a role to simulate. Permissions and visible modules will adjust accordingly.</AlertDialogDescription>
+           </AlertDialogHeader>
+           <div className="flex flex-col gap-2 py-2">
+             {[
+-              { id: 'Admin', label: 'Admin', icon: Shield, desc: 'Full access to all modules' },
+-              { id: 'Teammate', label: 'Teammate', icon: UserIcon, desc: 'Self-service portal access and tasks' },
++              { id: 'Admin', label: 'Admin', icon: <Icon name="shield" size={16} />, desc: 'Full access to all modules' },
++              { id: 'Teammate', label: 'Teammate', icon: <Icon name="person" size={16} />, desc: 'Self-service portal access and tasks' },
+             ].map(role => (
+               <button
+                 key={role.id}
+                 onClick={() => { setSimulatedRole(role.id); setShowRoleModal(false) }}
+                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-semibold transition-all cursor-pointer border ${
+                   simulatedRole === role.id
+                     ? 'bg-primary/10 text-primary border-primary/30'
+                     : 'bg-muted/40 text-foreground border-border hover:bg-muted'
+                 }`}
+               >
+                 <div className="size-9 flex items-center justify-center rounded-lg bg-background border border-border shrink-0">
+-                  <role.icon size={16} />
++                  {role.icon}
+                 </div>
+                 <div className="flex flex-col">
+                   <span>{role.label}</span>
+                   <span className="text-[11px] font-normal text-muted-foreground">{role.desc}</span>
+                 </div>
+                 {simulatedRole === role.id && (
+                   <span className="ml-auto text-[10px] uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">Active</span>
+                 )}
+               </button>
+             ))}
+diff --git a/src/components/layout/ToastContainer.jsx b/src/components/layout/ToastContainer.jsx
+index e86acdc..2eac5b7 100644
+--- a/src/components/layout/ToastContainer.jsx
++++ b/src/components/layout/ToastContainer.jsx
+@@ -1,36 +1,36 @@
+-import { X, Bell } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ 
+ export default function ToastContainer({ toasts, removeToast }) {
+   return (
+     <div className="fixed bottom-0 left-0 right-0 sm:left-auto z-[100] flex max-h-screen w-full flex-col p-4 sm:max-w-[420px] gap-2 pointer-events-none" aria-live="polite" aria-atomic="false">
+       {toasts.map(toast => (
+         <div key={toast.id}
+           className="pointer-events-auto group relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-md border border-border bg-background p-4 pr-6 text-foreground shadow-lg transition-all"
+           role="alert"
+           style={{ animation: 'slideIn 0.3s ease-out' }}
+         >
+           <div className="flex items-start gap-3 flex-1 w-full">
+-            <Bell size={18} className="shrink-0 mt-0.5 text-muted-foreground" />
++            <Icon name="notifications" size={18} className="shrink-0 mt-0.5 text-muted-foreground" />
+             <p className="flex-1 text-sm font-medium leading-relaxed">
+               {toast.message}
+             </p>
+             <div className="flex flex-col sm:flex-row items-center gap-2 shrink-0">
+               {toast.action && (
+                 <button onClick={() => { toast.action.onClick(); removeToast(toast.id) }}
+                   className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium transition-colors hover:bg-secondary focus:outline-none focus:ring-1 focus:ring-ring disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive pointer-events-auto">
+                   {toast.action.label}
+                 </button>
+               )}
+               <button onClick={() => removeToast(toast.id)}
+                 className="absolute right-1 top-1 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-1 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600 pointer-events-auto cursor-pointer border-none bg-transparent">
+-                <X size={14} />
++                <Icon name="close" size={14} />
+               </button>
+             </div>
+           </div>
+           <div className="absolute bottom-0 left-0 h-1 w-full bg-muted" aria-hidden="true">
+             <div className="h-full bg-primary/50"
+               style={{ animation: 'shrink 4s linear' }} />
+           </div>
+         </div>
+       ))}
+     </div>
+diff --git a/src/components/layout/Topbar.jsx b/src/components/layout/Topbar.jsx
+index d75b42c..56b5c81 100644
+--- a/src/components/layout/Topbar.jsx
++++ b/src/components/layout/Topbar.jsx
+@@ -1,11 +1,11 @@
+-import { Monitor, Sun, Moon, Menu, Bell, UserRound } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Button } from "@/components/ui/button"
+ import hrPulseLogo from '../../Assets/Logo Banner.svg'
+ 
+ import { useState, useEffect, useRef } from 'react'
+ import { createPortal } from 'react-dom'
+ import { Badge } from "@/components/ui/badge"
+ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications, onProfileClick, showThemeToggle = true }) {
+   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+   const buttonRef = useRef(null)
+@@ -42,33 +42,33 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
+           <div className="flex items-center gap-1 shrink-0">
+             {onProfileClick && (
+               <Button
+                 variant="ghost"
+                 size="icon"
+                 onClick={onProfileClick}
+                 title="Profile"
+                 aria-label="Profile"
+                 className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0 !border-transparent"
+               >
+-                <UserRound size={22} className="size-[22px]" />
++                <Icon name="person" size={22} className="size-[22px]" />
+               </Button>
+             )}
+             {showThemeToggle && (
+               <Button
+                 variant="ghost"
+                 size="icon"
+                 onClick={toggleTheme}
+                 title={`Theme: ${themeMode}`}
+                 aria-label="Toggle theme"
+                 className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0 !border-transparent"
+               >
+-                {themeMode === 'light' ? <Sun size={22} className="size-[22px]" /> : <Moon size={22} className="size-[22px]" />}
++                {themeMode === 'light' ? <Icon name="light_mode" size={22} className="size-[22px]" /> : <Icon name="dark_mode" size={22} className="size-[22px]" />}
+               </Button>
+             )}
+           </div>
+         </header>
+       ) : (
+         <header aria-label="Top bar" className="topbar w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-2 min-[400px]:px-4 flex items-center justify-between rounded-full bg-background/50 backdrop-blur-lg saturate-150 text-foreground border border-border/50 shadow-sm transition-all duration-300">
+           
+           {/* Left Section: Brand Pill */}
+           <div className="flex items-center gap-1 min-[400px]:gap-3 sm:gap-4 shrink-0">
+ 
+@@ -98,35 +98,35 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
+ 
+             {/* Theme Toggle Button */}
+             {showThemeToggle && (
+               <Button
+                 variant="ghost"
+                 size="icon"
+                 onClick={toggleTheme}
+                 title={`Theme: ${themeMode}`}
+                 className="rounded-full size-8 min-[400px]:size-9 sm:size-10 text-foreground hover:bg-muted shrink-0"
+               >
+-                {themeMode === 'light' ? <Sun size={20} /> : <Moon size={20} />}
++                {themeMode === 'light' ? <Icon name="light_mode" size={20} /> : <Icon name="dark_mode" size={20} />}
+               </Button>
+             )}
+ 
+             {/* Notifications Button (Desktop) */}
+             <div className="relative">
+               <Button
+                 ref={buttonRef}
+                 variant="ghost"
+                 size="icon"
+                 onClick={() => { setShowNotifications(prev => !prev); markNotificationsRead() }}
+                 className="rounded-full size-8 min-[400px]:size-9 sm:size-10 text-foreground hover:bg-muted relative shrink-0"
+                 id="notification-trigger"
+               >
+-                <Bell size={20} />
++                <Icon name="notifications" size={20} />
+                 {unreadCount > 0 && (
+                   <span className="absolute top-1.5 right-1.5 flex size-3">
+                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                     <span className="relative inline-flex rounded-full size-3 bg-destructive"></span>
+                   </span>
+                 )}
+               </Button>
+             </div>
+ 
+           </div>
+diff --git a/src/utils/helpers.js b/src/utils/helpers.js
+index 4b64b27..a0b052d 100644
+--- a/src/utils/helpers.js
++++ b/src/utils/helpers.js
+@@ -1,13 +1,12 @@
+-import { LayoutDashboard, Users, User, Banknote, Clock, Receipt, Settings2, FolderOpen, Megaphone, CalendarDays, Laptop, CloudSync, CheckSquare } from 'lucide-react'
+-
+ import { createElement } from 'react'
++import Icon from '../components/ui/Icon.jsx'
+ 
+ export const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
+ 
+ export function timestampArrayChanges(prev, next) {
+   if (!Array.isArray(prev) || !Array.isArray(next)) return next;
+   const prevMap = new Map(prev.map(item => [item.id, item]));
+   return next.map(item => {
+     const prevItem = prevMap.get(item.id);
+     if (!prevItem) {
+       return { ...item, updated_at: new Date().toISOString() };
+@@ -15,24 +14,24 @@ export function timestampArrayChanges(prev, next) {
+     const cleanPrev = { ...prevItem, updated_at: undefined, _conflict: undefined };
+     const cleanItem = { ...item, updated_at: undefined, _conflict: undefined };
+     if (JSON.stringify(cleanPrev) !== JSON.stringify(cleanItem)) {
+       return { ...item, updated_at: new Date().toISOString() };
+     }
+     return item;
+   });
+ }
+ 
+ export const allNavItems = [
+-  { id: 'dashboard', label: 'Dashboard', icon: createElement(LayoutDashboard, { size: 18 }) },
+-  { id: 'tasks', label: 'Tasks', icon: createElement(CheckSquare, { size: 18 }) },
+-  { id: 'announcements', label: 'Announcements', icon: createElement(Megaphone, { size: 18 }) },
+-  { id: 'calendar', label: 'Events', icon: createElement(CalendarDays, { size: 18 }) },
+-  { id: 'documents', label: 'Documents', icon: createElement(FolderOpen, { size: 18 }) },
+-  { id: 'employees', label: 'Employees', icon: createElement(Users, { size: 18 }) },
+-  { id: 'payroll', label: 'Payroll', icon: createElement(Banknote, { size: 18 }) },
+-  { id: 'attendance', label: 'Leaves & Attendance', icon: createElement(Clock, { size: 18 }) },
+-  { id: 'expenses', label: 'Expenses', icon: createElement(Receipt, { size: 18 }) },
+-  { id: 'assets', label: 'Assets', icon: createElement(Laptop, { size: 18 }) },
+-  { id: 'settings', label: 'Settings', icon: createElement(Settings2, { size: 18 }) },
+-  { id: 'drive', label: 'Drive Sync', icon: createElement(CloudSync, { size: 18 }) },
+-  { id: 'profile', label: 'Profile', icon: createElement(User, { size: 18 }) },
++  { id: 'dashboard', label: 'Dashboard', icon: createElement(Icon, { name: 'dashboard', size: 18 }) },
++  { id: 'tasks', label: 'Tasks', icon: createElement(Icon, { name: 'check_box', size: 18 }) },
++  { id: 'announcements', label: 'Announcements', icon: createElement(Icon, { name: 'campaign', size: 18 }) },
++  { id: 'calendar', label: 'Events', icon: createElement(Icon, { name: 'calendar_month', size: 18 }) },
++  { id: 'documents', label: 'Documents', icon: createElement(Icon, { name: 'folder_open', size: 18 }) },
++  { id: 'employees', label: 'Employees', icon: createElement(Icon, { name: 'group', size: 18 }) },
++  { id: 'payroll', label: 'Payroll', icon: createElement(Icon, { name: 'payments', size: 18 }) },
++  { id: 'attendance', label: 'Leaves & Attendance', icon: createElement(Icon, { name: 'schedule', size: 18 }) },
++  { id: 'expenses', label: 'Expenses', icon: createElement(Icon, { name: 'receipt_long', size: 18 }) },
++  { id: 'assets', label: 'Assets', icon: createElement(Icon, { name: 'laptop_windows', size: 18 }) },
++  { id: 'settings', label: 'Settings', icon: createElement(Icon, { name: 'settings', size: 18 }) },
++  { id: 'drive', label: 'Drive Sync', icon: createElement(Icon, { name: 'cloud_sync', size: 18 }) },
++  { id: 'profile', label: 'Profile', icon: createElement(Icon, { name: 'person', size: 18 }) },
+ ]

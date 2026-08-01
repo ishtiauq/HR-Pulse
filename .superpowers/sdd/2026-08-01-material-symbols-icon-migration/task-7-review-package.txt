@@ -1,0 +1,1214 @@
+diff --git a/src/components/Payroll.jsx b/src/components/Payroll.jsx
+index 4f5a45a..a8e43f0 100644
+--- a/src/components/Payroll.jsx
++++ b/src/components/Payroll.jsx
+@@ -1,13 +1,13 @@
+ import { useState, useRef, useMemo, useEffect } from 'react'
+ import jsPDF from 'jspdf'
+-import { Banknote, Download, Search, X, PlusCircle, Calendar, Pencil, CheckSquare, Trash2, ChevronDown, Check, User } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ 
+ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+ import { Button } from "@/components/ui/button"
+ import { Input } from "@/components/ui/input"
+ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+ import { Badge } from "@/components/ui/badge"
+ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+ 
+ import AdSlot from './AdSlot.jsx'
+@@ -560,86 +560,86 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
+ 
+     addLog('Ledger Updated', `${applyGlobally ? 'Globally updated' : 'Updated'} compensation for ${selectedEmpLog.employee.name}`, 'success')
+   }
+ 
+   return (
+     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
+       
+       {/* Header and Month Selector */}
+       <div className="flex items-center justify-between">
+         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+-          <Banknote size={20} className="text-primary" />
++          <Icon name="payments" size={20} className="text-primary" />
+           Payroll
+         </h1>
+       </div>
+       <div className="border-t border-border border-headline mb-2" />
+       
+       <div ref={pickerRef} className="flex gap-2 items-center justify-end">
+         {/* Month dropdown */}
+         <div className="relative w-[140px] h-10">
+           <button onClick={() => { setMonthOpen(!monthOpen); setYearOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${monthOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
+             <div className="flex items-center gap-2 overflow-hidden">
+-              <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
++              <Icon name="calendar_month" size={16} className="h-4 w-4 shrink-0 text-muted-foreground" />
+               <span className="break-words">{monthNames[currentMonth - 1]}</span>
+             </div>
+-            <ChevronDown className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} />
++            <Icon name="keyboard_arrow_down" size={16} className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${monthOpen ? 'rotate-180' : ''}`} />
+           </button>
+           {monthOpen && (
+             <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
+               {monthNames.map((name, i) => (
+                 <button key={name} onClick={() => { setSelectedMonth(`${currentYear}-${String(i + 1).padStart(2, '0')}`); setMonthOpen(false) }} 
+                   className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${i + 1 === currentMonth ? 'bg-accent text-accent-foreground font-semibold' : ''}`}>
+                   {name}
+                 </button>
+               ))}
+             </div>
+           )}
+         </div>
+         {/* Year dropdown */}
+         <div className="relative w-24 h-10">
+           <button onClick={() => { setYearOpen(!yearOpen); setMonthOpen(false) }} className={`flex w-full h-10 items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${yearOpen ? 'ring-2 ring-ring ring-offset-2' : ''}`}>
+             <span className="break-words">{currentYear}</span>
+-            <ChevronDown className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${yearOpen ? 'rotate-180' : ''}`} />
++            <Icon name="keyboard_arrow_down" size={16} className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${yearOpen ? 'rotate-180' : ''}`} />
+           </button>
+           {yearOpen && (
+             <div className="absolute top-full left-0 right-0 mt-2 max-h-60 overflow-y-auto z-[100] rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
+               {yearOptions.map(y => (
+                 <button key={y} onClick={() => { setSelectedMonth(`${y}-${String(currentMonth).padStart(2, '0')}`); setYearOpen(false) }} 
+                   className={`relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground ${y === currentYear ? 'bg-accent text-accent-foreground font-semibold' : ''}`}>
+                   {y}
+                 </button>
+               ))}
+             </div>
+           )}
+         </div>
+       </div>
+ 
+       {!entries ? (
+         <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed border-2 bg-muted/20">
+-          <Calendar className="h-12 w-12 text-primary opacity-80 mb-4" />
++          <Icon name="calendar_month" size={48} className="h-12 w-12 text-primary opacity-80 mb-4" />
+           <h3 className="text-xl font-semibold mb-2">Payroll Not Initialized</h3>
+           <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
+             The payroll sheet for {monthLabel} has not been created yet. 
+             Initialize it to pull the active roster and carry over compensation parameters.
+           </p>
+           <Button onClick={handleInitializeMonth} size="lg">
+-            <PlusCircle className="mr-2 h-5 w-5" /> Initialize Month Payroll
++            <Icon name="add_circle" size={20} className="mr-2 h-5 w-5" /> Initialize Month Payroll
+           </Button>
+         </Card>
+       ) : (
+         <>
+           {/* Stats Cards Row */}
+           <div className="grid gap-4 md:grid-cols-2">
+             <Card>
+               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                 <CardTitle className="text-sm font-medium uppercase text-muted-foreground tracking-wider">Total Payout Budget</CardTitle>
+-                <Banknote className="h-4 w-4 text-muted-foreground" />
++                <Icon name="payments" size={16} className="h-4 w-4 text-muted-foreground" />
+               </CardHeader>
+               <CardContent>
+                 <div className="text-2xl font-bold font-mono">{currency}{totalCost.toLocaleString()}</div>
+               </CardContent>
+             </Card>
+ 
+             <Card>
+               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                 <CardTitle className="text-sm font-medium uppercase text-muted-foreground tracking-wider">Average Salary</CardTitle>
+               </CardHeader>
+@@ -650,43 +650,43 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
+           </div>
+ 
+           {/* Toolbar Filter Section */}
+           <div className="flex justify-between items-center flex-wrap gap-4 mt-2">
+             <div className="flex items-center gap-3 bg-muted/30 px-3 py-1.5 rounded-lg border border-border">
+               <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary" aria-label="Select all" checked={selectedRows.length === filteredEntries.length && filteredEntries.length > 0} onChange={toggleSelectAll} />
+               <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Select All</span>
+             </div>
+             
+             <div className="relative flex-1 min-w-[200px] max-w-[350px]">
+-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
++              <Icon name="search" size={16} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+               <Input placeholder="Search employee or role..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
+             </div>
+ 
+             <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
+               {['All', 'Paid', 'Pending'].map(status => (
+                 <button
+                   key={status}
+                   onClick={() => setStatusFilter(status)}
+                   className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${statusFilter === status ? 'bg-background text-foreground shadow-sm' : 'hover:bg-background/50 hover:text-foreground'}`}
+                 >
+-                  {statusFilter === status && <Check className="mr-1.5 h-3.5 w-3.5" />}
++                  {statusFilter === status && <Icon name="check" size={14} className="mr-1.5 h-3.5 w-3.5" />}
+                   {status}
+                 </button>
+               ))}
+             </div>
+           </div>
+ 
+           {/* Bulk Actions Sticky Bar */}
+           {selectedRows.length > 0 && (
+             <div className="sticky top-2 z-[50] p-3 px-4 bg-primary text-primary-foreground flex justify-between items-center rounded-lg shadow-lg animate-in slide-in-from-top-2">
+               <div className="flex items-center gap-2 font-medium">
+-                <CheckSquare className="h-5 w-5" />
++                <Icon name="check_box" size={20} className="h-5 w-5" />
+                 <span>{selectedRows.length} employee{selectedRows.length > 1 ? 's' : ''} selected</span>
+               </div>
+               <div className="flex gap-2 items-center">
+                 <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary-foreground/20" onClick={() => setSelectedRows([])}>Cancel</Button>
+                 <Button variant="secondary" size="sm" onClick={handleBulkExecute} disabled={processingId === 'bulk-selected'}>
+                   {processingId === 'bulk-selected' ? 'Processing...' : 'Execute Selected'}
+                 </Button>
+               </div>
+             </div>
+           )}
+@@ -706,21 +706,21 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
+ 
+               return (
+                 <Card key={entry.employeeId} className={`overflow-hidden transition-all ${isSelected ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''}`}>
+                   <div className="p-4 flex flex-col gap-4">
+                     {/* Header */}
+                     <div className="flex items-start justify-between">
+                       <div className="flex items-center gap-3">
+                         <input type="checkbox" className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary mt-1" aria-label={`Select ${emp.name}`} checked={isSelected} onChange={() => toggleRowSelection(entry.employeeId)} />
+                         <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
+                           {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+-                          <AvatarFallback className="bg-primary/10 text-primary"><User size={20} /></AvatarFallback>
++                          <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={20} /></AvatarFallback>
+                         </Avatar>
+                         <div className="flex flex-col">
+                           <span className="font-semibold text-base leading-tight">{emp.name}</span>
+                           <span className="text-xs text-muted-foreground">{emp.role}</span>
+                         </div>
+                       </div>
+                       <Badge variant={isPaid ? 'default' : 'destructive'} className={`${isPaid ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'}`}>
+                         {entry.status}
+                       </Badge>
+                     </div>
+@@ -749,57 +749,57 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
+                       )}
+                       <div className="flex flex-col col-span-2 pt-2 mt-1 border-t border-border/50">
+                         <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Net Payout</span>
+                         <span className="font-mono font-bold text-primary text-lg">{currency}{netPay.toLocaleString()}</span>
+                       </div>
+                     </div>
+ 
+                     {/* Footer Actions */}
+                     <div className="flex items-center gap-2 pt-1">
+                       <Button variant="outline" className="flex-1" onClick={() => openCompensationModal(entry)}>
+-                        <Pencil className="mr-2 h-4 w-4 text-blue-500" /> Edit
++                        <Icon name="edit" size={16} className="mr-2 h-4 w-4 text-blue-500" /> Edit
+                       </Button>
+                       {!isPaid ? (
+                         <Button className="flex-1" onClick={() => handleExecutePayment(entry)} disabled={isProcessing}>
+                           {isProcessing ? '...' : 'Execute'}
+                         </Button>
+                       ) : (
+                         <Button variant="secondary" className="flex-1" onClick={() => generatePayslipReceipt(entry, entry.paymentDate)}>
+-                          <Download className="mr-2 h-4 w-4" /> Payslip
++                          <Icon name="download" size={16} className="mr-2 h-4 w-4" /> Payslip
+                         </Button>
+                       )}
+                     </div>
+                   </div>
+                 </Card>
+               )
+             })}
+           </div>
+         </>
+       )}
+ 
+       {/* MANAGE COMPENSATION MODAL */}
+       <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+         <DialogContent className="sm:max-w-md">
+           <DialogHeader>
+             <DialogTitle className="flex items-center gap-2">
+-              <Pencil className="h-5 w-5 text-blue-500" />
++              <Icon name="edit" size={20} className="h-5 w-5 text-blue-500" />
+               Manage Compensation
+             </DialogTitle>
+           </DialogHeader>
+           
+           {selectedEmpLog && (
+             <div className="flex flex-col gap-4">
+               {/* Employee Info */}
+               <div className="flex items-center gap-4 py-4 px-2 border-b border-border/50">
+                 <Avatar className="w-10 h-10 shrink-0 ring-1 ring-border">
+                   {selectedEmpLog.employee.avatar ? <AvatarImage src={selectedEmpLog.employee.avatar} alt={selectedEmpLog.employee.name} className="object-cover" /> : null}
+-                  <AvatarFallback className="bg-primary/10 text-primary"><User size={20} /></AvatarFallback>
++                  <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={20} /></AvatarFallback>
+                 </Avatar>
+                 <div className="flex flex-col">
+                   <span className="font-semibold text-sm">{selectedEmpLog.employee.name}</span>
+                   <span className="text-xs text-muted-foreground">{selectedEmpLog.employee.role}</span>
+                 </div>
+               </div>
+ 
+               <form onSubmit={handleSaveCompensationLedger} className="flex flex-col gap-4">
+                 <div className="flex flex-col gap-2">
+                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Gross Monthly Salary ({currency})</label>
+@@ -843,21 +843,21 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
+                     </button>
+                   </div>
+                   <span className="text-[11px] text-muted-foreground">
+                     {applyGlobally ? 'Salary is saved centrally and affects all months.' : 'Change applies only to the current selected month.'}
+                   </span>
+                 </div>
+ 
+                 <DialogFooter className="mt-4">
+                   <Button type="button" variant="outline" onClick={() => { setIsDrawerOpen(false); setTimeout(() => setSelectedEmpLog(null), 300); }}>Cancel</Button>
+                   <Button type="submit">
+-                    <CheckSquare className="mr-2 h-4 w-4" /> Apply Changes
++                    <Icon name="check_box" size={16} className="mr-2 h-4 w-4" /> Apply Changes
+                   </Button>
+                 </DialogFooter>
+               </form>
+             </div>
+           )}
+         </DialogContent>
+       </Dialog>
+ 
+       <AdSlot type="horizontal" className="mt-4" />
+     </div>
+diff --git a/src/components/ProfileView.jsx b/src/components/ProfileView.jsx
+index 3cec52a..2786dbd 100644
+--- a/src/components/ProfileView.jsx
++++ b/src/components/ProfileView.jsx
+@@ -1,12 +1,12 @@
+ import { useState } from 'react'
+-import { AlertCircle } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Button } from "@/components/ui/button"
+ import { Input } from "@/components/ui/input"
+ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+ 
+ const getInitialsAvatar = (name) => {
+   const parts = name.split(' ')
+   const initials = parts.length > 1 ? parts[0][0] + parts[1][0] : parts[0][0]
+ 
+   let hash = 0
+   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
+@@ -52,21 +52,21 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
+     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[800px] mx-auto pb-10">
+       <div className="flex justify-between items-center">
+         <h2 className="text-2xl font-bold m-0">My Profile</h2>
+         {!editMode && !hasPending && (
+           <Button variant="outline" onClick={() => setEditMode(true)}>Edit Details</Button>
+         )}
+       </div>
+ 
+       {hasPending && (
+         <div className="p-4 rounded-md flex gap-3 items-center bg-amber-500/10 border-l-4 border-l-amber-500 text-foreground">
+-          <AlertCircle className="h-5 w-5 text-amber-500" />
++          <Icon name="error" size={20} className="h-5 w-5 text-amber-500" />
+           <span className="text-sm font-medium">You have pending profile updates waiting for HR approval.</span>
+         </div>
+       )}
+ 
+       <Card>
+         <CardContent className="p-6 flex flex-col sm:flex-row gap-6 items-start">
+           <div className="mx-auto sm:mx-0">
+             {getInitialsAvatar(currentUser.name)}
+           </div>
+           <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
+diff --git a/src/components/Settings.jsx b/src/components/Settings.jsx
+index c721422..4f80700 100644
+--- a/src/components/Settings.jsx
++++ b/src/components/Settings.jsx
+@@ -1,12 +1,12 @@
+ import { useState, useRef, useEffect } from 'react'
+-import { Save, Settings2, DollarSign, Sliders, Info, Percent, Building2, Bell, Globe, Mail, Plus, Trash2, Upload, Activity, X, ShieldCheck, List, FileSpreadsheet, Download, Receipt, CalendarClock, Check, ChevronDown, MapPin, Search, Sun, Moon } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { useModal } from '../services/useModal.js'
+ import AdSlot from './AdSlot.jsx'
+ import { formatDateTime } from '../services/date.js'
+ import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet'
+ import 'leaflet/dist/leaflet.css'
+ import L from 'leaflet'
+ 
+ // Fix default leaflet icon issue
+ delete L.Icon.Default.prototype._getIconUrl;
+ L.Icon.Default.mergeOptions({
+@@ -201,30 +201,30 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+     setDragStart({ x: e.clientX - logoX, y: e.clientY - logoY })
+     e.currentTarget.setPointerCapture(e.pointerId)
+   }
+ 
+   const handlePointerMove = (e) => { if (dragStart) { setLogoX(e.clientX - dragStart.x); setLogoY(e.clientY - dragStart.y) } }
+   const handlePointerUp = () => setDragStart(null)
+ 
+   const handleRemoveLogo = () => { setLogo(''); setLogoX(0); setLogoY(0); setLogoZoom(1); setShowLogoModal(false) }
+ 
+   const menuItems = [
+-    { id: 'theme', icon: Sun, label: 'Appearance & Theme' },
+-    { id: 'payroll', icon: Sliders, label: 'Payroll Settings' },
+-    { id: 'company', icon: Building2, label: 'Company Profile' },
+-    { id: 'attendance', icon: MapPin, label: 'Attendance & Leaves' },
+-    { id: 'expenses', icon: Receipt, label: 'Expense Policies' },
+-    { id: 'rosters', icon: CalendarClock, label: 'Rosters & Shifts' },
+-    { id: 'notifications', icon: Bell, label: 'Notifications' },
+-    { id: 'audit', icon: List, label: 'Audit Logs' },
+-    { id: 'security', icon: ShieldCheck, label: 'Security' },
+-    { id: 'sync', icon: Activity, label: 'Sync Conflicts', badge: syncConflicts?.length },
++    { id: 'theme', icon: <Icon name="light_mode" size={20} />, label: 'Appearance & Theme' },
++    { id: 'payroll', icon: <Icon name="tune" size={20} />, label: 'Payroll Settings' },
++    { id: 'company', icon: <Icon name="apartment" size={20} />, label: 'Company Profile' },
++    { id: 'attendance', icon: <Icon name="pin_drop" size={20} />, label: 'Attendance & Leaves' },
++    { id: 'expenses', icon: <Icon name="receipt_long" size={20} />, label: 'Expense Policies' },
++    { id: 'rosters', icon: <Icon name="calendar_clock" size={20} />, label: 'Rosters & Shifts' },
++    { id: 'notifications', icon: <Icon name="notifications" size={20} />, label: 'Notifications' },
++    { id: 'audit', icon: <Icon name="list" size={20} />, label: 'Audit Logs' },
++    { id: 'security', icon: <Icon name="verified_user" size={20} />, label: 'Security' },
++    { id: 'sync', icon: <Icon name="monitoring" size={20} />, label: 'Sync Conflicts', badge: syncConflicts?.length },
+   ]
+ 
+   const handleExportCSV = () => {
+     const filteredAudit = (auditLogs || []).filter(l => {
+       if (auditFilterAction !== 'All' && l.action !== auditFilterAction) return false
+       if (auditFilterDate && !l.timestamp.startsWith(auditFilterDate)) return false
+       return true
+     })
+     if (!filteredAudit.length) return
+     const headers = ['Timestamp', 'User', 'Action', 'Entity', 'Details', 'IP Address']
+@@ -237,38 +237,38 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+     if (addToast) addToast("Audit logs exported to CSV", "success")
+   }
+ 
+   const renderSettingsContent = (id) => {
+     switch (id) {
+       case 'theme': return (
+         <div className="flex flex-col gap-6">
+           <Card>
+             <CardHeader>
+               <div className="flex items-center gap-2">
+-                {themeMode === 'dark' ? <Moon className="h-5 w-5 text-muted-foreground" /> : <Sun className="h-5 w-5 text-muted-foreground" />}
++                {themeMode === 'dark' ? <Icon name="dark_mode" size={20} className="h-5 w-5 text-muted-foreground" /> : <Icon name="light_mode" size={20} className="h-5 w-5 text-muted-foreground" />}
+                 <CardTitle className="text-lg">Theme</CardTitle>
+               </div>
+               <CardDescription>Choose between light and dark mode for the entire application.</CardDescription>
+             </CardHeader>
+             <CardContent>
+               <div className="flex bg-muted rounded-lg p-1 max-w-[280px]">
+                 <button
+                   onClick={() => { if (themeMode !== 'light') toggleTheme() }}
+                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md transition-all cursor-pointer border-0 ${themeMode === 'light' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                 >
+-                  <Sun size={16} /> Light
++                  <Icon name="light_mode" size={16} /> Light
+                 </button>
+                 <button
+                   onClick={() => { if (themeMode !== 'dark') toggleTheme() }}
+                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md transition-all cursor-pointer border-0 ${themeMode === 'dark' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                 >
+-                  <Moon size={16} /> Dark
++                  <Icon name="dark_mode" size={16} /> Dark
+                 </button>
+               </div>
+               <p className="text-xs text-muted-foreground mt-3">Applies instantly across all portals.</p>
+             </CardContent>
+           </Card>
+         </div>
+       )
+       case 'payroll': return (
+         <div className="flex flex-col gap-6">
+           <Card>
+@@ -290,27 +290,27 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+             </CardContent>
+           </Card>
+ 
+           <Card>
+             <CardHeader className="flex flex-row justify-between items-center space-y-0">
+               <div>
+                 <CardTitle className="text-lg">Salary Structure</CardTitle>
+                 <CardDescription>Configure earning and deduction components for your payroll.</CardDescription>
+               </div>
+               <Button variant="outline" size="sm" onClick={handleAddComponent}>
+-                <Plus className="mr-2 h-4 w-4" /> Add Component
++                <Icon name="add" size={16} className="mr-2 h-4 w-4" /> Add Component
+               </Button>
+             </CardHeader>
+             <CardContent className="flex flex-col gap-6">
+               {isOver100 && (
+                 <div className="p-3 bg-red-100 text-red-900 border border-red-200 rounded-lg flex items-center gap-2 text-sm">
+-                  <Info className="h-4 w-4" /> Component total exceeds 100%. Please adjust before saving.
++                  <Icon name="info" size={16} className="h-4 w-4" /> Component total exceeds 100%. Please adjust before saving.
+                 </div>
+               )}
+ 
+               <div className="flex flex-col gap-3">
+                 {salaryStructure.length === 0 ? (
+                   <span className="text-sm text-muted-foreground text-center py-4">No components configured.</span>
+                 ) : (
+                   salaryStructure.map(item => (
+                     <div key={item.id} className="flex flex-wrap md:flex-nowrap items-center gap-3 p-3 bg-muted/40 border border-border rounded-lg">
+                       <Input value={item.name} onChange={e => handleComponentChange(item.id, 'name', e.target.value)} placeholder="Component name" className="flex-1 min-w-[120px]" />
+@@ -321,93 +321,93 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+                         <button onClick={() => handleComponentChange(item.id, 'type', 'deduction')}
+                           className={`px-3 py-1 text-xs rounded-sm transition-all ${item.type === 'deduction' ? 'bg-background shadow-sm text-red-600 font-medium' : 'text-muted-foreground'}`}>Deduction</button>
+                       </div>
+ 
+                       <div className="relative w-[80px]">
+                         <Input type="number" min="0" max="100" value={item.percentage} onChange={e => handleComponentChange(item.id, 'percentage', Number(e.target.value))} className="pr-6 text-center" />
+                         <span className="absolute right-2 top-2.5 text-xs text-muted-foreground pointer-events-none">%</span>
+                       </div>
+ 
+                       <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-red-500" onClick={() => setComponentToDelete(item.id)}>
+-                        <Trash2 className="h-4 w-4" />
++                        <Icon name="delete" size={16} className="h-4 w-4" />
+                       </Button>
+                     </div>
+                   ))
+                 )}
+               </div>
+ 
+               {salaryStructure.length > 0 && (
+                 <div className="flex justify-between items-center p-4 bg-muted/30 border border-border rounded-lg mt-2">
+                   <span className="font-semibold text-sm">Net Earning Ratio</span>
+                   <span className={`font-bold text-lg font-mono ${netPayPercent >= 0 ? 'text-foreground' : 'text-red-500'}`}>{netPayPercent}%</span>
+                 </div>
+               )}
+             </CardContent>
+           </Card>
+         </div>
+       )
+       case 'company': return (
+         <Card>
+           <CardHeader>
+             <div className="flex items-center gap-2">
+-              <Building2 className="h-5 w-5 text-muted-foreground" />
++              <Icon name="apartment" size={20} className="h-5 w-5 text-muted-foreground" />
+               <CardTitle className="text-lg">Company Profile Settings</CardTitle>
+             </div>
+             <CardDescription>Manage public details used to brand generated documents.</CardDescription>
+           </CardHeader>
+           <CardContent className="flex flex-col gap-6">
+             <div className="flex flex-col gap-2">
+               <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Brand Logo</label>
+               <div className="flex items-center gap-4">
+                 <div role="button" tabIndex={0} onClick={() => { if (logo) setShowLogoModal(true); else triggerFileInput() }}
+                   className="w-16 h-16 rounded-xl border-2 border-dashed flex items-center justify-center cursor-pointer overflow-hidden hover:bg-muted/50 transition-colors relative">
+                   {logo ? <img src={logo} alt="" className="w-full h-full object-cover" style={{ transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)` }} />
+-                    : <Upload className="h-6 w-6 text-muted-foreground/50" />}
++                    : <Icon name="upload" size={24} className="h-6 w-6 text-muted-foreground/50" />}
+                 </div>
+                 <Button variant="outline" size="sm" onClick={triggerFileInput}>
+-                  <Upload className="mr-2 h-4 w-4" /> Upload Logo
++                  <Icon name="upload" size={16} className="mr-2 h-4 w-4" /> Upload Logo
+                 </Button>
+                 <input type="file" ref={fileInputRef} onChange={handleLogoUpload} accept="image/*" className="hidden" />
+               </div>
+             </div>
+ 
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <div className="flex flex-col gap-2">
+                 <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Legal Entity Name</label>
+                 <div className="relative">
+-                  <Building2 className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
++                  <Icon name="apartment" size={16} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                   <Input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="HR Pulse Ltd." className="pl-9" />
+                 </div>
+               </div>
+               <div className="flex flex-col gap-2">
+                 <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">HR Support Email</label>
+                 <div className="relative">
+-                  <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
++                  <Icon name="mail" size={16} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                   <Input type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="hr@hrpulse.io" className="pl-9" />
+                 </div>
+               </div>
+               <div className="flex flex-col gap-2 md:col-span-2">
+                 <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Company Website URL</label>
+                 <div className="relative">
+-                  <Globe className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
++                  <Icon name="language" size={16} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                   <Input value={companyWebsite} onChange={e => setCompanyWebsite(e.target.value)} placeholder="www.hrpulse.io" className="pl-9" />
+                 </div>
+               </div>
+             </div>
+           </CardContent>
+         </Card>
+       )
+       case 'notifications': return (
+         <Card>
+           <CardHeader>
+             <div className="flex items-center gap-2">
+-              <Bell className="h-5 w-5 text-muted-foreground" />
++              <Icon name="notifications" size={20} className="h-5 w-5 text-muted-foreground" />
+               <CardTitle className="text-lg">Notification Preferences</CardTitle>
+             </div>
+             <CardDescription>Enable alerts, sync logs alerts, or background notification parameters.</CardDescription>
+           </CardHeader>
+           <CardContent className="flex flex-col">
+             {[
+               { label: 'Enable Real-time Sync Alerts', desc: 'Displays popups when files successfully sync with Google Drive.', val: syncAlerts, set: setSyncAlerts },
+               { label: 'Email Monthly Payout Digest', desc: 'Sends a copy of the payroll statements to the HR support inbox.', val: emailDigests, set: setEmailDigests },
+             ].map((item, i) => (
+               <div key={item.label} className={`py-4 flex justify-between items-center ${i === 0 ? 'border-b border-border' : ''}`}>
+@@ -419,21 +419,21 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+               </div>
+             ))}
+           </CardContent>
+         </Card>
+       )
+       case 'attendance': return (
+         <div className="flex flex-col gap-6">
+           <Card>
+             <CardHeader>
+               <div className="flex items-center gap-2">
+-                <MapPin className="h-5 w-5 text-muted-foreground" />
++                <Icon name="pin_drop" size={20} className="h-5 w-5 text-muted-foreground" />
+                 <CardTitle className="text-lg">Office Location Settings</CardTitle>
+               </div>
+               <CardDescription>Set the central GPS coordinates and check-in radius for your office.</CardDescription>
+             </CardHeader>
+             <CardContent className="flex flex-col gap-6">
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                 <div className="flex flex-col gap-2">
+                   <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Latitude</label>
+                   <Input type="number" step="any" value={officeLocation.lat} onChange={e => setOfficeLocation({...officeLocation, lat: parseFloat(e.target.value)})} />
+                 </div>
+@@ -445,30 +445,30 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+                   <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Radius (meters)</label>
+                   <Input type="number" value={officeLocation.radius} onChange={e => setOfficeLocation({...officeLocation, radius: parseInt(e.target.value, 10)})} />
+                 </div>
+               </div>
+               
+               <div className="flex flex-col gap-2 mt-2">
+                 <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Interactive Map Picker</label>
+                 
+                 <form onSubmit={handleMapSearch} className="flex gap-2 mb-2">
+                   <div className="relative flex-1">
+-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
++                    <Icon name="search" size={16} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                     <Input 
+                       placeholder="Search for a city, building, or address..." 
+                       className="pl-9"
+                       value={mapSearchQuery}
+                       onChange={(e) => setMapSearchQuery(e.target.value)}
+                     />
+                   </div>
+                   <Button type="submit" disabled={isMapSearching} variant="secondary">
+-                    {isMapSearching ? <Activity className="h-4 w-4 animate-spin" /> : 'Search'}
++                    {isMapSearching ? <Icon name="monitoring" size={16} className="h-4 w-4 animate-spin" /> : 'Search'}
+                   </Button>
+                 </form>
+ 
+                 <div className="h-[400px] w-full rounded-xl overflow-hidden border border-border shadow-sm z-0 relative" style={{ zIndex: 0 }}>
+                   <MapContainer center={[officeLocation.lat, officeLocation.lng]} zoom={15} scrollWheelZoom={true} style={{ height: '100%', width: '100%', zIndex: 0 }}>
+                     <TileLayer
+                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                     />
+                     <LocationMarker 
+@@ -478,21 +478,21 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+                   </MapContainer>
+                 </div>
+                 <p className="text-xs text-muted-foreground mt-1 text-center">Click anywhere on the map to set your office location pin.</p>
+               </div>
+             </CardContent>
+           </Card>
+ 
+           <Card>
+             <CardHeader>
+               <div className="flex items-center gap-2">
+-                <CalendarClock className="h-5 w-5 text-muted-foreground" />
++                <Icon name="calendar_clock" size={20} className="h-5 w-5 text-muted-foreground" />
+                 <CardTitle className="text-lg">Leave Types & Balances</CardTitle>
+               </div>
+               <CardDescription>Determine what leaves the company provides and the default yearly allowance for each.</CardDescription>
+             </CardHeader>
+             <CardContent>
+               <div className="space-y-4">
+                 {Object.entries(leavePolicies).map(([type, days]) => (
+                   <div key={type} className="flex items-center gap-4 bg-muted/30 p-3 rounded-xl border border-border">
+                     <Input 
+                       className="flex-1 font-semibold" 
+@@ -515,42 +515,42 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+                         placeholder="Days"
+                       />
+                       <span className="text-sm text-muted-foreground">days</span>
+                     </div>
+                     <Button 
+                       variant="ghost" 
+                       size="icon" 
+                       className="text-destructive hover:text-destructive hover:bg-destructive/10" 
+                       onClick={() => setLeaveTypeToDelete(type)}
+                     >
+-                      <Trash2 className="h-4 w-4" />
++                      <Icon name="delete" size={16} className="h-4 w-4" />
+                     </Button>
+                   </div>
+                 ))}
+                 
+                 <Button 
+                   variant="outline" 
+                   className="w-full mt-2 border-dashed border-2 hover:border-primary hover:text-primary transition-colors bg-transparent"
+                   onClick={() => setLeavePolicies({ ...leavePolicies, [`New Leave ${Date.now()}`]: 0 })}
+                 >
+-                  <Plus className="mr-2 h-4 w-4" /> Add Leave Type
++                  <Icon name="add" size={16} className="mr-2 h-4 w-4" /> Add Leave Type
+                 </Button>
+               </div>
+             </CardContent>
+           </Card>
+         </div>
+       )
+       case 'expenses': return (
+         <Card>
+           <CardHeader>
+             <div className="flex items-center gap-2">
+-              <Receipt className="h-5 w-5 text-muted-foreground" />
++              <Icon name="receipt_long" size={20} className="h-5 w-5 text-muted-foreground" />
+               <CardTitle className="text-lg">Expense Policies</CardTitle>
+             </div>
+             <CardDescription>Set maximum reimbursement limits per category.</CardDescription>
+           </CardHeader>
+           <CardContent>
+             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+               {Object.keys(expensePolicies).map(cat => (
+                 <div key={cat} className="flex flex-col gap-2">
+                   <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">{cat}</label>
+                   <Input type="number" value={expensePolicies[cat]} onChange={e => setExpensePolicies(prev => ({ ...prev, [cat]: Number(e.target.value) }))} />
+@@ -558,25 +558,25 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+               ))}
+             </div>
+           </CardContent>
+         </Card>
+       )
+       case 'rosters': return (
+         <div className="flex flex-col gap-6">
+           <Card>
+             <CardHeader className="flex flex-row justify-between items-center space-y-0">
+               <div className="flex items-center gap-2">
+-                <CalendarClock className="h-5 w-5 text-muted-foreground" />
++                <Icon name="calendar_clock" size={20} className="h-5 w-5 text-muted-foreground" />
+                 <CardTitle className="text-lg">Shift Templates</CardTitle>
+               </div>
+               <Button variant="outline" size="sm" onClick={() => setShiftTemplates(prev => [...prev, { id: `st-${Date.now()}`, name: 'New Shift', start: '09:00', end: '17:00', break: 60, color: '#333333' }])}>
+-                <Plus className="mr-2 h-4 w-4" /> Add Shift
++                <Icon name="add" size={16} className="mr-2 h-4 w-4" /> Add Shift
+               </Button>
+             </CardHeader>
+             <CardContent className="flex flex-col gap-4">
+               {shiftTemplates.map(t => (
+                 <div key={t.id} className="flex flex-wrap gap-4 items-end p-4 bg-muted/30 border border-border rounded-lg">
+                   <div className="flex-1 min-w-[140px] flex flex-col gap-2">
+                     <label className="text-xs font-medium text-muted-foreground uppercase">Shift Name</label>
+                     <Input value={t.name} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, name: e.target.value } : x))} />
+                   </div>
+                   <div className="w-[100px] flex flex-col gap-2">
+@@ -589,31 +589,31 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+                   </div>
+                   <div className="w-[80px] flex flex-col gap-2">
+                     <label className="text-xs font-medium text-muted-foreground uppercase">Break(m)</label>
+                     <Input type="number" value={t.break} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, break: parseInt(e.target.value) || 0 } : x))} />
+                   </div>
+                   <div className="w-[50px] flex flex-col gap-2">
+                     <label className="text-xs font-medium text-transparent uppercase">C</label>
+                     <input type="color" value={t.color} onChange={e => setShiftTemplates(prev => prev.map(x => x.id === t.id ? { ...x, color: e.target.value } : x))} className="h-10 w-full p-0 border-0 bg-transparent rounded cursor-pointer" />
+                   </div>
+                   <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-red-500 mb-0.5" onClick={() => setShiftTemplates(prev => prev.filter(x => x.id !== t.id))}>
+-                    <Trash2 className="h-4 w-4" />
++                    <Icon name="delete" size={16} className="h-4 w-4" />
+                   </Button>
+                 </div>
+               ))}
+             </CardContent>
+           </Card>
+ 
+           <Card>
+             <CardHeader>
+               <div className="flex items-center gap-2">
+-                <Activity className="h-5 w-5 text-muted-foreground" />
++                <Icon name="monitoring" size={20} className="h-5 w-5 text-muted-foreground" />
+                 <CardTitle className="text-lg">Overtime Rules</CardTitle>
+               </div>
+             </CardHeader>
+             <CardContent>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="flex flex-col gap-2">
+                   <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Weekday Multiplier</label>
+                   <Input type="number" step="0.1" value={overtimeRules.multiplierWeekday} onChange={e => setOvertimeRules(prev => ({ ...prev, multiplierWeekday: parseFloat(e.target.value) || 1 }))} />
+                 </div>
+                 <div className="flex flex-col gap-2">
+@@ -623,27 +623,27 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+               </div>
+             </CardContent>
+           </Card>
+         </div>
+       )
+       case 'audit': return (
+         <Card>
+           <CardHeader className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+             <div>
+               <div className="flex items-center gap-2">
+-                <List className="h-5 w-5 text-muted-foreground" />
++                <Icon name="list" size={20} className="h-5 w-5 text-muted-foreground" />
+                 <CardTitle className="text-lg">Audit Logs</CardTitle>
+               </div>
+               <CardDescription>Review all system actions for compliance and security.</CardDescription>
+             </div>
+             <Button variant="outline" size="sm" onClick={handleExportCSV}>
+-              <Download className="mr-2 h-4 w-4" /> Export CSV
++              <Icon name="download" size={16} className="mr-2 h-4 w-4" /> Export CSV
+             </Button>
+           </CardHeader>
+           <CardContent className="flex flex-col gap-4">
+             <div className="flex flex-wrap items-end gap-4 p-4 bg-muted/40 border border-border rounded-lg">
+               <div className="flex-1 min-w-[140px] flex flex-col gap-2">
+                 <DatePicker label="Date" value={auditFilterDate} onChange={e => setAuditFilterDate(e.target.value)} />
+               </div>
+               <div className="flex-1 min-w-[140px] flex flex-col gap-2">
+                 <Select label="ACTION TYPE" value={auditFilterAction} onChange={setAuditFilterAction}>
+                   <SelectItem id="All">All Actions</SelectItem>
+@@ -697,21 +697,21 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+                 </TableBody>
+               </Table>
+             </div>
+           </CardContent>
+         </Card>
+       )
+       case 'security': return (
+         <Card>
+           <CardHeader>
+             <div className="flex items-center gap-2">
+-              <ShieldCheck className="h-5 w-5 text-muted-foreground" />
++              <Icon name="verified_user" size={20} className="h-5 w-5 text-muted-foreground" />
+               <CardTitle className="text-lg">Session Management</CardTitle>
+             </div>
+             <CardDescription>Review devices currently logged into your account.</CardDescription>
+           </CardHeader>
+           <CardContent className="flex flex-col gap-4">
+             {activeSessions.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8 border border-border rounded-lg border-dashed">No active sessions tracked locally.</div>
+             ) : (
+               activeSessions.map(sess => (
+                 <div key={sess.id} className="p-4 bg-muted/30 border border-border rounded-lg flex justify-between items-center gap-4 flex-wrap">
+@@ -738,21 +738,21 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+                 </Button>
+               </div>
+             )}
+           </CardContent>
+         </Card>
+       )
+       case 'sync': return (
+         <Card>
+           <CardHeader>
+             <div className="flex items-center gap-2">
+-              <Activity className="h-5 w-5 text-muted-foreground" />
++              <Icon name="monitoring" size={20} className="h-5 w-5 text-muted-foreground" />
+               <CardTitle className="text-lg">Sync Conflicts</CardTitle>
+             </div>
+             <CardDescription>Review and resolve data conflicts between local and remote databases.</CardDescription>
+           </CardHeader>
+           <CardContent>
+             {/* Desktop Table View */}
+             <div className="hidden lg:block border border-border rounded-lg overflow-hidden">
+               <Table>
+                 <TableHeader className="bg-muted/50">
+                   <TableRow>
+@@ -824,60 +824,59 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+         </Card>
+       )
+       default: return null
+     }
+   }
+ 
+   return (
+     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
+       <div className="flex items-center justify-between">
+         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+-          <Settings2 size={20} className="text-primary" />
++          <Icon name="settings" size={20} className="text-primary" />
+           System Settings
+         </h1>
+       </div>
+       <div className="border-t border-border border-headline" />
+ 
+       <div className="flex flex-col gap-4">
+         {menuItems.map(item => {
+-          const Icon = item.icon
+           const isActive = activeSubmenu === item.id && panelOpen
+           return (
+             <Card key={item.id} className={`overflow-hidden transition-all duration-200 shadow-xs border-border ${isActive ? 'ring-1 ring-primary/20' : ''}`}>
+               <button 
+                 onClick={() => setTab(item.id)}
+                 className="w-full flex items-center justify-between p-4 md:p-5 bg-card hover:bg-muted/50 transition-colors border-0 outline-none cursor-pointer"
+               >
+                 <div className="flex items-center gap-3">
+                   <div className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-muted text-muted-foreground'}`}>
+-                    <Icon className="h-5 w-5" />
++                    {item.icon}
+                   </div>
+                   <span className={`font-semibold text-base transition-colors ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
+                     {item.label}
+                   </span>
+                   {item.badge > 0 && (
+                     <Badge variant={isActive ? 'default' : 'secondary'} className="ml-2">{item.badge}</Badge>
+                   )}
+                 </div>
+-                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform duration-300 ${isActive ? 'rotate-180' : ''}`} />
++                <Icon name="keyboard_arrow_down" size={20} className={`h-5 w-5 text-muted-foreground transition-transform duration-300 ${isActive ? 'rotate-180' : ''}`} />
+               </button>
+               
+               <div className={`grid transition-all duration-300 ease-in-out ${isActive ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                 <div className="overflow-hidden">
+                   <div className="p-4 md:p-6 border-t border-border bg-muted/10 flex flex-col gap-6">
+                     {isActive && renderSettingsContent(item.id)}
+                     
+                     {isActive && ['payroll', 'company', 'attendance', 'expenses', 'rosters', 'notifications'].includes(item.id) && (
+                       <div className="flex justify-end gap-3 pt-4 mt-2 border-t border-border/50">
+                         <Button variant="ghost" onClick={() => setShowResetModal(true)}>Reset Defaults</Button>
+                         <Button onClick={handleSave} disabled={isSaving || (item.id === 'payroll' && isOver100)}>
+-                          {isSaving ? <Activity className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
++                          {isSaving ? <Icon name="monitoring" size={16} className="mr-2 h-4 w-4 animate-spin" /> : <Icon name="save" size={16} className="mr-2 h-4 w-4" />}
+                           {isSaving ? 'Saving...' : 'Save Settings'}
+                         </Button>
+                       </div>
+                     )}
+                   </div>
+                 </div>
+               </div>
+             </Card>
+           )
+         })}
+@@ -889,38 +888,38 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
+       <Dialog open={showLogoModal} onOpenChange={setShowLogoModal}>
+         <DialogContent className="sm:max-w-md">
+           <DialogHeader>
+             <DialogTitle>Edit Brand Logo</DialogTitle>
+           </DialogHeader>
+           <div className="flex flex-col items-center gap-6 py-4">
+             <p className="text-sm text-muted-foreground text-center">Drag the image to reposition it, or use the slider below to zoom.</p>
+             <div role="img" aria-label="Logo preview" onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerUp} onPointerLeave={handlePointerUp}
+               className="w-32 h-32 rounded-2xl bg-muted border border-border flex items-center justify-center overflow-hidden relative cursor-grab active:cursor-grabbing touch-none">
+               {logo ? <img src={logo} alt="" draggable="false" className="w-full h-full object-cover pointer-events-none" style={{ transform: `scale(${logoZoom}) translate(${logoX}px, ${logoY}px)` }} />
+-                : <Activity className="h-8 w-8 text-muted-foreground/50" />}
++                : <Icon name="monitoring" size={32} className="h-8 w-8 text-muted-foreground/50" />}
+             </div>
+             <div className="w-full flex items-center gap-3">
+               <span className="text-xs font-medium text-muted-foreground">Zoom</span>
+               <input type="range" min="0.5" max="3" step="0.05" value={logoZoom} onChange={e => setLogoZoom(parseFloat(e.target.value))} className="flex-1 accent-primary" />
+             </div>
+             <div className="flex gap-3 w-full">
+               <Button variant="outline" className="flex-1" onClick={triggerFileInput}>
+-                <Upload className="mr-2 h-4 w-4" /> Replace
++                <Icon name="upload" size={16} className="mr-2 h-4 w-4" /> Replace
+               </Button>
+               <Button variant="outline" className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200" onClick={handleRemoveLogo}>
+-                <Trash2 className="mr-2 h-4 w-4" /> Remove
++                <Icon name="delete" size={16} className="mr-2 h-4 w-4" /> Remove
+               </Button>
+             </div>
+           </div>
+           <DialogFooter>
+             <Button className="w-full" onClick={() => setShowLogoModal(false)}>
+-              <Check className="mr-2 h-4 w-4" /> Done
++              <Icon name="check" size={16} className="mr-2 h-4 w-4" /> Done
+             </Button>
+           </DialogFooter>
+         </DialogContent>
+       </Dialog>
+ 
+       {/* Reset Modal */}
+       <AlertDialog open={showResetModal} onOpenChange={setShowResetModal}>
+         <AlertDialogContent>
+           <AlertDialogHeader>
+             <AlertDialogTitle>Reset Settings?</AlertDialogTitle>
+diff --git a/src/components/Tasks.jsx b/src/components/Tasks.jsx
+index a1715fb..da6b97f 100644
+--- a/src/components/Tasks.jsx
++++ b/src/components/Tasks.jsx
+@@ -1,12 +1,12 @@
+ import { useState } from 'react'
+-import { Plus, Search, LayoutGrid, List, MoreVertical, Calendar as CalendarIcon, Edit, Trash2, CheckSquare, ChevronDown, MessageSquare, Send, User } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Button } from "@/components/ui/button"
+ import { Input } from "@/components/ui/input"
+ import { DatePicker } from "@/components/ui/date-picker"
+ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
+ import { Select, SelectItem } from "@/components/ui/select"
+ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+ 
+ export default function Tasks({ tasks = [], setTasks, employees = [], currentUser, addToast, simulatedRole, addLog, addNotification }) {
+   const [activeStatusTab, setActiveStatusTab] = useState('To Do')
+@@ -181,47 +181,47 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
+     return employees.filter(e => ids.includes(e.id))
+   }
+ 
+   const canEditDetails = simulatedRole !== 'Teammate' || !editingTask || editingTask.createdBy === currentUser?.id;
+ 
+   return (
+     <div className="w-full flex flex-col gap-6 animate-fade-in p-2 sm:p-4">
+       {/* Header */}
+       <div className="flex flex-col pb-4 border-b border-border border-headline mb-2">
+         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+-          <CheckSquare size={20} className="text-primary" /> Tasks
++          <Icon name="check_box" size={20} className="text-primary" /> Tasks
+         </h1>
+       </div>
+       
+       <div className="flex flex-wrap gap-4 mb-4 items-center w-full justify-between">
+         <div className="relative flex-auto min-w-[250px] lg:max-w-md w-full">
+-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
++          <Icon name="search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+           <Input 
+             placeholder="Search tasks or assignees..." 
+             value={search}
+             onChange={(e) => setSearch(e.target.value)}
+             className="pl-9 bg-background w-full"
+           />
+         </div>
+         
+         <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+           <div className="flex-1 sm:flex-none min-w-[140px]">
+             <Select value={filterAssignee} onChange={setFilterAssignee}>
+               <SelectItem id="all">All Assignees</SelectItem>
+               <SelectItem id="unassigned">Unassigned</SelectItem>
+               {employees.map(e => <SelectItem key={e.id} id={e.id}>{e.name}</SelectItem>)}
+             </Select>
+           </div>
+           
+ 
+           <Button onClick={() => openModal()} className="shadow-sm w-full sm:w-auto">
+-            <Plus className="h-4 w-4 mr-2" /> Add Task
++            <Icon name="add" size={16} className="h-4 w-4 mr-2" /> Add Task
+           </Button>
+         </div>
+       </div>
+ 
+       {/* Status Tabs */}
+       <div className="w-full overflow-x-auto pb-2 hide-scrollbar">
+         <div className="flex w-max min-w-full sm:min-w-0 p-1.5 bg-muted/40 rounded-xl border border-border/60 gap-1.5">
+           {COLUMNS.map(col => {
+             const count = filteredTasks.filter(t => t.status === col).length;
+             const isActive = activeStatusTab === col;
+@@ -253,87 +253,87 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
+             <div 
+               key={task.id}
+               className="bg-card text-card-foreground rounded-xl border border-border p-4 sm:p-5 shadow-sm hover:border-primary/50 hover:shadow-md transition-all group flex flex-col h-full"
+             >
+               <div className="flex justify-between items-start mb-2.5 sm:mb-3">
+                 <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded ${getPriorityColor(task.priority)}`}>
+                   {task.priority}
+                 </span>
+                 <div className="flex gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                   <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openModal(task) }} className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10">
+-                    <Edit className="h-4 w-4" />
++                    <Icon name="edit" size={16} className="h-4 w-4" />
+                   </Button>
+                   {(simulatedRole !== 'Teammate' || task.createdBy === currentUser?.id) && (
+                     <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setTaskToDelete(task.id) }} className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+-                      <Trash2 className="h-4 w-4" />
++                      <Icon name="delete" size={16} className="h-4 w-4" />
+                     </Button>
+                   )}
+                 </div>
+               </div>
+               
+               <h4 className="font-semibold text-sm sm:text-base mb-1.5 sm:mb-2 leading-tight">{task.title}</h4>
+               <p className="text-xs sm:text-sm text-muted-foreground break-words mb-3 sm:mb-4 flex-1">{task.description}</p>
+               
+               <div className="mb-3 sm:mb-4 flex items-center gap-2">
+                 <span className="text-xs font-medium text-muted-foreground shrink-0">Status:</span>
+                 <Select value={task.status} onChange={(val) => {
+                   setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: val } : t))
+                   addLog(`Moved task to ${val}`, `Task ID: ${task.id}`)
+                 }}>
+                   {COLUMNS.map(c => <SelectItem key={c} id={c}>{c}</SelectItem>)}
+                 </Select>
+               </div>
+ 
+               {task.updates && task.updates.length > 0 && (
+                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
+-                  <MessageSquare className="h-3.5 w-3.5" />
++                  <Icon name="chat" size={14} className="h-3.5 w-3.5" />
+                   <span>{task.updates.length} updates</span>
+                 </div>
+               )}
+               
+               {task.tags && task.tags.length > 0 && (
+                 <div className="flex flex-wrap gap-1.5 mb-3 sm:mb-4">
+                   {task.tags.map((tag, idx) => (
+                     <span key={idx} className="text-[10px] font-medium bg-secondary text-secondary-foreground px-2 py-0.5 rounded border border-border/50">
+                       {tag}
+                     </span>
+                   ))}
+                 </div>
+               )}
+               
+               <div className="flex items-center justify-between mt-auto pt-3 sm:pt-4 border-t border-border/50">
+                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+-                  <CalendarIcon className="h-3.5 w-3.5" />
++                  <Icon name="calendar_month" size={14} className="h-3.5 w-3.5" />
+                   {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No date'}
+                 </div>
+                 {assignees.length > 0 && (
+                   <div className="flex -space-x-2">
+                     {assignees.slice(0, 3).map((a, i) => (
+                       <Avatar key={a.id} className="h-7 w-7 border-2 border-card relative" style={{ zIndex: 3 - i }} title={a.name}>
+                         {a.avatar ? <AvatarImage src={a.avatar} alt={a.name} className="object-cover" /> : null}
+-                        <AvatarFallback className="bg-primary/10 text-primary"><User size={14} /></AvatarFallback>
++                        <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={14} /></AvatarFallback>
+                       </Avatar>
+                     ))}
+                     {assignees.length > 3 && (
+                       <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center text-[10px] font-medium border-2 border-card relative z-0">
+                         +{assignees.length - 3}
+                       </div>
+                     )}
+                   </div>
+                 )}
+               </div>
+             </div>
+           )
+         })}
+         {filteredTasks.filter(t => t.status === activeStatusTab).length === 0 && (
+           <div className="col-span-full flex flex-col items-center justify-center py-20 text-center border-2 border-dashed border-border rounded-xl">
+-            <CheckSquare className="h-12 w-12 text-muted-foreground/30 mb-3" />
++            <Icon name="check_box" size={48} className="h-12 w-12 text-muted-foreground/30 mb-3" />
+             <h3 className="text-lg font-medium text-foreground">No tasks found</h3>
+             <p className="text-sm text-muted-foreground">There are no tasks in '{activeStatusTab}' status.</p>
+           </div>
+         )}
+       </div>
+ 
+       {/* Delete Confirmation Alert */}
+       <AlertDialog open={!!taskToDelete} onOpenChange={(open) => !open && setTaskToDelete(null)}>
+         <AlertDialogContent>
+           <AlertDialogHeader>
+@@ -429,21 +429,21 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
+                     <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Assignees</label>
+                     <div className="relative">
+                       <Button 
+                         variant="outline" 
+                         className="w-full justify-between font-normal bg-background shadow-sm h-9 px-3 py-2 text-sm"
+                         onClick={() => setShowAssigneesDropdown(!showAssigneesDropdown)}
+                       >
+                         {taskForm.assigneeIds.length > 0 
+                           ? <span className="flex items-center gap-2"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">{taskForm.assigneeIds.length}</span> selected</span>
+                           : <span className="text-muted-foreground">Select Assignees...</span>}
+-                        <ChevronDown className="h-4 w-4 opacity-50" />
++                        <Icon name="keyboard_arrow_down" size={16} className="h-4 w-4 opacity-50" />
+                       </Button>
+                       {showAssigneesDropdown && (
+                         <div className="absolute bottom-full mb-1 z-50 w-full bg-popover border border-border rounded-md shadow-md text-popover-foreground">
+                           <div className="px-3 py-2 text-sm font-semibold bg-muted/40 border-b border-border">Select Employees</div>
+                           <div className="max-h-[180px] overflow-y-auto p-1.5 flex flex-col gap-0.5">
+                             {employees.map(emp => (
+                               <label key={emp.id} className="flex items-center gap-2.5 text-sm p-2 hover:bg-accent rounded-sm cursor-pointer transition-colors group">
+                                 <input 
+                                   type="checkbox" 
+                                   checked={taskForm.assigneeIds.includes(emp.id)}
+@@ -451,21 +451,21 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
+                                     if (e.target.checked) {
+                                       setTaskForm({...taskForm, assigneeIds: [...taskForm.assigneeIds, emp.id]})
+                                     } else {
+                                       setTaskForm({...taskForm, assigneeIds: taskForm.assigneeIds.filter(id => id !== emp.id)})
+                                     }
+                                   }}
+                                   className="rounded border-border accent-primary h-4 w-4 shrink-0 transition-all"
+                                 />
+                                 <Avatar className="h-6 w-6 shrink-0 ring-1 ring-border group-hover:ring-primary/50">
+                                   {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+-                                  <AvatarFallback className="bg-primary/10 text-primary"><User size={12} /></AvatarFallback>
++                                  <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={12} /></AvatarFallback>
+                                 </Avatar>
+                                 <span className="truncate">{emp.name}</span>
+                               </label>
+                             ))}
+                           </div>
+                         </div>
+                       )}
+                     </div>
+                   </div>
+                   <div className="space-y-2">
+@@ -485,21 +485,21 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
+                 <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+                   {taskForm.updates.length === 0 ? (
+                     <div className="text-center text-sm text-muted-foreground mt-8">No updates yet. Be the first to add one!</div>
+                   ) : (
+                     taskForm.updates.map(update => {
+                       const author = getAssignees([update.authorId])[0]
+                       return (
+                         <div key={update.id} className="flex gap-3 text-sm">
+                           <Avatar className="h-8 w-8 shrink-0">
+                             {author?.avatar ? <AvatarImage src={author.avatar} className="object-cover" /> : null}
+-                            <AvatarFallback className="bg-primary/10 text-primary"><User size={16} /></AvatarFallback>
++                            <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={16} /></AvatarFallback>
+                           </Avatar>
+                           <div className="flex-1 bg-muted/50 rounded-lg p-3">
+                             <div className="flex items-center gap-2">
+                               <span className="text-sm font-semibold">{author?.name || 'Unknown'}</span>
+                               <span className="text-xs text-muted-foreground">{new Date(update.timestamp).toLocaleString()}</span>
+                             </div>
+                             <p className="text-sm">{update.text}</p>
+                           </div>
+                         </div>
+                       )
+@@ -510,21 +510,21 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
+                   <div className="grid gap-1 flex-1">
+                     <Input 
+                       placeholder="Type your update here..." 
+                       value={updateText}
+                       onChange={e => setUpdateText(e.target.value)}
+                       onKeyDown={e => {
+                         if (e.key === 'Enter') handleAddUpdate()
+                       }}
+                     />
+                   </div>
+-                  <Button onClick={handleAddUpdate} size="icon"><Send className="h-4 w-4" /></Button>
++                  <Button onClick={handleAddUpdate} size="icon"><Icon name="send" size={16} className="h-4 w-4" /></Button>
+                 </div>
+               </div>
+               )}
+             </div>
+           ) : (
+             <div className="grid gap-5 py-5 max-h-[65vh] overflow-y-auto px-6">
+               <div className="space-y-2">
+                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">Task Title <span className="text-destructive">*</span></label>
+                 <Input 
+                   value={taskForm.title} 
+@@ -576,21 +576,21 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
+                   <div className="relative">
+                     <Button 
+                       variant="outline" 
+                       className="w-full justify-between font-normal bg-background shadow-sm h-9 px-3 py-2 text-sm"
+                       onClick={() => { if (canEditDetails) setShowAssigneesDropdown(!showAssigneesDropdown) }}
+                       disabled={!canEditDetails}
+                     >
+                       {taskForm.assigneeIds.length > 0 
+                         ? <span className="flex items-center gap-2"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">{taskForm.assigneeIds.length}</span> selected</span>
+                         : <span className="text-muted-foreground">Select Assignees...</span>}
+-                      <ChevronDown className="h-4 w-4 opacity-50" />
++                      <Icon name="keyboard_arrow_down" size={16} className="h-4 w-4 opacity-50" />
+                     </Button>
+                     {showAssigneesDropdown && (
+                       <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-md text-popover-foreground">
+                         <div className="px-3 py-2 text-sm font-semibold bg-muted/40 border-b border-border">Select Employees</div>
+                         <div className="max-h-[180px] overflow-y-auto p-1.5 flex flex-col gap-0.5">
+                           {employees.map(emp => (
+                             <label key={emp.id} className="flex items-center gap-2.5 text-sm p-2 hover:bg-accent rounded-sm cursor-pointer transition-colors group">
+                               <input 
+                                 type="checkbox" 
+                                 checked={taskForm.assigneeIds.includes(emp.id)}
+@@ -599,21 +599,21 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
+                                     setTaskForm({...taskForm, assigneeIds: [...taskForm.assigneeIds, emp.id]})
+                                   } else {
+                                     setTaskForm({...taskForm, assigneeIds: taskForm.assigneeIds.filter(id => id !== emp.id)})
+                                   }
+                                 }}
+                                 className="rounded border-border accent-primary h-4 w-4 shrink-0 transition-all"
+                               />
+                               <div className="flex items-center gap-2">
+                                 <Avatar className="h-6 w-6 shrink-0 ring-1 ring-border group-hover:ring-primary/50">
+                                   {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+-                                  <AvatarFallback className="bg-primary/10 text-primary"><User size={12} /></AvatarFallback>
++                                  <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={12} /></AvatarFallback>
+                                 </Avatar>
+                                 <span>{emp.name}</span>
+                               </div>
+                             </label>
+                           ))}
+                         </div>
+                       </div>
+                     )}
+                   </div>
+                 </div>

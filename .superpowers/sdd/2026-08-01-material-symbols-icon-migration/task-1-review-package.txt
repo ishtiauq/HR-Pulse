@@ -1,0 +1,170 @@
+ package-lock.json          | 11 +++++++++++
+ package.json               |  2 ++
+ src/components/ui/Icon.jsx | 15 +++++++++++++++
+ src/index.css              | 21 +++++++++++++++++++++
+ 4 files changed, 49 insertions(+)
+diff --git a/package-lock.json b/package-lock.json
+index c4398a4..fc66b33 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -3,23 +3,25 @@
+   "version": "0.0.0",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "hr-pulse",
+       "version": "0.0.0",
+       "dependencies": {
+         "@colbymchenry/codegraph": "^1.5.0",
+         "@fontsource-variable/inter": "^5.3.0",
++        "@fontsource-variable/material-symbols-rounded": "^5.3.1",
+         "@hugeicons/core-free-icons": "^4.2.3",
+         "@hugeicons/react": "^1.1.9",
+         "@internationalized/date": "^3.12.2",
++        "@react-leaflet/core": "^3.0.0",
+         "class-variance-authority": "^0.7.1",
+         "clsx": "^2.1.1",
+         "framer-motion": "^12.43.0",
+         "html2canvas": "^1.4.1",
+         "jspdf": "^4.2.1",
+         "jspdf-autotable": "^5.0.8",
+         "leaflet": "^1.9.4",
+         "lucide-react": "^1.24.0",
+         "react": "^19.2.7",
+         "react-aria-components": "^1.19.0",
+@@ -766,20 +768,29 @@
+     },
+     "node_modules/@fontsource-variable/inter": {
+       "version": "5.3.0",
+       "resolved": "https://registry.npmjs.org/@fontsource-variable/inter/-/inter-5.3.0.tgz",
+       "integrity": "sha512-OupL48va4JNofb97w6NYeF9S7W/kHNKM0Er8Dem5nqi4jeOLrVJDoE8tZEpnMJmtkvNbB1EIPPwHcdkF6b1oUA==",
+       "license": "OFL-1.1",
+       "funding": {
+         "url": "https://github.com/sponsors/ayuhito"
+       }
+     },
++    "node_modules/@fontsource-variable/material-symbols-rounded": {
++      "version": "5.3.1",
++      "resolved": "https://registry.npmjs.org/@fontsource-variable/material-symbols-rounded/-/material-symbols-rounded-5.3.1.tgz",
++      "integrity": "sha512-jaG2HtEbjAYiFqQCzyq3bNiM0RP7gOBluXNIK/k3iZHG5UbUwnQTBrW/GjsBXpczQ+/NYwvKdrpYfVM3YBVYhQ==",
++      "license": "OFL-1.1",
++      "funding": {
++        "url": "https://github.com/sponsors/ayuhito"
++      }
++    },
+     "node_modules/@hono/node-server": {
+       "version": "1.19.17",
+       "resolved": "https://registry.npmjs.org/@hono/node-server/-/node-server-1.19.17.tgz",
+       "integrity": "sha512-dSneS5qhiauZWGDCeK4o695Xd9nUNjviSZCMQrj10eetr8Uln1ucn6bbphOM6UynAMMtNIzZNSpL9vnASJwrPQ==",
+       "license": "MIT",
+       "engines": {
+         "node": ">=18.14.1"
+       },
+       "peerDependencies": {
+         "hono": "^4"
+diff --git a/package.json b/package.json
+index 4385316..fa684f9 100644
+--- a/package.json
++++ b/package.json
+@@ -5,23 +5,25 @@
+   "type": "module",
+   "scripts": {
+     "predev": "echo Starting dev server...",
+     "dev": "vite",
+     "build": "vite build",
+     "preview": "vite preview"
+   },
+   "dependencies": {
+     "@colbymchenry/codegraph": "^1.5.0",
+     "@fontsource-variable/inter": "^5.3.0",
++    "@fontsource-variable/material-symbols-rounded": "^5.3.1",
+     "@hugeicons/core-free-icons": "^4.2.3",
+     "@hugeicons/react": "^1.1.9",
+     "@internationalized/date": "^3.12.2",
++    "@react-leaflet/core": "^3.0.0",
+     "class-variance-authority": "^0.7.1",
+     "clsx": "^2.1.1",
+     "framer-motion": "^12.43.0",
+     "html2canvas": "^1.4.1",
+     "jspdf": "^4.2.1",
+     "jspdf-autotable": "^5.0.8",
+     "leaflet": "^1.9.4",
+     "lucide-react": "^1.24.0",
+     "react": "^19.2.7",
+     "react-aria-components": "^1.19.0",
+diff --git a/src/components/ui/Icon.jsx b/src/components/ui/Icon.jsx
+new file mode 100644
+index 0000000..91062ef
+--- /dev/null
++++ b/src/components/ui/Icon.jsx
+@@ -0,0 +1,15 @@
++import { cn } from "@/lib/utils"
++
++export default function Icon({ name, size = 20, className, style, ariaLabel, ...props }) {
++  return (
++    <span
++      className={cn("msr", className)}
++      style={{ fontSize: size, ...style }}
++      aria-hidden={ariaLabel ? undefined : "true"}
++      aria-label={ariaLabel}
++      {...props}
++    >
++      {name}
++    </span>
++  )
++}
+diff --git a/src/index.css b/src/index.css
+index d087cd8..daf6e16 100644
+--- a/src/index.css
++++ b/src/index.css
+@@ -1,14 +1,15 @@
+ @import "tailwindcss";
+ @import "tw-animate-css";
+ @import "shadcn/tailwind.css";
+ @import "@fontsource-variable/inter";
++@import "@fontsource-variable/material-symbols-rounded";
+ 
+ @custom-variant dark (&:where(.dark, .dark *));
+ 
+ @theme {
+   --font-sans: "Inter Variable", sans-serif;
+   --color-border: var(--border);
+   --color-input: var(--input);
+   --color-ring: var(--ring);
+   --color-background: var(--background);
+   --color-foreground: var(--foreground);
+@@ -327,13 +328,33 @@ button:active {
+ input, select, textarea, .border-input {
+   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+   border-radius: 0.75rem !important; /* Rounded inputs */
+ }
+ input:focus, select:focus, textarea:focus, .focus-within\:ring-2:focus-within {
+   outline: none !important;
+   box-shadow: 0 0 0 3px rgba(240, 90, 20, 0.3) !important; /* Animated Focus Glow */
+   border-color: var(--primary) !important;
+ }
+ 
++.msr {
++  font-family: "Material Symbols Rounded Variable", "Material Symbols Rounded";
++  font-weight: 600;
++  font-style: normal;
++  font-variation-settings: "FILL" 1, "wght" 600, "GRAD" 0, "opsz" auto;
++  font-size: 1.25rem;
++  line-height: 1;
++  letter-spacing: normal;
++  text-transform: none;
++  display: inline-block;
++  white-space: nowrap;
++  word-wrap: normal;
++  direction: ltr;
++  -webkit-font-smoothing: antialiased;
++  -moz-osx-font-smoothing: grayscale;
++  text-rendering: optimizeLegibility;
++  font-feature-settings: "liga";
++  user-select: none;
++}
++
+ 
+ 
+ 

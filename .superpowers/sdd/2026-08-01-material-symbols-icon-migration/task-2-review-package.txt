@@ -1,0 +1,193 @@
+ src/components/ui/calendar.jsx      | 6 +++---
+ src/components/ui/date-picker.jsx   | 4 ++--
+ src/components/ui/dropdown-menu.jsx | 7 +++----
+ src/components/ui/select.jsx        | 4 ++--
+ 4 files changed, 10 insertions(+), 11 deletions(-)
+diff --git a/src/components/ui/calendar.jsx b/src/components/ui/calendar.jsx
+index c943b4f..0a1db64 100644
+--- a/src/components/ui/calendar.jsx
++++ b/src/components/ui/calendar.jsx
+@@ -1,25 +1,25 @@
+ import React from 'react'
+ import { Calendar as AriaCalendar, CalendarCell, CalendarGrid, CalendarGridBody, CalendarGridHeader, CalendarHeaderCell, Heading, Button as AriaButton } from 'react-aria-components'
+-import { ChevronLeft, ChevronRight } from 'lucide-react'
++import Icon from "./Icon.jsx"
+ import { cn } from '@/lib/utils'
+ 
+ export function Calendar({ className, ...props }) {
+   return (
+     <AriaCalendar className={cn("w-fit", className)} {...props}>
+       <header className="flex items-center justify-between px-1 pb-4 w-full">
+         <AriaButton slot="previous" className="flex items-center justify-center size-8 rounded-md bg-transparent hover:bg-muted text-muted-foreground outline-none focus-visible:ring-2 ring-ring transition-colors cursor-pointer">
+-          <ChevronLeft size={16} />
++          <Icon name="chevron_left" size={16} />
+         </AriaButton>
+         <Heading className="text-sm font-semibold tracking-tight text-foreground" />
+         <AriaButton slot="next" className="flex items-center justify-center size-8 rounded-md bg-transparent hover:bg-muted text-muted-foreground outline-none focus-visible:ring-2 ring-ring transition-colors cursor-pointer">
+-          <ChevronRight size={16} />
++          <Icon name="chevron_right" size={16} />
+         </AriaButton>
+       </header>
+       <CalendarGrid className="w-full border-collapse space-y-1">
+         <CalendarGridHeader>
+           {day => <CalendarHeaderCell className="text-xs font-medium text-muted-foreground w-9 h-9">{day}</CalendarHeaderCell>}
+         </CalendarGridHeader>
+         <CalendarGridBody>
+           {date => (
+             <CalendarCell 
+               date={date}
+diff --git a/src/components/ui/date-picker.jsx b/src/components/ui/date-picker.jsx
+index d2dc008..087d60b 100644
+--- a/src/components/ui/date-picker.jsx
++++ b/src/components/ui/date-picker.jsx
+@@ -1,13 +1,13 @@
+ import React from 'react'
+ import { DatePicker as AriaDatePicker, Group, DateInput, DateSegment, Dialog, Popover as AriaPopover, Button as AriaButton } from 'react-aria-components'
+-import { CalendarIcon } from 'lucide-react'
++import Icon from "./Icon.jsx"
+ import { Calendar } from './calendar'
+ import { parseDate } from '@internationalized/date'
+ import { cn } from '@/lib/utils'
+ 
+ export function DatePicker({ label, value, onChange, className, required, ...props }) {
+   // Safe parsing of YYYY-MM-DD
+   let parsedValue = null
+   try {
+     if (typeof value === 'string' && value.length === 10) {
+       parsedValue = parseDate(value)
+@@ -23,21 +23,21 @@ export function DatePicker({ label, value, onChange, className, required, ...pro
+       {...props}
+     >
+       {label && <label className="text-sm font-semibold text-muted-foreground">{label}</label>}
+       <Group className="flex h-10 w-full items-center rounded-md border border-input bg-background/50 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 transition-all cursor-text">
+         <DateInput className="flex flex-1 items-center px-3 gap-0.5 outline-none bg-transparent h-full">
+           {segment => (
+             <DateSegment segment={segment} className="px-0.5 tabular-nums focus:bg-primary focus:text-primary-foreground rounded-sm outline-none caret-transparent" />
+           )}
+         </DateInput>
+         <AriaButton className="pr-3 pl-2 h-full flex items-center justify-center outline-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+-          <CalendarIcon size={16} />
++          <Icon name="calendar_month" size={16} />
+         </AriaButton>
+       </Group>
+       <AriaPopover className="z-50 animate-in fade-in-0 zoom-in-95 origin-top" offset={8}>
+         <Dialog className="outline-none flex flex-col rounded-2xl p-4 overflow-hidden">
+           <Calendar />
+         </Dialog>
+       </AriaPopover>
+     </AriaDatePicker>
+   )
+ }
+diff --git a/src/components/ui/dropdown-menu.jsx b/src/components/ui/dropdown-menu.jsx
+index e31d78e..dafdc8e 100644
+--- a/src/components/ui/dropdown-menu.jsx
++++ b/src/components/ui/dropdown-menu.jsx
+@@ -6,22 +6,21 @@ import {
+   MenuItem as MenuItemPrimitive,
+   Menu as MenuPrimitive,
+   MenuSection as MenuSectionPrimitive,
+   MenuTrigger as MenuTriggerPrimitive,
+   Popover as PopoverPrimitive,
+   Separator as SeparatorPrimitive,
+   SubmenuTrigger as SubmenuTriggerPrimitive,
+ } from "react-aria-components";
+ 
+ import { cn } from "@/lib/utils"
+-import { HugeiconsIcon } from "@hugeicons/react"
+-import { Tick02Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
++import Icon from "./Icon.jsx"
+ 
+ function DropdownMenuTrigger({
+   ...props
+ }) {
+   return <MenuTriggerPrimitive data-slot="dropdown-menu-trigger" {...props} />;
+ }
+ 
+ function DropdownMenu({
+   "data-slot": dataSlot = "dropdown-menu-content",
+   placement = "bottom start",
+@@ -105,21 +104,21 @@ function DropdownMenuItem({
+         <>
+           {selectionMode !== "none" ? (
+             <span
+               className="pointer-events-none absolute right-2 flex items-center justify-center"
+               data-slot={
+                 selectionMode === "single"
+                   ? "dropdown-menu-radio-item-indicator"
+                   : "dropdown-menu-checkbox-item-indicator"
+               }>
+               {isSelected ? (
+-                <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} />
++                <Icon name="check" size={16} />
+               ) : null}
+             </span>
+           ) : null}
+           {children}
+         </>
+       ))}
+     </MenuItemPrimitive>
+   );
+ }
+ 
+@@ -141,21 +140,21 @@ function DropdownMenuSubTrigger({
+       data-inset={inset}
+       textValue={typeof children === "string" ? children : props.textValue}
+       className={cn(
+         "flex cursor-default items-center gap-2 rounded-2xl px-3 py-2 text-sm font-medium outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-inset:pl-9.5 data-open:bg-accent data-open:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+         className
+       )}
+       {...props}>
+       {composeRenderProps(children, (children) => (
+         <>
+           {children}
+-          <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} className="ml-auto" />
++          <Icon name="arrow_forward" size={16} className="ml-auto" />
+         </>
+       ))}
+     </MenuItemPrimitive>
+   );
+ }
+ 
+ function DropdownMenuSubContent({
+   placement = "end top",
+   crossOffset = -3,
+   offset = 0,
+diff --git a/src/components/ui/select.jsx b/src/components/ui/select.jsx
+index 770cf20..a70873e 100644
+--- a/src/components/ui/select.jsx
++++ b/src/components/ui/select.jsx
+@@ -1,32 +1,32 @@
+ import React from "react"
+ import { Select as AriaSelect, Label as AriaLabel, Button as AriaButton, SelectValue, Popover as AriaPopover, ListBox as AriaListBox, ListBoxItem as AriaListBoxItem } from "react-aria-components"
+-import { ChevronDown } from "lucide-react"
++import Icon from "./Icon.jsx"
+ import { cn } from "@/lib/utils"
+ 
+ const Select = React.forwardRef(({ className, label, error, placeholder, children, value, onValueChange, onChange, ...props }, ref) => {
+   return (
+     <AriaSelect 
+       ref={ref}
+       selectedKey={value !== undefined ? value : null} 
+       onSelectionChange={onValueChange || onChange} 
+       className={cn("flex flex-col gap-1.5", className)} 
+       {...props}
+     >
+       {label && <AriaLabel className="text-xs font-bold text-foreground">{label}</AriaLabel>}
+       <AriaButton className="flex h-9 w-full items-center justify-between rounded-lg border border-input bg-background px-3 py-1 text-xs sm:text-sm shadow-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer">
+         <SelectValue className="text-left break-words">
+           {({ defaultChildren, isPlaceholder }) =>
+             isPlaceholder ? <span className="text-muted-foreground font-normal text-xs sm:text-sm">{placeholder || 'Select...'}</span> : defaultChildren
+           }
+         </SelectValue>
+-        <ChevronDown size={16} className="shrink-0 text-muted-foreground opacity-50" />
++        <Icon name="keyboard_arrow_down" size={16} className="shrink-0 text-muted-foreground opacity-50" />
+       </AriaButton>
+       <AriaPopover className="z-50 w-[--trigger-width] rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md">
+         <AriaListBox className="outline-none max-h-60 overflow-y-auto">
+           {children}
+         </AriaListBox>
+       </AriaPopover>
+     </AriaSelect>
+   )
+ })
+ Select.displayName = "Select"

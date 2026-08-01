@@ -1,0 +1,1282 @@
+ src/components/Calendar.jsx  | 36 +++++++++++-------------
+ src/components/Dashboard.jsx | 44 ++++++++++++++---------------
+ src/components/Documents.jsx | 67 ++++++++++++++++++++++----------------------
+ src/components/DriveSync.jsx | 40 +++++++++++++-------------
+ 4 files changed, 91 insertions(+), 96 deletions(-)
+diff --git a/src/components/Calendar.jsx b/src/components/Calendar.jsx
+index 34f3a4f..ad3609b 100644
+--- a/src/components/Calendar.jsx
++++ b/src/components/Calendar.jsx
+@@ -1,28 +1,28 @@
+ import { useState } from 'react'
+ import { useModal } from '../services/useModal.js'
+-import { Calendar as CalendarIcon, CalendarDays, Plus, Edit, Trash2, ChevronLeft, ChevronRight, FileText, Users, Gift, AlertTriangle, Clock, X } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { useConfirm } from '../hooks/useConfirm'
+ import AdSlot from './AdSlot'
+ import { formatDate } from '../services/date.js'
+ import { Button } from "@/components/ui/button"
+ import { Badge } from "@/components/ui/badge"
+ import { Card, CardContent } from "@/components/ui/card"
+ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
+ import { DatePicker } from "@/components/ui/date-picker"
+ 
+ const EVENT_TYPES = [
+-  { id: 'meeting', label: 'Meeting', icon: Users, color: '#3b82f6' },
+-  { id: 'holiday', label: 'Holiday', icon: CalendarIcon, color: '#10b981' },
+-  { id: 'birthday', label: 'Birthday', icon: Gift, color: '#f59e0b' },
+-  { id: 'deadline', label: 'Deadline', icon: AlertTriangle, color: '#ef4444' },
+-  { id: 'other', label: 'Other', icon: FileText, color: '#8b5cf6' },
++  { id: 'meeting', label: 'Meeting', icon: <Icon name="group" size={14} />, color: '#3b82f6' },
++  { id: 'holiday', label: 'Holiday', icon: <Icon name="calendar_month" size={14} />, color: '#10b981' },
++  { id: 'birthday', label: 'Birthday', icon: <Icon name="redeem" size={14} />, color: '#f59e0b' },
++  { id: 'deadline', label: 'Deadline', icon: <Icon name="warning" size={14} />, color: '#ef4444' },
++  { id: 'other', label: 'Other', icon: <Icon name="description" size={14} />, color: '#8b5cf6' },
+ ]
+ 
+ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+ 
+ export default function Calendar({ events, setEvents, employees, addLog, addToast, currentUser, simulatedRole }) {
+   const today = new Date()
+   const [currentMonth, setCurrentMonth] = useState(today.getMonth())
+   const [currentYear, setCurrentYear] = useState(today.getFullYear())
+   const [selectedDate, setSelectedDate] = useState(null)
+@@ -153,32 +153,32 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
+         const d = new Date(ev.date + 'T00:00:00')
+         return d.getMonth() === currentMonth && d.getFullYear() === currentYear
+       })
+ 
+   const renderCalendarGrid = () => (
+     <Card>
+       <CardContent className="p-5 sm:p-6">
+         <div className="flex flex-col sm:flex-row justify-between items-center mb-5 gap-4">
+           <div className="flex items-center gap-2 sm:gap-3">
+             <Button variant="outline" size="icon" className="size-8 sm:size-10" onClick={prevMonth} aria-label="Previous month">
+-              <ChevronLeft size={18} />
++              <Icon name="chevron_left" size={18} />
+             </Button>
+             <h2 className="text-base sm:text-lg font-bold m-0 min-w-[140px] sm:min-w-[180px] text-center text-foreground">
+               {MONTHS[currentMonth]} {currentYear}
+             </h2>
+             <Button variant="outline" size="icon" className="size-8 sm:size-10" onClick={nextMonth} aria-label="Next month">
+-              <ChevronRight size={18} />
++              <Icon name="chevron_right" size={18} />
+             </Button>
+           </div>
+           {(simulatedRole === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
+             <Button className="w-full sm:w-auto" onClick={() => openCreateModal(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`)}>
+-              <Plus size={16} className="mr-1.5" /> Add Event
++              <Icon name="add" size={16} className="mr-1.5" /> Add Event
+             </Button>
+           )}
+         </div>
+ 
+         <div role="grid" aria-label="Calendar" className="grid grid-cols-7 gap-1 text-center">
+           {DAYS.map(d => (
+             <div key={d} role="columnheader" className="py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">{d}</div>
+           ))}
+           {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+             <div key={`empty-${i}`} />
+@@ -216,83 +216,82 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
+           })}
+         </div>
+       </CardContent>
+     </Card>
+   )
+ 
+   const renderEventList = () => (
+     <Card>
+       <CardContent className="p-5 sm:p-6">
+         <h3 className="text-lg font-bold m-0 mb-4 flex items-center gap-2 text-foreground">
+-          <CalendarIcon size={18} className="text-primary" />
++          <Icon name="calendar_month" size={18} className="text-primary" />
+           {selectedDate ? `Events on ${formatDate(selectedDate)}` : "This Month's Events"}
+         </h3>
+ 
+         {filteredEvents.length === 0 ? (
+           <p className="text-center py-8 text-muted-foreground">
+             {selectedDate ? 'No events on this day' : 'No events this month'}
+           </p>
+         ) : (
+           <div role="list" className="flex flex-col gap-2">
+             {filteredEvents.map(ev => {
+               const typeInfo = getTypeInfo(ev.type)
+-              const TypeIcon = typeInfo.icon
+               return (
+                 <div key={ev.id} role="listitem" className="flex items-start sm:items-center gap-3 p-3 px-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors flex-wrap sm:flex-nowrap">
+                   <div className="flex items-center justify-center shrink-0 size-9 rounded-lg text-muted-foreground">
+-                    <TypeIcon size={16} />
++                    {typeInfo.icon}
+                   </div>
+                   <div className="flex-1 min-w-[200px]">
+                     <div className="flex items-center gap-2 flex-wrap">
+                       <span className="font-semibold text-sm text-foreground">{ev.title}</span>
+                       <Badge variant="outline" className="text-[10px] px-2 py-0.5 border-border text-muted-foreground">{typeInfo.label}</Badge>
+                     </div>
+                     <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
+                       <span className="text-xs flex items-center gap-1 text-muted-foreground">
+-                        <CalendarIcon size={12} /> {formatDate(ev.date)}
++                        <Icon name="calendar_month" size={12} /> {formatDate(ev.date)}
+                       </span>
+                       {ev.time && (
+                         <span className="text-xs flex items-center gap-1 text-muted-foreground">
+-                          <Clock size={12} /> {ev.time}
++                          <Icon name="schedule" size={12} /> {ev.time}
+                         </span>
+                       )}
+                     </div>
+                     {ev.description && (
+                       <p className="text-xs m-0 mt-1.5 text-muted-foreground">{ev.description}</p>
+                     )}
+                   </div>
+                   <div className="flex items-center gap-1">
+                     {!ev.isAuto && (simulatedRole === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
+                       <>
+                         <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditModal(ev)} aria-label="Edit event">
+-                          <Edit size={14} />
++                          <Icon name="edit" size={14} />
+                         </Button>
+                         <Button variant="ghost" size="icon" className="size-8 text-destructive hover:text-destructive" onClick={() => handleDelete(ev.id)} aria-label="Delete event">
+-                          <Trash2 size={14} />
++                          <Icon name="delete" size={14} />
+                         </Button>
+                       </>
+                     )}
+                   </div>
+                 </div>
+               )
+             })}
+           </div>
+         )}
+       </CardContent>
+     </Card>
+   )
+ 
+   return (
+     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
+       <div className="flex items-center justify-between">
+         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+-          <CalendarDays size={20} className="text-primary" />
++          <Icon name="calendar_month" size={20} className="text-primary" />
+           Events
+         </h1>
+       </div>
+       <div className="border-t border-border border-headline" />
+ 
+       <div className={`grid gap-6 items-start ${selectedDate ? 'grid-cols-1 xl:grid-cols-[1fr_380px]' : 'grid-cols-1'}`}>
+         {renderCalendarGrid()}
+         {selectedDate && renderEventList()}
+       </div>
+ 
+@@ -318,31 +317,30 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
+               <div className="flex flex-col gap-1.5">
+                 <label className="text-sm font-semibold text-muted-foreground">Time</label>
+                 <input type="time" value={formTime} onChange={e => setFormTime(e.target.value)} aria-label="Event time"
+                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+               </div>
+             </div>
+             <div className="flex flex-col gap-1.5">
+               <label className="text-sm font-semibold text-muted-foreground">Type</label>
+               <div className="flex gap-2 flex-wrap">
+                 {EVENT_TYPES.map(t => {
+-                  const Icon = t.icon
+                   const isActive = formType === t.id
+                   return (
+                     <button key={t.id} type="button" onClick={() => setFormType(t.id)}
+                       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer border ${isActive ? 'border-2' : 'border border-input'}`}
+                       style={{
+                         borderColor: isActive ? t.color : undefined,
+                         background: isActive ? `${t.color}15` : undefined,
+                         color: isActive ? t.color : undefined,
+                       }}>
+-                      <Icon size={14} /> {t.label}
++                      {t.icon} {t.label}
+                     </button>
+                   )
+                 })}
+               </div>
+             </div>
+             <div className="flex flex-col gap-1.5">
+               <label className="text-sm font-semibold text-muted-foreground">Description</label>
+               <textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={3} placeholder="Event description (optional)" aria-label="Event description"
+                 className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y" />
+             </div>
+diff --git a/src/components/Dashboard.jsx b/src/components/Dashboard.jsx
+index dd4397f..e460994 100644
+--- a/src/components/Dashboard.jsx
++++ b/src/components/Dashboard.jsx
+@@ -1,12 +1,12 @@
+ import { useEffect, useState } from 'react'
+-import { Megaphone, Calendar as CalendarIcon, CreditCard, ChevronDown, LayoutDashboard, Gift, Award, Users, Activity, User, CheckSquare, FileText, Monitor } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Button } from "@/components/ui/button"
+ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+ import { Badge } from "@/components/ui/badge"
+ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+ import { formatDateShort } from '../services/date.js'
+ import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
+ 
+ const DashboardWidget = ({ 
+   id, title, icon, action, 
+   useAccordion, expandedWidgets, toggleWidget,
+@@ -224,45 +224,45 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
+           attendance={attendance} 
+           setAttendance={setAttendance} 
+           addToast={addToast} 
+           settings={settings}
+         />
+       )}
+ 
+       {/* Page Title */}
+       <div className="flex items-center justify-between">
+         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+-          <LayoutDashboard size={20} className="text-primary" />
++          <Icon name="dashboard" size={20} className="text-primary" />
+           Dashboard Overview
+         </h1>
+       </div>
+       <div className="border-t border-border border-headline" />
+       
+       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-card p-5 sm:p-6 rounded-2xl border border-border shadow-sm bg-gradient-to-r from-card to-primary/5 gap-4">
+         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-3 text-foreground m-0">
+-          <Activity size={24} className="text-primary shrink-0" />
++          <Icon name="monitoring" size={24} className="text-primary shrink-0" />
+           Admin Overview
+         </h2>
+         <span className="text-sm font-semibold text-foreground bg-muted/80 px-4 py-2 rounded-md border border-border/50 shrink-0">
+           {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+         </span>
+       </div>
+ 
+       {/* Unified Responsive & Adaptive Dashboard Grid */}
+       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5 lg:gap-6 items-stretch">
+         
+         {/* Widget 1 — Employee Directory (Span 4) */}
+         {canViewEmployees && (
+           <DashboardWidget
+           id="w1"
+           title="Employee Directory"
+-          icon={<Users size={18} />}
++          icon={<Icon name="group" size={18} />}
+           action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('employees')} className="text-xs font-semibold h-7">View All</Button>}
+           contentClass="flex items-center justify-around py-4"
+           {...wProps}
+         >
+           <div className="flex flex-col items-center gap-1.5">
+             <span className="text-4xl font-black tabular-nums text-foreground">{activeCount}</span>
+             <Badge variant="success" className="gap-1.5 py-1 px-3">
+               <span className="sync-dot sync-blink w-2 h-2 rounded-full bg-status-success"></span>
+               Active
+             </Badge>
+@@ -276,21 +276,21 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
+             </Badge>
+           </div>
+         </DashboardWidget>
+         )}
+ 
+         {/* Widget 2 — Today's Attendance (Span 4) */}
+         {canViewAttendance && (
+           <DashboardWidget
+           id="w2"
+           title="Today's Attendance"
+-          icon={<Users size={18} />}
++          icon={<Icon name="group" size={18} />}
+           iconClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+           action={<Button variant="outline" size="sm" onClick={() => setShowAttDropdown(!showAttDropdown)} className="text-xs font-semibold h-7">{showAttDropdown ? 'Hide' : 'Details'}</Button>}
+           contentClass="flex flex-col justify-between pt-4"
+           {...wProps}
+         >
+           <div className="flex items-center justify-between gap-3 py-2">
+             <div className="flex flex-col items-center flex-1">
+               <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                 <span className="pulse-dot pulse-dot-green m-0"></span>
+                 {todayStats.present}
+@@ -319,21 +319,21 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
+             <span className="font-extrabold text-sm text-foreground">{attendanceRate}%</span>
+           </div>
+         </DashboardWidget>
+         )}
+ 
+         {/* Widget 3 — Drive Connection (Span 4) */}
+         {canViewDrive && (
+           <DashboardWidget
+           id="w3"
+           title="Drive Connection"
+-          icon={<svg className="lucide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19a4.5 4.5 0 0 0 0-9 4.4 4.4 0 0 0-.8.1 7 7 0 1 0-11 5.9"></path></svg>}
++          icon={<Icon name="cloud" size={18} />}
+           action={<Badge variant={driveConnected ? "outline" : "destructive"}>{driveConnected ? 'Synced' : 'Error'}</Badge>}
+           contentClass="flex flex-col justify-between pt-4"
+           {...wProps}
+         >
+           <div className="flex items-center gap-3">
+             <span className="text-xl sm:text-2xl font-black text-foreground">
+               {driveConnected ? 'Healthy Connection' : 'Drive Disconnected'}
+             </span>
+           </div>
+           <p className="text-xs font-medium m-0 mt-3 text-muted-foreground leading-relaxed">
+@@ -368,21 +368,21 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
+                 </button>
+                 {attFilter === item.key && (
+                   <div className="px-6 pb-4 pt-1 bg-muted/20">
+                     {attendanceLists[item.key].length === 0 ? (
+                       <p className="my-1.5 text-xs text-muted-foreground italic">No personnel in this category</p>
+                     ) : (
+                       attendanceLists[item.key].map((emp) => (
+                         <div key={emp.id} className="flex items-center gap-3.5 py-2 border-b border-border/40 last:border-none">
+                           <Avatar className="w-8 h-8 shrink-0">
+                             {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+-                            <AvatarFallback className="bg-primary/10 text-primary"><User size={16} /></AvatarFallback>
++                            <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={16} /></AvatarFallback>
+                           </Avatar>
+                           <div className="flex-1 min-w-0">
+                             <span className="block text-xs font-extrabold text-foreground">{emp.name}</span>
+                             <span className="text-[11px] font-medium text-muted-foreground">{emp.role}</span>
+                           </div>
+                           {emp.time && <Badge variant="outline" className="text-[11px] px-2.5 py-0.5">{emp.time}</Badge>}
+                         </div>
+                       ))
+                     )}
+                   </div>
+@@ -390,38 +390,38 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
+               </div>
+             ))}
+           </Card>
+         )}
+ 
+         {/* Widget 4 — Announcements (Span 6) */}
+         {canViewAnnouncements && (
+           <DashboardWidget
+           id="w4"
+           title="Announcements"
+-          icon={<Megaphone size={18} />}
++          icon={<Icon name="campaign" size={18} />}
+           iconClass="bg-amber-500/10 text-amber-500"
+           cardClass="xl:col-span-6"
+           action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('announcements')} className="text-xs font-semibold h-7">View All</Button>}
+           contentClass="flex flex-col justify-start gap-2.5 pt-4"
+           {...wProps}
+         >
+           {recentAnnouncements.length === 0 ? (
+             <p className="text-center my-auto text-xs text-muted-foreground">No active announcements</p>
+           ) : (
+             recentAnnouncements.map((ann, idx) => (
+               <div
+                 key={ann.id || idx}
+                 className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/70 transition-colors cursor-pointer"
+                 onClick={() => setCurrentView && setCurrentView('announcements')}
+               >
+                 <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-500/10 text-amber-500 shrink-0">
+-                  <Megaphone size={16} />
++                  <Icon name="campaign" size={16} />
+                 </div>
+                 <div className="flex-1 min-w-0 pr-2">
+                   <p className="m-0 text-xs font-bold text-foreground break-words">{ann.title}</p>
+                   <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">
+                     {getEmployeeName(ann.authorId)} &middot; {new Date(ann.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                   </p>
+                 </div>
+                 {ann.priority === 'Important' && (
+                   <Badge variant="destructive" className="uppercase text-[10px]">
+                     Important
+@@ -431,21 +431,21 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
+             ))
+           )}
+         </DashboardWidget>
+         )}
+ 
+         {/* Widget 5 — Payroll Summary (Span 6) */}
+         {canViewPayroll && (
+           <DashboardWidget
+           id="w5"
+           title="Payroll Summary"
+-          icon={<CreditCard size={18} />}
++          icon={<Icon name="credit_card" size={18} />}
+           cardClass="xl:col-span-6"
+           action={currentPayrollMonth && <Badge variant="secondary" className="px-3 py-1 h-7">{currentPayrollMonth}</Badge>}
+           contentClass="flex flex-col justify-between pt-4"
+           {...wProps}
+         >
+           {!currentPayrollMonth ? (
+             <p className="text-center my-auto text-xs text-muted-foreground">No payroll data found</p>
+           ) : (
+             <>
+               <div className="grid grid-cols-2 xl:grid-cols-3 gap-3 p-3.5 rounded-lg bg-muted/40 border border-border/50">
+@@ -469,39 +469,39 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
+             </>
+           )}
+         </DashboardWidget>
+         )}
+ 
+         {/* Widget 6 — Upcoming Events (Span 4) */}
+         {canViewCalendar && (
+           <DashboardWidget
+           id="w6"
+           title="Upcoming Events"
+-          icon={<CalendarIcon size={18} />}
++          icon={<Icon name="calendar_month" size={18} />}
+           iconClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+           action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('calendar')} className="text-xs font-semibold h-7">Events</Button>}
+           contentClass="flex flex-col justify-start gap-2.5 pt-4"
+           {...wProps}
+         >
+           {upcomingEvents.length === 0 ? (
+             <p className="text-center my-auto text-xs text-muted-foreground">No upcoming events</p>
+           ) : (
+             upcomingEvents.map((evt, idx) => (
+               <div
+                 key={evt.id || idx}
+                 className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/70 transition-colors cursor-pointer"
+                 onClick={() => setCurrentView && setCurrentView('calendar')}
+               >
+                 <div
+                   className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                 >
+-                  <CalendarIcon size={16} style={{ color: evt.type === 'holiday' ? '#10b981' : evt.type === 'birthday' ? '#f59e0b' : '#3b82f6' }} />
++                  <Icon name="calendar_month" size={16} style={{ color: evt.type === 'holiday' ? '#10b981' : evt.type === 'birthday' ? '#f59e0b' : '#3b82f6' }} />
+                 </div>
+                 <div className="flex-1 min-w-0 pr-2">
+                   <p className="m-0 text-xs font-bold text-foreground break-words">{evt.title}</p>
+                   <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground break-words">
+                     {formatDate(evt.date)}{evt.time ? ` at ${evt.time}` : ''}
+                   </p>
+                 </div>
+                 <Badge variant="outline" className="capitalize text-[10px] px-2 py-0.5">
+                   {evt.type}
+                 </Badge>
+@@ -509,88 +509,86 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
+             ))
+           )}
+         </DashboardWidget>
+         )}
+ 
+         {/* Widget 7 — Drive Sync Logs (Span 4) */}
+         {canViewDrive && (
+           <DashboardWidget
+           id="w7"
+           title="Drive Sync Logs"
+-          icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>}
++          icon={<Icon name="trending_up" size={18} />}
+           action={<Badge variant="success">Live</Badge>}
+           contentClass="flex flex-col justify-start gap-2.5 pt-4"
+           {...wProps}
+         >
+           {syncLogs.map((log) => (
+             <div key={log.id} className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50">
+               <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-muted text-muted-foreground shrink-0 border border-border/40">
+-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
+-                </svg>
++                <Icon name="download" size={15} />
+               </div>
+               <div className="flex-1 min-w-0 pr-2">
+                 <p className="m-0 text-xs font-bold text-foreground break-words">{log.action}</p>
+                 <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground break-words">{log.details}</p>
+               </div>
+               <Badge variant={log.status === 'success' ? 'success' : log.status === 'error' ? 'destructive' : 'warning'} className="uppercase text-[10px]">
+                 {log.status === 'success' ? 'Synced' : log.status === 'error' ? 'Failed' : 'Pending'}
+               </Badge>
+             </div>
+           ))}
+         </DashboardWidget>
+         )}
+ 
+         {/* Widget 8 — Upcoming Milestones (Span 4) */}
+         {canViewEmployees && (
+           <DashboardWidget
+           id="w8"
+           title="Upcoming Milestones"
+-          icon={<Award size={18} />}
++          icon={<Icon name="workspace_premium" size={18} />}
+           iconClass="bg-amber-500/10 text-amber-500"
+           action={<Badge variant="secondary" className="px-3 py-1">30 Days</Badge>}
+           contentClass="flex flex-col justify-start pt-4"
+           {...wProps}
+         >
+           {upcomingMilestones.length === 0 ? (
+             <div className="flex-1 flex flex-col items-center justify-center text-center p-5">
+-              <Gift size={34} className="text-muted-foreground/40 mb-2" />
++              <Icon name="redeem" size={34} className="text-muted-foreground/40 mb-2" />
+               <p className="m-0 text-xs font-medium text-muted-foreground max-w-[200px] leading-relaxed">No birthdays or work anniversaries in the next 30 days.</p>
+             </div>
+           ) : (
+             <div className="flex flex-col gap-2.5">
+               {upcomingMilestones.map((milestone, i) => (
+                 <div key={i} className="flex gap-4 p-4 border rounded-xl bg-card hover:shadow-md transition-shadow">
+                   <Avatar className="w-8 h-8 shrink-0">
+                     {milestone.avatar ? <AvatarImage src={milestone.avatar} alt={milestone.empName} className="object-cover" /> : null}
+-                    <AvatarFallback className="bg-primary/10 text-primary"><User size={16} /></AvatarFallback>
++                    <AvatarFallback className="bg-primary/10 text-primary"><Icon name="person" size={16} /></AvatarFallback>
+                   </Avatar>
+                   <div className="flex-1 flex flex-col gap-1">
+                     <p className="m-0 text-xs font-bold text-foreground break-words">{milestone.empName}</p>
+                     <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">{milestone.label}</p>
+                   </div>
+                   <Badge variant="default" className="uppercase text-[10px]">
+                     {milestone.daysRemaining === 0 ? 'Today' : `${milestone.daysRemaining}d`}
+                   </Badge>
+                 </div>
+               ))}
+             </div>
+           )}
+         </DashboardWidget>
+         )}
+ 
+       {/* 8. TASKS WIDGET */}
+       {canViewTasks && (
+         <DashboardWidget
+           id="tasks-widget"
+           title="Tasks Overview"
+-          icon={<CheckSquare size={18} />}
++          icon={<Icon name="check_box" size={18} />}
+           iconClass="bg-orange-500/10 text-orange-500"
+           {...wProps}
+           action={
+             <Button variant="ghost" size="sm" onClick={() => setCurrentView('tasks')} className="text-orange-500 hover:text-orange-600 hover:bg-orange-500/10 -mr-2">
+               View All
+             </Button>
+           }
+         >
+           <div className="flex flex-col h-full justify-between gap-4">
+             <div className="flex flex-col gap-1">
+@@ -609,21 +607,21 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
+             )}
+           </div>
+         </DashboardWidget>
+       )}
+ 
+       {/* 9. DOCUMENTS WIDGET */}
+       {canViewDocuments && (
+         <DashboardWidget
+           id="documents-widget"
+           title="Recent Documents"
+-          icon={<FileText size={18} />}
++          icon={<Icon name="description" size={18} />}
+           iconClass="bg-blue-500/10 text-blue-500"
+           {...wProps}
+           action={
+             <Button variant="ghost" size="sm" onClick={() => setCurrentView('documents')} className="text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 -mr-2">
+               View All
+             </Button>
+           }
+         >
+           <div className="flex flex-col h-full gap-3">
+             {recentDocuments.length > 0 ? recentDocuments.map((doc, i) => (
+@@ -641,36 +639,36 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
+             )}
+           </div>
+         </DashboardWidget>
+       )}
+ 
+       {/* 10. ASSETS WIDGET */}
+       {canViewAssets && (
+         <DashboardWidget
+           id="assets-widget"
+           title="Asset Inventory"
+-          icon={<Monitor size={18} />}
++          icon={<Icon name="monitor" size={18} />}
+           iconClass="bg-teal-500/10 text-teal-500"
+           {...wProps}
+           action={
+             <Button variant="ghost" size="sm" onClick={() => setCurrentView('assets')} className="text-teal-500 hover:text-teal-600 hover:bg-teal-500/10 -mr-2">
+               Manage
+             </Button>
+           }
+         >
+           <div className="flex flex-col h-full justify-between gap-4">
+             <div className="flex items-center justify-between p-3 rounded-xl bg-teal-500/5 border border-teal-500/10">
+               <div className="flex flex-col">
+                 <span className="text-xs font-semibold text-teal-600/80 uppercase tracking-wider mb-1">Total Assets</span>
+                 <span className="text-2xl font-black text-foreground">{assets.length}</span>
+               </div>
+-              <Monitor className="text-teal-500/30 w-10 h-10" />
++              <Icon name="monitor" size={40} className="text-teal-500/30" />
+             </div>
+             
+             <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border">
+               <div className="flex flex-col">
+                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Available</span>
+                 <span className="text-xl font-bold text-foreground">{availableAssetsCount}</span>
+               </div>
+               <div className="flex flex-col items-end">
+                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Assigned</span>
+                 <span className="text-xl font-bold text-foreground">{assets.length - availableAssetsCount}</span>
+diff --git a/src/components/Documents.jsx b/src/components/Documents.jsx
+index a9e06b1..9900bf2 100644
+--- a/src/components/Documents.jsx
++++ b/src/components/Documents.jsx
+@@ -1,39 +1,39 @@
+ import { useState, useRef, useEffect } from 'react'
+-import { FileText, Search, Upload, Download, Trash2, X, Folder, FolderOpen, FileSpreadsheet, FileImage, FileArchive, File, Settings, Pencil, ChevronLeft, ChevronRight, Filter, Plus } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Card, CardContent } from "@/components/ui/card"
+ import { useConfirm } from '../hooks/useConfirm'
+ import { Button } from "@/components/ui/button"
+ import { Input } from "@/components/ui/input"
+ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+ import { Select, SelectItem } from "@/components/ui/select"
+ import { Badge } from "@/components/ui/badge"
+ import AdSlot from './AdSlot'
+ import { formatDate } from '../services/date.js'
+ 
+ const BLUE = '#3b82f6'
+ const defaultCategories = [
+-  { id: 'hr-docs', label: 'HR Documents', icon: Folder, color: BLUE },
+-  { id: 'policies', label: 'Policies', icon: FileText, color: BLUE },
+-  { id: 'forms', label: 'Forms', icon: FileText, color: BLUE },
+-  { id: 'training', label: 'Training', icon: FileArchive, color: BLUE },
+-  { id: 'other', label: 'Other', icon: File, color: BLUE },
++  { id: 'hr-docs', label: 'HR Documents', icon: <Icon name="folder" size={10} className="inline mr-0.5" />, color: BLUE },
++  { id: 'policies', label: 'Policies', icon: <Icon name="description" size={10} className="inline mr-0.5" />, color: BLUE },
++  { id: 'forms', label: 'Forms', icon: <Icon name="description" size={10} className="inline mr-0.5" />, color: BLUE },
++  { id: 'training', label: 'Training', icon: <Icon name="folder_zip" size={10} className="inline mr-0.5" />, color: BLUE },
++  { id: 'other', label: 'Other', icon: <Icon name="description" size={10} className="inline mr-0.5" />, color: BLUE },
+ ]
+ 
+ const getFileIcon = (type) => {
+-  if (!type) return File
++  if (!type) return 'description'
+   const t = type.toLowerCase()
+-  if (t.includes('pdf')) return FileText
+-  if (t.includes('sheet') || t.includes('excel') || t.includes('xls') || t.includes('csv')) return FileSpreadsheet
+-  if (t.includes('image') || t.includes('png') || t.includes('jpg') || t.includes('jpeg') || t.includes('gif')) return FileImage
+-  if (t.includes('zip') || t.includes('rar') || t.includes('tar') || t.includes('gz')) return FileArchive
+-  return File
++  if (t.includes('pdf')) return 'description'
++  if (t.includes('sheet') || t.includes('excel') || t.includes('xls') || t.includes('csv')) return 'table_chart'
++  if (t.includes('image') || t.includes('png') || t.includes('jpg') || t.includes('jpeg') || t.includes('gif')) return 'image'
++  if (t.includes('zip') || t.includes('rar') || t.includes('tar') || t.includes('gz')) return 'folder_zip'
++  return 'description'
+ }
+ 
+ const formatFileSize = (bytes) => {
+   if (!bytes) return '--'
+   if (bytes < 1024) return bytes + ' B'
+   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+ }
+ 
+ export default function Documents({ documents, setDocuments, addLog, addToast, currentUser, simulatedRole }) {
+@@ -158,21 +158,21 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
+   }
+ 
+   const handleSaveCategory = () => {
+     if (!catFormName.trim()) return addToast('Category name is required', 'warning')
+     if (editingCategory) {
+       setCategories(prev => prev.map(c =>
+         c.id === editingCategory.id ? { ...c, label: catFormName.trim() } : c
+       ))
+       addToast('Category updated', 'success')
+     } else {
+-      setCategories(prev => [...prev, { id: `cat-${Date.now()}`, label: catFormName.trim(), icon: File, color: BLUE }])
++      setCategories(prev => [...prev, { id: `cat-${Date.now()}`, label: catFormName.trim(), icon: <Icon name="description" size={10} className="inline mr-0.5" />, color: BLUE }])
+       addToast('Category added', 'success')
+     }
+     setShowCategoryModal(false)
+   }
+ 
+   const handleDeleteCategory = async (catId) => {
+     const catLabel = getCategoryInfo(catId)?.label || 'this category'
+     const docsInCategory = documents.filter(d => d.category === catId)
+     let message = `Delete "${catLabel}" category?`
+     if (docsInCategory.length > 0) {
+@@ -217,47 +217,47 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
+       if (filterDate === '90days') matchDate = diffDays <= 90
+     }
+ 
+     return matchSearch && matchCategory && matchFormat && matchDate
+   })
+ 
+   return (
+     <div className="fade-in px-1 sm:px-0 pb-10">
+       <div className="flex items-center justify-between mb-4">
+         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+-          <FolderOpen size={20} className="text-primary" />
++          <Icon name="folder_open" size={20} className="text-primary" />
+           Documents
+         </h1>
+       </div>
+       <div className="border-t border-border border-headline mb-6" />
+ 
+       <div className="flex gap-2 mb-6">
+         <div className="relative flex-1 flex items-center">
+-          <Search size={16} className="absolute left-3 text-muted-foreground" />
++          <Icon name="search" size={16} className="absolute left-3 text-muted-foreground" />
+           <Input
+             type="text"
+             value={search}
+             onChange={e => setSearch(e.target.value)}
+             placeholder="Search documents..."
+             aria-label="Search documents"
+             className="w-full pl-9 bg-muted/40"
+           />
+         </div>
+         
+         <Button variant={showFilters ? "secondary" : "outline"} className="shrink-0 gap-2" onClick={() => setShowFilters(!showFilters)}>
+-          <Filter size={16} />
++          <Icon name="filter_list" size={16} />
+           <span className="hidden sm:inline">Filter</span>
+         </Button>
+ 
+         {!isMobile && (
+           <Button variant="default" className="shrink-0" onClick={() => { resetForm(); setShowUploadModal(true) }}>
+-            <Upload size={16} className="mr-2" />
++            <Icon name="upload" size={16} className="mr-2" />
+             Upload
+           </Button>
+         )}
+       </div>
+ 
+       {showFilters && (
+         <Card className="mb-6 p-4 bg-muted/20 border-border/50 shadow-sm animate-in fade-in slide-in-from-top-2">
+           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+             <div className="flex flex-col gap-1.5">
+               <span className="text-xs font-semibold text-muted-foreground ml-1">Category</span>
+@@ -285,85 +285,84 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
+                 <SelectItem value="90days">Last 3 Months</SelectItem>
+               </Select>
+             </div>
+           </div>
+         </Card>
+       )}
+ 
+ 
+       {filteredDocs.length === 0 ? (
+         <Card className="text-center p-8 sm:p-10 lg:p-12">
+-          <FileText size={48} className="mb-4 opacity-50 text-muted-foreground mx-auto" />
++          <Icon name="description" size={48} className="mb-4 opacity-50 text-muted-foreground mx-auto" />
+           <h3 className="m-0 mb-2 text-muted-foreground">No documents found</h3>
+           <p className="m-0 text-[0.9rem] text-muted-foreground/60">
+             {search || selectedCategory !== 'all' ? 'Try a different search or filter' : 'Upload your first document to get started'}
+           </p>
+         </Card>
+       ) : (
+         <div role="list" className="flex flex-col gap-2">
+           {filteredDocs.map(doc => {
+             const catInfo = getCategoryInfo(doc.category)
+-            const Icon = getFileIcon(doc.fileType)
+-            const CatIcon = catInfo.icon
++            const fileIcon = getFileIcon(doc.fileType)
+             return (
+               <Card key={doc.id} role="listitem" className="cursor-default hover:border-primary transition-colors">
+                 <CardContent className={`p-3 sm:p-4 lg:p-5 flex ${isMobile ? 'flex-col items-stretch gap-3' : 'flex-row items-center gap-4'}`}>
+                   <div className="flex items-center gap-3 w-full">
+                     <div className="flex items-center justify-center shrink-0 rounded-xl w-[38px] sm:w-11 h-[38px] sm:h-11 bg-muted/50 text-muted-foreground">
+-                      <Icon size={isMobile ? 18 : 20} />
++                      <Icon name={fileIcon} size={isMobile ? 18 : 20} />
+                     </div>
+                     <div className="flex-1 min-w-0">
+                       <div className="flex items-center gap-2 flex-wrap">
+                         <span className="font-bold text-[0.85rem] sm:text-[0.95rem] text-foreground">{doc.name}</span>
+                         <span className="text-[0.7rem] px-2 py-0.5 rounded-full font-semibold border border-border text-muted-foreground bg-muted/20">
+-                          <CatIcon size={10} className="inline mr-0.5" />{catInfo.label}
++                          {catInfo.icon}{catInfo.label}
+                         </span>
+                       </div>
+                       <div className="flex items-center gap-3 mt-1 flex-wrap">
+                         <span className="text-[0.75rem] sm:text-[0.8rem] text-muted-foreground/60">{doc.fileName}</span>
+                         <span className="text-[0.7rem] sm:text-[0.75rem] text-muted-foreground/60">{formatFileSize(doc.fileSize)}</span>
+                         <span className="text-[0.7rem] sm:text-[0.75rem] text-muted-foreground/60">Uploaded {formatDate(doc.uploadedAt)}</span>
+                       </div>
+                       {doc.description && (
+                         <p className="text-[0.78rem] sm:text-[0.8rem] text-muted-foreground m-0 mt-1">{doc.description}</p>
+                       )}
+                     </div>
+                   </div>
+                   <div className={`flex gap-1 ${isMobile ? 'justify-end border-t border-border pt-2.5' : ''}`}>
+                     <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-primary" onClick={() => handleDownload(doc)}>
+-                      <Download size={16} /> {isMobile ? 'Download' : ''}
++                      <Icon name="download" size={16} /> {isMobile ? 'Download' : ''}
+                     </Button>
+                     {(simulatedRole === 'Admin' || doc.uploadedBy === currentUser?.id) && (
+                       <>
+                         <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-primary" onClick={() => { setEditingDoc(doc); setFormName(doc.name); setFormCategory(doc.category); setFormDescription(doc.description || ''); setFormFile(null); setShowUploadModal(true) }}>
+-                          <Pencil size={16} /> {isMobile ? 'Edit' : ''}
++                          <Icon name="edit" size={16} /> {isMobile ? 'Edit' : ''}
+                         </Button>
+                         <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-destructive" onClick={() => handleDelete(doc.id)}>
+-                          <Trash2 size={16} /> {isMobile ? 'Delete' : ''}
++                          <Icon name="delete" size={16} /> {isMobile ? 'Delete' : ''}
+                         </Button>
+                       </>
+                     )}
+                   </div>
+                 </CardContent>
+               </Card>
+             )
+           })}
+         </div>
+       )}
+ 
+       {/* Upload / Edit Document Modal */}
+       <Dialog open={showUploadModal} onOpenChange={(open) => { if (!open) { setShowUploadModal(false); resetForm() } }}>
+         <DialogContent className="sm:max-w-[540px]">
+           <DialogHeader className="mb-6">
+               <DialogTitle className="flex items-center gap-4 text-xl sm:text-2xl font-bold">
+                 <div className="flex items-center justify-center rounded-2xl w-12 h-12 bg-primary/10 text-primary shadow-inner">
+-                  <Upload size={24} className="animate-pulse" />
++                  <Icon name="upload" size={24} className="animate-pulse" />
+                 </div>
+                 <span>{editingDoc ? 'Edit Document' : 'Upload Document'}</span>
+               </DialogTitle>
+             </DialogHeader>
+             <form onSubmit={handleSave} className="flex flex-col gap-6">
+               <div className="space-y-1.5 group">
+                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-focus-within:text-primary transition-colors">Document Name *</label>
+                 <Input type="text" required value={formName} onChange={e => setFormName(e.target.value)} placeholder="e.g. Employee Handbook 2026" aria-label="Document name" 
+                   className="rounded-xl bg-muted/40 border-border/50 focus-visible:ring-0 focus-visible:outline-none transition-all h-11" />
+               </div>
+@@ -374,96 +373,96 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
+                   <div className="flex-1">
+                     <Select value={formCategory} onChange={setFormCategory}>
+                       {categories.map(cat => (
+                         <SelectItem key={cat.id} value={cat.id}>
+                           {cat.label}
+                         </SelectItem>
+                       ))}
+                     </Select>
+                   </div>
+                   <button type="button" className="shrink-0 bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground border-none group/add h-10 px-4 rounded-lg flex items-center transition-all duration-300 ease-out overflow-hidden" onClick={() => { setEditingCategory(null); setCatFormName(''); setShowCategoryModal(true) }}>
+-                    <Plus size={18} className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" />
++                    <Icon name="add" size={18} className="transition-transform duration-300 group-hover/add:rotate-90 group-hover/add:scale-110" />
+                     <span className="w-0 overflow-hidden whitespace-nowrap text-sm font-bold opacity-0 transition-all duration-300 ease-out group-hover/add:w-auto group-hover/add:opacity-100 group-hover/add:ml-2">Add</span>
+                   </button>
+                 </div>
+               </div>
+ 
+               {!editingDoc && (
+                 <div className="space-y-1.5">
+                   <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">File</label>
+                   <div onClick={() => fileInputRef.current?.click()}
+                     className={`relative rounded-2xl text-center cursor-pointer p-8 sm:p-10 border-2 transition-all duration-300 ease-out overflow-hidden group/drop ${formFile ? 'border-emerald-500 bg-emerald-500/5 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'border-dashed border-border/60 bg-muted/20 hover:border-primary hover:bg-primary/5'}`}>
+                     
+                     {!formFile && <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover/drop:opacity-100 transition-opacity duration-500" />}
+ 
+                     {formFile ? (
+                       <div className="relative z-10 flex flex-col items-center animate-in zoom-in-95 duration-300">
+                         <div className="w-14 h-14 rounded-2xl inline-flex items-center justify-center mb-3 bg-emerald-500/15 text-emerald-500 shadow-sm ring-4 ring-emerald-500/10">
+-                          <FileText size={28} />
++                          <Icon name="description" size={28} />
+                         </div>
+                         <p className="m-0 text-[1rem] font-bold text-foreground mb-1 truncate max-w-[250px]">{formFile.name}</p>
+                         <p className="m-0 text-[0.8rem] text-emerald-600/80 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full">{formatFileSize(formFile.size)}</p>
+                       </div>
+                     ) : (
+                       <div className="relative z-10 flex flex-col items-center">
+                         <div className="w-14 h-14 rounded-2xl inline-flex items-center justify-center mb-4 bg-primary/10 text-primary shadow-sm group-hover/drop:scale-110 group-hover/drop:rotate-3 transition-transform duration-300">
+-                          <Upload size={28} />
++                          <Icon name="upload" size={28} />
+                         </div>
+                         <p className="m-0 text-base text-foreground font-semibold mb-1 group-hover/drop:text-primary transition-colors">Click to browse or drop a file</p>
+                         <p className="m-0 text-xs text-muted-foreground font-medium">PDF, Images, Spreadsheets (Up to 10MB)</p>
+                       </div>
+                     )}
+                   </div>
+                   <input type="file" ref={fileInputRef} onChange={(e) => { const file = e.target.files[0]; if (file) setFormFile(file) }} className="hidden" />
+                 </div>
+               )}
+ 
+               <div className="space-y-1.5 group shrink-0">
+                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-focus-within:text-primary transition-colors">Description</label>
+                 <textarea value={formDescription} onChange={e => setFormDescription(e.target.value)} rows={3} placeholder="Brief description (optional)" aria-label="Document description"
+                   className="flex w-full rounded-xl bg-muted/40 border border-border/50 px-4 py-3 text-sm font-medium text-foreground placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-0 transition-all resize-y" />
+               </div>
+ 
+               <DialogFooter>
+                 <Button variant="ghost" type="button" onClick={() => { setShowUploadModal(false); resetForm() }}>Cancel</Button>
+                 <Button type="submit">
+-                  <Upload size={18} className="mr-2" /> 
++                  <Icon name="upload" size={18} className="mr-2" /> 
+                   {editingDoc ? 'Update Document' : 'Upload Document'}
+                 </Button>
+               </DialogFooter>
+             </form>
+         </DialogContent>
+       </Dialog>
+ 
+       {/* Category Management Modal */}
+       <Dialog open={showCategoryModal} onOpenChange={setShowCategoryModal}>
+         <DialogContent className="sm:max-w-[480px]">
+           <DialogHeader className="relative">
+             <DialogTitle>Manage Categories</DialogTitle>
+             <button type="button" onClick={() => setShowCategoryModal(false)}
+               className="absolute right-0 top-0 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer border-none">
+-              <X size={16} />
++              <Icon name="close" size={16} />
+             </button>
+           </DialogHeader>
+           <div className="flex flex-col gap-5">
+             {/* Category list */}
+             <div className="flex flex-col gap-1.5">
+               <label className="text-[0.82rem] font-semibold text-muted-foreground">Categories</label>
+               <div className="flex flex-col gap-1.5 max-h-[240px] overflow-y-auto">
+                 {categories.filter(c => c.id !== 'other').map(cat => (
+                   <div key={cat.id} className="flex items-center gap-2.5 p-2 px-3 rounded-lg bg-muted/30 border border-border">
+                     <span className="flex-1 text-[0.9rem] font-medium text-foreground">{cat.label}</span>
+                     <Button variant="ghost" size="icon-xs" aria-label="Edit category" onClick={() => { setEditingCategory(cat); setCatFormName(cat.label) }}>
+-                      <Pencil size={14} />
++                      <Icon name="edit" size={14} />
+                     </Button>
+                     <Button variant="ghost" size="icon-xs" aria-label="Delete category" onClick={() => handleDeleteCategory(cat.id)}>
+-                      <Trash2 size={14} />
++                      <Icon name="delete" size={14} />
+                     </Button>
+                   </div>
+                 ))}
+                 {categories.filter(c => c.id === 'other').map(cat => (
+                   <div key={cat.id} className="flex items-center gap-2.5 p-2 px-3 rounded-lg opacity-60 bg-muted/30 border border-border">
+                     <span className="flex-1 text-[0.9rem] font-medium text-foreground">{cat.label}</span>
+                     <span className="text-[0.75rem] text-muted-foreground">Protected</span>
+                   </div>
+                 ))}
+               </div>
+@@ -493,18 +492,18 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
+               </div>
+             </div>
+           </div>
+         </DialogContent>
+       </Dialog>
+       {isMobile && (
+         <Button
+           className="fixed bottom-[76px] right-8 h-14 w-14 rounded-full shadow-[0_4px_20px_rgba(249,115,22,0.4)] z-50 p-0 hover:scale-105 active:scale-95 transition-transform"
+           onClick={() => { resetForm(); setShowUploadModal(true) }}
+         >
+-          <Upload size={24} />
++          <Icon name="upload" size={24} />
+         </Button>
+       )}
+       <ConfirmDialog />
+       <AdSlot />
+     </div>
+   )
+ }
+diff --git a/src/components/DriveSync.jsx b/src/components/DriveSync.jsx
+index cfd0c57..916b7bd 100644
+--- a/src/components/DriveSync.jsx
++++ b/src/components/DriveSync.jsx
+@@ -1,12 +1,12 @@
+ import { useState, useEffect } from 'react'
+-import { CloudSync, HardDrive, CloudOff, CloudLightning, ArrowLeftRight, Download, Info, FileJson, AlertCircle, RefreshCw, X, Trash2, Shield, RotateCcw } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Card, CardContent } from "@/components/ui/card"
+ import { useConfirm } from '../hooks/useConfirm'
+ import { Button } from "@/components/ui/button"
+ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+ import AdSlot from './AdSlot'
+ import { getLocalCacheSizeMB, clearLocalCache } from '../services/db.js'
+ import { createBackup, listBackups, restoreBackup } from '../services/googleDrive.js'
+ import { formatDateTime } from '../services/date.js'
+ 
+@@ -96,48 +96,48 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
+       setIsRestoring(false)
+     }
+   }
+ 
+   return (
+     <div className="animate-fade-in flex flex-col gap-6 sm:gap-8 lg:gap-10">
+ 
+       {/* Header */}
+       <div className="flex items-center justify-between">
+         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+-          <CloudSync size={20} className="text-primary" />
++          <Icon name="cloud_sync" size={20} className="text-primary" />
+           Google Drive Sync Management
+         </h1>
+       </div>
+       <div className="border-t border-border border-headline" />
+ 
+       {/* Connection Controller Card */}
+       <Card className={`p-6 sm:p-8 lg:p-10 ${driveConnected ? 'bg-emerald-500/5' : ''}`}>
+         <div className="flex justify-between items-center flex-wrap gap-6">
+           <div className="flex gap-5 items-center">
+             <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center ${driveConnected ? 'bg-status-success/10 text-emerald-500 shadow-[0_4px_20px_rgba(16,185,129,0.2)]' : 'bg-status-error/10 text-destructive'}`}>
+               {driveConnected && (
+                 <>
+                   <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-status-success animate-ping" />
+                   <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-status-success" />
+                 </>
+               )}
+-              {driveConnected ? <CloudLightning size={28} /> : <CloudOff size={28} />}
++              {driveConnected ? <Icon name="bolt" size={28} /> : <Icon name="cloud_off" size={28} />}
+             </div>
+             <div role="status" aria-live="polite">
+               <h3 className="text-xl flex items-center gap-2 text-foreground">
+                 {driveConnected ? 'Sync Tunnel Active' : 'Sync Tunnel Paused'}
+               </h3>
+               <div className="text-muted-foreground text-[0.85rem] mt-1 flex gap-4 flex-wrap">
+                 {driveConnected ? (
+                   <>
+-                    <span className="flex items-center gap-1"><RefreshCw size={14} /> Last Synced: {timeSinceSync} minutes ago</span>
+-                    <span className="flex items-center gap-1"><ArrowLeftRight size={14} /> Next sync in {timeUntilSync} minutes</span>
++                    <span className="flex items-center gap-1"><Icon name="refresh" size={14} /> Last Synced: {timeSinceSync} minutes ago</span>
++                    <span className="flex items-center gap-1"><Icon name="swap_horiz" size={14} /> Next sync in {timeUntilSync} minutes</span>
+                   </>
+                 ) : (
+                   'Local database is working offline. Operations will be buffered until connection resumes.'
+                 )}
+               </div>
+             </div>
+           </div>
+ 
+           <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+             <Button
+@@ -151,21 +151,21 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
+                 } catch(e) {
+                   addLog('Cache Error', 'Failed to clear local cache', 'error')
+                   setIsClearing(false)
+                 }
+               }}
+               disabled={isClearing}
+               variant="outline"
+               aria-label="Clear local cache and resync"
+               className="border-destructive text-destructive hover:text-destructive font-semibold"
+             >
+-              <Trash2 size={16} />
++              <Icon name="delete" size={16} />
+               {isClearing ? 'Clearing...' : 'Clear Local Cache & Resync'}
+             </Button>
+             <Button
+               onClick={handleToggleConnection}
+               aria-label={driveConnected ? 'Pause cloud connection' : 'Establish cloud connection'}
+               variant={driveConnected ? 'outline' : 'default'}
+               className={driveConnected ? 'border-amber-500 text-amber-500 hover:text-amber-600 font-semibold' : 'font-semibold'}
+             >
+               {driveConnected ? 'Pause Cloud Connection' : 'Establish Cloud Connection'}
+             </Button>
+@@ -175,35 +175,35 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
+ 
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+ 
+         {/* Sync Mechanism Diagram */}
+         <Card className="flex flex-col">
+           <CardContent className="p-4 sm:p-6 lg:p-8 flex flex-col justify-center h-full gap-5">
+             <h4 className="text-base text-foreground font-semibold">Data Synchronization Flow</h4>
+ 
+             <div className="py-2 sm:py-5 flex items-center justify-between gap-2 sm:gap-3 w-full">
+               <div className="flex-1 w-full max-w-[140px] rounded-xl border border-border bg-muted/10 text-center p-3 px-1 sm:px-2">
+-                <HardDrive size={24} className="text-primary mx-auto mb-1.5" />
++                <Icon name="storage" size={24} className="text-primary mx-auto mb-1.5" />
+                 <span className="text-[0.7rem] sm:text-[0.8rem] block font-semibold text-foreground">Local Cache</span>
+                 <span className="text-[0.65rem] sm:text-[0.7rem] text-muted-foreground block mb-0.5">{driveConnected ? '0 pending' : 'Offline queue'}</span>
+                 <span className="text-[0.65rem] sm:text-[0.7rem] text-primary font-semibold">{cacheSize} MB</span>
+               </div>
+ 
+               <div className="flex flex-col items-center gap-0.5 shrink-0 px-1 sm:px-3">
+-                <ArrowLeftRight size={20} className={driveConnected ? 'text-emerald-500 animate-pulse' : 'text-muted-foreground'} />
++                <Icon name="swap_horiz" size={20} className={driveConnected ? 'text-emerald-500 animate-pulse' : 'text-muted-foreground'} />
+                 <span className={`text-[0.65rem] sm:text-[0.7rem] font-semibold ${driveConnected ? 'text-emerald-500' : 'text-muted-foreground'}`}>
+                   {driveConnected ? 'Active' : 'Offline'}
+                 </span>
+               </div>
+ 
+               <div className="flex-1 w-full max-w-[140px] rounded-xl border border-border bg-muted/10 text-center p-3 px-1 sm:px-2">
+-                <CloudLightning size={24} className={`mx-auto mb-1.5 ${driveConnected ? 'text-emerald-500' : 'text-muted-foreground'}`} />
++                <Icon name="bolt" size={24} className={`mx-auto mb-1.5 ${driveConnected ? 'text-emerald-500' : 'text-muted-foreground'}`} />
+                 <span className="text-[0.7rem] sm:text-[0.8rem] block font-semibold text-foreground">Drive DB</span>
+                 <span className="text-[0.7rem] text-muted-foreground">{driveConnected ? 'Synced' : 'Waiting'}</span>
+               </div>
+             </div>
+           </CardContent>
+         </Card>
+ 
+         {/* Database backup commands */}
+         <Card className="flex flex-col">
+           <CardContent className="p-4 sm:p-6 lg:p-8 flex flex-col h-full gap-5">
+@@ -215,32 +215,32 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
+             </div>
+ 
+             <div className="flex gap-3 mt-auto">
+               <Button
+                 aria-label="Create backup now"
+                 variant="default"
+                 className="flex-1 justify-center"
+                 onClick={handleCreateBackup}
+                 disabled={isBackingUp || !driveConnected}
+               >
+-                <Download size={16} /> {isBackingUp ? 'Creating Backup...' : 'Create Backup Now'}
++                <Icon name="download" size={16} /> {isBackingUp ? 'Creating Backup...' : 'Create Backup Now'}
+               </Button>
+             </div>
+           </CardContent>
+         </Card>
+ 
+         {/* Data Integrity Testing */}
+         <Card className="flex flex-col">
+           <CardContent className="p-4 sm:p-6 lg:p-8 flex flex-col h-full gap-5">
+             <div>
+               <h4 className="text-base text-destructive font-semibold mb-2 flex items-center gap-2">
+-                <AlertCircle size={18} /> Data Integrity Testing
++                <Icon name="error" size={18} /> Data Integrity Testing
+               </h4>
+               <p className="text-[0.8rem] text-muted-foreground">
+                 Simulate cloud database corruption by writing duplicate IDs to `employees.json` in your Google Drive. Reloading the app will trigger validation alerts and backup recovery flows.
+               </p>
+             </div>
+ 
+             <div className="flex gap-3 mt-auto">
+               <Button
+                 aria-label="Simulate drive corruption"
+                 variant="outline"
+@@ -278,21 +278,21 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
+               </Button>
+             </div>
+           </CardContent>
+         </Card>
+         {/* Backup Browser Widget */}
+         <Card className="flex flex-col">
+         <CardContent className="p-6 sm:p-8 lg:p-10">
+           <div className="flex justify-between items-center mb-4">
+             <div>
+               <h4 className="text-[1.1rem] font-bold flex items-center gap-2 text-foreground">
+-                <Shield size={20} className="text-primary" /> Database Backups (/_backups/)
++                <Icon name="shield" size={20} className="text-primary" /> Database Backups (/_backups/)
+               </h4>
+               <p className="text-[0.8rem] text-muted-foreground mt-1">Automated backups are retained for 7 days + 4 weeks</p>
+             </div>
+           </div>
+ 
+           {/* Desktop Table View */}
+           <div role="log" aria-live="polite" aria-label="Backup logs" className="hidden xl:block overflow-hidden border border-border rounded-lg mt-4">
+             <Table>
+               <TableHeader className="bg-muted/50">
+                 <TableRow>
+@@ -304,108 +304,108 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
+               </TableHeader>
+               <TableBody>
+                 {(!Array.isArray(backupsList) || backupsList.length === 0) ? (
+                   <TableRow>
+                     <TableCell colSpan="4" className="p-6 text-center text-muted-foreground">No backups found.</TableCell>
+                   </TableRow>
+                 ) : backupsList.map(f => (
+                   <TableRow key={f.id}>
+                     <TableCell className="p-3 font-medium">
+                       <span className="flex items-center gap-2">
+-                        <FileJson size={16} className="text-muted-foreground shrink-0" /> {f.name}
++                        <Icon name="data_object" size={16} className="text-muted-foreground shrink-0" /> {f.name}
+                       </span>
+                     </TableCell>
+                     <TableCell className="p-3 text-[0.85rem] text-muted-foreground">
+                       {f.size ? (parseInt(f.size) / 1024).toFixed(1) + ' KB' : 'Unknown'}
+                     </TableCell>
+                     <TableCell className="p-3 text-[0.85rem] text-muted-foreground">
+                       {formatDateTime(f.modifiedTime)}
+                     </TableCell>
+                     <TableCell className="p-3 text-right">
+                       <div className="flex gap-2 justify-end">
+                         <Button
+                           aria-label="Download backup"
+                           variant="secondary"
+                           size="xs"
+                           onClick={() => window.open(`https://drive.google.com/uc?export=download&id=${f.id}`, '_blank')}
+                           title="Download Backup"
+                         >
+-                          <Download size={14} />
++                          <Icon name="download" size={14} />
+                         </Button>
+                         <Button
+                           aria-label="Restore from this backup"
+                           variant="default"
+                           size="xs"
+                           className="bg-amber-500 hover:bg-amber-600 text-white"
+                           onClick={() => setSelectedRestoreBackup(f)}
+                           title="Restore from this backup"
+                         >
+-                          <RotateCcw size={14} />
++                          <Icon name="restart_alt" size={14} />
+                         </Button>
+                       </div>
+                     </TableCell>
+                   </TableRow>
+                 ))}
+               </TableBody>
+             </Table>
+           </div>
+ 
+           {/* Mobile Card View */}
+           <div role="log" aria-live="polite" aria-label="Backup logs" className="xl:hidden flex flex-col gap-4 mt-4">
+             {(!Array.isArray(backupsList) || backupsList.length === 0) ? (
+               <div className="text-center text-muted-foreground py-8 border border-border rounded-lg border-dashed">No backups found.</div>
+             ) : backupsList.map(f => (
+               <div key={`${f.id}-mobile`} className="flex flex-col gap-3 p-4 bg-muted/20 border border-border rounded-lg">
+                 <div className="flex items-start gap-2">
+-                  <FileJson size={18} className="text-muted-foreground shrink-0 mt-0.5" />
++                  <Icon name="data_object" size={18} className="text-muted-foreground shrink-0 mt-0.5" />
+                   <div className="min-w-0">
+                     <div className="font-semibold text-sm text-foreground break-words">{f.name}</div>
+                     <div className="text-xs text-muted-foreground mt-1 flex gap-2 flex-wrap">
+                       <span>Size: {f.size ? (parseInt(f.size) / 1024).toFixed(1) + ' KB' : 'Unknown'}</span>
+                       <span>•</span>
+                       <span>{formatDateTime(f.modifiedTime)}</span>
+                     </div>
+                   </div>
+                 </div>
+                 
+                 <div className="flex gap-2 mt-1">
+                   <Button
+                     aria-label="Download backup"
+                     variant="secondary"
+                     size="sm"
+                     className="flex-1"
+                     onClick={() => window.open(`https://drive.google.com/uc?export=download&id=${f.id}`, '_blank')}
+                   >
+-                    <Download size={14} className="mr-2" /> Download
++                    <Icon name="download" size={14} className="mr-2" /> Download
+                   </Button>
+                   <Button
+                     aria-label="Restore from this backup"
+                     variant="default"
+                     size="sm"
+                     className="flex-1 bg-amber-500 hover:bg-amber-600 text-white"
+                     onClick={() => setSelectedRestoreBackup(f)}
+                   >
+-                    <RotateCcw size={14} className="mr-2" /> Restore
++                    <Icon name="restart_alt" size={14} className="mr-2" /> Restore
+                   </Button>
+                 </div>
+               </div>
+             ))}
+           </div>
+         </CardContent>
+       </Card>
+ 
+       {/* Restore Confirmation Modal */}
+       <Dialog open={!!selectedRestoreBackup} onOpenChange={(open) => { if (!open) setSelectedRestoreBackup(null) }}>
+         <DialogContent className="sm:max-w-[400px]">
+           <DialogHeader>
+             <DialogTitle className="flex items-center gap-2 text-amber-500">
+-              <AlertCircle size={24} /> Confirm Restore
++              <Icon name="error" size={24} /> Confirm Restore
+             </DialogTitle>
+           </DialogHeader>
+           <div className="flex flex-col gap-4">
+             <p className="text-sm text-muted-foreground">You are about to restore the database from:</p>
+             <div className="p-3 rounded-lg bg-muted font-mono text-sm text-foreground">
+               {selectedRestoreBackup?.name}
+             </div>
+             <p className="text-sm text-destructive font-medium">
+               WARNING: This will completely overwrite your current active database tables and cannot be undone. Unsynced offline changes will be permanently lost.
+             </p>
+@@ -423,21 +423,21 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
+             </Button>
+           </DialogFooter>
+         </DialogContent>
+       </Dialog>
+ 
+       </div>
+ 
+       {/* Info Warning Alert */}
+       <div className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-xl bg-indigo-500/5 border border-indigo-500/15">
+         <div className="flex gap-3 items-start">
+-          <Info size={18} className="text-primary shrink-0 mt-0.5" />
++          <Icon name="info" size={18} className="text-primary shrink-0 mt-0.5" />
+           <div className="flex flex-col gap-1">
+             <span className="text-[0.85rem] font-semibold text-foreground">Authentication Note</span>
+             <span className="text-[0.8rem] text-muted-foreground leading-relaxed max-w-[800px]">
+               This application uses standard OAuth2 authentication to establish read/write access to its private App Data folder on Google Drive.
+               The database files are stored securely and cannot be read by other tools.
+             </span>
+           </div>
+         </div>
+         <Button variant="secondary" onClick={handleTestConnection} className="whitespace-nowrap w-full sm:w-auto">
+           Test Connection

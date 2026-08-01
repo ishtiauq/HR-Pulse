@@ -1,0 +1,720 @@
+ src/components/attendance/AttendancePage.jsx   | 23 ++++++++++-------------
+ src/components/attendance/ClockWidget.jsx      |  4 ++--
+ src/components/attendance/DailyLogs.jsx        | 16 ++++++++--------
+ src/components/attendance/GeoCheckInWidget.jsx | 22 +++++++++++-----------
+ src/components/attendance/GlassTimePicker.jsx  |  4 ++--
+ src/components/attendance/LeaveRequests.jsx    | 10 +++++-----
+ src/components/attendance/OvertimeClaims.jsx   |  8 ++++----
+ src/components/attendance/RosterPlanner.jsx    |  8 ++++----
+ src/components/attendance/ShiftSwaps.jsx       |  8 ++++----
+ 9 files changed, 50 insertions(+), 53 deletions(-)
+diff --git a/src/components/attendance/AttendancePage.jsx b/src/components/attendance/AttendancePage.jsx
+index ad77daf..adcce96 100644
+--- a/src/components/attendance/AttendancePage.jsx
++++ b/src/components/attendance/AttendancePage.jsx
+@@ -1,12 +1,12 @@
+ import { useState } from 'react'
+-import { Clock, CalendarDays, ArrowUpDown, Cpu } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Button } from "@/components/ui/button"
+ import DailyLogs from './DailyLogs.jsx'
+ import LeaveRequests from './LeaveRequests.jsx'
+ import LeaveBalanceCard from './LeaveBalanceCard.jsx'
+ import RosterPlanner from './RosterPlanner.jsx'
+ import ShiftSwaps from './ShiftSwaps.jsx'
+ import OvertimeClaims from './OvertimeClaims.jsx'
+ 
+ export default function AttendancePage({ 
+   employees, 
+@@ -21,54 +21,51 @@ export default function AttendancePage({
+   setOvertimeClaims, 
+   addLog, 
+   addToast, 
+   addNotification, 
+   simulatedRole, 
+   addAuditLog,
+   settings 
+ }) {
+   const [tab, setTab] = useState('daily')
+   const tabs = [
+-    { id: 'daily', label: 'Daily Logs', icon: Clock },
+-    { id: 'leave', label: 'Leave Requests', icon: CalendarDays },
+-    { id: 'roster', label: 'Roster', icon: ArrowUpDown },
+-    { id: 'overtime', label: 'Overtime', icon: Cpu },
++    { id: 'daily', label: 'Daily Logs', icon: <Icon name="schedule" size={15} /> },
++    { id: 'leave', label: 'Leave Requests', icon: <Icon name="calendar_month" size={15} /> },
++    { id: 'roster', label: 'Roster', icon: <Icon name="swap_vert" size={15} /> },
++    { id: 'overtime', label: 'Overtime', icon: <Icon name="memory" size={15} /> },
+   ]
+ 
+   return (
+     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
+       <div className="flex items-center justify-between">
+         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+-          <Clock size={20} className="text-primary" />
++          <Icon name="schedule" size={20} className="text-primary" />
+           Attendance & Leaves
+         </h1>
+       </div>
+       <div className="border-t border-border border-headline" />
+ 
+       <div className="bg-card p-2 sm:p-2.5 rounded-[1.25rem] border border-border/50 shadow-sm overflow-x-auto overflow-y-hidden no-scrollbar">
+         <div role="tablist" aria-label="Attendance sections" className="flex gap-2 w-max">
+-          {tabs.map(t => {
+-            const Icon = t.icon
+-            return (
+-              <Button
++          {tabs.map(t => (
++            <Button
+                 key={t.id}
+                 role="tab"
+                 aria-selected={tab === t.id}
+                 variant={tab === t.id ? 'default' : 'ghost'}
+                 size="sm"
+                 className={`rounded-full px-4 ${tab !== t.id ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+                 onClick={() => setTab(t.id)}
+               >
+-                <Icon size={15} /> {t.label}
++                {t.icon} {t.label}
+               </Button>
+-            )
+-          })}
++          ))}
+         </div>
+       </div>
+ 
+       {tab === 'daily' && <DailyLogs employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />}
+       {tab === 'leave' && (
+         <div className="grid gap-6">
+           <LeaveBalanceCard employees={employees} balances={attendance.leaveBalances || {}} settings={settings} />
+           <LeaveRequests 
+             attendance={attendance}
+             leaves={attendance.leaves} 
+diff --git a/src/components/attendance/ClockWidget.jsx b/src/components/attendance/ClockWidget.jsx
+index 87c4f5b..5338414 100644
+--- a/src/components/attendance/ClockWidget.jsx
++++ b/src/components/attendance/ClockWidget.jsx
+@@ -1,12 +1,12 @@
+ import { useState, useEffect } from 'react'
+-import { Clock } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { toLocal, parseMin, fmtH } from '../../services/attendance.js'
+ import { Button } from "@/components/ui/button"
+ import { Card, CardContent } from "@/components/ui/card"
+ import { Select, SelectItem } from "@/components/ui/select"
+ 
+ export default function ClockWidget({ employees, attendance, setAttendance, addToast }) {
+   const today = toLocal(new Date())
+   const [currentTime, setCurrentTime] = useState(new Date())
+   const [clockEmpId, setClockEmpId] = useState('')
+ 
+@@ -86,21 +86,21 @@ export default function ClockWidget({ employees, attendance, setAttendance, addT
+               <SelectItem key={emp.id} id={emp.id}>{emp.name}</SelectItem>
+             ))}
+           </Select>
+ 
+           <Button
+             onClick={handleCheckIn}
+             disabled={!canCheckIn}
+             className="rounded-full px-4 sm:px-6"
+             style={{ background: canCheckIn ? '#28a745' : undefined }}
+           >
+-            <Clock size={15} /> Check In
++            <Icon name="schedule" size={15} /> Check In
+           </Button>
+ 
+           <Button
+             variant="outline"
+             onClick={handleCheckOut}
+             disabled={!canCheckOut}
+             className="rounded-full px-4 sm:px-6 border-2"
+             style={{ borderColor: canCheckOut ? '#dc3545' : undefined, color: canCheckOut ? '#dc3545' : undefined }}
+           >
+             Check Out
+diff --git a/src/components/attendance/DailyLogs.jsx b/src/components/attendance/DailyLogs.jsx
+index b95a18d..fd02a4c 100644
+--- a/src/components/attendance/DailyLogs.jsx
++++ b/src/components/attendance/DailyLogs.jsx
+@@ -1,14 +1,14 @@
+ import { useState } from 'react'
+ import { useAttendanceLogs } from '../../hooks/useAttendanceLogs.js'
+ import { PILL_STYLES } from '../../services/attendance.js'
+-import { CalendarDays, ChevronLeft, ChevronRight, Check, User, Clock, AlertTriangle } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Button } from "@/components/ui/button"
+ import { Card, CardContent } from "@/components/ui/card"
+ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+ import { GlassTimePicker } from './GlassTimePicker.jsx'
+ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
+ 
+ const z = (v) => v < 10 ? `0${v}` : `${v}`
+ 
+ export default function DailyLogs({ employees, attendance, setAttendance, addToast }) {
+   const {
+@@ -35,37 +35,37 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
+     }
+   }
+ 
+   return (
+     <Card className="border-border/50 shadow-sm rounded-2xl overflow-hidden bg-card">
+       <CardContent className="p-0">
+         <div className="bg-muted/30 border-b border-border p-4 sm:p-5 flex justify-between items-center flex-wrap gap-4">
+           <div className="flex items-center gap-3 relative">
+             <Button variant="outline" className="rounded-full bg-background shadow-sm h-10 px-5 border-border/50 hover:border-primary/50" onClick={(e) => { e.stopPropagation(); setShowDatePicker(v => !v); setCalYear(selYear); setCalMonth(selMonth) }}>
+               {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+-              <CalendarDays size={16} className="opacity-60 ml-2 text-primary" />
++              <Icon name="calendar_month" size={16} className="opacity-60 ml-2 text-primary" />
+             </Button>
+             <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+               {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' })}
+             </span>
+             {showDatePicker && (
+               <div onClick={e => e.stopPropagation()}
+                 className="absolute top-full left-0 z-50 w-[280px] p-4 mt-2 rounded-xl border border-border/50 bg-popover text-popover-foreground shadow-2xl backdrop-blur-xl">
+                 <div className="flex justify-between items-center mb-3">
+                   <Button variant="ghost" size="icon" className="size-8" onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1) } else setCalMonth(m => m - 1) }} aria-label="Previous month">
+-                    <ChevronLeft size={16} />
++                    <Icon name="chevron_left" size={16} />
+                   </Button>
+                   <span className="font-semibold text-sm text-foreground">
+                     {new Date(calYear, calMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                   </span>
+                   <Button variant="ghost" size="icon" className="size-8" onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1) } else setCalMonth(m => m + 1) }} aria-label="Next month">
+-                    <ChevronRight size={16} />
++                    <Icon name="chevron_right" size={16} />
+                   </Button>
+                 </div>
+                 <div className="grid grid-cols-7 gap-1 text-center mb-1">
+                   {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
+                     <span key={d} className="font-medium text-[10px] py-1 text-muted-foreground uppercase tracking-widest">{d}</span>
+                   ))}
+                   {calGrid.map((d, i) => (
+                     d === null ? <div key={i} /> : (
+                       <button key={i} aria-label={`${calYear}-${z(calMonth+1)}-${z(d)}`} onClick={() => { setSelectedDate(`${calYear}-${z(calMonth+1)}-${z(d)}`); setShowDatePicker(false) }}
+                         className={`size-8 rounded-full mx-auto text-sm font-medium transition-colors
+@@ -84,45 +84,45 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
+ 
+         <div className="flex flex-col max-h-[550px] overflow-y-auto no-scrollbar">
+           {employees.map((emp, idx) => {
+             const log = logs[emp.id] || { status: 'Absent', checkIn: '--', checkOut: '--', hours: '0.0' }
+             const ps = PILL_STYLES[log.status] || PILL_STYLES.Absent
+             return (
+               <div key={emp.id} className={`p-4 sm:p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4 transition-colors hover:bg-muted/20 ${idx !== employees.length - 1 ? 'border-b border-border/50' : ''}`}>
+                 <div className="flex items-center gap-4">
+                   <Avatar className="size-12 shrink-0 shadow-sm border border-border/50">
+                     {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
+-                    <AvatarFallback className="bg-primary/10 text-primary font-bold"><User size={20} /></AvatarFallback>
++                    <AvatarFallback className="bg-primary/10 text-primary font-bold"><Icon name="person" size={20} /></AvatarFallback>
+                   </Avatar>
+                   <div className="flex flex-col">
+                     <span className="text-base font-bold text-foreground">{emp.name}</span>
+                     <span className="text-xs font-semibold text-muted-foreground mt-0.5 tracking-wider uppercase">{emp.role}</span>
+                   </div>
+                 </div>
+ 
+                 <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 xl:gap-6 bg-muted/30 p-3 sm:px-4 rounded-2xl border border-border/30 w-full xl:w-auto">
+                   <div className="grid grid-cols-[1fr_24px_1fr] items-center w-full sm:flex sm:w-auto gap-2 sm:gap-4">
+                     <button
+                       onClick={() => setActivePicker({ empId: emp.id, field: 'checkIn', current: log.checkIn })}
+                       className="relative group w-full sm:flex-none sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 sm:gap-2 hover:border-primary hover:text-primary transition-all shadow-sm"
+                     >
+-                      <Clock size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
++                      <Icon name="schedule" size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                       <span className="truncate">{log.checkIn}</span>
+                     </button>
+                     
+                     <span className="text-muted-foreground/80 font-bold flex justify-center w-full sm:w-auto shrink-0">→</span>
+                     
+                     <button
+                       onClick={() => setActivePicker({ empId: emp.id, field: 'checkOut', current: log.checkOut })}
+                       className="relative group w-full sm:flex-none sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 sm:gap-2 hover:border-primary hover:text-primary transition-all shadow-sm"
+                     >
+-                      <Clock size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
++                      <Icon name="schedule" size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                       <span className="truncate">{log.checkOut}</span>
+                     </button>
+                   </div>
+ 
+                   <div className="h-8 w-px bg-muted-foreground/30 hidden sm:block"></div>
+                   
+                   <div className="grid grid-cols-[1fr_24px_1fr] items-center w-full sm:flex sm:w-auto gap-2 sm:gap-4">
+                     <div className="relative w-full sm:flex-none sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 shadow-sm">
+                       <span className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Total:</span>
+                       <span className="text-foreground tabular-nums truncate">{log.hours}<span className="text-[10px] opacity-50 ml-0.5">h</span></span>
+@@ -171,21 +171,21 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
+         setIsOpen={(open) => !open && setActivePicker(null)}
+         time={activePicker?.current}
+         onTimeChange={handleTimeChange}
+         label={activePicker?.field === 'checkIn' ? 'Check In Time' : 'Check Out Time'}
+       />
+ 
+       <AlertDialog open={!!pendingStatusChange} onOpenChange={(open) => !open && setPendingStatusChange(null)}>
+         <AlertDialogContent>
+           <AlertDialogHeader>
+             <AlertDialogTitle className="flex items-center gap-2">
+-              <AlertTriangle className="h-5 w-5 text-amber-500" />
++              <Icon name="warning" className="h-5 w-5 text-amber-500" />
+               Change Attendance Status?
+             </AlertDialogTitle>
+             <AlertDialogDescription>
+               Are you sure you want to change the attendance status for <strong>{pendingStatusChange?.empName}</strong> from <span className="font-semibold text-foreground">{pendingStatusChange?.oldStatus}</span> to <span className="font-semibold text-foreground">{pendingStatusChange?.status}</span>?
+             </AlertDialogDescription>
+           </AlertDialogHeader>
+           <AlertDialogFooter>
+             <AlertDialogCancel onClick={() => setPendingStatusChange(null)}>Cancel</AlertDialogCancel>
+             <AlertDialogAction 
+               onClick={handleConfirmStatusChange} 
+diff --git a/src/components/attendance/GeoCheckInWidget.jsx b/src/components/attendance/GeoCheckInWidget.jsx
+index 373abc3..5c6eccc 100644
+--- a/src/components/attendance/GeoCheckInWidget.jsx
++++ b/src/components/attendance/GeoCheckInWidget.jsx
+@@ -1,12 +1,12 @@
+ import { useState, useEffect } from 'react'
+-import { MapPin, Clock, CalendarCheck2, ShieldCheck, ShieldAlert, Loader2, PartyPopper, CheckCircle2 } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { toLocal, parseMin, fmtH } from '../../services/attendance.js'
+ import { Button } from "@/components/ui/button"
+ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+ 
+ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+ 
+ // Haversine formula to calculate distance between two coordinates in meters
+ function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+   const R = 6371e3; // Radius of the earth in m
+   const dLat = deg2rad(lat2 - lat1);
+@@ -172,23 +172,23 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
+ 
+   if (!empId) return null
+ 
+   return (
+     <>
+       <Dialog open={!!successMsg} onOpenChange={(open) => { if (!open) setSuccessMsg(null) }}>
+         <DialogContent className="max-w-[400px] border-border/50 bg-popover shadow-lg flex flex-col items-center justify-center p-5 sm:p-8 gap-4 rounded-[1rem] outline-none">
+           <DialogTitle className="sr-only">Check In Successful</DialogTitle>
+           <div className="size-16 sm:size-24 rounded-full bg-primary/10 flex items-center justify-center animate-bounce mt-2 sm:mt-4 shadow-inner">
+             {successMsg?.type === 'Check-in' ? (
+-              <PartyPopper className="text-primary" size={40} />
++              <Icon name="celebration" className="text-primary" size={40} />
+             ) : (
+-              <CheckCircle2 className="text-primary" size={40} />
++              <Icon name="check_circle" className="text-primary" size={40} />
+             )}
+           </div>
+           <h2 className="text-2xl sm:text-3xl font-black headline-gradient text-center">
+             {successMsg?.type} Successful!
+           </h2>
+           <div className="text-center flex flex-col sm:flex-row sm:flex-nowrap gap-2 w-full mt-1 sm:mt-2">
+             <div className="bg-muted/30 py-3 rounded-lg border border-border flex flex-col items-center justify-center flex-1">
+               <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Time Recorded</span>
+               <span className="text-foreground font-mono text-lg sm:text-xl font-bold">{successMsg?.time}</span>
+             </div>
+@@ -203,91 +203,91 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
+           <Button onClick={() => setSuccessMsg(null)} className="w-full mt-2 sm:mt-4 rounded-full h-11 text-base font-semibold shadow-sm">
+             Done
+           </Button>
+         </DialogContent>
+       </Dialog>
+ 
+       <Card className="col-span-full xl:col-span-12 border-primary/20 bg-card overflow-hidden shadow-sm mb-6">
+         <CardHeader className="bg-primary/5 pb-4 border-b border-border">
+           <div className="flex items-center gap-2.5">
+             <div className="p-2 rounded-md bg-primary/10 text-primary shrink-0">
+-              <CalendarCheck2 size={20} />
++              <Icon name="event_available" size={20} />
+             </div>
+             <CardTitle className="text-lg sm:text-xl font-extrabold m-0 truncate">Mark Attendance</CardTitle>
+           </div>
+         </CardHeader>
+       
+       <CardContent className="p-4 sm:p-5 flex flex-col gap-5">
+         <div className="flex flex-col items-center gap-1 text-center">
+           <div className="text-2xl sm:text-3xl font-black tabular-nums tracking-tight font-mono headline-gradient" aria-live="polite">{timeStr}</div>
+           <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</div>
+           {elapsed && (
+             <div className="mt-1 flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-full px-4 py-2">
+               <span className="text-xs uppercase tracking-wider font-semibold text-primary/70">Working time</span>
+               <span className="font-mono text-base font-bold text-primary">{elapsed}</span>
+             </div>
+           )}
+         </div>
+         <div className="flex-1 flex flex-col gap-2 min-w-0">
+           {isLoadingLoc ? (
+             <div className="flex items-center gap-2 text-muted-foreground text-sm">
+-              <Loader2 className="animate-spin" size={16} />
++              <Icon name="progress_activity" className="animate-spin" size={16} />
+               Verifying Location...
+             </div>
+           ) : locError ? (
+             <div className="flex items-center gap-2 text-destructive text-sm font-medium">
+-              <ShieldAlert size={16} />
++              <Icon name="gpp_maybe" size={16} />
+               {locError}
+             </div>
+           ) : distance !== null ? (
+             <div className="flex flex-col gap-1">
+               <div className="flex items-center gap-2">
+                 {distance <= maxDistance ? (
+-                  <ShieldCheck size={18} className="text-green-500" />
++                  <Icon name="verified_user" size={18} className="text-green-500" />
+                 ) : (
+-                  <ShieldAlert size={18} className="text-destructive" />
++                  <Icon name="gpp_maybe" size={18} className="text-destructive" />
+                 )}
+                 <span className="text-sm font-semibold">
+                   {distance <= maxDistance ? 'Location Verified' : 'Outside Office Zone'}
+                 </span>
+               </div>
+               <p className="text-xs text-muted-foreground m-0">
+                 You are {distance} meters away from the office. {distance <= maxDistance ? 'You may check in.' : `You must be within ${maxDistance} meters to check in.`}
+               </p>
+             </div>
+           ) : (
+             <div className="flex flex-col gap-1">
+               <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
+-                <MapPin size={16} />
++                <Icon name="pin_drop" size={16} />
+                 Location pending
+               </div>
+               <p className="text-xs text-muted-foreground m-0">
+                 Click Check In to verify your location.
+               </p>
+             </div>
+           )}
+         </div>
+ 
+         <div className="flex flex-col gap-3 w-full">
+           {canCheckIn || canCheckOut ? (
+             <Button
+               onClick={canCheckIn ? handleCheckIn : handleCheckOut}
+               disabled={(!canCheckIn && !canCheckOut) || isLoadingLoc}
+               className={`w-full sm:w-auto px-3 lg:px-10 h-12 rounded-full text-sm sm:text-base font-semibold flex items-center justify-center gap-2 shadow-sm mx-auto ${canCheckIn ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/30'}`}
+             >
+-              <Clock size={18} className="shrink-0" />
++              <Icon name="schedule" size={18} className="shrink-0" />
+               {isLoadingLoc ? 'Verifying...' : canCheckIn ? 'Check In' : 'Check Out'}
+             </Button>
+           ) : (
+             <div className="flex flex-col items-center gap-1 text-center">
+               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+-                <CheckCircle2 size={18} className="text-green-500" />
++                <Icon name="check_circle" size={18} className="text-green-500" />
+                 Checked out
+               </div>
+               <span className="text-xs text-muted-foreground">
+                 Check In available in {cooldownRemaining} min
+               </span>
+             </div>
+           )}
+         </div>
+       </CardContent>
+     </Card>
+diff --git a/src/components/attendance/GlassTimePicker.jsx b/src/components/attendance/GlassTimePicker.jsx
+index 30b2790..fb42228 100644
+--- a/src/components/attendance/GlassTimePicker.jsx
++++ b/src/components/attendance/GlassTimePicker.jsx
+@@ -1,14 +1,14 @@
+ import { useState, useEffect, useRef } from 'react'
+ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+ import { Button } from "@/components/ui/button"
+-import { Clock } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ 
+ const Wheel = ({ items, value, onChange, label }) => {
+   const containerRef = useRef(null)
+   const isScrolling = useRef(false)
+   const scrollTimeout = useRef(null)
+   const itemHeight = 44 // px
+ 
+   useEffect(() => {
+     if (!isScrolling.current && containerRef.current) {
+       const index = items.indexOf(value)
+@@ -87,21 +87,21 @@ export function GlassTimePicker({ time, onTimeChange, isOpen, setIsOpen, label }
+   }
+ 
+   const hoursList = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'))
+   const minutesList = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
+   const ampmList = ['AM', 'PM']
+ 
+   return (
+     <Dialog open={isOpen} onOpenChange={setIsOpen}>
+       <DialogContent className="max-w-[340px] bg-popover/95 backdrop-blur-xl border-border/50 shadow-2xl rounded-3xl p-6 outline-none">
+         <DialogTitle className="text-center text-lg font-bold flex items-center justify-center gap-2 mb-4 headline-gradient">
+-          <Clock size={18} className="text-primary" /> {label || 'Select Time'}
++          <Icon name="schedule" size={18} className="text-primary" /> {label || 'Select Time'}
+         </DialogTitle>
+ 
+         <div className="bg-muted/10 border border-border/50 rounded-2xl p-4 mb-4 flex gap-2">
+           <Wheel items={hoursList} value={h} onChange={setH} label="Hour" />
+           <div className="text-2xl font-black text-muted-foreground/30 flex items-center justify-center mt-6 mb-0">:</div>
+           <Wheel items={minutesList} value={m} onChange={setM} label="Minute" />
+           <div className="w-px bg-border/50 mt-6 mx-2" />
+           <Wheel items={ampmList} value={ampm} onChange={setAmpm} label="Period" />
+         </div>
+         
+diff --git a/src/components/attendance/LeaveRequests.jsx b/src/components/attendance/LeaveRequests.jsx
+index f48424e..17de1d2 100644
+--- a/src/components/attendance/LeaveRequests.jsx
++++ b/src/components/attendance/LeaveRequests.jsx
+@@ -1,14 +1,14 @@
+ import { useState } from 'react'
+ import { useLeaves } from '../../hooks/useLeaves.js'
+ import { formatDateShort } from '../../services/date.js'
+-import { Check, X, CalendarDays, AlertTriangle } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Button } from "@/components/ui/button"
+ import { Card, CardContent } from "@/components/ui/card"
+ import { Badge } from "@/components/ui/badge"
+ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
+ 
+ export default function LeaveRequests({ employees, attendance, setAttendance, addToast }) {
+   const { leaves, pendingLeaves, historyLeaves, balances, approveLeave, rejectLeave, pendingCount } = useLeaves(attendance, setAttendance, addToast)
+ 
+   const [pendingAction, setPendingAction] = useState(null) // { id, action: 'approve' | 'reject', empName }
+@@ -31,21 +31,21 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
+   }
+ 
+   return (
+     <Card>
+       <CardContent className="p-5 sm:p-6 flex flex-col gap-6">
+         <h3 className="text-base font-bold m-0 text-foreground">
+           Pending Requests {pendingCount > 0 && <span className="font-normal text-muted-foreground">({pendingCount})</span>}
+         </h3>
+         {pendingLeaves.length === 0 ? (
+           <div className="text-center py-12 text-muted-foreground">
+-            <CalendarDays size={32} className="opacity-30 mx-auto mb-3" />
++            <Icon name="calendar_month" size={32} className="opacity-30 mx-auto mb-3" />
+             <p className="m-0">No pending leave requests.</p>
+           </div>
+         ) : (
+           <div className="rounded-lg border border-border overflow-hidden">
+             <Table>
+               <TableHeader>
+                 <TableRow>
+                   <TableHead className="w-[160px]">Employee</TableHead>
+                   <TableHead className="w-[120px]">Type</TableHead>
+                   <TableHead className="w-[180px]">Dates</TableHead>
+@@ -60,24 +60,24 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
+                   return (
+                     <TableRow key={l.id}>
+                       <TableCell><span className="text-sm text-foreground">{emp?.name || l.employeeId}</span></TableCell>
+                       <TableCell><span className="text-sm text-foreground">{l.leaveType}</span></TableCell>
+                       <TableCell><span className="text-xs text-muted-foreground">{formatDateShort(l.startDate)} — {formatDateShort(l.endDate)}</span></TableCell>
+                       <TableCell className="text-center"><span className="text-sm font-semibold text-foreground">{l.days || '—'}</span></TableCell>
+                       <TableCell><span className="text-xs text-muted-foreground block max-w-[200px] break-words">{l.reason || '—'}</span></TableCell>
+                       <TableCell className="text-right">
+                         <div className="flex gap-2 justify-end">
+                           <Button size="sm" variant="default" onClick={() => setPendingAction({ id: l.id, action: 'approve', empName: emp?.name || l.employeeId })}>
+-                            <Check size={13} className="mr-1" /> Approve
++                            <Icon name="check" size={13} className="mr-1" /> Approve
+                           </Button>
+                           <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => setPendingAction({ id: l.id, action: 'reject', empName: emp?.name || l.employeeId })}>
+-                            <X size={13} className="mr-1" /> Reject
++                            <Icon name="close" size={13} className="mr-1" /> Reject
+                           </Button>
+                         </div>
+                       </TableCell>
+                     </TableRow>
+                   )
+                 })}
+               </TableBody>
+             </Table>
+           </div>
+         )}
+@@ -112,21 +112,21 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
+               </Table>
+             </div>
+           </>
+         )}
+       </CardContent>
+ 
+       <AlertDialog open={!!pendingAction} onOpenChange={(open) => !open && setPendingAction(null)}>
+         <AlertDialogContent>
+           <AlertDialogHeader>
+             <AlertDialogTitle className="flex items-center gap-2">
+-              <AlertTriangle className="h-5 w-5 text-amber-500" />
++              <Icon name="warning" className="h-5 w-5 text-amber-500" />
+               {pendingAction?.action === 'approve' ? 'Approve' : 'Reject'} Leave Request?
+             </AlertDialogTitle>
+             <AlertDialogDescription>
+               Are you sure you want to {pendingAction?.action} the leave request for <strong>{pendingAction?.empName}</strong>?
+             </AlertDialogDescription>
+           </AlertDialogHeader>
+           <AlertDialogFooter>
+             <AlertDialogCancel onClick={() => setPendingAction(null)}>Cancel</AlertDialogCancel>
+             <AlertDialogAction 
+               onClick={handleConfirmAction} 
+diff --git a/src/components/attendance/OvertimeClaims.jsx b/src/components/attendance/OvertimeClaims.jsx
+index 6f2aff0..a469e67 100644
+--- a/src/components/attendance/OvertimeClaims.jsx
++++ b/src/components/attendance/OvertimeClaims.jsx
+@@ -1,13 +1,13 @@
+ import { useOvertime } from '../../hooks/useOvertime.js'
+ import { formatDateShort } from '../../services/date.js'
+-import { Clock, Check, X } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Button } from "@/components/ui/button"
+ import { Card, CardContent } from "@/components/ui/card"
+ import { Badge } from "@/components/ui/badge"
+ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+ 
+ export default function OvertimeClaims({ employees, overtimeClaims, setOvertimeClaims, addToast }) {
+   const { pendingOvertime, historyOvertime, approveOvertime, rejectOvertime } = useOvertime(overtimeClaims, setOvertimeClaims, addToast)
+ 
+   const STATUS = {
+     Approved: { bg: '#28a745', color: '#fff' },
+@@ -17,43 +17,43 @@ export default function OvertimeClaims({ employees, overtimeClaims, setOvertimeC
+ 
+   return (
+     <Card>
+       <CardContent className="p-5 sm:p-6 flex flex-col gap-5">
+         <h3 className="text-base font-bold m-0 text-foreground">
+           Overtime Approvals {pendingOvertime.length > 0 && <span className="font-normal text-muted-foreground">({pendingOvertime.length})</span>}
+         </h3>
+ 
+         {pendingOvertime.length === 0 ? (
+           <div className="text-center py-12 text-muted-foreground">
+-            <Clock size={32} className="opacity-30 mx-auto mb-3" />
++            <Icon name="schedule" size={32} className="opacity-30 mx-auto mb-3" />
+             <p className="m-0">No pending overtime claims.</p>
+           </div>
+         ) : (
+           <div className="flex flex-col gap-3">
+             {pendingOvertime.map(c => {
+               const emp = employees.find(e => e.id === c.employeeId)
+               return (
+                 <div key={c.id} className="flex justify-between items-center flex-wrap gap-3 p-4 rounded-xl border border-border bg-card">
+                   <div className="flex-1 min-w-[200px]">
+                     <div className="text-sm font-semibold text-foreground">{emp?.name}</div>
+                     <div className="flex gap-3 mt-1 flex-wrap">
+                       <span className="text-xs text-muted-foreground">{formatDateShort(c.date)}</span>
+                       <span className="text-xs font-bold" style={{ color: '#b8860b' }}>{c.hours}h OT</span>
+                     </div>
+                     {c.reason && <div className="text-xs text-muted-foreground mt-0.5">{c.reason}</div>}
+                   </div>
+                   <div className="flex gap-2">
+                     <Button size="sm" onClick={() => approveOvertime(c.id)}>
+-                      <Check size={13} /> Approve
++                      <Icon name="check" size={13} /> Approve
+                     </Button>
+                     <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => rejectOvertime(c.id)}>
+-                      <X size={13} /> Reject
++                      <Icon name="close" size={13} /> Reject
+                     </Button>
+                   </div>
+                 </div>
+               )
+             })}
+           </div>
+         )}
+ 
+         {historyOvertime.length > 0 && (
+           <>
+diff --git a/src/components/attendance/RosterPlanner.jsx b/src/components/attendance/RosterPlanner.jsx
+index 7ce8d37..b2718fd 100644
+--- a/src/components/attendance/RosterPlanner.jsx
++++ b/src/components/attendance/RosterPlanner.jsx
+@@ -1,14 +1,14 @@
+ import { useRoster } from '../../hooks/useRoster.js'
+ import { addDays } from '../../services/attendance.js'
+ import { formatDateShort } from '../../services/date.js'
+-import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Button } from "@/components/ui/button"
+ import { Card, CardContent } from "@/components/ui/card"
+ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+ 
+ export default function RosterPlanner({ employees, roster, setRoster, shiftTemplates, addToast }) {
+   const {
+     weekStart, setWeekStart,
+     weekDates, labels, assign, copyPrevWeek, goBack, goNext,
+     openRosterEmp, setOpenRosterEmp, openRosterDate, setOpenRosterDate,
+     closeAll
+@@ -39,31 +39,31 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
+     addToast('Copied previous week roster.', 'success')
+   }
+ 
+   return (
+     <Card>
+       <CardContent className="p-5 sm:p-6">
+         <div className="flex justify-between items-center flex-wrap gap-3 pb-4">
+           <h3 className="text-base font-bold m-0 text-foreground">Weekly Roster Planner</h3>
+           <div className="flex items-center gap-3">
+             <Button variant="outline" size="sm" onClick={handleCopyPrev}>
+-              <CalendarDays size={14} /> Copy Prev Week
++              <Icon name="calendar_month" size={14} /> Copy Prev Week
+             </Button>
+             <div className="flex items-center gap-1 p-1 rounded-full border border-border bg-background">
+               <Button variant="ghost" size="icon" className="size-7" onClick={goBack} aria-label="Previous week">
+-                <ChevronLeft size={15} />
++                <Icon name="chevron_left" size={15} />
+               </Button>
+               <span className="text-xs font-semibold px-2 whitespace-nowrap text-foreground">
+                 {formatDateShort(weekDates[0])} — {formatDateShort(weekDates[6])}
+               </span>
+               <Button variant="ghost" size="icon" className="size-7" onClick={goNext} aria-label="Next week">
+-                <ChevronRight size={15} />
++                <Icon name="chevron_right" size={15} />
+               </Button>
+             </div>
+           </div>
+         </div>
+ 
+         <div className="rounded-lg border border-border overflow-hidden">
+           <div className="overflow-x-auto">
+             <Table>
+               <TableHeader>
+                 <TableRow>
+diff --git a/src/components/attendance/ShiftSwaps.jsx b/src/components/attendance/ShiftSwaps.jsx
+index 1a1cfe3..f34610f 100644
+--- a/src/components/attendance/ShiftSwaps.jsx
++++ b/src/components/attendance/ShiftSwaps.jsx
+@@ -1,13 +1,13 @@
+ import { useShiftSwaps } from '../../hooks/useShiftSwaps.js'
+ import { formatDateShort } from '../../services/date.js'
+-import { Check, X, Repeat } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Button } from "@/components/ui/button"
+ import { Card, CardContent } from "@/components/ui/card"
+ 
+ export default function ShiftSwaps({ employees, shiftSwaps, setShiftSwaps, roster, setRoster, addToast }) {
+   const { pendingSwaps, approveSwap, rejectSwap } = useShiftSwaps(shiftSwaps, setShiftSwaps, roster, setRoster, addToast)
+ 
+   if (pendingSwaps.length === 0) return null
+ 
+   return (
+     <Card>
+@@ -15,30 +15,30 @@ export default function ShiftSwaps({ employees, shiftSwaps, setShiftSwaps, roste
+         <h3 className="text-base font-bold m-0 text-foreground">Pending Shift Swaps ({pendingSwaps.length})</h3>
+         {pendingSwaps.map(swap => {
+           const r = employees.find(e => e.id === swap.requesterId)
+           const t = employees.find(e => e.id === swap.targetId)
+           return (
+             <div key={swap.id} className="flex justify-between items-center flex-wrap gap-3 p-4 rounded-xl border border-border bg-card">
+               <div className="flex-1 min-w-[200px]">
+                 <div className="text-xs font-medium text-muted-foreground mb-1">{formatDateShort(swap.date)}</div>
+                 <div className="flex items-center gap-2 flex-wrap">
+                   <span className="text-sm font-semibold text-foreground">{r?.name}</span>
+-                  <Repeat size={14} className="opacity-60 text-muted-foreground" />
++                  <Icon name="repeat" size={14} className="opacity-60 text-muted-foreground" />
+                   <span className="text-sm font-semibold text-foreground">{t?.name}</span>
+                 </div>
+                 {swap.reason && <div className="text-xs text-muted-foreground mt-1">Reason: {swap.reason}</div>}
+               </div>
+               <div className="flex gap-2">
+                 <Button size="sm" onClick={() => approveSwap(swap.id)}>
+-                  <Check size={13} /> Approve
++                  <Icon name="check" size={13} /> Approve
+                 </Button>
+                 <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => rejectSwap(swap.id)}>
+-                  <X size={13} /> Reject
++                  <Icon name="close" size={13} /> Reject
+                 </Button>
+               </div>
+             </div>
+           )
+         })}
+       </CardContent>
+     </Card>
+   )
+ }

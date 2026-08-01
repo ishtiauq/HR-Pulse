@@ -1,0 +1,959 @@
+ src/App.jsx                       | 16 ++++-----
+ src/components/EmployeeLogin.jsx  | 12 +++----
+ src/components/EmployeePortal.jsx | 76 +++++++++++++++++++--------------------
+ src/components/Login.jsx          | 25 ++++++-------
+ src/hooks/useCommandPalette.jsx   | 22 ++++++------
+ 5 files changed, 74 insertions(+), 77 deletions(-)
+diff --git a/src/App.jsx b/src/App.jsx
+index e961901..f220f5d 100644
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -1,20 +1,20 @@
+ import { useState, useEffect, useRef } from 'react'
+ 
+ import Login from './components/Login.jsx'
+ import EmployeePortal from './components/EmployeePortal.jsx'
+ import Sidebar from './components/layout/Sidebar.jsx'
+ import Topbar from './components/layout/Topbar.jsx'
+ import MobileTabButton from './components/layout/MobileTabButton.jsx'
+ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+ import { Button } from '@/components/ui/button'
+-import { Monitor, Sun, Moon, User as UserIcon, Menu, XCircle, LayoutDashboard, Users, Clock, Megaphone, ArrowLeftRight, LogOut, Bell, Home } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { Badge } from '@/components/ui/badge'
+ import ToastContainer from './components/layout/ToastContainer.jsx'
+ import CommandPalette from './components/layout/CommandPalette.jsx'
+ import AppContent from './components/AppContent.jsx'
+ import { allNavItems } from './utils/helpers.js'
+ import { useTheme } from './hooks/useTheme.js'
+ import { useToast } from './hooks/useToast.js'
+ import { useAuth } from './hooks/useAuth.js'
+ import { useCommandPalette } from './hooks/useCommandPalette.jsx'
+ import useAppData from './hooks/useAppData.js'
+@@ -237,68 +237,68 @@ export default function App() {
+ 
+       {/* Bottom Tab Bar (Mobile) — Floating Pill */}
+       {isMobile && (
+         <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+           <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-full max-w-[250px] flex items-center justify-around px-2 h-16 text-foreground shadow-lg shadow-black/5 transition-all duration-300" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+             <MobileTabButton
+               active={currentView === 'dashboard'}
+               label="Home"
+               onClick={() => { setCurrentView('dashboard'); setShowMobileMenu(false) }}
+             >
+-              <Home size={22} />
++              <Icon name="home" size={22} />
+             </MobileTabButton>
+             <MobileTabButton
+               active={currentView === 'announcements'}
+               label="Announcements"
+               onClick={() => { setCurrentView('announcements'); setShowMobileMenu(false) }}
+             >
+-              <Megaphone size={22} />
++              <Icon name="campaign" size={22} />
+             </MobileTabButton>
+             <MobileTabButton
+               active={false}
+               label="Notifications"
+               onClick={() => { appData.setShowNotifications(true); appData.markNotificationsRead() }}
+               badge={unreadCount > 0 ? (
+                 <span className="absolute top-1.5 right-1.5 flex size-3">
+                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                   <span className="relative inline-flex rounded-full size-3 bg-destructive"></span>
+                 </span>
+               ) : null}
+             >
+-              <Bell size={22} />
++              <Icon name="notifications" size={22} />
+             </MobileTabButton>
+             <MobileTabButton
+               active={showMobileMenu}
+               label="Menu"
+               onClick={() => setShowMobileMenu(!showMobileMenu)}
+             >
+-              <Menu size={22} />
++              <Icon name="menu" size={22} />
+             </MobileTabButton>
+           </nav>
+         </div>
+       )}
+ 
+       {/* Mobile Menu Drawer */}
+       <div 
+         className={`fixed inset-0 z-50 bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${showMobileMenu ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+         onClick={() => setShowMobileMenu(false)}
+         aria-hidden={!showMobileMenu}
+       />
+       
+       <div 
+         className={`fixed bottom-0 left-0 right-0 z-50 flex flex-col bg-popover rounded-t-2xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] border border-border/40 transition-transform duration-300 ease-in-out sm:w-[400px] sm:mx-auto max-h-[85vh] md:hidden ${showMobileMenu ? 'translate-y-0' : 'translate-y-full'}`}
+         aria-hidden={!showMobileMenu}
+       >
+         <div className="px-5 py-4 border-b border-border/50 bg-muted/20 rounded-t-2xl shrink-0 flex items-center justify-between">
+           <h2 className="text-left text-lg font-bold text-foreground">Menu</h2>
+           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground" onClick={() => setShowMobileMenu(false)}>
+-            <XCircle size={18} />
++            <Icon name="cancel" size={18} />
+           </Button>
+         </div>
+         <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
+           {visibleNavItems.filter(i => !['dashboard', 'announcements'].includes(i.id)).map(item => {
+             const active = currentView === item.id
+             return (
+               <Button
+                 key={item.id}
+                 variant={active ? "secondary" : "ghost"}
+                 className={`w-full justify-start py-6 rounded-xl transition-all ${active ? 'bg-primary/10 text-primary font-semibold shadow-sm' : 'text-foreground font-medium hover:bg-muted/60'}`}
+@@ -309,29 +309,29 @@ export default function App() {
+               </Button>
+             )
+           })}
+           
+           <div className="h-px bg-border/60 my-4 mx-2 shrink-0" />
+           
+           <button 
+             className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white transition-colors cursor-pointer border-none shadow-sm"
+             onClick={() => { appData.setShowRoleModal(true); setShowMobileMenu(false) }}
+           >
+-            <ArrowLeftRight size={20} />
++            <Icon name="swap_horiz" size={20} />
+             <span className="font-semibold text-base">Switch Role</span>
+           </button>
+ 
+           <button 
+             className="btn-shimmer mt-2 w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer border-none shadow-sm"
+             onClick={() => { handleLogout(); setShowMobileMenu(false) }}
+           >
+-            <LogOut size={20} />
++            <Icon name="logout" size={20} />
+             <span className="font-semibold text-base">Logout</span>
+           </button>
+         </div>
+       </div>
+ 
+       <ToastContainer toasts={toasts} removeToast={removeToast} />
+       <CommandPalette
+         showCommandPalette={showCommandPalette}
+         setShowCommandPalette={setShowCommandPalette}
+         commandSearch={commandSearch}
+diff --git a/src/components/EmployeeLogin.jsx b/src/components/EmployeeLogin.jsx
+index c973843..1eaddf0 100644
+--- a/src/components/EmployeeLogin.jsx
++++ b/src/components/EmployeeLogin.jsx
+@@ -1,12 +1,12 @@
+ import { useState } from 'react'
+-import { LogIn, ArrowLeft, Shield, Activity, Lock, Eye, EyeOff, Users } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { verifyPassword } from '../services/crypto.js'
+ 
+ export default function EmployeeLogin({ onLogin, onBack }) {
+   const [email, setEmail] = useState('')
+   const [password, setPassword] = useState('')
+   const [showPassword, setShowPassword] = useState(false)
+   const [isLoading, setIsLoading] = useState(false)
+   const [error, setError] = useState('')
+ 
+   const handleSubmit = async (e) => {
+@@ -55,32 +55,32 @@ export default function EmployeeLogin({ onLogin, onBack }) {
+     } catch (err) {
+       setError('Login failed: ' + err.message)
+       setIsLoading(false)
+     }
+   }
+ 
+   return (
+     <div className="welcome-screen-wrapper p-4 sm:p-6 lg:p-10">
+       <div className="welcome-brand">
+         <div className="welcome-logo-box">
+-          <Activity size={24} color="#fff" />
++          <Icon name="monitoring" size={24} className="text-white" />
+         </div>
+         <div>
+           <span className="welcome-title">HR Pulse</span>
+           <span className="welcome-tagline">EMPLOYEE LOGIN</span>
+         </div>
+       </div>
+ 
+       <div className="welcome-center-content">
+         <button onClick={onBack} className="btn btn-outline flex items-center gap-1.5 mb-6 px-4 py-2 rounded-lg bg-transparent cursor-pointer"
+           style={{ border: '1px solid var(--color-md-sys-outline-variant)', color: 'var(--text-secondary)', font: "500 13px 'Roboto'" }}>
+-          <ArrowLeft size={16} />
++          <Icon name="arrow_back" size={16} />
+           Back to HR Manager Login
+         </button>
+ 
+         <h1 className="welcome-heading mb-2" style={{ fontSize: 'var(--fs-headline-large)' }}>
+           Employee <span className="welcome-accent">Login</span>
+         </h1>
+         <p className="mb-8" style={{ color: 'var(--text-secondary)', fontSize: 'var(--fs-body-medium)' }}>
+           Sign in with your company credentials
+         </p>
+ 
+@@ -135,40 +135,40 @@ export default function EmployeeLogin({ onLogin, onBack }) {
+                   boxSizing: 'border-box'
+                 }}
+               />
+               <button
+                 type="button"
+                 onClick={() => setShowPassword(!showPassword)}
+                 aria-label={showPassword ? 'Hide password' : 'Show password'}
+                 className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-1"
+                 style={{ color: 'var(--text-secondary)' }}
+               >
+-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
++                {showPassword ? <Icon name="visibility_off" size={18} /> : <Icon name="visibility" size={18} />}
+               </button>
+             </div>
+           </div>
+ 
+           <button
+             type="submit"
+             disabled={isLoading}
+             className="connect-btn w-full justify-center mb-4 px-5 sm:px-6 py-3 sm:py-3.5"
+           >
+             {isLoading ? 'Signing in...' : 'Sign In'}
+-            {!isLoading && <LogIn size={16} />}
++            {!isLoading && <Icon name="login" size={16} />}
+           </button>
+ 
+           <button
+             type="button"
+             onClick={onBack}
+             className="btn btn-outline w-full justify-center flex items-center gap-1.5"
+           >
+-            <ArrowLeft size={16} />
++            <Icon name="arrow_back" size={16} />
+             Back to HR Manager Login
+           </button>
+         </form>
+       </div>
+ 
+       <style>{`
+         .welcome-screen-wrapper {
+           min-height: 100vh;
+           width: 100%;
+           display: flex;
+diff --git a/src/components/EmployeePortal.jsx b/src/components/EmployeePortal.jsx
+index 8c9c505..1aad1d5 100644
+--- a/src/components/EmployeePortal.jsx
++++ b/src/components/EmployeePortal.jsx
+@@ -1,12 +1,12 @@
+ import { useState, useEffect, useRef } from 'react'
+-import { Home, Calendar as CalendarIcon, FileText, User as UserIcon, Plus, Send, Download, CheckCircle2, XCircle, Clock, AlertCircle, User, Megaphone, MessageSquare, Heart, ThumbsUp, PartyPopper, Monitor, Sun, Moon, AlertTriangle, Upload, CheckSquare, CalendarDays, Menu, Receipt, FolderOpen, ArrowLeftRight, LogOut, LogIn, X, Bell } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { useModal } from '../services/useModal.js'
+ import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
+ import { parseMin } from '../services/attendance.js'
+ import { Select, SelectItem } from "@/components/ui/select"
+ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+ import { Button } from "@/components/ui/button"
+ import { Input } from "@/components/ui/input"
+ import { DatePicker } from "@/components/ui/date-picker"
+ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+ import { Badge } from "@/components/ui/badge"
+@@ -258,32 +258,32 @@ export default function EmployeePortal({
+             addLog={addLog} 
+             addToast={addToast} 
+             simulatedRole={currentUser.role} 
+             settings={settings}
+           />
+         )
+     }
+   }
+ 
+   const navItems = [
+-    { id: 'dashboard', icon: <Home size={18} />, label: 'Dashboard' },
+-    { id: 'my-tasks', icon: <CheckSquare size={18} />, label: 'Tasks' },
+-    { id: 'events', icon: <CalendarDays size={18} />, label: 'Events' },
+-    { id: 'announcements', icon: <Megaphone size={18} />, label: 'Feed' },
+-    { id: 'my-assets', icon: <Monitor size={18} />, label: 'Assets' },
+-    { id: 'attendance', icon: <Clock size={18} />, label: 'Attendance' },
+-    ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <CheckCircle2 size={18} />, label: 'Team Attendance' }] : []),
+-    { id: 'payslips', icon: <FileText size={18} />, label: 'Payslips' },
+-    { id: 'expenses', icon: <Receipt size={18} />, label: 'Expenses' },
+-    { id: 'documents', icon: <FolderOpen size={18} />, label: 'Documents' },
+-    { id: 'leave', icon: <CalendarIcon size={18} />, label: 'Leave' },
+-    { id: 'profile', icon: <UserIcon size={18} />, label: 'Profile' }
++    { id: 'dashboard', icon: <Icon name="home" size={18} />, label: 'Dashboard' },
++    { id: 'my-tasks', icon: <Icon name="check_box" size={18} />, label: 'Tasks' },
++    { id: 'events', icon: <Icon name="calendar_month" size={18} />, label: 'Events' },
++    { id: 'announcements', icon: <Icon name="campaign" size={18} />, label: 'Feed' },
++    { id: 'my-assets', icon: <Icon name="monitor" size={18} />, label: 'Assets' },
++    { id: 'attendance', icon: <Icon name="schedule" size={18} />, label: 'Attendance' },
++    ...(currentUser?.permissions?.includes('manage_attendance') ? [{ id: 'team_attendance', icon: <Icon name="check_circle" size={18} />, label: 'Team Attendance' }] : []),
++    { id: 'payslips', icon: <Icon name="description" size={18} />, label: 'Payslips' },
++    { id: 'expenses', icon: <Icon name="receipt_long" size={18} />, label: 'Expenses' },
++    { id: 'documents', icon: <Icon name="folder_open" size={18} />, label: 'Documents' },
++    { id: 'leave', icon: <Icon name="calendar_month" size={18} />, label: 'Leave' },
++    { id: 'profile', icon: <Icon name="person" size={18} />, label: 'Profile' }
+   ]
+ 
+   return (
+     <div className="dashboard-root app-shell relative" style={{ display: 'flex', height: '100vh', width: '100vw', maxWidth: '100vw', overflow: 'hidden', boxSizing: 'border-box' }}>
+       
+       <Sidebar
+         visibleNavItems={navItems}
+         isCollapsed={isSidebarCollapsed}
+         isDarkMode={themeMode === 'dark'}
+         currentView={activeTab}
+@@ -340,120 +340,120 @@ export default function EmployeePortal({
+         </div>
+       </main>
+ 
+       {/* Punch Modal */}
+       <Dialog open={showPunchModal} onOpenChange={setShowPunchModal}>
+         <DialogContent className="sm:max-w-[380px] p-5 sm:p-6">
+           <DialogHeader>
+             <div className="flex items-center justify-between">
+               <DialogTitle>Mark Attendance</DialogTitle>
+               <button onClick={() => setShowPunchModal(false)} className="size-8 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer" aria-label="Close">
+-                <X size={16} />
++                <Icon name="close" size={16} />
+               </button>
+             </div>
+           </DialogHeader>
+ 
+           <div className="flex flex-col items-center gap-2 py-3 text-center">
+             <div className={`size-16 rounded-full flex items-center justify-center ${isPunchedIn ? 'bg-emerald-500/10 text-emerald-600' : 'bg-primary/10 text-primary'}`}>
+-              {isPunchedIn ? <LogIn size={28} /> : <Clock size={28} />}
++              {isPunchedIn ? <Icon name="login" size={28} /> : <Icon name="schedule" size={28} />}
+             </div>
+             <div className="text-3xl sm:text-4xl font-black tabular-nums tracking-tight text-foreground" aria-live="polite">
+               {punchClock.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+             </div>
+             <div className="text-xs sm:text-sm font-medium text-muted-foreground">
+               {formatDate(new Date().toISOString().split('T')[0])}
+             </div>
+             {punchElapsed && (
+               <div className="mt-1 flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-full px-4 py-1.5">
+                 <span className="text-[11px] uppercase tracking-wider font-semibold text-primary/70">Working time</span>
+                 <span className="font-mono text-sm font-bold text-primary">{punchElapsed}</span>
+               </div>
+             )}
+           </div>
+ 
+           <div className="pt-2 pb-1">
+             {isPunchedOut ? (
+               <div className="flex flex-col items-center gap-2 py-3">
+                 <div className="size-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+-                  <CheckCircle2 size={20} />
++                  <Icon name="check_circle" size={20} />
+                 </div>
+                 <p className="text-sm font-semibold text-foreground">Today's attendance completed</p>
+                 <p className="text-xs text-muted-foreground">In: {punchLog.checkIn} • Out: {punchLog.checkOut} • {punchLog.hours}h</p>
+               </div>
+             ) : (
+               <Button
+                 onClick={handlePunchSubmit}
+                 className={`w-full h-14 rounded-2xl text-base font-semibold flex items-center justify-center gap-2 ${!isPunchedIn ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/30'}`}
+               >
+-                {isPunchedIn ? <><LogOut size={18} /> Check Out</> : <><LogIn size={18} /> Check In</>}
++                {isPunchedIn ? <><Icon name="logout" size={18} /> Check Out</> : <><Icon name="login" size={18} /> Check In</>}
+               </Button>
+             )}
+           </div>
+         </DialogContent>
+       </Dialog>
+ 
+       {/* Bottom Tab Bar (Mobile) — Floating Pill */}
+       {isMobile && (
+         <div className={`fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 pb-3 sm:pb-4 transition-all duration-300 ${isScrollingDown && !showMobileMenu ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'}`}>
+           <nav className="bottom-bar bottom-bar-pill pointer-events-auto w-full max-w-[250px] flex items-center justify-around px-2 h-16 text-foreground shadow-lg shadow-black/5 transition-all duration-300" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+             <MobileTabButton
+               active={activeTab === 'dashboard'}
+               label="Home"
+               onClick={() => { setActiveTab('dashboard'); setShowMobileMenu(false) }}
+             >
+-              <Home size={22} />
++              <Icon name="home" size={22} />
+             </MobileTabButton>
+             <MobileTabButton
+               active={activeTab === 'announcements'}
+               label="Announcements"
+               onClick={() => { setActiveTab('announcements'); setShowMobileMenu(false) }}
+             >
+-              <Megaphone size={22} />
++              <Icon name="campaign" size={22} />
+             </MobileTabButton>
+             <MobileTabButton
+               active={false}
+               label="Notifications"
+               onClick={() => { setShowNotifications(true); markNotificationsRead() }}
+               badge={(notifications || []).filter(n => !n.read).length > 0 ? (
+                 <span className="absolute top-1.5 right-1.5 flex size-3">
+                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                   <span className="relative inline-flex rounded-full size-3 bg-destructive"></span>
+                 </span>
+               ) : null}
+             >
+-              <Bell size={22} />
++              <Icon name="notifications" size={22} />
+             </MobileTabButton>
+             <MobileTabButton
+               active={showMobileMenu}
+               label="Menu"
+               onClick={() => setShowMobileMenu(!showMobileMenu)}
+             >
+-              <Menu size={22} />
++              <Icon name="menu" size={22} />
+             </MobileTabButton>
+           </nav>
+         </div>
+       )}
+       {/* Mobile Menu Drawer */}
+       <div 
+         className={`fixed inset-0 z-50 bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${showMobileMenu ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+         onClick={() => setShowMobileMenu(false)}
+         aria-hidden={!showMobileMenu}
+       />
+       
+       <div 
+         className={`fixed bottom-0 left-0 right-0 z-50 flex flex-col bg-popover rounded-t-2xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] border border-border/40 transition-transform duration-300 ease-in-out sm:w-[400px] sm:mx-auto max-h-[85vh] md:hidden ${showMobileMenu ? 'translate-y-0' : 'translate-y-full'}`}
+         aria-hidden={!showMobileMenu}
+       >
+         <div className="px-5 py-4 border-b border-border/50 bg-muted/20 rounded-t-2xl shrink-0 flex items-center justify-between">
+           <h2 className="text-left text-lg font-bold text-foreground">Menu</h2>
+           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground" onClick={() => setShowMobileMenu(false)}>
+-            <XCircle size={18} />
++            <Icon name="cancel" size={18} />
+           </Button>
+         </div>
+         <div className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1.5 pb-24">
+           {navItems.filter(i => !['dashboard', 'announcements'].includes(i.id)).map(item => {
+             const active = activeTab === item.id
+             return (
+               <Button
+                 key={item.id}
+                 variant={active ? "secondary" : "ghost"}
+                 className={`w-full justify-start py-6 rounded-xl transition-all ${active ? 'bg-primary/10 text-primary font-semibold shadow-sm' : 'text-foreground font-medium hover:bg-muted/60'}`}
+@@ -465,30 +465,30 @@ export default function EmployeePortal({
+             )
+           })}
+           
+           <div className="h-px bg-border/60 my-4 mx-2 shrink-0" />
+           
+           {!currentUser.isEmployee && (
+             <button 
+               className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white transition-colors cursor-pointer border-none shadow-sm mb-2"
+               onClick={() => { setShowRoleModal(true); setShowMobileMenu(false) }}
+             >
+-              <ArrowLeftRight size={20} />
++              <Icon name="swap_horiz" size={20} />
+               <span className="font-semibold text-base">Switch Role</span>
+             </button>
+           )}
+ 
+           <button 
+             className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer border-none shadow-sm"
+             onClick={() => { handleLogout(); setShowMobileMenu(false) }}
+           >
+-            <LogOut size={20} />
++            <Icon name="logout" size={20} />
+             <span className="font-semibold text-base">Logout</span>
+           </button>
+         </div>
+       </div>
+     </div>
+   )
+ }
+ 
+ // ----------------------------------------------------
+ // SUB-VIEWS
+@@ -563,81 +563,81 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
+               </Card>
+             ))
+           )}
+         </div>
+       </div>
+ 
+       <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+         <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('my-tasks')}>
+           <CardContent className="p-5 flex flex-col justify-center">
+             <div className="flex items-center gap-2 mb-2 text-primary">
+-              <CheckSquare size={18} />
++              <Icon name="check_box" size={18} />
+               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Active Tasks</h3>
+             </div>
+             <div className="text-3xl font-black tabular-nums text-foreground">
+               {myActiveTasks.length} <span className="text-sm font-semibold text-muted-foreground ml-1">tasks</span>
+             </div>
+           </CardContent>
+         </Card>
+         
+         <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('events')}>
+           <CardContent className="p-5 flex flex-col justify-center">
+             <div className="flex items-center gap-2 mb-2 text-emerald-500">
+-              <CalendarDays size={18} />
++              <Icon name="calendar_month" size={18} />
+               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Next Event</h3>
+             </div>
+             <div className="text-xl font-bold truncate text-foreground mb-1">
+               {nextEvent ? nextEvent.title : 'None Scheduled'}
+             </div>
+             <div className="text-sm font-medium text-muted-foreground">
+               {nextEvent ? formatDateShort(nextEvent.date) : 'Enjoy your time!'}
+             </div>
+           </CardContent>
+         </Card>
+         
+         <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('leave')}>
+           <CardContent className="p-5 flex flex-col justify-center">
+             <div className="flex items-center gap-2 mb-2 text-blue-500">
+-              <CalendarIcon size={18} />
++              <Icon name="calendar_month" size={18} />
+               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Available Leave</h3>
+             </div>
+             <div className="text-3xl font-black tabular-nums text-foreground">
+               {currentBalances.annual.limit - currentBalances.annual.used + currentBalances.sick.limit - currentBalances.sick.used} <span className="text-sm font-semibold text-muted-foreground ml-1">days total</span>
+             </div>
+           </CardContent>
+         </Card>
+ 
+         <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('my-assets')}>
+           <CardContent className="p-5 flex flex-col justify-center">
+             <div className="flex items-center gap-2 mb-2 text-amber-500">
+-              <Monitor size={18} />
++              <Icon name="monitor" size={18} />
+               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground m-0">Reimbursements</h3>
+             </div>
+             <div className="text-3xl font-black tabular-nums text-foreground">
+               ${totalPending.toFixed(2)} <span className="text-sm font-semibold text-muted-foreground ml-1">pending</span>
+             </div>
+           </CardContent>
+         </Card>
+       </div>
+ 
+       <div className="mt-4 flex flex-col gap-4">
+         <h3 className="text-lg font-semibold m-0">Quick Actions</h3>
+         <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+           <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer h-28 flex items-center justify-center group" onClick={() => setActiveTab('leave')}>
+             <CardContent className="p-0 flex flex-col gap-3 justify-center items-center">
+-              <CalendarIcon size={28} className="text-blue-500 transition-transform group-hover:scale-110" />
++              <Icon name="calendar_month" size={28} className="text-blue-500 transition-transform group-hover:scale-110" />
+               <span className="text-sm font-medium">Request Leave</span>
+             </CardContent>
+           </Card>
+           <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer h-28 flex items-center justify-center group" onClick={() => setActiveTab('payslips')}>
+             <CardContent className="p-0 flex flex-col gap-3 justify-center items-center">
+-              <Download size={28} className="text-green-500 transition-transform group-hover:scale-110" />
++              <Icon name="download" size={28} className="text-green-500 transition-transform group-hover:scale-110" />
+               <span className="text-sm font-medium">Download Payslip</span>
+             </CardContent>
+           </Card>
+         </div>
+       </div>
+     </div>
+   )
+ }
+ 
+ function AttendanceView({ 
+@@ -978,21 +978,21 @@ function PayslipsView({ currentUser, payroll, addToast }) {
+             </TableHeader>
+             <TableBody>
+               {myPayslips.map((slip, i) => (
+                 <TableRow key={i}>
+                   <TableCell>{slip.date}</TableCell>
+                   <TableCell>${slip.gross}</TableCell>
+                   <TableCell>${slip.deductions}</TableCell>
+                   <TableCell className="font-semibold text-green-600 dark:text-green-400">${slip.net}</TableCell>
+                   <TableCell>
+                     <Button variant="outline" size="sm" onClick={() => addToast('Downloading PDF...', 'info')}>
+-                      <Download className="h-4 w-4 mr-2" /> PDF
++                      <Icon name="download" size={16} className="h-4 w-4 mr-2" /> PDF
+                     </Button>
+                   </TableCell>
+                 </TableRow>
+               ))}
+             </TableBody>
+           </Table>
+         </div>
+       )}
+     </div>
+   )
+@@ -1078,21 +1078,21 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
+                 value={reason} 
+                 onChange={e => setReason(e.target.value)} 
+                 required 
+               />
+             </div>
+             
+             <div className="space-y-2">
+               <label className="text-sm font-medium leading-none">Attach Receipt / Medical Certificate</label>
+               <div className="flex items-center gap-3">
+                 <Button variant="outline" type="button" className="relative cursor-pointer overflow-hidden group">
+-                  <Upload className="h-4 w-4 mr-2" /> 
++                  <Icon name="upload" size={16} className="h-4 w-4 mr-2" /> 
+                   <span>{receiptName ? 'Change Document' : 'Upload File'}</span>
+                   <input 
+                     type="file" 
+                     accept="image/*,application/pdf" 
+                     className="absolute inset-0 opacity-0 cursor-pointer" 
+                     onChange={(e) => {
+                       const file = e.target.files?.[0];
+                       if (file) {
+                         setReceiptName(file.name);
+                         const reader = new FileReader();
+@@ -1106,21 +1106,21 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
+                 </Button>
+                 {receiptName && (
+                   <span className="text-sm text-muted-foreground break-words max-w-[200px]">
+                     {receiptName}
+                   </span>
+                 )}
+               </div>
+             </div>
+ 
+             <Button type="submit" className="w-fit mt-2">
+-              <Send className="h-4 w-4 mr-2" /> Submit Request
++              <Icon name="send" size={16} className="h-4 w-4 mr-2" /> Submit Request
+             </Button>
+           </form>
+         </CardContent>
+       </Card>
+ 
+       <Card>
+         <CardHeader>
+           <CardTitle>Application History</CardTitle>
+         </CardHeader>
+         <CardContent>
+@@ -1145,21 +1145,21 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
+                 ) : (
+                   myLeaves.map(l => (
+                     <TableRow key={l.id}>
+                       <TableCell className="font-medium">{l.leaveType}</TableCell>
+                       <TableCell>{l.startDate} to {l.endDate}</TableCell>
+                       <TableCell className="max-w-[200px] break-words">{l.reason}</TableCell>
+                       <TableCell>
+                         {l.receipt ? (
+                           <Button variant="link" className="p-0 h-auto" asChild>
+                             <a href={l.receipt} target="_blank" rel="noreferrer">
+-                              <FileText className="h-3.5 w-3.5 mr-1" /> View
++                              <Icon name="description" size={14} className="h-3.5 w-3.5 mr-1" /> View
+                             </a>
+                           </Button>
+                         ) : (
+                           <span className="text-muted-foreground">None</span>
+                         )}
+                       </TableCell>
+                       <TableCell>
+                         <Badge variant={l.status === 'Approved' ? 'default' : l.status === 'Rejected' ? 'destructive' : 'secondary'} className={l.status === 'Approved' ? 'bg-green-500 hover:bg-green-600' : l.status === 'Pending' ? 'bg-amber-500 hover:bg-amber-600' : ''}>
+                           {l.status}
+                         </Badge>
+@@ -1235,64 +1235,64 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
+     }
+     setAssetRequests(prev => [newReq, ...prev])
+     setRequestForm({ category: 'Laptop', justification: '', urgency: 'Medium' })
+     addToast('Asset request submitted to IT/HR', 'success')
+   }
+ 
+   return (
+     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[900px] mx-auto pb-10">
+       <div className="flex justify-between items-center">
+         <h2 className="text-2xl font-bold m-0 flex items-center gap-3">
+-          <Monitor className="h-6 w-6 text-primary" />
++          <Icon name="monitor" size={24} className="h-6 w-6 text-primary" />
+           My Assets
+         </h2>
+         <div className="flex gap-2 bg-muted p-1 rounded-lg">
+           <button className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'assigned' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('assigned')}>
+             Assigned to Me
+           </button>
+           <button className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'request' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('request')}>
+             Request Equipment
+           </button>
+         </div>
+       </div>
+ 
+       {activeTab === 'assigned' && (
+         <div className="flex flex-col gap-4">
+           {myAssets.length === 0 ? (
+             <Card>
+               <CardContent className="p-10 text-center text-muted-foreground flex flex-col items-center justify-center">
+-                <Monitor className="h-10 w-10 mb-3 opacity-20" />
++                <Icon name="monitor" size={40} className="h-10 w-10 mb-3 opacity-20" />
+                 No assets are currently assigned to you.
+               </CardContent>
+             </Card>
+           ) : (
+             myAssets.map(asset => (
+               <Card key={asset.id}>
+                 <CardContent className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                   <div className="flex items-center gap-4">
+                     <div className="h-12 w-12 rounded-xl flex items-center justify-center bg-primary/10">
+-                      <Monitor className="h-6 w-6 text-primary" />
++                      <Icon name="monitor" size={24} className="h-6 w-6 text-primary" />
+                     </div>
+                     <div>
+                       <div className="font-bold text-lg">{asset.name}</div>
+                       <div className="text-sm text-muted-foreground">{asset.category} &middot; SN: {asset.serialNumber}</div>
+                       <div className="text-xs mt-1 text-muted-foreground">
+                         Assigned: {asset.assignmentDate} &middot; Condition: {asset.condition}
+                       </div>
+                       {asset.warrantyExpiry && (
+                         <div className="text-xs text-muted-foreground">Warranty until: {asset.warrantyExpiry}</div>
+                       )}
+                     </div>
+                   </div>
+                   <div className="flex gap-2">
+                     <Button variant="outline" className="text-amber-500 border-amber-500/20 hover:bg-amber-500/10 hover:text-amber-600" onClick={() => { setIssueAsset(asset); setShowIssueModal(true) }}>
+-                      <AlertTriangle className="h-4 w-4 mr-2" /> Report Issue
++                      <Icon name="warning" size={16} className="h-4 w-4 mr-2" /> Report Issue
+                     </Button>
+                     <Button variant="outline" onClick={() => handleRequestReturn(asset.id)}>
+                       Request Return
+                     </Button>
+                   </div>
+                 </CardContent>
+               </Card>
+             ))
+           )}
+ 
+diff --git a/src/components/Login.jsx b/src/components/Login.jsx
+index 1737a42..5eee26e 100644
+--- a/src/components/Login.jsx
++++ b/src/components/Login.jsx
+@@ -1,16 +1,13 @@
+ import React, { useState } from 'react'
+ import { motion, AnimatePresence } from 'framer-motion'
+-import { 
+-  Shield, User, ArrowRight, Cloud, 
+-  Eye, EyeOff, Activity, Moon, Sun
+-} from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { fetchUserProfile } from '../services/googleDrive.js'
+ import { verifyPassword } from '../services/crypto.js'
+ 
+ export default function Login({ onLogin, themeMode, toggleTheme }) {
+   const [role, setRole] = useState('admin') // 'admin' | 'employee'
+   const [isLoading, setIsLoading] = useState(false)
+   const [showIntermediateModal, setShowIntermediateModal] = useState(false)
+ 
+   // --- Employee state ---
+   const [email, setEmail] = useState('')
+@@ -146,38 +143,38 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
+ 
+       {/* Glassmorphism Navbar */}
+       <header className="absolute top-0 w-full z-50">
+         <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
+           <motion.div 
+             initial={{ opacity: 0, x: -20 }}
+             animate={{ opacity: 1, x: 0 }}
+             className="flex items-center gap-3"
+           >
+             <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold shadow-lg">
+-              <Activity size={24} />
++              <Icon name="monitoring" size={24} />
+             </div>
+             <span className="font-extrabold text-xl tracking-tight">HR Pulse</span>
+           </motion.div>
+           <motion.div 
+             initial={{ opacity: 0, x: 20 }}
+             animate={{ opacity: 1, x: 0 }}
+             className="flex items-center gap-4"
+           >
+             <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card/50 backdrop-blur-md shadow-sm text-xs font-semibold">
+               <div className="w-2 h-2 rounded-full bg-green-500 animate-blink" />
+               System Operational
+             </div>
+             <button 
+               onClick={toggleTheme} 
+               className="w-10 h-10 rounded-full flex items-center justify-center border border-border bg-card/50 backdrop-blur-md shadow-sm hover:bg-muted transition-colors"
+             >
+-              {themeMode === 'light' ? <Sun size={18} /> : <Moon size={18} />}
++              {themeMode === 'light' ? <Icon name="light_mode" size={18} /> : <Icon name="dark_mode" size={18} />}
+             </button>
+           </motion.div>
+         </div>
+       </header>
+ 
+       {/* Main Centered Content */}
+       <main className="flex-1 flex flex-col items-center justify-center px-4 relative z-10 py-24">
+         
+         <motion.div 
+           initial={{ opacity: 0, y: 20 }}
+@@ -199,64 +196,64 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
+               {/* Role Selector Tabs */}
+               <div className="flex p-1.5 bg-muted/60 rounded-full mb-8 border border-border">
+                 <button
+                   onClick={() => setRole('admin')}
+                   className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-semibold transition-all duration-200 ${
+                     role === 'admin'
+                       ? 'bg-background text-foreground shadow-sm'
+                       : 'text-muted-foreground hover:text-foreground'
+                   }`}
+                 >
+-                  <Shield size={16} /> Workspace Admin
++                  <Icon name="shield" size={16} /> Workspace Admin
+                 </button>
+                 <button
+                   onClick={() => setRole('employee')}
+                   className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-semibold transition-all duration-200 ${
+                     role === 'employee'
+                       ? 'bg-background text-foreground shadow-sm'
+                       : 'text-muted-foreground hover:text-foreground'
+                   }`}
+                 >
+-                  <User size={16} /> Teammate
++                  <Icon name="person" size={16} /> Teammate
+                 </button>
+               </div>
+ 
+               <div className="min-h-[220px]">
+                   {error && (
+                     <div className="p-4 mb-6 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
+                       <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                       {error}
+                     </div>
+                   )}
+ 
+                   {role === 'admin' ? (
+                     <div className="flex flex-col gap-5">
+                       <div className="text-center mb-2">
+                         <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 border border-primary/20">
+-                          <Shield size={32} className="text-primary" />
++                          <Icon name="shield" size={32} className="text-primary" />
+                         </div>
+                         <h3 className="font-bold text-lg">Admin Access</h3>
+                         <p className="text-xs text-muted-foreground mt-1">Manage payroll, attendance, and organization settings securely via Google Drive.</p>
+                       </div>
+                       <button 
+                         onClick={handleConnectClick} 
+                         disabled={isLoading}
+                         className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-3 bg-primary text-primary-foreground disabled:opacity-50"
+                       >
+                         {isLoading ? (
+                           <div className="flex items-center gap-2">
+-                            <Cloud size={18} className="animate-pulse" />
++                            <Icon name="cloud" size={18} className="animate-pulse" />
+                             Connecting Workspace...
+                           </div>
+                         ) : (
+                           <>
+-                            <Cloud size={20} /> Secure Drive Connect
++                            <Icon name="cloud" size={20} /> Secure Drive Connect
+                           </>
+                         )}
+                       </button>
+                     </div>
+                   ) : (
+                     <form onSubmit={handleEmployeeSubmit} className="space-y-5">
+                       <div>
+                         <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
+                         <input
+                           type="text"
+@@ -276,51 +273,51 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
+                             onChange={e => setPassword(e.target.value)}
+                             placeholder="••••••••"
+                             className="w-full border-input px-4 py-3.5 pr-11 text-sm font-medium focus:outline-none transition-all"
+                             required
+                           />
+                           <button 
+                             type="button" 
+                             onClick={() => setShowPassword(!showPassword)}
+                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                           >
+-                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
++                            {showPassword ? <Icon name="visibility_off" size={18} /> : <Icon name="visibility" size={18} />}
+                           </button>
+                         </div>
+                       </div>
+                       <button
+                         type="submit"
+                         disabled={isLoading}
+                         className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
+                       >
+-                        {isLoading ? 'Signing In...' : 'Access Portal'} <ArrowRight size={18} />
++                        {isLoading ? 'Signing In...' : 'Access Portal'} <Icon name="arrow_forward" size={18} />
+                       </button>
+                     </form>
+                   )}
+               </div>
+             </div>
+           </div>
+ 
+ 
+ 
+         </motion.div>
+       </main>
+ 
+       {/* Intermediate Auth Modal */}
+       {showIntermediateModal && (
+         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md">
+           <div 
+             role="dialog"
+             className="p-8 max-w-sm w-full animate-fade-in"
+           >
+             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 border border-primary/20">
+-              <Shield size={24} className="text-primary" />
++              <Icon name="shield" size={24} className="text-primary" />
+             </div>
+             <h3 className="text-xl font-bold mb-2">Connect Google Drive</h3>
+             <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
+               HR Pulse requires access to your Google Drive to store company data securely. We only access the dedicated app-data folder.
+             </p>
+             <div className="flex flex-col gap-3">
+               <button 
+                 onClick={handleConfirmAuthorize}
+                 className="w-full py-3.5 rounded-full text-sm font-bold bg-primary text-primary-foreground"
+               >
+diff --git a/src/hooks/useCommandPalette.jsx b/src/hooks/useCommandPalette.jsx
+index 8bee64f..0f1aa1a 100644
+--- a/src/hooks/useCommandPalette.jsx
++++ b/src/hooks/useCommandPalette.jsx
+@@ -1,14 +1,14 @@
+ import { useState, useEffect } from 'react'
+ import { clearLocalCache } from '../services/db.js'
+ import { createBackup } from '../services/googleDrive.js'
+-import { User, History, Moon, Sun, Trash2, HardDrive, LayoutDashboard, Settings as SettingsIcon, FileText } from 'lucide-react'
++import Icon from "@/components/ui/Icon.jsx"
+ import { useConfirm } from './useConfirm'
+ 
+ export function useCommandPalette({ user, employees, themeMode, toggleTheme, setCurrentView, addToast, setSelectedEmployeeId }) {
+   const [showCommandPalette, setShowCommandPalette] = useState(false)
+   const [commandSearch, setCommandSearch] = useState('')
+   const [paletteIndex, setPaletteIndex] = useState(0)
+ 
+   const { confirm, ConfirmDialog } = useConfirm()
+   const [recentActions, setRecentActions] = useState(() => {
+     const saved = localStorage.getItem('hr_pulse_recent_actions')
+@@ -136,30 +136,30 @@ export function useCommandPalette({ user, employees, themeMode, toggleTheme, set
+         view: selectedItem.id.replace('page-', ''),
+         employeeId: selectedItem.employeeId
+       })
+       setShowCommandPalette(false)
+       setCommandSearch('')
+       setPaletteIndex(0)
+     }
+   }
+ 
+   const getCategoryIcon = (category, id) => {
+-    if (category === 'Employees') return <User size={16} />
+-    if (category === 'Recent Actions') return <History size={16} />
+-    if (id.includes('darkmode')) return themeMode === 'light' ? <Moon size={16} /> : <Sun size={16} />
+-    if (id.includes('clearcache')) return <Trash2 size={16} />
+-    if (id.includes('backup')) return <HardDrive size={16} />
+-    if (id.includes('dashboard')) return <LayoutDashboard size={16} />
+-    if (id.includes('settings')) return <SettingsIcon size={16} />
+-    if (id.includes('drive')) return <HardDrive size={16} />
+-    if (id.includes('employees')) return <User size={16} />
+-    return <FileText size={16} />
++    if (category === 'Employees') return <Icon name="person" size={16} />
++    if (category === 'Recent Actions') return <Icon name="history" size={16} />
++    if (id.includes('darkmode')) return themeMode === 'light' ? <Icon name="dark_mode" size={16} /> : <Icon name="light_mode" size={16} />
++    if (id.includes('clearcache')) return <Icon name="delete" size={16} />
++    if (id.includes('backup')) return <Icon name="storage" size={16} />
++    if (id.includes('dashboard')) return <Icon name="dashboard" size={16} />
++    if (id.includes('settings')) return <Icon name="settings" size={16} />
++    if (id.includes('drive')) return <Icon name="storage" size={16} />
++    if (id.includes('employees')) return <Icon name="person" size={16} />
++    return <Icon name="description" size={16} />
+   }
+ 
+   return {
+     showCommandPalette, setShowCommandPalette,
+     commandSearch, setCommandSearch,
+     paletteIndex, setPaletteIndex,
+     filteredItems, selectPaletteItem,
+     getCategoryIcon,
+     ConfirmDialog
+   }
