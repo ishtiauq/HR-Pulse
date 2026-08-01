@@ -1,7 +1,7 @@
 import { useRoster } from '../../hooks/useRoster.js'
 import { addDays } from '../../services/attendance.js'
 import { formatDateShort } from '../../services/date.js'
-import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
@@ -46,17 +46,17 @@ export default function RosterPlanner({ employees, roster, setRoster, shiftTempl
           <h3 className="text-base font-bold m-0 text-foreground">Weekly Roster Planner</h3>
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" onClick={handleCopyPrev}>
-              <CalendarDays size={14} /> Copy Prev Week
+              <Icon name="calendar_month" size={14} /> Copy Prev Week
             </Button>
             <div className="flex items-center gap-1 p-1 rounded-full border border-border bg-background">
               <Button variant="ghost" size="icon" className="size-7" onClick={goBack} aria-label="Previous week">
-                <ChevronLeft size={15} />
+                <Icon name="chevron_left" size={15} />
               </Button>
               <span className="text-xs font-semibold px-2 whitespace-nowrap text-foreground">
                 {formatDateShort(weekDates[0])} — {formatDateShort(weekDates[6])}
               </span>
               <Button variant="ghost" size="icon" className="size-7" onClick={goNext} aria-label="Next week">
-                <ChevronRight size={15} />
+                <Icon name="chevron_right" size={15} />
               </Button>
             </div>
           </div>

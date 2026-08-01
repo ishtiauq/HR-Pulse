@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Clock } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 
 const Wheel = ({ items, value, onChange, label }) => {
   const containerRef = useRef(null)
@@ -94,7 +94,7 @@ export function GlassTimePicker({ time, onTimeChange, isOpen, setIsOpen, label }
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="max-w-[340px] bg-popover/95 backdrop-blur-xl border-border/50 shadow-2xl rounded-3xl p-6 outline-none">
         <DialogTitle className="text-center text-lg font-bold flex items-center justify-center gap-2 mb-4 headline-gradient">
-          <Clock size={18} className="text-primary" /> {label || 'Select Time'}
+          <Icon name="schedule" size={18} className="text-primary" /> {label || 'Select Time'}
         </DialogTitle>
 
         <div className="bg-muted/10 border border-border/50 rounded-2xl p-4 mb-4 flex gap-2">

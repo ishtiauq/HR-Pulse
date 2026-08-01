@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Clock, CalendarDays, ArrowUpDown, Cpu } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import DailyLogs from './DailyLogs.jsx'
 import LeaveRequests from './LeaveRequests.jsx'
@@ -28,17 +28,17 @@ export default function AttendancePage({
 }) {
   const [tab, setTab] = useState('daily')
   const tabs = [
-    { id: 'daily', label: 'Daily Logs', icon: Clock },
-    { id: 'leave', label: 'Leave Requests', icon: CalendarDays },
-    { id: 'roster', label: 'Roster', icon: ArrowUpDown },
-    { id: 'overtime', label: 'Overtime', icon: Cpu },
+    { id: 'daily', label: 'Daily Logs', icon: <Icon name="schedule" size={15} /> },
+    { id: 'leave', label: 'Leave Requests', icon: <Icon name="calendar_month" size={15} /> },
+    { id: 'roster', label: 'Roster', icon: <Icon name="swap_vert" size={15} /> },
+    { id: 'overtime', label: 'Overtime', icon: <Icon name="memory" size={15} /> },
   ]
 
   return (
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Clock size={20} className="text-primary" />
+          <Icon name="schedule" size={20} className="text-primary" />
           Attendance & Leaves
         </h1>
       </div>
@@ -46,10 +46,8 @@ export default function AttendancePage({
 
       <div className="bg-card p-2 sm:p-2.5 rounded-[1.25rem] border border-border/50 shadow-sm overflow-x-auto overflow-y-hidden no-scrollbar">
         <div role="tablist" aria-label="Attendance sections" className="flex gap-2 w-max">
-          {tabs.map(t => {
-            const Icon = t.icon
-            return (
-              <Button
+          {tabs.map(t => (
+            <Button
                 key={t.id}
                 role="tab"
                 aria-selected={tab === t.id}
@@ -58,10 +56,9 @@ export default function AttendancePage({
                 className={`rounded-full px-4 ${tab !== t.id ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => setTab(t.id)}
               >
-                <Icon size={15} /> {t.label}
+                {t.icon} {t.label}
               </Button>
-            )
-          })}
+          ))}
         </div>
       </div>
 

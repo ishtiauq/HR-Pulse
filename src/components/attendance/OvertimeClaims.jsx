@@ -1,6 +1,6 @@
 import { useOvertime } from '../../hooks/useOvertime.js'
 import { formatDateShort } from '../../services/date.js'
-import { Clock, Check, X } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -24,7 +24,7 @@ export default function OvertimeClaims({ employees, overtimeClaims, setOvertimeC
 
         {pendingOvertime.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            <Clock size={32} className="opacity-30 mx-auto mb-3" />
+            <Icon name="schedule" size={32} className="opacity-30 mx-auto mb-3" />
             <p className="m-0">No pending overtime claims.</p>
           </div>
         ) : (
@@ -43,10 +43,10 @@ export default function OvertimeClaims({ employees, overtimeClaims, setOvertimeC
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" onClick={() => approveOvertime(c.id)}>
-                      <Check size={13} /> Approve
+                      <Icon name="check" size={13} /> Approve
                     </Button>
                     <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => rejectOvertime(c.id)}>
-                      <X size={13} /> Reject
+                      <Icon name="close" size={13} /> Reject
                     </Button>
                   </div>
                 </div>

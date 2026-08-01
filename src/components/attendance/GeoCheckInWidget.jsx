@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { MapPin, Clock, CalendarCheck2, ShieldCheck, ShieldAlert, Loader2, PartyPopper, CheckCircle2 } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { toLocal, parseMin, fmtH } from '../../services/attendance.js'
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
@@ -179,9 +179,9 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
           <DialogTitle className="sr-only">Check In Successful</DialogTitle>
           <div className="size-16 sm:size-24 rounded-full bg-primary/10 flex items-center justify-center animate-bounce mt-2 sm:mt-4 shadow-inner">
             {successMsg?.type === 'Check-in' ? (
-              <PartyPopper className="text-primary" size={40} />
+              <Icon name="celebration" className="text-primary" size={40} />
             ) : (
-              <CheckCircle2 className="text-primary" size={40} />
+              <Icon name="check_circle" className="text-primary" size={40} />
             )}
           </div>
           <h2 className="text-2xl sm:text-3xl font-black headline-gradient text-center">
@@ -210,7 +210,7 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
         <CardHeader className="bg-primary/5 pb-4 border-b border-border">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-md bg-primary/10 text-primary shrink-0">
-              <CalendarCheck2 size={20} />
+              <Icon name="event_available" size={20} />
             </div>
             <CardTitle className="text-lg sm:text-xl font-extrabold m-0 truncate">Mark Attendance</CardTitle>
           </div>
@@ -230,21 +230,21 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
         <div className="flex-1 flex flex-col gap-2 min-w-0">
           {isLoadingLoc ? (
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <Loader2 className="animate-spin" size={16} />
+              <Icon name="progress_activity" className="animate-spin" size={16} />
               Verifying Location...
             </div>
           ) : locError ? (
             <div className="flex items-center gap-2 text-destructive text-sm font-medium">
-              <ShieldAlert size={16} />
+              <Icon name="gpp_maybe" size={16} />
               {locError}
             </div>
           ) : distance !== null ? (
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 {distance <= maxDistance ? (
-                  <ShieldCheck size={18} className="text-green-500" />
+                  <Icon name="verified_user" size={18} className="text-green-500" />
                 ) : (
-                  <ShieldAlert size={18} className="text-destructive" />
+                  <Icon name="gpp_maybe" size={18} className="text-destructive" />
                 )}
                 <span className="text-sm font-semibold">
                   {distance <= maxDistance ? 'Location Verified' : 'Outside Office Zone'}
@@ -257,7 +257,7 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
           ) : (
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
-                <MapPin size={16} />
+                <Icon name="pin_drop" size={16} />
                 Location pending
               </div>
               <p className="text-xs text-muted-foreground m-0">
@@ -274,13 +274,13 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
               disabled={(!canCheckIn && !canCheckOut) || isLoadingLoc}
               className={`w-full sm:w-auto px-3 lg:px-10 h-12 rounded-full text-sm sm:text-base font-semibold flex items-center justify-center gap-2 shadow-sm mx-auto ${canCheckIn ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/30'}`}
             >
-              <Clock size={18} className="shrink-0" />
+              <Icon name="schedule" size={18} className="shrink-0" />
               {isLoadingLoc ? 'Verifying...' : canCheckIn ? 'Check In' : 'Check Out'}
             </Button>
           ) : (
             <div className="flex flex-col items-center gap-1 text-center">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <CheckCircle2 size={18} className="text-green-500" />
+                <Icon name="check_circle" size={18} className="text-green-500" />
                 Checked out
               </div>
               <span className="text-xs text-muted-foreground">

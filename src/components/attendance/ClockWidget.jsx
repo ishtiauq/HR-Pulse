@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Clock } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { toLocal, parseMin, fmtH } from '../../services/attendance.js'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -93,7 +93,7 @@ export default function ClockWidget({ employees, attendance, setAttendance, addT
             className="rounded-full px-4 sm:px-6"
             style={{ background: canCheckIn ? '#28a745' : undefined }}
           >
-            <Clock size={15} /> Check In
+            <Icon name="schedule" size={15} /> Check In
           </Button>
 
           <Button

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLeaves } from '../../hooks/useLeaves.js'
 import { formatDateShort } from '../../services/date.js'
-import { Check, X, CalendarDays, AlertTriangle } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -38,7 +38,7 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
         </h3>
         {pendingLeaves.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            <CalendarDays size={32} className="opacity-30 mx-auto mb-3" />
+            <Icon name="calendar_month" size={32} className="opacity-30 mx-auto mb-3" />
             <p className="m-0">No pending leave requests.</p>
           </div>
         ) : (
@@ -67,10 +67,10 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
                           <Button size="sm" variant="default" onClick={() => setPendingAction({ id: l.id, action: 'approve', empName: emp?.name || l.employeeId })}>
-                            <Check size={13} className="mr-1" /> Approve
+                            <Icon name="check" size={13} className="mr-1" /> Approve
                           </Button>
                           <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:text-destructive" onClick={() => setPendingAction({ id: l.id, action: 'reject', empName: emp?.name || l.employeeId })}>
-                            <X size={13} className="mr-1" /> Reject
+                            <Icon name="close" size={13} className="mr-1" /> Reject
                           </Button>
                         </div>
                       </TableCell>
@@ -119,7 +119,7 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              <Icon name="warning" className="h-5 w-5 text-amber-500" />
               {pendingAction?.action === 'approve' ? 'Approve' : 'Reject'} Leave Request?
             </AlertDialogTitle>
             <AlertDialogDescription>

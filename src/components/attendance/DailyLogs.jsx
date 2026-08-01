@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAttendanceLogs } from '../../hooks/useAttendanceLogs.js'
 import { PILL_STYLES } from '../../services/attendance.js'
-import { CalendarDays, ChevronLeft, ChevronRight, Check, User, Clock, AlertTriangle } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -42,7 +42,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
           <div className="flex items-center gap-3 relative">
             <Button variant="outline" className="rounded-full bg-background shadow-sm h-10 px-5 border-border/50 hover:border-primary/50" onClick={(e) => { e.stopPropagation(); setShowDatePicker(v => !v); setCalYear(selYear); setCalMonth(selMonth) }}>
               {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-              <CalendarDays size={16} className="opacity-60 ml-2 text-primary" />
+              <Icon name="calendar_month" size={16} className="opacity-60 ml-2 text-primary" />
             </Button>
             <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' })}
@@ -52,13 +52,13 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                 className="absolute top-full left-0 z-50 w-[280px] p-4 mt-2 rounded-xl border border-border/50 bg-popover text-popover-foreground shadow-2xl backdrop-blur-xl">
                 <div className="flex justify-between items-center mb-3">
                   <Button variant="ghost" size="icon" className="size-8" onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1) } else setCalMonth(m => m - 1) }} aria-label="Previous month">
-                    <ChevronLeft size={16} />
+                    <Icon name="chevron_left" size={16} />
                   </Button>
                   <span className="font-semibold text-sm text-foreground">
                     {new Date(calYear, calMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </span>
                   <Button variant="ghost" size="icon" className="size-8" onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1) } else setCalMonth(m => m + 1) }} aria-label="Next month">
-                    <ChevronRight size={16} />
+                    <Icon name="chevron_right" size={16} />
                   </Button>
                 </div>
                 <div className="grid grid-cols-7 gap-1 text-center mb-1">
@@ -91,7 +91,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                 <div className="flex items-center gap-4">
                   <Avatar className="size-12 shrink-0 shadow-sm border border-border/50">
                     {emp.avatar ? <AvatarImage src={emp.avatar} alt={emp.name} className="object-cover" /> : null}
-                    <AvatarFallback className="bg-primary/10 text-primary font-bold"><User size={20} /></AvatarFallback>
+                    <AvatarFallback className="bg-primary/10 text-primary font-bold"><Icon name="person" size={20} /></AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
                     <span className="text-base font-bold text-foreground">{emp.name}</span>
@@ -105,7 +105,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                       onClick={() => setActivePicker({ empId: emp.id, field: 'checkIn', current: log.checkIn })}
                       className="relative group w-full sm:flex-none sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 sm:gap-2 hover:border-primary hover:text-primary transition-all shadow-sm"
                     >
-                      <Clock size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                      <Icon name="schedule" size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                       <span className="truncate">{log.checkIn}</span>
                     </button>
                     
@@ -115,7 +115,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                       onClick={() => setActivePicker({ empId: emp.id, field: 'checkOut', current: log.checkOut })}
                       className="relative group w-full sm:flex-none sm:w-[125px] h-10 rounded-xl border border-input bg-background/80 text-sm font-semibold flex items-center justify-center gap-1 sm:gap-2 hover:border-primary hover:text-primary transition-all shadow-sm"
                     >
-                      <Clock size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                      <Icon name="schedule" size={14} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                       <span className="truncate">{log.checkOut}</span>
                     </button>
                   </div>
@@ -178,7 +178,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              <Icon name="warning" className="h-5 w-5 text-amber-500" />
               Change Attendance Status?
             </AlertDialogTitle>
             <AlertDialogDescription>
