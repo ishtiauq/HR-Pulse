@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
+@import "@fontsource-variable/material-symbols-rounded";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -332,6 +333,26 @@ input:focus, select:focus, textarea:focus, .focus-within\:ring-2:focus-within {
   outline: none !important;
   box-shadow: 0 0 0 3px rgba(240, 90, 20, 0.3) !important; /* Animated Focus Glow */
   border-color: var(--primary) !important;
+}
+
+.msr {
+  font-family: "Material Symbols Rounded Variable", "Material Symbols Rounded";
+  font-weight: 600;
+  font-style: normal;
+  font-variation-settings: "FILL" 1, "wght" 600, "GRAD" 0, "opsz" auto;
+  font-size: 1.25rem;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "liga";
+  user-select: none;
 }
 
 
