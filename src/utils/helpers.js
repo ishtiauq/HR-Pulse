@@ -1,6 +1,5 @@
-import { LayoutDashboard, Users, User, Banknote, Clock, Receipt, Settings2, FolderOpen, Megaphone, CalendarDays, Laptop, CloudSync, CheckSquare } from 'lucide-react'
-
 import { createElement } from 'react'
+import Icon from '../components/ui/Icon.jsx'
 
 export const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
 
@@ -22,17 +21,17 @@ export function timestampArrayChanges(prev, next) {
 }
 
 export const allNavItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: createElement(LayoutDashboard, { size: 18 }) },
-  { id: 'tasks', label: 'Tasks', icon: createElement(CheckSquare, { size: 18 }) },
-  { id: 'announcements', label: 'Announcements', icon: createElement(Megaphone, { size: 18 }) },
-  { id: 'calendar', label: 'Events', icon: createElement(CalendarDays, { size: 18 }) },
-  { id: 'documents', label: 'Documents', icon: createElement(FolderOpen, { size: 18 }) },
-  { id: 'employees', label: 'Employees', icon: createElement(Users, { size: 18 }) },
-  { id: 'payroll', label: 'Payroll', icon: createElement(Banknote, { size: 18 }) },
-  { id: 'attendance', label: 'Leaves & Attendance', icon: createElement(Clock, { size: 18 }) },
-  { id: 'expenses', label: 'Expenses', icon: createElement(Receipt, { size: 18 }) },
-  { id: 'assets', label: 'Assets', icon: createElement(Laptop, { size: 18 }) },
-  { id: 'settings', label: 'Settings', icon: createElement(Settings2, { size: 18 }) },
-  { id: 'drive', label: 'Drive Sync', icon: createElement(CloudSync, { size: 18 }) },
-  { id: 'profile', label: 'Profile', icon: createElement(User, { size: 18 }) },
+  { id: 'dashboard', label: 'Dashboard', icon: createElement(Icon, { name: 'dashboard', size: 18 }) },
+  { id: 'tasks', label: 'Tasks', icon: createElement(Icon, { name: 'check_box', size: 18 }) },
+  { id: 'announcements', label: 'Announcements', icon: createElement(Icon, { name: 'campaign', size: 18 }) },
+  { id: 'calendar', label: 'Events', icon: createElement(Icon, { name: 'calendar_month', size: 18 }) },
+  { id: 'documents', label: 'Documents', icon: createElement(Icon, { name: 'folder_open', size: 18 }) },
+  { id: 'employees', label: 'Employees', icon: createElement(Icon, { name: 'group', size: 18 }) },
+  { id: 'payroll', label: 'Payroll', icon: createElement(Icon, { name: 'payments', size: 18 }) },
+  { id: 'attendance', label: 'Leaves & Attendance', icon: createElement(Icon, { name: 'schedule', size: 18 }) },
+  { id: 'expenses', label: 'Expenses', icon: createElement(Icon, { name: 'receipt_long', size: 18 }) },
+  { id: 'assets', label: 'Assets', icon: createElement(Icon, { name: 'laptop_windows', size: 18 }) },
+  { id: 'settings', label: 'Settings', icon: createElement(Icon, { name: 'settings', size: 18 }) },
+  { id: 'drive', label: 'Drive Sync', icon: createElement(Icon, { name: 'cloud_sync', size: 18 }) },
+  { id: 'profile', label: 'Profile', icon: createElement(Icon, { name: 'person', size: 18 }) },
 ]

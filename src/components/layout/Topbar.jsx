@@ -1,4 +1,4 @@
-import { Monitor, Sun, Moon, Menu, Bell, UserRound } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import hrPulseLogo from '../../Assets/Logo Banner.svg'
 
@@ -49,7 +49,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                 aria-label="Profile"
                 className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0 !border-transparent"
               >
-                <UserRound size={22} className="size-[22px]" />
+                <Icon name="person" size={22} className="size-[22px]" />
               </Button>
             )}
             {showThemeToggle && (
@@ -61,7 +61,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                 aria-label="Toggle theme"
                 className="rounded-full size-10 sm:size-11 text-foreground hover:bg-muted shrink-0 !border-transparent"
               >
-                {themeMode === 'light' ? <Sun size={22} className="size-[22px]" /> : <Moon size={22} className="size-[22px]" />}
+                {themeMode === 'light' ? <Icon name="light_mode" size={22} className="size-[22px]" /> : <Icon name="dark_mode" size={22} className="size-[22px]" />}
               </Button>
             )}
           </div>
@@ -105,7 +105,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                 title={`Theme: ${themeMode}`}
                 className="rounded-full size-8 min-[400px]:size-9 sm:size-10 text-foreground hover:bg-muted shrink-0"
               >
-                {themeMode === 'light' ? <Sun size={20} /> : <Moon size={20} />}
+                {themeMode === 'light' ? <Icon name="light_mode" size={20} /> : <Icon name="dark_mode" size={20} />}
               </Button>
             )}
 
@@ -119,7 +119,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                 className="rounded-full size-8 min-[400px]:size-9 sm:size-10 text-foreground hover:bg-muted relative shrink-0"
                 id="notification-trigger"
               >
-                <Bell size={20} />
+                <Icon name="notifications" size={20} />
                 {unreadCount > 0 && (
                   <span className="absolute top-1.5 right-1.5 flex size-3">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>

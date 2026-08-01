@@ -1,4 +1,4 @@
-import { X, Bell } from 'lucide-react'
+import Icon from "@/components/ui/Icon.jsx"
 
 export default function ToastContainer({ toasts, removeToast }) {
   return (
@@ -10,7 +10,7 @@ export default function ToastContainer({ toasts, removeToast }) {
           style={{ animation: 'slideIn 0.3s ease-out' }}
         >
           <div className="flex items-start gap-3 flex-1 w-full">
-            <Bell size={18} className="shrink-0 mt-0.5 text-muted-foreground" />
+            <Icon name="notifications" size={18} className="shrink-0 mt-0.5 text-muted-foreground" />
             <p className="flex-1 text-sm font-medium leading-relaxed">
               {toast.message}
             </p>
@@ -23,7 +23,7 @@ export default function ToastContainer({ toasts, removeToast }) {
               )}
               <button onClick={() => removeToast(toast.id)}
                 className="absolute right-1 top-1 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-1 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600 pointer-events-auto cursor-pointer border-none bg-transparent">
-                <X size={14} />
+                <Icon name="close" size={14} />
               </button>
             </div>
           </div>
