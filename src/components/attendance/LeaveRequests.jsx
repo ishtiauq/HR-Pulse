@@ -119,7 +119,7 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <Icon name="warning" className="h-5 w-5 text-amber-500" />
+              <Icon name="warning" size={20} className="h-5 w-5 text-amber-500" />
               {pendingAction?.action === 'approve' ? 'Approve' : 'Reject'} Leave Request?
             </AlertDialogTitle>
             <AlertDialogDescription>

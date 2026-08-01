@@ -365,10 +365,10 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                       {/* Actions */}
                       <div className="flex items-center gap-2 pt-1">
                         <Button variant="outline" className="flex-1 border-destructive text-destructive hover:bg-destructive/10" onClick={() => setRejectReasonModal({ open: true, id: exp.id, reason: '' })}>
-                          <Icon name="close" className="mr-2 h-4 w-4" /> Reject
+                          <Icon name="close" size={16} className="mr-2 h-4 w-4" /> Reject
                         </Button>
                         <button type="button" className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none" onClick={() => handleApprove(exp.id)}>
-                          <Icon name="check" className="h-4 w-4" /> Approve
+                          <Icon name="check" size={16} className="h-4 w-4" /> Approve
                         </button>
                       </div>
                     </div>
@@ -468,7 +468,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                       {/* Actions */}
                       <div className="pt-1">
                         <Button variant="default" className="w-full" onClick={() => handleMarkReimbursed(exp.id)}>
-                          <Icon name="attach_money" className="mr-2 h-4 w-4" /> Mark as Reimbursed
+                          <Icon name="attach_money" size={16} className="mr-2 h-4 w-4" /> Mark as Reimbursed
                         </Button>
                       </div>
                     </div>
