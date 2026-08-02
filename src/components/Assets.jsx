@@ -67,17 +67,17 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
       </div>
 
       <Card className="shadow-xs border-border bg-card overflow-hidden">
-        <div className="p-4 border-b border-border flex flex-wrap gap-4 items-center justify-between bg-muted/20">
-          <div className="relative flex-1 min-w-[280px] max-w-md">
-            <Icon name="search" size={16} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input type="text" placeholder="Search by name or serial number..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 bg-background border-input shadow-sm" />
+        <div className="p-4 border-b border-border flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-between bg-muted/20">
+          <div className="relative flex-1 w-full sm:w-auto sm:min-w-[280px] sm:max-w-md">
+            <Icon name="search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input type="text" placeholder="Search by name or serial number..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 bg-background border-input shadow-sm w-full" />
           </div>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={triggerFileInput} className="shadow-sm">
+          <div className="flex gap-3 flex-wrap">
+            <Button variant="outline" onClick={triggerFileInput} className="shadow-sm flex-1 sm:flex-none">
               <Icon name="upload" size={16} className="mr-2 h-4 w-4" /> Import CSV
             </Button>
             <input type="file" ref={fileInputRef} onChange={handleImportCSV} accept=".csv" className="hidden" />
-            <Button onClick={() => setShowAddModal(true)} className="shadow-sm shadow-primary/20">
+            <Button onClick={() => setShowAddModal(true)} className="shadow-sm shadow-primary/20 flex-1 sm:flex-none">
               <Icon name="add" size={16} className="mr-2 h-4 w-4" /> Add Asset
             </Button>
           </div>
@@ -94,7 +94,7 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
           >
             <Icon name="category" size={18} className="text-primary" />
             All Assets
-            <span className="text-xs text-muted-foreground font-normal">({filteredAssets.length})</span>
+            <Badge variant="secondary" className="text-xs shrink-0">{filteredAssets.length}</Badge>
           </button>
           <Button variant="ghost" size="sm" onClick={onOpenCategoryManager} className="rounded-full h-8 px-3 text-xs flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
             <Icon name="tune" size={14} /> Manage Category
@@ -115,8 +115,8 @@ function AssetInventory({ filteredAssets, stats, assets, search, setSearch, filt
                   <span className="p-1.5 bg-primary/10 rounded-md text-primary flex items-center justify-center">
                     {categoryIcons[group.key] || <Icon name="monitor" size={16} />}
                   </span>
-                  <span className="flex-1 font-semibold text-foreground">{group.label}</span>
-                  <Badge variant="secondary" className="text-xs">{group.items.length} {group.items.length === 1 ? 'asset' : 'assets'}</Badge>
+                  <span className="flex-1 font-semibold text-foreground truncate">{group.label}</span>
+                  <Badge variant="secondary" className="text-xs shrink-0">{group.items.length}</Badge>
                 </button>
 
                 {isOpen && (
