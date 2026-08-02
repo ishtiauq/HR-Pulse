@@ -442,11 +442,11 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
                 viewport={{ once: false, amount: 0.3 }}
                 transition={{ type: "spring", stiffness: 200, damping: 22, mass: 0.9 }}
-                className="login-auth-card relative w-full max-w-[340px] mx-auto shrink-0"
+                className="login-auth-card relative w-full max-w-[400px] mx-auto shrink-0"
               >
                 {/* 1. Lanyard Back (Behind Card) */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0">
-                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%,black_100%)]">
+                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_25%,black_60%,black_100%)]">
                     {/* Back strap (Left) */}
                     <div className="absolute -bottom-[20px] left-[139px] w-[32px] h-[600px] bg-[#1812a0] origin-bottom -rotate-[14deg]" />
                   </div>
@@ -461,7 +461,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   <div className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[56px] h-[12px] rounded-full border border-border/50 shadow-[inset_0_4px_6px_rgba(0,0,0,0.4)] dark:shadow-[inset_0_4px_8px_rgba(0,0,0,0.9)] pointer-events-none" />
 
                   {/* Front strap (Right) - Pushed 1px down to overlap the hole lip and eliminate the gap */}
-                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%,black_100%)]">
+                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_25%,black_60%,black_100%)]">
                     <div className="absolute -bottom-[20px] right-[138px] w-[32px] h-[600px] bg-[#2922fa] origin-bottom rotate-[12deg] shadow-[-6px_0_15px_rgba(0,0,0,0.4)]" />
                   </div>
                 </div>
