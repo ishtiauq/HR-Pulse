@@ -218,6 +218,7 @@ export default function EmployeePortal({
                  addToast={addToast}
                  addLog={addLog}
                  simulatedRole="Teammate"
+                 headline="Feed"
                />
       case 'payslips':
         return <PayslipsView currentUser={currentUser} payroll={payroll} addToast={addToast} />
@@ -263,6 +264,7 @@ export default function EmployeePortal({
             addToast={addToast} 
             simulatedRole={currentUser.role} 
             settings={settings}
+            headline="Team Attendance"
           />
         )
     }
@@ -522,6 +524,13 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1200px] mx-auto">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+          <Icon name="dashboard" size={20} className="text-foreground" />
+          Dashboard
+        </h1>
+      </div>
+      <div className="border-t border-border border-headline" />
       <Card className="bg-gradient-to-br from-primary/10 via-background to-background border-primary/20 shadow-sm">
         <CardContent className="p-6 sm:p-8 flex items-center gap-5 sm:gap-6">
           <div className="size-16 sm:size-20 bg-background rounded-full shadow-sm flex items-center justify-center p-1">
@@ -747,14 +756,67 @@ function AttendanceView({
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
-      <h2 className="text-2xl font-bold m-0">My Attendance & Roster</h2>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+          <Icon name="schedule" size={20} className="text-foreground" />
+          Attendance
+        </h1>
+      </div>
+      <div className="border-t border-border border-headline" />
       
-      <div className="flex gap-2 border-b border-border pb-3 flex-wrap">
-        <Button variant={activeSubTab === 'history' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('history')}>My Logs</Button>
-        <Button variant={activeSubTab === 'roster' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('roster')}>My Schedule</Button>
-        <Button variant={activeSubTab === 'swap' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('swap')}>Request Swap</Button>
-        <Button variant={activeSubTab === 'offday' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('offday')}>Change Offday</Button>
-        <Button variant={activeSubTab === 'overtime' ? 'secondary' : 'ghost'} onClick={() => setActiveSubTab('overtime')}>Log Overtime</Button>
+      <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
+        <div role="tablist" aria-label="Attendance sections" className="menu-bar">
+          <Button
+            role="tab"
+            aria-selected={activeSubTab === 'history'}
+            variant={activeSubTab === 'history' ? 'default' : 'ghost'}
+            size="sm"
+            className={`rounded-full px-4 justify-center ${activeSubTab !== 'history' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+            onClick={() => setActiveSubTab('history')}
+          >
+            <Icon name="schedule" size={15} /> My Logs
+          </Button>
+          <Button
+            role="tab"
+            aria-selected={activeSubTab === 'roster'}
+            variant={activeSubTab === 'roster' ? 'default' : 'ghost'}
+            size="sm"
+            className={`rounded-full px-4 justify-center ${activeSubTab !== 'roster' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+            onClick={() => setActiveSubTab('roster')}
+          >
+            <Icon name="swap_vert" size={15} /> My Schedule
+          </Button>
+          <Button
+            role="tab"
+            aria-selected={activeSubTab === 'swap'}
+            variant={activeSubTab === 'swap' ? 'default' : 'ghost'}
+            size="sm"
+            className={`rounded-full px-4 justify-center ${activeSubTab !== 'swap' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+            onClick={() => setActiveSubTab('swap')}
+          >
+            <Icon name="swap_horiz" size={15} /> Request Swap
+          </Button>
+          <Button
+            role="tab"
+            aria-selected={activeSubTab === 'offday'}
+            variant={activeSubTab === 'offday' ? 'default' : 'ghost'}
+            size="sm"
+            className={`rounded-full px-4 justify-center ${activeSubTab !== 'offday' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+            onClick={() => setActiveSubTab('offday')}
+          >
+            <Icon name="event_busy" size={15} /> Change Offday
+          </Button>
+          <Button
+            role="tab"
+            aria-selected={activeSubTab === 'overtime'}
+            variant={activeSubTab === 'overtime' ? 'default' : 'ghost'}
+            size="sm"
+            className={`rounded-full px-4 justify-center ${activeSubTab !== 'overtime' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+            onClick={() => setActiveSubTab('overtime')}
+          >
+            <Icon name="memory" size={15} /> Log Overtime
+          </Button>
+        </div>
       </div>
 
       {activeSubTab === 'history' && (() => {
@@ -838,12 +900,17 @@ function AttendanceView({
       )}
 
       {activeSubTab === 'swap' && (
-        <Card className="max-w-[600px]">
-          <CardHeader>
-            <CardTitle>Request Shift Swap</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleRequestSwap} className="flex flex-col gap-5">
+        <Card className="max-w-[600px] overflow-hidden p-0 shadow-sm">
+          <div className="bg-muted/30 px-5 py-4 border-b border-border flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <span className="size-8 rounded-lg bg-muted text-foreground flex items-center justify-center shrink-0">
+                <Icon name="swap_horiz" size={16} />
+              </span>
+              <CardTitle className="text-base m-0 modal-title-solid">Request Shift Swap</CardTitle>
+            </div>
+          </div>
+          <CardContent className="p-5 sm:p-6">
+            <form id="swap-form" onSubmit={handleRequestSwap} className="flex flex-col gap-5">
               <div className="space-y-2">
                 <DatePicker label="Date to Swap" required value={swapDate} onChange={(e) => setSwapDate(e.target.value)} />
               </div>
@@ -867,20 +934,28 @@ function AttendanceView({
                   placeholder="Why do you need to swap?" 
                 />
               </div>
-
-              <Button type="submit" className="w-fit mt-2">Submit Request</Button>
             </form>
           </CardContent>
+          <div className="px-5 py-4 border-t border-border bg-muted/10 flex justify-end">
+            <Button type="submit" form="swap-form">
+              <Icon name="send" size={16} className="h-4 w-4 mr-2" /> Submit Request
+            </Button>
+          </div>
         </Card>
       )}
 
       {activeSubTab === 'offday' && (
-        <Card className="max-w-[600px]">
-          <CardHeader>
-            <CardTitle>Request Alternative Offday</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleRequestOffday} className="flex flex-col gap-5">
+        <Card className="max-w-[600px] overflow-hidden p-0 shadow-sm">
+          <div className="bg-muted/30 px-5 py-4 border-b border-border flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <span className="size-8 rounded-lg bg-muted text-foreground flex items-center justify-center shrink-0">
+                <Icon name="event_busy" size={16} />
+              </span>
+              <CardTitle className="text-base m-0 modal-title-solid">Request Alternative Offday</CardTitle>
+            </div>
+          </div>
+          <CardContent className="p-5 sm:p-6">
+            <form id="offday-form" onSubmit={handleRequestOffday} className="flex flex-col gap-5">
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none">Change Type</label>
                 <Select value={offdayType} onChange={setOffdayType} placeholder="Select Change Type">
@@ -911,21 +986,29 @@ function AttendanceView({
                   placeholder="Why do you need to change your offday?" 
                 />
               </div>
-
-              <Button type="submit" className="w-fit mt-2">Submit Request</Button>
             </form>
           </CardContent>
+          <div className="px-5 py-4 border-t border-border bg-muted/10 flex justify-end">
+            <Button type="submit" form="offday-form">
+              <Icon name="send" size={16} className="h-4 w-4 mr-2" /> Submit Request
+            </Button>
+          </div>
         </Card>
       )}
 
 
       {activeSubTab === 'overtime' && (
-        <Card className="max-w-[600px]">
-          <CardHeader>
-            <CardTitle>Log Overtime</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleClaimOvertime} className="flex flex-col gap-5">
+        <Card className="max-w-[600px] overflow-hidden p-0 shadow-sm">
+          <div className="bg-muted/30 px-5 py-4 border-b border-border flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <span className="size-8 rounded-lg bg-muted text-foreground flex items-center justify-center shrink-0">
+                <Icon name="memory" size={16} />
+              </span>
+              <CardTitle className="text-base m-0 modal-title-solid">Log Overtime</CardTitle>
+            </div>
+          </div>
+          <CardContent className="p-5 sm:p-6">
+            <form id="overtime-form" onSubmit={handleClaimOvertime} className="flex flex-col gap-5">
               <div className="space-y-2">
                 <DatePicker label="Date" required value={otDate} onChange={(e) => setOtDate(e.target.value)} />
               </div>
@@ -946,10 +1029,13 @@ function AttendanceView({
                   placeholder="Explain work done..." 
                 />
               </div>
-
-              <Button type="submit" className="w-fit mt-2">Submit Overtime</Button>
             </form>
           </CardContent>
+          <div className="px-5 py-4 border-t border-border bg-muted/10 flex justify-end">
+            <Button type="submit" form="overtime-form">
+              <Icon name="send" size={16} className="h-4 w-4 mr-2" /> Submit Overtime
+            </Button>
+          </div>
         </Card>
       )}
     </div>
@@ -961,7 +1047,13 @@ function PayslipsView({ currentUser, payroll, addToast }) {
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
-      <h2 className="text-2xl font-bold m-0">My Payslips</h2>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+          <Icon name="account_balance" size={20} className="text-foreground" />
+          Payslips
+        </h1>
+      </div>
+      <div className="border-t border-border border-headline" />
       
       {myPayslips.length === 0 ? (
         <Card>
@@ -1041,25 +1133,39 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[1000px] mx-auto pb-10">
-      <h2 className="text-2xl font-bold m-0">My Leave</h2>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+          <Icon name="calendar_month" size={20} className="text-foreground" />
+          Leave
+        </h1>
+      </div>
+      <div className="border-t border-border border-headline" />
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Object.entries(myBalance).map(([lType, days]) => (
-           <Card key={lType} className="bg-primary/5 border-primary/20 shadow-sm">
+       <Card key={lType} className="bg-muted/40 border-border/50 shadow-sm">
              <CardContent className="p-4 flex flex-col items-center justify-center">
-                <div className="text-xs font-bold text-primary/70 uppercase tracking-wider mb-1">{lType}</div>
-                <div className="text-3xl font-black text-primary tabular-nums">{days} <span className="text-sm text-primary/50">days</span></div>
+                <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">{lType}</div>
+                <div className="text-3xl font-black text-foreground tabular-nums">{days} <span className="text-sm text-muted-foreground">days</span></div>
              </CardContent>
            </Card>
         ))}
       </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Apply for Leave</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleApply} className="flex flex-col gap-5 max-w-[500px]">
+      <Card className="overflow-hidden p-0 shadow-sm">
+        <div className="bg-muted/30 px-5 py-4 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="size-8 rounded-lg bg-muted text-foreground flex items-center justify-center shrink-0">
+              <Icon name="calendar_month" size={16} />
+            </span>
+            <CardTitle className="text-base m-0 modal-title-solid">Apply for Leave</CardTitle>
+          </div>
+          <Badge variant="secondary" className="shrink-0 text-xs">
+            {Object.entries(myBalance).reduce((sum, [, d]) => sum + (d || 0), 0)} days left
+          </Badge>
+        </div>
+        <CardContent className="p-5 sm:p-6">
+          <form id="apply-leave-form" onSubmit={handleApply} className="flex flex-col gap-5 max-w-[500px]">
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none">Leave type</label>
               <Select value={type} onChange={setType} placeholder="Leave type">
@@ -1117,11 +1223,13 @@ function LeaveView({ currentUser, attendance, setAttendance, addToast, addLog, s
               </div>
             </div>
 
-            <Button type="submit" className="w-fit mt-2">
-              <Icon name="send" size={16} className="h-4 w-4 mr-2" /> Submit Request
-            </Button>
           </form>
         </CardContent>
+        <div className="px-5 py-4 border-t border-border bg-muted/10 flex justify-end">
+          <Button type="submit" form="apply-leave-form">
+            <Icon name="send" size={16} className="h-4 w-4 mr-2" /> Submit Request
+          </Button>
+        </div>
       </Card>
 
       <Card>
@@ -1289,12 +1397,14 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[900px] mx-auto pb-10">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold m-0 flex items-center gap-3">
-          <Icon name="monitor" size={24} className="h-6 w-6 text-primary" />
-          My Assets
-        </h2>
-        <div className="bg-card p-1.5 rounded-xl border border-border/50 shadow-sm w-full sm:w-auto">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+          <Icon name="monitor" size={20} className="text-foreground" />
+          Assets
+        </h1>
+      </div>
+      <div className="border-t border-border border-headline" />
+      <div className="bg-card p-1.5 rounded-xl border border-border/50 shadow-sm w-full sm:w-auto">
           <div className="menu-bar">
             <Button variant={activeTab === 'assigned' ? 'default' : 'ghost'} size="sm" className="rounded-full px-4" onClick={() => setActiveTab('assigned')}>
               Assigned to Me
@@ -1306,7 +1416,6 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
               Maintenance Request
             </Button>
           </div>
-        </div>
       </div>
 
       {activeTab === 'assigned' && (

@@ -170,7 +170,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="wallet" size={20} className="text-primary" />
+          <Icon name="wallet" size={20} className="text-foreground" />
           Expenses
         </h1>
       </div>
@@ -248,7 +248,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
           <Card className="flex-1">
             <CardContent className="p-6 sm:p-8">
               <h3 className="text-xl mb-6 flex items-center gap-2 text-foreground">
-                <Icon name="wallet" size={20} className="text-primary" />
+                <Icon name="wallet" size={20} className="text-foreground" />
                 Expense Details
               </h3>
               <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -505,7 +505,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
       {activeTab === 'my-claims' && (
         <div className="flex flex-col gap-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold text-foreground flex items-center gap-2"><Icon name="list" size={20} className="text-primary"/> My Expense History</h3>
+            <h3 className="text-xl font-semibold text-foreground flex items-center gap-2"><Icon name="list" size={20} className="text-foreground"/> My Expense History</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {myClaimsQueue.length === 0 ? (
@@ -568,7 +568,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
       {activeTab === 'history' && (canApprove || canReimburse) && (
         <div className="flex flex-col gap-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold text-foreground flex items-center gap-2"><Icon name="history" size={20} className="text-primary"/> Company Expense History</h3>
+            <h3 className="text-xl font-semibold text-foreground flex items-center gap-2"><Icon name="history" size={20} className="text-foreground"/> Company Expense History</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {historyQueue.length === 0 ? (

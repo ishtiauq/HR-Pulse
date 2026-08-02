@@ -80,8 +80,8 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="cloud_sync" size={20} className="text-primary" />
-          Google Drive Sync Management
+          <Icon name="cloud_sync" size={20} className="text-foreground" />
+          Drive Sync
         </h1>
       </div>
       <div className="border-t border-border border-headline" />
@@ -180,7 +180,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
           <div className="flex justify-between items-center mb-4">
             <div>
               <h4 className="text-[1.1rem] font-bold flex items-center gap-2 text-foreground">
-                <Icon name="shield" size={20} className="text-primary" /> Database Backups (/_backups/)
+                <Icon name="shield" size={20} className="text-foreground" /> Database Backups (/_backups/)
               </h4>
               <p className="text-[0.8rem] text-muted-foreground mt-1">Automated backups are retained for 7 days + 4 weeks</p>
             </div>

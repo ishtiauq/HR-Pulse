@@ -567,7 +567,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
       {/* Header and Month Selector */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="account_balance" size={20} className="text-primary" />
+          <Icon name="account_balance" size={20} className="text-foreground" />
           Payroll
         </h1>
       </div>

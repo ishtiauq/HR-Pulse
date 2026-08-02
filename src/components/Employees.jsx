@@ -429,7 +429,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient"><Icon name="group" size={20} className="text-primary" />Employees</h1>
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient"><Icon name="group" size={20} className="text-foreground" />Employees</h1>
       </div>
 
       {/* Pending Profile Updates Queue */}

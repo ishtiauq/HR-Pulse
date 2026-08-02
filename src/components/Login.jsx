@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Icon from "@/components/ui/Icon.jsx"
+import hrPulseLogo from '../Assets/Logo Banner.svg'
 import { fetchUserProfile } from '../services/googleDrive.js'
 import { verifyPassword } from '../services/crypto.js'
 
@@ -149,20 +150,17 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-3"
           >
-            <div className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold shadow-lg">
-              <Icon name="monitoring" size={24} />
-            </div>
-            <span className="font-extrabold text-xl tracking-tight">HR Pulse</span>
+            <img 
+              src={hrPulseLogo} 
+              alt="HR Pulse Logo" 
+              className="block h-9 w-auto max-w-[160px] object-contain shrink-0 drop-shadow-sm dark:invert" 
+            />
           </motion.div>
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-4"
           >
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card/50 backdrop-blur-md shadow-sm text-xs font-semibold">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-blink" />
-              System Operational
-            </div>
             <button 
               onClick={toggleTheme} 
               className="w-10 h-10 rounded-full flex items-center justify-center border border-border bg-card/50 backdrop-blur-md shadow-sm hover:bg-muted transition-colors"
@@ -182,9 +180,18 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="w-full max-w-[460px] flex flex-col gap-8"
         >
-          <div className="text-center">
-            <h1 className="text-4xl font-extrabold tracking-tight mb-3">Welcome Back</h1>
-            <p className="text-base text-muted-foreground">Sign in to your intelligent workspace.</p>
+          <div className="text-center flex flex-col items-center gap-4">
+            <div className="flex items-center justify-center">
+              <img 
+                src={hrPulseLogo} 
+                alt="HR Pulse Logo" 
+                className="block h-11 w-auto max-w-[200px] object-contain shrink-0 drop-shadow-sm dark:invert" 
+              />
+            </div>
+            <div>
+              <h1 className="text-3xl font-extrabold tracking-tight mb-1.5">Welcome Back</h1>
+              <p className="text-base text-muted-foreground">Sign in to your intelligent workspace.</p>
+            </div>
           </div>
 
           <div className="bg-card backdrop-blur-2xl border border-border p-8 rounded-2xl shadow-sm relative overflow-hidden">

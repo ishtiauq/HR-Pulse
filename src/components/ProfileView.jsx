@@ -50,12 +50,16 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 lg:gap-8 max-w-[800px] mx-auto pb-10">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold m-0">My Profile</h2>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
+          <Icon name="person" size={20} className="text-foreground" />
+          Profile
+        </h1>
         {!editMode && !hasPending && (
           <Button variant="outline" onClick={() => setEditMode(true)}>Edit Details</Button>
         )}
       </div>
+      <div className="border-t border-border border-headline" />
 
       {hasPending && (
         <div className="p-4 rounded-md flex gap-3 items-center bg-amber-500/10 border-l-4 border-l-amber-500 text-foreground">

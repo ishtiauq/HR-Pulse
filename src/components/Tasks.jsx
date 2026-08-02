@@ -188,18 +188,19 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
       {/* Header */}
       <div className="flex flex-col pb-4 border-b border-border border-headline mb-2">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="check_box" size={20} className="text-primary" /> Tasks
+          <Icon name="check_box" size={20} className="text-foreground" /> Tasks
         </h1>
       </div>
       
       <div className="flex flex-wrap gap-4 mb-4 items-center w-full justify-between">
-        <div className="glass-panel relative flex-auto min-w-[250px] lg:max-w-md w-full flex items-center px-1.5 py-1.5">
-          <Icon name="search" size={16} className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="relative flex-1 min-w-[250px] lg:max-w-md w-full flex items-center">
+          <Icon name="search" size={16} className="absolute left-3 text-muted-foreground" />
           <Input 
             placeholder="Search tasks or assignees..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-transparent w-full border-none shadow-none focus:shadow-none"
+            aria-label="Search tasks"
+            className="pl-9 w-full bg-muted/40"
           />
         </div>
         
@@ -213,7 +214,7 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
           </div>
           
 
-          <Button onClick={() => openModal()} className="shadow-sm w-full sm:w-auto">
+          <Button onClick={() => openModal()} className="hidden sm:flex shadow-sm">
             <Icon name="add" size={16} className="h-4 w-4 mr-2" /> Add Task
           </Button>
         </div>
@@ -638,6 +639,14 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Button
+        className="sm:hidden fixed bottom-[76px] right-8 h-14 w-14 rounded-full shadow-[0_4px_20px_rgba(249,115,22,0.4)] z-50 p-0 hover:scale-105 active:scale-95 transition-transform"
+        onClick={() => openModal()}
+        aria-label="Add Task"
+      >
+        <Icon name="add" size={24} />
+      </Button>
     </div>
   )
 }

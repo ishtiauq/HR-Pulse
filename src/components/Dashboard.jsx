@@ -231,8 +231,8 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       {/* Page Title */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="dashboard" size={20} className="text-primary" />
-          Dashboard Overview
+          <Icon name="dashboard" size={20} className="text-foreground" />
+          Dashboard
         </h1>
       </div>
       <div className="border-t border-border border-headline" />

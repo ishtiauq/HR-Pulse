@@ -259,6 +259,14 @@ html, body, #root {
   background-image: linear-gradient(to bottom, #f3f4f6, #9ca3af) !important;
 }
 
+/* Solid Foreground Text for Modal/Form Headers (overrides headline-gradient) */
+.modal-title-solid {
+  background-image: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  color: var(--foreground) !important;
+}
+
 /* Global Monochrome Icons */
 svg.lucide {
   filter: grayscale(100%) !important;

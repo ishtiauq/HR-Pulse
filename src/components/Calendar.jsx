@@ -286,7 +286,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
     <div className="animate-fade-in flex flex-col gap-6 w-full pb-10">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="calendar_month" size={20} className="text-primary" />
+          <Icon name="calendar_month" size={20} className="text-foreground" />
           Events
         </h1>
       </div>

@@ -232,7 +232,7 @@ function MetricBreakdownModal({ metricKey, metrics, assets, onClose }) {
       <DialogContent className="sm:max-w-[720px] p-0 overflow-hidden">
         <div className="bg-muted/30 p-5 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <Icon name={metric.icon} size={20} className="text-primary" />
+            <Icon name={metric.icon} size={20} className="text-foreground" />
             <DialogTitle className="text-lg">{metric.label}</DialogTitle>
             <DialogDescription className="text-sm ml-1">
               {list.length} {list.length === 1 ? 'asset' : 'assets'}
@@ -1028,8 +1028,8 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
     <div className="animate-fade-in pb-10 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="laptop_windows" size={20} className="text-primary" />
-          Asset Management
+          <Icon name="laptop_windows" size={20} className="text-foreground" />
+          Assets
         </h1>
       </div>
       <div className="border-t border-border border-headline" />

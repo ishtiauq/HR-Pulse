@@ -23,7 +23,7 @@ const HoverTooltip = ({ content, children, position = 'center' }) => {
   )
 }
 
-export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, simulatedRole }) {
+export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, simulatedRole, headline = 'Announcements' }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingPostId, setEditingPostId] = useState(null)
 
@@ -467,8 +467,8 @@ export default function Announcements({ employees, announcements, setAnnouncemen
     <div className="fade-in pb-10 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
-          <Icon name="rss_feed" size={20} className="text-primary" />
-          Announcements
+          <Icon name="rss_feed" size={20} className="text-foreground" />
+          {headline}
         </h1>
         
         <div className="flex gap-3">
