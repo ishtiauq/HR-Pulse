@@ -111,7 +111,7 @@ function FaqSection() {
         Frequently asked questions
       </motion.h2>
 
-      <div className="w-full max-w-4xl grid gap-3 sm:gap-4 sm:grid-cols-2 overflow-y-auto max-h-[calc(100dvh-9rem)] pr-1">
+      <div className="w-full max-w-4xl grid grid-cols-1 gap-3 sm:gap-4 overflow-y-auto max-h-[calc(100dvh-9rem)] pr-1">
         {FAQ_ITEMS.map((item, i) => {
           const isOpen = open === i
           return (
@@ -120,7 +120,7 @@ function FaqSection() {
               initial={{ opacity: 0, y: 24, scale: 0.95, filter: "blur(10px)" }}
               whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
               viewport={{ once: false, amount: 0.3 }}
-              transition={{ delay: (i % 2) * 0.08, duration: 0.5, ease: "easeOut" }}
+              transition={{ delay: i * 0.05, duration: 0.5, ease: "easeOut" }}
               className={`relative flex flex-col overflow-hidden rounded-2xl border bg-background/95 shadow-lg backdrop-blur-xl transition-colors ${isOpen ? 'border-primary/40' : 'border-border/50'}`}
             >
               <button
@@ -463,9 +463,9 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
             style={{ opacity: headingOpacity, y: headingY }}
-            className="login-hero-title uppercase text-5xl sm:text-6xl xl:text-[80px] w-full font-extrabold tracking-tight leading-[1.1] text-center"
+            className="login-hero-title uppercase text-5xl sm:text-6xl xl:text-[80px] w-full font-black tracking-tight leading-[1.1] text-center"
           >
-            Run your team,<br className="hidden sm:block" /> but make it <span className="headline-gradient">effortless.</span>
+            When People Win,<br className="hidden sm:block" /> Business Follows.
           </motion.h1>
         </section>
 
