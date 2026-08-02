@@ -20,7 +20,7 @@ import { useCommandPalette } from './hooks/useCommandPalette.jsx'
 import useAppData from './hooks/useAppData.js'
 
 export default function App() {
-  const { themeMode, isDarkMode, toggleTheme } = useTheme()
+  const { themeMode, isDarkMode, toggleTheme, setThemeMode } = useTheme()
   const { user, handleLogin, handleLogout } = useAuth()
   const { toasts, addToast, removeToast } = useToast()
 
@@ -108,7 +108,7 @@ export default function App() {
   })
 
   if (!user) {
-    return <Login onLogin={handleLogin} themeMode={themeMode} toggleTheme={toggleTheme} />
+    return <Login onLogin={handleLogin} themeMode={themeMode} toggleTheme={toggleTheme} setThemeMode={setThemeMode} />
   }
 
   if (appData.simulatedRole === 'Teammate' || user.isEmployee) {

@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import React, { useState, useRef, useEffect } from 'react'
+import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion'
 import Icon from "@/components/ui/Icon.jsx"
 import hrPulseLogo from '../Assets/Logo Banner.svg'
 import { fetchUserProfile } from '../services/googleDrive.js'
@@ -7,18 +7,51 @@ import { verifyPassword, hashPassword } from '../services/crypto.js'
 
 const ADMIN_ACCOUNTS_KEY = 'hr_pulse_admin_accounts'
 
-export default function Login({ onLogin, themeMode, toggleTheme }) {
+export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode }) {
   const [role, setRole] = useState('admin') // 'admin' | 'employee'
   const [mode, setMode] = useState('signin') // 'signin' | 'signup'
   const [isLoading, setIsLoading] = useState(false)
   const [showIntermediateModal, setShowIntermediateModal] = useState(false)
 
-  // Scroll animations
+  // Cinematic Scroll Sequence (400vh total height)
+  // 0.00 - 0.25: Stage 1 (Heading fades out)
+  // 0.35 - 0.65: Stage 2 (Subheading fades in then out)
+  // 0.66 - 1.00: Stage 3 (Modal slides up natively)
   const containerRef = useRef(null)
-  const { scrollY } = useScroll({ container: containerRef })
+  const { scrollYProgress } = useScroll({ container: containerRef })
   
-  const textOpacity = useTransform(scrollY, [0, 400], [1, 0])
-  const textY = useTransform(scrollY, [0, 400], [0, 150])
+  // Heading Parallax (Stage 1)
+  const headingOpacity = useTransform(scrollYProgress, [0, 0.15, 0.25], [1, 1, 0])
+  const headingY = useTransform(scrollYProgress, [0, 0.15, 0.25], [0, 0, -80])
+  
+  // Subheading Parallax (Stage 2)
+  const subOpacity = useTransform(scrollYProgress, [0, 0.35, 0.45, 0.55, 0.65, 1], [0, 0, 1, 1, 0, 0])
+  const subY = useTransform(scrollYProgress, [0, 0.35, 0.45, 0.55, 0.65, 1], [80, 80, 0, 0, -80, -80])
+  
+  // Scroll Indicator
+  const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0])
+
+  // Ambient Orb Parallax (Cinematic Warp during transition)
+  const orb1Scale = useTransform(scrollYProgress, [0, 0.15, 0.45], [1, 1, 1.8])
+  const orb1X = useTransform(scrollYProgress, [0, 0.15, 0.45], ["0%", "0%", "40%"])
+  const orb1Y = useTransform(scrollYProgress, [0, 0.15, 0.45], ["0%", "0%", "50%"])
+
+  const orb2Scale = useTransform(scrollYProgress, [0, 0.15, 0.45], [1, 1, 2.2])
+  const orb2X = useTransform(scrollYProgress, [0, 0.15, 0.45], ["0%", "0%", "-30%"])
+  const orb2Y = useTransform(scrollYProgress, [0, 0.15, 0.45], ["0%", "0%", "-60%"])
+
+  // Scroll-based Theme Switching
+  useEffect(() => {
+    setThemeMode('light') // Force light mode on initial load
+  }, [])
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest >= 0.25) {
+      setThemeMode(prev => prev !== 'dark' ? 'dark' : prev)
+    } else {
+      setThemeMode(prev => prev !== 'light' ? 'light' : prev)
+    }
+  })
 
   // --- Employee state ---
   const [email, setEmail] = useState('')
@@ -232,18 +265,33 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
   return (
     <div 
       ref={containerRef}
-      className="h-screen bg-background text-foreground relative overflow-y-auto overflow-x-hidden font-sans scroll-smooth"
+      className="h-screen bg-background text-foreground relative overflow-y-auto overflow-x-hidden font-sans scroll-smooth transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
     >
       
-      {/* Static Ambient Background (Fixed) */}
+      {/* Dynamic Warping Ambient Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-primary/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-secondary/20 rounded-full blur-[150px]" />
+        <motion.div 
+          style={{ scale: orb1Scale, x: orb1X, y: orb1Y }}
+          className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-primary/10 rounded-full blur-[120px]" 
+        />
+        <motion.div 
+          style={{ scale: orb2Scale, x: orb2X, y: orb2Y }}
+          className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-secondary/20 rounded-full blur-[150px]" 
+        />
       </div>
 
-      {/* Glassmorphism Navbar */}
-      <header className="fixed top-0 w-full z-50 pointer-events-none">
-        <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between pointer-events-auto">
+      {/* Deep Void Tech Grid (Fades in on Dark Mode) */}
+      <div 
+        className={`fixed inset-0 z-0 pointer-events-none transition-all duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${themeMode === 'dark' ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
+        style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
+          backgroundSize: '40px 40px'
+        }}
+      />
+
+      {/* Transparent Navbar */}
+      <header className="fixed top-0 w-full z-50 pointer-events-none bg-transparent">
+        <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between pointer-events-auto relative z-10">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -260,48 +308,66 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-4"
           >
-            <button 
-              onClick={toggleTheme} 
-              className="w-10 h-10 rounded-full flex items-center justify-center border border-border bg-card/50 backdrop-blur-md shadow-sm hover:bg-muted transition-colors"
-            >
-              {themeMode === 'light' ? <Icon name="light_mode" size={18} /> : <Icon name="dark_mode" size={18} />}
-            </button>
+            {/* Theme toggle removed from here as it is now scroll-driven */}
           </motion.div>
         </div>
       </header>
 
-      {/* Fixed Hero Text (Parallax) */}
-      <motion.div 
-        style={{ opacity: textOpacity, y: textY }}
-        className="fixed inset-0 flex flex-col justify-center items-center z-10 pointer-events-none px-6 mt-[-80px] sm:mt-0"
-      >
-        <h1 className="text-4xl sm:text-5xl xl:text-7xl font-extrabold tracking-tight leading-[1.1] text-center">
+      {/* Fixed Hero Text (Stage 1 & 2) */}
+      <div className="fixed inset-0 flex flex-col justify-center items-center z-10 pointer-events-none px-6 mt-[-80px] sm:mt-0 overflow-hidden">
+        
+        {/* Stage 1: Heading */}
+        <motion.h1 
+          initial={{ filter: "blur(20px)", opacity: 0, scale: 1.1 }}
+          animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          style={{ opacity: headingOpacity, y: headingY }}
+          className="absolute text-5xl sm:text-6xl xl:text-[80px] w-full font-extrabold tracking-tight leading-[1.1] text-center"
+        >
           Run your team,<br className="hidden sm:block" /> but make it <span className="headline-gradient">effortless.</span>
-        </h1>
-        <p className="mt-5 sm:mt-6 text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-2xl text-center mx-auto">
+        </motion.h1>
+
+        {/* Stage 2: Subheading */}
+        <motion.p 
+          style={{ opacity: subOpacity, y: subY }}
+          className="absolute text-lg sm:text-xl lg:text-2xl text-foreground font-medium leading-relaxed max-w-3xl text-center mx-auto drop-shadow-sm"
+        >
           Ditch the endless spreadsheets. Supercharge your HR with seamless attendance, automated payroll, and instant asset tracking in one incredibly slick, lightning-fast dashboard. Get started 100% free today.
-        </p>
+        </motion.p>
+      </div>
+
+      {/* Scroll Indicator */}
+      <motion.div 
+        style={{ opacity: scrollIndicatorOpacity }}
+        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2"
+      >
+        <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Scroll</span>
+        <div className="w-5 h-8 rounded-full border-2 border-muted-foreground/50 flex justify-center p-1">
+          <motion.div 
+            animate={{ y: [0, 12, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+            className="w-1.5 h-1.5 rounded-full bg-muted-foreground"
+          />
+        </div>
       </motion.div>
 
-      {/* Main Scrollable Content */}
-      <main className="relative z-20 w-full min-h-[160vh] flex flex-col pointer-events-none">
+      {/* Main Scrollable Content (Stage 3) */}
+      <main className="relative z-20 w-full flex flex-col pointer-events-none">
         
-        {/* Spacer to push modal down */}
-        <div className="w-full h-[75vh] shrink-0" />
+        {/* Spacer creates the 400vh total scroll distance (100vh viewport + 300vh spacer = 400vh total) */}
+        <div className="w-full h-[300vh] shrink-0" />
         
-        {/* Modal Container */}
-        <div className="w-full pb-32 px-4 pointer-events-auto flex justify-center">
-              <motion.div 
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="relative z-10 w-full max-w-[340px] mx-auto"
+        {/* Modal Container (Anchored at bottom of scroll track) */}
+        <div className="w-full px-4 pointer-events-auto flex flex-col justify-center h-screen items-center relative">
+              
+              <div 
+                className="relative z-10 w-full max-w-[340px] mx-auto mt-auto sm:mt-0"
               >
                 {/* 1. Lanyard Back (Behind Card) */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0">
-                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[350px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_25%,black_100%)]">
+                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[calc(50vh-190px)] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%,black_100%)]">
                     {/* Back strap (Left) */}
-                    <div className="absolute -bottom-[20px] left-[139px] w-[32px] h-[350px] bg-[#1812a0] origin-bottom -rotate-[14deg]" />
+                    <div className="absolute -bottom-[20px] left-[139px] w-[32px] h-[600px] bg-[#1812a0] origin-bottom -rotate-[14deg]" />
                   </div>
                 </div>
 
@@ -314,8 +380,8 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                   <div className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[56px] h-[12px] rounded-full border border-border/50 shadow-[inset_0_4px_6px_rgba(0,0,0,0.4)] dark:shadow-[inset_0_4px_8px_rgba(0,0,0,0.9)] pointer-events-none" />
 
                   {/* Front strap (Right) - Pushed 1px down to overlap the hole lip and eliminate the gap */}
-                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[350px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_25%,black_100%)]">
-                    <div className="absolute -bottom-[20px] right-[138px] w-[32px] h-[350px] bg-[#2922fa] origin-bottom rotate-[12deg] shadow-[-6px_0_15px_rgba(0,0,0,0.4)]" />
+                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[calc(50vh-190px)] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%,black_100%)]">
+                    <div className="absolute -bottom-[20px] right-[138px] w-[32px] h-[600px] bg-[#2922fa] origin-bottom rotate-[12deg] shadow-[-6px_0_15px_rgba(0,0,0,0.4)]" />
                   </div>
                 </div>
 
@@ -556,7 +622,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                 </p>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </main>
 

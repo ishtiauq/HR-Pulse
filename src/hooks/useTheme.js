@@ -27,5 +27,5 @@ export function useTheme() {
     localStorage.setItem('hr_pulse_theme', themeMode)
   }, [themeMode])
 
-  return { themeMode, isDarkMode, toggleTheme }
+  return { themeMode, isDarkMode, toggleTheme, setThemeMode }
 }
