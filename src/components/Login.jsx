@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Icon from "@/components/ui/Icon.jsx"
 import hrPulseLogo from '../Assets/Logo Banner.svg'
@@ -15,6 +15,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [showSignIn, setShowSignIn] = useState(false)
 
   // --- Existing OAuth logic ---
   const triggerOAuth = () => {
@@ -171,60 +172,84 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         </div>
       </header>
 
-      {/* Main Centered Content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4 relative z-10 py-24">
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-full max-w-[460px] flex flex-col gap-8"
-        >
-          <div className="text-center flex flex-col items-center gap-4">
-            <div className="flex items-center justify-center">
-              <img 
-                src={hrPulseLogo} 
-                alt="HR Pulse Logo" 
-                className="block h-11 w-auto max-w-[200px] object-contain shrink-0 drop-shadow-sm dark:invert" 
-              />
-            </div>
-            <div>
-              <h1 className="text-3xl font-extrabold tracking-tight mb-1.5">Welcome Back</h1>
-              <p className="text-base text-muted-foreground">Sign in to your intelligent workspace.</p>
-            </div>
-          </div>
+      {/* Main: Hero + Login Side by Side */}
+      <main className="flex-1 flex items-center justify-center px-4 relative z-10 py-24">
+        <div className="w-full max-w-[1100px] grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
 
-          <div className="bg-card backdrop-blur-2xl border border-border p-8 rounded-2xl shadow-sm relative overflow-hidden">
-            
-            {/* Subtle Inner Glow */}
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+          {/* Hero Section */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="text-center lg:text-left"
+          >
+            <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight leading-[1.08]">
+              Manage your squad,<br /> But Make It <span className="headline-gradient">Effortless.</span>
+            </h1>
+            <p className="mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
+              Stop juggling 10 different spreadsheets. Track attendance and leaves, process salary sheet, manage tasks, assets and employee data and sync logs in one slick dashboard—100% Free today!
+            </p>
+          </motion.div>
 
-            <div className="relative z-10">
-              {/* Role Selector Tabs */}
-              <div className="flex p-1.5 bg-muted/60 rounded-full mb-8 border border-border">
-                <button
-                  onClick={() => setRole('admin')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-semibold transition-all duration-200 ${
-                    role === 'admin'
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
+          {/* Right Column: CTA + Login Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+            className="w-full max-w-[440px] mx-auto lg:ml-0 lg:mr-auto flex flex-col items-center"
+          >
+            <button 
+              onClick={() => setShowSignIn(s => !s)}
+              className="px-8 py-4 rounded-full text-sm font-bold bg-primary text-primary-foreground shadow-sm hover:opacity-90 transition-opacity inline-flex items-center gap-2"
+            >
+              Claim Your Free Access <Icon name="keyboard_arrow_down" size={20} />
+            </button>
+
+            <AnimatePresence initial={false}>
+              {showSignIn && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, y: -8 }}
+                  animate={{ opacity: 1, height: 'auto', y: 0 }}
+                  exit={{ opacity: 0, height: 0, y: -8 }}
+                  transition={{ duration: 0.45, ease: 'easeOut' }}
+                  className="w-full overflow-hidden"
                 >
-                  <Icon name="shield" size={16} /> Workspace Admin
-                </button>
-                <button
-                  onClick={() => setRole('employee')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-sm font-semibold transition-all duration-200 ${
-                    role === 'employee'
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <Icon name="person" size={16} /> Teammate
-                </button>
-              </div>
+                  <div className="pt-6">
+                    <div className="bg-card backdrop-blur-2xl border border-border rounded-3xl shadow-2xl relative overflow-hidden">
+              
+              {/* Top Glow Effect */}
+              <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-12 -right-12 w-44 h-44 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
 
-              <div className="min-h-[220px]">
+              <div className="relative z-10 p-8">
+                {/* Title & Subtitle */}
+                <h2 className="text-2xl font-bold text-foreground tracking-tight">Sign in to your HR Pulse account</h2>
+
+                {/* Role Selector Tabs */}
+                <div className="flex p-1.5 bg-muted/60 rounded-full mb-6 mt-6 border border-border">
+                  <button
+                    onClick={() => setRole('admin')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+                      role === 'admin'
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Icon name="shield" size={16} /> Admin
+                  </button>
+                  <button
+                    onClick={() => setRole('employee')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+                      role === 'employee'
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Icon name="person" size={16} /> Teammate
+                  </button>
+                </div>
+
+                <div className="min-h-[220px]">
                   {error && (
                     <div className="p-4 mb-6 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
@@ -234,17 +259,13 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
 
                   {role === 'admin' ? (
                     <div className="flex flex-col gap-5">
-                      <div className="text-center mb-2">
-                        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 border border-primary/20">
-                          <Icon name="shield" size={32} className="text-primary" />
-                        </div>
-                        <h3 className="font-bold text-lg">Admin Access</h3>
-                        <p className="text-xs text-muted-foreground mt-1">Manage payroll, attendance, and organization settings securely via Google Drive.</p>
-                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Manage payroll, attendance, and organization settings securely via Google Drive.
+                      </p>
                       <button 
                         onClick={handleConnectClick} 
                         disabled={isLoading}
-                        className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-3 bg-primary text-primary-foreground disabled:opacity-50"
+                        className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-3 bg-primary text-primary-foreground shadow-sm disabled:opacity-50"
                       >
                         {isLoading ? (
                           <div className="flex items-center gap-2">
@@ -253,7 +274,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                           </div>
                         ) : (
                           <>
-                            <Icon name="cloud" size={20} /> Secure Drive Connect
+                            <Icon name="cloud" size={20} /> Continue with Google
                           </>
                         )}
                       </button>
@@ -300,13 +321,16 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                       </button>
                     </form>
                   )}
+                </div>
               </div>
             </div>
-          </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
 
-
-
-        </motion.div>
+        </div>
       </main>
 
       {/* Intermediate Auth Modal */}
