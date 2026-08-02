@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { motion } from 'framer-motion'
+import React, { useState, useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import Icon from "@/components/ui/Icon.jsx"
 import hrPulseLogo from '../Assets/Logo Banner.svg'
 import { fetchUserProfile } from '../services/googleDrive.js'
@@ -12,6 +12,13 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
   const [mode, setMode] = useState('signin') // 'signin' | 'signup'
   const [isLoading, setIsLoading] = useState(false)
   const [showIntermediateModal, setShowIntermediateModal] = useState(false)
+
+  // Scroll animations
+  const containerRef = useRef(null)
+  const { scrollY } = useScroll({ container: containerRef })
+  
+  const textOpacity = useTransform(scrollY, [0, 400], [1, 0])
+  const textY = useTransform(scrollY, [0, 400], [0, 150])
 
   // --- Employee state ---
   const [email, setEmail] = useState('')
@@ -223,17 +230,20 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
 
 
   return (
-    <div className="h-screen bg-background text-foreground flex flex-col relative overflow-y-auto overflow-x-hidden font-sans">
+    <div 
+      ref={containerRef}
+      className="h-screen bg-background text-foreground relative overflow-y-auto overflow-x-hidden font-sans scroll-smooth"
+    >
       
-      {/* Static Ambient Background (Smooth, no JS animation lag) */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Static Ambient Background (Fixed) */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-primary/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-secondary/20 rounded-full blur-[150px]" />
       </div>
 
       {/* Glassmorphism Navbar */}
-      <header className="absolute top-0 w-full z-50">
-        <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
+      <header className="fixed top-0 w-full z-50 pointer-events-none">
+        <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between pointer-events-auto">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -260,42 +270,36 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         </div>
       </header>
 
-      {/* Main: Hero + Login inside a single container */}
-      <main className="flex-1 flex flex-col relative z-10 px-4 pt-24 pb-10 sm:pt-28 sm:pb-14 lg:py-24">
-        <div className="w-full lg:w-[90%] mx-auto my-auto">
-          <div className="bg-card/40 backdrop-blur-xl border border-border rounded-2xl sm:rounded-3xl shadow-sm p-5 sm:p-8 lg:p-[5%] relative overflow-hidden">
+      {/* Fixed Hero Text (Parallax) */}
+      <motion.div 
+        style={{ opacity: textOpacity, y: textY }}
+        className="fixed inset-0 flex flex-col justify-center items-center z-10 pointer-events-none px-6 mt-[-80px] sm:mt-0"
+      >
+        <h1 className="text-4xl sm:text-5xl xl:text-7xl font-extrabold tracking-tight leading-[1.1] text-center">
+          Run your team,<br className="hidden sm:block" /> but make it <span className="headline-gradient">effortless.</span>
+        </h1>
+        <p className="mt-5 sm:mt-6 text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-2xl text-center mx-auto">
+          Ditch the endless spreadsheets. Supercharge your HR with seamless attendance, automated payroll, and instant asset tracking in one incredibly slick, lightning-fast dashboard. Get started 100% free today.
+        </p>
+      </motion.div>
 
-            {/* Ambient Glows */}
-            <div className="absolute -top-16 -left-16 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-20 -right-16 w-72 h-72 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="relative z-10 grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-[5%] items-center">
-
-              {/* Hero Section */}
+      {/* Main Scrollable Content */}
+      <main className="relative z-20 w-full min-h-[160vh] flex flex-col pointer-events-none">
+        
+        {/* Spacer to push modal down */}
+        <div className="w-full h-[75vh] shrink-0" />
+        
+        {/* Modal Container */}
+        <div className="w-full pb-32 px-4 pointer-events-auto flex justify-center">
               <motion.div 
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="text-center lg:text-left"
-              >
-                <h1 className="text-3xl sm:text-4xl xl:text-6xl font-extrabold tracking-tight leading-[1.1]">
-                  Manage your squad,<br className="hidden sm:block" /> But Make It <span className="headline-gradient">Effortless.</span>
-                </h1>
-                <p className="mt-5 sm:mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg text-left lg:mx-0 mx-auto">
-                  Stop juggling 10 different spreadsheets. Track attendance and leaves, process salary sheet, manage tasks, assets and employee data and sync logs in one slick dashboard—100% Free today!
-                </p>
-              </motion.div>
-
-              {/* Right Column: Login Card */}
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-                className="relative w-full max-w-[300px] mx-auto"
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="relative z-10 w-full max-w-[340px] mx-auto"
               >
                 {/* 1. Lanyard Back (Behind Card) */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0">
-                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[250px] sm:h-[300px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_15%,black_100%)] md:[mask-image:none]">
+                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[350px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_25%,black_100%)]">
                     {/* Back strap (Left) */}
                     <div className="absolute -bottom-[20px] left-[139px] w-[32px] h-[350px] bg-[#1812a0] origin-bottom -rotate-[14deg]" />
                   </div>
@@ -310,7 +314,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                   <div className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[56px] h-[12px] rounded-full border border-border/50 shadow-[inset_0_4px_6px_rgba(0,0,0,0.4)] dark:shadow-[inset_0_4px_8px_rgba(0,0,0,0.9)] pointer-events-none" />
 
                   {/* Front strap (Right) - Pushed 1px down to overlap the hole lip and eliminate the gap */}
-                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[250px] sm:h-[300px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_15%,black_100%)] md:[mask-image:none]">
+                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[350px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_25%,black_100%)]">
                     <div className="absolute -bottom-[20px] right-[138px] w-[32px] h-[350px] bg-[#2922fa] origin-bottom rotate-[12deg] shadow-[-6px_0_15px_rgba(0,0,0,0.4)]" />
                   </div>
                 </div>
@@ -553,9 +557,6 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
               </div>
             </div>
           </motion.div>
-
-            </div>
-          </div>
         </div>
       </main>
 
