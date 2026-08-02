@@ -36,7 +36,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
             <img 
               src={hrPulseLogo} 
               alt="HR Pulse Logo" 
-              className="block h-9 w-auto max-w-[160px] object-contain shrink-0 drop-shadow-sm dark:invert" 
+              className={`block h-9 w-auto max-w-[160px] object-contain shrink-0 drop-shadow-sm ${isDarkMode ? 'invert' : ''}`} 
             />
           </div>
           <div className="flex items-center gap-1 shrink-0">
@@ -67,7 +67,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
               <img 
                 src={hrPulseLogo} 
                 alt="HR Pulse Logo" 
-                className="h-8 sm:h-10 w-auto max-w-[140px] sm:max-w-[180px] object-contain shrink-0 drop-shadow-sm dark:invert" 
+                className={`h-8 sm:h-10 w-auto max-w-[140px] sm:max-w-[180px] object-contain shrink-0 drop-shadow-sm ${isDarkMode ? 'invert' : ''}`} 
               />
             </div>
           </div>

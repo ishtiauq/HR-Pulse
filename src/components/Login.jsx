@@ -7,38 +7,100 @@ import { verifyPassword, hashPassword } from '../services/crypto.js'
 
 const ADMIN_ACCOUNTS_KEY = 'hr_pulse_admin_accounts'
 
+// Subheading split into one dialog modal per line (Stage 2 stacked-deck reveal)
+const SUB_LINES = [
+  'Ditch the endless spreadsheets.',
+  'Supercharge your HR with seamless attendance,',
+  'automated payroll, and instant asset tracking',
+  'in one incredibly slick, lightning-fast dashboard.',
+  'Get started 100% free today.',
+]
+
+// Stage 2: each subheading line gets its OWN full-viewport section. When that
+// section scrolls into view, the popup modal reveals sleekly and dynamically:
+// the card blurs in with a spring, the accent bar draws in, a light sweeps
+// across the glass, and the text words cascade up one by one.
+function SubDialog({ line, index }) {
+  const words = line.split(' ')
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 44, scale: 0.9, filter: "blur(14px)" }}
+      whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+      viewport={{ once: false, amount: 0.4 }}
+      transition={{ type: "spring", stiffness: 220, damping: 20, mass: 0.9 }}
+      className="relative w-full max-w-lg flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-background/95 text-popover-foreground shadow-2xl backdrop-blur-xl"
+    >
+      {/* Top gradient accent bar — draws in from the left */}
+      <motion.div
+        initial={{ scaleX: 0 }}
+        whileInView={{ scaleX: 1 }}
+        viewport={{ once: false, amount: 0.4 }}
+        transition={{ delay: 0.15, duration: 0.6, ease: "easeOut" }}
+        className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-rose-500 to-primary z-10 origin-left"
+      />
+
+      {/* Light sweep that glides across the glass once */}
+      <motion.div
+        initial={{ x: "-130%" }}
+        whileInView={{ x: "230%" }}
+        viewport={{ once: false, amount: 0.4 }}
+        transition={{ delay: 0.3, duration: 0.9, ease: "easeInOut" }}
+        className="pointer-events-none absolute inset-y-0 left-0 w-1/3 z-10 -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+      />
+
+      <div
+        role="dialog"
+        aria-label={`Feature ${index + 1}`}
+        className="login-sub-dialog outline-none focus:outline-none flex flex-col w-full h-full p-6 sm:p-8"
+      >
+        <p className="login-sub-dialog-text text-base sm:text-lg lg:text-xl font-bold text-foreground leading-snug">
+          {words.map((word, i) => (
+            <motion.span
+              key={i}
+              initial={{ opacity: 0, y: 16, filter: "blur(6px)" }}
+              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              viewport={{ once: false, amount: 0.4 }}
+              transition={{ delay: 0.3 + i * 0.055, type: "spring", stiffness: 300, damping: 24 }}
+              className="inline-block will-change-transform"
+            >
+              {word}&nbsp;
+            </motion.span>
+          ))}
+        </p>
+      </div>
+    </motion.div>
+  )
+}
+
 export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode }) {
   const [role, setRole] = useState('admin') // 'admin' | 'employee'
   const [mode, setMode] = useState('signin') // 'signin' | 'signup'
   const [isLoading, setIsLoading] = useState(false)
   const [showIntermediateModal, setShowIntermediateModal] = useState(false)
 
-  // Cinematic Scroll Sequence (400vh total height)
-  // 0.00 - 0.25: Stage 1 (Heading fades out)
-  // 0.35 - 0.65: Stage 2 (Subheading fades in then out)
-  // 0.66 - 1.00: Stage 3 (Modal slides up natively)
+  // Cinematic Scroll Sequence — one full-viewport section per step:
+  //   Section 1: Hero heading
+  //   Sections 2-6: one subheading popup per section
+  //   Section 7: Auth modal
+  // With 7 viewport sections, scrollYProgress maps as section index / 6.
   const containerRef = useRef(null)
   const { scrollYProgress } = useScroll({ container: containerRef })
   
-  // Heading Parallax (Stage 1)
-  const headingOpacity = useTransform(scrollYProgress, [0, 0.15, 0.25], [1, 1, 0])
-  const headingY = useTransform(scrollYProgress, [0, 0.15, 0.25], [0, 0, -80])
-  
-  // Subheading Parallax (Stage 2)
-  const subOpacity = useTransform(scrollYProgress, [0, 0.35, 0.45, 0.55, 0.65, 1], [0, 0, 1, 1, 0, 0])
-  const subY = useTransform(scrollYProgress, [0, 0.35, 0.45, 0.55, 0.65, 1], [80, 80, 0, 0, -80, -80])
+  // Heading Parallax (Section 1 fades out as the first card section arrives)
+  const headingOpacity = useTransform(scrollYProgress, [0, 0.05, 0.11], [1, 1, 0])
+  const headingY = useTransform(scrollYProgress, [0, 0.05, 0.11], [0, 0, -80])
   
   // Scroll Indicator
   const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0])
 
   // Ambient Orb Parallax (Cinematic Warp during transition)
-  const orb1Scale = useTransform(scrollYProgress, [0, 0.15, 0.45], [1, 1, 1.8])
-  const orb1X = useTransform(scrollYProgress, [0, 0.15, 0.45], ["0%", "0%", "40%"])
-  const orb1Y = useTransform(scrollYProgress, [0, 0.15, 0.45], ["0%", "0%", "50%"])
+  const orb1Scale = useTransform(scrollYProgress, [0, 0.15, 0.55], [1, 1, 1.8])
+  const orb1X = useTransform(scrollYProgress, [0, 0.15, 0.55], ["0%", "0%", "40%"])
+  const orb1Y = useTransform(scrollYProgress, [0, 0.15, 0.55], ["0%", "0%", "50%"])
 
-  const orb2Scale = useTransform(scrollYProgress, [0, 0.15, 0.45], [1, 1, 2.2])
-  const orb2X = useTransform(scrollYProgress, [0, 0.15, 0.45], ["0%", "0%", "-30%"])
-  const orb2Y = useTransform(scrollYProgress, [0, 0.15, 0.45], ["0%", "0%", "-60%"])
+  const orb2Scale = useTransform(scrollYProgress, [0, 0.15, 0.55], [1, 1, 2.2])
+  const orb2X = useTransform(scrollYProgress, [0, 0.15, 0.55], ["0%", "0%", "-30%"])
+  const orb2Y = useTransform(scrollYProgress, [0, 0.15, 0.55], ["0%", "0%", "-60%"])
 
   // Scroll-based Theme Switching
   useEffect(() => {
@@ -46,7 +108,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   }, [])
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (latest >= 0.25) {
+    if (latest >= 0.1) {
       setThemeMode(prev => prev !== 'dark' ? 'dark' : prev)
     } else {
       setThemeMode(prev => prev !== 'light' ? 'light' : prev)
@@ -265,7 +327,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   return (
     <div 
       ref={containerRef}
-      className="h-screen bg-background text-foreground relative overflow-y-auto overflow-x-hidden font-sans scroll-smooth transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+      className="h-dvh bg-background text-foreground relative overflow-y-auto overflow-x-hidden font-sans scroll-smooth snap-y snap-mandatory transition-colors duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
     >
       
       {/* Dynamic Warping Ambient Background */}
@@ -291,7 +353,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
       {/* Transparent Navbar */}
       <header className="fixed top-0 w-full z-50 pointer-events-none bg-transparent">
-        <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between pointer-events-auto relative z-10">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between pointer-events-auto relative z-10">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -300,7 +362,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             <img 
               src={hrPulseLogo} 
               alt="HR Pulse Logo" 
-              className="block h-9 w-auto max-w-[160px] object-contain shrink-0 drop-shadow-sm dark:invert" 
+              className={`block h-9 w-auto max-w-[160px] object-contain shrink-0 drop-shadow-sm ${themeMode === 'dark' ? 'invert' : ''}`} 
             />
           </motion.div>
           <motion.div 
@@ -313,27 +375,27 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         </div>
       </header>
 
-      {/* Fixed Hero Text (Stage 1 & 2) */}
-      <div className="fixed inset-0 flex flex-col justify-center items-center z-10 pointer-events-none px-6 mt-[-80px] sm:mt-0 overflow-hidden">
-        
-        {/* Stage 1: Heading */}
-        <motion.h1 
-          initial={{ filter: "blur(20px)", opacity: 0, scale: 1.1 }}
-          animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-          style={{ opacity: headingOpacity, y: headingY }}
-          className="absolute text-5xl sm:text-6xl xl:text-[80px] w-full font-extrabold tracking-tight leading-[1.1] text-center"
-        >
-          Run your team,<br className="hidden sm:block" /> but make it <span className="headline-gradient">effortless.</span>
-        </motion.h1>
+      {/* Scroll deck: one full-viewport section per step */}
+      <div className="relative z-10">
+        {/* Section 1: Hero Heading */}
+        <section className="h-dvh w-full flex flex-col items-center justify-center px-6 snap-start">
+          <motion.h1 
+            initial={{ filter: "blur(20px)", opacity: 0, scale: 1.1 }}
+            animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            style={{ opacity: headingOpacity, y: headingY }}
+            className="login-hero-title uppercase text-5xl sm:text-6xl xl:text-[80px] w-full font-extrabold tracking-tight leading-[1.1] text-center"
+          >
+            Run your team,<br className="hidden sm:block" /> but make it <span className="headline-gradient">effortless.</span>
+          </motion.h1>
+        </section>
 
-        {/* Stage 2: Subheading */}
-        <motion.p 
-          style={{ opacity: subOpacity, y: subY }}
-          className="absolute text-lg sm:text-xl lg:text-2xl text-foreground font-medium leading-relaxed max-w-3xl text-center mx-auto drop-shadow-sm"
-        >
-          Ditch the endless spreadsheets. Supercharge your HR with seamless attendance, automated payroll, and instant asset tracking in one incredibly slick, lightning-fast dashboard. Get started 100% free today.
-        </motion.p>
+        {/* Sections 2-6: one subheading popup per section */}
+        {SUB_LINES.map((line, i) => (
+          <section key={i} className="h-dvh w-full flex flex-col items-center justify-center px-4 sm:px-6 snap-start">
+            <SubDialog line={line} index={i} />
+          </section>
+        ))}
       </div>
 
       {/* Scroll Indicator */}
@@ -351,21 +413,40 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         </div>
       </motion.div>
 
-      {/* Main Scrollable Content (Stage 3) */}
-      <main className="relative z-20 w-full flex flex-col pointer-events-none">
-        
-        {/* Spacer creates the 400vh total scroll distance (100vh viewport + 300vh spacer = 400vh total) */}
-        <div className="w-full h-[300vh] shrink-0" />
-        
-        {/* Modal Container (Anchored at bottom of scroll track) */}
-        <div className="w-full px-4 pointer-events-auto flex flex-col justify-center h-screen items-center relative">
-              
-              <div 
-                className="relative z-10 w-full max-w-[340px] mx-auto mt-auto sm:mt-0"
+      {/* Section 7: Auth Modal */}
+      <section className="relative h-dvh w-full flex flex-col items-center justify-center px-4 pb-8 sm:pb-0 snap-start overflow-hidden">
+              {/* Glowing aura behind the auth card — fades in/out as you scroll to/away from it */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.75 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: false, amount: 0.4 }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center"
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }}
+                  transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+                  className="absolute w-[26rem] h-[26rem] rounded-full bg-primary/30 blur-[120px]"
+                />
+                <motion.div
+                  animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0.9, 0.6] }}
+                  transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+                  className="absolute w-[18rem] h-[18rem] rounded-full bg-secondary/30 blur-[100px] -translate-y-10 translate-x-14"
+                />
+              </motion.div>
+
+              {/* Invisible box — holds card + ribbon as one unit and scales to fit every viewport */}
+              <div className="login-modal-box relative z-10">
+              <motion.div
+                initial={{ opacity: 0, y: 44, scale: 0.92, filter: "blur(12px)" }}
+                whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ type: "spring", stiffness: 200, damping: 22, mass: 0.9 }}
+                className="login-auth-card relative w-full max-w-[340px] mx-auto shrink-0"
               >
                 {/* 1. Lanyard Back (Behind Card) */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0">
-                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[calc(50vh-190px)] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%,black_100%)]">
+                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%,black_100%)]">
                     {/* Back strap (Left) */}
                     <div className="absolute -bottom-[20px] left-[139px] w-[32px] h-[600px] bg-[#1812a0] origin-bottom -rotate-[14deg]" />
                   </div>
@@ -380,7 +461,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   <div className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[56px] h-[12px] rounded-full border border-border/50 shadow-[inset_0_4px_6px_rgba(0,0,0,0.4)] dark:shadow-[inset_0_4px_8px_rgba(0,0,0,0.9)] pointer-events-none" />
 
                   {/* Front strap (Right) - Pushed 1px down to overlap the hole lip and eliminate the gap */}
-                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[calc(50vh-190px)] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%,black_100%)]">
+                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_30%,black_100%)]">
                     <div className="absolute -bottom-[20px] right-[138px] w-[32px] h-[600px] bg-[#2922fa] origin-bottom rotate-[12deg] shadow-[-6px_0_15px_rgba(0,0,0,0.4)]" />
                   </div>
                 </div>
@@ -392,7 +473,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute -bottom-12 -right-12 w-44 h-44 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
 
-              <div className="relative z-10 p-5 pt-10 sm:p-6 sm:pt-11">
+              <div className="login-auth-card-inner relative z-10 p-5 pt-10 sm:p-6 sm:pt-11">
                 {/* Title & Subtitle */}
                 <h2 className="text-2xl font-extrabold text-foreground tracking-tight">
                   {mode === 'signup' ? 'Sign Up' : 'Sign In'}
@@ -622,16 +703,16 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 </p>
               </div>
             </div>
-          </div>
-        </div>
-      </main>
+          </motion.div>
+              </div>
+      </section>
 
       {/* Intermediate Auth Modal */}
       {showIntermediateModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex overflow-y-auto p-4 bg-background/80 backdrop-blur-md">
           <div 
             role="dialog"
-            className="p-8 max-w-sm w-full animate-fade-in"
+            className="m-auto p-8 max-w-sm w-full animate-fade-in"
           >
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 border border-primary/20">
               <Icon name="shield" size={24} className="text-primary" />

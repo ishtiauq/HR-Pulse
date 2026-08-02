@@ -3,9 +3,6 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/material-symbols-rounded/full.css";
-
-@custom-variant dark (&:where(.dark, .dark *));
-
 @theme {
   --font-sans: "Inter Variable", sans-serif;
   --color-border: var(--border);
@@ -407,6 +404,53 @@ input:focus, select:focus, textarea:focus, .focus-within\:ring-2:focus-within {
   user-select: none;
 }
 
+/* ==============================================================
+   LOGIN CINEMATIC PAGE — SHORT-VIEWPORT ADAPTATION
+   Keeps every parallax stage (hero heading, subheading, login card)
+   fully inside the viewport on small phones / landscape phones.
+   ============================================================== */
+@media (max-height: 640px) {
+  .login-hero-stage { margin-top: -32px; }
+  .login-hero-title {
+    font-size: clamp(1.75rem, 6.5vw, 2.75rem);
+    line-height: 1.05;
+  }
+  .login-sub-dialog {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+  .login-sub-dialog-text {
+    font-size: 0.85rem;
+    line-height: 1.3;
+  }
+}
+
+/* ==============================================================
+   LOGIN CINEMATIC PAGE — TABLET / IPAD ADAPTATION
+   Enlarges the auth card on tablet-sized screens.
+   ============================================================== */
+@media (min-width: 768px) and (max-width: 1400px) {
+  .login-auth-card {
+    max-width: 440px;
+  }
+  .login-auth-card-inner {
+    padding: 3rem 1.75rem 1.75rem;
+  }
+}
 
 
+
+
+
+/* ==============================================================
+   LOGIN CINEMATIC PAGE - INVISIBLE MODAL BOX
+   Wraps the auth card + lanyard ribbon as one unit and scales the
+   whole thing to fit every viewport (no internal scrollbar). The
+   box is always centered; the ribbon keeps a fixed vertical length.
+   ============================================================== */
+.login-modal-box {
+  --modal-fit: min(1, calc(100dvh / 800px), calc(100vw / 400px));
+  transform: scale(var(--modal-fit));
+  transform-origin: center;
+}
 
