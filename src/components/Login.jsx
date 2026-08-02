@@ -442,7 +442,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
                 viewport={{ once: false, amount: 0.3 }}
                 transition={{ type: "spring", stiffness: 200, damping: 22, mass: 0.9 }}
-                className="login-auth-card relative w-full max-w-[500px] mx-auto shrink-0"
+                className="login-auth-card relative w-full max-w-[350px] mx-auto shrink-0"
               >
                 {/* 1. Lanyard Back (Behind Card) */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0">
