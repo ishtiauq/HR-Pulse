@@ -293,19 +293,30 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                 transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
                 className="relative w-full max-w-[380px] mx-auto"
               >
-                {/* ID Card Ribbon — passes through the punch hole, merges into the mother container */}
-                <div className="absolute top-[4px] left-1/2 -translate-x-1/2 w-[165%] h-8 -z-10 pointer-events-none">
-                  <div className="relative h-full w-full flex items-center justify-center">
-                    <div className="absolute inset-x-0 h-8 rounded-full bg-primary/70 blur-2xl [mask-image:linear-gradient(to_right,transparent,black_18%,black_82%,transparent)]" />
-                    <div className="absolute inset-x-0 h-8 rounded-full bg-primary/60 blur-lg [mask-image:linear-gradient(to_right,transparent,black_28%,black_72%,transparent)]" />
-                    <div className="absolute inset-x-0 h-8 rounded-full bg-primary/70 [mask-image:linear-gradient(to_right,transparent,black_40%,black_60%,transparent)]" />
+                {/* 1. Lanyard Back (Behind Card) */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0">
+                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[250px] sm:h-[300px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_15%,black_100%)] md:[mask-image:none]">
+                    {/* Back strap (Left) */}
+                    <div className="absolute -bottom-[20px] left-[135px] w-[26px] h-[350px] bg-[#1812a0] origin-bottom -rotate-[14deg]" />
                   </div>
                 </div>
 
-                {/* Punch-hole ring */}
-                <div className="absolute top-[18px] left-1/2 -translate-x-1/2 z-10 w-[22px] h-[22px] rounded-full border-2 border-border/60 shadow-inner pointer-events-none" />
+                {/* 2. Lanyard Front (In front of Card) */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-20">
+                  {/* Slot Hole Base (Matches page background to simulate a real hole) */}
+                  <div className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[56px] h-[12px] rounded-full bg-background" />
 
-                <div className="bg-card backdrop-blur-2xl border border-border rounded-2xl sm:rounded-3xl shadow-2xl relative overflow-hidden [mask-image:radial-gradient(circle_at_50%_18px,transparent_0_11px,black_11.5px)]">
+                  {/* Slot Hole Inner Shadow (Moved BEFORE Front Strap so Front Strap covers its top border) */}
+                  <div className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[56px] h-[12px] rounded-full border border-border/50 shadow-[inset_0_4px_6px_rgba(0,0,0,0.4)] dark:shadow-[inset_0_4px_8px_rgba(0,0,0,0.9)] pointer-events-none" />
+
+                  {/* Front strap (Right) - Pushed 1px down to overlap the hole lip and eliminate the gap */}
+                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[250px] sm:h-[300px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_15%,black_100%)] md:[mask-image:none]">
+                    <div className="absolute -bottom-[20px] right-[134px] w-[26px] h-[350px] bg-[#2922fa] origin-bottom rotate-[12deg] shadow-[-6px_0_15px_rgba(0,0,0,0.4)]" />
+                  </div>
+                </div>
+
+                {/* Card Container */}
+                <div className="bg-card backdrop-blur-2xl border border-border rounded-2xl sm:rounded-[28px] shadow-2xl relative z-10 overflow-hidden pt-12 pb-2">
               
               {/* Top Glow Effect */}
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
