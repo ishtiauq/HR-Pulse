@@ -223,7 +223,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
 
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden font-sans">
+    <div className="h-screen bg-background text-foreground flex flex-col relative overflow-y-auto overflow-x-hidden font-sans">
       
       {/* Static Ambient Background (Smooth, no JS animation lag) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -260,33 +260,40 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
         </div>
       </header>
 
-      {/* Main: Hero + Login Side by Side */}
-      <main className="flex-1 flex items-center justify-center px-4 relative z-10 py-24">
-        <div className="w-full max-w-[1100px] grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+      {/* Main: Hero + Login inside a single container */}
+      <main className="flex-1 flex flex-col relative z-10 px-4 py-24 lg:py-28">
+        <div className="w-full lg:w-[90%] mx-auto my-auto">
+          <div className="bg-card/40 backdrop-blur-xl border border-border rounded-3xl shadow-sm p-6 sm:p-10 lg:p-[5%] relative overflow-hidden">
 
-          {/* Hero Section */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="text-center lg:text-left"
-          >
-            <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight leading-[1.08]">
-              Manage your squad,<br /> But Make It <span className="headline-gradient">Effortless.</span>
-            </h1>
-            <p className="mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
-              Stop juggling 10 different spreadsheets. Track attendance and leaves, process salary sheet, manage tasks, assets and employee data and sync logs in one slick dashboard—100% Free today!
-            </p>
-          </motion.div>
+            {/* Ambient Glows */}
+            <div className="absolute -top-16 -left-16 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-20 -right-16 w-72 h-72 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Right Column: Login Card */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-            className="w-full max-w-[440px] mx-auto lg:ml-0 lg:mr-auto"
-          >
-            <div className="bg-card backdrop-blur-2xl border border-border rounded-3xl shadow-2xl relative overflow-hidden">
+            <div className="relative z-10 grid lg:grid-cols-2 gap-10 lg:gap-[5%] items-center">
+
+              {/* Hero Section */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="text-center lg:text-left"
+              >
+                <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight leading-[1.08]">
+                  Manage your squad,<br /> But Make It <span className="headline-gradient">Effortless.</span>
+                </h1>
+                <p className="mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
+                  Stop juggling 10 different spreadsheets. Track attendance and leaves, process salary sheet, manage tasks, assets and employee data and sync logs in one slick dashboard—100% Free today!
+                </p>
+              </motion.div>
+
+              {/* Right Column: Login Card */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+                className="w-full"
+              >
+                <div className="bg-card backdrop-blur-2xl border border-border rounded-3xl shadow-2xl relative overflow-hidden">
               
               {/* Top Glow Effect */}
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
@@ -524,6 +531,8 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
             </div>
           </motion.div>
 
+            </div>
+          </div>
         </div>
       </main>
 
