@@ -1,21 +1,109 @@
-import React, { useState, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useState } from 'react'
+import { motion } from 'framer-motion'
 import Icon from "@/components/ui/Icon.jsx"
 import hrPulseLogo from '../Assets/Logo Banner.svg'
 import { fetchUserProfile } from '../services/googleDrive.js'
-import { verifyPassword } from '../services/crypto.js'
+import { verifyPassword, hashPassword } from '../services/crypto.js'
+
+const ADMIN_ACCOUNTS_KEY = 'hr_pulse_admin_accounts'
 
 export default function Login({ onLogin, themeMode, toggleTheme }) {
   const [role, setRole] = useState('admin') // 'admin' | 'employee'
+  const [mode, setMode] = useState('signin') // 'signin' | 'signup'
   const [isLoading, setIsLoading] = useState(false)
   const [showIntermediateModal, setShowIntermediateModal] = useState(false)
 
   // --- Employee state ---
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [companyName, setCompanyName] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
-  const [showSignIn, setShowSignIn] = useState(false)
+
+  const getAdminAccounts = () => {
+    try {
+      return JSON.parse(localStorage.getItem(ADMIN_ACCOUNTS_KEY)) || []
+    } catch {
+      return []
+    }
+  }
+
+  const adminSession = (account) => ({
+    id: account.id,
+    name: account.name,
+    email: account.email,
+    role: 'Admin',
+    companyName: account.companyName,
+    avatar: '',
+    isWorkspaceOwner: true,
+    adminAccountId: account.id,
+    token: 'mock-token-' + Date.now()
+  })
+
+  // --- Admin signup (create workspace) ---
+  const handleSignup = async (e) => {
+    e.preventDefault()
+    setError('')
+    if (!fullName.trim() || !email.trim() || !companyName.trim() || !password) {
+      setError('Please fill in all fields.')
+      return
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const accounts = getAdminAccounts()
+      if (accounts.some(a => a.email.toLowerCase() === email.trim().toLowerCase())) {
+        setError('An account with this email already exists. Try signing in.')
+        setIsLoading(false)
+        return
+      }
+      const passwordHash = await hashPassword(password)
+      const account = {
+        id: `admin-${Date.now()}`,
+        name: fullName.trim(),
+        email: email.trim(),
+        companyName: companyName.trim(),
+        passwordHash,
+        createdAt: new Date().toISOString()
+      }
+      accounts.push(account)
+      localStorage.setItem(ADMIN_ACCOUNTS_KEY, JSON.stringify(accounts))
+      onLogin(adminSession(account))
+    } catch (err) {
+      setError('Sign up failed: ' + err.message)
+      setIsLoading(false)
+    }
+  }
+
+  // --- Admin email/password login ---
+  const handleAdminPasswordSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setIsLoading(true)
+    try {
+      const accounts = getAdminAccounts()
+      const account = accounts.find(a => a.email.toLowerCase() === email.trim().toLowerCase())
+      if (!account) {
+        setError('No admin account found with this email.')
+        setIsLoading(false)
+        return
+      }
+      const valid = await verifyPassword(password, account.passwordHash)
+      if (!valid) {
+        setError('Invalid email or password.')
+        setIsLoading(false)
+        return
+      }
+      onLogin(adminSession(account))
+    } catch (err) {
+      setError('Login failed: ' + err.message)
+      setIsLoading(false)
+    }
+  }
 
   // --- Existing OAuth logic ---
   const triggerOAuth = () => {
@@ -191,31 +279,14 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
             </p>
           </motion.div>
 
-          {/* Right Column: CTA + Login Card */}
+          {/* Right Column: Login Card */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-            className="w-full max-w-[440px] mx-auto lg:ml-0 lg:mr-auto flex flex-col items-center"
+            className="w-full max-w-[440px] mx-auto lg:ml-0 lg:mr-auto"
           >
-            <button 
-              onClick={() => setShowSignIn(s => !s)}
-              className="px-8 py-4 rounded-full text-sm font-bold bg-primary text-primary-foreground shadow-sm hover:opacity-90 transition-opacity inline-flex items-center gap-2"
-            >
-              Claim Your Free Access <Icon name="keyboard_arrow_down" size={20} />
-            </button>
-
-            <AnimatePresence initial={false}>
-              {showSignIn && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0, y: -8 }}
-                  animate={{ opacity: 1, height: 'auto', y: 0 }}
-                  exit={{ opacity: 0, height: 0, y: -8 }}
-                  transition={{ duration: 0.45, ease: 'easeOut' }}
-                  className="w-full overflow-hidden"
-                >
-                  <div className="pt-6">
-                    <div className="bg-card backdrop-blur-2xl border border-border rounded-3xl shadow-2xl relative overflow-hidden">
+            <div className="bg-card backdrop-blur-2xl border border-border rounded-3xl shadow-2xl relative overflow-hidden">
               
               {/* Top Glow Effect */}
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
@@ -223,68 +294,40 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
 
               <div className="relative z-10 p-8">
                 {/* Title & Subtitle */}
-                <h2 className="text-2xl font-bold text-foreground tracking-tight">Sign in to your HR Pulse account</h2>
+                <h2 className="text-2xl font-bold text-foreground tracking-tight">
+                  {mode === 'signup' ? 'Create your workspace' : 'Sign in to your HR Pulse account'}
+                </h2>
 
-                {/* Role Selector Tabs */}
-                <div className="flex p-1.5 bg-muted/60 rounded-full mb-6 mt-6 border border-border">
-                  <button
-                    onClick={() => setRole('admin')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
-                      role === 'admin'
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    <Icon name="shield" size={16} /> Admin
-                  </button>
-                  <button
-                    onClick={() => setRole('employee')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
-                      role === 'employee'
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    <Icon name="person" size={16} /> Teammate
-                  </button>
-                </div>
-
-                <div className="min-h-[220px]">
-                  {error && (
-                    <div className="p-4 mb-6 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                      {error}
-                    </div>
-                  )}
-
-                  {role === 'admin' ? (
-                    <div className="flex flex-col gap-5">
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        Manage payroll, attendance, and organization settings securely via Google Drive.
-                      </p>
-                      <button 
-                        onClick={handleConnectClick} 
-                        disabled={isLoading}
-                        className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-3 bg-primary text-primary-foreground shadow-sm disabled:opacity-50"
-                      >
-                        {isLoading ? (
-                          <div className="flex items-center gap-2">
-                            <Icon name="cloud" size={18} className="animate-pulse" />
-                            Connecting Workspace...
-                          </div>
-                        ) : (
-                          <>
-                            <Icon name="cloud" size={20} /> Continue with Google
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  ) : (
-                    <form onSubmit={handleEmployeeSubmit} className="space-y-5">
+                {mode === 'signup' ? (
+                  <>
+                    {/* Sign Up Form */}
+                    <form onSubmit={handleSignup} className="space-y-4 mt-6">
+                      <div>
+                        <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Full Name</label>
+                        <input
+                          type="text"
+                          value={fullName}
+                          onChange={e => setFullName(e.target.value)}
+                          placeholder="Jane Doe"
+                          className="w-full border-input px-4 py-3.5 text-sm font-medium focus:outline-none transition-all"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Company Name</label>
+                        <input
+                          type="text"
+                          value={companyName}
+                          onChange={e => setCompanyName(e.target.value)}
+                          placeholder="Acme Inc."
+                          className="w-full border-input px-4 py-3.5 text-sm font-medium focus:outline-none transition-all"
+                          required
+                        />
+                      </div>
                       <div>
                         <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
                         <input
-                          type="text"
+                          type="email"
                           value={email}
                           onChange={e => setEmail(e.target.value)}
                           placeholder="name@company.com"
@@ -312,22 +355,173 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                           </button>
                         </div>
                       </div>
+                      {error && (
+                        <div className="p-3.5 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                          {error}
+                        </div>
+                      )}
                       <button
                         type="submit"
                         disabled={isLoading}
                         className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
                       >
-                        {isLoading ? 'Signing In...' : 'Access Portal'} <Icon name="arrow_forward" size={18} />
+                        {isLoading ? 'Creating Workspace...' : 'Create Workspace'} <Icon name="arrow_forward" size={18} />
                       </button>
                     </form>
+                  </>
+                ) : (
+                  <>
+                    {/* Role Selector Tabs */}
+                    <div className="flex p-1.5 bg-muted/60 rounded-full mb-6 mt-6 border border-border">
+                      <button
+                        onClick={() => setRole('admin')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+                          role === 'admin'
+                            ? 'bg-background text-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        <Icon name="shield" size={16} /> Admin
+                      </button>
+                      <button
+                        onClick={() => setRole('employee')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
+                          role === 'employee'
+                            ? 'bg-background text-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        <Icon name="person" size={16} /> Teammate
+                      </button>
+                    </div>
+
+                    <div className="min-h-[220px]">
+                      {error && (
+                        <div className="p-4 mb-6 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                          {error}
+                        </div>
+                      )}
+
+                      {role === 'admin' ? (
+                        <>
+                          <form onSubmit={handleAdminPasswordSubmit} className="space-y-4">
+                            <div>
+                              <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
+                              <input
+                                type="email"
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                                placeholder="name@company.com"
+                                className="w-full border-input px-4 py-3.5 text-sm font-medium focus:outline-none transition-all"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Password</label>
+                              <div className="relative">
+                                <input
+                                  type={showPassword ? 'text' : 'password'}
+                                  value={password}
+                                  onChange={e => setPassword(e.target.value)}
+                                  placeholder="••••••••"
+                                  className="w-full border-input px-4 py-3.5 pr-11 text-sm font-medium focus:outline-none transition-all"
+                                  required
+                                />
+                                <button 
+                                  type="button" 
+                                  onClick={() => setShowPassword(!showPassword)}
+                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                                >
+                                  {showPassword ? <Icon name="visibility_off" size={18} /> : <Icon name="visibility" size={18} />}
+                                </button>
+                              </div>
+                            </div>
+                            <button
+                              type="submit"
+                              disabled={isLoading}
+                              className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
+                            >
+                              {isLoading ? 'Signing In...' : 'Sign In'} <Icon name="arrow_forward" size={18} />
+                            </button>
+                          </form>
+
+                          {/* Divider */}
+                          <div className="flex items-center my-6">
+                            <div className="flex-grow border-t border-border" />
+                            <span className="px-3 text-xs text-muted-foreground uppercase tracking-widest">OR</span>
+                            <div className="flex-grow border-t border-border" />
+                          </div>
+
+                          <button 
+                            onClick={handleConnectClick} 
+                            disabled={isLoading}
+                            className="w-full flex items-center justify-between px-5 py-3.5 bg-muted/40 border border-border rounded-2xl text-sm font-semibold text-foreground hover:bg-muted transition disabled:opacity-50"
+                          >
+                            <span className="flex items-center gap-3">
+                              <Icon name="cloud" size={18} />
+                              Continue with Google
+                            </span>
+                            <Icon name="arrow_forward" size={16} />
+                          </button>
+                        </>
+                      ) : (
+                        <form onSubmit={handleEmployeeSubmit} className="space-y-5">
+                          <div>
+                            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
+                            <input
+                              type="text"
+                              value={email}
+                              onChange={e => setEmail(e.target.value)}
+                              placeholder="name@company.com"
+                              className="w-full border-input px-4 py-3.5 text-sm font-medium focus:outline-none transition-all"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Password</label>
+                            <div className="relative">
+                              <input
+                                type={showPassword ? 'text' : 'password'}
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                className="w-full border-input px-4 py-3.5 pr-11 text-sm font-medium focus:outline-none transition-all"
+                                required
+                              />
+                              <button 
+                                type="button" 
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                              >
+                                {showPassword ? <Icon name="visibility_off" size={18} /> : <Icon name="visibility" size={18} />}
+                              </button>
+                            </div>
+                          </div>
+                          <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
+                          >
+                            {isLoading ? 'Signing In...' : 'Access Portal'} <Icon name="arrow_forward" size={18} />
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Footer toggle */}
+                <p className="text-center text-sm text-muted-foreground mt-8">
+                  {mode === 'signup' ? (
+                    <>Already have an account? <button onClick={() => { setMode('signin'); setError('') }} className="text-primary font-semibold hover:underline cursor-pointer">Sign in</button></>
+                  ) : (
+                    <>Don't have an account? <button onClick={() => { setMode('signup'); setError('') }} className="text-primary font-semibold hover:underline cursor-pointer">Sign up</button></>
                   )}
-                </div>
+                </p>
               </div>
             </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </motion.div>
 
         </div>
