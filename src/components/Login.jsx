@@ -291,15 +291,27 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-                className="w-full max-w-md mx-auto lg:max-w-none"
+                className="relative w-full max-w-[380px] mx-auto"
               >
-                <div className="bg-card backdrop-blur-2xl border border-border rounded-2xl sm:rounded-3xl shadow-2xl relative overflow-hidden">
+                {/* ID Card Ribbon — passes through the punch hole, merges into the mother container */}
+                <div className="absolute top-[4px] left-1/2 -translate-x-1/2 w-[165%] h-8 -z-10 pointer-events-none">
+                  <div className="relative h-full w-full flex items-center justify-center">
+                    <div className="absolute inset-x-0 h-8 rounded-full bg-primary/70 blur-2xl [mask-image:linear-gradient(to_right,transparent,black_18%,black_82%,transparent)]" />
+                    <div className="absolute inset-x-0 h-8 rounded-full bg-primary/60 blur-lg [mask-image:linear-gradient(to_right,transparent,black_28%,black_72%,transparent)]" />
+                    <div className="absolute inset-x-0 h-8 rounded-full bg-primary/70 [mask-image:linear-gradient(to_right,transparent,black_40%,black_60%,transparent)]" />
+                  </div>
+                </div>
+
+                {/* Punch-hole ring */}
+                <div className="absolute top-[18px] left-1/2 -translate-x-1/2 z-10 w-[22px] h-[22px] rounded-full border-2 border-border/60 shadow-inner pointer-events-none" />
+
+                <div className="bg-card backdrop-blur-2xl border border-border rounded-2xl sm:rounded-3xl shadow-2xl relative overflow-hidden [mask-image:radial-gradient(circle_at_50%_18px,transparent_0_11px,black_11.5px)]">
               
               {/* Top Glow Effect */}
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute -bottom-12 -right-12 w-44 h-44 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
 
-              <div className="relative z-10 p-6 sm:p-8">
+              <div className="relative z-10 p-5 pt-10 sm:p-6 sm:pt-11">
                 {/* Title & Subtitle */}
                 <h2 className="text-2xl font-extrabold text-foreground tracking-tight">
                   {mode === 'signup' ? 'Sign Up' : 'Sign In'}
@@ -308,7 +320,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                 {mode === 'signup' ? (
                   <>
                     {/* Sign Up Form */}
-                    <form onSubmit={handleSignup} className="space-y-4 mt-6">
+                    <form onSubmit={handleSignup} className="space-y-3.5 mt-5">
                       <div>
                         <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Full Name</label>
                         <input
@@ -316,7 +328,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                           value={fullName}
                           onChange={e => setFullName(e.target.value)}
                           placeholder="Jane Doe"
-                          className="w-full border-input px-4 py-3.5 text-sm font-medium focus:outline-none transition-all"
+                          className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
                           required
                         />
                       </div>
@@ -327,7 +339,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                           value={companyName}
                           onChange={e => setCompanyName(e.target.value)}
                           placeholder="Acme Inc."
-                          className="w-full border-input px-4 py-3.5 text-sm font-medium focus:outline-none transition-all"
+                          className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
                           required
                         />
                       </div>
@@ -338,7 +350,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                           value={email}
                           onChange={e => setEmail(e.target.value)}
                           placeholder="name@company.com"
-                          className="w-full border-input px-4 py-3.5 text-sm font-medium focus:outline-none transition-all"
+                          className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
                           required
                         />
                       </div>
@@ -350,7 +362,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             placeholder="••••••••"
-                            className="w-full border-input px-4 py-3.5 pr-11 text-sm font-medium focus:outline-none transition-all"
+                            className="w-full border-input px-4 py-3 pr-11 text-sm font-medium focus:outline-none transition-all"
                             required
                           />
                           <button 
@@ -421,7 +433,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 placeholder="name@company.com"
-                                className="w-full border-input px-4 py-3.5 text-sm font-medium focus:outline-none transition-all"
+                                className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
                                 required
                               />
                             </div>
@@ -433,7 +445,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                                   value={password}
                                   onChange={e => setPassword(e.target.value)}
                                   placeholder="••••••••"
-                                  className="w-full border-input px-4 py-3.5 pr-11 text-sm font-medium focus:outline-none transition-all"
+                                  className="w-full border-input px-4 py-3 pr-11 text-sm font-medium focus:outline-none transition-all"
                                   required
                                 />
                                 <button 
@@ -464,7 +476,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                           <button 
                             onClick={handleConnectClick} 
                             disabled={isLoading}
-                            className="w-full flex items-center justify-between px-5 py-3.5 bg-muted/40 border border-border rounded-2xl text-sm font-semibold text-foreground hover:bg-muted transition disabled:opacity-50"
+                            className="w-full flex items-center justify-between px-5 py-3 bg-muted/40 border border-border rounded-2xl text-sm font-semibold text-foreground hover:bg-muted transition disabled:opacity-50"
                           >
                             <span className="flex items-center gap-3">
                               <Icon name="cloud" size={18} />
@@ -474,7 +486,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                           </button>
                         </>
                       ) : (
-                        <form onSubmit={handleEmployeeSubmit} className="space-y-5">
+                        <form onSubmit={handleEmployeeSubmit} className="space-y-4">
                           <div>
                             <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
                             <input
@@ -482,7 +494,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                               value={email}
                               onChange={e => setEmail(e.target.value)}
                               placeholder="name@company.com"
-                              className="w-full border-input px-4 py-3.5 text-sm font-medium focus:outline-none transition-all"
+                              className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
                               required
                             />
                           </div>
@@ -494,7 +506,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 placeholder="••••••••"
-                                className="w-full border-input px-4 py-3.5 pr-11 text-sm font-medium focus:outline-none transition-all"
+                                className="w-full border-input px-4 py-3 pr-11 text-sm font-medium focus:outline-none transition-all"
                                 required
                               />
                               <button 
@@ -553,13 +565,13 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
             <div className="flex flex-col gap-3">
               <button 
                 onClick={handleConfirmAuthorize}
-                className="w-full py-3.5 rounded-full text-sm font-bold bg-primary text-primary-foreground"
+                className="w-full py-3 rounded-full text-sm font-bold bg-primary text-primary-foreground"
               >
                 Authorize & Connect
               </button>
               <button 
                 onClick={() => setShowIntermediateModal(false)}
-                className="w-full py-3.5 rounded-full text-sm font-bold bg-muted text-foreground"
+                className="w-full py-3 rounded-full text-sm font-bold bg-muted text-foreground"
               >
                 Cancel
               </button>
