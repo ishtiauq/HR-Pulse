@@ -1294,16 +1294,18 @@ function MyAssetsView({ currentUser, assets, setAssets, assetRequests, setAssetR
           <Icon name="monitor" size={24} className="h-6 w-6 text-primary" />
           My Assets
         </h2>
-        <div className="flex gap-2 bg-muted p-1 rounded-lg">
-          <button className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'assigned' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('assigned')}>
-            Assigned to Me
-          </button>
-          <button className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'request' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('request')}>
-            Request Equipment
-          </button>
-          <button className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'maintenance' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setActiveTab('maintenance')}>
-            Maintenance Request
-          </button>
+        <div className="bg-card p-1.5 rounded-xl border border-border/50 shadow-sm w-full sm:w-auto">
+          <div className="menu-bar">
+            <Button variant={activeTab === 'assigned' ? 'default' : 'ghost'} size="sm" className="rounded-full px-4" onClick={() => setActiveTab('assigned')}>
+              Assigned to Me
+            </Button>
+            <Button variant={activeTab === 'request' ? 'default' : 'ghost'} size="sm" className="rounded-full px-4" onClick={() => setActiveTab('request')}>
+              Request Equipment
+            </Button>
+            <Button variant={activeTab === 'maintenance' ? 'default' : 'ghost'} size="sm" className="rounded-full px-4" onClick={() => setActiveTab('maintenance')}>
+              Maintenance Request
+            </Button>
+          </div>
         </div>
       </div>
 

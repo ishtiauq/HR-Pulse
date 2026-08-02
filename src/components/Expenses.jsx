@@ -177,46 +177,68 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
       <div className="border-t border-border border-headline" />
 
       {/* Navigation Tabs */}
-      <div className="flex gap-2 bg-muted/20 p-1.5 rounded-lg border border-border w-fit">
-        <button 
-          onClick={() => setActiveTab('submit')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'submit' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
-        >
-          <Icon name="add" size={16} /> Claim
-        </button>
-        {!(canApprove || canReimburse) && (
-          <button 
-            onClick={() => setActiveTab('my-claims')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'my-claims' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
+      <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
+        <div role="tablist" aria-label="Expense management sections" className="menu-bar">
+          <Button
+            role="tab"
+            aria-selected={activeTab === 'submit'}
+            variant={activeTab === 'submit' ? 'default' : 'ghost'}
+            size="sm"
+            className={`rounded-full px-4 relative justify-center ${activeTab !== 'submit' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+            onClick={() => setActiveTab('submit')}
           >
-            <Icon name="list" size={16} /> My Claims
-          </button>
-        )}
-        {canApprove && (
-          <button 
-            onClick={() => setActiveTab('approve')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'approve' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
-          >
-            <Icon name="schedule" size={16} /> Approvals
-            {pendingQueue.length > 0 && <Badge variant="destructive" className="ml-1 px-1.5 py-0 min-w-[20px] h-5 flex items-center justify-center">{pendingQueue.length}</Badge>}
-          </button>
-        )}
-        {canReimburse && (
-          <button 
-            onClick={() => setActiveTab('finance')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'finance' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
-          >
-            <Icon name="pie_chart" size={16} /> Finance
-          </button>
-        )}
-        {(canApprove || canReimburse) && (
-          <button 
-            onClick={() => setActiveTab('history')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'history' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}`}
-          >
-            <Icon name="history" size={16} /> History
-          </button>
-        )}
+            <Icon name="add" size={16} /> Claim
+          </Button>
+          {!(canApprove || canReimburse) && (
+            <Button
+              role="tab"
+              aria-selected={activeTab === 'my-claims'}
+              variant={activeTab === 'my-claims' ? 'default' : 'ghost'}
+              size="sm"
+              className={`rounded-full px-4 relative justify-center ${activeTab !== 'my-claims' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+              onClick={() => setActiveTab('my-claims')}
+            >
+              <Icon name="list" size={16} /> My Claims
+            </Button>
+          )}
+          {canApprove && (
+            <Button
+              role="tab"
+              aria-selected={activeTab === 'approve'}
+              variant={activeTab === 'approve' ? 'default' : 'ghost'}
+              size="sm"
+              className={`rounded-full px-4 relative justify-center ${activeTab !== 'approve' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+              onClick={() => setActiveTab('approve')}
+            >
+              <Icon name="schedule" size={16} /> Approvals
+              {pendingQueue.length > 0 && <Badge variant="destructive" className="ml-1 px-1.5 py-0 min-w-[20px] h-5 flex items-center justify-center">{pendingQueue.length}</Badge>}
+            </Button>
+          )}
+          {canReimburse && (
+            <Button
+              role="tab"
+              aria-selected={activeTab === 'finance'}
+              variant={activeTab === 'finance' ? 'default' : 'ghost'}
+              size="sm"
+              className={`rounded-full px-4 relative justify-center ${activeTab !== 'finance' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+              onClick={() => setActiveTab('finance')}
+            >
+              <Icon name="pie_chart" size={16} /> Finance
+            </Button>
+          )}
+          {(canApprove || canReimburse) && (
+            <Button
+              role="tab"
+              aria-selected={activeTab === 'history'}
+              variant={activeTab === 'history' ? 'default' : 'ghost'}
+              size="sm"
+              className={`rounded-full px-4 relative justify-center ${activeTab !== 'history' ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+              onClick={() => setActiveTab('history')}
+            >
+              <Icon name="history" size={16} /> History
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Tabs Content */}

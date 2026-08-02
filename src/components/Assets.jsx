@@ -1035,7 +1035,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
       <div className="border-t border-border border-headline" />
       
       <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
-        <div role="tablist" aria-label="Asset management sections" className="grid grid-cols-2 sm:flex gap-2">
+        <div role="tablist" aria-label="Asset management sections" className="menu-bar">
           {[
             { id: 'inventory', label: 'Inventory', icon: <Icon name="inventory_2" size={16} /> },
             { id: 'assignments', label: 'Assignments', icon: <Icon name="assignment_ind" size={16} /> },
@@ -1048,7 +1048,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
               aria-selected={activeView === view.id}
               variant={activeView === view.id ? 'default' : 'ghost'}
               size="sm"
-              className={`rounded-full px-4 relative w-full sm:w-auto justify-center ${activeView !== view.id ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+              className={`rounded-full px-4 relative justify-center ${activeView !== view.id ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
               onClick={() => setActiveView(view.id)}
             >
               {view.icon} {view.label}

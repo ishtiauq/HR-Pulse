@@ -27,6 +27,10 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
   const [expandedCardId, setExpandedCardId] = useState(null)
   const [selectedIds, setSelectedIds] = useState(new Set())
   const [confirmDelete, setConfirmDelete] = useState(null)
+  const [expandedDepts, setExpandedDepts] = useState({})
+  const [showDeptManager, setShowDeptManager] = useState(false)
+  const [deptManagerState, setDeptManagerState] = useState({ editing: null, deleteConfirm: null })
+  const [removedDepts, setRemovedDepts] = useState([])
   useModal(() => setViewingEmployee(null))
 
   useEffect(() => {
@@ -96,6 +100,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
   // Compute dynamic departments list from default + current employees
   const defaultDepts = ['Engineering', 'Design', 'Human Resources']
   const activeDepts = Array.from(new Set([...defaultDepts, ...employees.map(emp => emp.department)]))
+    .filter(d => !removedDepts.includes(d))
   const filterDepartments = ['All', ...activeDepts]
 
   // Image Drag Handlers
@@ -323,6 +328,40 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
     return matchesSearch && matchesDept
   })
 
+  const toggleDept = (key) => setExpandedDepts(prev => ({ ...prev, [key]: !prev[key] }))
+
+  const departmentGroups = (deptFilter === 'All' ? activeDepts : activeDepts.filter(d => d === deptFilter))
+    .map(dept => ({ key: dept, items: filteredEmployees.filter(emp => emp.department === dept) }))
+    .filter(g => g.items.length > 0 || g.key === deptFilter)
+
+  const handleSaveDeptEdit = (oldName, newName) => {
+    const name = (newName || '').trim()
+    if (!name) return addToast('Department name is required', 'warning')
+    if (oldName === name) { setDeptManagerState({ editing: null, deleteConfirm: null }); return }
+    if (activeDepts.includes(name)) return addToast('Department already exists', 'warning')
+    setEmployees(prev => prev.map(emp => emp.department === oldName ? { ...emp, department: name } : emp))
+    setRemovedDepts(prev => prev.map(d => d === oldName ? name : d))
+    setDeptFilter(prev => prev === oldName ? name : prev)
+    setExpandedDepts(prev => {
+      const next = { ...prev }
+      delete next[oldName]
+      if (prev[oldName]) next[name] = true
+      return next
+    })
+    setDeptManagerState({ editing: null, deleteConfirm: null })
+    addToast(`Department renamed to "${name}"`, 'success')
+    addLog('Renamed department', `Department "${oldName}" renamed to "${name}"`)
+  }
+
+  const handleDeleteDept = (deptName) => {
+    setEmployees(prev => prev.map(emp => emp.department === deptName ? { ...emp, department: 'Uncategorized' } : emp))
+    setRemovedDepts(prev => [...prev, deptName])
+    setDeptFilter(prev => prev === deptName ? 'All' : prev)
+    setDeptManagerState({ editing: null, deleteConfirm: null })
+    addToast(`Department "${deptName}" deleted. Employees moved to Uncategorized.`, 'info')
+    addLog('Deleted department', `Department "${deptName}" deleted, employees moved to Uncategorized`, 'warning')
+  }
+
   const handleApproveProfileEdit = (editId) => {
     const editReq = pendingProfileEdits.find(e => e.id === editId)
     if (!editReq) return
@@ -391,144 +430,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient"><Icon name="group" size={20} className="text-primary" />Employees</h1>
-        <div className="hidden lg:flex gap-2 items-center">
-          <input 
-            id="csv-file-input" 
-            type="file" 
-            accept=".csv" 
-            className="hidden" 
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                const reader = new FileReader();
-                reader.onload = async (event) => {
-                  const csvText = event.target.result;
-                  try {
-                    const lines = csvText.split('\\n').filter(line => line.trim());
-                    if (lines.length < 2) {
-                      addToast('CSV file must have a header row and at least one data row.', 'warning');
-                      return;
-                    }
-                    const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, '').toLowerCase());
-                    const validHeaders = expectedHeaders.filter(h => rawHeaders.includes(h));
-                    if (validHeaders.length === 0) {
-                      addToast('CSV headers must include at least one of: ' + expectedHeaders.join(', '), 'warning');
-                      return;
-                    }
-                    const imported = [];
-                    const errors = [];
-                    for (let i = 1; i < lines.length; i++) {
-                      const cols = lines[i].split(',').map(c => sanitizeCell(c.trim().replace(/^["']|["']$/g, '')));
-                      const row = {};
-                      rawHeaders.forEach((header, index) => {
-                        row[header] = cols[index] || '';
-                      });
-                      const error = validateCSVRow(row);
-                      if (error) {
-                        errors.push(`Row ${i + 1}: ${error}`);
-                        continue;
-                      }
-                      if (row.password) {
-                        row.passwordHash = await hashPassword(row.password);
-                        delete row.password;
-                      }
-                      row.avatar = row.avatar || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200`;
-                      row.updated_at = new Date().toISOString();
-                      imported.push(row);
-                    }
-                    if (errors.length > 0) {
-                      addToast(`Skipped ${errors.length} invalid row(s)`, 'warning');
-                    }
-                    if (imported.length > 0) {
-                      setEmployees(prev => {
-                        const existingIds = new Set(prev.map(e => e.id));
-                        const filteredImport = imported.filter(e => !existingIds.has(e.id));
-                        return [...prev, ...filteredImport];
-                      });
-                      addToast(`Successfully imported ${imported.length} employees.`, 'success');
-                    }
-                  } catch (err) {
-                    addToast('Failed to parse CSV file: ' + err.message, 'danger');
-                  }
-                };
-                reader.readAsText(file);
-              }
-            }}
-          />
-          <Button variant="outline" onClick={() => document.getElementById('csv-file-input').click()}>
-            <Icon name="table_chart" size={16} className="mr-2 h-4 w-4" />
-            Import CSV
-          </Button>
-          <Button onClick={handleOpenAddForm}>
-            <Icon name="add" size={16} className="mr-2 h-4 w-4" />
-            Add Employee
-          </Button>
-        </div>
       </div>
-      <div className="border-t border-border" />
-
-      {/* Mobile/Tablet Action Buttons */}
-      <div className="lg:hidden grid grid-cols-2 gap-3 mb-2">
-        <Button variant="outline" className="w-full" onClick={() => document.getElementById('csv-file-input').click()}>
-          <Icon name="table_chart" size={16} className="mr-2 h-4 w-4" />
-          Import CSV
-        </Button>
-        <Button className="w-full" onClick={handleOpenAddForm}>
-          <Icon name="add" size={16} className="mr-2 h-4 w-4" />
-          Add Employee
-        </Button>
-      </div>
-
-      {/* Filters Toolbar */}
-      <Card className="shadow-sm overflow-hidden mb-6 border border-border">
-        <CardContent className="p-0 flex flex-col">
-          
-          {/* Top Container: Select All & Search */}
-          <div className="p-4 flex items-center gap-3 sm:gap-4 w-full">
-            <div className="flex items-center gap-2 pr-3 sm:pr-4 border-r border-border shrink-0">
-              <input
-                type="checkbox"
-                checked={filteredEmployees.length > 0 && selectedIds.size === filteredEmployees.length}
-                onChange={toggleSelectAll}
-                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary"
-              />
-              <span className="text-sm font-medium whitespace-nowrap">Select All</span>
-            </div>
-            
-            <div className="relative flex-1">
-              <Icon name="search" size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search by name, role, email..."
-                className="pl-9 bg-muted/40 hover:bg-muted/60 focus:bg-background transition-colors w-full"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="border-t border-border border-headline" />
-
-          {/* Bottom Container: Departments */}
-          <div className="p-4 bg-muted/10 flex flex-col sm:flex-row sm:items-center gap-3 w-full">
-            <div className="text-sm font-medium text-muted-foreground shrink-0">Departments:</div>
-            <div className="flex gap-2 flex-wrap flex-1">
-              {filterDepartments.map(dept => (
-                <Badge
-                  key={dept}
-                  variant={deptFilter === dept ? 'default' : 'secondary'}
-                  className="cursor-pointer hover:bg-primary/80 transition-colors"
-                  onClick={() => setDeptFilter(dept)}
-                >
-                  {deptFilter === dept && <Icon name="check" size={12} className="mr-1 h-3 w-3" />}
-                  {dept}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-        </CardContent>
-      </Card>
 
       {/* Pending Profile Updates Queue */}
       {pendingProfileEdits && pendingProfileEdits.length > 0 && (
@@ -592,18 +494,148 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       )}
 
       {/* Directory Grid */}
-      {filteredEmployees.length === 0 ? (
-        <div className="text-center py-20 flex flex-col items-center">
-          <Icon name="group" size={64} className="h-16 w-16 mb-4 text-muted-foreground/50" />
-          <h3 className="text-xl font-medium text-foreground mb-4">No employees found</h3>
-          <Button variant="outline" onClick={() => {setSearchTerm(''); setDeptFilter('All')}}>Clear Filters</Button>
+      <Card className="shadow-xs border-border bg-card overflow-hidden">
+        {/* Card header: search + actions */}
+        <div className="p-4 border-b border-border flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center justify-between bg-muted/20">
+          <div className="relative flex-1 w-full sm:w-auto sm:min-w-[280px] sm:max-w-md">
+            <Icon name="search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input type="text" placeholder="Search by name, role, email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9 bg-background border-input shadow-sm w-full" />
+          </div>
+          <div className="flex gap-3 items-center flex-wrap">
+            <div className="hidden sm:flex items-center gap-2 pr-3 sm:pr-4 border-r border-border shrink-0">
+              <input
+                type="checkbox"
+                checked={filteredEmployees.length > 0 && selectedIds.size === filteredEmployees.length}
+                onChange={toggleSelectAll}
+                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer accent-primary"
+              />
+              <span className="text-sm font-medium whitespace-nowrap">Select All</span>
+            </div>
+            <input
+              id="csv-file-input"
+              type="file"
+              accept=".csv"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = async (event) => {
+                    const csvText = event.target.result;
+                    try {
+                      const lines = csvText.split('\\n').filter(line => line.trim());
+                      if (lines.length < 2) {
+                        addToast('CSV file must have a header row and at least one data row.', 'warning');
+                        return;
+                      }
+                      const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, '').toLowerCase());
+                      const validHeaders = expectedHeaders.filter(h => rawHeaders.includes(h));
+                      if (validHeaders.length === 0) {
+                        addToast('CSV headers must include at least one of: ' + expectedHeaders.join(', '), 'warning');
+                        return;
+                      }
+                      const imported = [];
+                      const errors = [];
+                      for (let i = 1; i < lines.length; i++) {
+                        const cols = lines[i].split(',').map(c => sanitizeCell(c.trim().replace(/^["']|["']$/g, '')));
+                        const row = {};
+                        rawHeaders.forEach((header, index) => {
+                          row[header] = cols[index] || '';
+                        });
+                        const error = validateCSVRow(row);
+                        if (error) {
+                          errors.push(`Row ${i + 1}: ${error}`);
+                          continue;
+                        }
+                        if (row.password) {
+                          row.passwordHash = await hashPassword(row.password);
+                          delete row.password;
+                        }
+                        row.avatar = row.avatar || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200`;
+                        row.updated_at = new Date().toISOString();
+                        imported.push(row);
+                      }
+                      if (errors.length > 0) {
+                        addToast(`Skipped ${errors.length} invalid row(s)`, 'warning');
+                      }
+                      if (imported.length > 0) {
+                        setEmployees(prev => {
+                          const existingIds = new Set(prev.map(e => e.id));
+                          const filteredImport = imported.filter(e => !existingIds.has(e.id));
+                          return [...prev, ...filteredImport];
+                        });
+                        addToast(`Successfully imported ${imported.length} employees.`, 'success');
+                      }
+                    } catch (err) {
+                      addToast('Failed to parse CSV file: ' + err.message, 'danger');
+                    }
+                  };
+                  reader.readAsText(file);
+                }
+              }}
+            />
+            <Button variant="outline" onClick={() => document.getElementById('csv-file-input').click()} className="shadow-sm flex-1 sm:flex-none">
+              <Icon name="table_chart" size={16} className="mr-2 h-4 w-4" /> Import CSV
+            </Button>
+            <Button onClick={handleOpenAddForm} className="shadow-sm shadow-primary/20 flex-1 sm:flex-none">
+              <Icon name="add" size={16} className="mr-2 h-4 w-4" /> Add Employee
+            </Button>
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
-          {filteredEmployees.map(emp => {
-            const isExpanded = expandedCardId === emp.id
-            return (
-              <Card key={emp.id} className="relative overflow-visible group hover:border-primary/50 transition-colors cursor-pointer" onClick={() => setViewingEmployee(emp)}>
+
+        {/* Accordion header row */}
+        <div className="px-4 py-3 border-b border-border flex flex-wrap items-center justify-between gap-3">
+          <button
+            className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors"
+            onClick={() => {
+              const allOpen = Object.keys(expandedDepts).length > 0 && activeDepts.every(d => !!expandedDepts[d])
+              setExpandedDepts(activeDepts.reduce((acc, d) => ({ ...acc, [d]: !allOpen }), {}))
+            }}
+          >
+            <Icon name="group" size={18} className="text-primary" />
+            All Employees
+            <Badge variant="secondary" className="text-xs shrink-0">{filteredEmployees.length}</Badge>
+          </button>
+          <Button variant="ghost" size="sm" onClick={() => setShowDeptManager(true)} className="rounded-full h-8 px-3 text-xs flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+            <Icon name="tune" size={14} /> Manage Department
+          </Button>
+        </div>
+
+        {filteredEmployees.length === 0 ? (
+          <div className="text-center py-20 flex flex-col items-center">
+            <Icon name="group" size={64} className="h-16 w-16 mb-4 text-muted-foreground/50" />
+            <h3 className="text-xl font-medium text-foreground mb-4">No employees found</h3>
+            <Button variant="outline" onClick={() => {setSearchTerm(''); setDeptFilter('All')}}>Clear Filters</Button>
+          </div>
+        ) : (
+          <div className="divide-y divide-border">
+            {departmentGroups.map(group => {
+              const isOpen = !!expandedDepts[group.key]
+              return (
+                <div key={group.key}>
+                  <button
+                    className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-muted/40 transition-colors"
+                    onClick={() => toggleDept(group.key)}
+                  >
+                    <Icon name={isOpen ? 'expand_more' : 'chevron_right'} size={20} className="text-muted-foreground shrink-0 transition-transform" />
+                    <span className="p-1.5 bg-primary/10 rounded-md text-primary flex items-center justify-center">
+                      <Icon name="apartment" size={16} />
+                    </span>
+                    <span className="flex-1 font-semibold text-foreground truncate">{group.key}</span>
+                    <Badge variant="secondary" className="text-xs shrink-0">{group.items.length}</Badge>
+                  </button>
+                  {isOpen && (
+                    <div className="px-4 pb-5 animate-fade-in">
+                      {group.items.length === 0 ? (
+                        <div className="text-center text-muted-foreground py-8 border border-border border-dashed rounded-lg">
+                          No employees in this department.
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
+                          {group.items.map(emp => {
+                            const isExpanded = expandedCardId === emp.id
+                            return (
+                              <Card key={emp.id} className="relative overflow-visible group hover:border-primary/50 transition-colors cursor-pointer" onClick={() => setViewingEmployee(emp)}>
                 
                 {/* Selection Checkbox */}
                 <div 
@@ -718,8 +750,16 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
               </Card>
             )
           })}
-        </div>
-      )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </Card>
 
       {/* Employee Detail Modal */}
       <Dialog open={!!viewingEmployee} onOpenChange={(open) => { if(!open) setViewingEmployee(null) }}>
@@ -1033,6 +1073,100 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       </Dialog>
 
       <AdSlot type="horizontal" className="mt-8" />
+
+      {showDeptManager && (
+        <DepartmentManagerModal
+          departments={activeDepts}
+          employees={employees}
+          onClose={() => setShowDeptManager(false)}
+          onEdit={handleSaveDeptEdit}
+          onDelete={handleDeleteDept}
+          managerState={deptManagerState}
+          setManagerState={setDeptManagerState}
+        />
+      )}
     </div>
+  )
+}
+
+function DepartmentManagerModal({ departments, employees, onClose, onEdit, onDelete, managerState, setManagerState }) {
+  useModal(onClose)
+  const [editValue, setEditValue] = useState('')
+
+  const openEdit = (dept) => {
+    setManagerState({ editing: dept, deleteConfirm: null })
+    setEditValue(dept)
+  }
+
+  const submitEdit = () => {
+    onEdit(managerState.editing, editValue)
+  }
+
+  return (
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[480px]">
+        <DialogHeader className="flex flex-row items-center justify-between border-b border-border pb-4 mb-4 space-y-0">
+          <DialogTitle>Manage Departments</DialogTitle>
+          <button className="rounded-full p-2 hover:bg-muted transition-colors" onClick={onClose}>
+            <Icon name="close" size={16} />
+          </button>
+        </DialogHeader>
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[0.82rem] font-semibold text-muted-foreground">Departments</label>
+            <div className="flex flex-col gap-1.5 max-h-[280px] overflow-y-auto">
+              {(departments || []).map(dept => (
+                <div key={dept} className="flex items-center gap-2 p-2 px-3 rounded-lg bg-muted/30 border border-border">
+                  <span className="flex-1 text-[0.9rem] font-medium text-foreground">{dept}</span>
+                  <span className="text-[11px] text-muted-foreground">{employees.filter(e => e.department === dept).length} employee(s)</span>
+                  <Button variant="ghost" size="icon-xs" aria-label="Edit department" onClick={() => openEdit(dept)}>
+                    <Icon name="edit" size={14} />
+                  </Button>
+                  <Button variant="ghost" size="icon-xs" aria-label="Delete department" onClick={() => setManagerState({ editing: null, deleteConfirm: dept })}>
+                    <Icon name="delete" size={14} className="text-destructive" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {managerState.editing && (
+            <div className="border-t border-border pt-4">
+              <h3 className="m-0 mb-3 text-[0.95rem] font-semibold text-foreground">Edit Department</h3>
+              <div className="flex flex-col gap-3">
+                <Input
+                  type="text"
+                  value={editValue}
+                  onChange={e => setEditValue(e.target.value)}
+                  aria-label="Department name"
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submitEdit() } }}
+                />
+                <div className="flex gap-2 justify-end">
+                  <Button variant="secondary" size="sm" onClick={() => setManagerState({ editing: null, deleteConfirm: null })}>Cancel</Button>
+                  <Button variant="default" size="sm" className="flex items-center gap-1.5" onClick={submitEdit}>
+                    <Icon name="check" size={14} /> Save
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {managerState.deleteConfirm && (
+            <div className="border-t border-border pt-4">
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex items-start gap-2">
+                <Icon name="warning" size={16} className="text-destructive mt-0.5 shrink-0" />
+                <p className="text-sm text-foreground">
+                  Delete "<strong>{managerState.deleteConfirm}</strong>"? Employees in this department will be moved to <strong>Uncategorized</strong>.
+                </p>
+              </div>
+              <div className="flex gap-2 justify-end mt-3">
+                <Button variant="secondary" size="sm" onClick={() => setManagerState({ editing: null, deleteConfirm: null })}>Cancel</Button>
+                <Button variant="destructive" size="sm" onClick={() => onDelete(managerState.deleteConfirm)}>Delete</Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

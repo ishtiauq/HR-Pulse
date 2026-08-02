@@ -44,8 +44,8 @@ export default function AttendancePage({
       </div>
       <div className="border-t border-border border-headline" />
 
-      <div className="bg-card p-2 sm:p-2.5 rounded-[1.25rem] border border-border/50 shadow-sm overflow-x-auto overflow-y-hidden no-scrollbar">
-        <div role="tablist" aria-label="Attendance sections" className="flex gap-2 w-max">
+      <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
+        <div role="tablist" aria-label="Attendance sections" className="menu-bar">
           {tabs.map(t => (
             <Button
                 key={t.id}
@@ -53,7 +53,7 @@ export default function AttendancePage({
                 aria-selected={tab === t.id}
                 variant={tab === t.id ? 'default' : 'ghost'}
                 size="sm"
-                className={`rounded-full px-4 ${tab !== t.id ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
+                className={`rounded-full px-4 justify-center ${tab !== t.id ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => setTab(t.id)}
               >
                 {t.icon} {t.label}
@@ -65,7 +65,6 @@ export default function AttendancePage({
       {tab === 'daily' && <DailyLogs employees={employees} attendance={attendance} setAttendance={setAttendance} addToast={addToast} />}
       {tab === 'leave' && (
         <div className="grid gap-6">
-          <LeaveBalanceCard employees={employees} balances={attendance.leaveBalances || {}} settings={settings} />
           <LeaveRequests 
             attendance={attendance}
             leaves={attendance.leaves} 
@@ -75,6 +74,7 @@ export default function AttendancePage({
             addToast={addToast}
             settings={settings}
           />
+          <LeaveBalanceCard employees={employees} balances={attendance.leaveBalances || {}} leaves={attendance.leaves || []} settings={settings} />
         </div>
       )}
       {tab === 'roster' && (

@@ -28,7 +28,7 @@ export const allNavItems = [
   { id: 'documents', label: 'Documents', icon: createElement(Icon, { name: 'folder_open', size: 18 }) },
   { id: 'employees', label: 'Employees', icon: createElement(Icon, { name: 'group', size: 18 }) },
   { id: 'payroll', label: 'Payroll', icon: createElement(Icon, { name: 'account_balance', size: 18 }) },
-  { id: 'attendance', label: 'Leaves & Attendance', icon: createElement(Icon, { name: 'schedule', size: 18 }) },
+  { id: 'attendance', label: 'Attendance & Leaves', icon: createElement(Icon, { name: 'schedule', size: 18 }) },
   { id: 'expenses', label: 'Expenses', icon: createElement(Icon, { name: 'wallet', size: 18 }) },
   { id: 'assets', label: 'Assets', icon: createElement(Icon, { name: 'laptop_windows', size: 18 }) },
   { id: 'settings', label: 'Settings', icon: createElement(Icon, { name: 'settings', size: 18 }) },

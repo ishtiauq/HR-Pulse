@@ -189,6 +189,40 @@ html, body, #root {
   .bottom-bar.bottom-bar-pill {
     border-radius: 9999px !important;
   }
+
+  /* Pill-shaped glass tab menu bar (overrides default 1rem glass radius) */
+  .glass-panel.glass-pill {
+    border-radius: 9999px !important;
+  }
+
+  /* Keep the focus glow inside the pill for inputs nested in a glass pill */
+  .glass-panel.glass-pill input:focus,
+  .glass-panel.glass-pill select:focus,
+  .glass-panel.glass-pill textarea:focus {
+    box-shadow: none !important;
+    border-color: transparent !important;
+  }
+
+  /* Menu bar — equal-width tabs/buttons sized to the widest item, responsive on all screens */
+  .menu-bar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 0.5rem;
+  }
+  @media (min-width: 640px) {
+    .menu-bar {
+      display: flex;
+      flex-wrap: wrap;
+    }
+  }
+  .menu-bar > * {
+    flex: 1 1 0;
+    min-width: max-content;
+  }
+  .menu-bar > *:only-child {
+    grid-column: span 2;
+  }
 }
 
 /* Ensure glassmorphism modals clip their inner content (like calendar grids) properly to keep corners round, but allow vertical scrolling for long content */

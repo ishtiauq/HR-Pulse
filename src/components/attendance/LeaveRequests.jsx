@@ -4,20 +4,13 @@ import { formatDateShort } from '../../services/date.js'
 import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 
 export default function LeaveRequests({ employees, attendance, setAttendance, addToast }) {
-  const { leaves, pendingLeaves, historyLeaves, balances, approveLeave, rejectLeave, pendingCount } = useLeaves(attendance, setAttendance, addToast)
+  const { pendingLeaves, approveLeave, rejectLeave, pendingCount } = useLeaves(attendance, setAttendance, addToast)
 
   const [pendingAction, setPendingAction] = useState(null) // { id, action: 'approve' | 'reject', empName }
-
-  const STATUS = {
-    Approved: { bg: '#28a745', color: '#fff' },
-    Rejected: { bg: '#dc3545', color: '#fff' },
-    Pending: { bg: '#ffc107', color: '#121212' },
-  }
 
   const handleConfirmAction = () => {
     if (pendingAction) {
@@ -80,38 +73,6 @@ export default function LeaveRequests({ employees, attendance, setAttendance, ad
               </TableBody>
             </Table>
           </div>
-        )}
-
-        {historyLeaves.length > 0 && (
-          <>
-            <h3 className="text-base font-bold m-0 text-foreground">History</h3>
-            <div className="rounded-lg border border-border overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[180px]">Employee</TableHead>
-                    <TableHead className="w-[120px]">Type</TableHead>
-                    <TableHead className="w-[200px]">Dates</TableHead>
-                    <TableHead className="w-[100px]">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {historyLeaves.slice().reverse().map(l => {
-                    const emp = employees.find(e => e.id === l.employeeId)
-                    const s = STATUS[l.status] || STATUS.Pending
-                    return (
-                      <TableRow key={l.id}>
-                        <TableCell><span className="text-xs text-foreground">{emp?.name || l.employeeId}</span></TableCell>
-                        <TableCell><span className="text-xs text-muted-foreground">{l.leaveType}</span></TableCell>
-                        <TableCell><span className="text-xs text-muted-foreground">{formatDateShort(l.startDate)} — {formatDateShort(l.endDate)}</span></TableCell>
-                        <TableCell><Badge style={{ background: s.bg, color: s.color }}>{l.status}</Badge></TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          </>
         )}
       </CardContent>
 

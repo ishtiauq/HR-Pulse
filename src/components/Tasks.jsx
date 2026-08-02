@@ -193,13 +193,13 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
       </div>
       
       <div className="flex flex-wrap gap-4 mb-4 items-center w-full justify-between">
-        <div className="relative flex-auto min-w-[250px] lg:max-w-md w-full">
-          <Icon name="search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="glass-panel relative flex-auto min-w-[250px] lg:max-w-md w-full flex items-center px-1.5 py-1.5">
+          <Icon name="search" size={16} className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="Search tasks or assignees..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-background w-full"
+            className="pl-9 bg-transparent w-full border-none shadow-none focus:shadow-none"
           />
         </div>
         
@@ -220,26 +220,26 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
       </div>
 
       {/* Status Tabs */}
-      <div className="w-full overflow-x-auto pb-2 hide-scrollbar">
-        <div className="flex w-max min-w-full sm:min-w-0 p-1.5 bg-muted/40 rounded-xl border border-border/60 gap-1.5">
+      <div className="bg-card p-2 rounded-xl border border-border/50 shadow-sm w-full max-w-full">
+        <div role="tablist" aria-label="Task status sections" className="menu-bar">
           {COLUMNS.map(col => {
             const count = filteredTasks.filter(t => t.status === col).length;
             const isActive = activeStatusTab === col;
             return (
-              <button
+              <Button
                 key={col}
+                role="tab"
+                aria-selected={isActive}
+                variant={isActive ? 'default' : 'ghost'}
+                size="sm"
+                className={`rounded-full px-4 relative justify-center ${!isActive ? 'text-muted-foreground hover:bg-muted hover:text-foreground' : ''}`}
                 onClick={() => setActiveStatusTab(col)}
-                className={`flex-1 flex items-center justify-center gap-2.5 px-6 py-2.5 text-[0.9rem] font-medium rounded-lg whitespace-nowrap transition-all duration-200 ${
-                  isActive 
-                    ? 'bg-background text-foreground shadow-sm ring-1 ring-border/50' 
-                    : 'text-muted-foreground hover:bg-muted/80 hover:text-foreground'
-                }`}
               >
                 {col}
-                <span className={`flex items-center justify-center text-[11px] h-5 min-w-[22px] px-1.5 font-bold rounded-full transition-colors ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-muted-foreground/20 text-muted-foreground'}`}>
+                <span className={`flex items-center justify-center text-[11px] h-5 min-w-[22px] px-1.5 font-bold rounded-full transition-colors ${isActive ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted-foreground/20 text-muted-foreground'}`}>
                   {count}
                 </span>
-              </button>
+              </Button>
             )
           })}
         </div>
