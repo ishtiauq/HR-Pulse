@@ -261,15 +261,15 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
       </header>
 
       {/* Main: Hero + Login inside a single container */}
-      <main className="flex-1 flex flex-col relative z-10 px-4 py-24 lg:py-28">
+      <main className="flex-1 flex flex-col relative z-10 px-4 pt-24 pb-10 sm:pt-28 sm:pb-14 lg:py-24">
         <div className="w-full lg:w-[90%] mx-auto my-auto">
-          <div className="bg-card/40 backdrop-blur-xl border border-border rounded-3xl shadow-sm p-6 sm:p-10 lg:p-[5%] relative overflow-hidden">
+          <div className="bg-card/40 backdrop-blur-xl border border-border rounded-2xl sm:rounded-3xl shadow-sm p-5 sm:p-8 lg:p-[5%] relative overflow-hidden">
 
             {/* Ambient Glows */}
             <div className="absolute -top-16 -left-16 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-20 -right-16 w-72 h-72 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="relative z-10 grid lg:grid-cols-2 gap-10 lg:gap-[5%] items-center">
+            <div className="relative z-10 grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-[5%] items-center">
 
               {/* Hero Section */}
               <motion.div 
@@ -278,10 +278,10 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 className="text-center lg:text-left"
               >
-                <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight leading-[1.08]">
-                  Manage your squad,<br /> But Make It <span className="headline-gradient">Effortless.</span>
+                <h1 className="text-3xl sm:text-4xl xl:text-6xl font-extrabold tracking-tight leading-[1.1]">
+                  Manage your squad,<br className="hidden sm:block" /> But Make It <span className="headline-gradient">Effortless.</span>
                 </h1>
-                <p className="mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto lg:mx-0">
+                <p className="mt-5 sm:mt-6 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg text-left lg:mx-0 mx-auto">
                   Stop juggling 10 different spreadsheets. Track attendance and leaves, process salary sheet, manage tasks, assets and employee data and sync logs in one slick dashboard—100% Free today!
                 </p>
               </motion.div>
@@ -291,18 +291,18 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-                className="w-full"
+                className="w-full max-w-md mx-auto lg:max-w-none"
               >
-                <div className="bg-card backdrop-blur-2xl border border-border rounded-3xl shadow-2xl relative overflow-hidden">
+                <div className="bg-card backdrop-blur-2xl border border-border rounded-2xl sm:rounded-3xl shadow-2xl relative overflow-hidden">
               
               {/* Top Glow Effect */}
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute -bottom-12 -right-12 w-44 h-44 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
 
-              <div className="relative z-10 p-8">
+              <div className="relative z-10 p-6 sm:p-8">
                 {/* Title & Subtitle */}
-                <h2 className="text-2xl font-bold text-foreground tracking-tight">
-                  {mode === 'signup' ? 'Create your workspace' : 'Sign in to your HR Pulse account'}
+                <h2 className="text-2xl font-extrabold text-foreground tracking-tight">
+                  {mode === 'signup' ? 'Sign Up' : 'Sign In'}
                 </h2>
 
                 {mode === 'signup' ? (
