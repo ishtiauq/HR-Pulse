@@ -291,13 +291,13 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-                className="relative w-full max-w-[380px] mx-auto"
+                className="relative w-full max-w-[300px] mx-auto"
               >
                 {/* 1. Lanyard Back (Behind Card) */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0">
                   <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[250px] sm:h-[300px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_15%,black_100%)] md:[mask-image:none]">
                     {/* Back strap (Left) */}
-                    <div className="absolute -bottom-[20px] left-[135px] w-[26px] h-[350px] bg-[#1812a0] origin-bottom -rotate-[14deg]" />
+                    <div className="absolute -bottom-[20px] left-[139px] w-[32px] h-[350px] bg-[#1812a0] origin-bottom -rotate-[14deg]" />
                   </div>
                 </div>
 
@@ -311,7 +311,7 @@ export default function Login({ onLogin, themeMode, toggleTheme }) {
 
                   {/* Front strap (Right) - Pushed 1px down to overlap the hole lip and eliminate the gap */}
                   <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[250px] sm:h-[300px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_15%,black_100%)] md:[mask-image:none]">
-                    <div className="absolute -bottom-[20px] right-[134px] w-[26px] h-[350px] bg-[#2922fa] origin-bottom rotate-[12deg] shadow-[-6px_0_15px_rgba(0,0,0,0.4)]" />
+                    <div className="absolute -bottom-[20px] right-[138px] w-[32px] h-[350px] bg-[#2922fa] origin-bottom rotate-[12deg] shadow-[-6px_0_15px_rgba(0,0,0,0.4)]" />
                   </div>
                 </div>
 
