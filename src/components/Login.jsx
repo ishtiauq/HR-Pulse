@@ -442,7 +442,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
                 viewport={{ once: false, amount: 0.3 }}
                 transition={{ type: "spring", stiffness: 200, damping: 22, mass: 0.9 }}
-                className="login-auth-card relative w-full max-w-[400px] mx-auto shrink-0"
+                className="login-auth-card relative w-full max-w-[500px] mx-auto shrink-0"
               >
                 {/* 1. Lanyard Back (Behind Card) */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0">
@@ -466,7 +466,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   </div>
                 </div>
 
-                {/* Card Container */}
+                 {/* Card Container */}
                 <div className="bg-card backdrop-blur-2xl border border-border rounded-2xl sm:rounded-[28px] shadow-2xl relative z-10 overflow-hidden pt-12 pb-2">
               
               {/* Top Glow Effect */}
@@ -703,7 +703,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 </p>
               </div>
             </div>
-          </motion.div>
+            </motion.div>
               </div>
       </section>
 

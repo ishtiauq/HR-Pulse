@@ -431,7 +431,7 @@ input:focus, select:focus, textarea:focus, .focus-within\:ring-2:focus-within {
    ============================================================== */
 @media (min-width: 768px) and (max-width: 1400px) {
   .login-auth-card {
-    max-width: 440px;
+    max-width: 500px;
   }
   .login-auth-card-inner {
     padding: 3rem 1.75rem 1.75rem;
@@ -449,7 +449,7 @@ input:focus, select:focus, textarea:focus, .focus-within\:ring-2:focus-within {
    box is always centered; the ribbon keeps a fixed vertical length.
    ============================================================== */
 .login-modal-box {
-  --modal-fit: min(1, calc(100dvh / 800px), calc(100vw / 400px));
+  --modal-fit: min(1, calc(100dvh / 800px), calc(100vw / 500px));
   transform: scale(var(--modal-fit));
   transform-origin: center;
 }
