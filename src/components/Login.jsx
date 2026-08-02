@@ -72,6 +72,84 @@ function SubDialog({ line, index }) {
   )
 }
 
+// FAQ content — each entry renders as its own split glass card
+const FAQ_ITEMS = [
+  {
+    q: 'Is HR Pulse really free?',
+    a: 'Yes — creating a workspace is 100% free. No credit card, no trial clock, no hidden fees. You stay in full control of everything.',
+  },
+  {
+    q: 'Where is my company data stored?',
+    a: 'Everything lives in an encrypted app-data folder inside your own Google Drive. Only you decide what is shared and who gets access.',
+  },
+  {
+    q: 'How do teammates sign in?',
+    a: 'Your dashboard creates teammate accounts with work emails. Each teammate signs in with their email and a secure password — no extra setup.',
+  },
+  {
+    q: 'Can I use HR Pulse on any device?',
+    a: 'Yes. The app is fully responsive, so attendance, payroll, and asset tracking work smoothly on desktop, tablet, and mobile browsers.',
+  },
+  {
+    q: 'How does attendance tracking work?',
+    a: 'Teammates check in and out with one tap. Timesheets and approvals are generated automatically, ready to flow straight into payroll.',
+  },
+]
+
+// Final section: FAQ — each question is its own split glass card (no single modal)
+function FaqSection() {
+  const [open, setOpen] = useState(0)
+  return (
+    <section className="h-dvh w-full flex flex-col items-center justify-center px-4 sm:px-6 py-8 snap-start">
+      <motion.h2
+        initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
+        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        viewport={{ once: false, amount: 0.5 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight text-center mb-6 sm:mb-8"
+      >
+        Frequently asked questions
+      </motion.h2>
+
+      <div className="w-full max-w-4xl grid gap-3 sm:gap-4 sm:grid-cols-2 overflow-y-auto max-h-[calc(100dvh-9rem)] pr-1">
+        {FAQ_ITEMS.map((item, i) => {
+          const isOpen = open === i
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 24, scale: 0.95, filter: "blur(10px)" }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+              viewport={{ once: false, amount: 0.3 }}
+              transition={{ delay: (i % 2) * 0.08, duration: 0.5, ease: "easeOut" }}
+              className={`relative flex flex-col overflow-hidden rounded-2xl border bg-background/95 shadow-lg backdrop-blur-xl transition-colors ${isOpen ? 'border-primary/40' : 'border-border/50'}`}
+            >
+              <button
+                onClick={() => setOpen(isOpen ? -1 : i)}
+                className="w-full flex items-center justify-between gap-4 p-5 text-left"
+              >
+                <span className="text-sm sm:text-base font-semibold text-foreground leading-snug">{item.q}</span>
+                <Icon
+                  name="expand_more"
+                  size={20}
+                  className={`shrink-0 text-primary transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+              <motion.div
+                initial={false}
+                animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed px-5 pb-5">{item.a}</p>
+              </motion.div>
+            </motion.div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode }) {
   const [role, setRole] = useState('admin') // 'admin' | 'employee'
   const [mode, setMode] = useState('signin') // 'signin' | 'signup'
@@ -82,7 +160,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   //   Section 1: Hero heading
   //   Sections 2-6: one subheading popup per section
   //   Section 7: Auth modal
-  // With 7 viewport sections, scrollYProgress maps as section index / 6.
+  //   Section 8: FAQ
+  // With 8 viewport sections, scrollYProgress maps as section index / 7.
   const containerRef = useRef(null)
   const { scrollYProgress } = useScroll({ container: containerRef })
   
@@ -448,7 +527,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0">
                   <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_25%,black_60%,black_100%)]">
                     {/* Back strap (Left) */}
-                    <div className="absolute -bottom-[20px] left-[139px] w-[32px] h-[600px] bg-[#1812a0] origin-bottom -rotate-[14deg]" />
+                    <div className="absolute -bottom-[20px] left-[139px] w-[32px] h-[600px] bg-[#d15200] origin-bottom -rotate-[14deg]" />
                   </div>
                 </div>
 
@@ -462,7 +541,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
                   {/* Front strap (Right) - Pushed 1px down to overlap the hole lip and eliminate the gap */}
                   <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_25%,black_60%,black_100%)]">
-                    <div className="absolute -bottom-[20px] right-[138px] w-[32px] h-[600px] bg-[#2922fa] origin-bottom rotate-[12deg] shadow-[-6px_0_15px_rgba(0,0,0,0.4)]" />
+                    <div className="absolute -bottom-[20px] right-[138px] w-[32px] h-[600px] bg-[#ff6a00] origin-bottom rotate-[12deg] shadow-[-6px_0_15px_rgba(0,0,0,0.4)]" />
                   </div>
                 </div>
 
@@ -706,6 +785,9 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             </motion.div>
               </div>
       </section>
+
+      {/* Section 8: FAQ */}
+      <FaqSection />
 
       {/* Intermediate Auth Modal */}
       {showIntermediateModal && (
