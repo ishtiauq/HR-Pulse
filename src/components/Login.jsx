@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from 'framer-motion'
+import { motion, useScroll, useTransform, useSpring, useMotionValueEvent, useMotionValue, useMotionTemplate } from 'framer-motion'
 import Icon from "@/components/ui/Icon.jsx"
 import hrPulseLogo from '../Assets/Logo Banner.svg'
 import heroCharacters from '../Assets/hero-characters.png'
@@ -94,26 +94,113 @@ function MarketingSectionOne() {
 }
 
 function MarketingSectionTwo() {
+  const x = useMotionValue(0.5)
+  const y = useMotionValue(0.5)
+  
+  // Apply spring physics to the mouse coordinates for buttery smooth movement
+  const springConfig = { damping: 40, stiffness: 300, mass: 0.5 }
+  const smoothX = useSpring(x, springConfig)
+  const smoothY = useSpring(y, springConfig)
+  
+  const rotateX = useTransform(smoothY, [0, 1], [10, -10])
+  const rotateY = useTransform(smoothX, [0, 1], [-10, 10])
+  
+  // Dynamic smooth gradient position
+  const glareX = useTransform(smoothX, [0, 1], [0, 100])
+  const glareY = useTransform(smoothY, [0, 1], [0, 100])
+  const glareBackground = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.2) 0%, transparent 70%)`
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const mouseX = e.clientX - rect.left
+    const mouseY = e.clientY - rect.top
+    x.set(mouseX / rect.width)
+    y.set(mouseY / rect.height)
+  }
+
+  const handleMouseLeave = () => {
+    x.set(0.5)
+    y.set(0.5)
+  }
+
   return (
-    <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex flex-col items-center justify-center min-h-[60dvh] snap-start">
+    <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex flex-col items-center justify-center min-h-[60dvh] snap-start" style={{ perspective: '2000px' }}>
       <motion.div
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
         initial={{ opacity: 0, scale: 0.9, filter: "blur(15px)" }}
         whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
         viewport={{ once: false, amount: 0.4 }}
         transition={{ duration: 1, type: "spring", stiffness: 150, damping: 25 }}
-        className="relative w-full rounded-[3rem] overflow-hidden bg-black/40 backdrop-blur-2xl border border-white/10 p-10 sm:p-16 text-center shadow-[0_8px_40px_rgba(0,0,0,0.6)] text-white"
+        style={{
+          rotateX,
+          rotateY,
+          transformStyle: "preserve-3d"
+        }}
+        className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.6)] text-white group hover:shadow-[0_40px_100px_rgba(254,77,1,0.3)] transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1]"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-transparent to-transparent opacity-40 pointer-events-none" />
+        {/* Sleek Orange Blob for ambient glow */}
+        <div className="absolute top-[-5%] right-[5%] w-[30%] h-[40%] bg-primary/40 rounded-full blur-[70px] pointer-events-none" />
+
+        <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/50 opacity-40 pointer-events-none" />
         
-        <div className="relative z-10 flex flex-col items-center">
-          
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight mb-6 text-white">
-            100% Free (For Limited Time).
+        {/* Overlay Effects (Glare & Shimmer) placed at highest Z to cover all 3D elements */}
+        <div className="absolute inset-0 z-50 pointer-events-none rounded-[2.5rem] overflow-hidden" style={{ transform: "translateZ(60px)" }}>
+        </div>
+
+        {/* Top section: Chip & Contactless */}
+        <div className="relative z-10 flex items-center justify-between w-full mb-8 sm:mb-12" style={{ transform: "translateZ(30px)" }}>
+          <div className="flex items-center gap-5">
+            {/* EMV Smart Chip */}
+            <div className="w-14 h-11 rounded-lg bg-gradient-to-br from-[#ffd700] via-[#daa520] to-[#b8860b] shadow-inner border border-[#eed072] flex items-center justify-center overflow-hidden">
+               <div className="w-[85%] h-[80%] border border-black/20 rounded-md grid grid-cols-3 grid-rows-2 gap-[1px]">
+                  <div className="border border-black/10 rounded-[1px]"></div>
+                  <div className="border-x border-black/10"></div>
+                  <div className="border border-black/10 rounded-[1px]"></div>
+                  <div className="border border-black/10 rounded-[1px]"></div>
+                  <div className="border-x border-black/10"></div>
+                  <div className="border border-black/10 rounded-[1px]"></div>
+               </div>
+            </div>
+            {/* Contactless Icon */}
+            <div className="rotate-90 opacity-60">
+              <Icon name="wifi" size={36} />
+            </div>
+          </div>
+          {/* Logo / Brand mark */}
+          <div className="flex items-center gap-1 opacity-90">
+            <div className="w-10 h-10 rounded-full bg-primary mix-blend-screen shadow-[0_0_15px_rgba(254,77,1,0.5)]" />
+            <div className="w-10 h-10 rounded-full bg-white/30 mix-blend-screen -ml-5 backdrop-blur-sm border border-white/20" />
+          </div>
+        </div>
+
+        {/* Middle section: Main Text */}
+        <div className="relative z-10 flex-1 flex flex-col justify-center" style={{ transform: "translateZ(50px)" }}>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-[0.1em] mb-4 text-white drop-shadow-2xl font-mono uppercase">
+            100% FREE VIP
           </h2>
-          
-          <p className="text-lg sm:text-xl text-white/80 font-medium max-w-2xl mx-auto leading-relaxed mb-10">
+          <p className="text-sm sm:text-base text-white/80 font-medium max-w-2xl leading-relaxed text-justify drop-shadow-md">
             No cap—we're giving it away for free for a limited time. Go absolutely crazy, use all the features, and pay literally nothing right now. No subscriptions, no hidden fees. Plus, everything lives securely encrypted in your own Google Drive. Immaculate HR vibes.
           </p>
+        </div>
+
+        {/* Bottom section: Card Details */}
+        <div className="relative z-10 flex items-end justify-between w-full mt-10 sm:mt-12" style={{ transform: "translateZ(40px)" }}>
+          <div className="flex flex-col">
+            <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Cardholder</span>
+            <span className="text-lg sm:text-2xl font-bold tracking-widest text-white uppercase font-mono drop-shadow-md">HR Pulse User</span>
+          </div>
+          
+          <div className="flex gap-6 sm:gap-10">
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Valid Thru</span>
+              <span className="text-base sm:text-xl font-bold tracking-widest text-white font-mono drop-shadow-md">12/99</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Tier</span>
+              <span className="text-base sm:text-xl font-bold tracking-widest text-primary font-mono drop-shadow-md">ENTERPRISE</span>
+            </div>
+          </div>
         </div>
       </motion.div>
     </section>
