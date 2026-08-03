@@ -51,7 +51,7 @@ const MOCK_DASHBOARD_DATA = {
 
 function MarketingSectionOne() {
   return (
-    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex flex-col items-center justify-center min-h-[70dvh] snap-start">
+    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex flex-col items-center justify-center">
       <motion.div
         initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
         whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -124,7 +124,7 @@ function MarketingSectionTwo() {
   }
 
   return (
-    <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex flex-col items-center justify-center min-h-[60dvh] snap-start" style={{ perspective: '2000px' }}>
+    <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex flex-col items-center justify-center" style={{ perspective: '2000px' }}>
       <motion.div
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -135,9 +135,10 @@ function MarketingSectionTwo() {
         style={{
           rotateX,
           rotateY,
-          transformStyle: "preserve-3d"
+          transformStyle: "preserve-3d",
+          borderColor: 'rgba(255,255,255,0.1)'
         }}
-        className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.6)] text-white group hover:shadow-[0_40px_100px_rgba(254,77,1,0.3)] transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1]"
+        className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border !border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.6)] text-white group hover:shadow-[0_40px_100px_rgba(254,77,1,0.3)] transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
       >
         {/* Sleek Orange Blob for ambient glow */}
         <div className="absolute top-[-5%] right-[5%] w-[30%] h-[40%] bg-primary/40 rounded-full blur-[70px] pointer-events-none" />
@@ -148,25 +149,11 @@ function MarketingSectionTwo() {
         <div className="absolute inset-0 z-50 pointer-events-none rounded-[2.5rem] overflow-hidden" style={{ transform: "translateZ(60px)" }}>
         </div>
 
-        {/* Top section: Chip & Contactless */}
+        {/* Top section: 100% FREE & Logo */}
         <div className="relative z-10 flex items-center justify-between w-full mb-8 sm:mb-12" style={{ transform: "translateZ(30px)" }}>
-          <div className="flex items-center gap-5">
-            {/* EMV Smart Chip */}
-            <div className="w-14 h-11 rounded-lg bg-gradient-to-br from-[#ffd700] via-[#daa520] to-[#b8860b] shadow-inner border border-[#eed072] flex items-center justify-center overflow-hidden">
-               <div className="w-[85%] h-[80%] border border-black/20 rounded-md grid grid-cols-3 grid-rows-2 gap-[1px]">
-                  <div className="border border-black/10 rounded-[1px]"></div>
-                  <div className="border-x border-black/10"></div>
-                  <div className="border border-black/10 rounded-[1px]"></div>
-                  <div className="border border-black/10 rounded-[1px]"></div>
-                  <div className="border-x border-black/10"></div>
-                  <div className="border border-black/10 rounded-[1px]"></div>
-               </div>
-            </div>
-            {/* Contactless Icon */}
-            <div className="rotate-90 opacity-60">
-              <Icon name="wifi" size={36} />
-            </div>
-          </div>
+          <span className="text-2xl sm:text-3xl md:text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-100 via-gray-300 to-gray-500 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-mono uppercase">
+            100% FREE
+          </span>
           {/* Logo / Brand mark */}
           <div className="flex items-center gap-1 opacity-90">
             <div className="w-10 h-10 rounded-full bg-primary mix-blend-screen shadow-[0_0_15px_rgba(254,77,1,0.5)]" />
@@ -176,30 +163,28 @@ function MarketingSectionTwo() {
 
         {/* Middle section: Main Text */}
         <div className="relative z-10 flex-1 flex flex-col justify-center" style={{ transform: "translateZ(50px)" }}>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-[0.1em] mb-4 text-white drop-shadow-2xl font-mono uppercase">
-            100% FREE VIP
-          </h2>
-          <p className="text-sm sm:text-base text-white/80 font-medium max-w-2xl leading-relaxed text-justify drop-shadow-md">
-            No cap—we're giving it away for free for a limited time. Go absolutely crazy, use all the features, and pay literally nothing right now. No subscriptions, no hidden fees. Plus, everything lives securely encrypted in your own Google Drive. Immaculate HR vibes.
-          </p>
+          <div className="max-w-2xl w-full flex flex-col">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-[0.1em] font-sans uppercase mb-6 sm:mb-8">
+              <span className="text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] block w-full">
+                MEMBERSHIP
+              </span>
+            </h2>
+            <p className="text-sm sm:text-base text-white/80 font-medium leading-relaxed text-justify drop-shadow-md">
+              No cap—we're giving it away for free for a limited time. Go absolutely crazy, use all the features, and pay literally nothing right now. No subscriptions, no hidden fees. Plus, everything lives securely encrypted in your own Google Drive. Immaculate HR vibes.
+            </p>
+          </div>
         </div>
 
         {/* Bottom section: Card Details */}
         <div className="relative z-10 flex items-end justify-between w-full mt-10 sm:mt-12" style={{ transform: "translateZ(40px)" }}>
-          <div className="flex flex-col">
-            <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Cardholder</span>
-            <span className="text-lg sm:text-2xl font-bold tracking-widest text-white uppercase font-mono drop-shadow-md">HR Pulse User</span>
+          <div className="flex flex-col items-start">
+            <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Status</span>
+            <span className="text-base sm:text-xl font-bold tracking-widest text-white font-mono drop-shadow-md uppercase">LIMITED TIME</span>
           </div>
           
-          <div className="flex gap-6 sm:gap-10">
-            <div className="flex flex-col items-center">
-              <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Valid Thru</span>
-              <span className="text-base sm:text-xl font-bold tracking-widest text-white font-mono drop-shadow-md">12/99</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Tier</span>
-              <span className="text-base sm:text-xl font-bold tracking-widest text-primary font-mono drop-shadow-md">ENTERPRISE</span>
-            </div>
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Tier</span>
+            <span className="text-base sm:text-xl font-bold tracking-widest text-primary font-mono drop-shadow-md uppercase">ENTERPRISE</span>
           </div>
         </div>
       </motion.div>
@@ -282,6 +267,42 @@ function FaqSection() {
         })}
       </div>
     </section>
+  )
+}
+
+function MarketingStackedSections({ containerRef }) {
+  const section2Ref = useRef(null)
+  
+  const { scrollYProgress } = useScroll({
+    container: containerRef,
+    target: section2Ref,
+    offset: ["start end", "start 10%"]
+  })
+
+  // When Section 2 scrolls up, blur and fade Section 1
+  const blurValue = useTransform(scrollYProgress, [0, 1], [0, 30])
+  const opacityValue = useTransform(scrollYProgress, [0, 1], [1, 0])
+  const scaleValue = useTransform(scrollYProgress, [0, 1], [1, 0.9])
+  const filter = useMotionTemplate`blur(${blurValue}px)`
+
+  return (
+    <div className="relative w-full z-0">
+      {/* Sticky Section 1 (Stays underneath and blurs) */}
+      <motion.div 
+        className="sticky top-0 h-dvh w-full flex flex-col items-center justify-center overflow-hidden snap-start"
+        style={{ filter, opacity: opacityValue, scale: scaleValue }}
+      >
+        <MarketingSectionOne />
+      </motion.div>
+
+      {/* Section 2 (Scrolls on top) */}
+      <div 
+        ref={section2Ref} 
+        className="relative z-10 w-full min-h-dvh flex flex-col items-center justify-center snap-start"
+      >
+        <MarketingSectionTwo />
+      </div>
+    </div>
   )
 }
 
@@ -687,9 +708,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           </motion.div>
         </section>
 
-        {/* Section 2 & 3: Marketing Highlights */}
-        <MarketingSectionOne />
-        <MarketingSectionTwo />
+        {/* Section 2 & 3: Marketing Highlights (Stacked with Blur Transition) */}
+        <MarketingStackedSections containerRef={containerRef} />
       </div>
 
       {/* Scroll Indicator — fixed, fades out as you scroll away and back in on return */}
