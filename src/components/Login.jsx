@@ -50,45 +50,152 @@ const MOCK_DASHBOARD_DATA = {
   currentUser: { name: 'Admin', role: 'Admin' }
 }
 
-function MarketingSectionOne() {
-  return (
-    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex flex-col items-center justify-center">
-      <motion.div
-        initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
-        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        viewport={{ once: false, amount: 0.3 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="text-center mb-12 sm:mb-20"
-      >
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-foreground tracking-tight mb-6">
-          Everything your team needs, <br className="hidden sm:block" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-rose-500">
-            in one blazing-fast dashboard.
-          </span>
-        </h2>
-        <p className="text-lg sm:text-xl text-muted-foreground font-medium max-w-3xl mx-auto leading-relaxed">
-          Say goodbye to endless spreadsheets and disjointed tools. HR Pulse unifies your entire workflow.
-        </p>
-      </motion.div>
+function MarketingSectionOne({ containerRef }) {
+  const sectionRef = useRef(null)
+  
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    container: containerRef,
+    offset: ["start start", "end end"]
+  })
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-        {MARKETING_PILLARS.map((pillar, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 30, scale: 0.95 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: false, amount: 0.2 }}
-            transition={{ delay: i * 0.15, type: "spring", stiffness: 180, damping: 20 }}
-            className="relative flex flex-col items-center text-center p-8 sm:p-10 rounded-[2rem] border border-border/50 bg-card/60 backdrop-blur-xl shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group overflow-hidden"
+  const cards = [
+    {
+      title: "People & Pay",
+      subtitle: "Seamless Attendance tracking that flows directly into automated Payroll.",
+      bgColor: "bg-white text-black",
+      iconColor: "bg-black/5 text-black",
+      content: (
+        <div className="flex flex-col gap-3 w-full max-w-sm ml-auto">
+           <div className="bg-black/5 p-4 rounded-xl backdrop-blur-sm border border-black/10 shadow-lg">
+             <div className="text-sm font-semibold">Clocked In: 09:00 AM</div>
+             <div className="text-xs text-black/70">On time</div>
+           </div>
+           <div className="bg-black/5 p-4 rounded-xl backdrop-blur-sm border border-black/10 ml-8">
+             <div className="text-sm font-semibold">Payroll processed</div>
+             <div className="text-xs text-black/70">Payslip generated</div>
+           </div>
+        </div>
+      )
+    },
+    {
+      title: "Finance & Assets",
+      subtitle: "Instant Asset tracking and Expense management for complete visibility.",
+      bgColor: "bg-[#FE4D01] text-white",
+      iconColor: "bg-black/10 text-white",
+      content: (
+        <div className="flex flex-col gap-3 w-full max-w-sm ml-auto">
+           <div className="bg-black/10 p-4 rounded-xl backdrop-blur-sm border border-black/10 shadow-lg">
+             <div className="text-sm font-semibold">Expense Request: Lunch</div>
+             <div className="text-xs text-white/70">$15.00</div>
+           </div>
+           <div className="bg-black/5 p-4 rounded-xl backdrop-blur-sm border border-black/10 ml-8">
+             <div className="text-sm font-semibold">Approved</div>
+             <div className="text-xs text-white/70">Funds transferred</div>
+           </div>
+        </div>
+      )
+    },
+    {
+      title: "Collaboration",
+      subtitle: "Company-wide Announcements, Calendars, and Task management for the whole squad.",
+      bgColor: "bg-white text-black",
+      iconColor: "bg-black/5 text-black",
+      content: (
+        <div className="flex flex-col gap-3 w-full max-w-sm ml-auto">
+           <div className="bg-black/5 p-4 rounded-xl backdrop-blur-sm border border-black/10 shadow-lg">
+             <div className="text-sm font-semibold">New Announcement</div>
+             <div className="text-xs text-black/70">Townhall meeting at 3 PM</div>
+           </div>
+           <div className="bg-black/5 p-4 rounded-xl backdrop-blur-sm border border-black/10 ml-8">
+             <div className="text-sm font-semibold">Task Assigned</div>
+             <div className="text-xs text-black/70">Prepare slides</div>
+           </div>
+        </div>
+      )
+    }
+  ]
+
+  const card1Scale = useTransform(scrollYProgress, [0, 0.33, 0.66], [1, 0.96, 0.92])
+  
+  const card2Y = useTransform(scrollYProgress, [0, 0.33], [2000, 60])
+  const card2Scale = useTransform(scrollYProgress, [0.33, 0.66], [1, 0.96])
+  
+  const card3Y = useTransform(scrollYProgress, [0.33, 0.66], [2000, 120])
+
+  return (
+    <section ref={sectionRef} className="relative w-full h-[300vh] snap-start">
+      <div className="sticky top-0 h-dvh w-full flex flex-col items-center justify-center overflow-hidden px-4 sm:px-8">
+        <div className="w-full max-w-7xl text-left mb-6 sm:mb-10 z-20">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground tracking-tight mb-4">
+            Why Choose <span className="text-[#FE4D01]">Kormiis?</span>
+          </h2>
+        </div>
+
+        <div className="relative w-full max-w-7xl h-[60vh] min-h-[400px] flex justify-center perspective-[2000px]">
+          {/* Card 1 */}
+          <motion.div 
+            style={{ y: "0px", scale: card1Scale }}
+            className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-2xl flex flex-col origin-top ${cards[0].bgColor}`}
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            <div className="w-16 h-16 rounded-3xl bg-primary/10 text-primary flex items-center justify-center mb-6 shadow-inner border border-primary/20 group-hover:scale-110 transition-transform duration-500">
-              <Icon name={pillar.icon} size={32} />
+            <div className="flex items-center gap-5 mb-6 sm:mb-10">
+              <div className={`w-14 h-14 rounded-2xl flex shrink-0 items-center justify-center ${cards[0].iconColor}`}>
+                <Icon name="groups" size={28} />
+              </div>
+              <h3 className="text-3xl sm:text-4xl font-black">{cards[0].title}</h3>
             </div>
-            <h3 className="text-2xl font-extrabold text-foreground mb-4 tracking-tight">{pillar.title}</h3>
-            <p className="text-muted-foreground font-medium text-base leading-relaxed">{pillar.desc}</p>
+            <div className="flex flex-col sm:flex-row gap-8 flex-1 w-full items-center">
+              <div className="flex-1">
+                <p className="text-lg sm:text-xl opacity-90 leading-relaxed">{cards[0].subtitle}</p>
+              </div>
+              <div className="flex-1 w-full flex items-center justify-end">
+                {cards[0].content}
+              </div>
+            </div>
           </motion.div>
-        ))}
+
+          {/* Card 2 */}
+          <motion.div 
+            style={{ y: card2Y, scale: card2Scale }}
+            className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-2xl flex flex-col origin-top ${cards[1].bgColor}`}
+          >
+            <div className="flex items-center gap-5 mb-6 sm:mb-10">
+              <div className={`w-14 h-14 rounded-2xl flex shrink-0 items-center justify-center ${cards[1].iconColor}`}>
+                <Icon name="account_balance_wallet" size={28} />
+              </div>
+              <h3 className="text-3xl sm:text-4xl font-black">{cards[1].title}</h3>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-8 flex-1 w-full items-center">
+              <div className="flex-1">
+                <p className="text-lg sm:text-xl opacity-90 leading-relaxed">{cards[1].subtitle}</p>
+              </div>
+              <div className="flex-1 w-full flex items-center justify-end">
+                {cards[1].content}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Card 3 */}
+          <motion.div 
+            style={{ y: card3Y }}
+            className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-2xl flex flex-col origin-top ${cards[2].bgColor}`}
+          >
+            <div className="flex items-center gap-5 mb-6 sm:mb-10">
+              <div className={`w-14 h-14 rounded-2xl flex shrink-0 items-center justify-center ${cards[2].iconColor}`}>
+                <Icon name="forum" size={28} />
+              </div>
+              <h3 className="text-3xl sm:text-4xl font-black">{cards[2].title}</h3>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-8 flex-1 w-full items-center">
+              <div className="flex-1">
+                <p className="text-lg sm:text-xl opacity-90 leading-relaxed">{cards[2].subtitle}</p>
+              </div>
+              <div className="flex-1 w-full flex items-center justify-end">
+                {cards[2].content}
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </section>
   )
@@ -280,23 +387,18 @@ function MarketingStackedSections({ containerRef }) {
     offset: ["start end", "start 10%"]
   })
 
-  // When Section 2 scrolls up, blur and fade Section 1
+  // When Section 3 (MarketingSectionTwo) scrolls up, blur and fade Section 2 (MarketingSectionOne)
   const blurValue = useTransform(scrollYProgress, [0, 1], [0, 30])
   const opacityValue = useTransform(scrollYProgress, [0, 1], [1, 0])
-  const scaleValue = useTransform(scrollYProgress, [0, 1], [1, 0.9])
   const filter = useMotionTemplate`blur(${blurValue}px)`
 
   return (
     <div className="relative w-full z-0">
-      {/* Sticky Section 1 (Stays underneath and blurs) */}
-      <motion.div 
-        className="sticky top-0 h-dvh w-full flex flex-col items-center justify-center overflow-hidden snap-start"
-        style={{ filter, opacity: opacityValue, scale: scaleValue }}
-      >
-        <MarketingSectionOne />
+      <motion.div style={{ filter, opacity: opacityValue }}>
+        <MarketingSectionOne containerRef={containerRef} />
       </motion.div>
 
-      {/* Section 2 (Scrolls on top) */}
+      {/* Section 3 (Scrolls on top) */}
       <div 
         ref={section2Ref} 
         className="relative z-10 w-full min-h-dvh flex flex-col items-center justify-center snap-start"
@@ -393,14 +495,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setThemeMode('light') // Force light mode on initial load
   }, [])
 
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    // Transition to dark mode when entering MarketingSectionTwo (Section 3)
-    if (latest >= 0.4) {
-      setThemeMode(prev => prev !== 'dark' ? 'dark' : prev)
-    } else {
-      setThemeMode(prev => prev !== 'light' ? 'light' : prev)
-    }
-  })
 
   // Topbar visible only at the very top on mobile; fixed on desktop/tablet.
   // Hides the instant you start scrolling, shows again when back at the top.
@@ -711,16 +805,17 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       {/* Scroll deck: one full-viewport section per step */}
       <div className="relative z-10">
         {/* Section 1: Hero Heading */}
-        <section className="relative h-dvh w-full flex flex-col items-center justify-center px-6 sm:px-10 lg:px-16 snap-start">
+        <section className="relative h-dvh w-full flex flex-col items-center justify-center lg:justify-start lg:pt-[100px] lg:pb-6 px-6 sm:px-10 lg:px-16 snap-start overflow-hidden">
           <motion.div
             style={{ opacity: headingOpacity, y: headingY }}
-            className="flex flex-col items-center justify-center w-full mt-10"
+            className="flex flex-col items-center w-full h-full lg:h-[calc(100vh-124px)] lg:gap-8 mt-10 lg:mt-0"
           >
+            {/* Headline */}
             <motion.h1 
               initial={{ filter: "blur(20px)", opacity: 0, scale: 1.1 }}
               animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
               transition={{ duration: 1.2, ease: "easeOut" }}
-              className="login-hero-title uppercase text-5xl sm:text-6xl lg:text-7xl xl:text-[96px] w-full font-black tracking-tight leading-[1.1] text-center"
+              className="login-hero-title uppercase text-5xl sm:text-6xl lg:text-[52px] xl:text-[96px] w-full font-black tracking-tight leading-[1.1] text-center shrink-0"
             >
               When{' '}
               <span className="text-primary relative inline-block align-baseline">
@@ -735,13 +830,29 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               Business<br className="sm:hidden" /> Follows.
             </motion.h1>
 
+            {/* Image (Flexible height to keep everything in viewport) */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
-              className="mt-6 sm:mt-10 w-full max-w-5xl flex justify-center mix-blend-multiply dark:mix-blend-screen"
+              className="mt-6 sm:mt-10 lg:mt-0 w-full max-w-7xl flex-1 min-h-0 flex items-center justify-center mix-blend-multiply dark:mix-blend-screen"
             >
-              <img src={heroCharacters} alt="Team" className="w-full h-auto object-contain max-h-[40vh] sm:max-h-[50vh]" />
+              <img src={heroCharacters} alt="Team" className="w-full h-full object-contain max-h-[40vh] sm:max-h-[50vh] lg:max-h-full" />
+            </motion.div>
+            
+            {/* Scroll Indicator (Desktop only - static flow at bottom) */}
+            <motion.div
+              style={{ opacity: scrollIndicatorOpacity }}
+              className="hidden lg:flex flex-col items-center gap-2 shrink-0 z-20 pointer-events-none"
+            >
+              <span className="text-xs font-bold uppercase tracking-widest text-[#FE4D01]">Scroll</span>
+              <motion.div 
+                animate={{ y: [0, 8, 0] }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                className="w-10 h-10 rounded-full bg-[#FE4D01] flex items-center justify-center text-white shadow-[0_0_15px_rgba(254,77,1,0.4)]"
+              >
+                <Icon name="arrow_downward" size={24} />
+              </motion.div>
             </motion.div>
           </motion.div>
         </section>
@@ -750,19 +861,19 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         <MarketingStackedSections containerRef={containerRef} />
       </div>
 
-      {/* Scroll Indicator — fixed, fades out as you scroll away and back in on return */}
+      {/* Scroll Indicator (Mobile/Tablet only - fixed bottom) */}
       <motion.div
         style={{ opacity: scrollIndicatorOpacity }}
-        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2"
+        className="lg:hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2"
       >
-        <span className="text-xs font-bold uppercase tracking-[0.25em] text-primary">Scroll</span>
-        <div className="w-5 h-8 rounded-full bg-primary/90 flex justify-center p-1 shadow-lg shadow-primary/40">
-          <motion.div 
-            animate={{ y: [0, 12, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-            className="w-1.5 h-1.5 rounded-full bg-white"
-          />
-        </div>
+        <span className="text-xs font-bold uppercase tracking-widest text-[#FE4D01]">Scroll</span>
+        <motion.div 
+          animate={{ y: [0, 8, 0] }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+          className="w-10 h-10 rounded-full bg-[#FE4D01] flex items-center justify-center text-white shadow-[0_0_15px_rgba(254,77,1,0.4)]"
+        >
+          <Icon name="arrow_downward" size={24} />
+        </motion.div>
       </motion.div>
 
       {/* Section 7: Auth Modal */}
