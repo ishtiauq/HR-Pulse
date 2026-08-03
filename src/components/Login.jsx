@@ -5,6 +5,8 @@ import hrPulseLogo from '../Assets/Logo Banner.svg'
 import heroCharacters from '../Assets/hero-characters.png'
 import { fetchUserProfile } from '../services/googleDrive.js'
 import { verifyPassword, hashPassword } from '../services/crypto.js'
+import Dashboard from './Dashboard.jsx'
+import { allNavItems } from '../utils/helpers.js'
 
 const ADMIN_ACCOUNTS_KEY = 'hr_pulse_admin_accounts'
 
@@ -25,6 +27,27 @@ const MARKETING_PILLARS = [
     desc: 'Company-wide Announcements, Calendars, and Task management for the whole squad.'
   }
 ]
+
+const MOCK_DASHBOARD_DATA = {
+  employees: [
+    { id: '1', name: 'John Doe', role: 'Developer', status: 'Active' },
+    { id: '2', name: 'Jane Smith', role: 'Designer', status: 'Active' },
+    { id: '3', name: 'Mike Ross', role: 'Manager', status: 'Active' }
+  ],
+  attendance: {},
+  payroll: {},
+  announcements: [
+    { id: 'a1', title: 'Welcome to HR Pulse', authorId: '1', date: new Date().toISOString(), priority: 'Important' }
+  ],
+  events: [],
+  tasks: [{ id: 't1', title: 'Complete Onboarding', status: 'Pending' }],
+  documents: [],
+  assets: [{ id: 'as1', name: 'MacBook Pro', status: 'Assigned' }],
+  driveConnected: true,
+  hasPermission: () => true,
+  simulatedRole: 'Admin',
+  currentUser: { name: 'Admin', role: 'Admin' }
+}
 
 function MarketingSectionOne() {
   return (
@@ -78,26 +101,19 @@ function MarketingSectionTwo() {
         whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
         viewport={{ once: false, amount: 0.4 }}
         transition={{ duration: 1, type: "spring", stiffness: 150, damping: 25 }}
-        className="relative w-full rounded-[3rem] overflow-hidden bg-foreground text-background p-10 sm:p-16 text-center shadow-2xl"
+        className="relative w-full rounded-[3rem] overflow-hidden bg-black/40 backdrop-blur-2xl border border-white/10 p-10 sm:p-16 text-center shadow-[0_8px_40px_rgba(0,0,0,0.6)] text-white"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-transparent to-transparent opacity-40 pointer-events-none" />
         
         <div className="relative z-10 flex flex-col items-center">
-          <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-[0_0_40px_rgba(254,77,1,0.6)] mb-8">
-            <Icon name="cloud_done" size={40} className="text-primary-foreground" />
-          </div>
           
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight mb-6 text-background">
-            100% Free (For Now ⏳). <br className="sm:hidden"/> Your Data, Your Drive.
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight mb-6 text-white">
+            100% Free (For Limited Time).
           </h2>
           
-          <p className="text-lg sm:text-xl text-background/80 font-medium max-w-2xl mx-auto leading-relaxed mb-10">
+          <p className="text-lg sm:text-xl text-white/80 font-medium max-w-2xl mx-auto leading-relaxed mb-10">
             No cap—we're giving it away for free for a limited time. Go absolutely crazy, use all the features, and pay literally nothing right now. No subscriptions, no hidden fees. Plus, everything lives securely encrypted in your own Google Drive. Immaculate HR vibes.
           </p>
-
-          <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-sm bg-background/10 px-6 py-3 rounded-full backdrop-blur-md border border-background/20">
-            <Icon name="verified_user" size={18} /> Enterprise-Grade Privacy
-          </div>
         </div>
       </motion.div>
     </section>
@@ -264,7 +280,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   }, [])
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (latest >= 0.1) {
+    // Transition to dark mode when entering MarketingSectionTwo (Section 3)
+    if (latest >= 0.4) {
       setThemeMode(prev => prev !== 'dark' ? 'dark' : prev)
     } else {
       setThemeMode(prev => prev !== 'light' ? 'light' : prev)
@@ -509,11 +526,11 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         />
       </div>
 
-      {/* Deep Void Tech Grid (Fades in on Dark Mode) */}
+      {/* Dark Mode Subtle Grid Background */}
       <div 
-        className={`fixed inset-0 z-0 pointer-events-none transition-all duration-[1500ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${themeMode === 'dark' ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
+        className={`fixed inset-0 pointer-events-none transition-opacity duration-700 ease-in-out z-0 ${themeMode === 'dark' ? 'opacity-100' : 'opacity-0'}`}
         style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px)',
           backgroundSize: '40px 40px'
         }}
       />
