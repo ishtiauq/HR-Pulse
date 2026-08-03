@@ -414,6 +414,19 @@ input:focus, select:focus, textarea:focus, .focus-within\:ring-2:focus-within {
 }
 
 /* ==============================================================
+   LOGIN CINEMATIC PAGE — MOBILE SINGLE-LINE HEADLINE
+   On phones the full headline ("When EMPLOYEES Win, Business
+   Follows.") stays on ONE line no matter the screen width, by
+   scaling the font-size fluidly with the viewport width.
+   ============================================================== */
+@media (max-width: 639px) {
+  .login-hero-title {
+    font-size: clamp(1.5rem, 9.5vw, 3.25rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+}/* ==============================================================
    LOGIN CINEMATIC PAGE — SHORT-VIEWPORT ADAPTATION
    Keeps every parallax stage (hero heading, subheading, login card)
    fully inside the viewport on small phones / landscape phones.

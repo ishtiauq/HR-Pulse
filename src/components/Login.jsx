@@ -157,6 +157,42 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const [showIntermediateModal, setShowIntermediateModal] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
+  // Auto-typing hero word: Employee -> Team -> Squad -> Crew -> People -> loop
+  const ROTATING_WORDS = ['Employees', 'Team', 'Squad', 'Crew', 'People']
+  const [typed, setTyped] = useState('')
+  const [wordIndex, setWordIndex] = useState(0)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isWaiting, setIsWaiting] = useState(false)
+  useEffect(() => {
+    const word = ROTATING_WORDS[wordIndex]
+    let timeout
+
+    if (isWaiting) {
+      timeout = setTimeout(() => {
+        setIsWaiting(false)
+        setIsDeleting(true)
+      }, 1600)
+    } else if (!isDeleting) {
+      timeout = setTimeout(() => {
+        const next = word.slice(0, typed.length + 1)
+        setTyped(next)
+        if (next === word) setIsWaiting(true)
+      }, 110)
+    } else {
+      timeout = setTimeout(() => {
+        if (typed.length <= 1) {
+          setIsDeleting(false)
+          setTyped('')
+          setWordIndex(i => (i + 1) % ROTATING_WORDS.length)
+        } else {
+          setTyped(word.slice(0, typed.length - 1))
+        }
+      }, 45)
+    }
+
+    return () => clearTimeout(timeout)
+  }, [typed, isDeleting, isWaiting, wordIndex])
+
   // Keep the topbar fixed on desktop/tablet; only mobile uses hide/show-on-scroll
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768)
@@ -475,15 +511,25 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       {/* Scroll deck: one full-viewport section per step */}
       <div className="relative z-10">
         {/* Section 1: Hero Heading */}
-        <section className="relative h-dvh w-full flex flex-col items-center justify-center px-6 snap-start">
+        <section className="relative h-dvh w-full flex flex-col items-center justify-center px-6 sm:px-10 lg:px-16 snap-start">
           <motion.h1 
             initial={{ filter: "blur(20px)", opacity: 0, scale: 1.1 }}
             animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
             style={{ opacity: headingOpacity, y: headingY }}
-            className="login-hero-title uppercase text-5xl sm:text-6xl xl:text-[80px] w-full font-black tracking-tight leading-[1.1] text-center"
+            className="login-hero-title uppercase text-5xl sm:text-6xl lg:text-7xl xl:text-[96px] w-full font-black tracking-tight leading-[1.1] text-center"
           >
-            When People Win,<br className="hidden sm:block" /> Business Follows.
+            When{' '}
+            <span className="text-primary relative inline-block align-baseline">
+              {typed}
+              <motion.span
+                animate={{ opacity: [1, 0, 1] }}
+                transition={{ repeat: Infinity, duration: 1, ease: "easeInOut" }}
+                className="inline-block w-[3px] h-[0.85em] bg-primary align-baseline ml-0.5"
+              />
+            </span>
+            <br className="sm:hidden" /> Win,<br />
+            Business<br className="sm:hidden" /> Follows.
           </motion.h1>
 
           {/* Scroll Indicator — lives inside the first section so it scrolls away with it */}
