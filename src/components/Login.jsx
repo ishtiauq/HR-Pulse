@@ -8,68 +8,99 @@ import { verifyPassword, hashPassword } from '../services/crypto.js'
 
 const ADMIN_ACCOUNTS_KEY = 'hr_pulse_admin_accounts'
 
-// Subheading split into one dialog modal per line (Stage 2 stacked-deck reveal)
-const SUB_LINES = [
-  'Ditch the endless spreadsheets.',
-  'Supercharge your HR with seamless attendance,',
-  'automated payroll, and instant asset tracking',
-  'in one incredibly slick, lightning-fast dashboard.',
-  'Get started 100% free today.',
+const MARKETING_PILLARS = [
+  {
+    icon: 'groups',
+    title: 'People & Pay',
+    desc: 'Seamless Attendance tracking that flows directly into automated Payroll.'
+  },
+  {
+    icon: 'account_balance_wallet',
+    title: 'Finance & Assets',
+    desc: 'Instant Asset tracking and Expense management for complete visibility.'
+  },
+  {
+    icon: 'forum',
+    title: 'Collaboration',
+    desc: 'Company-wide Announcements, Calendars, and Task management for the whole squad.'
+  }
 ]
 
-// Stage 2: each subheading line gets its OWN full-viewport section. When that
-// section scrolls into view, the popup modal reveals sleekly and dynamically:
-// the card blurs in with a spring, the accent bar draws in, a light sweeps
-// across the glass, and the text words cascade up one by one.
-function SubDialog({ line, index }) {
-  const words = line.split(' ')
+function MarketingSectionOne() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 44, scale: 0.9, filter: "blur(14px)" }}
-      whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-      viewport={{ once: false, amount: 0.4 }}
-      transition={{ type: "spring", stiffness: 220, damping: 20, mass: 0.9 }}
-      className="relative w-full max-w-lg flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-background/95 text-popover-foreground shadow-2xl backdrop-blur-xl"
-    >
-      {/* Top gradient accent bar — draws in from the left */}
+    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex flex-col items-center justify-center min-h-[70dvh] snap-start">
       <motion.div
-        initial={{ scaleX: 0 }}
-        whileInView={{ scaleX: 1 }}
-        viewport={{ once: false, amount: 0.4 }}
-        transition={{ delay: 0.15, duration: 0.6, ease: "easeOut" }}
-        className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-rose-500 to-primary z-10 origin-left"
-      />
-
-      {/* Light sweep that glides across the glass once */}
-      <motion.div
-        initial={{ x: "-130%" }}
-        whileInView={{ x: "230%" }}
-        viewport={{ once: false, amount: 0.4 }}
-        transition={{ delay: 0.3, duration: 0.9, ease: "easeInOut" }}
-        className="pointer-events-none absolute inset-y-0 left-0 w-1/3 z-10 -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-      />
-
-      <div
-        role="dialog"
-        aria-label={`Feature ${index + 1}`}
-        className="login-sub-dialog outline-none focus:outline-none flex flex-col w-full h-full p-6 sm:p-8"
+        initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
+        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        viewport={{ once: false, amount: 0.3 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="text-center mb-12 sm:mb-20"
       >
-        <p className="login-sub-dialog-text font-bold text-foreground tracking-tight">
-          {words.map((word, i) => (
-            <motion.span
-              key={i}
-              initial={{ opacity: 0, y: 16, filter: "blur(6px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              viewport={{ once: false, amount: 0.4 }}
-              transition={{ delay: 0.3 + i * 0.055, type: "spring", stiffness: 300, damping: 24 }}
-              className="inline-block will-change-transform"
-            >
-              {word}&nbsp;
-            </motion.span>
-          ))}
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-foreground tracking-tight mb-6">
+          Everything your team needs, <br className="hidden sm:block" />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-rose-500">
+            in one blazing-fast dashboard.
+          </span>
+        </h2>
+        <p className="text-lg sm:text-xl text-muted-foreground font-medium max-w-3xl mx-auto leading-relaxed">
+          Say goodbye to endless spreadsheets and disjointed tools. HR Pulse unifies your entire workflow.
         </p>
+      </motion.div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+        {MARKETING_PILLARS.map((pillar, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: false, amount: 0.2 }}
+            transition={{ delay: i * 0.15, type: "spring", stiffness: 180, damping: 20 }}
+            className="relative flex flex-col items-center text-center p-8 sm:p-10 rounded-[2rem] border border-border/50 bg-card/60 backdrop-blur-xl shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className="w-16 h-16 rounded-3xl bg-primary/10 text-primary flex items-center justify-center mb-6 shadow-inner border border-primary/20 group-hover:scale-110 transition-transform duration-500">
+              <Icon name={pillar.icon} size={32} />
+            </div>
+            <h3 className="text-2xl font-extrabold text-foreground mb-4 tracking-tight">{pillar.title}</h3>
+            <p className="text-muted-foreground font-medium text-base leading-relaxed">{pillar.desc}</p>
+          </motion.div>
+        ))}
       </div>
-    </motion.div>
+    </section>
+  )
+}
+
+function MarketingSectionTwo() {
+  return (
+    <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex flex-col items-center justify-center min-h-[60dvh] snap-start">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, filter: "blur(15px)" }}
+        whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+        viewport={{ once: false, amount: 0.4 }}
+        transition={{ duration: 1, type: "spring", stiffness: 150, damping: 25 }}
+        className="relative w-full rounded-[3rem] overflow-hidden bg-foreground text-background p-10 sm:p-16 text-center shadow-2xl"
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent opacity-30 pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-[0_0_40px_rgba(254,77,1,0.6)] mb-8">
+            <Icon name="cloud_done" size={40} className="text-primary-foreground" />
+          </div>
+          
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight mb-6 text-background">
+            100% Free (For Now ⏳). <br className="sm:hidden"/> Your Data, Your Drive.
+          </h2>
+          
+          <p className="text-lg sm:text-xl text-background/80 font-medium max-w-2xl mx-auto leading-relaxed mb-10">
+            No cap—we're giving it away for free for a limited time. Go absolutely crazy, use all the features, and pay literally nothing right now. No subscriptions, no hidden fees. Plus, everything lives securely encrypted in your own Google Drive. Immaculate HR vibes.
+          </p>
+
+          <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-sm bg-background/10 px-6 py-3 rounded-full backdrop-blur-md border border-background/20">
+            <Icon name="verified_user" size={18} /> Enterprise-Grade Privacy
+          </div>
+        </div>
+      </motion.div>
+    </section>
   )
 }
 
@@ -552,12 +583,9 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           </motion.div>
         </section>
 
-        {/* Sections 2-6: one subheading popup per section */}
-        {SUB_LINES.map((line, i) => (
-          <section key={i} className="h-dvh w-full flex flex-col items-center justify-center px-4 sm:px-6 snap-start">
-            <SubDialog line={line} index={i} />
-          </section>
-        ))}
+        {/* Section 2 & 3: Marketing Highlights */}
+        <MarketingSectionOne />
+        <MarketingSectionTwo />
       </div>
 
       {/* Scroll Indicator — fixed, fades out as you scroll away and back in on return */}
