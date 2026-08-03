@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion'
+import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from 'framer-motion'
 import Icon from "@/components/ui/Icon.jsx"
 import hrPulseLogo from '../Assets/Logo Banner.svg'
 import { fetchUserProfile } from '../services/googleDrive.js'
@@ -212,6 +212,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   // Heading Parallax (Section 1 fades out as the first card section arrives)
   const headingOpacity = useTransform(scrollYProgress, [0, 0.05, 0.11], [1, 1, 0])
   const headingY = useTransform(scrollYProgress, [0, 0.05, 0.11], [0, 0, -80])
+
+  // Scroll Indicator — fades out as you leave section 1, fades back in on return
+  const scrollIndicatorRaw = useTransform(scrollYProgress, [0, 0.03, 0.12], [1, 1, 0])
+  const scrollIndicatorOpacity = useSpring(scrollIndicatorRaw, { stiffness: 120, damping: 22, mass: 0.6 })
   
   // Ambient Orb Parallax (Cinematic Warp during transition)
   const orb1Scale = useTransform(scrollYProgress, [0, 0.15, 0.55], [1, 1, 1.8])
@@ -235,14 +239,15 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     }
   })
 
-  // Topbar visible only in the first section on mobile; fixed on desktop/tablet
+  // Topbar visible only at the very top on mobile; fixed on desktop/tablet.
+  // Hides the instant you start scrolling, shows again when back at the top.
   const [showTopbar, setShowTopbar] = useState(true)
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     if (!isMobile) {
       setShowTopbar(true)
       return
     }
-    setShowTopbar(latest < 0.1)
+    setShowTopbar(latest < 0.002)
   })
 
   // --- Employee state ---
@@ -532,17 +537,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             Business<br className="sm:hidden" /> Follows.
           </motion.h1>
 
-          {/* Scroll Indicator — lives inside the first section so it scrolls away with it */}
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-[0.25em] text-primary">Scroll</span>
-            <div className="w-5 h-8 rounded-full bg-primary/90 flex justify-center p-1 shadow-lg shadow-primary/40">
-              <motion.div 
-                animate={{ y: [0, 12, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                className="w-1.5 h-1.5 rounded-full bg-white"
-              />
-            </div>
-          </div>
         </section>
 
         {/* Sections 2-6: one subheading popup per section */}
@@ -552,6 +546,21 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           </section>
         ))}
       </div>
+
+      {/* Scroll Indicator — fixed, fades out as you scroll away and back in on return */}
+      <motion.div
+        style={{ opacity: scrollIndicatorOpacity }}
+        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2"
+      >
+        <span className="text-xs font-bold uppercase tracking-[0.25em] text-primary">Scroll</span>
+        <div className="w-5 h-8 rounded-full bg-primary/90 flex justify-center p-1 shadow-lg shadow-primary/40">
+          <motion.div 
+            animate={{ y: [0, 12, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+            className="w-1.5 h-1.5 rounded-full bg-white"
+          />
+        </div>
+      </motion.div>
 
       {/* Section 7: Auth Modal */}
       <section className="relative h-dvh w-full flex flex-col items-center justify-center px-4 pb-8 sm:pb-0 snap-start overflow-hidden">
