@@ -111,7 +111,7 @@ function FaqSection() {
         Frequently asked questions
       </motion.h2>
 
-      <div className="w-full max-w-4xl grid grid-cols-1 gap-3 sm:gap-4 overflow-y-auto max-h-[calc(100dvh-9rem)] pr-1">
+      <div className="w-full max-w-4xl grid grid-cols-1 gap-3 sm:gap-4">
         {FAQ_ITEMS.map((item, i) => {
           const isOpen = open === i
           return (
@@ -155,6 +155,14 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const [mode, setMode] = useState('signin') // 'signin' | 'signup'
   const [isLoading, setIsLoading] = useState(false)
   const [showIntermediateModal, setShowIntermediateModal] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  // Keep the topbar fixed on desktop/tablet; only mobile uses hide/show-on-scroll
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   // Cinematic Scroll Sequence — one full-viewport section per step:
   //   Section 1: Hero heading
@@ -169,9 +177,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const headingOpacity = useTransform(scrollYProgress, [0, 0.05, 0.11], [1, 1, 0])
   const headingY = useTransform(scrollYProgress, [0, 0.05, 0.11], [0, 0, -80])
   
-  // Scroll Indicator
-  const scrollIndicatorOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0])
-
   // Ambient Orb Parallax (Cinematic Warp during transition)
   const orb1Scale = useTransform(scrollYProgress, [0, 0.15, 0.55], [1, 1, 1.8])
   const orb1X = useTransform(scrollYProgress, [0, 0.15, 0.55], ["0%", "0%", "40%"])
@@ -192,6 +197,16 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     } else {
       setThemeMode(prev => prev !== 'light' ? 'light' : prev)
     }
+  })
+
+  // Topbar visible only in the first section on mobile; fixed on desktop/tablet
+  const [showTopbar, setShowTopbar] = useState(true)
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (!isMobile) {
+      setShowTopbar(true)
+      return
+    }
+    setShowTopbar(latest < 0.1)
   })
 
   // --- Employee state ---
@@ -431,7 +446,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       />
 
       {/* Transparent Navbar */}
-      <header className="fixed top-0 w-full z-50 pointer-events-none bg-transparent">
+      <header
+        className="fixed top-0 w-full z-50 pointer-events-none bg-transparent"
+        style={{ transform: isMobile && !showTopbar ? 'translateY(-100%)' : 'translateY(0%)', transition: 'transform 300ms ease' }}
+      >
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between pointer-events-auto relative z-10">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -457,7 +475,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       {/* Scroll deck: one full-viewport section per step */}
       <div className="relative z-10">
         {/* Section 1: Hero Heading */}
-        <section className="h-dvh w-full flex flex-col items-center justify-center px-6 snap-start">
+        <section className="relative h-dvh w-full flex flex-col items-center justify-center px-6 snap-start">
           <motion.h1 
             initial={{ filter: "blur(20px)", opacity: 0, scale: 1.1 }}
             animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
@@ -467,6 +485,18 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           >
             When People Win,<br className="hidden sm:block" /> Business Follows.
           </motion.h1>
+
+          {/* Scroll Indicator — lives inside the first section so it scrolls away with it */}
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-primary">Scroll</span>
+            <div className="w-5 h-8 rounded-full bg-primary/90 flex justify-center p-1 shadow-lg shadow-primary/40">
+              <motion.div 
+                animate={{ y: [0, 12, 0] }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                className="w-1.5 h-1.5 rounded-full bg-white"
+              />
+            </div>
+          </div>
         </section>
 
         {/* Sections 2-6: one subheading popup per section */}
@@ -477,43 +507,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         ))}
       </div>
 
-      {/* Scroll Indicator */}
-      <motion.div 
-        style={{ opacity: scrollIndicatorOpacity }}
-        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2"
-      >
-        <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Scroll</span>
-        <div className="w-5 h-8 rounded-full border-2 border-muted-foreground/50 flex justify-center p-1">
-          <motion.div 
-            animate={{ y: [0, 12, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-            className="w-1.5 h-1.5 rounded-full bg-muted-foreground"
-          />
-        </div>
-      </motion.div>
-
       {/* Section 7: Auth Modal */}
       <section className="relative h-dvh w-full flex flex-col items-center justify-center px-4 pb-8 sm:pb-0 snap-start overflow-hidden">
-              {/* Glowing aura behind the auth card — fades in/out as you scroll to/away from it */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.75 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: false, amount: 0.4 }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center"
-              >
-                <motion.div
-                  animate={{ scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }}
-                  transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-                  className="absolute w-[26rem] h-[26rem] rounded-full bg-primary/30 blur-[120px]"
-                />
-                <motion.div
-                  animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0.9, 0.6] }}
-                  transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-                  className="absolute w-[18rem] h-[18rem] rounded-full bg-secondary/30 blur-[100px] -translate-y-10 translate-x-14"
-                />
-              </motion.div>
-
               {/* Invisible box — holds card + ribbon as one unit and scales to fit every viewport */}
               <div className="login-modal-box relative z-10">
               <motion.div
@@ -525,7 +520,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               >
                 {/* 1. Lanyard Back (Behind Card) */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0">
-                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_25%,black_60%,black_100%)]">
+                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[150px] sm:h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_30%,black_60%,black_100%)] sm:[mask-image:linear-gradient(to_bottom,transparent_0%,transparent_30%,black_70%,black_100%)]">
                     {/* Back strap (Left) */}
                     <div className="absolute -bottom-[20px] left-[139px] w-[32px] h-[600px] bg-[#d15200] origin-bottom -rotate-[14deg]" />
                   </div>
@@ -540,7 +535,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   <div className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[56px] h-[12px] rounded-full border border-border/50 shadow-[inset_0_4px_6px_rgba(0,0,0,0.4)] dark:shadow-[inset_0_4px_8px_rgba(0,0,0,0.9)] pointer-events-none" />
 
                   {/* Front strap (Right) - Pushed 1px down to overlap the hole lip and eliminate the gap */}
-                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_25%,black_60%,black_100%)]">
+                  <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[150px] sm:h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_30%,black_60%,black_100%)] sm:[mask-image:linear-gradient(to_bottom,transparent_0%,transparent_30%,black_70%,black_100%)]">
                     <div className="absolute -bottom-[20px] right-[138px] w-[32px] h-[600px] bg-[#ff6a00] origin-bottom rotate-[12deg] shadow-[-6px_0_15px_rgba(0,0,0,0.4)]" />
                   </div>
                 </div>
@@ -633,7 +628,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 ) : (
                   <>
                     {/* Role Selector Tabs */}
-                    <div className="flex p-1.5 bg-muted/60 rounded-full mb-6 mt-6 border border-border">
+                    <div className="flex p-1.5 bg-muted/60 rounded-full mb-4 mt-4 border border-border">
                       <button
                         onClick={() => setRole('admin')}
                         className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 ${
@@ -656,7 +651,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       </button>
                     </div>
 
-                    <div className="min-h-[220px]">
+                    <div className="min-h-[200px]">
                       {error && (
                         <div className="p-4 mb-6 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
                           <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
@@ -708,7 +703,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                           </form>
 
                           {/* Divider */}
-                          <div className="flex items-center my-6">
+                          <div className="flex items-center my-4">
                             <div className="flex-grow border-t border-border" />
                             <span className="px-3 text-xs text-muted-foreground uppercase tracking-widest">OR</span>
                             <div className="flex-grow border-t border-border" />
@@ -773,7 +768,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 )}
 
                 {/* Footer toggle */}
-                <p className="text-center text-sm text-muted-foreground mt-8">
+                <p className="text-center text-sm text-muted-foreground mt-6">
                   {mode === 'signup' ? (
                     <>Already have an account? <button onClick={() => { setMode('signin'); setError('') }} className="text-primary font-semibold hover:underline cursor-pointer">Sign in</button></>
                   ) : (
