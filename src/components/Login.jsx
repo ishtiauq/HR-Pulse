@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from 'framer-motion'
 import Icon from "@/components/ui/Icon.jsx"
 import hrPulseLogo from '../Assets/Logo Banner.svg'
+import heroCharacters from '../Assets/hero-characters.jpg'
 import { fetchUserProfile } from '../services/googleDrive.js'
 import { verifyPassword, hashPassword } from '../services/crypto.js'
 
@@ -517,26 +518,38 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       <div className="relative z-10">
         {/* Section 1: Hero Heading */}
         <section className="relative h-dvh w-full flex flex-col items-center justify-center px-6 sm:px-10 lg:px-16 snap-start">
-          <motion.h1 
-            initial={{ filter: "blur(20px)", opacity: 0, scale: 1.1 }}
-            animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
+          <motion.div
             style={{ opacity: headingOpacity, y: headingY }}
-            className="login-hero-title uppercase text-5xl sm:text-6xl lg:text-7xl xl:text-[96px] w-full font-black tracking-tight leading-[1.1] text-center"
+            className="flex flex-col items-center justify-center w-full mt-10"
           >
-            When{' '}
-            <span className="text-primary relative inline-block align-baseline">
-              {typed}
-              <motion.span
-                animate={{ opacity: [1, 0, 1] }}
-                transition={{ repeat: Infinity, duration: 1, ease: "easeInOut" }}
-                className="inline-block w-[3px] h-[0.85em] bg-primary align-baseline ml-0.5"
-              />
-            </span>
-            <br className="sm:hidden" /> Win,<br />
-            Business<br className="sm:hidden" /> Follows.
-          </motion.h1>
+            <motion.h1 
+              initial={{ filter: "blur(20px)", opacity: 0, scale: 1.1 }}
+              animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+              className="login-hero-title uppercase text-5xl sm:text-6xl lg:text-7xl xl:text-[96px] w-full font-black tracking-tight leading-[1.1] text-center"
+            >
+              When{' '}
+              <span className="text-primary relative inline-block align-baseline">
+                {typed}
+                <motion.span
+                  animate={{ opacity: [1, 0, 1] }}
+                  transition={{ repeat: Infinity, duration: 1, ease: "easeInOut" }}
+                  className="inline-block w-[3px] h-[0.85em] bg-primary align-baseline ml-0.5"
+                />
+              </span>
+              <br className="sm:hidden" /> Win,<br />
+              Business<br className="sm:hidden" /> Follows.
+            </motion.h1>
 
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
+              className="mt-6 sm:mt-10 w-full max-w-5xl flex justify-center mix-blend-multiply dark:mix-blend-screen"
+            >
+              <img src={heroCharacters} alt="Team" className="w-full h-auto object-contain max-h-[40vh] sm:max-h-[50vh]" />
+            </motion.div>
+          </motion.div>
         </section>
 
         {/* Sections 2-6: one subheading popup per section */}
