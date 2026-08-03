@@ -5,6 +5,7 @@ import hrPulseLogo from '../Assets/Logo Banner.svg'
 import heroCharacters from '../Assets/hero-characters.png'
 import { fetchUserProfile } from '../services/googleDrive.js'
 import { verifyPassword, hashPassword } from '../services/crypto.js'
+import { loginWithGoogle, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, updateProfileData, updateDriveConnectionStatus, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp } from '../services/auth.js'
 import Dashboard from './Dashboard.jsx'
 import { allNavItems } from '../utils/helpers.js'
 
@@ -308,7 +309,12 @@ function MarketingStackedSections({ containerRef }) {
 
 export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode }) {
   const [role, setRole] = useState('admin') // 'admin' | 'employee'
-  const [mode, setMode] = useState('signin') // 'signin' | 'signup'
+  const [mode, setMode] = useState('signin')
+  const [onboardingStep, setOnboardingStep] = useState(1)
+  const [firebaseUser, setFirebaseUser] = useState(null)
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [otpCode, setOtpCode] = useState('')
+  const [confirmationResult, setConfirmationResult] = useState(null) // 'signin' | 'signup'
   const [isLoading, setIsLoading] = useState(false)
   const [showIntermediateModal, setShowIntermediateModal] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
@@ -435,86 +441,130 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     token: 'mock-token-' + Date.now()
   })
 
-  // --- Admin signup (create workspace) ---
+  // --- Admin signup (Firebase) ---
   const handleSignup = async (e) => {
     e.preventDefault()
     setError('')
-    if (!fullName.trim() || !email.trim() || !companyName.trim() || !password) {
-      setError('Please fill in all fields.')
+    if (!email.trim() || !password) {
+      setError('Please fill in email and password.')
       return
     }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters.')
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.')
       return
     }
     setIsLoading(true)
     try {
-      const accounts = getAdminAccounts()
-      if (accounts.some(a => a.email.toLowerCase() === email.trim().toLowerCase())) {
-        setError('An account with this email already exists. Try signing in.')
-        setIsLoading(false)
-        return
-      }
-      const passwordHash = await hashPassword(password)
-      const account = {
-        id: `admin-${Date.now()}`,
-        name: fullName.trim(),
-        email: email.trim(),
-        companyName: companyName.trim(),
-        passwordHash,
-        createdAt: new Date().toISOString()
-      }
-      accounts.push(account)
-      localStorage.setItem(ADMIN_ACCOUNTS_KEY, JSON.stringify(accounts))
-      onLogin(adminSession(account))
+      const user = await registerWithEmail(email.trim(), password)
+      setFirebaseUser(user)
+      await checkAndCreateUserDoc(user)
+      setIsLoading(false)
+      setOnboardingStep(2)
     } catch (err) {
       setError('Sign up failed: ' + err.message)
       setIsLoading(false)
     }
   }
 
-  // --- Admin email/password login ---
+  // --- Admin login (Firebase) ---
   const handleAdminPasswordSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setIsLoading(true)
     try {
-      const accounts = getAdminAccounts()
-      const account = accounts.find(a => a.email.toLowerCase() === email.trim().toLowerCase())
-      if (!account) {
-        setError('No admin account found with this email.')
-        setIsLoading(false)
-        return
+      const user = await loginWithEmail(email.trim(), password)
+      setFirebaseUser(user)
+      const { data } = await checkAndCreateUserDoc(user)
+      setIsLoading(false)
+      if (!data?.fullName || !data?.companyName) {
+        setOnboardingStep(2)
+      } else {
+        setFullName(data.fullName)
+        setCompanyName(data.companyName)
+        setOnboardingStep(3)
       }
-      const valid = await verifyPassword(password, account.passwordHash)
-      if (!valid) {
-        setError('Invalid email or password.')
-        setIsLoading(false)
-        return
-      }
-      onLogin(adminSession(account))
     } catch (err) {
       setError('Login failed: ' + err.message)
       setIsLoading(false)
     }
   }
 
-  // --- Existing OAuth logic ---
-  const triggerOAuth = () => {
+  // --- Google SSO (Firebase) ---
+  const handleFirebaseGoogleLogin = async () => {
+    setError('')
+    setIsLoading(true)
+    try {
+      const user = await loginWithGoogle()
+      setFirebaseUser(user)
+      const { data } = await checkAndCreateUserDoc(user)
+      setIsLoading(false)
+      if (!data?.fullName || !data?.companyName) {
+        setOnboardingStep(2)
+      } else {
+        setFullName(data.fullName)
+        setCompanyName(data.companyName)
+        setOnboardingStep(3)
+      }
+    } catch (err) {
+      setError('Google Login failed: ' + err.message)
+      setIsLoading(false)
+    }
+  }
+
+  // --- Phone Auth (Firebase) ---
+  const handleSendPhoneOtp = async (e) => {
+    e.preventDefault()
+    setError('')
+    if (!phoneNumber.trim()) {
+      setError('Please enter a phone number.')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const recaptchaVerifier = setupRecaptcha('recaptcha-container')
+      const confirmation = await requestPhoneOtp(phoneNumber, recaptchaVerifier)
+      setConfirmationResult(confirmation)
+      setIsLoading(false)
+    } catch (err) {
+      setError('Failed to send SMS: ' + err.message)
+      setIsLoading(false)
+    }
+  }
+
+  const handleVerifyPhoneOtp = async (e) => {
+    e.preventDefault()
+    setError('')
+    if (!otpCode.trim()) {
+      setError('Please enter the verification code.')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const user = await verifyPhoneOtp(confirmationResult, otpCode)
+      setFirebaseUser(user)
+      const { data } = await checkAndCreateUserDoc(user)
+      setIsLoading(false)
+      if (!data?.fullName || !data?.companyName) {
+        setOnboardingStep(2)
+      } else {
+        setFullName(data.fullName)
+        setCompanyName(data.companyName)
+        setOnboardingStep(3)
+      }
+    } catch (err) {
+      setError('Failed to verify code: ' + err.message)
+      setIsLoading(false)
+    }
+  }
+
+  // --- Google Drive Connection ---
+  const triggerDriveOAuth = () => {
     setIsLoading(true)
     if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
       console.warn("Google Client Library not detected. Falling back to simulated login.");
       setTimeout(() => {
         setIsLoading(false)
-        const simulatedUser = {
-          name: 'System Admin',
-          email: 'admin@company.com',
-          avatar: '',
-          role: 'Admin',
-          isSimulated: true,
-          token: 'mock-token-12345'
-        }
-        onLogin(simulatedUser)
+        onLogin(adminSession({ id: firebaseUser?.uid || 'local', name: fullName || 'System Admin', email: firebaseUser?.email || 'admin@company.com', companyName: companyName || 'Acme' }))
       }, 1200)
       return
     }
@@ -526,19 +576,22 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         callback: async (tokenResponse) => {
           if (tokenResponse && tokenResponse.access_token) {
             try {
-              const profile = await fetchUserProfile(tokenResponse.access_token)
-              const googleUser = {
-                name: profile.name,
-                email: profile.email,
-                avatar: profile.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+              if (firebaseUser) {
+                await updateDriveConnectionStatus(firebaseUser.uid, true)
+              }
+              const adminUser = {
+                name: fullName || 'Admin',
+                email: firebaseUser?.email || '',
+                companyName: companyName,
                 role: 'Admin',
-                token: tokenResponse.access_token
+                token: tokenResponse.access_token,
+                uid: firebaseUser?.uid
               }
               setIsLoading(false)
-              onLogin(googleUser)
+              onLogin(adminUser)
             } catch (err) {
               setIsLoading(false)
-              setError("Failed to fetch Google profile details: " + err.message)
+              setError("Failed during Drive connection: " + err.message)
             }
           } else {
             setIsLoading(false)
@@ -554,21 +607,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       setIsLoading(false)
       setError("Error initializing Google Login client: " + e.message)
     }
-  }
-
-  const handleConnectClick = () => {
-    const shown = localStorage.getItem('hr_pulse_auth_modal_shown')
-    if (shown === 'true') {
-      triggerOAuth()
-    } else {
-      setShowIntermediateModal(true)
-    }
-  }
-
-  const handleConfirmAuthorize = () => {
-    localStorage.setItem('hr_pulse_auth_modal_shown', 'true')
-    setShowIntermediateModal(false)
-    triggerOAuth()
   }
 
   // --- Employee login logic ---
@@ -773,32 +811,9 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   {mode === 'signup' ? 'Sign Up' : 'Sign In'}
                 </h2>
 
-                {mode === 'signup' ? (
+                {onboardingStep === 1 && mode === 'signup' ? (
                   <>
-                    {/* Sign Up Form */}
                     <form onSubmit={handleSignup} className="space-y-3.5 mt-5">
-                      <div>
-                        <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Full Name</label>
-                        <input
-                          type="text"
-                          value={fullName}
-                          onChange={e => setFullName(e.target.value)}
-                          placeholder="Jane Doe"
-                          className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Company Name</label>
-                        <input
-                          type="text"
-                          value={companyName}
-                          onChange={e => setCompanyName(e.target.value)}
-                          placeholder="Acme Inc."
-                          className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
-                          required
-                        />
-                      </div>
                       <div>
                         <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
                         <input
@@ -841,13 +856,12 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                         disabled={isLoading}
                         className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
                       >
-                        {isLoading ? 'Creating Workspace...' : 'Create Workspace'} <Icon name="arrow_forward" size={18} />
+                        {isLoading ? 'Creating Account...' : 'Continue'} <Icon name="arrow_forward" size={18} />
                       </button>
                     </form>
                   </>
-                ) : (
+                ) : onboardingStep === 1 && mode === 'signin' ? (
                   <>
-                    {/* Role Selector Tabs */}
                     <div className="flex p-1.5 bg-muted/60 rounded-full mb-4 mt-4 border border-border">
                       <button
                         onClick={() => setRole('admin')}
@@ -922,24 +936,28 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                             </button>
                           </form>
 
-                          {/* Divider */}
                           <div className="flex items-center my-4">
                             <div className="flex-grow border-t border-border" />
                             <span className="px-3 text-xs text-muted-foreground uppercase tracking-widest">OR</span>
                             <div className="flex-grow border-t border-border" />
                           </div>
 
-                          <button 
-                            onClick={handleConnectClick} 
-                            disabled={isLoading}
-                            className="w-full flex items-center justify-between px-5 py-3 bg-muted/40 border border-border rounded-2xl text-sm font-semibold text-foreground hover:bg-muted transition disabled:opacity-50"
-                          >
-                            <span className="flex items-center gap-3">
-                              <Icon name="cloud" size={18} />
-                              Continue with Google
-                            </span>
-                            <Icon name="arrow_forward" size={16} />
-                          </button>
+                          <div className="flex gap-3">
+                            <button 
+                              onClick={handleFirebaseGoogleLogin} 
+                              disabled={isLoading}
+                              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-muted/40 border border-border rounded-2xl text-sm font-semibold text-foreground hover:bg-muted transition disabled:opacity-50"
+                            >
+                              <Icon name="cloud" size={18} /> Google
+                            </button>
+                            <button 
+                              onClick={() => setMode('phone')} 
+                              disabled={isLoading}
+                              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-muted/40 border border-border rounded-2xl text-sm font-semibold text-foreground hover:bg-muted transition disabled:opacity-50"
+                            >
+                              <Icon name="smartphone" size={18} /> Phone
+                            </button>
+                          </div>
                         </>
                       ) : (
                         <form onSubmit={handleEmployeeSubmit} className="space-y-4">
@@ -985,7 +1003,141 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       )}
                     </div>
                   </>
-                )}
+                ) : onboardingStep === 1 && mode === 'phone' ? (
+                  <div className="mt-5">
+                    {!confirmationResult ? (
+                      <form onSubmit={handleSendPhoneOtp} className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Phone Number</label>
+                          <input
+                            type="tel"
+                            value={phoneNumber}
+                            onChange={e => setPhoneNumber(e.target.value)}
+                            placeholder="+1 555-555-5555"
+                            className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
+                            required
+                          />
+                        </div>
+                        <div id="recaptcha-container"></div>
+                        {error && (
+                          <div className="p-3.5 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                            {error}
+                          </div>
+                        )}
+                        <button
+                          type="submit"
+                          disabled={isLoading}
+                          className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
+                        >
+                          {isLoading ? 'Sending SMS...' : 'Send SMS Code'} <Icon name="arrow_forward" size={18} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setMode('signin')}
+                          className="w-full py-3 mt-2 text-sm font-medium text-muted-foreground hover:text-foreground transition"
+                        >
+                          Back to Email Login
+                        </button>
+                      </form>
+                    ) : (
+                      <form onSubmit={handleVerifyPhoneOtp} className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">6-Digit Code</label>
+                          <input
+                            type="text"
+                            value={otpCode}
+                            onChange={e => setOtpCode(e.target.value)}
+                            placeholder="123456"
+                            className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all tracking-widest text-center"
+                            maxLength={6}
+                            required
+                          />
+                        </div>
+                        {error && (
+                          <div className="p-3.5 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                            {error}
+                          </div>
+                        )}
+                        <button
+                          type="submit"
+                          disabled={isLoading}
+                          className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
+                        >
+                          {isLoading ? 'Verifying...' : 'Verify & Continue'} <Icon name="check" size={18} />
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                ) : onboardingStep === 2 ? (
+                  <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    setIsLoading(true);
+                    await updateProfileData(firebaseUser.uid, fullName, companyName);
+                    setIsLoading(false);
+                    setOnboardingStep(3);
+                  }} className="space-y-3.5 mt-5">
+                    <div>
+                      <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Full Name</label>
+                      <input
+                        type="text"
+                        value={fullName}
+                        onChange={e => setFullName(e.target.value)}
+                        placeholder="Jane Doe"
+                        className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Company Name</label>
+                      <input
+                        type="text"
+                        value={companyName}
+                        onChange={e => setCompanyName(e.target.value)}
+                        placeholder="Acme Inc."
+                        className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
+                        required
+                      />
+                    </div>
+                    {error && (
+                      <div className="p-3.5 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                        {error}
+                      </div>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
+                    >
+                      {isLoading ? 'Saving...' : 'Complete Profile'} <Icon name="arrow_forward" size={18} />
+                    </button>
+                  </form>
+                ) : onboardingStep === 3 ? (
+                  <div className="mt-8 text-center">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 border border-primary/20">
+                      <Icon name="shield" size={24} className="text-primary" />
+                    </div>
+                    <h3 className="text-lg font-bold mb-2 text-foreground">Connect Google Drive</h3>
+                    <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+                      HR Pulse requires access to your Google Drive to store company data securely.
+                    </p>
+                    {error && (
+                      <div className="p-3.5 mb-4 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                        {error}
+                      </div>
+                    )}
+                    <button 
+                      onClick={triggerDriveOAuth} 
+                      disabled={isLoading} 
+                      className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
+                    >
+                      {isLoading ? 'Connecting...' : 'Authorize & Connect'} <Icon name="cloud" size={18} />
+                    </button>
+                  </div>
+                ) : null}
 
                 {/* Footer toggle */}
                 <p className="text-center text-sm text-muted-foreground mt-6">

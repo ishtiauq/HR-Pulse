@@ -98,6 +98,19 @@
   --sidebar-border: var(--border);
 }
 
+.force-light-mode {
+  --background: hsl(0 0% 93%) !important;
+  --foreground: hsl(210 20% 10%) !important;
+  --card: hsl(0 0% 100%) !important;
+  --card-foreground: hsl(210 20% 10%) !important;
+  --popover: hsl(0 0% 100%) !important;
+  --popover-foreground: hsl(210 20% 10%) !important;
+  --muted: hsl(210 25% 97%) !important;
+  --muted-foreground: hsl(210 10% 45%) !important;
+  --border: hsl(210 15% 90%) !important;
+  --input: hsl(210 15% 90%) !important;
+}
+
 * {
   border-color: var(--border);
 }
@@ -475,6 +488,34 @@ input:focus, select:focus, textarea:focus, .focus-within\:ring-2:focus-within {
   --modal-fit: min(1, calc(100dvh / 800px), calc(100vw / 350px));
   transform: scale(var(--modal-fit));
   transform-origin: center;
+}
+
+/* ==============================================================
+   LOGIN CINEMATIC PAGE - AUTH CARD GLASS EFFECT
+   Provides a near-white liquid glass aesthetic as requested
+   ============================================================== */
+#login-auth-glass-card {
+  --foreground: hsl(210 20% 10%);
+  --muted-foreground: hsl(215 16% 47%);
+  color: var(--foreground) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(32px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(150%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    0 12px 32px 0 rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255,255,255,0.2) !important;
+}
+.dark #login-auth-glass-card {
+  --foreground: hsl(210 20% 10%);
+  --muted-foreground: hsl(215 16% 47%);
+  color: var(--foreground) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.5),
+    0 12px 32px 0 rgba(0, 0, 0, 0.3) !important;
 }
 
 /* ==============================================================
