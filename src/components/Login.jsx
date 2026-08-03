@@ -590,7 +590,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0">
                   <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[150px] sm:h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_30%,black_60%,black_100%)] sm:[mask-image:linear-gradient(to_bottom,transparent_0%,transparent_30%,black_70%,black_100%)]">
                     {/* Back strap (Left) */}
-                    <div className="absolute -bottom-[20px] left-[139px] w-[32px] h-[600px] bg-[#d15200] origin-bottom -rotate-[14deg]" />
+                    <div className="absolute -bottom-[20px] left-[139px] w-[32px] h-[600px] bg-[#CC3E01] origin-bottom -rotate-[14deg]" />
                   </div>
                 </div>
 
@@ -604,7 +604,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
                   {/* Front strap (Right) - Pushed 1px down to overlap the hole lip and eliminate the gap */}
                   <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[150px] sm:h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_30%,black_60%,black_100%)] sm:[mask-image:linear-gradient(to_bottom,transparent_0%,transparent_30%,black_70%,black_100%)]">
-                    <div className="absolute -bottom-[20px] right-[138px] w-[32px] h-[600px] bg-[#ff6a00] origin-bottom rotate-[12deg] shadow-[-6px_0_15px_rgba(0,0,0,0.4)]" />
+                    <div className="absolute -bottom-[20px] right-[138px] w-[32px] h-[600px] bg-[#FE4D01] origin-bottom rotate-[12deg] shadow-[-6px_0_15px_rgba(0,0,0,0.4)]" />
                   </div>
                 </div>
 
