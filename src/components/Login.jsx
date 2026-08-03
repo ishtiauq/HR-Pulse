@@ -53,7 +53,7 @@ function SubDialog({ line, index }) {
         aria-label={`Feature ${index + 1}`}
         className="login-sub-dialog outline-none focus:outline-none flex flex-col w-full h-full p-6 sm:p-8"
       >
-        <p className="login-sub-dialog-text text-base sm:text-lg lg:text-xl font-bold text-foreground leading-snug">
+        <p className="login-sub-dialog-text font-bold text-foreground tracking-tight">
           {words.map((word, i) => (
             <motion.span
               key={i}

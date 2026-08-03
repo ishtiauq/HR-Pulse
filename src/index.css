@@ -405,6 +405,15 @@ input:focus, select:focus, textarea:focus, .focus-within\:ring-2:focus-within {
 }
 
 /* ==============================================================
+   LOGIN CINEMATIC PAGE — SUBDIALOG FLUID TYPE
+   Subheading scales smoothly on every screen (~half the headline).
+   ============================================================== */
+.login-sub-dialog-text {
+  font-size: clamp(1.5rem, 1rem + 1.9vw, 2.5rem);
+  line-height: 1.25;
+}
+
+/* ==============================================================
    LOGIN CINEMATIC PAGE — SHORT-VIEWPORT ADAPTATION
    Keeps every parallax stage (hero heading, subheading, login card)
    fully inside the viewport on small phones / landscape phones.
@@ -420,7 +429,7 @@ input:focus, select:focus, textarea:focus, .focus-within\:ring-2:focus-within {
     padding-bottom: 0.75rem;
   }
   .login-sub-dialog-text {
-    font-size: 0.85rem;
+    font-size: clamp(0.875rem, 3.25vw, 1.375rem);
     line-height: 1.3;
   }
 }
