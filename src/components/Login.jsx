@@ -67,39 +67,45 @@ function MarketingSectionOne({ containerRef }) {
 
   const cards = [
     {
-      title: "Attendance that pays itself",
-      subtitle: "One-tap clock-in flows straight into automated payroll — no re-typing, no errors.",
+      title: "Smart Attendance Tracking",
+      subtitle: "Clock in effortlessly with a single tap. Live attendance data flows straight into automated payroll.",
       bgColor: "bg-white text-black",
       iconColor: "bg-black/5 text-black",
-      iconName: "groups",
+      iconName: "touch_app",
       content: (
-        <div className="flex w-full max-w-sm ml-auto justify-end">
-           <img src={card1Illustration} alt="Attendance & Payroll" className="w-full h-full max-h-[160px] sm:max-h-[220px] object-contain rounded-2xl drop-shadow-sm transition-all duration-300" />
-        </div>
+        <ul className="flex flex-col gap-2 w-full mt-2">
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-80"><Icon name="check_circle" size={18} className="text-[#FE4D01]" /> Quick tap to clock in & out</li>
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-80"><Icon name="check_circle" size={18} className="text-[#FE4D01]" /> Live location and time tracking</li>
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-80"><Icon name="check_circle" size={18} className="text-[#FE4D01]" /> No manual entry for payroll</li>
+        </ul>
       )
     },
     {
-      title: "Every taka, tracked",
-      subtitle: "Salaries, expenses & company assets in real-time view, all in one place.",
+      title: "Built-in Task Management",
+      subtitle: "Assign tasks, track progress in real-time, and hit your deadlines without switching to another app.",
       bgColor: "bg-[#FE4D01] text-white",
       iconColor: "bg-black/10 text-white",
-      iconName: "account_balance_wallet",
+      iconName: "task_alt",
       content: (
-        <div className="flex w-full max-w-sm ml-auto justify-end">
-           <img src={card2Illustration} alt="Finance & Assets" className="w-full h-full max-h-[160px] sm:max-h-[220px] object-contain rounded-2xl drop-shadow-sm transition-all duration-300" />
-        </div>
+        <ul className="flex flex-col gap-2 w-full mt-2">
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-90"><Icon name="check_circle" size={18} className="text-white/60" /> Assign tasks to team members instantly</li>
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-90"><Icon name="check_circle" size={18} className="text-white/60" /> Track who is doing what in real-time</li>
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-90"><Icon name="check_circle" size={18} className="text-white/60" /> Set clear deadlines & get reminders</li>
+        </ul>
       )
     },
     {
-      title: "Teamwork without the chaos",
-      subtitle: "Announcements, events, tasks & documents — one home for the whole squad.",
+      title: "Smart Leave Management",
+      subtitle: "Request time off, get instant approvals, and track leave balances without the email chaos.",
       bgColor: "bg-black text-white",
       iconColor: "bg-white/10 text-white",
-      iconName: "forum",
+      iconName: "event_available",
       content: (
-        <div className="flex w-full max-w-sm ml-auto justify-end">
-           <img src={card3Illustration} alt="Collaboration" className="w-full h-full max-h-[160px] sm:max-h-[220px] object-contain rounded-2xl drop-shadow-sm transition-all duration-300" />
-        </div>
+        <ul className="flex flex-col gap-2 w-full mt-2">
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-80"><Icon name="check_circle" size={18} className="text-white/50" /> Request time off from your phone</li>
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-80"><Icon name="check_circle" size={18} className="text-white/50" /> Managers can approve with one click</li>
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-80"><Icon name="check_circle" size={18} className="text-white/50" /> Track your remaining leave balance</li>
+        </ul>
       )
     },
     {
@@ -109,11 +115,11 @@ function MarketingSectionOne({ containerRef }) {
       iconColor: "bg-black/5 text-black",
       iconName: "devices",
       content: (
-        <div className="flex w-full max-w-sm ml-auto justify-end">
-           <div className="w-full h-[160px] sm:h-[220px] flex items-center justify-center bg-black/5 rounded-2xl">
-             <Icon name="important_devices" size={80} className="text-black/20" />
-           </div>
-        </div>
+        <ul className="flex flex-col gap-2 w-full mt-2">
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-80"><Icon name="check_circle" size={18} className="text-[#FE4D01]" /> Perfect for remote and office teams</li>
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-80"><Icon name="check_circle" size={18} className="text-[#FE4D01]" /> Nothing to install, just open your browser</li>
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-80"><Icon name="check_circle" size={18} className="text-[#FE4D01]" /> Always synced across all your devices</li>
+        </ul>
       )
     },
     {
@@ -123,11 +129,11 @@ function MarketingSectionOne({ containerRef }) {
       iconColor: "bg-black/10 text-white",
       iconName: "cloud_done",
       content: (
-        <div className="flex w-full max-w-sm ml-auto justify-end">
-           <div className="w-full h-[160px] sm:h-[220px] flex items-center justify-center bg-black/10 rounded-2xl">
-             <Icon name="security" size={80} className="text-white/30" />
-           </div>
-        </div>
+        <ul className="flex flex-col gap-2 w-full mt-2">
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-90"><Icon name="check_circle" size={18} className="text-white/60" /> Files are saved straight to your Google Drive</li>
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-90"><Icon name="check_circle" size={18} className="text-white/60" /> You own your company data, not us</li>
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-90"><Icon name="check_circle" size={18} className="text-white/60" /> Backed by bank-level Google security</li>
+        </ul>
       )
     },
     {
@@ -137,70 +143,52 @@ function MarketingSectionOne({ containerRef }) {
       iconColor: "bg-white/10 text-white",
       iconName: "money_off",
       content: (
-        <div className="flex w-full max-w-sm ml-auto justify-end">
-           <div className="w-full h-[160px] sm:h-[220px] flex items-center justify-center bg-white/10 rounded-2xl">
-             <Icon name="payments" size={80} className="text-white/30" />
-           </div>
-        </div>
+        <ul className="flex flex-col gap-2 w-full mt-2">
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-80"><Icon name="check_circle" size={18} className="text-white/50" /> 100% free for your entire team</li>
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-80"><Icon name="check_circle" size={18} className="text-white/50" /> No sneaky per-user license fees</li>
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-80"><Icon name="check_circle" size={18} className="text-white/50" /> Premium features without the premium price</li>
+        </ul>
       )
     }
   ]
 
-  const card2Y = useTransform(scrollYProgress, [0, 0.33], [2000, 85])
-  const card3Y = useTransform(scrollYProgress, [0.33, 0.66], [2000, 170])
+  const card2Y = useTransform(scrollYProgress, [0, 0.33], [2000, 40])
+  const card3Y = useTransform(scrollYProgress, [0.33, 0.66], [2000, 80])
 
   return (
-    <section ref={sectionRef} className="relative w-full h-[300vh] snap-start">
-      <div className="sticky top-0 h-dvh w-full flex flex-col items-center justify-center overflow-hidden px-4 sm:px-8">
-        <div className="w-full text-left mb-6 sm:mb-10 z-20">
+    <section ref={sectionRef} className="relative w-full lg:h-[300vh] lg:snap-start py-12 lg:py-0">
+      <div className="lg:sticky lg:top-0 lg:h-dvh w-full flex flex-col justify-center lg:overflow-hidden px-4 sm:px-8 snap-start lg:snap-align-none shrink-0">
+        <div className="w-full text-left mb-8 sm:mb-10 z-20 pt-8 lg:pt-0">
           <h2 className="text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] font-black tracking-tight mb-4 text-foreground">
             Why Choose <span className="text-[#FE4D01]">Kormiis?</span>
           </h2>
           <p className="text-xl sm:text-2xl text-muted-foreground font-medium max-w-3xl mb-8">
             Everything a growing team needs — without the enterprise price tag or the setup headache.
           </p>
-          
-          {/* Differentiators strip */}
-          <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-2 px-4 py-2 bg-background/50 backdrop-blur-md rounded-full border border-border">
-              <Icon name="money_off" size={18} className="text-[#FE4D01]" />
-              <span className="text-sm font-bold">Zero cost — no per-seat fees</span>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-background/50 backdrop-blur-md rounded-full border border-border">
-              <Icon name="timer" size={18} className="text-[#FE4D01]" />
-              <span className="text-sm font-bold">Zero setup — ready in minutes</span>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-background/50 backdrop-blur-md rounded-full border border-border">
-              <Icon name="cloud_done" size={18} className="text-[#FE4D01]" />
-              <span className="text-sm font-bold">Your Drive, your rules — never locked in their cloud</span>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-background/50 backdrop-blur-md rounded-full border border-border">
-              <Icon name="devices" size={18} className="text-[#FE4D01]" />
-              <span className="text-sm font-bold">Works on any device — desktop, tablet, mobile</span>
-            </div>
-          </div>
+
         </div>
 
-        <div className="w-full h-[45vh] md:h-[50vh] min-h-[350px] grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 perspective-[2000px]">
+        {/* DESKTOP GRID (Hidden on mobile) */}
+        <div className="hidden lg:grid w-full h-[40vh] md:h-[45vh] min-h-[300px] grid-cols-2 gap-12 perspective-[2000px]">
           {/* Left Column Stack */}
           <div className="relative w-full h-full flex justify-center">
             {[0, 1, 2].map((i) => (
               <motion.div 
                 key={i}
                 style={{ y: i === 0 ? "0px" : i === 1 ? card2Y : card3Y }}
-                className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-sm flex flex-col origin-top overflow-hidden ${cards[i].bgColor}`}
+                className={`absolute top-0 w-full h-full p-6 sm:p-8 rounded-[2rem] shadow-sm flex flex-col origin-top overflow-hidden ${cards[i].bgColor}`}
               >
-                <div className="flex items-center gap-5 mb-6 sm:mb-10">
-                  <div className={`w-14 h-14 rounded-2xl flex shrink-0 items-center justify-center ${cards[i].iconColor}`}>
-                    <Icon name={cards[i].iconName} size={28} />
+                <div className="flex items-center gap-4 mb-4 sm:mb-6">
+                  <div className={`w-12 h-12 rounded-2xl flex shrink-0 items-center justify-center ${cards[i].iconColor}`}>
+                    <Icon name={cards[i].iconName} size={24} />
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-black">{cards[i].title}</h3>
+                  <h3 className="text-xl sm:text-2xl font-black">{cards[i].title}</h3>
                 </div>
-                <div className="flex flex-col gap-6 flex-1 w-full">
+                <div className="flex flex-col gap-4 flex-1 w-full">
                   <div className="w-full">
                     <p className="text-base sm:text-lg opacity-90 leading-relaxed">{cards[i].subtitle}</p>
                   </div>
-                  <div className="flex-1 w-full flex items-end justify-center">
+                  <div className="w-full flex items-start justify-start mt-2">
                     {cards[i].content}
                   </div>
                 </div>
@@ -214,25 +202,48 @@ function MarketingSectionOne({ containerRef }) {
               <motion.div 
                 key={i}
                 style={{ y: i === 3 ? "0px" : i === 4 ? card2Y : card3Y }}
-                className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-sm flex flex-col origin-top overflow-hidden ${cards[i].bgColor}`}
+                className={`absolute top-0 w-full h-full p-6 sm:p-8 rounded-[2rem] shadow-sm flex flex-col origin-top overflow-hidden ${cards[i].bgColor}`}
               >
-                <div className="flex items-center gap-5 mb-6 sm:mb-10">
-                  <div className={`w-14 h-14 rounded-2xl flex shrink-0 items-center justify-center ${cards[i].iconColor}`}>
-                    <Icon name={cards[i].iconName} size={28} />
+                <div className="flex items-center gap-4 mb-4 sm:mb-6">
+                  <div className={`w-12 h-12 rounded-2xl flex shrink-0 items-center justify-center ${cards[i].iconColor}`}>
+                    <Icon name={cards[i].iconName} size={24} />
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-black">{cards[i].title}</h3>
+                  <h3 className="text-xl sm:text-2xl font-black">{cards[i].title}</h3>
                 </div>
-                <div className="flex flex-col gap-6 flex-1 w-full">
+                <div className="flex flex-col gap-4 flex-1 w-full">
                   <div className="w-full">
                     <p className="text-base sm:text-lg opacity-90 leading-relaxed">{cards[i].subtitle}</p>
                   </div>
-                  <div className="flex-1 w-full flex items-end justify-center">
+                  <div className="w-full flex items-start justify-start mt-2">
                     {cards[i].content}
                   </div>
                 </div>
               </motion.div>
             ))}
           </div>
+        </div>
+
+        {/* MOBILE LIST (Hidden on desktop) */}
+        <div className="flex lg:hidden w-full flex-col gap-6 mt-6 pb-12">
+          {cards.map((card, i) => (
+            <div 
+              key={i} 
+              className={`w-full p-6 sm:p-8 rounded-[1.5rem] shadow-sm border border-black/5 flex flex-col snap-center shrink-0 ${card.bgColor}`}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`w-12 h-12 rounded-xl flex shrink-0 items-center justify-center ${card.iconColor}`}>
+                  <Icon name={card.iconName} size={24} />
+                </div>
+                <h3 className="text-xl font-black">{card.title}</h3>
+              </div>
+              <div className="flex flex-col gap-3 w-full flex-1">
+                <p className="text-sm sm:text-base opacity-90 leading-relaxed">{card.subtitle}</p>
+                <div className="w-full flex items-start justify-start flex-1 mt-2">
+                  {card.content}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -455,54 +466,6 @@ function MarketingStackedSections({ containerRef }) {
         <MarketingSectionOne containerRef={containerRef} />
       </motion.div>
 
-      {/* New "Live in 3 steps" section (between Section 2 and Membership card) */}
-      <section className="relative z-10 w-full min-h-[70vh] flex flex-col items-center justify-center snap-start bg-background text-foreground px-4 py-20">
-        <div className="max-w-6xl mx-auto w-full">
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-center mb-16">
-            Live in <span className="text-primary">3 steps</span>
-          </h2>
-          
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: false, amount: 0.3 }}
-              className="w-full lg:w-1/3 max-w-sm mx-auto"
-            >
-              <img src={threeStepsIllustration} alt="3 Steps Workflow" className="w-full h-auto object-contain rounded-2xl drop-shadow-sm transition-all duration-300" />
-            </motion.div>
-            
-            <div className="w-full lg:w-2/3 grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12 relative">
-              {/* Connecting line */}
-              <div className="hidden sm:block absolute top-12 left-[15%] right-[15%] h-[2px] bg-border z-0"></div>
-              
-              <div className="relative z-10 flex flex-col items-center text-center gap-4">
-                <div className="w-24 h-24 rounded-full bg-primary/10 border-4 border-background flex items-center justify-center text-primary mb-2 shadow-sm">
-                  <Icon name="cloud_sync" size={40} />
-                </div>
-                <h3 className="text-xl font-bold">1. Connect Google Drive</h3>
-                <p className="text-muted-foreground">Your private encrypted app-folder is created instantly.</p>
-              </div>
-              
-              <div className="relative z-10 flex flex-col items-center text-center gap-4">
-                <div className="w-24 h-24 rounded-full bg-primary/10 border-4 border-background flex items-center justify-center text-primary mb-2 shadow-sm">
-                  <Icon name="person_add" size={40} />
-                </div>
-                <h3 className="text-xl font-bold">2. Invite your team</h3>
-                <p className="text-muted-foreground">Each teammate gets a secure portal.</p>
-              </div>
-              
-              <div className="relative z-10 flex flex-col items-center text-center gap-4">
-                <div className="w-24 h-24 rounded-full bg-primary/10 border-4 border-background flex items-center justify-center text-primary mb-2 shadow-sm">
-                  <Icon name="query_stats" size={40} />
-                </div>
-                <h3 className="text-xl font-bold">3. Track everything</h3>
-                <p className="text-muted-foreground">Attendance flows into payroll; expenses & assets stay visible.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Section 3 (Scrolls on top) */}
       <div 
@@ -647,14 +610,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   }, [])
 
 
-  // Topbar visible only at the very top on mobile; fixed on desktop/tablet.
+  // Topbar visible only at the very top on all devices.
   // Hides the instant you start scrolling, shows again when back at the top.
   const [showTopbar, setShowTopbar] = useState(true)
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (!isMobile) {
-      setShowTopbar(true)
-      return
-    }
     setShowTopbar(latest < 0.002)
   })
 
@@ -929,7 +888,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       {/* Transparent Navbar */}
       <header
         className="fixed top-0 w-full z-50 pointer-events-none bg-transparent"
-        style={{ transform: isMobile && !showTopbar ? 'translateY(-100%)' : 'translateY(0%)', transition: 'transform 300ms ease' }}
+        style={{ transform: !showTopbar ? 'translateY(-100%)' : 'translateY(0%)', transition: 'transform 300ms ease' }}
       >
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between pointer-events-auto relative z-10">
           <motion.div 
@@ -1010,43 +969,117 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         </section>
 
         {/* New "Sound familiar?" pain strip (between hero and Section 2) */}
-        <section className="relative z-10 w-full py-16 sm:py-24 bg-background border-y border-border px-4 snap-start flex flex-col items-center justify-center min-h-[50vh]">
-          <div className="max-w-6xl mx-auto w-full text-center">
-            <h2 className="text-2xl sm:text-4xl font-bold mb-10 text-foreground text-center">Sound familiar?</h2>
+        <section className="relative z-10 w-full py-16 sm:py-24 bg-background border-y border-border snap-start flex flex-col items-center justify-center min-h-[50vh] overflow-hidden">
+          <div className="w-full text-center mb-10 px-4">
+            <h2 className="text-3xl sm:text-5xl font-black text-foreground tracking-tight">
+              Ditch the <span className="text-red-500">Chaos</span>. Embrace <span className="text-[#FE4D01]">Control</span>.
+            </h2>
+          </div>
+          
+          {/* Infinite Marquee */}
+          <div className="w-full overflow-hidden flex whitespace-nowrap mb-16 relative">
+            {/* Gradient masks for smooth fade in/out */}
+            <div className="absolute inset-y-0 left-0 w-12 sm:w-24 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute inset-y-0 right-0 w-12 sm:w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
             
-            <div className="flex flex-col md:flex-row items-center justify-center gap-10 lg:gap-16 mb-12">
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: false, amount: 0.3 }}
-                className="w-full md:w-1/2 max-w-sm mx-auto"
-              >
-                <img src={painStripIllustration} alt="Pain Points" className="w-full h-auto object-contain rounded-2xl drop-shadow-sm transition-all duration-300" />
-              </motion.div>
+            <motion.div 
+              className="flex items-center gap-4"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
+            >
+              {[
+                "Lost receipts", "Buddy punching", "Manual payroll", "WhatsApp groups", 
+                "Spreadsheet chaos", "No leave tracking", "Stolen assets", "Forgotten approvals",
+                "Lost receipts", "Buddy punching", "Manual payroll", "WhatsApp groups", 
+                "Spreadsheet chaos", "No leave tracking", "Stolen assets", "Forgotten approvals",
+                "Lost receipts", "Buddy punching", "Manual payroll", "WhatsApp groups", 
+                "Spreadsheet chaos", "No leave tracking", "Stolen assets", "Forgotten approvals",
+                "Lost receipts", "Buddy punching", "Manual payroll", "WhatsApp groups", 
+                "Spreadsheet chaos", "No leave tracking", "Stolen assets", "Forgotten approvals"
+              ].map((text, i) => (
+                <div key={i} className="flex items-center gap-2 sm:gap-3 bg-muted/40 border border-border/50 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full shrink-0">
+                  <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                  <span className="text-xs sm:text-sm font-semibold opacity-80">{text}</span>
+                </div>
+              ))}
+            </motion.div>
+          </div>
 
-              <div className="flex flex-col gap-6 items-center md:items-start text-left w-full md:w-1/2">
-                <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-2xl border border-border/50 w-full">
-                  <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
-                    <Icon name="close" size={20} />
+          {/* Chaos vs Control Comparison Table */}
+          <div className="max-w-4xl mx-auto w-full px-4 relative z-20">
+            <div className="bg-card/50 backdrop-blur-xl border border-border rounded-3xl overflow-hidden shadow-sm">
+              {/* Header */}
+              <div className="grid grid-cols-2 border-b border-border">
+                <div className="p-6 sm:p-8 bg-red-500/5 text-center flex flex-col items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-4 shadow-sm">
+                    <Icon name="warning" size={24} />
                   </div>
-                  <p className="text-lg text-muted-foreground font-medium">Attendance tracked in a WhatsApp group chat</p>
+                  <h3 className="text-lg sm:text-2xl font-black text-foreground">The Old Way</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">Chaos & scattered tools</p>
                 </div>
-                <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-2xl border border-border/50 w-full">
-                  <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
-                    <Icon name="close" size={20} />
+                <div className="p-6 sm:p-8 bg-[#FE4D01] text-white text-center border-l border-[#FE4D01]/20 flex flex-col items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 bg-white/5 opacity-50"></div>
+                  <div className="relative z-10 flex flex-col items-center">
+                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-white mb-4 shadow-sm">
+                      <Icon name="check_circle" size={24} />
+                    </div>
+                    <h3 className="text-lg sm:text-2xl font-black text-white">The Kormiis Way</h3>
+                    <p className="text-xs sm:text-sm text-white/80 mt-1 font-medium">Everything in one place</p>
                   </div>
-                  <p className="text-lg text-muted-foreground font-medium">Payroll weekends spent re-typing spreadsheets</p>
                 </div>
-                <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-2xl border border-border/50 w-full">
-                  <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
-                    <Icon name="close" size={20} />
+              </div>
+
+              {/* Rows */}
+              <div className="divide-y divide-border">
+                {/* Row 1 */}
+                <div className="grid grid-cols-2 group">
+                  <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-red-500/5 group-hover:bg-red-500/10 transition-colors">
+                    <Icon name="close" size={20} className="text-red-500 shrink-0 mt-0.5" />
+                    <span className="text-sm sm:text-base font-medium opacity-80 leading-snug">Buddy punching & tracking attendance in WhatsApp</span>
                   </div>
-                  <p className="text-lg text-muted-foreground font-medium">Company assets, expenses & leave scattered everywhere</p>
+                  <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-[#FE4D01] group-hover:brightness-95 transition-all border-l border-[#FE4D01]/20 relative">
+                    <Icon name="check" size={20} className="text-white shrink-0 mt-0.5" />
+                    <span className="text-sm sm:text-base font-medium text-white/95 leading-snug">One-tap smart attendance with live GPS locations</span>
+                  </div>
+                </div>
+                
+                {/* Row 2 */}
+                <div className="grid grid-cols-2 group">
+                  <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-red-500/5 group-hover:bg-red-500/10 transition-colors">
+                    <Icon name="close" size={20} className="text-red-500 shrink-0 mt-0.5" />
+                    <span className="text-sm sm:text-base font-medium opacity-80 leading-snug">Weekends wasted re-typing paper sheets into Excel</span>
+                  </div>
+                  <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-[#FE4D01] group-hover:brightness-95 transition-all border-l border-[#FE4D01]/20 relative">
+                    <Icon name="check" size={20} className="text-white shrink-0 mt-0.5" />
+                    <span className="text-sm sm:text-base font-medium text-white/95 leading-snug">Automated payroll math that exports instantly</span>
+                  </div>
+                </div>
+
+                {/* Row 3 */}
+                <div className="grid grid-cols-2 group">
+                  <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-red-500/5 group-hover:bg-red-500/10 transition-colors">
+                    <Icon name="close" size={20} className="text-red-500 shrink-0 mt-0.5" />
+                    <span className="text-sm sm:text-base font-medium opacity-80 leading-snug">Leave requests in emails & lost expense receipts</span>
+                  </div>
+                  <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-[#FE4D01] group-hover:brightness-95 transition-all border-l border-[#FE4D01]/20 relative">
+                    <Icon name="check" size={20} className="text-white shrink-0 mt-0.5" />
+                    <span className="text-sm sm:text-base font-medium text-white/95 leading-snug">Everything secured directly in your company Google Drive</span>
+                  </div>
+                </div>
+
+                {/* Row 4 */}
+                <div className="grid grid-cols-2 group">
+                  <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-red-500/5 group-hover:bg-red-500/10 transition-colors">
+                    <Icon name="close" size={20} className="text-red-500 shrink-0 mt-0.5" />
+                    <span className="text-sm sm:text-base font-medium opacity-80 leading-snug">Expensive $10/user monthly enterprise software fees</span>
+                  </div>
+                  <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-[#FE4D01] group-hover:brightness-95 transition-all border-l border-[#FE4D01]/20 relative">
+                    <Icon name="star" size={20} className="text-white shrink-0 mt-0.5" />
+                    <span className="text-sm sm:text-base font-bold text-white leading-snug">100% Free forever. No sneaky per-seat fees.</span>
+                  </div>
                 </div>
               </div>
             </div>
-            
-            <h3 className="text-xl sm:text-2xl font-bold text-primary mt-12">Kormiis puts it all in one place.</h3>
           </div>
         </section>
 
