@@ -968,6 +968,98 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           </motion.div>
         </section>
 
+        {/* What is Kormiis - Merged Section (Grid) */}
+        <section className="relative z-10 w-full min-h-[70vh] flex flex-col items-center justify-center bg-background px-4 py-16 sm:py-24 snap-start border-t border-border overflow-hidden">
+          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+            
+            {/* Left Column: Text Content */}
+            <div className="flex flex-col gap-6 sm:gap-8 text-left max-w-xl mx-auto lg:mx-0">
+              <motion.h2 
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: false, amount: 0.5 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="text-4xl sm:text-5xl lg:text-7xl font-black text-foreground tracking-tight leading-tight"
+              >
+                What is <br className="hidden lg:block" /><span className="text-primary">Kormiis</span>?
+              </motion.h2>
+              
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: false, amount: 0.5 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="text-lg sm:text-xl md:text-2xl font-medium text-muted-foreground leading-relaxed space-y-6"
+              >
+                <p>
+                  Kormiis is the <strong className="text-foreground">anti-enterprise</strong> HR Management Web App. Just everything your growing team needs.
+                </p>
+                <p>
+                  No setup fees. No per-user licenses. No 3-month onboarding or subscription fee!
+                </p>
+                <p className="text-foreground font-semibold">
+                  One central hub for your entire business. Secured automatically in your company Google Drive.
+                </p>
+                <div className="pt-4">
+                  <span className="text-white font-black tracking-wide uppercase text-sm sm:text-base inline-block px-6 py-3 bg-[#FE4D01] rounded-full shadow-md">
+                    Free for limited time.
+                  </span>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Right Column: Slot Machine */}
+            <div className="relative w-full h-[400px] sm:h-[550px] lg:h-[650px] flex justify-center gap-4 sm:gap-8 overflow-hidden rounded-3xl lg:ml-auto">
+              {/* Gradient masks for smooth fade in/out at top and bottom */}
+              <div className="absolute inset-x-0 top-0 h-24 sm:h-32 bg-gradient-to-b from-background to-transparent z-20 pointer-events-none"></div>
+              <div className="absolute inset-x-0 bottom-0 h-24 sm:h-32 bg-gradient-to-t from-background to-transparent z-20 pointer-events-none"></div>
+
+              {/* Reel 1 (Scrolls Up) */}
+              <motion.div 
+                className="flex flex-col gap-4 sm:gap-6 relative z-10 will-change-transform"
+                animate={{ y: ["0%", "-50%"] }}
+                transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
+              >
+                {[...Array(8)].flatMap(() => [
+                  { label: "Attendance", icon: "schedule", color: "text-blue-500" },
+                  { label: "Payroll", icon: "account_balance", color: "text-emerald-500" },
+                  { label: "Expenses", icon: "wallet", color: "text-orange-500" },
+                  { label: "Leave", icon: "calendar_month", color: "text-pink-500" },
+                ]).map((item, i) => (
+                  <div key={`col1-${i}`} className="flex items-center gap-4 p-4 sm:p-5 bg-card/50 backdrop-blur-md border border-border rounded-2xl shadow-sm w-40 sm:w-56 lg:w-64 shrink-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-background border border-border flex items-center justify-center shadow-inner shrink-0">
+                      <Icon name={item.icon} size={20} className={item.color} />
+                    </div>
+                    <span className="font-bold text-foreground text-sm sm:text-base whitespace-nowrap">{item.label}</span>
+                  </div>
+                ))}
+              </motion.div>
+
+              {/* Reel 2 (Scrolls Down) */}
+              <motion.div 
+                className="flex flex-col gap-4 sm:gap-6 relative z-10 will-change-transform"
+                animate={{ y: ["-50%", "0%"] }}
+                transition={{ repeat: Infinity, duration: 14, ease: "linear" }}
+              >
+                {[...Array(8)].flatMap(() => [
+                  { label: "Assets", icon: "monitor", color: "text-purple-500" },
+                  { label: "Documents", icon: "folder_open", color: "text-amber-500" },
+                  { label: "Tasks", icon: "check_box", color: "text-teal-500" },
+                  { label: "Feed", icon: "rss_feed", color: "text-indigo-500" },
+                ]).map((item, i) => (
+                  <div key={`col2-${i}`} className="flex items-center gap-4 p-4 sm:p-5 bg-card/50 backdrop-blur-md border border-border rounded-2xl shadow-sm w-40 sm:w-56 lg:w-64 shrink-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-background border border-border flex items-center justify-center shadow-inner shrink-0">
+                      <Icon name={item.icon} size={20} className={item.color} />
+                    </div>
+                    <span className="font-bold text-foreground text-sm sm:text-base whitespace-nowrap">{item.label}</span>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+            
+          </div>
+        </section>
+
         {/* New "Sound familiar?" pain strip (between hero and Section 2) */}
         <section className="relative z-10 w-full py-16 sm:py-24 bg-background border-y border-border snap-start flex flex-col items-center justify-center min-h-[50vh] overflow-hidden">
           <div className="w-full text-center mb-10 px-4">
