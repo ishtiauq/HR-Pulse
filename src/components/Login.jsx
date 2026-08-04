@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, useScroll, useTransform, useSpring, useMotionValueEvent, useMotionValue, useMotionTemplate } from 'framer-motion'
 import Icon from "@/components/ui/Icon.jsx"
-import hrPulseLogo from '../Assets/Kormiis Logo.svg'
+import hrPulseLogo from '../Assets/Kormiis Logo Final.svg'
 import heroCharacters from '../Assets/hero-characters.png'
 import { fetchUserProfile } from '../services/googleDrive.js'
 import { verifyPassword, hashPassword } from '../services/crypto.js'

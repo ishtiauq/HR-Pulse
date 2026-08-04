@@ -1,6 +1,6 @@
 import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
-import hrPulseLogo from '../../Assets/Kormiis Logo.svg'
+import hrPulseLogo from '../../Assets/Kormiis Logo Final.svg'
 
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
