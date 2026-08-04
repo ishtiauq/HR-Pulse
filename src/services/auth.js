@@ -1,4 +1,4 @@
-import { auth, db, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber } from './firebase.js';
+import { auth, db, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber } from './firebase.js';
 
 /**
  * Ensures a user document exists in Firestore. 
@@ -8,7 +8,7 @@ export const checkAndCreateUserDoc = async (user) => {
   if (!db) return { isNewUser: true }; // Fallback if Firebase not configured
   
   const userRef = doc(db, 'users', user.uid);
-  const userSnap = await getDoc(userRef);
+  const userSnap = await getDocFromServer(userRef);
   
   if (!userSnap.exists()) {
     // New user, create initial document

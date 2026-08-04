@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, serverTimestamp, initializeFirestore } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, initializeFirestore, persistentLocalCache } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -18,7 +18,10 @@ try {
   if (firebaseConfig.apiKey) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
-    db = initializeFirestore(app, { experimentalForceLongPolling: true });
+    db = initializeFirestore(app, { 
+      localCache: persistentLocalCache(),
+      experimentalForceLongPolling: true
+    });
   } else {
     console.warn('Firebase configuration missing. Please add VITE_FIREBASE_* environment variables to your .env file.');
   }
@@ -26,4 +29,4 @@ try {
   console.error('Firebase initialization error:', error);
 }
 
-export { auth, db, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, RecaptchaVerifier, signInWithPhoneNumber, doc, setDoc, getDoc, serverTimestamp };
+export { auth, db, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, RecaptchaVerifier, signInWithPhoneNumber, doc, setDoc, getDoc, getDocFromServer, serverTimestamp };
