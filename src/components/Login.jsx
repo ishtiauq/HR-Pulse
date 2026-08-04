@@ -67,7 +67,7 @@ function MarketingSectionOne({ containerRef }) {
       iconColor: "bg-black/5 text-black",
       content: (
         <div className="flex flex-col gap-3 w-full max-w-sm ml-auto">
-           <div className="bg-black/5 p-4 rounded-xl backdrop-blur-sm border border-black/10 shadow-lg">
+           <div className="bg-black/5 p-4 rounded-xl backdrop-blur-sm border border-black/10 shadow-sm">
              <div className="text-sm font-semibold">Clocked In: 09:00 AM</div>
              <div className="text-xs text-black/70">On time</div>
            </div>
@@ -85,7 +85,7 @@ function MarketingSectionOne({ containerRef }) {
       iconColor: "bg-black/10 text-white",
       content: (
         <div className="flex flex-col gap-3 w-full max-w-sm ml-auto">
-           <div className="bg-black/10 p-4 rounded-xl backdrop-blur-sm border border-black/10 shadow-lg">
+           <div className="bg-black/10 p-4 rounded-xl backdrop-blur-sm border border-black/10 shadow-sm">
              <div className="text-sm font-semibold">Expense Request: Lunch</div>
              <div className="text-xs text-white/70">$15.00</div>
            </div>
@@ -103,7 +103,7 @@ function MarketingSectionOne({ containerRef }) {
       iconColor: "bg-black/5 text-black",
       content: (
         <div className="flex flex-col gap-3 w-full max-w-sm ml-auto">
-           <div className="bg-black/5 p-4 rounded-xl backdrop-blur-sm border border-black/10 shadow-lg">
+           <div className="bg-black/5 p-4 rounded-xl backdrop-blur-sm border border-black/10 shadow-sm">
              <div className="text-sm font-semibold">New Announcement</div>
              <div className="text-xs text-black/70">Townhall meeting at 3 PM</div>
            </div>
@@ -116,27 +116,23 @@ function MarketingSectionOne({ containerRef }) {
     }
   ]
 
-  const card1Scale = useTransform(scrollYProgress, [0, 0.33, 0.66], [1, 0.96, 0.92])
-  
-  const card2Y = useTransform(scrollYProgress, [0, 0.33], [2000, 60])
-  const card2Scale = useTransform(scrollYProgress, [0.33, 0.66], [1, 0.96])
-  
-  const card3Y = useTransform(scrollYProgress, [0.33, 0.66], [2000, 120])
+  const card2Y = useTransform(scrollYProgress, [0, 0.33], [2000, 85])
+  const card3Y = useTransform(scrollYProgress, [0.33, 0.66], [2000, 170])
 
   return (
     <section ref={sectionRef} className="relative w-full h-[300vh] snap-start">
       <div className="sticky top-0 h-dvh w-full flex flex-col items-center justify-center overflow-hidden px-4 sm:px-8">
-        <div className="w-full max-w-7xl text-left mb-6 sm:mb-10 z-20">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground tracking-tight mb-4">
+        <div className="w-full text-left mb-6 sm:mb-10 z-20">
+          <h2 className="text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] font-black tracking-tight mb-4 text-foreground">
             Why Choose <span className="text-[#FE4D01]">Kormiis?</span>
           </h2>
         </div>
 
-        <div className="relative w-full max-w-7xl h-[60vh] min-h-[400px] flex justify-center perspective-[2000px]">
+        <div className="relative w-full h-[40vh] md:h-[45vh] min-h-[300px] flex justify-center perspective-[2000px]">
           {/* Card 1 */}
           <motion.div 
-            style={{ y: "0px", scale: card1Scale }}
-            className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-2xl flex flex-col origin-top ${cards[0].bgColor}`}
+            style={{ y: "0px" }}
+            className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-sm flex flex-col origin-top ${cards[0].bgColor}`}
           >
             <div className="flex items-center gap-5 mb-6 sm:mb-10">
               <div className={`w-14 h-14 rounded-2xl flex shrink-0 items-center justify-center ${cards[0].iconColor}`}>
@@ -156,8 +152,8 @@ function MarketingSectionOne({ containerRef }) {
 
           {/* Card 2 */}
           <motion.div 
-            style={{ y: card2Y, scale: card2Scale }}
-            className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-2xl flex flex-col origin-top ${cards[1].bgColor}`}
+            style={{ y: card2Y }}
+            className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-sm flex flex-col origin-top ${cards[1].bgColor}`}
           >
             <div className="flex items-center gap-5 mb-6 sm:mb-10">
               <div className={`w-14 h-14 rounded-2xl flex shrink-0 items-center justify-center ${cards[1].iconColor}`}>
@@ -178,7 +174,7 @@ function MarketingSectionOne({ containerRef }) {
           {/* Card 3 */}
           <motion.div 
             style={{ y: card3Y }}
-            className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-2xl flex flex-col origin-top ${cards[2].bgColor}`}
+            className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-sm flex flex-col origin-top ${cards[2].bgColor}`}
           >
             <div className="flex items-center gap-5 mb-6 sm:mb-10">
               <div className={`w-14 h-14 rounded-2xl flex shrink-0 items-center justify-center ${cards[2].iconColor}`}>
@@ -236,8 +232,8 @@ function MarketingSectionTwo() {
       <motion.div
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        initial={{ opacity: 0, scale: 0.9, filter: "blur(15px)" }}
-        whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+        initial={{ opacity: 0, filter: "blur(15px)" }}
+        whileInView={{ opacity: 1, filter: "blur(0px)" }}
         viewport={{ once: false, amount: 0.4 }}
         transition={{ duration: 1, type: "spring", stiffness: 150, damping: 25 }}
         style={{
@@ -349,7 +345,7 @@ function FaqSection() {
               whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
               viewport={{ once: false, amount: 0.3 }}
               transition={{ delay: i * 0.05, duration: 0.5, ease: "easeOut" }}
-              className={`relative flex flex-col overflow-hidden rounded-2xl border bg-background/95 shadow-lg backdrop-blur-xl transition-colors ${isOpen ? 'border-primary/40' : 'border-border/50'}`}
+              className={`relative flex flex-col overflow-hidden rounded-2xl border bg-background/95 shadow-sm backdrop-blur-xl transition-colors ${isOpen ? 'border-primary/40' : 'border-border/50'}`}
             >
               <button
                 onClick={() => setOpen(isOpen ? -1 : i)}
@@ -401,11 +397,56 @@ function MarketingStackedSections({ containerRef }) {
       {/* Section 3 (Scrolls on top) */}
       <div 
         ref={section2Ref} 
-        className="relative z-10 w-full min-h-dvh flex flex-col items-center justify-center snap-start"
+        className="relative z-10 w-full min-h-dvh flex flex-col items-center justify-center snap-start bg-black text-white"
       >
         <MarketingSectionTwo />
       </div>
     </div>
+  )
+}
+
+function FooterSection({ themeMode, logoSrc }) {
+  const currentYear = new Date().getFullYear();
+  return (
+    <footer className="w-full bg-background border-t border-border py-12 px-6 sm:px-10 lg:px-16 mt-auto shrink-0 snap-start">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-10">
+        <div className="flex flex-col gap-4 max-w-sm">
+          <img 
+            src={logoSrc} 
+            alt="HR Pulse Logo" 
+            className={`block h-8 w-auto object-contain object-left self-start shrink-0 ${themeMode === 'dark' ? 'invert' : ''}`} 
+          />
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Kormiis is the all-in-one platform for modern HR, Payroll, and Team Management. Empowering teams to win.
+          </p>
+        </div>
+        
+        <div className="flex gap-16 sm:gap-24">
+          <div className="flex flex-col gap-3">
+            <h4 className="font-bold text-foreground">Product</h4>
+            <a href="#" className="text-sm text-muted-foreground hover:text-[#FE4D01] transition-colors">Features</a>
+            <a href="#" className="text-sm text-muted-foreground hover:text-[#FE4D01] transition-colors">Pricing</a>
+            <a href="#" className="text-sm text-muted-foreground hover:text-[#FE4D01] transition-colors">Integrations</a>
+          </div>
+          <div className="flex flex-col gap-3">
+            <h4 className="font-bold text-foreground">Company</h4>
+            <a href="#" className="text-sm text-muted-foreground hover:text-[#FE4D01] transition-colors">About Us</a>
+            <a href="#" className="text-sm text-muted-foreground hover:text-[#FE4D01] transition-colors">Careers</a>
+            <a href="#" className="text-sm text-muted-foreground hover:text-[#FE4D01] transition-colors">Contact</a>
+          </div>
+        </div>
+      </div>
+      
+      <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
+        <p className="text-sm text-muted-foreground">
+          &copy; {currentYear} Kormiis. All rights reserved.
+        </p>
+        <div className="flex gap-6">
+          <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
+          <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
+        </div>
+      </div>
+    </footer>
   )
 }
 
@@ -805,17 +846,17 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       {/* Scroll deck: one full-viewport section per step */}
       <div className="relative z-10">
         {/* Section 1: Hero Heading */}
-        <section className="relative h-dvh w-full flex flex-col items-center justify-center lg:justify-start lg:pt-[100px] lg:pb-6 px-6 sm:px-10 lg:px-16 snap-start overflow-hidden">
+        <section className="relative h-dvh w-full flex flex-col items-center pt-[80px] pb-[100px] px-4 sm:px-10 lg:px-16 snap-start overflow-hidden">
           <motion.div
             style={{ opacity: headingOpacity, y: headingY }}
-            className="flex flex-col items-center w-full h-full lg:h-[calc(100vh-124px)] lg:gap-8 mt-10 lg:mt-0"
+            className="flex flex-col items-center justify-center w-full h-full gap-6 sm:gap-8 lg:gap-10"
           >
             {/* Headline */}
             <motion.h1 
               initial={{ filter: "blur(20px)", opacity: 0, scale: 1.1 }}
               animate={{ filter: "blur(0px)", opacity: 1, scale: 1 }}
               transition={{ duration: 1.2, ease: "easeOut" }}
-              className="login-hero-title uppercase text-5xl sm:text-6xl lg:text-[52px] xl:text-[96px] w-full font-black tracking-tight leading-[1.1] text-center shrink-0"
+              className="login-hero-title uppercase text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] w-full font-black tracking-tight text-center shrink-0"
             >
               When{' '}
               <span className="text-primary relative inline-block align-baseline">
@@ -830,29 +871,30 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               Business<br className="sm:hidden" /> Follows.
             </motion.h1>
 
-            {/* Image (Flexible height to keep everything in viewport) */}
+            {/* Image */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
-              className="mt-6 sm:mt-10 lg:mt-0 w-full max-w-7xl flex-1 min-h-0 flex items-center justify-center mix-blend-multiply dark:mix-blend-screen"
+              className="w-full max-w-7xl flex justify-center mix-blend-multiply dark:mix-blend-screen overflow-hidden"
+              style={{ flexShrink: 1, minHeight: 0 }}
             >
-              <img src={heroCharacters} alt="Team" className="w-full h-full object-contain max-h-[40vh] sm:max-h-[50vh] lg:max-h-full" />
+              <img src={heroCharacters} alt="Team" className="w-full h-full object-contain max-h-[40vh] sm:max-h-[50vh] lg:max-h-[65vh]" />
             </motion.div>
+          </motion.div>
             
-            {/* Scroll Indicator (Desktop only - static flow at bottom) */}
-            <motion.div
-              style={{ opacity: scrollIndicatorOpacity }}
-              className="hidden lg:flex flex-col items-center gap-2 shrink-0 z-20 pointer-events-none"
+          {/* Scroll Indicator (Absolute bottom edge of viewport) */}
+          <motion.div
+            style={{ opacity: scrollIndicatorOpacity }}
+            className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-20 pointer-events-none"
+          >
+            <span className="text-xs font-bold uppercase tracking-widest text-[#FE4D01]">Scroll</span>
+            <motion.div 
+              animate={{ y: [0, 8, 0] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+              className="w-10 h-10 rounded-full bg-[#FE4D01] flex items-center justify-center text-white shadow-[0_0_15px_rgba(254,77,1,0.4)]"
             >
-              <span className="text-xs font-bold uppercase tracking-widest text-[#FE4D01]">Scroll</span>
-              <motion.div 
-                animate={{ y: [0, 8, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                className="w-10 h-10 rounded-full bg-[#FE4D01] flex items-center justify-center text-white shadow-[0_0_15px_rgba(254,77,1,0.4)]"
-              >
-                <Icon name="arrow_downward" size={24} />
-              </motion.div>
+              <Icon name="arrow_downward" size={24} />
             </motion.div>
           </motion.div>
         </section>
@@ -861,23 +903,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         <MarketingStackedSections containerRef={containerRef} />
       </div>
 
-      {/* Scroll Indicator (Mobile/Tablet only - fixed bottom) */}
-      <motion.div
-        style={{ opacity: scrollIndicatorOpacity }}
-        className="lg:hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-20 pointer-events-none flex flex-col items-center gap-2"
-      >
-        <span className="text-xs font-bold uppercase tracking-widest text-[#FE4D01]">Scroll</span>
-        <motion.div 
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-          className="w-10 h-10 rounded-full bg-[#FE4D01] flex items-center justify-center text-white shadow-[0_0_15px_rgba(254,77,1,0.4)]"
-        >
-          <Icon name="arrow_downward" size={24} />
-        </motion.div>
-      </motion.div>
+
 
       {/* Section 7: Auth Modal */}
-      <section className="relative h-dvh w-full flex flex-col items-center justify-center px-4 pb-8 sm:pb-0 snap-start overflow-hidden">
+      <section className="relative h-dvh w-full flex flex-col items-center justify-center px-4 pb-8 sm:pb-0 snap-start overflow-hidden bg-black text-white">
               {/* Invisible box — holds card + ribbon as one unit and scales to fit every viewport */}
               <div className="login-modal-box relative z-10">
               <motion.div
@@ -898,7 +927,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 {/* 2. Lanyard Front (In front of Card) */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-20">
                   {/* Slot Hole Base (Matches page background to simulate a real hole) */}
-                  <div className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[56px] h-[12px] rounded-full bg-background" />
+                  <div className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[56px] h-[12px] rounded-full bg-black" />
 
                   {/* Slot Hole Inner Shadow (Moved BEFORE Front Strap so Front Strap covers its top border) */}
                   <div className="absolute top-[22px] left-1/2 -translate-x-1/2 w-[56px] h-[12px] rounded-full border border-border/50 shadow-[inset_0_4px_6px_rgba(0,0,0,0.4)] dark:shadow-[inset_0_4px_8px_rgba(0,0,0,0.9)] pointer-events-none" />
@@ -910,7 +939,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 </div>
 
                  {/* Card Container */}
-                <div className="bg-card backdrop-blur-2xl border border-border rounded-2xl sm:rounded-[28px] shadow-2xl relative z-10 overflow-hidden pt-12 pb-2">
+                <div className="bg-[#F0F8FF] backdrop-blur-2xl border border-border rounded-2xl sm:rounded-[28px] shadow-2xl relative z-10 overflow-hidden pt-12 pb-2">
               
               {/* Top Glow Effect */}
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
@@ -932,7 +961,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                           value={email}
                           onChange={e => setEmail(e.target.value)}
                           placeholder="name@company.com"
-                          className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
+                          className="w-full border-input bg-gray-100 text-gray-900 px-4 py-3 text-sm font-medium focus:outline-none transition-all"
                           required
                         />
                       </div>
@@ -944,7 +973,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             placeholder="••••••••"
-                            className="w-full border-input px-4 py-3 pr-11 text-sm font-medium focus:outline-none transition-all"
+                            className="w-full border-input bg-gray-100 text-gray-900 px-4 py-3 pr-11 text-sm font-medium focus:outline-none transition-all"
                             required
                           />
                           <button 
@@ -1014,7 +1043,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 placeholder="name@company.com"
-                                className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
+                                className="w-full border-input bg-gray-100 text-gray-900 px-4 py-3 text-sm font-medium focus:outline-none transition-all"
                                 required
                               />
                             </div>
@@ -1026,7 +1055,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                                   value={password}
                                   onChange={e => setPassword(e.target.value)}
                                   placeholder="••••••••"
-                                  className="w-full border-input px-4 py-3 pr-11 text-sm font-medium focus:outline-none transition-all"
+                                  className="w-full border-input bg-gray-100 text-gray-900 px-4 py-3 pr-11 text-sm font-medium focus:outline-none transition-all"
                                   required
                                 />
                                 <button 
@@ -1059,7 +1088,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                               disabled={isLoading}
                               className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-muted/40 border border-border rounded-2xl text-sm font-semibold text-foreground hover:bg-muted transition disabled:opacity-50"
                             >
-                              <Icon name="cloud" size={18} /> Google
+                              <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.01 24.01 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg> Google
                             </button>
                             <button 
                               onClick={() => setMode('phone')} 
@@ -1079,7 +1108,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                               value={email}
                               onChange={e => setEmail(e.target.value)}
                               placeholder="name@company.com"
-                              className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
+                              className="w-full border-input bg-gray-100 text-gray-900 px-4 py-3 text-sm font-medium focus:outline-none transition-all"
                               required
                             />
                           </div>
@@ -1091,7 +1120,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 placeholder="••••••••"
-                                className="w-full border-input px-4 py-3 pr-11 text-sm font-medium focus:outline-none transition-all"
+                                className="w-full border-input bg-gray-100 text-gray-900 px-4 py-3 pr-11 text-sm font-medium focus:outline-none transition-all"
                                 required
                               />
                               <button 
@@ -1266,6 +1295,9 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
       {/* Section 8: FAQ */}
       <FaqSection />
+
+      {/* Footer */}
+      <FooterSection themeMode={themeMode} logoSrc={hrPulseLogo} />
 
       {/* Intermediate Auth Modal */}
       {showIntermediateModal && (
