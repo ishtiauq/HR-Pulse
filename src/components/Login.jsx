@@ -14,18 +14,18 @@ const ADMIN_ACCOUNTS_KEY = 'hr_pulse_admin_accounts'
 const MARKETING_PILLARS = [
   {
     icon: 'groups',
-    title: 'People & Pay',
-    desc: 'Seamless Attendance tracking that flows directly into automated Payroll.'
+    title: 'Attendance that pays itself',
+    desc: 'One-tap clock-in flows straight into automated payroll — no re-typing, no errors.'
   },
   {
     icon: 'account_balance_wallet',
-    title: 'Finance & Assets',
-    desc: 'Instant Asset tracking and Expense management for complete visibility.'
+    title: 'Every taka, tracked',
+    desc: 'Salaries, expenses & company assets in real-time view, all in one place.'
   },
   {
     icon: 'forum',
-    title: 'Collaboration',
-    desc: 'Company-wide Announcements, Calendars, and Task management for the whole squad.'
+    title: 'Teamwork without the chaos',
+    desc: 'Announcements, events, tasks & documents — one home for the whole squad.'
   }
 ]
 
@@ -61,8 +61,8 @@ function MarketingSectionOne({ containerRef }) {
 
   const cards = [
     {
-      title: "People & Pay",
-      subtitle: "Seamless Attendance tracking that flows directly into automated Payroll.",
+      title: "Attendance that pays itself",
+      subtitle: "One-tap clock-in flows straight into automated payroll — no re-typing, no errors.",
       bgColor: "bg-white text-black",
       iconColor: "bg-black/5 text-black",
       content: (
@@ -79,8 +79,8 @@ function MarketingSectionOne({ containerRef }) {
       )
     },
     {
-      title: "Finance & Assets",
-      subtitle: "Instant Asset tracking and Expense management for complete visibility.",
+      title: "Every taka, tracked",
+      subtitle: "Salaries, expenses & company assets in real-time view, all in one place.",
       bgColor: "bg-[#FE4D01] text-white",
       iconColor: "bg-black/10 text-white",
       content: (
@@ -97,8 +97,8 @@ function MarketingSectionOne({ containerRef }) {
       )
     },
     {
-      title: "Collaboration",
-      subtitle: "Company-wide Announcements, Calendars, and Task management for the whole squad.",
+      title: "Teamwork without the chaos",
+      subtitle: "Announcements, events, tasks & documents — one home for the whole squad.",
       bgColor: "bg-white text-black",
       iconColor: "bg-black/5 text-black",
       content: (
@@ -126,6 +126,29 @@ function MarketingSectionOne({ containerRef }) {
           <h2 className="text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] font-black tracking-tight mb-4 text-foreground">
             Why Choose <span className="text-[#FE4D01]">Kormiis?</span>
           </h2>
+          <p className="text-xl sm:text-2xl text-muted-foreground font-medium max-w-3xl mb-8">
+            Everything a growing team needs — without the enterprise price tag or the setup headache.
+          </p>
+          
+          {/* Differentiators strip */}
+          <div className="flex flex-wrap gap-3">
+            <div className="flex items-center gap-2 px-4 py-2 bg-background/50 backdrop-blur-md rounded-full border border-border">
+              <Icon name="money_off" size={18} className="text-[#FE4D01]" />
+              <span className="text-sm font-bold">Zero cost — no per-seat fees</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-background/50 backdrop-blur-md rounded-full border border-border">
+              <Icon name="timer" size={18} className="text-[#FE4D01]" />
+              <span className="text-sm font-bold">Zero setup — ready in minutes</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-background/50 backdrop-blur-md rounded-full border border-border">
+              <Icon name="cloud_done" size={18} className="text-[#FE4D01]" />
+              <span className="text-sm font-bold">Your Drive, your rules — never locked in their cloud</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-background/50 backdrop-blur-md rounded-full border border-border">
+              <Icon name="devices" size={18} className="text-[#FE4D01]" />
+              <span className="text-sm font-bold">Works on any device — desktop, tablet, mobile</span>
+            </div>
+          </div>
         </div>
 
         <div className="relative w-full h-[40vh] md:h-[45vh] min-h-[300px] flex justify-center perspective-[2000px]">
@@ -274,7 +297,7 @@ function MarketingSectionTwo() {
               </span>
             </h2>
             <p className="text-sm sm:text-base text-white/80 font-medium leading-relaxed text-justify drop-shadow-md">
-              No cap—we're giving it away for free for a limited time. Go absolutely crazy, use all the features, and pay literally nothing right now. No subscriptions, no hidden fees. Plus, everything lives securely encrypted in your own Google Drive. Immaculate HR vibes.
+              Free for growing teams, no subscriptions or hidden fees. Your data stays securely encrypted in your own Google Drive.
             </p>
           </div>
         </div>
@@ -298,6 +321,14 @@ function MarketingSectionTwo() {
 
 // FAQ content — each entry renders as its own split glass card
 const FAQ_ITEMS = [
+  {
+    q: 'Can Kormiis read my company data?',
+    a: 'No — encrypted in a private app-data folder in your own Google Drive; only you and your team decide access.',
+  },
+  {
+    q: "What's the catch if it's free?",
+    a: 'No catch — free for a limited time for growing teams; no subscriptions, no card.',
+  },
   {
     q: 'Is HR Pulse really free?',
     a: 'Yes — creating a workspace is 100% free. No credit card, no trial clock, no hidden fees. You stay in full control of everything.',
@@ -394,6 +425,44 @@ function MarketingStackedSections({ containerRef }) {
         <MarketingSectionOne containerRef={containerRef} />
       </motion.div>
 
+      {/* New "Live in 3 steps" section (between Section 2 and Membership card) */}
+      <section className="relative z-10 w-full min-h-[70vh] flex flex-col items-center justify-center snap-start bg-background text-foreground px-4 py-20">
+        <div className="max-w-5xl mx-auto w-full">
+          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-center mb-16">
+            Live in <span className="text-primary">3 steps</span>
+          </h2>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12 relative">
+            {/* Connecting line */}
+            <div className="hidden sm:block absolute top-12 left-[15%] right-[15%] h-[2px] bg-border z-0"></div>
+            
+            <div className="relative z-10 flex flex-col items-center text-center gap-4">
+              <div className="w-24 h-24 rounded-full bg-primary/10 border-4 border-background flex items-center justify-center text-primary mb-2 shadow-sm">
+                <Icon name="cloud_sync" size={40} />
+              </div>
+              <h3 className="text-xl font-bold">1. Connect Google Drive</h3>
+              <p className="text-muted-foreground">Your private encrypted app-folder is created instantly.</p>
+            </div>
+            
+            <div className="relative z-10 flex flex-col items-center text-center gap-4">
+              <div className="w-24 h-24 rounded-full bg-primary/10 border-4 border-background flex items-center justify-center text-primary mb-2 shadow-sm">
+                <Icon name="person_add" size={40} />
+              </div>
+              <h3 className="text-xl font-bold">2. Invite your team</h3>
+              <p className="text-muted-foreground">Each teammate gets a secure portal.</p>
+            </div>
+            
+            <div className="relative z-10 flex flex-col items-center text-center gap-4">
+              <div className="w-24 h-24 rounded-full bg-primary/10 border-4 border-background flex items-center justify-center text-primary mb-2 shadow-sm">
+                <Icon name="query_stats" size={40} />
+              </div>
+              <h3 className="text-xl font-bold">3. Track everything</h3>
+              <p className="text-muted-foreground">Attendance flows into payroll; expenses & assets stay visible.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Section 3 (Scrolls on top) */}
       <div 
         ref={section2Ref} 
@@ -417,7 +486,7 @@ function FooterSection({ themeMode, logoSrc }) {
             className={`block h-8 w-auto object-contain object-left self-start shrink-0 ${themeMode === 'dark' ? 'invert' : ''}`} 
           />
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Kormiis is the all-in-one platform for modern HR, Payroll, and Team Management. Empowering teams to win.
+            Kormiis is the free all-in-one HR, Payroll & team management platform that lives in your own Google Drive. Empowering teams to win.
           </p>
         </div>
         
@@ -899,6 +968,36 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           </motion.div>
         </section>
 
+        {/* New "Sound familiar?" pain strip (between hero and Section 2) */}
+        <section className="relative z-10 w-full py-16 sm:py-24 bg-background border-y border-border px-4 snap-start flex flex-col items-center justify-center min-h-[50vh]">
+          <div className="max-w-4xl mx-auto w-full text-center">
+            <h2 className="text-2xl sm:text-4xl font-bold mb-10 text-foreground">Sound familiar?</h2>
+            
+            <div className="flex flex-col gap-6 items-center text-left max-w-2xl mx-auto mb-12">
+              <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-2xl border border-border/50 w-full">
+                <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
+                  <Icon name="close" size={20} />
+                </div>
+                <p className="text-lg text-muted-foreground font-medium">Attendance tracked in a WhatsApp group chat</p>
+              </div>
+              <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-2xl border border-border/50 w-full">
+                <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
+                  <Icon name="close" size={20} />
+                </div>
+                <p className="text-lg text-muted-foreground font-medium">Payroll weekends spent re-typing spreadsheets</p>
+              </div>
+              <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-2xl border border-border/50 w-full">
+                <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
+                  <Icon name="close" size={20} />
+                </div>
+                <p className="text-lg text-muted-foreground font-medium">Company assets, expenses & leave scattered everywhere</p>
+              </div>
+            </div>
+            
+            <h3 className="text-xl sm:text-2xl font-bold text-primary">Kormiis puts it all in one place.</h3>
+          </div>
+        </section>
+
         {/* Section 2 & 3: Marketing Highlights (Stacked with Blur Transition) */}
         <MarketingStackedSections containerRef={containerRef} />
       </div>
@@ -906,7 +1005,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
 
       {/* Section 7: Auth Modal */}
-      <section className="relative h-dvh w-full flex flex-col items-center justify-center px-4 pb-8 sm:pb-0 snap-start overflow-hidden bg-black text-white">
+      <section id="auth-section" className="relative h-dvh w-full flex flex-col items-center justify-center px-4 pb-8 sm:pb-0 snap-start overflow-hidden bg-black text-white">
               {/* Invisible box — holds card + ribbon as one unit and scales to fit every viewport */}
               <div className="login-modal-box relative z-10">
               <motion.div
