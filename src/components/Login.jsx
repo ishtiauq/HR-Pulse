@@ -8,6 +8,12 @@ import { verifyPassword, hashPassword } from '../services/crypto.js'
 import { loginWithGoogle, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, updateProfileData, updateDriveConnectionStatus, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp } from '../services/auth.js'
 import Dashboard from './Dashboard.jsx'
 import { allNavItems } from '../utils/helpers.js'
+import painStripIllustration from '../Assets/pain-strip.png'
+import threeStepsIllustration from '../Assets/three-steps.png'
+import faqIllustration from '../Assets/faq-illustration.png'
+import card1Illustration from '../Assets/card-1.png'
+import card2Illustration from '../Assets/card-2.png'
+import card3Illustration from '../Assets/card-3.png'
 
 const ADMIN_ACCOUNTS_KEY = 'hr_pulse_admin_accounts'
 
@@ -65,16 +71,10 @@ function MarketingSectionOne({ containerRef }) {
       subtitle: "One-tap clock-in flows straight into automated payroll — no re-typing, no errors.",
       bgColor: "bg-white text-black",
       iconColor: "bg-black/5 text-black",
+      iconName: "groups",
       content: (
-        <div className="flex flex-col gap-3 w-full max-w-sm ml-auto">
-           <div className="bg-black/5 p-4 rounded-xl backdrop-blur-sm border border-black/10 shadow-sm">
-             <div className="text-sm font-semibold">Clocked In: 09:00 AM</div>
-             <div className="text-xs text-black/70">On time</div>
-           </div>
-           <div className="bg-black/5 p-4 rounded-xl backdrop-blur-sm border border-black/10 ml-8">
-             <div className="text-sm font-semibold">Payroll processed</div>
-             <div className="text-xs text-black/70">Payslip generated</div>
-           </div>
+        <div className="flex w-full max-w-sm ml-auto justify-end">
+           <img src={card1Illustration} alt="Attendance & Payroll" className="w-full h-full max-h-[160px] sm:max-h-[220px] object-contain rounded-2xl drop-shadow-sm transition-all duration-300" />
         </div>
       )
     },
@@ -83,33 +83,63 @@ function MarketingSectionOne({ containerRef }) {
       subtitle: "Salaries, expenses & company assets in real-time view, all in one place.",
       bgColor: "bg-[#FE4D01] text-white",
       iconColor: "bg-black/10 text-white",
+      iconName: "account_balance_wallet",
       content: (
-        <div className="flex flex-col gap-3 w-full max-w-sm ml-auto">
-           <div className="bg-black/10 p-4 rounded-xl backdrop-blur-sm border border-black/10 shadow-sm">
-             <div className="text-sm font-semibold">Expense Request: Lunch</div>
-             <div className="text-xs text-white/70">$15.00</div>
-           </div>
-           <div className="bg-black/5 p-4 rounded-xl backdrop-blur-sm border border-black/10 ml-8">
-             <div className="text-sm font-semibold">Approved</div>
-             <div className="text-xs text-white/70">Funds transferred</div>
-           </div>
+        <div className="flex w-full max-w-sm ml-auto justify-end">
+           <img src={card2Illustration} alt="Finance & Assets" className="w-full h-full max-h-[160px] sm:max-h-[220px] object-contain rounded-2xl drop-shadow-sm transition-all duration-300" />
         </div>
       )
     },
     {
       title: "Teamwork without the chaos",
       subtitle: "Announcements, events, tasks & documents — one home for the whole squad.",
+      bgColor: "bg-black text-white",
+      iconColor: "bg-white/10 text-white",
+      iconName: "forum",
+      content: (
+        <div className="flex w-full max-w-sm ml-auto justify-end">
+           <img src={card3Illustration} alt="Collaboration" className="w-full h-full max-h-[160px] sm:max-h-[220px] object-contain rounded-2xl drop-shadow-sm transition-all duration-300" />
+        </div>
+      )
+    },
+    {
+      title: "Works on any device",
+      subtitle: "Desktop, tablet, or mobile — Kormiis adapts to wherever you work.",
       bgColor: "bg-white text-black",
       iconColor: "bg-black/5 text-black",
+      iconName: "devices",
       content: (
-        <div className="flex flex-col gap-3 w-full max-w-sm ml-auto">
-           <div className="bg-black/5 p-4 rounded-xl backdrop-blur-sm border border-black/10 shadow-sm">
-             <div className="text-sm font-semibold">New Announcement</div>
-             <div className="text-xs text-black/70">Townhall meeting at 3 PM</div>
+        <div className="flex w-full max-w-sm ml-auto justify-end">
+           <div className="w-full h-[160px] sm:h-[220px] flex items-center justify-center bg-black/5 rounded-2xl">
+             <Icon name="important_devices" size={80} className="text-black/20" />
            </div>
-           <div className="bg-black/5 p-4 rounded-xl backdrop-blur-sm border border-black/10 ml-8">
-             <div className="text-sm font-semibold">Task Assigned</div>
-             <div className="text-xs text-black/70">Prepare slides</div>
+        </div>
+      )
+    },
+    {
+      title: "Your drive, Your Rules",
+      subtitle: "Everything is stored in your secure Google Drive. We don't lock you in.",
+      bgColor: "bg-[#FE4D01] text-white",
+      iconColor: "bg-black/10 text-white",
+      iconName: "cloud_done",
+      content: (
+        <div className="flex w-full max-w-sm ml-auto justify-end">
+           <div className="w-full h-[160px] sm:h-[220px] flex items-center justify-center bg-black/10 rounded-2xl">
+             <Icon name="security" size={80} className="text-white/30" />
+           </div>
+        </div>
+      )
+    },
+    {
+      title: "Zero Fees",
+      subtitle: "No per-seat licenses. Kormiis is completely free to use.",
+      bgColor: "bg-black text-white",
+      iconColor: "bg-white/10 text-white",
+      iconName: "money_off",
+      content: (
+        <div className="flex w-full max-w-sm ml-auto justify-end">
+           <div className="w-full h-[160px] sm:h-[220px] flex items-center justify-center bg-white/10 rounded-2xl">
+             <Icon name="payments" size={80} className="text-white/30" />
            </div>
         </div>
       )
@@ -151,69 +181,58 @@ function MarketingSectionOne({ containerRef }) {
           </div>
         </div>
 
-        <div className="relative w-full h-[40vh] md:h-[45vh] min-h-[300px] flex justify-center perspective-[2000px]">
-          {/* Card 1 */}
-          <motion.div 
-            style={{ y: "0px" }}
-            className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-sm flex flex-col origin-top ${cards[0].bgColor}`}
-          >
-            <div className="flex items-center gap-5 mb-6 sm:mb-10">
-              <div className={`w-14 h-14 rounded-2xl flex shrink-0 items-center justify-center ${cards[0].iconColor}`}>
-                <Icon name="groups" size={28} />
-              </div>
-              <h3 className="text-3xl sm:text-4xl font-black">{cards[0].title}</h3>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-8 flex-1 w-full items-center">
-              <div className="flex-1">
-                <p className="text-lg sm:text-xl opacity-90 leading-relaxed">{cards[0].subtitle}</p>
-              </div>
-              <div className="flex-1 w-full flex items-center justify-end">
-                {cards[0].content}
-              </div>
-            </div>
-          </motion.div>
+        <div className="w-full h-[45vh] md:h-[50vh] min-h-[350px] grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 perspective-[2000px]">
+          {/* Left Column Stack */}
+          <div className="relative w-full h-full flex justify-center">
+            {[0, 1, 2].map((i) => (
+              <motion.div 
+                key={i}
+                style={{ y: i === 0 ? "0px" : i === 1 ? card2Y : card3Y }}
+                className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-sm flex flex-col origin-top overflow-hidden ${cards[i].bgColor}`}
+              >
+                <div className="flex items-center gap-5 mb-6 sm:mb-10">
+                  <div className={`w-14 h-14 rounded-2xl flex shrink-0 items-center justify-center ${cards[i].iconColor}`}>
+                    <Icon name={cards[i].iconName} size={28} />
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-black">{cards[i].title}</h3>
+                </div>
+                <div className="flex flex-col gap-6 flex-1 w-full">
+                  <div className="w-full">
+                    <p className="text-base sm:text-lg opacity-90 leading-relaxed">{cards[i].subtitle}</p>
+                  </div>
+                  <div className="flex-1 w-full flex items-end justify-center">
+                    {cards[i].content}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
 
-          {/* Card 2 */}
-          <motion.div 
-            style={{ y: card2Y }}
-            className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-sm flex flex-col origin-top ${cards[1].bgColor}`}
-          >
-            <div className="flex items-center gap-5 mb-6 sm:mb-10">
-              <div className={`w-14 h-14 rounded-2xl flex shrink-0 items-center justify-center ${cards[1].iconColor}`}>
-                <Icon name="account_balance_wallet" size={28} />
-              </div>
-              <h3 className="text-3xl sm:text-4xl font-black">{cards[1].title}</h3>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-8 flex-1 w-full items-center">
-              <div className="flex-1">
-                <p className="text-lg sm:text-xl opacity-90 leading-relaxed">{cards[1].subtitle}</p>
-              </div>
-              <div className="flex-1 w-full flex items-center justify-end">
-                {cards[1].content}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Card 3 */}
-          <motion.div 
-            style={{ y: card3Y }}
-            className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-sm flex flex-col origin-top ${cards[2].bgColor}`}
-          >
-            <div className="flex items-center gap-5 mb-6 sm:mb-10">
-              <div className={`w-14 h-14 rounded-2xl flex shrink-0 items-center justify-center ${cards[2].iconColor}`}>
-                <Icon name="forum" size={28} />
-              </div>
-              <h3 className="text-3xl sm:text-4xl font-black">{cards[2].title}</h3>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-8 flex-1 w-full items-center">
-              <div className="flex-1">
-                <p className="text-lg sm:text-xl opacity-90 leading-relaxed">{cards[2].subtitle}</p>
-              </div>
-              <div className="flex-1 w-full flex items-center justify-end">
-                {cards[2].content}
-              </div>
-            </div>
-          </motion.div>
+          {/* Right Column Stack */}
+          <div className="relative w-full h-full flex justify-center">
+            {[3, 4, 5].map((i) => (
+              <motion.div 
+                key={i}
+                style={{ y: i === 3 ? "0px" : i === 4 ? card2Y : card3Y }}
+                className={`absolute top-0 w-full h-full p-8 sm:p-12 rounded-[2.5rem] shadow-sm flex flex-col origin-top overflow-hidden ${cards[i].bgColor}`}
+              >
+                <div className="flex items-center gap-5 mb-6 sm:mb-10">
+                  <div className={`w-14 h-14 rounded-2xl flex shrink-0 items-center justify-center ${cards[i].iconColor}`}>
+                    <Icon name={cards[i].iconName} size={28} />
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-black">{cards[i].title}</h3>
+                </div>
+                <div className="flex flex-col gap-6 flex-1 w-full">
+                  <div className="w-full">
+                    <p className="text-base sm:text-lg opacity-90 leading-relaxed">{cards[i].subtitle}</p>
+                  </div>
+                  <div className="flex-1 w-full flex items-end justify-center">
+                    {cards[i].content}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -355,51 +374,62 @@ const FAQ_ITEMS = [
 function FaqSection() {
   const [open, setOpen] = useState(0)
   return (
-    <section className="h-dvh w-full flex flex-col items-center justify-center px-4 sm:px-6 py-8 snap-start">
+    <section className="min-h-dvh w-full flex flex-col items-center justify-center px-4 sm:px-6 py-16 snap-start">
       <motion.h2
         initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
         whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         viewport={{ once: false, amount: 0.5 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight text-center mb-6 sm:mb-8"
+        className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight text-center mb-12"
       >
         Frequently asked questions
       </motion.h2>
 
-      <div className="w-full max-w-4xl grid grid-cols-1 gap-3 sm:gap-4">
-        {FAQ_ITEMS.map((item, i) => {
-          const isOpen = open === i
-          return (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 24, scale: 0.95, filter: "blur(10px)" }}
-              whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-              viewport={{ once: false, amount: 0.3 }}
-              transition={{ delay: i * 0.05, duration: 0.5, ease: "easeOut" }}
-              className={`relative flex flex-col overflow-hidden rounded-2xl border bg-background/95 shadow-sm backdrop-blur-xl transition-colors ${isOpen ? 'border-primary/40' : 'border-border/50'}`}
-            >
-              <button
-                onClick={() => setOpen(isOpen ? -1 : i)}
-                className="w-full flex items-center justify-between gap-4 p-5 text-left"
-              >
-                <span className="text-sm sm:text-base font-semibold text-foreground leading-snug">{item.q}</span>
-                <Icon
-                  name="expand_more"
-                  size={20}
-                  className={`shrink-0 text-primary transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-                />
-              </button>
+      <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center lg:items-start gap-12 lg:gap-16">
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: false, amount: 0.3 }}
+          className="w-full lg:w-1/3 max-w-sm mx-auto order-last lg:order-first"
+        >
+          <img src={faqIllustration} alt="FAQ" className="w-full h-auto object-contain rounded-2xl drop-shadow-sm transition-all duration-300" />
+        </motion.div>
+
+        <div className="w-full lg:w-2/3 grid grid-cols-1 gap-3 sm:gap-4">
+          {FAQ_ITEMS.map((item, i) => {
+            const isOpen = open === i
+            return (
               <motion.div
-                initial={false}
-                animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="overflow-hidden"
+                key={i}
+                initial={{ opacity: 0, y: 24, scale: 0.95, filter: "blur(10px)" }}
+                whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                viewport={{ once: false, amount: 0.3 }}
+                transition={{ delay: i * 0.05, duration: 0.5, ease: "easeOut" }}
+                className={`relative flex flex-col overflow-hidden rounded-2xl border bg-background/95 shadow-sm backdrop-blur-xl transition-colors ${isOpen ? 'border-primary/40' : 'border-border/50'}`}
               >
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed px-5 pb-5">{item.a}</p>
+                <button
+                  onClick={() => setOpen(isOpen ? -1 : i)}
+                  className="w-full flex items-center justify-between gap-4 p-5 text-left"
+                >
+                  <span className="text-sm sm:text-base font-semibold text-foreground leading-snug">{item.q}</span>
+                  <Icon
+                    name="expand_more"
+                    size={20}
+                    className={`shrink-0 text-primary transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                <motion.div
+                  initial={false}
+                  animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden"
+                >
+                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed px-5 pb-5">{item.a}</p>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
     </section>
   )
@@ -427,37 +457,48 @@ function MarketingStackedSections({ containerRef }) {
 
       {/* New "Live in 3 steps" section (between Section 2 and Membership card) */}
       <section className="relative z-10 w-full min-h-[70vh] flex flex-col items-center justify-center snap-start bg-background text-foreground px-4 py-20">
-        <div className="max-w-5xl mx-auto w-full">
+        <div className="max-w-6xl mx-auto w-full">
           <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-center mb-16">
             Live in <span className="text-primary">3 steps</span>
           </h2>
           
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12 relative">
-            {/* Connecting line */}
-            <div className="hidden sm:block absolute top-12 left-[15%] right-[15%] h-[2px] bg-border z-0"></div>
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: false, amount: 0.3 }}
+              className="w-full lg:w-1/3 max-w-sm mx-auto"
+            >
+              <img src={threeStepsIllustration} alt="3 Steps Workflow" className="w-full h-auto object-contain rounded-2xl drop-shadow-sm transition-all duration-300" />
+            </motion.div>
             
-            <div className="relative z-10 flex flex-col items-center text-center gap-4">
-              <div className="w-24 h-24 rounded-full bg-primary/10 border-4 border-background flex items-center justify-center text-primary mb-2 shadow-sm">
-                <Icon name="cloud_sync" size={40} />
+            <div className="w-full lg:w-2/3 grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12 relative">
+              {/* Connecting line */}
+              <div className="hidden sm:block absolute top-12 left-[15%] right-[15%] h-[2px] bg-border z-0"></div>
+              
+              <div className="relative z-10 flex flex-col items-center text-center gap-4">
+                <div className="w-24 h-24 rounded-full bg-primary/10 border-4 border-background flex items-center justify-center text-primary mb-2 shadow-sm">
+                  <Icon name="cloud_sync" size={40} />
+                </div>
+                <h3 className="text-xl font-bold">1. Connect Google Drive</h3>
+                <p className="text-muted-foreground">Your private encrypted app-folder is created instantly.</p>
               </div>
-              <h3 className="text-xl font-bold">1. Connect Google Drive</h3>
-              <p className="text-muted-foreground">Your private encrypted app-folder is created instantly.</p>
-            </div>
-            
-            <div className="relative z-10 flex flex-col items-center text-center gap-4">
-              <div className="w-24 h-24 rounded-full bg-primary/10 border-4 border-background flex items-center justify-center text-primary mb-2 shadow-sm">
-                <Icon name="person_add" size={40} />
+              
+              <div className="relative z-10 flex flex-col items-center text-center gap-4">
+                <div className="w-24 h-24 rounded-full bg-primary/10 border-4 border-background flex items-center justify-center text-primary mb-2 shadow-sm">
+                  <Icon name="person_add" size={40} />
+                </div>
+                <h3 className="text-xl font-bold">2. Invite your team</h3>
+                <p className="text-muted-foreground">Each teammate gets a secure portal.</p>
               </div>
-              <h3 className="text-xl font-bold">2. Invite your team</h3>
-              <p className="text-muted-foreground">Each teammate gets a secure portal.</p>
-            </div>
-            
-            <div className="relative z-10 flex flex-col items-center text-center gap-4">
-              <div className="w-24 h-24 rounded-full bg-primary/10 border-4 border-background flex items-center justify-center text-primary mb-2 shadow-sm">
-                <Icon name="query_stats" size={40} />
+              
+              <div className="relative z-10 flex flex-col items-center text-center gap-4">
+                <div className="w-24 h-24 rounded-full bg-primary/10 border-4 border-background flex items-center justify-center text-primary mb-2 shadow-sm">
+                  <Icon name="query_stats" size={40} />
+                </div>
+                <h3 className="text-xl font-bold">3. Track everything</h3>
+                <p className="text-muted-foreground">Attendance flows into payroll; expenses & assets stay visible.</p>
               </div>
-              <h3 className="text-xl font-bold">3. Track everything</h3>
-              <p className="text-muted-foreground">Attendance flows into payroll; expenses & assets stay visible.</p>
             </div>
           </div>
         </div>
@@ -970,31 +1011,42 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
         {/* New "Sound familiar?" pain strip (between hero and Section 2) */}
         <section className="relative z-10 w-full py-16 sm:py-24 bg-background border-y border-border px-4 snap-start flex flex-col items-center justify-center min-h-[50vh]">
-          <div className="max-w-4xl mx-auto w-full text-center">
-            <h2 className="text-2xl sm:text-4xl font-bold mb-10 text-foreground">Sound familiar?</h2>
+          <div className="max-w-6xl mx-auto w-full text-center">
+            <h2 className="text-2xl sm:text-4xl font-bold mb-10 text-foreground text-center">Sound familiar?</h2>
             
-            <div className="flex flex-col gap-6 items-center text-left max-w-2xl mx-auto mb-12">
-              <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-2xl border border-border/50 w-full">
-                <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
-                  <Icon name="close" size={20} />
+            <div className="flex flex-col md:flex-row items-center justify-center gap-10 lg:gap-16 mb-12">
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: false, amount: 0.3 }}
+                className="w-full md:w-1/2 max-w-sm mx-auto"
+              >
+                <img src={painStripIllustration} alt="Pain Points" className="w-full h-auto object-contain rounded-2xl drop-shadow-sm transition-all duration-300" />
+              </motion.div>
+
+              <div className="flex flex-col gap-6 items-center md:items-start text-left w-full md:w-1/2">
+                <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-2xl border border-border/50 w-full">
+                  <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
+                    <Icon name="close" size={20} />
+                  </div>
+                  <p className="text-lg text-muted-foreground font-medium">Attendance tracked in a WhatsApp group chat</p>
                 </div>
-                <p className="text-lg text-muted-foreground font-medium">Attendance tracked in a WhatsApp group chat</p>
-              </div>
-              <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-2xl border border-border/50 w-full">
-                <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
-                  <Icon name="close" size={20} />
+                <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-2xl border border-border/50 w-full">
+                  <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
+                    <Icon name="close" size={20} />
+                  </div>
+                  <p className="text-lg text-muted-foreground font-medium">Payroll weekends spent re-typing spreadsheets</p>
                 </div>
-                <p className="text-lg text-muted-foreground font-medium">Payroll weekends spent re-typing spreadsheets</p>
-              </div>
-              <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-2xl border border-border/50 w-full">
-                <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
-                  <Icon name="close" size={20} />
+                <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-2xl border border-border/50 w-full">
+                  <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
+                    <Icon name="close" size={20} />
+                  </div>
+                  <p className="text-lg text-muted-foreground font-medium">Company assets, expenses & leave scattered everywhere</p>
                 </div>
-                <p className="text-lg text-muted-foreground font-medium">Company assets, expenses & leave scattered everywhere</p>
               </div>
             </div>
             
-            <h3 className="text-xl sm:text-2xl font-bold text-primary">Kormiis puts it all in one place.</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-primary mt-12">Kormiis puts it all in one place.</h3>
           </div>
         </section>
 
