@@ -446,14 +446,16 @@ function MarketingStackedSections({ containerRef }) {
     offset: ["start end", "start 10%"]
   })
 
-  // When Section 3 (MarketingSectionTwo) scrolls up, blur and fade Section 2 (MarketingSectionOne)
-  const blurValue = useTransform(scrollYProgress, [0, 1], [0, 30])
+  // When Section 3 (MarketingSectionTwo) scrolls up, zoom out and fade Section 2 (MarketingSectionOne)
+  const scaleValue = useTransform(scrollYProgress, [0, 1], [1, 0.4])
   const opacityValue = useTransform(scrollYProgress, [0, 1], [1, 0])
-  const filter = useMotionTemplate`blur(${blurValue}px)`
+  
+  // As section 2 scrolls into view, zoom it IN from 75% to 100%
+  const zoomInValue = useTransform(scrollYProgress, [0, 1], [0.75, 1])
 
   return (
     <div className="relative w-full z-0">
-      <motion.div style={{ filter, opacity: opacityValue }}>
+      <motion.div style={{ scale: scaleValue, opacity: opacityValue, transformOrigin: 'center center' }}>
         <MarketingSectionOne containerRef={containerRef} />
       </motion.div>
 
@@ -461,9 +463,11 @@ function MarketingStackedSections({ containerRef }) {
       {/* Section 3 (Scrolls on top) */}
       <div 
         ref={section2Ref} 
-        className="relative z-10 w-full min-h-dvh flex flex-col items-center justify-center snap-start bg-black text-white"
+        className="relative z-10 w-full min-h-dvh flex flex-col items-center justify-center snap-start bg-black text-white overflow-hidden"
       >
-        <MarketingSectionTwo />
+        <motion.div style={{ scale: zoomInValue, transformOrigin: 'center center', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <MarketingSectionTwo />
+        </motion.div>
       </div>
     </div>
   )
