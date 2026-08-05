@@ -263,7 +263,10 @@ function MarketingSectionTwo() {
         </p>
       </div>
       
-      <div className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border border-white/10 shadow-[0_20px_100px_rgba(254,77,1,0.15)] text-white p-8 sm:p-14 aspect-auto md:aspect-[1.65/1]">
+      <div 
+        style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+        className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border !border-white/10 shadow-[0_20px_100px_rgba(254,77,1,0.15)] text-white group hover:shadow-[0_40px_120px_rgba(254,77,1,0.3)] transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
+      >
         {/* Sleek Orange Blob for ambient glow */}
         <div className="absolute top-[-5%] right-[5%] w-[30%] h-[40%] bg-primary/40 rounded-full blur-[70px] pointer-events-none" />
 
