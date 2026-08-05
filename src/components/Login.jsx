@@ -385,13 +385,13 @@ const FAQ_ITEMS = [
 function FaqSection() {
   const [open, setOpen] = useState(0)
   return (
-    <section className="min-h-dvh w-full flex flex-col items-center justify-center px-4 sm:px-6 py-16 snap-start">
+    <section className="min-h-dvh w-full flex flex-col items-center justify-center px-4 sm:px-6 py-16 snap-start bg-black">
       <motion.h2
         initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
         whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         viewport={{ once: false, amount: 0.5 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight text-center mb-12"
+        className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight text-center mb-12"
       >
         Frequently asked questions
       </motion.h2>
@@ -482,14 +482,19 @@ function FooterSection({ themeMode, logoSrc }) {
   const currentYear = new Date().getFullYear();
   return (
     <footer className="w-full bg-background border-t border-border py-12 px-6 sm:px-10 lg:px-16 mt-auto shrink-0 snap-start">
+      {/* Top Logo Section */}
+      <div className="max-w-7xl mx-auto w-full flex justify-center sm:justify-start pb-8 border-b border-border mb-8">
+        <img 
+          src={logoSrc} 
+          alt="Kormiis Logo" 
+          className={`block h-16 sm:h-20 lg:h-24 w-auto object-contain object-left shrink-0 ${themeMode === 'dark' ? 'invert' : ''}`} 
+        />
+      </div>
+
+      {/* Rest of Elements */}
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-10">
         <div className="flex flex-col gap-4 max-w-sm">
-          <img 
-            src={logoSrc} 
-            alt="HR Pulse Logo" 
-            className={`block h-8 w-auto object-contain object-left self-start shrink-0 ${themeMode === 'dark' ? 'invert' : ''}`} 
-          />
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
             Kormiis is the free all-in-one HR, Payroll & team management platform that lives in your own Google Drive. Empowering teams to win.
           </p>
         </div>
@@ -1024,7 +1029,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
                 {/* Reel 1 (Scrolls Up, Always Visible) */}
                 <div 
-                  className="flex flex-col gap-2 sm:gap-4 lg:gap-6 pb-2 sm:pb-4 lg:pb-6 relative z-10 will-change-transform w-full sm:w-auto items-center animate-slot-up"
+                  className="flex flex-col gap-2 sm:gap-4 lg:gap-6 pb-2 sm:pb-4 lg:pb-6 relative z-10 will-change-transform w-full sm:w-auto items-center animate-slot-up shrink-0 h-max"
                 >
                   {[...Array(8)].flatMap(() => [
                     { label: "Attendance", icon: "schedule", color: "text-blue-500" },
@@ -1043,7 +1048,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
                 {/* Reel 2 (Scrolls Down, Hidden on Mobile) */}
                 <div 
-                  className="hidden sm:flex flex-col gap-2 sm:gap-4 lg:gap-6 pb-2 sm:pb-4 lg:pb-6 relative z-10 will-change-transform animate-slot-down"
+                  className="hidden sm:flex flex-col gap-2 sm:gap-4 lg:gap-6 pb-2 sm:pb-4 lg:pb-6 relative z-10 will-change-transform animate-slot-down shrink-0 h-max"
                 >
                   {[...Array(8)].flatMap(() => [
                     { label: "Assets", icon: "monitor", color: "text-purple-500" },
@@ -1065,41 +1070,15 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           </div>
         </section>
 
-        {/* New "Sound familiar?" pain strip (between hero and Section 2) */}
+        {/* New Comparison Section (Old Way vs Kormiis) */}
         <section className="relative z-10 w-full py-16 sm:py-24 bg-background border-y border-border snap-start flex flex-col items-center justify-center min-h-[50vh] overflow-hidden">
-          <div className="w-full text-center mb-10 px-4">
+          <div className="w-full text-center mb-12 sm:mb-16 px-4">
             <h2 className="text-3xl sm:text-5xl font-black text-foreground tracking-tight">
-              Ditch the <span className="text-red-500">Chaos</span>. Embrace <span className="text-[#FE4D01]">Control</span>.
+              Say Goodbye to <span className="text-red-500">Manual Work</span>.
             </h2>
-          </div>
-          
-          {/* Infinite Marquee */}
-          <div className="w-full overflow-hidden flex whitespace-nowrap mb-16 relative">
-            {/* Gradient masks for smooth fade in/out */}
-            <div className="absolute inset-y-0 left-0 w-12 sm:w-24 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
-            <div className="absolute inset-y-0 right-0 w-12 sm:w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
-            
-            <motion.div 
-              className="flex items-center gap-4"
-              animate={{ x: ["0%", "-50%"] }}
-              transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
-            >
-              {[
-                "Lost receipts", "Buddy punching", "Manual payroll", "WhatsApp groups", 
-                "Spreadsheet chaos", "No leave tracking", "Stolen assets", "Forgotten approvals",
-                "Lost receipts", "Buddy punching", "Manual payroll", "WhatsApp groups", 
-                "Spreadsheet chaos", "No leave tracking", "Stolen assets", "Forgotten approvals",
-                "Lost receipts", "Buddy punching", "Manual payroll", "WhatsApp groups", 
-                "Spreadsheet chaos", "No leave tracking", "Stolen assets", "Forgotten approvals",
-                "Lost receipts", "Buddy punching", "Manual payroll", "WhatsApp groups", 
-                "Spreadsheet chaos", "No leave tracking", "Stolen assets", "Forgotten approvals"
-              ].map((text, i) => (
-                <div key={i} className="flex items-center gap-2 sm:gap-3 bg-muted/40 border border-border/50 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full shrink-0">
-                  <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                  <span className="text-xs sm:text-sm font-semibold opacity-80">{text}</span>
-                </div>
-              ))}
-            </motion.div>
+            <p className="text-muted-foreground mt-4 text-lg sm:text-xl font-medium">
+              See why growing teams are making the switch to Kormiis.
+            </p>
           </div>
 
           {/* Chaos vs Control Comparison Table */}
