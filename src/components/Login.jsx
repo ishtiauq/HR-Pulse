@@ -58,14 +58,6 @@ const MOCK_DASHBOARD_DATA = {
 }
 
 function MarketingSectionOne({ containerRef }) {
-  const sectionRef = useRef(null)
-  
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    container: containerRef,
-    offset: ["start start", "end end"]
-  })
-
   const cards = [
     {
       title: "Smart Attendance Tracking",
@@ -153,93 +145,35 @@ function MarketingSectionOne({ containerRef }) {
     }
   ]
 
-  const card2Y = useTransform(scrollYProgress, [0, 0.33], [2000, 40])
-  const card3Y = useTransform(scrollYProgress, [0.33, 0.66], [2000, 80])
-
   return (
-    <section ref={sectionRef} className="relative w-full lg:h-[300vh] lg:snap-start py-12 lg:py-0">
-      <div className="lg:sticky lg:top-0 lg:h-dvh w-full flex flex-col justify-center lg:overflow-hidden px-4 sm:px-8 snap-start lg:snap-align-none shrink-0">
-        <div className="w-full text-left mb-8 sm:mb-10 z-20 pt-8 lg:pt-0">
+    <section className="relative w-full py-16 lg:py-32 snap-start flex flex-col items-center">
+      <div className="max-w-5xl mx-auto w-full flex flex-col items-center justify-center px-4 sm:px-8 shrink-0">
+        <div className="w-full text-center mb-12 sm:mb-20">
           <h2 className="text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] font-black tracking-tight mb-4 text-foreground">
             Why Choose <span className="text-[#FE4D01]">Kormiis?</span>
           </h2>
-          <p className="text-xl sm:text-2xl text-muted-foreground font-medium max-w-3xl mb-8">
+          <p className="text-xl sm:text-2xl text-muted-foreground font-medium max-w-3xl mx-auto">
             Everything a growing team needs — without the enterprise price tag or the setup headache.
           </p>
-
         </div>
 
-        {/* DESKTOP GRID (Hidden on mobile) */}
-        <div className="hidden lg:grid w-full h-[40vh] md:h-[45vh] min-h-[300px] grid-cols-2 gap-12 perspective-[2000px]">
-          {/* Left Column Stack */}
-          <div className="relative w-full h-full flex justify-center">
-            {[0, 1, 2].map((i) => (
-              <motion.div 
-                key={i}
-                style={{ y: i === 0 ? "0px" : i === 1 ? card2Y : card3Y }}
-                className={`absolute top-0 w-full h-full p-6 sm:p-8 rounded-[2rem] shadow-sm flex flex-col origin-top overflow-hidden ${cards[i].bgColor}`}
-              >
-                <div className="flex items-center gap-4 mb-4 sm:mb-6">
-                  <div className={`w-12 h-12 rounded-2xl flex shrink-0 items-center justify-center ${cards[i].iconColor}`}>
-                    <Icon name={cards[i].iconName} size={24} />
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-black">{cards[i].title}</h3>
-                </div>
-                <div className="flex flex-col gap-4 flex-1 w-full">
-                  <div className="w-full">
-                    <p className="text-base sm:text-lg opacity-90 leading-relaxed">{cards[i].subtitle}</p>
-                  </div>
-                  <div className="w-full flex items-start justify-start mt-2">
-                    {cards[i].content}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Right Column Stack */}
-          <div className="relative w-full h-full flex justify-center">
-            {[3, 4, 5].map((i) => (
-              <motion.div 
-                key={i}
-                style={{ y: i === 3 ? "0px" : i === 4 ? card2Y : card3Y }}
-                className={`absolute top-0 w-full h-full p-6 sm:p-8 rounded-[2rem] shadow-sm flex flex-col origin-top overflow-hidden ${cards[i].bgColor}`}
-              >
-                <div className="flex items-center gap-4 mb-4 sm:mb-6">
-                  <div className={`w-12 h-12 rounded-2xl flex shrink-0 items-center justify-center ${cards[i].iconColor}`}>
-                    <Icon name={cards[i].iconName} size={24} />
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-black">{cards[i].title}</h3>
-                </div>
-                <div className="flex flex-col gap-4 flex-1 w-full">
-                  <div className="w-full">
-                    <p className="text-base sm:text-lg opacity-90 leading-relaxed">{cards[i].subtitle}</p>
-                  </div>
-                  <div className="w-full flex items-start justify-start mt-2">
-                    {cards[i].content}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* MOBILE LIST (Hidden on desktop) */}
-        <div className="flex lg:hidden w-full flex-col gap-6 mt-6 pb-12">
+        {/* SINGLE COLUMN LIST (Desktop & Mobile) */}
+        <div className="flex w-full flex-col gap-6 sm:gap-10 pb-32 items-center relative">
           {cards.map((card, i) => (
             <div 
               key={i} 
-              className={`w-full p-6 sm:p-8 rounded-[1.5rem] shadow-sm border border-black/5 flex flex-col snap-center shrink-0 ${card.bgColor}`}
+              style={{ top: `calc(12vh + ${i * 60}px)` }}
+              className={`w-full max-w-4xl p-8 sm:p-12 rounded-[2rem] lg:rounded-[3rem] shadow-2xl border border-white/10 flex flex-col shrink-0 sticky z-10 ${card.bgColor}`}
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`w-12 h-12 rounded-xl flex shrink-0 items-center justify-center ${card.iconColor}`}>
-                  <Icon name={card.iconName} size={24} />
+              <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8 mb-6 sm:mb-8">
+                <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl flex shrink-0 items-center justify-center ${card.iconColor}`}>
+                  <Icon name={card.iconName} size={36} className="scale-75 sm:scale-100" />
                 </div>
-                <h3 className="text-xl font-black">{card.title}</h3>
+                <h3 className="text-2xl sm:text-4xl font-black">{card.title}</h3>
               </div>
-              <div className="flex flex-col gap-3 w-full flex-1">
-                <p className="text-sm sm:text-base opacity-90 leading-relaxed">{card.subtitle}</p>
-                <div className="w-full flex items-start justify-start flex-1 mt-2">
+              <div className="flex flex-col gap-4 w-full flex-1">
+                <p className="text-lg sm:text-2xl opacity-90 leading-relaxed font-medium">{card.subtitle}</p>
+                <div className="w-full flex items-start justify-start flex-1 mt-4">
                   {card.content}
                 </div>
               </div>
@@ -835,7 +769,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             <img 
               src={hrPulseLogo} 
               alt="HR Pulse Logo" 
-              className={`block h-9 w-auto max-w-[160px] object-contain shrink-0 drop-shadow-sm ${themeMode === 'dark' ? 'invert' : ''}`} 
+              className={`block h-7 sm:h-9 w-auto max-w-[130px] sm:max-w-[160px] object-contain shrink-0 drop-shadow-sm ${themeMode === 'dark' ? 'invert' : ''}`} 
             />
           </motion.div>
           <motion.div 
@@ -1111,23 +1045,23 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             viewport={{ once: true }}
             className="flex flex-col text-left z-20 pt-8 lg:pt-0 w-full max-w-[600px] mx-auto lg:mx-0"
           >
-            <div className="bg-background rounded-[2rem] relative overflow-hidden p-8 sm:p-10 lg:p-12">
+            <div className="bg-transparent rounded-[2rem] relative overflow-hidden p-8 sm:p-10 lg:p-12">
               {/* Decorative Background Elements */}
               <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-green-500/10 rounded-full blur-3xl pointer-events-none" />
 
               <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-bold text-sm w-max mb-6 border border-primary/20">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FE4D01] text-white font-bold text-sm w-max mb-6 shadow-sm">
                   <Icon name="security" size={18} />
                   100% Data Privacy
                 </div>
                 
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground tracking-tight leading-tight mb-6">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-6">
                   Your Data, <br className="hidden lg:block"/>
                   Your <span className="text-primary">Google Drive</span>.
                 </h2>
                 
-                <div className="space-y-6 text-muted-foreground text-base sm:text-lg font-medium">
+                <div className="space-y-6 text-white/80 text-base sm:text-lg font-medium">
                   <p>
                     We believe your company data belongs to you. That's why Kormiis uses your secure Google Drive as its database.
                   </p>
@@ -1137,19 +1071,19 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
                         <Icon name="check" size={14} />
                       </div>
-                      <span><strong className="text-foreground">Zero Lock-in:</strong> You have direct access to your data files at all times. If you leave, your data stays with you.</span>
+                      <span><strong className="text-white">Zero Lock-in:</strong> You have direct access to your data files at all times. If you leave, your data stays with you.</span>
                     </li>
                     <li className="flex items-start gap-4">
                       <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
                         <Icon name="check" size={14} />
                       </div>
-                      <span><strong className="text-foreground">Bank-level Security:</strong> Secured by Google's world-class infrastructure and encryption.</span>
+                      <span><strong className="text-white">Bank-level Security:</strong> Secured by Google's world-class infrastructure and encryption.</span>
                     </li>
                     <li className="flex items-start gap-4">
                       <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
                         <Icon name="check" size={14} />
                       </div>
-                      <span><strong className="text-foreground">Private App Data:</strong> Kormiis stores data in an isolated, hidden folder that doesn't clutter your Drive.</span>
+                      <span><strong className="text-white">Private App Data:</strong> Kormiis stores data in an isolated, hidden folder that doesn't clutter your Drive.</span>
                     </li>
                   </ul>
                   
@@ -1168,10 +1102,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           <div className="flex items-center justify-center relative z-10 w-full pt-12 lg:pt-0">
             <div className="login-modal-box relative w-full flex justify-center">
                 <motion.div
-                  initial={{ opacity: 0, y: 44, scale: 0.92, filter: "blur(12px)" }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                  viewport={{ once: false, amount: 0.3 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 22, mass: 0.9 }}
                   className="login-auth-card relative w-full max-w-[350px] mx-auto shrink-0"
                 >
                 {/* 1. Lanyard Back (Behind Card) */}
