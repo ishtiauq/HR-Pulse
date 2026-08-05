@@ -1200,7 +1200,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                           value={email}
                           onChange={e => setEmail(e.target.value)}
                           placeholder="name@company.com"
-                          className="w-full border-input bg-gray-100 text-gray-900 px-4 py-3 text-sm font-medium focus:outline-none transition-all"
+                          className="w-full bg-transparent text-gray-900 px-4 py-3 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
                           required
                         />
                       </div>
@@ -1212,7 +1212,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             placeholder="••••••••"
-                            className="w-full border-input bg-gray-100 text-gray-900 px-4 py-3 pr-11 text-sm font-medium focus:outline-none transition-all"
+                            className="w-full bg-transparent text-gray-900 px-4 py-3 pr-11 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
                             required
                           />
                           <button 
@@ -1282,7 +1282,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 placeholder="name@company.com"
-                                className="w-full border-input bg-gray-100 text-gray-900 px-4 py-3 text-sm font-medium focus:outline-none transition-all"
+                                className="w-full bg-transparent text-gray-900 px-4 py-3 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
                                 required
                               />
                             </div>
@@ -1294,7 +1294,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                                   value={password}
                                   onChange={e => setPassword(e.target.value)}
                                   placeholder="••••••••"
-                                  className="w-full border-input bg-gray-100 text-gray-900 px-4 py-3 pr-11 text-sm font-medium focus:outline-none transition-all"
+                                  className="w-full bg-transparent text-gray-900 px-4 py-3 pr-11 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
                                   required
                                 />
                                 <button 
@@ -1347,7 +1347,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                               value={email}
                               onChange={e => setEmail(e.target.value)}
                               placeholder="name@company.com"
-                              className="w-full border-input bg-gray-100 text-gray-900 px-4 py-3 text-sm font-medium focus:outline-none transition-all"
+                              className="w-full bg-transparent text-gray-900 px-4 py-3 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
                               required
                             />
                           </div>
@@ -1359,7 +1359,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 placeholder="••••••••"
-                                className="w-full border-input bg-gray-100 text-gray-900 px-4 py-3 pr-11 text-sm font-medium focus:outline-none transition-all"
+                                className="w-full bg-transparent text-gray-900 px-4 py-3 pr-11 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
                                 required
                               />
                               <button 
@@ -1393,7 +1393,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                             value={phoneNumber}
                             onChange={e => setPhoneNumber(e.target.value)}
                             placeholder="+1 555-555-5555"
-                            className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
+                            className="w-full bg-transparent text-gray-900 px-4 py-3 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
                             required
                           />
                         </div>
@@ -1428,7 +1428,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                             value={otpCode}
                             onChange={e => setOtpCode(e.target.value)}
                             placeholder="123456"
-                            className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all tracking-widest text-center"
+                            className="w-full bg-transparent text-gray-900 px-4 py-3 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all tracking-widest text-center"
                             maxLength={6}
                             required
                           />
@@ -1464,7 +1464,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                         value={fullName}
                         onChange={e => setFullName(e.target.value)}
                         placeholder="Jane Doe"
-                        className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
+                        className="w-full bg-transparent text-gray-900 px-4 py-3 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
                         required
                       />
                     </div>
@@ -1475,7 +1475,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                         value={companyName}
                         onChange={e => setCompanyName(e.target.value)}
                         placeholder="Acme Inc."
-                        className="w-full border-input px-4 py-3 text-sm font-medium focus:outline-none transition-all"
+                        className="w-full bg-transparent text-gray-900 px-4 py-3 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
                         required
                       />
                     </div>
