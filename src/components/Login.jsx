@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { motion, useScroll, useTransform, useSpring, useMotionValueEvent, useMotionValue, useMotionTemplate } from 'framer-motion'
 import Icon from "@/components/ui/Icon.jsx"
 import hrPulseLogo from '../Assets/Kormiis Logo Final.svg'
+import hrPulseMembershipLogo from '../Assets/Kormiis Logo Membership.svg'
 import heroCharacters from '../Assets/hero-characters.png'
 import { fetchUserProfile } from '../services/googleDrive.js'
 import { verifyPassword, hashPassword } from '../services/crypto.js'
@@ -281,7 +282,26 @@ function MarketingSectionTwo() {
   }
 
   return (
-    <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex flex-col items-center justify-center" style={{ perspective: '2000px' }}>
+    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center" style={{ perspective: '2000px' }}>
+      <div className="flex flex-col items-start text-left">
+        <motion.h2 
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: false, amount: 0.5 }}
+          className="text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] font-black tracking-tight mb-4 sm:mb-6"
+        >
+          Is it really <span className="text-[#FE4D01]">FREE?</span>
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0, x: -10 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: false, amount: 0.5 }}
+          transition={{ delay: 0.1 }}
+          className="text-lg sm:text-xl md:text-2xl text-white/80 font-medium max-w-2xl tracking-tight"
+        >
+          Yes. It's completely free for a limited time. No hidden conditions, no subscriptions, and absolutely no credit/debit card required.
+        </motion.p>
+      </div>
       <motion.div
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -295,7 +315,7 @@ function MarketingSectionTwo() {
           transformStyle: "preserve-3d",
           borderColor: 'rgba(255,255,255,0.1)'
         }}
-        className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border !border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.6)] text-white group hover:shadow-[0_40px_100px_rgba(254,77,1,0.3)] transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
+        className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border !border-white/10 shadow-[0_20px_100px_rgba(254,77,1,0.15)] text-white group hover:shadow-[0_40px_120px_rgba(254,77,1,0.3)] transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
       >
         {/* Sleek Orange Blob for ambient glow */}
         <div className="absolute top-[-5%] right-[5%] w-[30%] h-[40%] bg-primary/40 rounded-full blur-[70px] pointer-events-none" />
@@ -308,13 +328,12 @@ function MarketingSectionTwo() {
 
         {/* Top section: 100% FREE & Logo */}
         <div className="relative z-10 flex items-center justify-between w-full mb-8 sm:mb-12" style={{ transform: "translateZ(30px)" }}>
-          <span className="text-2xl sm:text-3xl md:text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-100 via-gray-300 to-gray-500 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-mono uppercase">
+          <span className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-gray-100 via-gray-300 to-gray-500 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-sans uppercase">
             100% FREE
           </span>
           {/* Logo / Brand mark */}
-          <div className="flex items-center gap-1 opacity-90">
-            <div className="w-10 h-10 rounded-full bg-primary mix-blend-screen shadow-[0_0_15px_rgba(254,77,1,0.5)]" />
-            <div className="w-10 h-10 rounded-full bg-white/30 mix-blend-screen -ml-5 backdrop-blur-sm border border-white/20" />
+          <div className="flex items-center opacity-90">
+            <img src={hrPulseMembershipLogo} alt="Kormiis Logo" className="h-5 sm:h-7 w-auto object-contain drop-shadow-md" />
           </div>
         </div>
 
@@ -326,22 +345,20 @@ function MarketingSectionTwo() {
                 MEMBERSHIP
               </span>
             </h2>
-            <p className="text-sm sm:text-base text-white/80 font-medium leading-relaxed text-justify drop-shadow-md">
-              Free for growing teams, no subscriptions or hidden fees. Your data stays securely encrypted in your own Google Drive.
-            </p>
+
           </div>
         </div>
 
         {/* Bottom section: Card Details */}
         <div className="relative z-10 flex items-end justify-between w-full mt-10 sm:mt-12" style={{ transform: "translateZ(40px)" }}>
           <div className="flex flex-col items-start">
-            <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Status</span>
-            <span className="text-base sm:text-xl font-bold tracking-widest text-white font-mono drop-shadow-md uppercase">LIMITED TIME</span>
+            <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Valid thru</span>
+            <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-mono drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">LIMITED TIME</span>
           </div>
           
           <div className="flex flex-col items-end">
             <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Tier</span>
-            <span className="text-base sm:text-xl font-bold tracking-widest text-primary font-mono drop-shadow-md uppercase">ENTERPRISE</span>
+            <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-mono drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">ENTERPRISE</span>
           </div>
         </div>
       </motion.div>
@@ -438,36 +455,14 @@ function FaqSection() {
 }
 
 function MarketingStackedSections({ containerRef }) {
-  const section2Ref = useRef(null)
-  
-  const { scrollYProgress } = useScroll({
-    container: containerRef,
-    target: section2Ref,
-    offset: ["start end", "start 10%"]
-  })
-
-  // When Section 3 (MarketingSectionTwo) scrolls up, zoom out and fade Section 2 (MarketingSectionOne)
-  const scaleValue = useTransform(scrollYProgress, [0, 1], [1, 0.4])
-  const opacityValue = useTransform(scrollYProgress, [0, 1], [1, 0])
-  
-  // As section 2 scrolls into view, zoom it IN from 75% to 100%
-  const zoomInValue = useTransform(scrollYProgress, [0, 1], [0.75, 1])
-
   return (
     <div className="relative w-full z-0">
-      <motion.div style={{ scale: scaleValue, opacity: opacityValue, transformOrigin: 'center center' }}>
-        <MarketingSectionOne containerRef={containerRef} />
-      </motion.div>
+      <MarketingSectionOne containerRef={containerRef} />
 
-
-      {/* Section 3 (Scrolls on top) */}
-      <div 
-        ref={section2Ref} 
-        className="relative z-10 w-full min-h-dvh flex flex-col items-center justify-center snap-start bg-black text-white overflow-hidden"
-      >
-        <motion.div style={{ scale: zoomInValue, transformOrigin: 'center center', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="relative z-10 w-full min-h-dvh flex flex-col items-center justify-center snap-start bg-black text-white overflow-hidden">
+        <div className="w-full h-full flex items-center justify-center">
           <MarketingSectionTwo />
-        </motion.div>
+        </div>
       </div>
     </div>
   )
@@ -511,6 +506,13 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const [isLoading, setIsLoading] = useState(false)
   const [showIntermediateModal, setShowIntermediateModal] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  const scrollToAuth = () => {
+    const el = document.getElementById('auth-section');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
 
   // Auto-typing hero word: Employee -> Team -> Squad -> Crew -> People -> loop
   const ROTATING_WORDS = ['Employees', 'Team', 'Squad', 'Crew', 'People']
@@ -884,10 +886,10 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-2 sm:gap-4"
           >
-            <button className="text-black font-semibold text-sm sm:text-base hover:opacity-70 transition-opacity bg-transparent px-3 py-2">
+            <button onClick={scrollToAuth} className="text-black font-semibold text-sm sm:text-base hover:opacity-70 transition-opacity bg-transparent px-3 py-2">
               Log in
             </button>
-            <button className="bg-[#FE4D01] text-white font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 rounded-full hover:bg-[#FE4D01]/90 transition-colors shadow-sm">
+            <button onClick={scrollToAuth} className="bg-[#FE4D01] text-white font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 rounded-full hover:bg-[#FE4D01]/90 transition-colors shadow-sm">
               Start for free
             </button>
           </motion.div>
