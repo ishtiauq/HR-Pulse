@@ -385,28 +385,19 @@ const FAQ_ITEMS = [
 function FaqSection() {
   const [open, setOpen] = useState(0)
   return (
-    <section className="min-h-dvh w-full flex flex-col items-center justify-center px-4 sm:px-6 py-16 snap-start bg-black">
+    <section className="min-h-dvh w-full flex flex-col items-center justify-center px-4 sm:px-6 py-16 snap-start">
       <motion.h2
         initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
         whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         viewport={{ once: false, amount: 0.5 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight text-center mb-12"
+        className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight text-center mb-12"
       >
         Frequently asked questions
       </motion.h2>
 
-      <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center lg:items-start gap-12 lg:gap-16">
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: false, amount: 0.3 }}
-          className="w-full lg:w-1/3 max-w-sm mx-auto order-last lg:order-first"
-        >
-          <img src={faqIllustration} alt="FAQ" className="w-full h-auto object-contain rounded-2xl drop-shadow-sm transition-all duration-300" />
-        </motion.div>
-
-        <div className="w-full lg:w-2/3 grid grid-cols-1 gap-3 sm:gap-4">
+      <div className="w-full max-w-3xl mx-auto">
+        <div className="w-full grid grid-cols-1 gap-3 sm:gap-4">
           {FAQ_ITEMS.map((item, i) => {
             const isOpen = open === i
             return (
@@ -481,41 +472,18 @@ function MarketingStackedSections({ containerRef }) {
 function FooterSection({ themeMode, logoSrc }) {
   const currentYear = new Date().getFullYear();
   return (
-    <footer className="w-full bg-background border-t border-border py-12 px-6 sm:px-10 lg:px-16 mt-auto shrink-0 snap-start">
-      {/* Top Logo Section */}
-      <div className="max-w-7xl mx-auto w-full flex justify-center sm:justify-start pb-8 border-b border-border mb-8">
+    <footer className="w-full bg-background border-t border-border pt-12 pb-6 mt-auto shrink-0 snap-start overflow-hidden">
+      {/* Top Logo Section - Full Screen Width */}
+      <div className="w-full flex justify-center pb-8 border-b border-border mb-8 px-[10px]">
         <img 
           src={logoSrc} 
           alt="Kormiis Logo" 
-          className={`block h-16 sm:h-20 lg:h-24 w-auto object-contain object-left shrink-0 ${themeMode === 'dark' ? 'invert' : ''}`} 
+          className={`block w-full h-auto object-contain ${themeMode === 'dark' ? 'invert' : ''}`} 
         />
       </div>
 
-      {/* Rest of Elements */}
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-10">
-        <div className="flex flex-col gap-4 max-w-sm">
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Kormiis is the free all-in-one HR, Payroll & team management platform that lives in your own Google Drive. Empowering teams to win.
-          </p>
-        </div>
-        
-        <div className="flex gap-16 sm:gap-24">
-          <div className="flex flex-col gap-3">
-            <h4 className="font-bold text-foreground">Product</h4>
-            <a href="#" className="text-sm text-muted-foreground hover:text-[#FE4D01] transition-colors">Features</a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-[#FE4D01] transition-colors">Pricing</a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-[#FE4D01] transition-colors">Integrations</a>
-          </div>
-          <div className="flex flex-col gap-3">
-            <h4 className="font-bold text-foreground">Company</h4>
-            <a href="#" className="text-sm text-muted-foreground hover:text-[#FE4D01] transition-colors">About Us</a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-[#FE4D01] transition-colors">Careers</a>
-            <a href="#" className="text-sm text-muted-foreground hover:text-[#FE4D01] transition-colors">Contact</a>
-          </div>
-        </div>
-      </div>
-      
-      <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
+      {/* Copyright & Links */}
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 px-6 sm:px-10 lg:px-16">
         <p className="text-sm text-muted-foreground">
           &copy; {currentYear} Kormiis. All rights reserved.
         </p>
@@ -910,9 +878,14 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-4"
+            className="flex items-center gap-2 sm:gap-4"
           >
-            {/* Theme toggle removed from here as it is now scroll-driven */}
+            <button className="text-black font-semibold text-sm sm:text-base hover:opacity-70 transition-opacity bg-transparent px-3 py-2">
+              Log in
+            </button>
+            <button className="bg-[#FE4D01] text-white font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 rounded-full hover:bg-[#FE4D01]/90 transition-colors shadow-sm">
+              Start for free
+            </button>
           </motion.div>
         </div>
       </header>
