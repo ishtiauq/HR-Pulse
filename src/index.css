@@ -142,6 +142,21 @@ html, body, #root {
   animation: fade-in 0.3s ease-out;
 }
 
+@keyframes slot-scroll-up {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+@keyframes slot-scroll-down {
+  0% { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+.animate-slot-up {
+  animation: slot-scroll-up 9s linear infinite;
+}
+.animate-slot-down {
+  animation: slot-scroll-down 11s linear infinite;
+}
+
 @keyframes slideIn {
   from { transform: translateX(100%); opacity: 0; }
   to   { transform: translateX(0); opacity: 1; }

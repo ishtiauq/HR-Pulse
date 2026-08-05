@@ -969,17 +969,17 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         </section>
 
         {/* What is Kormiis - Merged Section (Grid) */}
-        <section className="relative z-10 w-full min-h-[70vh] flex flex-col items-center justify-center bg-background px-4 py-16 sm:py-24 snap-start border-t border-border overflow-hidden">
-          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-stretch">
+        <section className="relative z-10 w-full min-h-[50vh] sm:min-h-[70vh] flex flex-col items-center justify-center bg-background px-4 py-12 sm:py-24 snap-start border-t border-border overflow-hidden">
+          <div className="max-w-7xl mx-auto w-full grid grid-cols-2 gap-4 sm:gap-8 lg:gap-12 items-stretch">
             
             {/* Left Column: Text Content */}
-            <div className="flex flex-col justify-center gap-6 sm:gap-8 text-left max-w-xl mx-auto lg:mx-0">
+            <div className="flex flex-col justify-center gap-4 sm:gap-6 lg:gap-8 text-left w-full mx-0">
               <motion.h2 
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: false, amount: 0.5 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="text-4xl sm:text-5xl lg:text-7xl font-black text-foreground tracking-tight leading-tight mt-0"
+                className="text-2xl sm:text-4xl lg:text-7xl font-black text-foreground tracking-tight leading-tight mt-0"
               >
                 What is <br className="hidden lg:block" /><span className="text-primary">Kormiis</span>?
               </motion.h2>
@@ -989,7 +989,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: false, amount: 0.5 }}
                 transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="text-lg sm:text-xl md:text-2xl font-medium text-muted-foreground leading-relaxed space-y-4 sm:space-y-6"
+                className="text-xs sm:text-base md:text-xl lg:text-2xl font-medium text-muted-foreground leading-snug sm:leading-relaxed space-y-2 sm:space-y-4 lg:space-y-6"
               >
                 <p>
                   Kormiis is the <strong className="text-foreground">anti-enterprise</strong> HR Management Web App. Just everything your growing team needs.
@@ -1009,24 +1009,22 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 transition={{ delay: 0.4, duration: 0.5 }}
                 className="pt-2"
               >
-                <span className="text-white font-black tracking-wide uppercase text-sm sm:text-base inline-block px-6 py-3 bg-[#FE4D01] rounded-full shadow-md">
+                <span className="text-white font-black tracking-wide uppercase text-[10px] sm:text-xs lg:text-base inline-block px-3 py-1.5 sm:px-6 sm:py-3 bg-[#FE4D01] rounded-full shadow-md whitespace-nowrap">
                   Free for limited time.
                 </span>
               </motion.div>
             </div>
 
             {/* Right Column: Slot Machine */}
-            <div className="relative w-full h-[400px] sm:h-[450px] lg:h-auto lg:min-h-0 lg:ml-auto">
-              <div className="relative lg:absolute lg:inset-0 w-full h-full flex justify-center gap-4 sm:gap-8 overflow-hidden rounded-3xl">
+            <div className="relative w-full h-auto min-h-0">
+              <div className="absolute inset-0 w-full h-full flex justify-center gap-2 sm:gap-4 lg:gap-8 overflow-hidden rounded-xl sm:rounded-3xl">
                 {/* Gradient masks for smooth fade in/out at top and bottom */}
-                <div className="absolute inset-x-0 top-0 h-24 sm:h-32 bg-gradient-to-b from-background to-transparent z-20 pointer-events-none"></div>
-                <div className="absolute inset-x-0 bottom-0 h-24 sm:h-32 bg-gradient-to-t from-background to-transparent z-20 pointer-events-none"></div>
+                <div className="absolute inset-x-0 top-0 h-12 sm:h-24 lg:h-32 bg-gradient-to-b from-background to-transparent z-20 pointer-events-none"></div>
+                <div className="absolute inset-x-0 bottom-0 h-12 sm:h-24 lg:h-32 bg-gradient-to-t from-background to-transparent z-20 pointer-events-none"></div>
 
-                {/* Reel 1 (Scrolls Up) */}
-                <motion.div 
-                  className="flex flex-col gap-4 sm:gap-6 pb-4 sm:pb-6 relative z-10 will-change-transform"
-                  animate={{ y: ["0%", "-50%"] }}
-                  transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
+                {/* Reel 1 (Scrolls Up, Always Visible) */}
+                <div 
+                  className="flex flex-col gap-2 sm:gap-4 lg:gap-6 pb-2 sm:pb-4 lg:pb-6 relative z-10 will-change-transform w-full sm:w-auto items-center animate-slot-up"
                 >
                   {[...Array(8)].flatMap(() => [
                     { label: "Attendance", icon: "schedule", color: "text-blue-500" },
@@ -1034,20 +1032,18 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     { label: "Expenses", icon: "wallet", color: "text-orange-500" },
                     { label: "Leave", icon: "calendar_month", color: "text-pink-500" },
                   ]).map((item, i) => (
-                    <div key={`col1-${i}`} className="flex items-center gap-4 p-4 sm:p-5 bg-card/50 backdrop-blur-md border border-border rounded-2xl shadow-sm w-40 sm:w-56 lg:w-64 shrink-0">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-background border border-border flex items-center justify-center shadow-inner shrink-0">
-                        <Icon name={item.icon} size={20} className={item.color} />
+                    <div key={`col1-${i}`} className="flex items-center justify-start gap-2 lg:gap-4 p-2 sm:p-3 lg:p-5 bg-card/50 backdrop-blur-md border border-border rounded-lg lg:rounded-2xl shadow-sm w-[130px] sm:w-32 lg:w-64 shrink-0">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-md lg:rounded-xl bg-background border border-border flex items-center justify-center shadow-inner shrink-0">
+                        <Icon name={item.icon} size={20} className={`${item.color} scale-75 sm:scale-100`} />
                       </div>
-                      <span className="font-bold text-foreground text-sm sm:text-base whitespace-nowrap">{item.label}</span>
+                      <span className="block font-bold text-foreground text-[11px] sm:text-xs lg:text-base whitespace-nowrap truncate">{item.label}</span>
                     </div>
                   ))}
-                </motion.div>
+                </div>
 
-                {/* Reel 2 (Scrolls Down) */}
-                <motion.div 
-                  className="flex flex-col gap-4 sm:gap-6 pb-4 sm:pb-6 relative z-10 will-change-transform"
-                  animate={{ y: ["-50%", "0%"] }}
-                  transition={{ repeat: Infinity, duration: 14, ease: "linear" }}
+                {/* Reel 2 (Scrolls Down, Hidden on Mobile) */}
+                <div 
+                  className="hidden sm:flex flex-col gap-2 sm:gap-4 lg:gap-6 pb-2 sm:pb-4 lg:pb-6 relative z-10 will-change-transform animate-slot-down"
                 >
                   {[...Array(8)].flatMap(() => [
                     { label: "Assets", icon: "monitor", color: "text-purple-500" },
@@ -1055,14 +1051,14 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     { label: "Tasks", icon: "check_box", color: "text-teal-500" },
                     { label: "Feed", icon: "rss_feed", color: "text-indigo-500" },
                   ]).map((item, i) => (
-                    <div key={`col2-${i}`} className="flex items-center gap-4 p-4 sm:p-5 bg-card/50 backdrop-blur-md border border-border rounded-2xl shadow-sm w-40 sm:w-56 lg:w-64 shrink-0">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-background border border-border flex items-center justify-center shadow-inner shrink-0">
-                        <Icon name={item.icon} size={20} className={item.color} />
+                    <div key={`col2-${i}`} className="flex items-center justify-center sm:justify-start gap-2 lg:gap-4 p-2 sm:p-3 lg:p-5 bg-card/50 backdrop-blur-md border border-border rounded-lg lg:rounded-2xl shadow-sm w-12 sm:w-32 lg:w-64 shrink-0">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-md lg:rounded-xl bg-background border border-border flex items-center justify-center shadow-inner shrink-0">
+                        <Icon name={item.icon} size={20} className={`${item.color} scale-75 sm:scale-100`} />
                       </div>
-                      <span className="font-bold text-foreground text-sm sm:text-base whitespace-nowrap">{item.label}</span>
+                      <span className="block font-bold text-foreground text-[11px] sm:text-xs lg:text-base whitespace-nowrap truncate">{item.label}</span>
                     </div>
                   ))}
-                </motion.div>
+                </div>
               </div>
             </div>
             
