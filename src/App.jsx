@@ -148,6 +148,8 @@ export default function App() {
         settings={appData.settings}
         documents={appData.documents}
         setDocuments={appData.handleSetDocuments}
+        notes={appData.notes}
+        setNotes={appData.handleSetNotes}
         simulatedRole={appData.simulatedRole}
         setSimulatedRole={appData.setSimulatedRole}
         handleLogout={handleLogout}

@@ -23,7 +23,7 @@ function deg2rad(deg) {
   return deg * (Math.PI/180)
 }
 
-export default function GeoCheckInWidget({ currentUser, attendance, setAttendance, addToast, settings }) {
+export default function GeoCheckInWidget({ currentUser, attendance, setAttendance, addToast, settings, notes = [], setNotes }) {
   const today = toLocal(new Date())
   const [currentTime, setCurrentTime] = useState(new Date())
   
@@ -166,6 +166,22 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
           }
         }
       }))
+      
+      // Auto-reset Daily Checklist
+      const dailyChecklists = notes.filter(n => n.type === 'list' && n.isDailyChecklist)
+      if (dailyChecklists.length > 0 && setNotes) {
+        // Sort by updatedAt descending to get the active one
+        dailyChecklists.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
+        const activeChecklist = dailyChecklists[0]
+        const hasCheckedItems = activeChecklist.items?.some(i => i.done)
+        if (hasCheckedItems) {
+          const resetItems = activeChecklist.items.map(i => ({ ...i, done: false }))
+          const resetNote = { ...activeChecklist, items: resetItems, updatedAt: new Date().toISOString() }
+          setNotes(notes.map(n => n.id === resetNote.id ? resetNote : n))
+          addToast('Daily Checklist reset for tomorrow.', 'info')
+        }
+      }
+
       showSuccessOverlay('Check-out', now, h)
     })
   }

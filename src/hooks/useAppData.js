@@ -337,29 +337,55 @@ export default function useAppData({ user, addToast }) {
 
         const defaultTasks = []
         let tasksData = await readTable('tasks', user.token, bgSyncCallback)
-        if (!tasksData) {
-          const saved = localStorage.getItem('hr_pulse_tasks')
-          if (saved) { try { tasksData = JSON.parse(saved) } catch (e) {} }
-          if (!tasksData) tasksData = defaultTasks
+        const savedTasksStr = localStorage.getItem('hr_pulse_tasks')
+        let savedTasks = null
+        if (savedTasksStr) { try { savedTasks = JSON.parse(savedTasksStr) } catch (e) {} }
+        
+        if (!tasksData || (Array.isArray(tasksData) && tasksData.length === 0 && Array.isArray(savedTasks) && savedTasks.length > 0)) {
+          tasksData = savedTasks || defaultTasks
           await writeTable('tasks', tasksData, meta, user.token)
         }
         setTasks(tasksData)
 
         let notesData = await readTable('notes', user.token, bgSyncCallback)
-        if (!notesData) {
-          const saved = localStorage.getItem('hr_pulse_notes')
-          if (saved) { try { notesData = JSON.parse(saved) } catch (e) {} }
-          if (!notesData) notesData = []
+        const savedNotesStr = localStorage.getItem('hr_pulse_notes')
+        let savedNotes = null
+        if (savedNotesStr) { try { savedNotes = JSON.parse(savedNotesStr) } catch (e) {} }
+        
+        let shouldUploadNotes = false;
+        if (!notesData || (Array.isArray(notesData) && notesData.length === 0 && Array.isArray(savedNotes) && savedNotes.length > 0)) {
+          notesData = savedNotes || []
+          shouldUploadNotes = true;
+        } else if (Array.isArray(notesData) && Array.isArray(savedNotes)) {
+          // Prevent local data loss on refresh if local is newer
+          const getLatestUpdate = (arr) => arr.reduce((latest, n) => {
+            const d = new Date(n.updatedAt || 0).getTime();
+            return d > latest ? d : latest;
+          }, 0);
+          
+          const localLatest = getLatestUpdate(savedNotes);
+          const remoteLatest = getLatestUpdate(notesData);
+          
+          if (localLatest > remoteLatest) {
+            console.warn('[Sync] Local notes are newer than remote notes. Keeping local notes to prevent data loss.');
+            notesData = savedNotes;
+            shouldUploadNotes = true;
+          }
+        }
+        
+        if (shouldUploadNotes) {
           await writeTable('notes', notesData, meta, user.token)
         }
         setNotesRaw(notesData)
 
         const defaultExpenses = []
         let expensesData = await readTable('expenses', user.token, bgSyncCallback)
-        if (!expensesData) {
-          const saved = localStorage.getItem('hr_pulse_expenses')
-          if (saved) { try { expensesData = JSON.parse(saved) } catch (e) {} }
-          if (!expensesData) expensesData = defaultExpenses
+        const savedExpensesStr = localStorage.getItem('hr_pulse_expenses')
+        let savedExpenses = null
+        if (savedExpensesStr) { try { savedExpenses = JSON.parse(savedExpensesStr) } catch (e) {} }
+        
+        if (!expensesData || (Array.isArray(expensesData) && expensesData.length === 0 && Array.isArray(savedExpenses) && savedExpenses.length > 0)) {
+          expensesData = savedExpenses || defaultExpenses
           await writeTable('expenses', expensesData, meta, user.token)
         }
         setExpensesRaw(expensesData)

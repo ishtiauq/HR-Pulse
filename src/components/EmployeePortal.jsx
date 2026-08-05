@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
+import DailyChecklistWidget from './DailyChecklistWidget.jsx'
 import { useModal } from '../services/useModal.js'
 import { formatDate, formatDateShort, formatDateTime, formatMonthYear, formatDateWithWeekday } from '../services/date.js'
 import { parseMin } from '../services/attendance.js'
@@ -197,7 +198,7 @@ export default function EmployeePortal({
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} expenses={expenses} announcements={announcements} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} settings={settings} />
+        return <DashboardView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} expenses={expenses} announcements={announcements} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} settings={settings} notes={notes} setNotes={setNotes} />
       case 'attendance':
         return <AttendanceView 
                  currentUser={currentUser} 
@@ -251,7 +252,7 @@ export default function EmployeePortal({
       case 'notes':
         return <div className="max-w-[1200px] mx-auto w-full"><Notes notes={notes} setNotes={setNotes} currentUser={currentUser} addToast={addToast} simulatedRole="Teammate" /></div>
       default:
-        return <DashboardView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} expenses={expenses} announcements={announcements} tasks={tasks} events={events} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} settings={settings} />
+        return <DashboardView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} expenses={expenses} announcements={announcements} tasks={tasks} events={events} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} settings={settings} notes={notes} setNotes={setNotes} />
       case 'team_attendance':
         return (
           <AttendancePage 
@@ -506,7 +507,7 @@ export default function EmployeePortal({
 // SUB-VIEWS
 // ----------------------------------------------------
 
-function DashboardView({ currentUser, attendance, setAttendance, addToast, expenses, announcements, tasks, events, setActiveTab, setShowPunchModal, settings }) {
+function DashboardView({ currentUser, attendance, setAttendance, addToast, expenses, announcements, tasks, events, setActiveTab, setShowPunchModal, settings, notes, setNotes }) {
   const currentBalances = attendance?.balances?.[currentUser.id] || {
     annual: { limit: 20, used: 0 },
     sick: { limit: 14, used: 0 },
@@ -585,7 +586,9 @@ function DashboardView({ currentUser, attendance, setAttendance, addToast, expen
         </div>
       </div>
 
-      <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
+        <DailyChecklistWidget notes={notes} setNotes={setNotes} />
+        
         <Card className="hover:border-primary/50 transition-colors shadow-sm cursor-pointer" onClick={() => setActiveTab('my-tasks')}>
           <CardContent className="p-5 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-2 text-primary">

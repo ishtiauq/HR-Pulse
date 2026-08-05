@@ -24,7 +24,10 @@ const PRIORITY_STYLES = {
 
 export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
   const [showModal, setShowModal] = useState(false)
+  const [showViewModal, setShowViewModal] = useState(false)
   const [editingNote, setEditingNote] = useState(null)
+  const [viewingNote, setViewingNote] = useState(null)
+  const [noteToDelete, setNoteToDelete] = useState(null)
   
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
@@ -37,6 +40,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
   // Audio State
   const [isRecording, setIsRecording] = useState(false)
   const [audioURL, setAudioURL] = useState(null)
+  const [isDailyChecklist, setIsDailyChecklist] = useState(false)
   const mediaRecorderRef = useRef(null)
   const audioChunksRef = useRef([])
 
@@ -51,6 +55,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
       setPriority(editingNote.priority || 'Medium')
       setPinned(editingNote.pinned || false)
       setAudioURL(editingNote.audioURL || null)
+      setIsDailyChecklist(editingNote.isDailyChecklist || false)
     } else {
       resetForm()
     }
@@ -65,6 +70,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
     setPriority('Medium')
     setPinned(false)
     setAudioURL(null)
+    setIsDailyChecklist(false)
   }
 
   const handleSave = () => {
@@ -76,6 +82,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
     const noteData = {
       id: editingNote ? editingNote.id : `note-${Date.now()}`,
       title, content, type, items, color, priority, pinned, audioURL,
+      isDailyChecklist: type === 'checklist' ? isDailyChecklist : false,
       updatedAt: new Date().toISOString()
     }
 
@@ -91,17 +98,26 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
     setEditingNote(null)
   }
 
+  const confirmDelete = (id) => {
+    setNotes(notes.filter(n => n.id !== id))
+    addToast('Note deleted', 'success')
+    if (viewingNote?.id === id) {
+      setShowViewModal(false)
+    }
+    setNoteToDelete(null)
+  }
+
   const handleDelete = (id, e) => {
     e.stopPropagation()
-    if (confirm('Delete this note?')) {
-      setNotes(notes.filter(n => n.id !== id))
-      addToast('Note deleted', 'success')
-    }
+    setNoteToDelete(id)
   }
 
   const togglePin = (id, e) => {
-    e.stopPropagation()
+    if (e) e.stopPropagation()
     setNotes(notes.map(n => n.id === id ? { ...n, pinned: !n.pinned } : n))
+    if (viewingNote?.id === id) {
+      setViewingNote({ ...viewingNote, pinned: !viewingNote.pinned })
+    }
   }
 
   const toggleChecklistItem = (noteId, itemId, e) => {
@@ -153,30 +169,29 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
 
   const NoteCard = ({ note }) => (
     <motion.div
-      layoutId={`note-${note.id}`}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
       whileHover={{ y: -4, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
       className={`relative group p-5 rounded-2xl border ${note.color?.value || 'bg-card'} ${note.color?.border || 'border-border'} shadow-sm cursor-pointer overflow-hidden break-inside-avoid mb-4 transition-all`}
-      onClick={() => { setEditingNote(note); setShowModal(true) }}
+      onClick={() => { setViewingNote(note); setShowViewModal(true) }}
     >
       {/* Top Actions */}
       <div className="flex items-start justify-between gap-2 mb-3">
+        {note.pinned ? (
+          <div className="text-primary opacity-80">
+            <Icon name="push_pin" size={16} />
+          </div>
+        ) : <div />}
         <div className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${PRIORITY_STYLES[note.priority || 'Medium']}`}>
           {note.priority || 'Medium'} Priority
         </div>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onClick={(e) => togglePin(note.id, e)} className="p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 text-foreground/70 transition-colors">
-            <Icon name="push_pin" size={16} className={note.pinned ? 'text-primary' : ''} />
-          </button>
-          <button onClick={(e) => handleDelete(note.id, e)} className="p-1.5 rounded-full hover:bg-destructive/10 text-destructive/70 transition-colors">
-            <Icon name="delete" size={16} />
-          </button>
-        </div>
       </div>
 
-      {note.title && <h3 className="text-lg font-bold text-foreground mb-2 leading-tight">{note.title}</h3>}
+      {note.title && <h3 className="text-lg font-bold text-foreground mb-2 leading-tight flex items-center gap-2">
+        {note.isDailyChecklist && <Icon name="task_alt" size={18} className="text-primary" />}
+        {note.title}
+      </h3>}
       
       {note.type === 'text' && note.content && (
         <p className="text-sm text-foreground/80 whitespace-pre-wrap line-clamp-6">{note.content}</p>
@@ -221,13 +236,16 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5 headline-gradient">
           <Icon name="sticky_note_2" size={24} className="text-foreground" />
-          My Notes
+          Notes
         </h1>
-        <Button onClick={() => { setEditingNote(null); setShowModal(true) }} className="gap-2 rounded-xl shadow-sm bg-primary hover:bg-primary/90">
+      </div>
+      <div className="border-t border-border border-headline" />
+      
+      <div className="flex justify-end w-full">
+        <Button onClick={() => { setEditingNote(null); setShowModal(true) }} className="hidden sm:flex gap-2 rounded-xl shadow-sm bg-primary hover:bg-primary/90">
           <Icon name="add" size={18} /> New Note
         </Button>
       </div>
-      <div className="border-t border-border border-headline" />
 
       {notes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center px-4">
@@ -280,7 +298,6 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
               onClick={() => setShowModal(false)}
             />
             <motion.div 
-              layoutId={editingNote ? `note-${editingNote.id}` : "new-note"}
               initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className={`relative w-full max-w-2xl bg-card rounded-2xl shadow-2xl border border-border overflow-hidden flex flex-col max-h-[90vh]`}
             >
@@ -335,21 +352,25 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
                         </button>
                       </div>
                     ))}
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="size-5 flex items-center justify-center text-muted-foreground"><Icon name="add" size={18} /></div>
-                      <Input 
-                        placeholder="Add item..." 
-                        className="flex-1 border-none bg-transparent h-8 px-1 focus-visible:ring-0 placeholder:text-muted-foreground/60"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && e.target.value.trim()) {
-                            setItems([...items, { id: Date.now(), text: e.target.value, done: false }])
-                            e.target.value = ''
-                          }
-                        }}
-                      />
+                      <Button variant="ghost" size="sm" onClick={() => setItems([...items, { id: Date.now(), text: '', done: false }])} className="text-primary hover:text-primary hover:bg-primary/10 mt-2 self-start rounded-lg px-3">
+                        <Icon name="add" size={18} className="mr-1.5" /> Add Item
+                      </Button>
+
+                      <div className="mt-4 pt-4 border-t border-border flex items-center gap-3">
+                        <div className="flex-1">
+                          <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                            Set as a daily checklist
+                          </label>
+                        </div>
+                        <button
+                          onClick={() => setIsDailyChecklist(!isDailyChecklist)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${isDailyChecklist ? 'bg-primary' : 'bg-muted'}`}
+                        >
+                          <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isDailyChecklist ? 'translate-x-6' : 'translate-x-1'}`} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Audio Section */}
                 <div className="mt-2 p-4 bg-muted/40 rounded-xl border border-border">
@@ -423,6 +444,149 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Note View Modal */}
+      <AnimatePresence>
+        {showViewModal && viewingNote && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+              onClick={() => setShowViewModal(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className={`relative w-full max-w-2xl bg-card rounded-2xl shadow-2xl border border-border overflow-hidden flex flex-col max-h-[90vh]`}
+            >
+              {/* Header */}
+              <div className={`p-4 border-b flex items-center justify-between ${viewingNote.color?.value || 'bg-card'} ${viewingNote.color?.border || 'border-border'}`}>
+                <div className="flex items-center gap-2">
+                  <div className={`px-1.5 py-0.5 rounded-[4px] text-[8px] sm:text-[9px] font-bold uppercase tracking-wide border ${PRIORITY_STYLES[viewingNote.priority || 'Medium']}`}>
+                    {viewingNote.priority || 'Medium'} Priority
+                  </div>
+                  {viewingNote.pinned && <Icon name="push_pin" size={16} className="text-primary ml-1" />}
+                  {viewingNote.isDailyChecklist && <Icon name="task_alt" size={16} className="text-primary ml-1" />}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setShowViewModal(false)} className="p-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 text-foreground/60 transition-colors">
+                    <Icon name="close" size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-5">
+                {viewingNote.title && (
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground break-words">{viewingNote.title}</h2>
+                )}
+
+                {viewingNote.type === 'text' && viewingNote.content && (
+                  <div className="text-base sm:text-lg text-foreground/90 whitespace-pre-wrap leading-relaxed">
+                    {viewingNote.content}
+                  </div>
+                )}
+
+                {viewingNote.type === 'checklist' && viewingNote.items && viewingNote.items.length > 0 && (
+                  <div className="flex flex-col gap-3 mt-2">
+                    {viewingNote.items.map(item => (
+                      <div key={item.id} className="flex items-center gap-3">
+                        <button 
+                          onClick={(e) => toggleChecklistItem(viewingNote.id, item.id, e)}
+                          className={`flex-shrink-0 size-6 rounded-md border-2 flex items-center justify-center transition-colors ${item.done ? 'bg-primary border-primary text-primary-foreground' : 'border-foreground/30 hover:border-primary'}`}
+                        >
+                          {item.done && <Icon name="check" size={16} />}
+                        </button>
+                        <span className={`text-base transition-all break-words flex-1 ${item.done ? 'text-foreground/50 line-through' : 'text-foreground/90'}`}>
+                          {item.text}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {viewingNote.audioURL && (
+                  <div className="mt-4 p-4 bg-muted/30 rounded-xl border border-border">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3">
+                      <Icon name="mic" size={18} className="text-primary" /> Voice Note
+                    </div>
+                    <audio src={viewingNote.audioURL} controls className="w-full h-10" />
+                  </div>
+                )}
+                
+                <div className="text-xs text-muted-foreground mt-4 font-medium">
+                  Last updated: {new Date(viewingNote.updatedAt).toLocaleString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+
+              {/* Footer / Toolbar */}
+              <div className="p-4 border-t border-border flex items-center justify-center gap-3 sm:gap-4 bg-muted/10">
+                <Button 
+                  variant="outline"
+                  onClick={(e) => togglePin(viewingNote.id, e)} 
+                  className={`rounded-xl px-4 sm:px-6 font-bold shadow-sm flex items-center gap-2 ${viewingNote.pinned ? 'border-primary text-primary bg-primary/5 hover:bg-primary/10' : ''}`}
+                >
+                  <Icon name="push_pin" size={18} /> {viewingNote.pinned ? "Unpin" : "Pin"}
+                </Button>
+
+                <Button 
+                  onClick={() => {
+                    setEditingNote(viewingNote);
+                    setShowViewModal(false);
+                    setShowModal(true);
+                  }} 
+                  className="rounded-xl px-4 sm:px-6 font-bold shadow-sm flex items-center gap-2"
+                >
+                  <Icon name="edit" size={18} /> Edit
+                </Button>
+
+                <Button 
+                  variant="destructive" 
+                  onClick={(e) => handleDelete(viewingNote.id, e)} 
+                  className="rounded-xl px-4 sm:px-6 flex items-center gap-2 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground border-none font-bold shadow-none"
+                >
+                  <Icon name="delete" size={18} /> Delete
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {noteToDelete && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+              onClick={() => setNoteToDelete(null)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-sm bg-card rounded-2xl shadow-2xl border border-border p-6 flex flex-col items-center text-center"
+            >
+              <div className="size-14 rounded-full bg-destructive/10 flex items-center justify-center text-destructive mb-4">
+                <Icon name="warning" size={28} />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">Delete Note?</h3>
+              <p className="text-sm text-muted-foreground mb-6">Are you sure you want to delete this note? This action cannot be undone.</p>
+              
+              <div className="flex items-center gap-3 w-full">
+                <Button variant="outline" onClick={() => setNoteToDelete(null)} className="flex-1 rounded-xl">Cancel</Button>
+                <Button variant="destructive" onClick={() => confirmDelete(noteToDelete)} className="flex-1 rounded-xl shadow-sm">Delete</Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <Button
+        className="sm:hidden fixed bottom-[76px] right-8 h-14 w-14 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.2)] dark:shadow-[0_4px_20px_rgba(255,255,255,0.1)] z-50 p-0 hover:scale-105 active:scale-95 transition-transform bg-primary text-primary-foreground"
+        onClick={() => { setEditingNote(null); setShowModal(true) }}
+        aria-label="New Note"
+      >
+        <Icon name="add" size={24} />
+      </Button>
     </div>
   )
 }

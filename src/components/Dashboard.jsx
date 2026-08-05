@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { formatDateShort } from '../services/date.js'
 import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
+import DailyChecklistWidget from './DailyChecklistWidget.jsx'
 
 const DashboardWidget = ({ 
   id, title, icon, action, 
@@ -16,7 +17,7 @@ const DashboardWidget = ({
   children
 }) => {
   return (
-    <Card className={`flex flex-col p-0 h-full xl:col-span-4 ${cardClass}`}>
+    <Card className={`flex flex-col p-0 h-full ${cardClass}`}>
       <CardHeader className="flex-row items-center justify-between pb-3.5 space-y-0">
         <div className="flex items-center gap-3">
           <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${iconClass}`}>
@@ -33,7 +34,7 @@ const DashboardWidget = ({
   )
 }
 
-export default function Dashboard({ employees, driveConnected, onSync, attendance, setAttendance, currentUser, addToast, setCurrentView, announcements, events, payroll, isSidebarCollapsed, simulatedRole, hasPermission, tasks = [], documents = [], assets = [], settings }) {
+export default function Dashboard({ employees, driveConnected, onSync, attendance, setAttendance, currentUser, addToast, setCurrentView, announcements, events, payroll, isSidebarCollapsed, simulatedRole, hasPermission, tasks = [], documents = [], assets = [], settings, notes = [], setNotes }) {
   const [expandedWidgets, setExpandedWidgets] = useState([])
   
   const toggleWidget = (id) => setExpandedWidgets(prev => prev.includes(id) ? prev.filter(w => w !== id) : [...prev, id])
@@ -225,6 +226,8 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           setAttendance={setAttendance} 
           addToast={addToast} 
           settings={settings}
+          notes={notes}
+          setNotes={setNotes}
         />
       )}
 
@@ -248,33 +251,46 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       </div>
 
       {/* Unified Responsive & Adaptive Dashboard Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5 lg:gap-6 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-5 lg:gap-6 items-stretch">
         
-        {/* Widget 1 — Employee Directory (Span 4) */}
-        {canViewEmployees && (
+        {/* Widget 4 — Announcements (Span 6) */}
+        {canViewAnnouncements && (
           <DashboardWidget
-          id="w1"
-          title="Employee Directory"
-          icon={<Icon name="group" size={18} />}
-          action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('employees')} className="text-xs font-semibold h-7">View All</Button>}
-          contentClass="flex items-center justify-around py-4"
+          id="w4"
+          title="Announcements"
+          icon={<Icon name="rss_feed" size={18} />}
+          iconClass="bg-amber-500/10 text-amber-500"
+          cardClass="col-span-full"
+          action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('announcements')} className="text-xs font-semibold h-7">View All</Button>}
+          contentClass="flex flex-col justify-start gap-2.5 pt-4"
           {...wProps}
         >
-          <div className="flex flex-col items-center gap-1.5">
-            <span className="text-4xl font-black tabular-nums text-foreground">{activeCount}</span>
-            <Badge variant="success" className="gap-1.5 py-1 px-3">
-              <span className="sync-dot sync-blink w-2 h-2 rounded-full bg-status-success"></span>
-              Active
-            </Badge>
-          </div>
-          <div className="w-[1px] h-12 bg-border"></div>
-          <div className="flex flex-col items-center gap-1.5">
-            <span className="text-4xl font-black tabular-nums text-foreground">{inactiveCount}</span>
-            <Badge variant="destructive" className="gap-1.5 py-1 px-3">
-              <span className="sync-dot w-2 h-2 rounded-full bg-status-error"></span>
-              Inactive
-            </Badge>
-          </div>
+          {recentAnnouncements.length === 0 ? (
+            <p className="text-center my-auto text-xs text-muted-foreground">No active announcements</p>
+          ) : (
+            recentAnnouncements.map((ann, idx) => (
+              <div
+                key={ann.id || idx}
+                className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/70 transition-colors cursor-pointer"
+                onClick={() => setCurrentView && setCurrentView('announcements')}
+              >
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-500/10 text-amber-500 shrink-0">
+                  <Icon name="rss_feed" size={16} />
+                </div>
+                <div className="flex-1 min-w-0 pr-2">
+                  <p className="m-0 text-xs font-bold text-foreground break-words">{ann.title}</p>
+                  <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">
+                    {getEmployeeName(ann.authorId)} &middot; {new Date(ann.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </p>
+                </div>
+                {ann.priority === 'Important' && (
+                  <Badge variant="destructive" className="uppercase text-[10px]">
+                    Important
+                  </Badge>
+                )}
+              </div>
+            ))
+          )}
         </DashboardWidget>
         )}
 
@@ -289,29 +305,29 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           contentClass="flex flex-col justify-between pt-4"
           {...wProps}
         >
-          <div className="flex items-center justify-between gap-3 py-2">
+          <div className="flex items-center justify-between gap-1 sm:gap-2 xl:gap-3 py-2">
             <div className="flex flex-col items-center flex-1">
-              <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+              <span className="text-xl sm:text-2xl xl:text-3xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1 xl:gap-1.5">
                 <span className="pulse-dot pulse-dot-green m-0"></span>
                 {todayStats.present}
               </span>
-              <span className="text-xs font-medium text-muted-foreground mt-1">Present</span>
+              <span className="text-[10px] xl:text-xs font-medium text-muted-foreground mt-1">Present</span>
             </div>
             <div className="w-[1px] h-10 bg-border"></div>
             <div className="flex flex-col items-center flex-1">
-              <span className="text-2xl sm:text-3xl font-black text-destructive flex items-center gap-1.5">
+              <span className="text-xl sm:text-2xl xl:text-3xl font-black text-destructive flex items-center gap-1 xl:gap-1.5">
                 <span className="pulse-dot pulse-dot-red m-0"></span>
                 {todayStats.absent}
               </span>
-              <span className="text-xs font-medium text-muted-foreground mt-1">Absent</span>
+              <span className="text-[10px] xl:text-xs font-medium text-muted-foreground mt-1">Absent</span>
             </div>
             <div className="w-[1px] h-10 bg-border"></div>
             <div className="flex flex-col items-center flex-1">
-              <span className="text-2xl sm:text-3xl font-black text-amber-500 flex items-center gap-1.5">
+              <span className="text-xl sm:text-2xl xl:text-3xl font-black text-amber-500 flex items-center gap-1 xl:gap-1.5">
                 <span className="pulse-dot pulse-dot-orange m-0"></span>
                 {todayStats.onLeave}
               </span>
-              <span className="text-xs font-medium text-muted-foreground mt-1">Leave</span>
+              <span className="text-[10px] xl:text-xs font-medium text-muted-foreground mt-1">Leave</span>
             </div>
           </div>
           <div className="mt-3 pt-3 border-t border-border flex justify-between items-center text-xs font-medium text-muted-foreground">
@@ -321,30 +337,45 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         </DashboardWidget>
         )}
 
-        {/* Widget 3 — Drive Connection (Span 4) */}
-        {canViewDrive && (
-          <DashboardWidget
-          id="w3"
-          title="Drive Connection"
-          icon={<Icon name="cloud" size={18} />}
-          action={<Badge variant={driveConnected ? "outline" : "destructive"}>{driveConnected ? 'Synced' : 'Error'}</Badge>}
-          contentClass="flex flex-col justify-between pt-4"
-          {...wProps}
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-xl sm:text-2xl font-black text-foreground">
-              {driveConnected ? 'Healthy Connection' : 'Drive Disconnected'}
-            </span>
-          </div>
-          <p className="text-xs font-medium m-0 mt-3 text-muted-foreground leading-relaxed">
-            {driveConnected ? 'Google Drive biometric & roster logs sync automatically.' : 'Re-authenticate with Google Drive to enable auto sync.'}
-          </p>
-        </DashboardWidget>
-        )}
+        {/* Widget 4 — Daily Checklist */}
+        <DailyChecklistWidget notes={notes} setNotes={setNotes} cardClass="" />
 
-        {/* Attendance Details Dropdown (Span 12 Full Width) */}
+        {/* 8. TASKS WIDGET */}
+      {canViewTasks && (
+        <DashboardWidget
+          id="tasks-widget"
+          title="Tasks Overview"
+          icon={<Icon name="check_box" size={18} />}
+          iconClass="bg-orange-500/10 text-orange-500"
+          {...wProps}
+          action={
+            <Button variant="ghost" size="sm" onClick={() => setCurrentView('tasks')} className="text-orange-500 hover:text-orange-600 hover:bg-orange-500/10 -mr-2">
+              View All
+            </Button>
+          }
+        >
+          <div className="flex flex-col h-full justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <span className="text-3xl font-black text-foreground">{pendingTasksCount}</span>
+              <span className="text-sm font-medium text-muted-foreground">Pending Tasks</span>
+            </div>
+            {tasks.filter(t => t.status !== 'Done').slice(0, 2).map((t, i) => (
+              <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30 border border-border">
+                <div className="w-2 h-2 rounded-full bg-orange-500 shrink-0" />
+                <p className="text-sm font-medium text-foreground truncate flex-1">{t.title}</p>
+                <Badge variant="outline" className="text-[10px] shrink-0">{t.status}</Badge>
+              </div>
+            ))}
+            {pendingTasksCount === 0 && (
+              <p className="text-sm text-muted-foreground italic">No pending tasks! Great job.</p>
+            )}
+          </div>
+        </DashboardWidget>
+      )}
+
+      {/* Attendance Details Dropdown (Full Width) */}
         {showAttDropdown && canViewAttendance && (
-          <Card className="md:col-span-2 xl:col-span-12 overflow-hidden p-0">
+          <Card className="md:col-span-2 lg:col-span-3 overflow-hidden p-0">
             <div className="px-6 py-3.5 border-b border-border font-extrabold text-xs uppercase tracking-wider text-muted-foreground">
               Today's Attendance Roster Breakdowns
             </div>
@@ -392,47 +423,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           </Card>
         )}
 
-        {/* Widget 4 — Announcements (Span 6) */}
-        {canViewAnnouncements && (
-          <DashboardWidget
-          id="w4"
-          title="Announcements"
-          icon={<Icon name="rss_feed" size={18} />}
-          iconClass="bg-amber-500/10 text-amber-500"
-          cardClass="xl:col-span-6"
-          action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('announcements')} className="text-xs font-semibold h-7">View All</Button>}
-          contentClass="flex flex-col justify-start gap-2.5 pt-4"
-          {...wProps}
-        >
-          {recentAnnouncements.length === 0 ? (
-            <p className="text-center my-auto text-xs text-muted-foreground">No active announcements</p>
-          ) : (
-            recentAnnouncements.map((ann, idx) => (
-              <div
-                key={ann.id || idx}
-                className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/70 transition-colors cursor-pointer"
-                onClick={() => setCurrentView && setCurrentView('announcements')}
-              >
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-500/10 text-amber-500 shrink-0">
-                  <Icon name="rss_feed" size={16} />
-                </div>
-                <div className="flex-1 min-w-0 pr-2">
-                  <p className="m-0 text-xs font-bold text-foreground break-words">{ann.title}</p>
-                  <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground">
-                    {getEmployeeName(ann.authorId)} &middot; {new Date(ann.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </p>
-                </div>
-                {ann.priority === 'Important' && (
-                  <Badge variant="destructive" className="uppercase text-[10px]">
-                    Important
-                  </Badge>
-                )}
-              </div>
-            ))
-          )}
-        </DashboardWidget>
-        )}
-
         {/* Widget 5 — Payroll Summary (Span 6) */}
         {canViewPayroll && (
           <DashboardWidget
@@ -471,7 +461,39 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         </DashboardWidget>
         )}
 
-        {/* Widget 6 — Upcoming Events (Span 4) */}
+        {/* 9. DOCUMENTS WIDGET */}
+      {canViewDocuments && (
+        <DashboardWidget
+          id="documents-widget"
+          title="Recent Documents"
+          icon={<Icon name="description" size={18} />}
+          iconClass="bg-blue-500/10 text-blue-500"
+          {...wProps}
+          action={
+            <Button variant="ghost" size="sm" onClick={() => setCurrentView('documents')} className="text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 -mr-2">
+              View All
+            </Button>
+          }
+        >
+          <div className="flex flex-col h-full gap-3">
+            {recentDocuments.length > 0 ? recentDocuments.map((doc, i) => (
+              <div key={i} className="flex flex-col gap-1 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-bold text-foreground truncate pr-2">{doc.name}</span>
+                  <Badge variant="secondary" className="text-[10px] shrink-0">{doc.category || 'Doc'}</Badge>
+                </div>
+                <span className="text-[11px] text-muted-foreground">Updated {formatDateShort(doc.uploadDate || doc.date || new Date().toISOString())}</span>
+              </div>
+            )) : (
+              <div className="flex-1 flex items-center justify-center">
+                <p className="text-sm text-muted-foreground italic text-center">No documents found.</p>
+              </div>
+            )}
+          </div>
+        </DashboardWidget>
+      )}
+
+      {/* Widget 6 — Upcoming Events (Span 4) */}
         {canViewCalendar && (
           <DashboardWidget
           id="w6"
@@ -511,30 +533,89 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         </DashboardWidget>
         )}
 
-        {/* Widget 7 — Drive Sync Logs (Span 4) */}
-        {canViewDrive && (
+        {/* Widget 1 — Employee Directory */}
+        {canViewEmployees && (
           <DashboardWidget
-          id="w7"
-          title="Drive Sync Logs"
-          icon={<Icon name="trending_up" size={18} />}
-          action={<Badge variant="success">Live</Badge>}
-          contentClass="flex flex-col justify-start gap-2.5 pt-4"
+          id="w1"
+          title="Employee Directory"
+          icon={<Icon name="group" size={18} />}
+          action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('employees')} className="text-xs font-semibold h-7">View All</Button>}
+          contentClass="flex items-center justify-around py-4"
           {...wProps}
         >
-          {syncLogs.map((log) => (
-            <div key={log.id} className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-muted text-muted-foreground shrink-0 border border-border/40">
-                <Icon name="download" size={15} />
+          <div className="flex flex-col items-center gap-1.5">
+            <span className="text-3xl xl:text-4xl font-black tabular-nums text-foreground">{activeCount}</span>
+            <Badge variant="success" className="gap-1 xl:gap-1.5 py-1 px-2 xl:px-3 text-[10px] xl:text-xs">
+              <span className="sync-dot sync-blink w-1.5 h-1.5 xl:w-2 xl:h-2 rounded-full bg-status-success"></span>
+              Active
+            </Badge>
+          </div>
+          <div className="w-[1px] h-12 bg-border"></div>
+          <div className="flex flex-col items-center gap-1.5">
+            <span className="text-3xl xl:text-4xl font-black tabular-nums text-foreground">{inactiveCount}</span>
+            <Badge variant="destructive" className="gap-1 xl:gap-1.5 py-1 px-2 xl:px-3 text-[10px] xl:text-xs">
+              <span className="sync-dot w-1.5 h-1.5 xl:w-2 xl:h-2 rounded-full bg-status-error"></span>
+              Inactive
+            </Badge>
+          </div>
+        </DashboardWidget>
+        )}
+
+        {/* 10. ASSETS WIDGET */}
+      {canViewAssets && (
+        <DashboardWidget
+          id="assets-widget"
+          title="Asset Inventory"
+          icon={<Icon name="devices_other" size={18} />}
+          iconClass="bg-teal-500/10 text-teal-500"
+          {...wProps}
+          action={
+            <Button variant="ghost" size="sm" onClick={() => setCurrentView('assets')} className="text-teal-500 hover:text-teal-600 hover:bg-teal-500/10 -mr-2">
+              Manage
+            </Button>
+          }
+        >
+          <div className="flex flex-col h-full justify-between gap-4">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-teal-500/5 border border-teal-500/10">
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold text-teal-600/80 uppercase tracking-wider mb-1">Total Assets</span>
+                <span className="text-2xl font-black text-foreground">{assets.length}</span>
               </div>
-              <div className="flex-1 min-w-0 pr-2">
-                <p className="m-0 text-xs font-bold text-foreground break-words">{log.action}</p>
-                <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground break-words">{log.details}</p>
-              </div>
-              <Badge variant={log.status === 'success' ? 'success' : log.status === 'error' ? 'destructive' : 'warning'} className="uppercase text-[10px]">
-                {log.status === 'success' ? 'Synced' : log.status === 'error' ? 'Failed' : 'Pending'}
-              </Badge>
+              <Icon name="laptop_windows" size={40} className="text-teal-500/30" />
             </div>
-          ))}
+            
+            <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border">
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Available</span>
+                <span className="text-xl font-bold text-foreground">{availableAssetsCount}</span>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Assigned</span>
+                <span className="text-xl font-bold text-foreground">{assets.length - availableAssetsCount}</span>
+              </div>
+            </div>
+          </div>
+        </DashboardWidget>
+      )}
+
+{/* Widget 3 — Drive Connection (Span 4) */}
+        {canViewDrive && (
+          <DashboardWidget
+          id="w3"
+          title="Drive Connection"
+          icon={<Icon name="cloud" size={18} />}
+          action={<Badge variant={driveConnected ? "outline" : "destructive"}>{driveConnected ? 'Synced' : 'Error'}</Badge>}
+          contentClass="flex flex-col justify-between pt-4"
+          {...wProps}
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-lg sm:text-xl xl:text-2xl font-black text-foreground leading-tight truncate">
+              {driveConnected ? 'Healthy Connection' : 'Drive Disconnected'}
+            </span>
+          </div>
+          <p className="text-xs font-medium m-0 mt-3 text-muted-foreground leading-relaxed">
+            {driveConnected ? 'Google Drive biometric & roster logs sync automatically.' : 'Re-authenticate with Google Drive to enable auto sync.'}
+          </p>
         </DashboardWidget>
         )}
 
@@ -576,109 +657,35 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         </DashboardWidget>
         )}
 
-      {/* 8. TASKS WIDGET */}
-      {canViewTasks && (
-        <DashboardWidget
-          id="tasks-widget"
-          title="Tasks Overview"
-          icon={<Icon name="check_box" size={18} />}
-          iconClass="bg-orange-500/10 text-orange-500"
-          {...wProps}
-          action={
-            <Button variant="ghost" size="sm" onClick={() => setCurrentView('tasks')} className="text-orange-500 hover:text-orange-600 hover:bg-orange-500/10 -mr-2">
-              View All
-            </Button>
-          }
+      {/* Widget 7 — Drive Sync Logs (Span 4) */}
+        {canViewDrive && (
+          <DashboardWidget
+          id="w7"
+          title="Drive Sync Logs"
+          icon={<Icon name="trending_up" size={18} />}
+          action={<Badge variant="success">Live</Badge>}
+          contentClass="flex flex-col justify-start gap-2.5 pt-4"
+          cardClass="col-span-full"
+            {...wProps}
         >
-          <div className="flex flex-col h-full justify-between gap-4">
-            <div className="flex flex-col gap-1">
-              <span className="text-3xl font-black text-foreground">{pendingTasksCount}</span>
-              <span className="text-sm font-medium text-muted-foreground">Pending Tasks</span>
+          {(syncLogs || []).slice(0, 5).map((log) => (
+            <div key={log.id} className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-muted text-muted-foreground shrink-0 border border-border/40">
+                <Icon name="download" size={15} />
+              </div>
+              <div className="flex-1 min-w-0 pr-2">
+                <p className="m-0 text-xs font-bold text-foreground break-words">{log.action}</p>
+                <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground break-words">{log.details}</p>
+              </div>
+              <Badge variant={log.status === 'success' ? 'success' : log.status === 'error' ? 'destructive' : 'warning'} className="uppercase text-[10px]">
+                {log.status === 'success' ? 'Synced' : log.status === 'error' ? 'Failed' : 'Pending'}
+              </Badge>
             </div>
-            {tasks.filter(t => t.status !== 'Done').slice(0, 2).map((t, i) => (
-              <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30 border border-border">
-                <div className="w-2 h-2 rounded-full bg-orange-500 shrink-0" />
-                <p className="text-sm font-medium text-foreground truncate flex-1">{t.title}</p>
-                <Badge variant="outline" className="text-[10px] shrink-0">{t.status}</Badge>
-              </div>
-            ))}
-            {pendingTasksCount === 0 && (
-              <p className="text-sm text-muted-foreground italic">No pending tasks! Great job.</p>
-            )}
-          </div>
+          ))}
         </DashboardWidget>
-      )}
+        )}
 
-      {/* 9. DOCUMENTS WIDGET */}
-      {canViewDocuments && (
-        <DashboardWidget
-          id="documents-widget"
-          title="Recent Documents"
-          icon={<Icon name="description" size={18} />}
-          iconClass="bg-blue-500/10 text-blue-500"
-          {...wProps}
-          action={
-            <Button variant="ghost" size="sm" onClick={() => setCurrentView('documents')} className="text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 -mr-2">
-              View All
-            </Button>
-          }
-        >
-          <div className="flex flex-col h-full gap-3">
-            {recentDocuments.length > 0 ? recentDocuments.map((doc, i) => (
-              <div key={i} className="flex flex-col gap-1 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold text-foreground truncate pr-2">{doc.name}</span>
-                  <Badge variant="secondary" className="text-[10px] shrink-0">{doc.category || 'Doc'}</Badge>
-                </div>
-                <span className="text-[11px] text-muted-foreground">Updated {formatDateShort(doc.uploadDate || doc.date || new Date().toISOString())}</span>
-              </div>
-            )) : (
-              <div className="flex-1 flex items-center justify-center">
-                <p className="text-sm text-muted-foreground italic text-center">No documents found.</p>
-              </div>
-            )}
-          </div>
-        </DashboardWidget>
-      )}
-
-      {/* 10. ASSETS WIDGET */}
-      {canViewAssets && (
-        <DashboardWidget
-          id="assets-widget"
-          title="Asset Inventory"
-          icon={<Icon name="devices_other" size={18} />}
-          iconClass="bg-teal-500/10 text-teal-500"
-          {...wProps}
-          action={
-            <Button variant="ghost" size="sm" onClick={() => setCurrentView('assets')} className="text-teal-500 hover:text-teal-600 hover:bg-teal-500/10 -mr-2">
-              Manage
-            </Button>
-          }
-        >
-          <div className="flex flex-col h-full justify-between gap-4">
-            <div className="flex items-center justify-between p-3 rounded-xl bg-teal-500/5 border border-teal-500/10">
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-teal-600/80 uppercase tracking-wider mb-1">Total Assets</span>
-                <span className="text-2xl font-black text-foreground">{assets.length}</span>
-              </div>
-              <Icon name="laptop_windows" size={40} className="text-teal-500/30" />
-            </div>
-            
-            <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border">
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Available</span>
-                <span className="text-xl font-bold text-foreground">{availableAssetsCount}</span>
-              </div>
-              <div className="flex flex-col items-end">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Assigned</span>
-                <span className="text-xl font-bold text-foreground">{assets.length - availableAssetsCount}</span>
-              </div>
-            </div>
-          </div>
-        </DashboardWidget>
-      )}
-
-      {/* SPACER for bottom padding */}
+              {/* SPACER for bottom padding */}
       <div className="h-8 col-span-full"></div>
     </div>
     </div>
