@@ -252,6 +252,24 @@ function MarketingSectionOne({ containerRef }) {
 }
 
 function MarketingSectionTwo() {
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+
+  // Hardcore tilt: flip signs so hovering left pushes left side back, and increase angle
+  const rotateX = useTransform(mouseY, [-300, 300], [25, -25])
+  const rotateY = useTransform(mouseX, [-300, 300], [25, -25])
+
+  function handleMouseMove(e) {
+    const rect = e.currentTarget.getBoundingClientRect()
+    mouseX.set(e.clientX - rect.left - rect.width / 2)
+    mouseY.set(e.clientY - rect.top - rect.height / 2)
+  }
+
+  function handleMouseLeave() {
+    mouseX.set(0)
+    mouseY.set(0)
+  }
+
   return (
     <section className="w-full bg-black">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -264,10 +282,14 @@ function MarketingSectionTwo() {
           </p>
         </div>
         
-        <div 
-          style={{ borderColor: 'rgba(255,255,255,0.1)' }}
-          className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border !border-white/10 shadow-[0_20px_100px_rgba(254,77,1,0.15)] text-white group hover:shadow-[0_40px_120px_rgba(254,77,1,0.3)] transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
-        >
+        {/* Perspective wrapper for 3D pop */}
+        <div style={{ perspective: "1000px" }} className="w-full h-full relative">
+          <motion.div 
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            style={{ rotateX, rotateY, borderColor: 'rgba(255,255,255,0.1)', transformStyle: "preserve-3d" }}
+            className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border !border-white/10 shadow-[0_20px_100px_rgba(254,77,1,0.15)] text-white group hover:shadow-[0_40px_120px_rgba(254,77,1,0.3)] transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
+          >
           {/* Sleek Orange Blob for ambient glow */}
           <div className="absolute top-[-5%] right-[5%] w-[30%] h-[40%] bg-primary/40 rounded-full blur-[70px] pointer-events-none" />
 
@@ -307,6 +329,7 @@ function MarketingSectionTwo() {
               <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-mono drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">ENTERPRISE</span>
             </div>
           </div>
+        </motion.div>
         </div>
       </div>
     </section>
