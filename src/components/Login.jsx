@@ -252,82 +252,25 @@ function MarketingSectionOne({ containerRef }) {
 }
 
 function MarketingSectionTwo() {
-  const x = useMotionValue(0.5)
-  const y = useMotionValue(0.5)
-  
-  // Apply spring physics to the mouse coordinates for buttery smooth movement
-  const springConfig = { damping: 40, stiffness: 300, mass: 0.5 }
-  const smoothX = useSpring(x, springConfig)
-  const smoothY = useSpring(y, springConfig)
-  
-  const rotateX = useTransform(smoothY, [0, 1], [10, -10])
-  const rotateY = useTransform(smoothX, [0, 1], [-10, 10])
-  
-  // Dynamic smooth gradient position
-  const glareX = useTransform(smoothX, [0, 1], [0, 100])
-  const glareY = useTransform(smoothY, [0, 1], [0, 100])
-  const glareBackground = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.2) 0%, transparent 70%)`
-
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const mouseX = e.clientX - rect.left
-    const mouseY = e.clientY - rect.top
-    x.set(mouseX / rect.width)
-    y.set(mouseY / rect.height)
-  }
-
-  const handleMouseLeave = () => {
-    x.set(0.5)
-    y.set(0.5)
-  }
-
   return (
-    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center" style={{ perspective: '2000px' }}>
+    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
       <div className="flex flex-col items-start text-left">
-        <motion.h2 
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: false, amount: 0.5 }}
-          className="text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] font-black tracking-tight mb-4 sm:mb-6"
-        >
+        <h2 className="text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] font-black tracking-tight mb-4 sm:mb-6">
           Is it really <span className="text-[#FE4D01]">FREE?</span>
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, x: -10 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: false, amount: 0.5 }}
-          transition={{ delay: 0.1 }}
-          className="text-lg sm:text-xl md:text-2xl text-white/80 font-medium max-w-2xl tracking-tight"
-        >
+        </h2>
+        <p className="text-lg sm:text-xl md:text-2xl text-white/80 font-medium max-w-2xl tracking-tight">
           Yes. It's completely free for a limited time. No hidden conditions, no subscriptions, and absolutely no credit/debit card required.
-        </motion.p>
+        </p>
       </div>
-      <motion.div
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        initial={{ opacity: 0, filter: "blur(15px)" }}
-        whileInView={{ opacity: 1, filter: "blur(0px)" }}
-        viewport={{ once: false, amount: 0.4 }}
-        transition={{ duration: 1, type: "spring", stiffness: 150, damping: 25 }}
-        style={{
-          rotateX,
-          rotateY,
-          transformStyle: "preserve-3d",
-          borderColor: 'rgba(255,255,255,0.1)'
-        }}
-        className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border !border-white/10 shadow-[0_20px_100px_rgba(254,77,1,0.15)] text-white group hover:shadow-[0_40px_120px_rgba(254,77,1,0.3)] transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
-      >
+      
+      <div className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border border-white/10 shadow-[0_20px_100px_rgba(254,77,1,0.15)] text-white p-8 sm:p-14 aspect-auto md:aspect-[1.65/1]">
         {/* Sleek Orange Blob for ambient glow */}
         <div className="absolute top-[-5%] right-[5%] w-[30%] h-[40%] bg-primary/40 rounded-full blur-[70px] pointer-events-none" />
 
         <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/50 opacity-40 pointer-events-none" />
-        
-        {/* Overlay Effects (Glare & Shimmer) placed at highest Z to cover all 3D elements */}
-        <div className="absolute inset-0 z-50 pointer-events-none rounded-[2.5rem] overflow-hidden" style={{ transform: "translateZ(60px)" }}>
-        </div>
 
         {/* Top section: 100% FREE & Logo */}
-        <div className="relative z-10 flex items-center justify-between w-full mb-8 sm:mb-12" style={{ transform: "translateZ(30px)" }}>
+        <div className="relative z-10 flex items-center justify-between w-full mb-8 sm:mb-12">
           <span className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-gray-100 via-gray-300 to-gray-500 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-sans uppercase">
             100% FREE
           </span>
@@ -338,19 +281,18 @@ function MarketingSectionTwo() {
         </div>
 
         {/* Middle section: Main Text */}
-        <div className="relative z-10 flex-1 flex flex-col justify-center" style={{ transform: "translateZ(50px)" }}>
+        <div className="relative z-10 flex-1 flex flex-col justify-center">
           <div className="max-w-2xl w-full flex flex-col">
             <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-[0.1em] font-sans uppercase mb-6 sm:mb-8">
               <span className="text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] block w-full">
                 MEMBERSHIP
               </span>
             </h2>
-
           </div>
         </div>
 
         {/* Bottom section: Card Details */}
-        <div className="relative z-10 flex items-end justify-between w-full mt-10 sm:mt-12" style={{ transform: "translateZ(40px)" }}>
+        <div className="relative z-10 flex items-end justify-between w-full mt-10 sm:mt-12">
           <div className="flex flex-col items-start">
             <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Valid thru</span>
             <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-mono drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">LIMITED TIME</span>
@@ -361,7 +303,7 @@ function MarketingSectionTwo() {
             <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-mono drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">ENTERPRISE</span>
           </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   )
 }
@@ -403,27 +345,17 @@ function FaqSection() {
   const [open, setOpen] = useState(0)
   return (
     <section className="min-h-dvh w-full flex flex-col items-center justify-center px-4 sm:px-6 py-16 snap-start">
-      <motion.h2
-        initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        viewport={{ once: false, amount: 0.5 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight text-center mb-12"
-      >
+      <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight text-center mb-12">
         Frequently asked questions
-      </motion.h2>
+      </h2>
 
       <div className="w-full max-w-3xl mx-auto">
         <div className="w-full grid grid-cols-1 gap-3 sm:gap-4">
           {FAQ_ITEMS.map((item, i) => {
             const isOpen = open === i
             return (
-              <motion.div
+              <div
                 key={i}
-                initial={{ opacity: 0, y: 24, scale: 0.95, filter: "blur(10px)" }}
-                whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                viewport={{ once: false, amount: 0.3 }}
-                transition={{ delay: i * 0.05, duration: 0.5, ease: "easeOut" }}
                 className={`relative flex flex-col overflow-hidden rounded-2xl border bg-background/95 shadow-sm backdrop-blur-xl transition-colors ${isOpen ? 'border-primary/40' : 'border-border/50'}`}
               >
                 <button
@@ -437,15 +369,12 @@ function FaqSection() {
                     className={`shrink-0 text-primary transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
                   />
                 </button>
-                <motion.div
-                  initial={false}
-                  animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="overflow-hidden"
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${isOpen ? 'h-auto opacity-100' : 'h-0 opacity-0'}`}
                 >
                   <p className="text-sm sm:text-base text-muted-foreground leading-relaxed px-5 pb-5">{item.a}</p>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             )
           })}
         </div>
@@ -1145,9 +1074,71 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
 
       {/* Section 7: Auth Modal */}
-      <section id="auth-section" className="relative h-dvh w-full flex flex-col items-center justify-center px-4 pb-8 sm:pb-0 snap-start overflow-hidden bg-black text-white">
-              {/* Invisible box — holds card + ribbon as one unit and scales to fit every viewport */}
-              <div className="login-modal-box relative z-10">
+      <section id="auth-section" className="relative min-h-dvh w-full flex items-center justify-center px-4 sm:px-8 lg:px-16 py-12 lg:py-0 snap-start overflow-hidden">
+        <div className="max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left Grid: Google Drive & Privacy Info */}
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="flex flex-col text-left z-20 pt-8 lg:pt-0 w-full max-w-[600px] mx-auto lg:mx-0"
+          >
+            <div className="bg-card backdrop-blur-2xl border border-border rounded-[2rem] shadow-2xl relative overflow-hidden p-8 sm:p-10 lg:p-12">
+              {/* Decorative Background Elements */}
+              <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-green-500/10 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="relative z-10">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-bold text-sm w-max mb-6 border border-primary/20">
+                  <Icon name="security" size={18} />
+                  100% Data Privacy
+                </div>
+                
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground tracking-tight leading-tight mb-6">
+                  Your Data, <br className="hidden lg:block"/>
+                  Your <span className="text-primary">Google Drive</span>.
+                </h2>
+                
+                <div className="space-y-6 text-muted-foreground text-base sm:text-lg font-medium">
+                  <p>
+                    We believe your company data belongs to you. That's why Kormiis uses your secure Google Drive as its database.
+                  </p>
+                  
+                  <ul className="space-y-4">
+                    <li className="flex items-start gap-4">
+                      <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
+                        <Icon name="check" size={14} />
+                      </div>
+                      <span><strong className="text-foreground">Zero Lock-in:</strong> You have direct access to your data files at all times. If you leave, your data stays with you.</span>
+                    </li>
+                    <li className="flex items-start gap-4">
+                      <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
+                        <Icon name="check" size={14} />
+                      </div>
+                      <span><strong className="text-foreground">Bank-level Security:</strong> Secured by Google's world-class infrastructure and encryption.</span>
+                    </li>
+                    <li className="flex items-start gap-4">
+                      <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
+                        <Icon name="check" size={14} />
+                      </div>
+                      <span><strong className="text-foreground">Private App Data:</strong> Kormiis stores data in an isolated, hidden folder that doesn't clutter your Drive.</span>
+                    </li>
+                  </ul>
+                  
+                  <div className="pt-6 border-t border-border mt-8 flex items-center gap-3">
+                    <Icon name="info" size={20} className="text-primary shrink-0" />
+                    <p className="text-sm opacity-90 leading-snug">
+                      By logging in, you'll connect Kormiis to your Drive to securely sync attendance, payroll, and tasks.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right Grid: Login Modal */}
+          <div className="flex items-center justify-center relative z-10 w-full pt-12 lg:pt-0">
+            <div className="login-modal-box relative w-full flex justify-center">
               <motion.div
                 initial={{ opacity: 0, y: 44, scale: 0.92, filter: "blur(12px)" }}
                 whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
@@ -1178,7 +1169,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 </div>
 
                  {/* Card Container */}
-                <div className="bg-[#F0F8FF] backdrop-blur-2xl border border-border rounded-2xl sm:rounded-[28px] shadow-2xl relative z-10 overflow-hidden pt-12 pb-2">
+                <div className="bg-card backdrop-blur-2xl border border-border rounded-2xl sm:rounded-[28px] shadow-2xl relative z-10 overflow-hidden pt-12 pb-2">
               
               {/* Top Glow Effect */}
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
@@ -1200,7 +1191,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                           value={email}
                           onChange={e => setEmail(e.target.value)}
                           placeholder="name@company.com"
-                          className="w-full bg-transparent text-gray-900 px-4 py-3 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
+                          className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-sm font-medium rounded-xl focus:outline-none transition-all"
                           required
                         />
                       </div>
@@ -1212,7 +1203,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             placeholder="••••••••"
-                            className="w-full bg-transparent text-gray-900 px-4 py-3 pr-11 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
+                            className="w-full bg-background/40 border border-input text-foreground px-4 py-3 pr-11 text-sm font-medium rounded-xl focus:outline-none transition-all"
                             required
                           />
                           <button 
@@ -1282,7 +1273,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 placeholder="name@company.com"
-                                className="w-full bg-transparent text-gray-900 px-4 py-3 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
+                                className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-sm font-medium rounded-xl focus:outline-none transition-all"
                                 required
                               />
                             </div>
@@ -1294,7 +1285,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                                   value={password}
                                   onChange={e => setPassword(e.target.value)}
                                   placeholder="••••••••"
-                                  className="w-full bg-transparent text-gray-900 px-4 py-3 pr-11 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
+                                  className="w-full bg-background/40 border border-input text-foreground px-4 py-3 pr-11 text-sm font-medium rounded-xl focus:outline-none transition-all"
                                   required
                                 />
                                 <button 
@@ -1347,7 +1338,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                               value={email}
                               onChange={e => setEmail(e.target.value)}
                               placeholder="name@company.com"
-                              className="w-full bg-transparent text-gray-900 px-4 py-3 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
+                              className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-sm font-medium rounded-xl focus:outline-none transition-all"
                               required
                             />
                           </div>
@@ -1359,7 +1350,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 placeholder="••••••••"
-                                className="w-full bg-transparent text-gray-900 px-4 py-3 pr-11 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
+                                className="w-full bg-background/40 border border-input text-foreground px-4 py-3 pr-11 text-sm font-medium rounded-xl focus:outline-none transition-all"
                                 required
                               />
                               <button 
@@ -1393,7 +1384,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                             value={phoneNumber}
                             onChange={e => setPhoneNumber(e.target.value)}
                             placeholder="+1 555-555-5555"
-                            className="w-full bg-transparent text-gray-900 px-4 py-3 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
+                            className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-sm font-medium rounded-xl focus:outline-none transition-all"
                             required
                           />
                         </div>
@@ -1428,7 +1419,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                             value={otpCode}
                             onChange={e => setOtpCode(e.target.value)}
                             placeholder="123456"
-                            className="w-full bg-transparent text-gray-900 px-4 py-3 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all tracking-widest text-center"
+                            className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-sm font-medium rounded-xl focus:outline-none transition-all tracking-widest text-center"
                             maxLength={6}
                             required
                           />
@@ -1464,7 +1455,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                         value={fullName}
                         onChange={e => setFullName(e.target.value)}
                         placeholder="Jane Doe"
-                        className="w-full bg-transparent text-gray-900 px-4 py-3 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
+                        className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-sm font-medium rounded-xl focus:outline-none transition-all"
                         required
                       />
                     </div>
@@ -1475,7 +1466,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                         value={companyName}
                         onChange={e => setCompanyName(e.target.value)}
                         placeholder="Acme Inc."
-                        className="w-full bg-transparent text-gray-900 px-4 py-3 text-sm font-medium border border-black focus:outline-none focus:ring-2 focus:ring-[#FE4D01] focus:border-[#FE4D01] rounded-lg transition-all"
+                        className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-sm font-medium rounded-xl focus:outline-none transition-all"
                         required
                       />
                     </div>
@@ -1529,7 +1520,9 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
               </div>
             </div>
             </motion.div>
-              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Section 8: FAQ */}
