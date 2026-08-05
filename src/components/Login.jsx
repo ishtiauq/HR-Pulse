@@ -253,57 +253,59 @@ function MarketingSectionOne({ containerRef }) {
 
 function MarketingSectionTwo() {
   return (
-    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
-      <div className="flex flex-col items-start text-left">
-        <h2 className="text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] font-black tracking-tight mb-4 sm:mb-6">
-          Is it really <span className="text-[#FE4D01]">FREE?</span>
-        </h2>
-        <p className="text-lg sm:text-xl md:text-2xl text-white/80 font-medium max-w-2xl tracking-tight">
-          Yes. It's completely free for a limited time. No hidden conditions, no subscriptions, and absolutely no credit/debit card required.
-        </p>
-      </div>
-      
-      <div 
-        style={{ borderColor: 'rgba(255,255,255,0.1)' }}
-        className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border !border-white/10 shadow-[0_20px_100px_rgba(254,77,1,0.15)] text-white group hover:shadow-[0_40px_120px_rgba(254,77,1,0.3)] transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
-      >
-        {/* Sleek Orange Blob for ambient glow */}
-        <div className="absolute top-[-5%] right-[5%] w-[30%] h-[40%] bg-primary/40 rounded-full blur-[70px] pointer-events-none" />
-
-        <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/50 opacity-40 pointer-events-none" />
-
-        {/* Top section: 100% FREE & Logo */}
-        <div className="relative z-10 flex items-center justify-between w-full mb-8 sm:mb-12">
-          <span className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-gray-100 via-gray-300 to-gray-500 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-sans uppercase">
-            100% FREE
-          </span>
-          {/* Logo / Brand mark */}
-          <div className="flex items-center opacity-90">
-            <img src={hrPulseMembershipLogo} alt="Kormiis Logo" className="h-5 sm:h-7 w-auto object-contain drop-shadow-md" />
-          </div>
+    <section className="w-full bg-black">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="flex flex-col items-start text-left">
+          <h2 className="text-[clamp(2.5rem,6vw+0.5rem,6rem)] leading-[1.1] font-black tracking-tight mb-4 sm:mb-6">
+            Is it really <span className="text-[#FE4D01]">FREE?</span>
+          </h2>
+          <p className="text-lg sm:text-xl md:text-2xl text-white/80 font-medium max-w-2xl tracking-tight">
+            Yes. It's completely free for a limited time. No hidden conditions, no subscriptions, and absolutely no credit/debit card required.
+          </p>
         </div>
+        
+        <div 
+          style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+          className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border !border-white/10 shadow-[0_20px_100px_rgba(254,77,1,0.15)] text-white group hover:shadow-[0_40px_120px_rgba(254,77,1,0.3)] transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
+        >
+          {/* Sleek Orange Blob for ambient glow */}
+          <div className="absolute top-[-5%] right-[5%] w-[30%] h-[40%] bg-primary/40 rounded-full blur-[70px] pointer-events-none" />
 
-        {/* Middle section: Main Text */}
-        <div className="relative z-10 flex-1 flex flex-col justify-center">
-          <div className="max-w-2xl w-full flex flex-col">
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-[0.1em] font-sans uppercase mb-6 sm:mb-8">
-              <span className="text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] block w-full">
-                MEMBERSHIP
-              </span>
-            </h2>
-          </div>
-        </div>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/50 opacity-40 pointer-events-none" />
 
-        {/* Bottom section: Card Details */}
-        <div className="relative z-10 flex items-end justify-between w-full mt-10 sm:mt-12">
-          <div className="flex flex-col items-start">
-            <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Valid thru</span>
-            <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-mono drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">LIMITED TIME</span>
+          {/* Top section: 100% FREE & Logo */}
+          <div className="relative z-10 flex items-center justify-between w-full mb-8 sm:mb-12">
+            <span className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-gray-100 via-gray-300 to-gray-500 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] font-sans uppercase">
+              100% FREE
+            </span>
+            {/* Logo / Brand mark */}
+            <div className="flex items-center opacity-90">
+              <img src={hrPulseMembershipLogo} alt="Kormiis Logo" className="h-5 sm:h-7 w-auto object-contain drop-shadow-md" />
+            </div>
           </div>
-          
-          <div className="flex flex-col items-end">
-            <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Tier</span>
-            <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-mono drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">ENTERPRISE</span>
+
+          {/* Middle section: Main Text */}
+          <div className="relative z-10 flex-1 flex flex-col justify-center">
+            <div className="max-w-2xl w-full flex flex-col">
+              <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-[0.1em] font-sans uppercase mb-6 sm:mb-8">
+                <span className="text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] block w-full">
+                  MEMBERSHIP
+                </span>
+              </h2>
+            </div>
+          </div>
+
+          {/* Bottom section: Card Details */}
+          <div className="relative z-10 flex items-end justify-between w-full mt-10 sm:mt-12">
+            <div className="flex flex-col items-start">
+              <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Valid thru</span>
+              <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-mono drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">LIMITED TIME</span>
+            </div>
+            
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] sm:text-xs text-white/40 tracking-[0.2em] uppercase mb-1">Tier</span>
+              <span className="text-base sm:text-xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-gray-300 via-gray-400 to-gray-600 font-mono drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] uppercase">ENTERPRISE</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1077,7 +1079,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
 
       {/* Section 7: Auth Modal */}
-      <section id="auth-section" className="relative min-h-dvh w-full flex items-center justify-center px-4 sm:px-8 lg:px-16 py-12 lg:py-0 snap-start overflow-hidden">
+      <section id="auth-section" className="relative min-h-dvh w-full bg-black flex items-center justify-center px-4 sm:px-8 lg:px-16 py-12 lg:py-0 snap-start overflow-hidden">
         <div className="max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left Grid: Google Drive & Privacy Info */}
           <motion.div 
@@ -1086,7 +1088,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             viewport={{ once: true }}
             className="flex flex-col text-left z-20 pt-8 lg:pt-0 w-full max-w-[600px] mx-auto lg:mx-0"
           >
-            <div className="bg-card backdrop-blur-2xl border border-border rounded-[2rem] shadow-2xl relative overflow-hidden p-8 sm:p-10 lg:p-12">
+            <div className="bg-background rounded-[2rem] relative overflow-hidden p-8 sm:p-10 lg:p-12">
               {/* Decorative Background Elements */}
               <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-green-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -1142,13 +1144,13 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
           {/* Right Grid: Login Modal */}
           <div className="flex items-center justify-center relative z-10 w-full pt-12 lg:pt-0">
             <div className="login-modal-box relative w-full flex justify-center">
-              <motion.div
-                initial={{ opacity: 0, y: 44, scale: 0.92, filter: "blur(12px)" }}
-                whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                viewport={{ once: false, amount: 0.3 }}
-                transition={{ type: "spring", stiffness: 200, damping: 22, mass: 0.9 }}
-                className="login-auth-card relative w-full max-w-[350px] mx-auto shrink-0"
-              >
+                <motion.div
+                  initial={{ opacity: 0, y: 44, scale: 0.92, filter: "blur(12px)" }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 22, mass: 0.9 }}
+                  className="login-auth-card relative w-full max-w-[350px] mx-auto shrink-0"
+                >
                 {/* 1. Lanyard Back (Behind Card) */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none z-0">
                   <div className="absolute bottom-[calc(100%-23px)] left-1/2 -translate-x-1/2 w-[300px] h-[150px] sm:h-[200px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_30%,black_60%,black_100%)] sm:[mask-image:linear-gradient(to_bottom,transparent_0%,transparent_30%,black_70%,black_100%)]">
@@ -1172,7 +1174,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 </div>
 
                  {/* Card Container */}
-                <div className="bg-card backdrop-blur-2xl border border-border rounded-2xl sm:rounded-[28px] shadow-2xl relative z-10 overflow-hidden pt-12 pb-2">
+                <div className="bg-background rounded-2xl sm:rounded-[28px] relative z-10 overflow-hidden pt-12 pb-2">
               
               {/* Top Glow Effect */}
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
@@ -1188,25 +1190,25 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   <>
                     <form onSubmit={handleSignup} className="space-y-3.5 mt-5">
                       <div>
-                        <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
+                        <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
                         <input
                           type="email"
                           value={email}
                           onChange={e => setEmail(e.target.value)}
                           placeholder="name@company.com"
-                          className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-sm font-medium rounded-xl focus:outline-none transition-all"
+                          className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all"
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Password</label>
+                        <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Password</label>
                         <div className="relative">
                           <input
                             type={showPassword ? 'text' : 'password'}
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             placeholder="••••••••"
-                            className="w-full bg-background/40 border border-input text-foreground px-4 py-3 pr-11 text-sm font-medium rounded-xl focus:outline-none transition-all"
+                            className="w-full bg-background/40 border border-input text-foreground px-4 py-3 pr-11 text-base font-medium rounded-xl focus:outline-none transition-all"
                             required
                           />
                           <button 
@@ -1227,7 +1229,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
+                        className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
                       >
                         {isLoading ? 'Creating Account...' : 'Continue'} <Icon name="arrow_forward" size={18} />
                       </button>
@@ -1270,25 +1272,25 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                         <>
                           <form onSubmit={handleAdminPasswordSubmit} className="space-y-4">
                             <div>
-                              <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
+                              <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
                               <input
                                 type="email"
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                                 placeholder="name@company.com"
-                                className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-sm font-medium rounded-xl focus:outline-none transition-all"
+                                className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all"
                                 required
                               />
                             </div>
                             <div>
-                              <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Password</label>
+                              <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Password</label>
                               <div className="relative">
                                 <input
                                   type={showPassword ? 'text' : 'password'}
                                   value={password}
                                   onChange={e => setPassword(e.target.value)}
                                   placeholder="••••••••"
-                                  className="w-full bg-background/40 border border-input text-foreground px-4 py-3 pr-11 text-sm font-medium rounded-xl focus:outline-none transition-all"
+                                  className="w-full bg-background/40 border border-input text-foreground px-4 py-3 pr-11 text-base font-medium rounded-xl focus:outline-none transition-all"
                                   required
                                 />
                                 <button 
@@ -1303,7 +1305,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                             <button
                               type="submit"
                               disabled={isLoading}
-                              className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
+                              className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
                             >
                               {isLoading ? 'Signing In...' : 'Sign In'} <Icon name="arrow_forward" size={18} />
                             </button>
@@ -1335,25 +1337,25 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       ) : (
                         <form onSubmit={handleEmployeeSubmit} className="space-y-4">
                           <div>
-                            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
+                            <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
                             <input
                               type="text"
                               value={email}
                               onChange={e => setEmail(e.target.value)}
                               placeholder="name@company.com"
-                              className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-sm font-medium rounded-xl focus:outline-none transition-all"
+                              className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all"
                               required
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Password</label>
+                            <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Password</label>
                             <div className="relative">
                               <input
                                 type={showPassword ? 'text' : 'password'}
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 placeholder="••••••••"
-                                className="w-full bg-background/40 border border-input text-foreground px-4 py-3 pr-11 text-sm font-medium rounded-xl focus:outline-none transition-all"
+                                className="w-full bg-background/40 border border-input text-foreground px-4 py-3 pr-11 text-base font-medium rounded-xl focus:outline-none transition-all"
                                 required
                               />
                               <button 
@@ -1368,7 +1370,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                           <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
+                            className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
                           >
                             {isLoading ? 'Signing In...' : 'Access Portal'} <Icon name="arrow_forward" size={18} />
                           </button>
@@ -1381,13 +1383,13 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     {!confirmationResult ? (
                       <form onSubmit={handleSendPhoneOtp} className="space-y-4">
                         <div>
-                          <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Phone Number</label>
+                          <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Phone Number</label>
                           <input
                             type="tel"
                             value={phoneNumber}
                             onChange={e => setPhoneNumber(e.target.value)}
                             placeholder="+1 555-555-5555"
-                            className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-sm font-medium rounded-xl focus:outline-none transition-all"
+                            className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all"
                             required
                           />
                         </div>
@@ -1401,7 +1403,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                         <button
                           type="submit"
                           disabled={isLoading}
-                          className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
+                          className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
                         >
                           {isLoading ? 'Sending SMS...' : 'Send SMS Code'} <Icon name="arrow_forward" size={18} />
                         </button>
@@ -1416,13 +1418,13 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     ) : (
                       <form onSubmit={handleVerifyPhoneOtp} className="space-y-4">
                         <div>
-                          <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">6-Digit Code</label>
+                          <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">6-Digit Code</label>
                           <input
                             type="text"
                             value={otpCode}
                             onChange={e => setOtpCode(e.target.value)}
                             placeholder="123456"
-                            className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-sm font-medium rounded-xl focus:outline-none transition-all tracking-widest text-center"
+                            className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all tracking-widest text-center"
                             maxLength={6}
                             required
                           />
@@ -1436,7 +1438,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                         <button
                           type="submit"
                           disabled={isLoading}
-                          className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
+                          className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
                         >
                           {isLoading ? 'Verifying...' : 'Verify & Continue'} <Icon name="check" size={18} />
                         </button>
@@ -1452,24 +1454,24 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     setOnboardingStep(3);
                   }} className="space-y-3.5 mt-5">
                     <div>
-                      <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Full Name</label>
+                      <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Full Name</label>
                       <input
                         type="text"
                         value={fullName}
                         onChange={e => setFullName(e.target.value)}
                         placeholder="Jane Doe"
-                        className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-sm font-medium rounded-xl focus:outline-none transition-all"
+                        className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Company Name</label>
+                      <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Company Name</label>
                       <input
                         type="text"
                         value={companyName}
                         onChange={e => setCompanyName(e.target.value)}
                         placeholder="Acme Inc."
-                        className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-sm font-medium rounded-xl focus:outline-none transition-all"
+                        className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all"
                         required
                       />
                     </div>
@@ -1482,7 +1484,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
+                      className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
                     >
                       {isLoading ? 'Saving...' : 'Complete Profile'} <Icon name="arrow_forward" size={18} />
                     </button>
@@ -1505,7 +1507,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     <button 
                       onClick={triggerDriveOAuth} 
                       disabled={isLoading} 
-                      className="w-full py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
+                      className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
                     >
                       {isLoading ? 'Connecting...' : 'Authorize & Connect'} <Icon name="cloud" size={18} />
                     </button>
@@ -1551,13 +1553,13 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             <div className="flex flex-col gap-3">
               <button 
                 onClick={handleConfirmAuthorize}
-                className="w-full py-3 rounded-full text-sm font-bold bg-primary text-primary-foreground"
+                className="w-full py-3 rounded-full text-base font-bold bg-primary text-primary-foreground"
               >
                 Authorize & Connect
               </button>
               <button 
                 onClick={() => setShowIntermediateModal(false)}
-                className="w-full py-3 rounded-full text-sm font-bold bg-muted text-foreground"
+                className="w-full py-3 rounded-full text-base font-bold bg-muted text-foreground"
               >
                 Cancel
               </button>
