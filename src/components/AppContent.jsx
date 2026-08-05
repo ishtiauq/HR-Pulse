@@ -11,6 +11,7 @@ import Settings from './Settings.jsx'
 import DriveSync from './DriveSync.jsx'
 import Tasks from './Tasks.jsx'
 import ProfileView from './ProfileView.jsx'
+import Notes from './Notes.jsx'
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AppContent({ currentView, setCurrentView, isAppLoading, hasPermission, simulatedRole, user, isSidebarCollapsed, themeMode, toggleTheme, ...data }) {
@@ -131,6 +132,8 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       return <ProfileView currentUser={user} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} addLog={data.addLog} />
     case 'drive':
       return <DriveSync user={user} driveConnected={data.driveConnected} setDriveConnected={data.setDriveConnected} addLog={data.addLog} addToast={data.addToast} />
+    case 'notes':
+      return <Notes notes={data.notes} setNotes={data.handleSetNotes} currentUser={user} addToast={data.addToast} simulatedRole={simulatedRole} />
     default:
       return <Dashboard employees={data.employees} syncLogs={data.syncLogs} driveConnected={data.driveConnected} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} simulatedRole={simulatedRole} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} />
   }

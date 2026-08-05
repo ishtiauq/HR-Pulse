@@ -48,7 +48,7 @@ export default function useAppData({ user, addToast }) {
     
     // For Teammates, base permissions + custom permissions
     if (currentRole === 'Teammate') {
-      const basePerms = ['dashboard', 'attendance', 'expenses', 'calendar', 'tasks', 'profile']
+      const basePerms = ['dashboard', 'attendance', 'expenses', 'calendar', 'tasks', 'profile', 'notes']
       const customPerms = user?.permissions || []
       return basePerms.includes(resource) || customPerms.includes(resource)
     }
@@ -98,6 +98,7 @@ export default function useAppData({ user, addToast }) {
     return []
   })
   const [tasks, setTasks] = useState(() => loadSaved('hr_pulse_tasks') || [])
+  const [notes, setNotesRaw] = useState(() => loadSaved('hr_pulse_notes') || [])
   const [assets, setAssets] = useState(() => loadSaved('hr_pulse_assets') || [])
   const [assetRequests, setAssetRequests] = useState(() => loadSaved('hr_pulse_asset_requests') || [])
   const [assetCategories, setAssetCategories] = useState(() => loadSaved('hr_pulse_asset_categories') || ['Laptop', 'Phone', 'Monitor', 'Peripherals', 'Access Card'])
@@ -157,6 +158,7 @@ export default function useAppData({ user, addToast }) {
     { key: 'hr_pulse_asset_categories', val: assetCategories },
     { key: 'hr_pulse_events', val: events },
     { key: 'hr_pulse_documents', val: documents },
+    { key: 'hr_pulse_notes', val: notes },
   ]
   persistStates.forEach(({ key, val }) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -255,6 +257,7 @@ export default function useAppData({ user, addToast }) {
         if (tableName === 'attendance_logs') setAttendanceRaw(prev => ({ ...prev, dailyLogs: data }))
         if (tableName === 'leave_requests') setAttendanceRaw(prev => ({ ...prev, leaves: data }))
         if (tableName === 'leave_balances') setAttendanceRaw(prev => ({ ...prev, balances: data }))
+        if (tableName === 'notes') setNotesRaw(data)
       }
 
       try {
@@ -331,6 +334,25 @@ export default function useAppData({ user, addToast }) {
           await writeTable('attendance_logs', logsData, meta, user.token)
         }
         setAttendanceRaw({ leaves: leavesData, balances: balancesData, dailyLogs: logsData })
+
+        const defaultTasks = []
+        let tasksData = await readTable('tasks', user.token, bgSyncCallback)
+        if (!tasksData) {
+          const saved = localStorage.getItem('hr_pulse_tasks')
+          if (saved) { try { tasksData = JSON.parse(saved) } catch (e) {} }
+          if (!tasksData) tasksData = defaultTasks
+          await writeTable('tasks', tasksData, meta, user.token)
+        }
+        setTasks(tasksData)
+
+        let notesData = await readTable('notes', user.token, bgSyncCallback)
+        if (!notesData) {
+          const saved = localStorage.getItem('hr_pulse_notes')
+          if (saved) { try { notesData = JSON.parse(saved) } catch (e) {} }
+          if (!notesData) notesData = []
+          await writeTable('notes', notesData, meta, user.token)
+        }
+        setNotesRaw(notesData)
 
         const defaultExpenses = []
         let expensesData = await readTable('expenses', user.token, bgSyncCallback)
@@ -498,6 +520,29 @@ export default function useAppData({ user, addToast }) {
     setTasks((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       localStorage.setItem('hr_pulse_tasks', JSON.stringify(next))
+      if (user && driveConnected && metaManifest) {
+        const meta = { ...metaManifest }
+        writeTable('tasks', next, meta, user.token)
+          .catch((err) => { setDbStatus('corruption'); addLog('Save Failed', 'Could not save tasks data to cloud: ' + err.message, 'danger') })
+      }
+      return next
+    })
+  }
+
+  const handleSetNotes = (updater) => {
+    setNotesRaw((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      localStorage.setItem('hr_pulse_notes', JSON.stringify(next))
+      if (user && driveConnected && metaManifest) {
+        const meta = { ...metaManifest }
+        writeTable('notes', next, meta, user.token)
+          .then(({ updatedData, conflicts, offline }) => {
+            setMetaManifest(meta)
+            if (offline) { addToast('Offline - notes saved locally.', 'warning'); setNotesRaw(updatedData) }
+            else if (conflicts && conflicts.length > 0) { setSyncConflicts(c => [...c, ...conflicts]); addToast('Sync conflict auto-resolved.', 'warning'); setNotesRaw(updatedData) }
+          })
+          .catch((err) => { setDbStatus('corruption'); addLog('Save Failed', 'Could not save notes data to cloud: ' + err.message, 'danger') })
+      }
       return next
     })
   }
@@ -544,7 +589,7 @@ export default function useAppData({ user, addToast }) {
     notifications, showNotifications, setShowNotifications,
 
     /* Data */
-    employees, payroll, attendance, expenses, events, documents, tasks,
+    employees, payroll, attendance, expenses, events, documents, tasks, notes,
     roster, setRoster, shiftSwaps, setShiftSwaps,
     overtimeClaims, setOvertimeClaims,
     announcements, setAnnouncements,
@@ -552,7 +597,7 @@ export default function useAppData({ user, addToast }) {
     settings, syncLogs,
 
     /* Functions */
-    handleSetEmployees, handleSetPayroll, handleSetSettings, handleSetTasks,
+    handleSetEmployees, handleSetPayroll, handleSetSettings, handleSetTasks, handleSetNotes,
     handleSetAttendance, handleSetExpenses, handleSetEvents, handleSetDocuments,
     handleAutoRepairDatabase, handleSync,
     addLog, addAuditLog, hasPermission,

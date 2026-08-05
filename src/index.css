@@ -428,6 +428,15 @@ input:focus, select:focus, textarea:focus, .focus-within\:ring-2:focus-within {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* Bottom Nav Mobile Icon States */
+button[role="tab"] .msr {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0 !important;
+}
+button[role="tab"][aria-selected="true"] .msr {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0 !important;
+}
   font-feature-settings: "liga";
   user-select: none;
 }

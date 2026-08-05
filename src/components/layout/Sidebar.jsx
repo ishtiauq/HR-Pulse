@@ -183,6 +183,14 @@ export default function Sidebar({
 
       {/* Scoped scrollbar styles */}
       <style>{`
+        /* Sidebar Icon States */
+        aside .msr {
+          font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0 !important;
+        }
+        aside [data-active="true"] .msr {
+          font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0 !important;
+        }
+
         .sidebar-nav-scroll {
           scrollbar-width: thin;
           scrollbar-color: transparent transparent;

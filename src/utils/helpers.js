@@ -30,8 +30,9 @@ export const allNavItems = [
   { id: 'payroll', label: 'Payroll', icon: createElement(Icon, { name: 'account_balance', size: 18 }) },
   { id: 'attendance', label: 'Attendance & Leaves', icon: createElement(Icon, { name: 'schedule', size: 18 }) },
   { id: 'expenses', label: 'Expenses', icon: createElement(Icon, { name: 'wallet', size: 18 }) },
-  { id: 'assets', label: 'Assets', icon: createElement(Icon, { name: 'laptop_windows', size: 18 }) },
+  { id: 'assets', label: 'Assets', icon: createElement(Icon, { name: 'devices_other', size: 18 }) },
   { id: 'settings', label: 'Settings', icon: createElement(Icon, { name: 'settings', size: 18 }) },
+  { id: 'notes', label: 'Notes', icon: createElement(Icon, { name: 'sticky_note_2', size: 18 }) },
   { id: 'drive', label: 'Drive Sync', icon: createElement(Icon, { name: 'cloud_sync', size: 18 }) },
   { id: 'profile', label: 'Profile', icon: createElement(Icon, { name: 'person', size: 18 }) },
 ]

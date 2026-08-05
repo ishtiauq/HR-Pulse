@@ -646,7 +646,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         <DashboardWidget
           id="assets-widget"
           title="Asset Inventory"
-          icon={<Icon name="monitor" size={18} />}
+          icon={<Icon name="devices_other" size={18} />}
           iconClass="bg-teal-500/10 text-teal-500"
           {...wProps}
           action={
@@ -661,7 +661,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 <span className="text-xs font-semibold text-teal-600/80 uppercase tracking-wider mb-1">Total Assets</span>
                 <span className="text-2xl font-black text-foreground">{assets.length}</span>
               </div>
-              <Icon name="monitor" size={40} className="text-teal-500/30" />
+              <Icon name="laptop_windows" size={40} className="text-teal-500/30" />
             </div>
             
             <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border">

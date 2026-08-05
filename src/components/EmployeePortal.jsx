@@ -17,6 +17,7 @@ import Calendar from './Calendar.jsx'
 import Announcements from './Announcements.jsx'
 import Expenses from './Expenses.jsx'
 import Documents from './Documents.jsx'
+import Notes from './Notes.jsx'
 import Sidebar from './layout/Sidebar.jsx'
 import Topbar from './layout/Topbar.jsx'
 import MobileTabButton from './layout/MobileTabButton.jsx'
@@ -78,6 +79,8 @@ export default function EmployeePortal({
   assetRequests,
   setAssetRequests,
   settings,
+  notes,
+  setNotes,
   simulatedRole,
   setSimulatedRole,
   handleLogout,
@@ -245,6 +248,8 @@ export default function EmployeePortal({
         return <div className="max-w-[1200px] mx-auto w-full"><Expenses employees={employees} expenses={expenses} setExpenses={setExpenses} settings={settings} addLog={addLog} addToast={addToast} addAuditLog={addLog} simulatedRole="Teammate" currentUser={currentUser} /></div>
       case 'documents':
         return <div className="max-w-[1200px] mx-auto w-full"><Documents documents={documents} setDocuments={setDocuments} addLog={addLog} addToast={addToast} currentUser={currentUser} simulatedRole="Teammate" /></div>
+      case 'notes':
+        return <div className="max-w-[1200px] mx-auto w-full"><Notes notes={notes} setNotes={setNotes} currentUser={currentUser} addToast={addToast} simulatedRole="Teammate" /></div>
       default:
         return <DashboardView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} expenses={expenses} announcements={announcements} tasks={tasks} events={events} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} settings={settings} />
       case 'team_attendance':

@@ -10,6 +10,14 @@ export default function MobileTabButton({ active, label, onClick, children, badg
     >
       {children}
       {badge}
+      <style>{`
+        button[role="tab"][aria-selected="false"] .msr {
+          font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0 !important;
+        }
+        button[role="tab"][aria-selected="true"] .msr {
+          font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0 !important;
+        }
+      `}</style>
     </button>
   )
 }
