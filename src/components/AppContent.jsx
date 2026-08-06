@@ -119,7 +119,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
     case 'calendar':
       return <Calendar events={data.events} setEvents={data.handleSetEvents} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} />
     case 'documents':
-      return <Documents documents={data.documents} setDocuments={data.handleSetDocuments} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} />
+      return <Documents documents={data.documents} setDocuments={data.handleSetDocuments} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} adminUid={data.adminUid} />
     case 'assets':
       return <Assets employees={data.employees} assets={data.assets} setAssets={data.setAssets} assetRequests={data.assetRequests} setAssetRequests={data.setAssetRequests} assetCategories={data.assetCategories} setAssetCategories={data.setAssetCategories} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} />
     case 'tasks':

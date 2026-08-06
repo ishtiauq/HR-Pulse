@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { readMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBackup } from '../services/googleDrive.js'
+import { readMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBackup, getOrCreateFilesFolder, uploadBinaryFile } from '../services/googleDrive.js'
 import { validateDatabase } from '../services/validator.js'
 import { encryptJson, decryptJson } from '../services/crypto.js'
 import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, getDeviceInfo } from '../utils/helpers.js'
-import { syncEmployeeSnapshot, subscribeToTable, writeToTable } from '../services/bridge.js'
+import { syncEmployeeSnapshot, subscribeToTable, writeToTable, deleteFromFirebaseStorage, downloadFromFirebaseStorage } from '../services/bridge.js'
 
 export default function useAppData({ user, addToast }) {
   /* ─── Drive / DB state ─── */
@@ -507,7 +507,13 @@ export default function useAppData({ user, addToast }) {
         setIsSyncing(false)
         setIsAppLoading(false)
         setDbStatus('corruption')
-        addLog('Sync Failed', 'Could not sync database with Google Drive: ' + err.message, 'danger')
+        if (err.message && (err.message.includes('Unauthorized') || err.message.includes('401'))) {
+          setDriveConnected(false);
+          addToast('Google Drive session expired. Please sign in again.', 'warning');
+          addLog('Sync Paused', 'Session expired. Please sign in to Google Drive.', 'warning');
+        } else {
+          addLog('Sync Failed', 'Could not sync database with Google Drive: ' + err.message, 'danger')
+        }
         console.error(err)
       }
     }
@@ -805,8 +811,70 @@ export default function useAppData({ user, addToast }) {
     return () => clearInterval(interval)
   }, [driveConnected])
 
+  /* ─── Background File Sync (Admin Node Only) ─── */
+  useEffect(() => {
+    // Only the Admin (Master Node) with Drive connected processes pending syncs
+    if (!user || user.isEmployee || !driveConnected || !adminUid || !documents || !documents.length || !metaManifest) return;
+
+    const pendingDocs = documents.filter(doc => doc.status === 'pending_sync' && doc.downloadUrl);
+    if (pendingDocs.length === 0) return;
+
+    let isProcessing = false;
+
+    const syncPendingFiles = async () => {
+      if (isProcessing) return;
+      isProcessing = true;
+
+      try {
+        const folderId = await getOrCreateFilesFolder(user.token);
+        
+        for (const doc of pendingDocs) {
+          try {
+            console.log(`Syncing document ${doc.name} to Google Drive...`);
+            
+            // 1. Download from Firebase Storage bypassing CORS
+            const storagePath = `${doc.id}_${doc.fileName}`;
+            const blob = await downloadFromFirebaseStorage(adminUid, storagePath);
+            
+            // 2. Upload to Google Drive
+            const driveData = await uploadBinaryFile(doc.fileName, blob, doc.fileType, folderId, user.token);
+            
+            // 3. Update Firestore Document with the permanent Drive link
+            const nextDocs = documents.map(d => d.id === doc.id ? { 
+              ...d, 
+              status: 'synced', 
+              downloadUrl: driveData.webContentLink,
+              driveFileId: driveData.id
+            } : d);
+            
+            await writeToTable(adminUid, 'documents', nextDocs).catch(e => console.error(e));
+            await writeTable('documents', nextDocs, { ...metaManifest }, user.token).catch(e => console.error(e));
+            
+            // Update local state early to avoid redundant processing
+            setDocuments(nextDocs);
+            
+            // 4. Delete temporary file from Firebase Storage
+            const storagePath = `${doc.id}_${doc.fileName}`;
+            await deleteFromFirebaseStorage(adminUid, storagePath);
+            
+            console.log(`Document ${doc.name} successfully moved to Google Drive.`);
+          } catch(e) {
+            console.error(`Failed to sync doc ${doc.id}:`, e);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to initialize drive files folder:", e);
+      } finally {
+        isProcessing = false;
+      }
+    };
+    
+    syncPendingFiles();
+  }, [documents, user, driveConnected, adminUid, metaManifest]);
+
   return {
     /* Drive / DB */
+    adminUid,
     driveConnected, setDriveConnected,
     driveFileId, setDriveFileId, setPayrollFileId, setSettingsFileId, setAttendanceFileId,
     isSyncing, setIsSyncing,

@@ -1,4 +1,5 @@
-import { db, doc, setDoc, getDoc, collection, getDocs, writeBatch, onSnapshot, serverTimestamp } from './firebase.js';
+import { db, storage, doc, setDoc, getDoc, collection, getDocs, writeBatch, onSnapshot, serverTimestamp } from './firebase.js';
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject, getBytes } from 'firebase/storage';
 
 /**
  * Subscribes to a specific table's snapshot in Firebase.
@@ -75,4 +76,37 @@ export const fetchEmployeeSnapshot = async (adminUid) => {
     console.error('Failed to fetch employee snapshot:', error);
   }
   return [];
+};
+
+/**
+ * Uploads a file to Firebase Storage temporarily for the File Bridge.
+ */
+export const uploadToFirebaseStorage = async (adminUid, file, path) => {
+  if (!storage) throw new Error('Firebase Storage is not initialized.');
+  const storageRef = ref(storage, `companies/${adminUid}/pending_uploads/${path}`);
+  const snapshot = await uploadBytesResumable(storageRef, file);
+  return await getDownloadURL(snapshot.ref);
+};
+
+/**
+ * Downloads a file from Firebase Storage as a Blob
+ */
+export const downloadFromFirebaseStorage = async (adminUid, path) => {
+  if (!storage) throw new Error('Firebase Storage is not initialized.');
+  const storageRef = ref(storage, `companies/${adminUid}/pending_uploads/${path}`);
+  const arrayBuffer = await getBytes(storageRef);
+  return new Blob([arrayBuffer]);
+};
+
+/**
+ * Deletes a file from Firebase Storage after it has been safely synced to Google Drive.
+ */
+export const deleteFromFirebaseStorage = async (adminUid, path) => {
+  if (!storage) return;
+  const storageRef = ref(storage, `companies/${adminUid}/pending_uploads/${path}`);
+  try {
+    await deleteObject(storageRef);
+  } catch (error) {
+    console.error('Failed to delete file from Firebase Storage:', error);
+  }
 };

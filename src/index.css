@@ -63,7 +63,7 @@
   --border: hsl(210 15% 90%);
   --input: hsl(210 15% 90%);
   --ring: hsl(18 99.2% 50%);
-  --radius: 0.75rem;
+  --radius: 1rem;
   --sidebar: var(--card);
   --sidebar-foreground: var(--foreground);
   --sidebar-accent: var(--accent);

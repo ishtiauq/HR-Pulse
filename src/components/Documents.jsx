@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
+import { uploadToFirebaseStorage } from '../services/bridge.js'
 import { Card, CardContent } from "@/components/ui/card"
 import { useConfirm } from '../hooks/useConfirm'
 import { Button } from "@/components/ui/button"
@@ -102,52 +103,67 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
     setEditingDoc(null)
   }
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault()
-    if (!formName) return addToast('Document name is required', 'warning')
+    if (!formName.trim() || !formCategory.trim()) return
 
-    if (editingDoc) {
-      setDocuments(prev => prev.map(d =>
-        d.id === editingDoc.id
-          ? { ...d, name: formName, category: formCategory, description: formDescription }
-          : d
-      ))
-      addToast('Document updated', 'success')
-      addLog('Document Updated', formName)
-    } else {
-      const newDoc = {
-        id: `doc-${Date.now()}`,
-        name: formName,
-        category: formCategory,
-        description: formDescription,
-        fileName: formFile?.name || `${formName.replace(/\s+/g, '_')}.pdf`,
-        fileSize: formFile?.size || Math.floor(Math.random() * 5000000) + 100000,
-        fileType: formFile?.type || 'application/pdf',
-        uploadedBy: currentUser?.id || 'unknown',
-        uploadedAt: new Date().toISOString(),
-      }
-      setDocuments(prev => [newDoc, ...prev])
-      addToast('Document uploaded successfully', 'success')
-      addLog('Document Uploaded', formName)
+    if (!editingDoc && !formFile) {
+      addToast('Please select a file to upload', 'error')
+      return
     }
 
-    setShowUploadModal(false)
-    resetForm()
+    setIsUploading(true)
+    try {
+      if (editingDoc) {
+        setDocuments(prev => prev.map(d => d.id === editingDoc.id ? { ...d, name: formName, category: formCategory, description: formDescription } : d))
+        addToast('Document metadata updated', 'success')
+        addLog('Document Updated', formName)
+      } else {
+        const id = `doc-${Date.now()}`;
+        const fileName = formFile?.name || `${formName.replace(/\s+/g, '_')}.pdf`;
+        let downloadUrl = null;
+        
+        if (adminUid && formFile) {
+          const path = `${id}_${fileName}`;
+          downloadUrl = await uploadToFirebaseStorage(adminUid, formFile, path);
+        }
+
+        const newDoc = {
+          id,
+          name: formName,
+          category: formCategory,
+          description: formDescription,
+          fileName,
+          fileSize: formFile?.size || 0,
+          fileType: formFile?.type || 'application/pdf',
+          uploadedBy: currentUser?.id || 'unknown',
+          uploadedAt: new Date().toISOString(),
+          downloadUrl,
+          status: 'pending_sync', // Triggers the Admin node to move it to Google Drive
+        }
+        setDocuments(prev => [newDoc, ...prev])
+        addToast('Document uploaded successfully. Syncing to secure storage...', 'success')
+        addLog('Document Uploaded', formName)
+      }
+
+      setShowUploadModal(false)
+      resetForm()
+    } catch (err) {
+      console.error('Upload error:', err)
+      addToast('Failed to upload document', 'error')
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const handleDownload = (doc) => {
-    addToast(`Downloading ${doc.fileName}...`, 'info')
-    setTimeout(() => {
-      const blob = new Blob([`Dummy content for ${doc.name}`], { type: 'text/plain' })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = doc.fileName
-      a.click()
-      window.URL.revokeObjectURL(url)
-      addToast(`${doc.fileName} downloaded`, 'success')
+    if (doc.downloadUrl) {
+      addToast(`Opening ${doc.fileName}...`, 'info')
+      window.open(doc.downloadUrl, '_blank')
       addLog('Document Downloaded', doc.name)
-    }, 1000)
+    } else {
+      addToast('Document file is still syncing or unavailable', 'warning')
+    }
   }
 
   const handleDelete = async (id) => {

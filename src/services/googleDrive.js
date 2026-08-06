@@ -90,8 +90,54 @@ export async function getOrCreateDbFolder(token) {
     },
     body: JSON.stringify(metadata)
   });
-  if (!createRes.ok) throw new Error(`Failed to create DB folder: ${createRes.statusText}`);
+  if (!createRes.ok) throw new Error('Failed to create DB folder');
   const createData = await createRes.json();
+  return createData.id;
+}
+
+/**
+ * Find or create a visible folder for storing uploaded documents
+ */
+export async function getOrCreateFilesFolder(token) {
+  if (isMockToken(token)) return 'mock-folder-root-id';
+  const folderName = 'HR Pulse Documents';
+  const query = encodeURIComponent(`name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+  const url = `${DRIVE_FILES_URL}?q=${query}&fields=files(id,name)`;
+  
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error(`Failed to search for Files folder: ${res.statusText}`);
+  const data = await res.json();
+  
+  if (data.files && data.files.length > 0) {
+    return data.files[0].id;
+  }
+
+  // Create visible folder
+  const metadata = {
+    name: folderName,
+    mimeType: 'application/vnd.google-apps.folder'
+  };
+  const createRes = await fetch(DRIVE_FILES_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(metadata)
+  });
+  if (!createRes.ok) throw new Error('Failed to create Files folder');
+  const createData = await createRes.json();
+  
+  // Make folder publicly viewable so employees can download files
+  await fetch(`https://www.googleapis.com/drive/v3/files/${createData.id}/permissions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ type: 'anyone', role: 'reader' })
+  }).catch(e => console.warn('Failed to set permissions on Files folder', e));
+
   return createData.id;
 }
 
@@ -193,6 +239,50 @@ export async function createFileInFolder(filename, folderId, content, token) {
 
   if (!res.ok) throw new Error(`Failed to create file ${filename}`);
   return await res.json();
+}
+
+/**
+ * Uploads a binary file (Blob/File) to Google Drive.
+ */
+export async function uploadBinaryFile(filename, blob, mimeType, parentId, token) {
+  if (isMockToken(token)) return { id: `mock-file-${Date.now()}`, webContentLink: '#' };
+
+  const metadata = {
+    name: filename,
+    parents: [parentId]
+  };
+
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  form.append('file', blob);
+
+  const res = await fetch(`${DRIVE_UPLOAD_URL}?uploadType=multipart&fields=id,name,webViewLink,webContentLink`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    body: form
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error('Drive upload failed:', errText);
+    throw new Error(`Failed to upload binary file ${filename}`);
+  }
+  
+  const data = await res.json();
+  
+  // Set permissions so anyone with the link can view (important for employee downloads)
+  await fetch(`https://www.googleapis.com/drive/v3/files/${data.id}/permissions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ type: 'anyone', role: 'reader' })
+  }).catch(e => console.warn('Failed to set permissions on Drive file', e));
+
+  return data;
 }
 
 /**

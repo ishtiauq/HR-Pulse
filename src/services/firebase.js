@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, initializeFirestore, persistentLocalCache, collection, getDocs, writeBatch, onSnapshot } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,13 +12,14 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-let app, auth, db;
+let app, auth, db, storage;
 
 try {
   // Only initialize if the API key is present
   if (firebaseConfig.apiKey) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
+    storage = getStorage(app);
     db = initializeFirestore(app, { 
       localCache: persistentLocalCache(),
       experimentalForceLongPolling: true
@@ -29,4 +31,4 @@ try {
   console.error('Firebase initialization error:', error);
 }
 
-export { auth, db, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, RecaptchaVerifier, signInWithPhoneNumber, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, collection, getDocs, writeBatch, onSnapshot };
+export { auth, db, storage, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, RecaptchaVerifier, signInWithPhoneNumber, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, collection, getDocs, writeBatch, onSnapshot };
