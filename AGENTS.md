@@ -14,7 +14,7 @@ Whenever building new components or updating existing ones in this project, you 
 1. **Glassmorphism Everywhere**: Use `.bg-card`, `.bg-popover`, or `.bg-sidebar` for structural containers. For Modals/Dialogs, ensure they use `[role="dialog"]` which automatically applies the glass effect.
 2. **Inputs & Forms**: Do not use solid backgrounds. The global system handles `.border-input`, `input`, `select`, and `textarea` automatically. Focus states have a glowing ring.
 3. **Buttons**: Use standard `.bg-primary` for primary actions. They are globally shaped as pills (`rounded-full`) and have interactive glow on hover.
-4. **Modals/Popovers**: Nested popovers are fixed globally, and standard modals are given a `1rem` radius. Always use Shadcn `Dialog` or React Aria Components `Popover`/`Modal`.
+4. **Modals/Popovers & Containers**: The global `--radius` is set to `1rem` (16px) for cards, popovers, and all containers. Modals and Dialogs also use a `1rem` radius. Always use Shadcn `Dialog` or React Aria Components `Popover`/`Modal`.
 5. **No Placeholders/Mockups**: The UI should remain clean, without dummy text unless requested.
 6. **No Custom Colors**: Rely on semantic variables (`bg-primary`, `text-muted-foreground`, etc.). The global system neutralizes hardcoded Tailwind colors.
 7. **Subtle Shadows**: Use Shadcn's default tight shadow depth (`shadow-sm`) globally for cards and containers. Avoid large, diffuse drop-shadows. This is handled globally in `src/index.css`.

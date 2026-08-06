@@ -854,7 +854,6 @@ export default function useAppData({ user, addToast }) {
             setDocuments(nextDocs);
             
             // 4. Delete temporary file from Firebase Storage
-            const storagePath = `${doc.id}_${doc.fileName}`;
             await deleteFromFirebaseStorage(adminUid, storagePath);
             
             console.log(`Document ${doc.name} successfully moved to Google Drive.`);
