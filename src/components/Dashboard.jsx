@@ -212,7 +212,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
   const upcomingEvents = (events || [])
     .filter(e => new Date(e.date) >= new Date('2026-07-17'))
     .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .slice(0, 4)
+    .slice(0, 3)
 
   const recentAnnouncements = (announcements || []).slice(0, 3)
 
@@ -423,40 +423,43 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           </Card>
         )}
 
-        {/* Widget 5 — Payroll Summary */}
-        {canViewPayroll && (
+      {/* Widget 6 — Upcoming Events */}
+        {canViewCalendar && (
           <DashboardWidget
-          id="w5"
-          title="Payroll Summary"
-          icon={<Icon name="account_balance" size={18} />}
+          id="w6"
+          title="Upcoming Events"
+          icon={<Icon name="calendar_month" size={18} />}
+          iconClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
           cardClass="md:col-span-2 lg:col-span-2"
-          action={currentPayrollMonth && <Badge variant="secondary" className="px-3 py-1 h-7">{currentPayrollMonth}</Badge>}
-          contentClass="flex flex-col justify-between pt-4"
+          action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('calendar')} className="text-xs font-semibold h-7">Events</Button>}
+          contentClass="flex flex-col justify-start gap-2.5 pt-4"
           {...wProps}
         >
-          {!currentPayrollMonth ? (
-            <p className="text-center my-auto text-xs text-muted-foreground">No payroll data found</p>
+          {upcomingEvents.length === 0 ? (
+            <p className="text-center my-auto text-xs text-muted-foreground">No upcoming events</p>
           ) : (
-            <>
-              <div className="grid grid-cols-2 xl:grid-cols-3 gap-3 p-3.5 rounded-lg bg-muted/40 border border-border/50">
-                <div>
-                  <span className="block text-xs font-medium text-muted-foreground">Paid</span>
-                  <span className="text-xl sm:text-2xl font-black tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5 block">{paidCount}</span>
+            upcomingEvents.map((evt, idx) => (
+              <div
+                key={evt.id || idx}
+                className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/70 transition-colors cursor-pointer"
+                onClick={() => setCurrentView && setCurrentView('calendar')}
+              >
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                >
+                  <Icon name="calendar_month" size={16} style={{ color: evt.type === 'holiday' ? '#10b981' : evt.type === 'birthday' ? '#f59e0b' : '#3b82f6' }} />
                 </div>
-                <div>
-                  <span className="block text-xs font-medium text-muted-foreground">Pending</span>
-                  <span className="text-xl sm:text-2xl font-black tabular-nums text-amber-500 mt-0.5 block">{pendingCount}</span>
+                <div className="flex-1 min-w-0 pr-2">
+                  <p className="m-0 text-xs font-bold text-foreground break-words">{evt.title}</p>
+                  <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground break-words">
+                    {formatDate(evt.date)}{evt.time ? ` at ${evt.time}` : ''}
+                  </p>
                 </div>
-                <div className="col-span-2 xl:col-span-1 xl:text-right border-t xl:border-t-0 border-border/50 pt-2 xl:pt-0 mt-1 xl:mt-0">
-                  <span className="block text-xs font-medium text-muted-foreground">Total Payroll</span>
-                  <span className="text-xl sm:text-2xl font-black tabular-nums text-foreground mt-0.5 block">${totalPayrollCost.toLocaleString()}</span>
-                </div>
+                <Badge variant="outline" className="capitalize text-[10px] px-2 py-0.5">
+                  {evt.type}
+                </Badge>
               </div>
-              <div className="mt-3 pt-3 flex justify-between items-center border-t border-border">
-                <span className="text-xs font-medium text-muted-foreground">{currentPayrollData.length} Employees total</span>
-                <Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('payroll')} className="text-xs font-semibold h-7">View Payroll</Button>
-              </div>
-            </>
+            ))
           )}
         </DashboardWidget>
         )}
@@ -493,42 +496,39 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         </DashboardWidget>
       )}
 
-      {/* Widget 6 — Upcoming Events (Span 4) */}
-        {canViewCalendar && (
+        {/* Widget 5 — Payroll Summary */}
+        {canViewPayroll && (
           <DashboardWidget
-          id="w6"
-          title="Upcoming Events"
-          icon={<Icon name="calendar_month" size={18} />}
-          iconClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-          action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('calendar')} className="text-xs font-semibold h-7">Events</Button>}
-          contentClass="flex flex-col justify-start gap-2.5 pt-4"
+          id="w5"
+          title="Payroll Summary"
+          icon={<Icon name="account_balance" size={18} />}
+          action={currentPayrollMonth && <Badge variant="secondary" className="px-3 py-1 h-7">{currentPayrollMonth}</Badge>}
+          contentClass="flex flex-col justify-between pt-4"
           {...wProps}
         >
-          {upcomingEvents.length === 0 ? (
-            <p className="text-center my-auto text-xs text-muted-foreground">No upcoming events</p>
+          {!currentPayrollMonth ? (
+            <p className="text-center my-auto text-xs text-muted-foreground">No payroll data found</p>
           ) : (
-            upcomingEvents.map((evt, idx) => (
-              <div
-                key={evt.id || idx}
-                className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50 hover:bg-muted/70 transition-colors cursor-pointer"
-                onClick={() => setCurrentView && setCurrentView('calendar')}
-              >
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                >
-                  <Icon name="calendar_month" size={16} style={{ color: evt.type === 'holiday' ? '#10b981' : evt.type === 'birthday' ? '#f59e0b' : '#3b82f6' }} />
+            <>
+              <div className="grid grid-cols-2 gap-3 p-3.5 rounded-lg bg-muted/40 border border-border/50">
+                <div>
+                  <span className="block text-xs font-medium text-muted-foreground">Paid</span>
+                  <span className="text-xl sm:text-2xl font-black tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5 block">{paidCount}</span>
                 </div>
-                <div className="flex-1 min-w-0 pr-2">
-                  <p className="m-0 text-xs font-bold text-foreground break-words">{evt.title}</p>
-                  <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground break-words">
-                    {formatDate(evt.date)}{evt.time ? ` at ${evt.time}` : ''}
-                  </p>
+                <div>
+                  <span className="block text-xs font-medium text-muted-foreground">Pending</span>
+                  <span className="text-xl sm:text-2xl font-black tabular-nums text-amber-500 mt-0.5 block">{pendingCount}</span>
                 </div>
-                <Badge variant="outline" className="capitalize text-[10px] px-2 py-0.5">
-                  {evt.type}
-                </Badge>
+                <div className="col-span-2 border-t border-border/50 pt-2 mt-1">
+                  <span className="block text-xs font-medium text-muted-foreground">Total Payroll</span>
+                  <span className="text-xl sm:text-2xl font-black tabular-nums text-foreground mt-0.5 block">${totalPayrollCost.toLocaleString()}</span>
+                </div>
               </div>
-            ))
+              <div className="mt-3 pt-3 flex justify-between items-center border-t border-border">
+                <span className="text-xs font-medium text-muted-foreground">{currentPayrollData.length} Emp</span>
+                <Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('payroll')} className="text-xs font-semibold h-7">View</Button>
+              </div>
+            </>
           )}
         </DashboardWidget>
         )}
@@ -657,7 +657,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         </DashboardWidget>
         )}
 
-      {/* Widget 7 — Drive Sync Logs (Span 4) */}
+      {/* Widget 7 — Drive Sync Logs */}
         {canViewDrive && (
           <DashboardWidget
           id="w7"
@@ -665,7 +665,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           icon={<Icon name="trending_up" size={18} />}
           action={<Badge variant="success">Live</Badge>}
           contentClass="flex flex-col justify-start gap-2.5 pt-4"
-          cardClass="col-span-full"
             {...wProps}
         >
           {(syncLogs || []).slice(0, 5).map((log) => (
