@@ -210,6 +210,10 @@ export default function App() {
                 isSyncing={appData.isSyncing}
                 driveConnected={appData.driveConnected}
                 syncConflicts={appData.syncConflicts}
+                dataIntegrityIssues={appData.dataIntegrityIssues}
+                showCorruptionModal={appData.showCorruptionModal}
+                setShowCorruptionModal={appData.setShowCorruptionModal}
+                handleAutoRepairDatabase={appData.handleAutoRepairDatabase}
                 setShowNotifications={appData.setShowNotifications}
                 markNotificationsRead={appData.markNotificationsRead}
                 unreadCount={unreadCount}

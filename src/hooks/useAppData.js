@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { readMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBackup } from '../services/googleDrive.js'
 import { validateDatabase } from '../services/validator.js'
 import { encryptJson, decryptJson } from '../services/crypto.js'
-import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges } from '../utils/helpers.js'
-import { syncEmployeeSnapshot, submitAttendanceToMailbox, flushAttendanceMailbox } from '../services/bridge.js'
+import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, getDeviceInfo } from '../utils/helpers.js'
+import { syncEmployeeSnapshot, submitAttendanceToMailbox, flushAttendanceMailbox, flushDeviceMailbox } from '../services/bridge.js'
 
 export default function useAppData({ user, addToast }) {
   /* ─── Drive / DB state ─── */
@@ -317,7 +317,7 @@ export default function useAppData({ user, addToast }) {
         if (Array.isArray(payrollData)) payrollData = { '2026-07': payrollData }
         setPayrollRaw(payrollData)
 
-        const defaultSettings = { currency: '\u09F3', salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'HR Pulse Ltd.', email: 'hr@hrpulse.io', website: 'www.hrpulse.io' }, notifications: { syncAlerts: true, emailDigests: false } }
+        const defaultSettings = { currency: '৳', salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'HR Pulse Ltd.', email: 'hr@hrpulse.io', website: 'www.hrpulse.io' }, notifications: { syncAlerts: true, emailDigests: false } }
         let settingsData = await readTable('settings', user.token, bgSyncCallback)
         if (!settingsData) {
           const saved = localStorage.getItem('hr_pulse_settings')
@@ -325,6 +325,21 @@ export default function useAppData({ user, addToast }) {
           if (!settingsData) settingsData = defaultSettings
           await writeTable('settings', settingsData, meta, user.token)
         }
+
+        if (!user.isEmployee && user.uid) {
+          const currentDevice = getDeviceInfo()
+          const adminDevices = settingsData.adminDevices || []
+          const existingDevice = adminDevices.find(d => d.deviceId === currentDevice.deviceId)
+          
+          if (!existingDevice) {
+            settingsData.adminDevices = [...adminDevices, currentDevice]
+            await writeTable('settings', settingsData, meta, user.token)
+          } else {
+            settingsData.adminDevices = adminDevices.map(d => d.deviceId === currentDevice.deviceId ? { ...d, lastLogin: currentDevice.lastLogin } : d)
+            await writeTable('settings', settingsData, meta, user.token)
+          }
+        }
+
         setSettingsRaw(settingsData)
 
         const defaultLeaves = []
@@ -350,7 +365,7 @@ export default function useAppData({ user, addToast }) {
           await writeTable('attendance_logs', logsData, meta, user.token)
         }
 
-        // --- Hybrid Bridge: Flush Mailbox for Admin ---
+        // --- Hybrid Bridge: Flush Mailboxes for Admin ---
         if (!user.isEmployee && user.uid) {
           const mailboxLogs = await flushAttendanceMailbox(user.uid)
           if (mailboxLogs && mailboxLogs.length > 0) {
@@ -375,6 +390,28 @@ export default function useAppData({ user, addToast }) {
             await writeTable('leave_balances', balancesData, meta, user.token)
             await writeTable('attendance_logs', logsData, meta, user.token)
             addToast(`Synced ${mailboxLogs.length} remote attendance records!`, 'success')
+          }
+
+          const deviceLogs = await flushDeviceMailbox(user.uid)
+          if (deviceLogs && deviceLogs.length > 0) {
+            addLog('Hybrid Sync', `Found ${deviceLogs.length} remote device registrations. Merging...`, 'info')
+            let empUpdated = false
+            deviceLogs.forEach(deviceReg => {
+              const emp = empData.find(e => e.id === deviceReg.employeeId)
+              if (emp) {
+                const empDevices = emp.devices || []
+                if (!empDevices.find(d => d.deviceId === deviceReg.device.deviceId)) {
+                  emp.devices = [...empDevices, deviceReg.device]
+                  empUpdated = true
+                }
+              }
+            })
+            if (empUpdated) {
+              await writeTable('employees', empData, meta, user.token)
+              setEmployeesRaw([...empData])
+              syncEmployeeSnapshot(user.uid, empData)
+              addToast(`Synced ${deviceLogs.length} remote device registrations!`, 'success')
+            }
           }
         }
 
@@ -531,27 +568,106 @@ export default function useAppData({ user, addToast }) {
     if (!user) return
     try {
       setIsSyncing(true)
-      addLog('Repairing DB', 'Running deduplication and logical constraint repairs...')
+      addLog('Repairing DB', 'Running comprehensive deduplication and logical constraint repairs...')
       const meta = { ...metaManifest }
+      
+      // 1. Employees
       let empData = await readTable('employees', user.token) || []
       const uniqueEmps = []
       const seenIds = new Set()
-      empData.forEach(emp => { if (!seenIds.has(emp.id)) { seenIds.add(emp.id); uniqueEmps.push(emp) } })
-      await writeTable('employees', uniqueEmps, meta, user.token)
-      setEmployeesRaw(uniqueEmps)
-      const leavesData = await readTable('leave_requests', user.token) || []
+      const seenEmails = new Set()
+      empData.forEach(emp => { 
+        if (!seenIds.has(emp.id) && (!emp.email || !seenEmails.has(emp.email))) { 
+          seenIds.add(emp.id)
+          if (emp.email) seenEmails.add(emp.email)
+          uniqueEmps.push(emp) 
+        } 
+      })
+
+      // 2. Leaves
+      let leavesData = await readTable('leave_requests', user.token) || []
+      const approvedLeavesByEmp = {}
+      const fixedLeaves = leavesData.filter(leave => {
+        if (!seenIds.has(leave.employeeId)) return false // Remove orphaned
+        
+        if (leave.status === 'Approved') {
+          const start = new Date(leave.startDate).getTime()
+          const end = new Date(leave.endDate).getTime()
+          let hasOverlap = false
+          if (approvedLeavesByEmp[leave.employeeId]) {
+            approvedLeavesByEmp[leave.employeeId].forEach(existingLeave => {
+              if (start <= existingLeave.end && end >= existingLeave.start) {
+                hasOverlap = true
+              }
+            })
+          }
+          if (hasOverlap) {
+            // Demote overlapping approved leave to rejected to resolve conflict
+            leave.status = 'Rejected'
+          } else {
+            if (!approvedLeavesByEmp[leave.employeeId]) approvedLeavesByEmp[leave.employeeId] = []
+            approvedLeavesByEmp[leave.employeeId].push({ start, end })
+          }
+        }
+        return true
+      })
       const balancesData = await readTable('leave_balances', user.token) || {}
-      const logsData = await readTable('attendance_logs', user.token) || {}
-      const payrollData = await readTable('payroll', user.token) || {}
-      const expensesData = await readTable('expenses', user.token) || []
-      const fixedIssues = validateDatabase(uniqueEmps, logsData, leavesData, payrollData, expensesData)
-      setDataIntegrityIssues(fixedIssues)
-      if (fixedIssues.length === 0) {
+
+      // 3. Attendance Logs
+      let logsData = await readTable('attendance_logs', user.token) || {}
+      const fixedLogs = { ...logsData }
+      Object.keys(fixedLogs).forEach(date => {
+        if (fixedLogs[date] && typeof fixedLogs[date] === 'object') {
+          Object.keys(fixedLogs[date]).forEach(empId => {
+            if (!seenIds.has(empId)) delete fixedLogs[date][empId]
+          })
+        }
+      })
+
+      // 4. Payroll
+      let payrollData = await readTable('payroll', user.token) || {}
+      const fixedPayroll = { ...payrollData }
+      Object.keys(fixedPayroll).forEach(month => {
+        if (Array.isArray(fixedPayroll[month])) {
+          fixedPayroll[month] = fixedPayroll[month]
+            .filter(record => seenIds.has(record.employeeId))
+            .map(record => ({ ...record, grossSalary: Math.max(0, record.grossSalary || 0) }))
+        }
+      })
+
+      // 5. Expenses
+      let expensesData = await readTable('expenses', user.token) || []
+      const fixedExpenses = expensesData
+        .filter(exp => seenIds.has(exp.employeeId))
+        .map(exp => ({ ...exp, amount: Math.max(0, exp.amount || 0) }))
+
+      // Save fixed data
+      await Promise.all([
+        writeTable('employees', uniqueEmps, meta, user.token),
+        writeTable('leave_requests', fixedLeaves, meta, user.token),
+        writeTable('attendance_logs', fixedLogs, meta, user.token),
+        writeTable('payroll', fixedPayroll, meta, user.token),
+        writeTable('expenses', fixedExpenses, meta, user.token)
+      ])
+
+      // Update state
+      setEmployeesRaw(uniqueEmps)
+      setAttendanceRaw(prev => ({ ...prev, leaves: fixedLeaves, dailyLogs: fixedLogs }))
+      setPayrollRaw(fixedPayroll)
+      setExpensesRaw(fixedExpenses)
+
+      // Re-validate
+      const remainingIssues = validateDatabase(uniqueEmps, fixedLogs, fixedLeaves, fixedPayroll, fixedExpenses)
+      setDataIntegrityIssues(remainingIssues)
+      
+      if (remainingIssues.length === 0) {
         setDbStatus('healthy')
         addToast('Database successfully repaired!', 'success')
-        addLog('Repair Success', 'Removed duplicate employee IDs. Database is healthy.', 'success')
+        addLog('Repair Success', 'Removed corrupted and orphaned records. Database is healthy.', 'success')
         setShowCorruptionModal(false)
-      } else { addToast('Database partially repaired, remaining issues exist.', 'warning') }
+      } else { 
+        addToast('Database partially repaired, remaining issues exist.', 'warning') 
+      }
     } catch (e) { addToast('Repair failed: ' + e.message, 'error') }
     finally { setIsSyncing(false) }
   }

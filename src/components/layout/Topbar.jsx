@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications, onProfileClick, showThemeToggle = true, user }) {
+export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, dataIntegrityIssues = [], showCorruptionModal, setShowCorruptionModal, handleAutoRepairDatabase, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications, onProfileClick, showThemeToggle = true, user }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const buttonRef = useRef(null)
   const [modalPos, setModalPos] = useState({ top: 0, right: 0 })
@@ -78,12 +78,18 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
             {/* Sync Status Button */}
             <Button
               variant="outline"
-              onClick={handleSync}
+              onClick={() => {
+                if (dataIntegrityIssues && dataIntegrityIssues.length > 0) {
+                  if (setShowCorruptionModal) setShowCorruptionModal(true)
+                } else {
+                  if (handleSync) handleSync()
+                }
+              }}
               disabled={isSyncing}
               className="h-8 w-8 p-0 sm:w-auto sm:h-9 sm:px-4 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-semibold gap-1.5 sm:gap-2 shrink-0"
             >
-              <span className={`w-2 h-2 min-w-[8px] min-h-[8px] block rounded-full shrink-0 ${isSyncing ? 'bg-status-warning animate-spin' : (!driveConnected || syncConflicts.length > 0) ? 'bg-status-error animate-pulse' : 'bg-status-success animate-pulse'}`}></span>
-              <span className="hidden sm:inline">{isSyncing ? 'Syncing...' : (!driveConnected || syncConflicts.length > 0) ? 'Not Synced' : 'Synced'}</span>
+              <span className={`w-2 h-2 min-w-[8px] min-h-[8px] block rounded-full shrink-0 ${isSyncing ? 'bg-status-warning animate-spin' : (!driveConnected || syncConflicts.length > 0 || dataIntegrityIssues.length > 0) ? 'bg-status-error animate-pulse' : 'bg-status-success animate-pulse'}`}></span>
+              <span className="hidden sm:inline">{isSyncing ? 'Syncing...' : (!driveConnected || syncConflicts.length > 0 || dataIntegrityIssues.length > 0) ? (dataIntegrityIssues.length > 0 ? 'Data Error' : 'Not Synced') : 'Synced'}</span>
             </Button>
 
             {/* Theme Toggle Button */}
@@ -228,6 +234,44 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
           </div>
         </>,
         document.body
+      )}
+
+      {/* Corruption / Data Integrity Modal */}
+      {showCorruptionModal !== undefined && (
+        <Dialog open={showCorruptionModal} onOpenChange={setShowCorruptionModal}>
+          <DialogContent className="max-w-md bg-card/95 backdrop-blur-xl border-destructive/20 shadow-2xl p-0 overflow-hidden sm:rounded-[24px]">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-rose-600 z-10" />
+            <DialogHeader className="p-6 pb-4">
+              <DialogTitle className="text-xl font-extrabold flex items-center gap-2.5 text-foreground">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-destructive/10 text-destructive shrink-0">
+                  <Icon name="warning" size={22} />
+                </div>
+                Data Integrity Issues
+              </DialogTitle>
+            </DialogHeader>
+            <div className="px-6 py-2">
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                The database validator has found {dataIntegrityIssues?.length || 0} issues. These might be duplicate records, orphaned data, or incorrect values.
+              </p>
+              <div className="max-h-[250px] overflow-y-auto space-y-2 pr-2 mb-4">
+                {(dataIntegrityIssues || []).map((issue, idx) => (
+                  <div key={idx} className="flex gap-2 items-start p-3 bg-destructive/5 border border-destructive/20 rounded-lg text-sm text-foreground">
+                    <Icon name="error_outline" size={16} className="text-destructive shrink-0 mt-0.5" />
+                    <span className="leading-tight font-medium text-xs sm:text-sm">{issue}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter className="p-4 px-6 bg-muted/10 pb-6 flex justify-end gap-3 mt-4 border-t border-border/50">
+              <Button variant="outline" onClick={() => setShowCorruptionModal(false)} className="rounded-full font-semibold">
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={() => { if(handleAutoRepairDatabase) handleAutoRepairDatabase(); }} className="rounded-full shadow-lg shadow-destructive/20 font-bold px-6">
+                Auto-Repair Database
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </>
   )

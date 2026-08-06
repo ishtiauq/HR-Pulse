@@ -36,3 +36,32 @@ export const allNavItems = [
   { id: 'drive', label: 'Drive Sync', icon: createElement(Icon, { name: 'cloud_sync', size: 18 }) },
   { id: 'profile', label: 'Profile', icon: createElement(Icon, { name: 'person', size: 18 }) },
 ]
+
+export function getDeviceInfo() {
+  let deviceId = localStorage.getItem('hr_pulse_device_id')
+  if (!deviceId) {
+    deviceId = 'dev_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    localStorage.setItem('hr_pulse_device_id', deviceId)
+  }
+
+  const ua = navigator.userAgent
+  let browser = 'Unknown Browser'
+  if (ua.includes('Firefox')) browser = 'Firefox'
+  else if (ua.includes('Edg')) browser = 'Edge'
+  else if (ua.includes('Chrome')) browser = 'Chrome'
+  else if (ua.includes('Safari')) browser = 'Safari'
+
+  let os = 'Unknown OS'
+  if (ua.includes('Win')) os = 'Windows'
+  else if (ua.includes('Mac')) os = 'MacOS'
+  else if (ua.includes('X11') || ua.includes('Linux')) os = 'Linux'
+  else if (ua.includes('Android')) os = 'Android'
+  else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS'
+
+  return {
+    deviceId,
+    label: `${os} - ${browser}`,
+    lastLogin: new Date().toISOString(),
+    isBlocked: false
+  }
+}

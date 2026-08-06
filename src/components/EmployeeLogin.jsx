@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import { verifyPassword } from '../services/crypto.js'
-import { fetchEmployeeSnapshot } from '../services/bridge.js'
+import { fetchEmployeeSnapshot, submitDeviceToMailbox } from '../services/bridge.js'
+import { getDeviceInfo } from '../utils/helpers.js'
 
 export default function EmployeeLogin({ onLogin, onBack }) {
   const [companyId, setCompanyId] = useState('')
@@ -50,6 +51,30 @@ export default function EmployeeLogin({ onLogin, onBack }) {
         setError('Invalid email or password.')
         setIsLoading(false)
         return
+      }
+
+      // Check device access
+      const currentDevice = getDeviceInfo()
+      const employeeDevices = employee.devices || []
+      const existingDevice = employeeDevices.find(d => d.deviceId === currentDevice.deviceId)
+
+      if (existingDevice && existingDevice.isBlocked) {
+        setError('Login denied. This device has been blocked by the admin.')
+        setIsLoading(false)
+        return
+      }
+
+      if (!existingDevice) {
+        // Submit new device to Mailbox for Admin to approve/track
+        try {
+          await submitDeviceToMailbox(companyId.trim(), {
+            employeeId: employee.id,
+            device: currentDevice,
+            timestamp: new Date().toISOString()
+          })
+        } catch (e) {
+          console.error("Failed to register device to mailbox:", e)
+        }
       }
 
       const hrToken = localStorage.getItem('hr_pulse_hr_token')

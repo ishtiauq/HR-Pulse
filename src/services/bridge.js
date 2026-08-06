@@ -17,7 +17,8 @@ export const syncEmployeeSnapshot = async (adminUid, employees) => {
     passwordHash: emp.passwordHash || emp.password,
     role: emp.role || 'Employee',
     department: emp.department || '',
-    avatar: emp.avatar || ''
+    avatar: emp.avatar || '',
+    devices: emp.devices || []
   }));
 
   try {
@@ -85,4 +86,44 @@ export const flushAttendanceMailbox = async (adminUid) => {
   await batch.commit();
   console.log(`Flushed ${logs.length} attendance records from mailbox.`);
   return logs;
+};
+
+/**
+ * Submits a new device registration to the Firebase mailbox for the Admin to process.
+ */
+export const submitDeviceToMailbox = async (adminUid, deviceData) => {
+  if (!db || !adminUid) throw new Error('Firebase not connected or missing Admin ID.');
+  
+  const deviceRef = doc(collection(db, 'companies', adminUid, 'device_mailbox'));
+  await setDoc(deviceRef, {
+    ...deviceData,
+    _submittedAt: new Date().toISOString()
+  });
+};
+
+/**
+ * Flushes all pending device registrations from the Firebase mailbox so they can be
+ * saved to the Admin's Google Drive. Deletes them from Firebase once retrieved.
+ */
+export const flushDeviceMailbox = async (adminUid) => {
+  if (!db || !adminUid) return [];
+  
+  const mailboxRef = collection(db, 'companies', adminUid, 'device_mailbox');
+  const snap = await getDocs(mailboxRef);
+  
+  if (snap.empty) return [];
+  
+  const devices = [];
+  const batch = writeBatch(db);
+  
+  snap.forEach(docSnap => {
+    const data = docSnap.data();
+    delete data._submittedAt; // Remove metadata
+    devices.push(data);
+    batch.delete(docSnap.ref); // Queue deletion
+  });
+  
+  await batch.commit();
+  console.log(`Flushed ${devices.length} device registrations from mailbox.`);
+  return devices;
 };
