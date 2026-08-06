@@ -15,22 +15,14 @@ export default function EmployeeLogin({ onLogin, onBack }) {
     setIsLoading(true)
 
     try {
-      const hrToken = localStorage.getItem('hr_pulse_hr_token')
-      if (!hrToken) {
-        setError('Device not registered. Please ask an Admin to login first.')
+      const storedEmployees = localStorage.getItem('hr_pulse_employees_plain')
+      if (!storedEmployees) {
+        setError('No employee data found. Please contact your HR department.')
         setIsLoading(false)
         return
       }
 
-      const { readTable } = await import('../services/database.js')
-      const employees = await readTable('employees', hrToken)
-
-      if (!employees || employees.length === 0) {
-        setError('No employee data found in cloud. Please contact HR.')
-        setIsLoading(false)
-        return
-      }
-
+      const employees = JSON.parse(storedEmployees)
       const employee = employees.find(e => e.email === email)
 
       if (!employee) {
@@ -46,6 +38,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
         return
       }
 
+      const hrToken = localStorage.getItem('hr_pulse_hr_token')
 
       const employeeUser = {
         name: employee.name,

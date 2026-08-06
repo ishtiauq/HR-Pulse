@@ -251,7 +251,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       </div>
 
       {/* Unified Responsive & Adaptive Dashboard Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 lg:gap-6 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-5 lg:gap-6 items-stretch">
         
         {/* Widget 4 — Announcements (Span 6) */}
         {canViewAnnouncements && (
@@ -301,7 +301,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           title="Today's Attendance"
           icon={<Icon name="group" size={18} />}
           iconClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-          cardClass="col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-2"
           action={<Button variant="outline" size="sm" onClick={() => setShowAttDropdown(!showAttDropdown)} className="text-xs font-semibold h-7">{showAttDropdown ? 'Hide' : 'Details'}</Button>}
           contentClass="flex flex-col justify-between pt-4"
           {...wProps}
@@ -339,7 +338,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         )}
 
         {/* Widget 4 — Daily Checklist */}
-        <DailyChecklistWidget notes={notes} setNotes={setNotes} cardClass="col-span-1" />
+        <DailyChecklistWidget notes={notes} setNotes={setNotes} cardClass="" />
 
         {/* 8. TASKS WIDGET */}
       {canViewTasks && (
@@ -348,7 +347,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           title="Tasks Overview"
           icon={<Icon name="check_box" size={18} />}
           iconClass="bg-orange-500/10 text-orange-500"
-          cardClass="col-span-1"
           {...wProps}
           action={
             <Button variant="ghost" size="sm" onClick={() => setCurrentView('tasks')} className="text-orange-500 hover:text-orange-600 hover:bg-orange-500/10 -mr-2">
@@ -377,7 +375,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
 
       {/* Attendance Details Dropdown (Full Width) */}
         {showAttDropdown && canViewAttendance && (
-          <Card className="col-span-full overflow-hidden p-0">
+          <Card className="md:col-span-2 lg:col-span-3 overflow-hidden p-0">
             <div className="px-6 py-3.5 border-b border-border font-extrabold text-xs uppercase tracking-wider text-muted-foreground">
               Today's Attendance Roster Breakdowns
             </div>
@@ -431,7 +429,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           id="w5"
           title="Payroll Summary"
           icon={<Icon name="account_balance" size={18} />}
-          cardClass="col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-2"
+          cardClass="xl:col-span-6"
           action={currentPayrollMonth && <Badge variant="secondary" className="px-3 py-1 h-7">{currentPayrollMonth}</Badge>}
           contentClass="flex flex-col justify-between pt-4"
           {...wProps}
@@ -470,7 +468,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           title="Recent Documents"
           icon={<Icon name="description" size={18} />}
           iconClass="bg-blue-500/10 text-blue-500"
-          cardClass="col-span-1"
           {...wProps}
           action={
             <Button variant="ghost" size="sm" onClick={() => setCurrentView('documents')} className="text-blue-500 hover:text-blue-600 hover:bg-blue-500/10 -mr-2">
@@ -503,7 +500,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           title="Upcoming Events"
           icon={<Icon name="calendar_month" size={18} />}
           iconClass="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-          cardClass="col-span-1"
           action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('calendar')} className="text-xs font-semibold h-7">Events</Button>}
           contentClass="flex flex-col justify-start gap-2.5 pt-4"
           {...wProps}
@@ -543,7 +539,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           id="w1"
           title="Employee Directory"
           icon={<Icon name="group" size={18} />}
-          cardClass="col-span-1"
           action={<Button variant="outline" size="sm" onClick={() => setCurrentView && setCurrentView('employees')} className="text-xs font-semibold h-7">View All</Button>}
           contentClass="flex items-center justify-around py-4"
           {...wProps}
@@ -573,7 +568,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           title="Asset Inventory"
           icon={<Icon name="devices_other" size={18} />}
           iconClass="bg-teal-500/10 text-teal-500"
-          cardClass="col-span-1"
           {...wProps}
           action={
             <Button variant="ghost" size="sm" onClick={() => setCurrentView('assets')} className="text-teal-500 hover:text-teal-600 hover:bg-teal-500/10 -mr-2">
@@ -610,7 +604,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           id="w3"
           title="Drive Connection"
           icon={<Icon name="cloud" size={18} />}
-          cardClass="col-span-1"
           action={<Badge variant={driveConnected ? "outline" : "destructive"}>{driveConnected ? 'Synced' : 'Error'}</Badge>}
           contentClass="flex flex-col justify-between pt-4"
           {...wProps}
@@ -633,7 +626,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           title="Upcoming Milestones"
           icon={<Icon name="workspace_premium" size={18} />}
           iconClass="bg-amber-500/10 text-amber-500"
-          cardClass="col-span-1"
           action={<Badge variant="secondary" className="px-3 py-1">30 Days</Badge>}
           contentClass="flex flex-col justify-start pt-4"
           {...wProps}

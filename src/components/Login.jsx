@@ -4,7 +4,7 @@ import Icon from "@/components/ui/Icon.jsx"
 import hrPulseLogo from '../Assets/Kormiis Logo Final.svg'
 import hrPulseMembershipLogo from '../Assets/Kormiis Logo Membership.svg'
 import heroCharacters from '../Assets/hero-characters.png'
-import { fetchUserProfile } from '../services/database.js'
+import { fetchUserProfile } from '../services/googleDrive.js'
 import { verifyPassword, hashPassword } from '../services/crypto.js'
 import { loginWithGoogle, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, updateProfileData, updateDriveConnectionStatus, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp } from '../services/auth.js'
 import Dashboard from './Dashboard.jsx'
@@ -631,21 +631,56 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     }
   }
 
-  // --- Connect Database ---
+  // --- Google Drive Connection ---
   const triggerDriveOAuth = () => {
     setIsLoading(true)
-    setTimeout(() => {
-      const adminUser = {
-        name: fullName || 'Admin',
-        email: firebaseUser?.email || '',
-        companyName: companyName,
-        role: 'Admin',
-        token: firebaseUser?.uid || 'local',
-        uid: firebaseUser?.uid
-      }
+    if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
+      console.warn("Google Client Library not detected. Falling back to simulated login.");
+      setTimeout(() => {
+        setIsLoading(false)
+        onLogin(adminSession({ id: firebaseUser?.uid || 'local', name: fullName || 'System Admin', email: firebaseUser?.email || 'admin@company.com', companyName: companyName || 'Acme' }))
+      }, 1200)
+      return
+    }
+    try {
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+      const client = window.google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'https://www.googleapis.com/auth/drive.appdata email profile openid',
+        callback: async (tokenResponse) => {
+          if (tokenResponse && tokenResponse.access_token) {
+            try {
+              if (firebaseUser) {
+                await updateDriveConnectionStatus(firebaseUser.uid, true)
+              }
+              const adminUser = {
+                name: fullName || 'Admin',
+                email: firebaseUser?.email || '',
+                companyName: companyName,
+                role: 'Admin',
+                token: tokenResponse.access_token,
+                uid: firebaseUser?.uid
+              }
+              setIsLoading(false)
+              onLogin(adminUser)
+            } catch (err) {
+              setIsLoading(false)
+              setError("Failed during Drive connection: " + err.message)
+            }
+          } else {
+            setIsLoading(false)
+          }
+        },
+        error_callback: (err) => {
+          setIsLoading(false)
+          setError("Authorization error: " + err.message)
+        }
+      })
+      client.requestAccessToken({ prompt: 'consent' })
+    } catch (e) {
       setIsLoading(false)
-      onLogin(adminUser)
-    }, 800)
+      setError("Error initializing Google Login client: " + e.message)
+    }
   }
 
   // --- Employee login logic ---
@@ -654,21 +689,13 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setError('')
     setIsLoading(true)
     try {
-      const hrToken = localStorage.getItem('hr_pulse_hr_token')
-      if (!hrToken) {
-        setError('Device not registered. Please ask an Admin to login first.')
+      const storedEmployees = localStorage.getItem('hr_pulse_employees_plain')
+      if (!storedEmployees) {
+        setError('No employee data found. Please contact your HR department.')
         setIsLoading(false)
         return
       }
-
-      const { readTable } = await import('../services/database.js')
-      const employees = await readTable('employees', hrToken)
-
-      if (!employees || employees.length === 0) {
-        setError('No employee data found in cloud. Please contact HR.')
-        setIsLoading(false)
-        return
-      }
+      const employees = JSON.parse(storedEmployees)
       const employee = employees.find(e => e.email === email)
       if (!employee) {
         setError('Invalid email or password.')
@@ -681,10 +708,11 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         setIsLoading(false)
         return
       }
+      const hrToken = localStorage.getItem('hr_pulse_hr_token')
       const employeeUser = {
         name: employee.name,
         email: employee.email,
-        role: employee.role || 'Employee',
+        role: employee.role || 'Teammate',
         department: employee.department,
         avatar: employee.avatar || '',
         isEmployee: true,
