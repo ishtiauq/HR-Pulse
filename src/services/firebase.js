@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, initializeFirestore, persistentLocalCache } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, initializeFirestore, persistentLocalCache, collection, getDocs, writeBatch } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -29,4 +29,4 @@ try {
   console.error('Firebase initialization error:', error);
 }
 
-export { auth, db, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, RecaptchaVerifier, signInWithPhoneNumber, doc, setDoc, getDoc, getDocFromServer, serverTimestamp };
+export { auth, db, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, RecaptchaVerifier, signInWithPhoneNumber, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, collection, getDocs, writeBatch };

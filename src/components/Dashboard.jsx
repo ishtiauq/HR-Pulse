@@ -423,13 +423,13 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
           </Card>
         )}
 
-        {/* Widget 5 — Payroll Summary (Span 6) */}
+        {/* Widget 5 — Payroll Summary */}
         {canViewPayroll && (
           <DashboardWidget
           id="w5"
           title="Payroll Summary"
           icon={<Icon name="account_balance" size={18} />}
-          cardClass="xl:col-span-6"
+          cardClass="md:col-span-2 lg:col-span-2"
           action={currentPayrollMonth && <Badge variant="secondary" className="px-3 py-1 h-7">{currentPayrollMonth}</Badge>}
           contentClass="flex flex-col justify-between pt-4"
           {...wProps}
