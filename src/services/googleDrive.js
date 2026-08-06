@@ -301,7 +301,7 @@ export async function readTable(tableName, token, onBackgroundSync) {
         await setLocalFile(filename, remoteData);
         await setLastKnownModifiedTime(filename, remoteModified);
         if (onBackgroundSync && JSON.stringify(localData) !== JSON.stringify(remoteData)) {
-          onBackgroundSync(remoteData, tableName);
+          onBackgroundSync(tableName, remoteData);
         }
       }
     } catch (err) {
