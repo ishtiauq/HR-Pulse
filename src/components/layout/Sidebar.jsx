@@ -83,7 +83,7 @@ export default function Sidebar({
         </nav>
 
         {/* FOOTER SECTION */}
-        <div className="shrink-0 p-3 pt-4 flex flex-col gap-1 border-t border-sidebar-border bg-sidebar/80">
+        <div className="shrink-0 p-3 pt-4 flex flex-col gap-1 border-t border-sidebar-border bg-sidebar">
           
           {/* USER PROFILE */}
           <button

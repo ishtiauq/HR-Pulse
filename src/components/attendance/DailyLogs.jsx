@@ -49,7 +49,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
             </span>
             {showDatePicker && (
               <div onClick={e => e.stopPropagation()}
-                className="absolute top-full left-0 z-50 w-[280px] p-4 mt-2 rounded-xl border border-border/50 bg-popover text-popover-foreground shadow-2xl backdrop-blur-xl">
+                className="absolute top-full left-0 z-50 w-[280px] p-4 mt-2 rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl">
                 <div className="flex justify-between items-center mb-3">
                   <Button variant="ghost" size="icon" className="size-8" onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1) } else setCalMonth(m => m - 1) }} aria-label="Previous month">
                     <Icon name="chevron_left" size={16} />
@@ -139,7 +139,7 @@ export default function DailyLogs({ employees, attendance, setAttendance, addToa
                       </button>
                       {openStatusEmp === emp.id && (
                         <div onClick={e => e.stopPropagation()}
-                          className="absolute right-0 top-[calc(100%+8px)] z-50 min-w-[130px] p-2 rounded-2xl border border-border/50 bg-popover shadow-xl backdrop-blur-xl animate-in fade-in zoom-in duration-200">
+                          className="absolute right-0 top-[calc(100%+8px)] z-50 min-w-[130px] p-2 rounded-2xl border border-border bg-popover shadow-xl animate-in fade-in zoom-in duration-200">
                           {Object.entries(PILL_STYLES).map(([k, v]) => (
                             <button key={k} onClick={() => { 
                               if (k !== log.status) {

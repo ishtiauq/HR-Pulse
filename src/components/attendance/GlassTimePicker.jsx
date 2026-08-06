@@ -92,7 +92,7 @@ export function GlassTimePicker({ time, onTimeChange, isOpen, setIsOpen, label }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-[340px] bg-popover/95 backdrop-blur-xl border-border/50 shadow-2xl rounded-3xl p-6 outline-none">
+      <DialogContent className="max-w-[340px] bg-popover border-border shadow-2xl rounded-3xl p-6 outline-none">
         <DialogTitle className="text-center text-lg font-bold flex items-center justify-center gap-2 mb-4 headline-gradient">
           <Icon name="schedule" size={18} className="text-primary" /> {label || 'Select Time'}
         </DialogTitle>

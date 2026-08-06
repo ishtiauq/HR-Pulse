@@ -167,46 +167,12 @@ html, body, #root {
   to   { width: 0%; }
 }
 
-/* Global Glassmorphism for Cards, Modals, Popovers, and Sidebar (Liquid Glass) */
 @layer components {
-  .bg-card, .bg-popover, .bg-sidebar, [role="dialog"], [role="alertdialog"], [role="alert"], .topbar, .bottom-bar, .glass-panel {
-    background: rgba(255, 255, 255, 0.75) !important;
-    backdrop-filter: blur(24px) saturate(120%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(120%) !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    box-shadow: 
-      inset 0 1px 1px rgba(255, 255, 255, 0.5),
-      0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
-    border-radius: 1rem !important; /* rounded-2xl */
-    isolation: isolate;
-  }
-
-  .dark .bg-card, .dark .bg-popover, .dark .bg-sidebar, .dark [role="dialog"], .dark [role="alertdialog"], .dark [role="alert"], .dark .topbar, .dark .bottom-bar, .dark .glass-panel {
-    background: rgba(15, 15, 20, 0.85) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 
-      inset 0 1px 1px rgba(255, 255, 255, 0.05),
-      0 1px 2px 0 rgba(0, 0, 0, 0.2) !important;
-  }
-
-  /* Chrome sometimes drops backdrop-filter on heavy pages and renders these fully transparent.
-     Fallback keeps them opaque so the UI never looks see-through in production. */
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .bg-card, .bg-popover, .bg-sidebar, [role="dialog"], [role="alertdialog"], [role="alert"], .topbar, .bottom-bar, .glass-panel {
-      background: #f4f5f7 !important;
-    }
-    .dark .bg-card, .dark .bg-popover, .dark .bg-sidebar, .dark [role="dialog"], .dark [role="alertdialog"], .dark [role="alert"], .dark .topbar, .dark .bottom-bar, .dark .glass-panel {
-      background: #14141a !important;
-    }
-  }
-
   /* Full-width (edge-to-edge) mobile top bar — background matches the app background */
   .topbar.topbar-bar {
     border-radius: 0 !important;
     border: none !important;
     background: var(--background) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
     box-shadow: none !important;
   }
 
@@ -215,7 +181,7 @@ html, body, #root {
     border-radius: 9999px !important;
   }
 
-  /* Pill-shaped glass tab menu bar (overrides default 1rem glass radius) */
+  /* Pill-shaped solid tab menu bar */
   .glass-panel.glass-pill {
     border-radius: 9999px !important;
   }
@@ -256,14 +222,7 @@ html, body, #root {
   overflow-y: auto !important;
 }
 
-/* Fix nested backdrop-filter bug (Webkit/iOS) by making nested dialogs solid */
-[role="dialog"] [role="dialog"], 
-[role="alertdialog"] [role="dialog"],
-[role="dialog"] [role="alertdialog"] {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  background: var(--card) !important;
-}
+
 
 /* Headline Separator Utility */
 .border-headline {
@@ -521,24 +480,29 @@ button[role="tab"][aria-selected="true"] .msr {
   --foreground: hsl(210 20% 10%);
   --muted-foreground: hsl(215 16% 47%);
   color: var(--foreground) !important;
-  background: rgba(255, 255, 255, 0.9) !important;
-  backdrop-filter: blur(32px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(150%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 
-    inset 0 1px 1px rgba(255, 255, 255, 0.8),
-    0 12px 32px 0 rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255,255,255,0.2) !important;
+  background: hsl(var(--card)) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
 }
 .dark #login-auth-glass-card {
   --foreground: hsl(210 20% 10%);
   --muted-foreground: hsl(215 16% 47%);
   color: var(--foreground) !important;
-  background: rgba(255, 255, 255, 0.85) !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  box-shadow: 
-    inset 0 1px 1px rgba(255, 255, 255, 0.5),
-    0 12px 32px 0 rgba(0, 0, 0, 0.3) !important;
+  background: hsl(var(--card)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Toast solid styling */
+.toast {
+  border-radius: 1rem !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-md) !important;
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .toast {
+  background: hsl(var(--card)) !important;
+  border: 1px solid var(--border) !important;
 }
 
 /* ==============================================================

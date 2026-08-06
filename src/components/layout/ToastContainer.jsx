@@ -5,7 +5,7 @@ export default function ToastContainer({ toasts, removeToast }) {
     <div className="fixed bottom-0 left-0 right-0 sm:left-auto z-[100] flex max-h-screen w-full flex-col p-4 sm:max-w-[420px] gap-2 pointer-events-none" aria-live="polite" aria-atomic="false">
       {toasts.map(toast => (
         <div key={toast.id}
-          className="pointer-events-auto group relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-md border border-border bg-background p-4 pr-6 text-foreground shadow-lg transition-all"
+          className="toast pointer-events-auto group relative flex w-full items-center justify-between space-x-2 overflow-hidden rounded-md border border-border p-4 pr-6 text-foreground shadow-lg transition-all"
           role="alert"
           style={{ animation: 'slideIn 0.3s ease-out' }}
         >

@@ -640,7 +640,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                 {/* Selection Checkbox */}
                 <div 
                   onClick={(e) => e.stopPropagation()} 
-                  className={`absolute top-3 left-3 z-10 p-1 rounded bg-background/80 backdrop-blur-sm border shadow-sm transition-opacity ${selectedIds.has(emp.id) ? 'opacity-100 border-primary' : 'opacity-0 group-hover:opacity-100 border-border'}`}
+                  className={`absolute top-3 left-3 z-10 p-1 rounded bg-background border shadow-sm transition-opacity ${selectedIds.has(emp.id) ? 'opacity-100 border-primary' : 'opacity-0 group-hover:opacity-100 border-border'}`}
                 >
                   <input
                     type="checkbox"

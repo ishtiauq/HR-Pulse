@@ -222,7 +222,7 @@ function MarketingSectionTwo() {
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{ rotateX, rotateY, borderColor: 'rgba(255,255,255,0.1)', transformStyle: "preserve-3d" }}
-            className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-3xl border !border-white/10 shadow-[0_20px_100px_rgba(254,77,1,0.15)] text-white group hover:shadow-[0_40px_120px_rgba(254,77,1,0.3)] transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
+            className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-card border border-border shadow-[0_20px_100px_rgba(254,77,1,0.15)] text-foreground group hover:shadow-[0_40px_120px_rgba(254,77,1,0.3)] transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
           >
           {/* Sleek Orange Blob for ambient glow */}
           <div className="absolute top-[-5%] right-[5%] w-[30%] h-[40%] bg-primary/40 rounded-full blur-[70px] pointer-events-none" />
@@ -318,7 +318,7 @@ function FaqSection() {
             return (
               <div
                 key={i}
-                className={`relative flex flex-col overflow-hidden rounded-2xl border bg-background/95 shadow-sm backdrop-blur-xl transition-colors ${isOpen ? 'border-primary/40' : 'border-border/50'}`}
+                className={`relative flex flex-col overflow-hidden rounded-2xl border bg-background shadow-sm transition-colors ${isOpen ? 'border-primary/40' : 'border-border'}`}
               >
                 <button
                   onClick={() => setOpen(isOpen ? -1 : i)}
@@ -907,7 +907,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     { label: "Expenses", icon: "wallet", color: "text-orange-500" },
                     { label: "Leave", icon: "calendar_month", color: "text-pink-500" },
                   ]).map((item, i) => (
-                    <div key={`col1-${i}`} className="flex items-center justify-start gap-2 lg:gap-4 p-2 sm:p-3 lg:p-5 bg-card/50 backdrop-blur-md border border-border rounded-lg lg:rounded-2xl shadow-sm w-[130px] sm:w-32 lg:w-64 shrink-0">
+                    <div key={`col1-${i}`} className="flex items-center justify-start gap-2 lg:gap-4 p-2 sm:p-3 lg:p-5 bg-card border border-border rounded-lg lg:rounded-2xl shadow-sm w-[130px] sm:w-32 lg:w-64 shrink-0">
                       <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-md lg:rounded-xl bg-background border border-border flex items-center justify-center shadow-inner shrink-0">
                         <Icon name={item.icon} size={20} className={`${item.color} scale-75 sm:scale-100`} />
                       </div>
@@ -926,7 +926,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     { label: "Tasks", icon: "check_box", color: "text-teal-500" },
                     { label: "Feed", icon: "rss_feed", color: "text-indigo-500" },
                   ]).map((item, i) => (
-                    <div key={`col2-${i}`} className="flex items-center justify-center sm:justify-start gap-2 lg:gap-4 p-2 sm:p-3 lg:p-5 bg-card/50 backdrop-blur-md border border-border rounded-lg lg:rounded-2xl shadow-sm w-12 sm:w-32 lg:w-64 shrink-0">
+                    <div key={`col2-${i}`} className="flex items-center justify-center sm:justify-start gap-2 lg:gap-4 p-2 sm:p-3 lg:p-5 bg-card border border-border rounded-lg lg:rounded-2xl shadow-sm w-12 sm:w-32 lg:w-64 shrink-0">
                       <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-md lg:rounded-xl bg-background border border-border flex items-center justify-center shadow-inner shrink-0">
                         <Icon name={item.icon} size={20} className={`${item.color} scale-75 sm:scale-100`} />
                       </div>
@@ -953,7 +953,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
           {/* Chaos vs Control Comparison Table */}
           <div className="max-w-4xl mx-auto w-full px-4 relative z-20">
-            <div className="bg-card/50 backdrop-blur-xl border border-border rounded-3xl overflow-hidden shadow-sm">
+            <div className="bg-card border border-border rounded-3xl overflow-hidden shadow-sm">
               {/* Header */}
               <div className="grid grid-cols-2 border-b border-border">
                 <div className="p-6 sm:p-8 bg-red-500/5 text-center flex flex-col items-center justify-center">
@@ -1491,7 +1491,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
       {/* Intermediate Auth Modal */}
       {showIntermediateModal && (
-        <div className="fixed inset-0 z-[100] flex overflow-y-auto p-4 bg-background/80 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex overflow-y-auto p-4 bg-black/50">
           <div 
             role="dialog"
             className="m-auto p-8 max-w-sm w-full animate-fade-in"

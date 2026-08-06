@@ -57,7 +57,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
           </div>
         </header>
       ) : (
-        <header aria-label="Top bar" className="topbar w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-2 min-[400px]:px-4 flex items-center justify-between rounded-full bg-background/50 backdrop-blur-lg saturate-150 text-foreground border border-border/50 shadow-sm transition-all duration-300">
+        <header aria-label="Top bar" className="topbar w-[98%] min-[400px]:w-[94%] sm:w-[85%] max-w-3xl mx-auto h-14 sm:h-16 px-2 min-[400px]:px-4 flex items-center justify-between rounded-full bg-background text-foreground border border-border shadow-sm transition-all duration-300">
           
           {/* Left Section: Brand Pill */}
           <div className="flex items-center gap-1 min-[400px]:gap-3 sm:gap-4 shrink-0">
@@ -188,7 +188,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
           <div
             role="dialog"
             aria-label="Notifications"
-            className="fixed flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-background/95 text-popover-foreground shadow-2xl backdrop-blur-xl animate-in fade-in-0 zoom-in-95 p-0 z-50"
+            className="fixed flex flex-col overflow-hidden rounded-2xl border border-border bg-background text-popover-foreground shadow-2xl animate-in fade-in-0 zoom-in-95 p-0 z-50"
             style={{ top: `${modalPos.top}px`, right: `${modalPos.right}px`, width: '380px' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -239,7 +239,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
       {/* Corruption / Data Integrity Modal */}
       {showCorruptionModal !== undefined && (
         <Dialog open={showCorruptionModal} onOpenChange={setShowCorruptionModal}>
-          <DialogContent className="max-w-md bg-card/95 backdrop-blur-xl border-destructive/20 shadow-2xl p-0 overflow-hidden sm:rounded-[24px]">
+          <DialogContent className="max-w-md bg-card border-destructive/20 shadow-2xl p-0 overflow-hidden sm:rounded-[24px]">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-rose-600 z-10" />
             <DialogHeader className="p-6 pb-4">
               <DialogTitle className="text-xl font-extrabold flex items-center gap-2.5 text-foreground">
