@@ -3,7 +3,7 @@ import { readMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBac
 import { validateDatabase } from '../services/validator.js'
 import { encryptJson, decryptJson } from '../services/crypto.js'
 import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, getDeviceInfo } from '../utils/helpers.js'
-import { syncEmployeeSnapshot, subscribeToTable, writeToTable } from '../services/bridge.js'
+import { syncEmployeeSnapshot, submitAttendanceToMailbox, flushAttendanceMailbox, flushDeviceMailbox } from '../services/bridge.js'
 
 export default function useAppData({ user, addToast }) {
   /* ─── Drive / DB state ─── */
@@ -165,69 +165,6 @@ export default function useAppData({ user, addToast }) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => { localStorage.setItem(key, JSON.stringify(val)) }, [val])
   })
-
-  /* ─── Firebase Real-Time Subscriptions ─── */
-  const adminUid = user?.isEmployee ? user.adminUid : user?.uid;
-  useEffect(() => {
-    if (!adminUid) return;
-
-    const applyUpdate = (setter, driveWriter, tableName, data) => {
-      if (data) {
-        setter(prev => {
-          if (JSON.stringify(prev) !== JSON.stringify(data)) {
-            // Data changed from remote Firestore
-            if (!user?.isEmployee && driveConnected && metaManifest) {
-              // Master Node: Backup to Drive
-              driveWriter(tableName, data, { ...metaManifest }, user.token).catch(e => console.error(e));
-            }
-            return data;
-          }
-          return prev;
-        });
-      }
-    };
-
-    const unsubEmployees = subscribeToTable(adminUid, 'employees', (data) => applyUpdate(setEmployeesRaw, writeTable, 'employees', data));
-    const unsubPayroll = subscribeToTable(adminUid, 'payroll', (data) => applyUpdate(setPayrollRaw, writeTable, 'payroll', data));
-    const unsubSettings = subscribeToTable(adminUid, 'settings', (data) => applyUpdate(setSettingsRaw, writeTable, 'settings', data));
-    const unsubTasks = subscribeToTable(adminUid, 'tasks', (data) => applyUpdate(setTasks, writeTable, 'tasks', data));
-    const unsubNotes = subscribeToTable(adminUid, 'notes', (data) => applyUpdate(setNotesRaw, writeTable, 'notes', data));
-    const unsubExpenses = subscribeToTable(adminUid, 'expenses', (data) => applyUpdate(setExpensesRaw, writeTable, 'expenses', data));
-    const unsubEvents = subscribeToTable(adminUid, 'events', (data) => applyUpdate(setEvents, writeTable, 'events', data));
-    const unsubDocuments = subscribeToTable(adminUid, 'documents', (data) => applyUpdate(setDocuments, writeTable, 'documents', data));
-    const unsubRoster = subscribeToTable(adminUid, 'roster', (data) => applyUpdate(setRoster, writeTable, 'roster', data));
-    const unsubShiftSwaps = subscribeToTable(adminUid, 'shift_swaps', (data) => applyUpdate(setShiftSwaps, writeTable, 'shift_swaps', data));
-    const unsubOvertime = subscribeToTable(adminUid, 'overtime_claims', (data) => applyUpdate(setOvertimeClaims, writeTable, 'overtime_claims', data));
-    const unsubAnnouncements = subscribeToTable(adminUid, 'announcements', (data) => applyUpdate(setAnnouncements, writeTable, 'announcements', data));
-    const unsubAssets = subscribeToTable(adminUid, 'assets', (data) => applyUpdate(setAssets, writeTable, 'assets', data));
-    const unsubAssetRequests = subscribeToTable(adminUid, 'asset_requests', (data) => applyUpdate(setAssetRequests, writeTable, 'asset_requests', data));
-    const unsubAssetCategories = subscribeToTable(adminUid, 'asset_categories', (data) => applyUpdate(setAssetCategories, writeTable, 'asset_categories', data));
-
-    const handleAttUpdate = (key, data) => {
-      if(data) {
-        setAttendanceRaw(prev => {
-          if (JSON.stringify(prev[key]) !== JSON.stringify(data)) {
-            const next = { ...prev, [key]: data };
-            if (!user?.isEmployee && driveConnected && metaManifest) {
-               const tn = key === 'leaves' ? 'leave_requests' : key === 'balances' ? 'leave_balances' : 'attendance_logs';
-               writeTable(tn, data, { ...metaManifest }, user.token).catch(e => console.error(e));
-            }
-            return next;
-          }
-          return prev;
-        });
-      }
-    };
-    const unsubLeaves = subscribeToTable(adminUid, 'leave_requests', (data) => handleAttUpdate('leaves', data));
-    const unsubBalances = subscribeToTable(adminUid, 'leave_balances', (data) => handleAttUpdate('balances', data));
-    const unsubLogs = subscribeToTable(adminUid, 'attendance_logs', (data) => handleAttUpdate('dailyLogs', data));
-
-    return () => {
-      unsubEmployees(); unsubPayroll(); unsubSettings(); unsubTasks(); unsubNotes(); unsubExpenses(); unsubEvents();
-      unsubDocuments(); unsubRoster(); unsubShiftSwaps(); unsubOvertime(); unsubAnnouncements(); unsubAssets();
-      unsubAssetRequests(); unsubAssetCategories(); unsubLeaves(); unsubBalances(); unsubLogs();
-    };
-  }, [adminUid, driveConnected, metaManifest, user]);
 
   /* ─── Birthday / Work anniversary auto-post ─── */
   useEffect(() => {
@@ -428,7 +365,55 @@ export default function useAppData({ user, addToast }) {
           await writeTable('attendance_logs', logsData, meta, user.token)
         }
 
+        // --- Hybrid Bridge: Flush Mailboxes for Admin ---
+        if (!user.isEmployee && user.uid) {
+          const mailboxLogs = await flushAttendanceMailbox(user.uid)
+          if (mailboxLogs && mailboxLogs.length > 0) {
+            addLog('Hybrid Sync', `Found ${mailboxLogs.length} remote attendance submissions. Merging...`, 'info')
+            mailboxLogs.forEach(log => {
+              if (log.data.leaves) {
+                leavesData = [...leavesData, ...log.data.leaves]
+                const seen = new Set(); leavesData = leavesData.filter(l => { if (seen.has(l.id)) return false; seen.add(l.id); return true })
+              }
+              if (log.data.dailyLogs) {
+                Object.keys(log.data.dailyLogs).forEach(month => {
+                  if (!logsData[month]) logsData[month] = []
+                  logsData[month] = [...logsData[month], ...log.data.dailyLogs[month]]
+                  const seen = new Set(); logsData[month] = logsData[month].filter(l => { if (seen.has(l.id)) return false; seen.add(l.id); return true })
+                })
+              }
+              if (log.data.balances && log.employeeId && log.data.balances[log.employeeId]) {
+                balancesData[log.employeeId] = log.data.balances[log.employeeId]
+              }
+            })
+            await writeTable('leave_requests', leavesData, meta, user.token)
+            await writeTable('leave_balances', balancesData, meta, user.token)
+            await writeTable('attendance_logs', logsData, meta, user.token)
+            addToast(`Synced ${mailboxLogs.length} remote attendance records!`, 'success')
+          }
 
+          const deviceLogs = await flushDeviceMailbox(user.uid)
+          if (deviceLogs && deviceLogs.length > 0) {
+            addLog('Hybrid Sync', `Found ${deviceLogs.length} remote device registrations. Merging...`, 'info')
+            let empUpdated = false
+            deviceLogs.forEach(deviceReg => {
+              const emp = empData.find(e => e.id === deviceReg.employeeId)
+              if (emp) {
+                const empDevices = emp.devices || []
+                if (!empDevices.find(d => d.deviceId === deviceReg.device.deviceId)) {
+                  emp.devices = [...empDevices, deviceReg.device]
+                  empUpdated = true
+                }
+              }
+            })
+            if (empUpdated) {
+              await writeTable('employees', empData, meta, user.token)
+              setEmployeesRaw([...empData])
+              syncEmployeeSnapshot(user.uid, empData)
+              addToast(`Synced ${deviceLogs.length} remote device registrations!`, 'success')
+            }
+          }
+        }
 
         setAttendanceRaw({ leaves: leavesData, balances: balancesData, dailyLogs: logsData })
 
@@ -522,8 +507,7 @@ export default function useAppData({ user, addToast }) {
   const handleSetEmployees = (updater) => {
     setEmployeesRaw((prev) => {
       const next = timestampArrayChanges(prev, typeof updater === 'function' ? updater(prev) : updater)
-      if (adminUid) writeToTable(adminUid, 'employees', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
+      if (user && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
         writeTable('employees', next, meta, user.token)
           .then(({ updatedData, conflicts, offline }) => {
@@ -532,7 +516,9 @@ export default function useAppData({ user, addToast }) {
             else if (conflicts && conflicts.length > 0) { setSyncConflicts(c => [...c, ...conflicts]); addToast('Sync conflict auto-resolved. Review flagged items.', 'warning'); setEmployeesRaw(updatedData) }
             else { 
               addLog('Database Saved', 'Changes successfully uploaded to Google Drive.', 'success')
-              syncEmployeeSnapshot(user.uid, next)
+              if (!user.isEmployee && user.uid) {
+                syncEmployeeSnapshot(user.uid, next)
+              }
             }
           })
           .catch((err) => { setDbStatus('corruption'); addLog('Save Failed', 'Could not save changes to cloud: ' + err.message, 'danger') })
@@ -544,8 +530,7 @@ export default function useAppData({ user, addToast }) {
   const handleSetPayroll = (updater) => {
     setPayrollRaw((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
-      if (adminUid) writeToTable(adminUid, 'payroll', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
+      if (user && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
         writeTable('payroll', next, meta, user.token)
           .then(({ updatedData, conflicts, offline }) => {
@@ -564,8 +549,7 @@ export default function useAppData({ user, addToast }) {
     setSettingsRaw((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       localStorage.setItem('hr_pulse_settings', JSON.stringify(next))
-      if (adminUid) writeToTable(adminUid, 'settings', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
+      if (user && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
         writeTable('settings', next, meta, user.token)
           .then(({ updatedData, conflicts, offline }) => {
@@ -693,13 +677,19 @@ export default function useAppData({ user, addToast }) {
       const rawNext = typeof updater === 'function' ? updater(prev) : updater
       const next = { ...rawNext, leaves: timestampArrayChanges(prev.leaves, rawNext.leaves) }
       
-      if (adminUid) {
-        writeToTable(adminUid, 'leave_requests', next.leaves).catch(e => console.error(e));
-        writeToTable(adminUid, 'leave_balances', next.balances).catch(e => console.error(e));
-        writeToTable(adminUid, 'attendance_logs', next.dailyLogs).catch(e => console.error(e));
-      }
-      
-      if (!user?.isEmployee && driveConnected && metaManifest) {
+      if (user?.isEmployee && user?.adminUid && (!user.token || !driveConnected)) {
+        // Send to Firebase Mailbox for remote employees
+        submitAttendanceToMailbox(user.adminUid, {
+          employeeId: user.employeeId,
+          data: next,
+          timestamp: new Date().toISOString()
+        })
+          .then(() => addToast('Attendance sent securely.', 'success'))
+          .catch(err => {
+            console.error('Mailbox error:', err)
+            addToast('Failed to sync. Please check connection.', 'error')
+          })
+      } else if (user && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
         Promise.all([
           writeTable('leave_requests', next.leaves, meta, user.token), 
@@ -716,8 +706,7 @@ export default function useAppData({ user, addToast }) {
   const handleSetExpenses = (updater) => {
     setExpensesRaw((prev) => {
       const next = timestampArrayChanges(prev, typeof updater === 'function' ? updater(prev) : updater)
-      if (adminUid) writeToTable(adminUid, 'expenses', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
+      if (user && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
         writeTable('expenses', next, meta, user.token)
           .then(({ updatedData, conflicts, offline }) => {
@@ -733,22 +722,14 @@ export default function useAppData({ user, addToast }) {
   }
 
   const handleSetEvents = (updater) => {
-    setEvents((prev) => {
-      const next = typeof updater === 'function' ? updater(prev) : updater
-      if (adminUid) writeToTable(adminUid, 'events', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
-        writeTable('events', next, { ...metaManifest }, user.token).catch(err => console.error(err))
-      }
-      return next
-    })
+    setEvents((prev) => typeof updater === 'function' ? updater(prev) : updater)
   }
 
   const handleSetTasks = (updater) => {
     setTasks((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       localStorage.setItem('hr_pulse_tasks', JSON.stringify(next))
-      if (adminUid) writeToTable(adminUid, 'tasks', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
+      if (user && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
         writeTable('tasks', next, meta, user.token)
           .catch((err) => { setDbStatus('corruption'); addLog('Save Failed', 'Could not save tasks data to cloud: ' + err.message, 'danger') })
@@ -761,8 +742,7 @@ export default function useAppData({ user, addToast }) {
     setNotesRaw((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       localStorage.setItem('hr_pulse_notes', JSON.stringify(next))
-      if (adminUid) writeToTable(adminUid, 'notes', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
+      if (user && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
         writeTable('notes', next, meta, user.token)
           .then(({ updatedData, conflicts, offline }) => {
@@ -777,14 +757,7 @@ export default function useAppData({ user, addToast }) {
   }
 
   const handleSetDocuments = (updater) => {
-    setDocuments((prev) => {
-      const next = typeof updater === 'function' ? updater(prev) : updater
-      if (adminUid) writeToTable(adminUid, 'documents', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
-        writeTable('documents', next, { ...metaManifest }, user.token).catch(err => console.error(err))
-      }
-      return next
-    })
+    setDocuments((prev) => typeof updater === 'function' ? updater(prev) : updater)
   }
 
   const handleSync = () => { if (syncRef.current && !isSyncing) syncRef.current() }

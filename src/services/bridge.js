@@ -1,13 +1,43 @@
-import { db, doc, setDoc, getDoc, collection, getDocs, writeBatch } from './firebase.js';
+import { db, doc, setDoc, getDoc, collection, getDocs, writeBatch, onSnapshot, serverTimestamp } from './firebase.js';
+
+/**
+ * Subscribes to a specific table's snapshot in Firebase.
+ * Returns an unsubscribe function.
+ */
+export const subscribeToTable = (adminUid, tableName, onDataCallback) => {
+  if (!db || !adminUid) return () => {};
+  const tableRef = doc(db, 'companies', adminUid, 'snapshots', tableName);
+  
+  return onSnapshot(tableRef, (snapshot) => {
+    if (snapshot.exists() && snapshot.data().data) {
+      onDataCallback(snapshot.data().data);
+    } else {
+      onDataCallback(null);
+    }
+  }, (error) => {
+    console.error(`Error subscribing to ${tableName}:`, error);
+  });
+};
+
+/**
+ * Writes an entire table's snapshot to Firebase.
+ */
+export const writeToTable = async (adminUid, tableName, data) => {
+  if (!db || !adminUid) throw new Error('Firebase not connected or missing Admin ID.');
+  const tableRef = doc(db, 'companies', adminUid, 'snapshots', tableName);
+  await setDoc(tableRef, {
+    data,
+    lastUpdated: serverTimestamp()
+  });
+};
 
 /**
  * Uploads a read-only snapshot of the employee directory to Firestore.
  * This allows employees to authenticate from their personal devices
- * without having access to the Admin's Google Drive.
  */
 export const syncEmployeeSnapshot = async (adminUid, employees) => {
   if (!db || !adminUid) return;
-  const snapshotRef = doc(db, 'companies', adminUid, 'snapshots', 'employees');
+  const snapshotRef = doc(db, 'companies', adminUid, 'snapshots', 'employees_auth');
   
   // Extract only the minimal fields necessary for login to maintain privacy
   const snapshotData = employees.map(emp => ({
@@ -34,7 +64,7 @@ export const syncEmployeeSnapshot = async (adminUid, employees) => {
  */
 export const fetchEmployeeSnapshot = async (adminUid) => {
   if (!db || !adminUid) return [];
-  const snapshotRef = doc(db, 'companies', adminUid, 'snapshots', 'employees');
+  const snapshotRef = doc(db, 'companies', adminUid, 'snapshots', 'employees_auth');
   
   try {
     const snap = await getDoc(snapshotRef);
@@ -45,85 +75,4 @@ export const fetchEmployeeSnapshot = async (adminUid) => {
     console.error('Failed to fetch employee snapshot:', error);
   }
   return [];
-};
-
-/**
- * Allows an employee to submit a clock-in/out record to the Firebase mailbox
- * when they are operating from a personal device.
- */
-export const submitAttendanceToMailbox = async (adminUid, attendanceLog) => {
-  if (!db || !adminUid) throw new Error('Firebase not connected or missing Admin ID.');
-  
-  const logRef = doc(collection(db, 'companies', adminUid, 'attendance_mailbox'));
-  await setDoc(logRef, {
-    ...attendanceLog,
-    _submittedAt: new Date().toISOString()
-  });
-};
-
-/**
- * Flushes all pending attendance logs from the Firebase mailbox so they can be
- * saved to the Admin's Google Drive. Deletes them from Firebase once retrieved.
- */
-export const flushAttendanceMailbox = async (adminUid) => {
-  if (!db || !adminUid) return [];
-  
-  const mailboxRef = collection(db, 'companies', adminUid, 'attendance_mailbox');
-  const snap = await getDocs(mailboxRef);
-  
-  if (snap.empty) return [];
-  
-  const logs = [];
-  const batch = writeBatch(db);
-  
-  snap.forEach(docSnap => {
-    const data = docSnap.data();
-    delete data._submittedAt; // Remove metadata
-    logs.push(data);
-    batch.delete(docSnap.ref); // Queue deletion
-  });
-  
-  await batch.commit();
-  console.log(`Flushed ${logs.length} attendance records from mailbox.`);
-  return logs;
-};
-
-/**
- * Submits a new device registration to the Firebase mailbox for the Admin to process.
- */
-export const submitDeviceToMailbox = async (adminUid, deviceData) => {
-  if (!db || !adminUid) throw new Error('Firebase not connected or missing Admin ID.');
-  
-  const deviceRef = doc(collection(db, 'companies', adminUid, 'device_mailbox'));
-  await setDoc(deviceRef, {
-    ...deviceData,
-    _submittedAt: new Date().toISOString()
-  });
-};
-
-/**
- * Flushes all pending device registrations from the Firebase mailbox so they can be
- * saved to the Admin's Google Drive. Deletes them from Firebase once retrieved.
- */
-export const flushDeviceMailbox = async (adminUid) => {
-  if (!db || !adminUid) return [];
-  
-  const mailboxRef = collection(db, 'companies', adminUid, 'device_mailbox');
-  const snap = await getDocs(mailboxRef);
-  
-  if (snap.empty) return [];
-  
-  const devices = [];
-  const batch = writeBatch(db);
-  
-  snap.forEach(docSnap => {
-    const data = docSnap.data();
-    delete data._submittedAt; // Remove metadata
-    devices.push(data);
-    batch.delete(docSnap.ref); // Queue deletion
-  });
-  
-  await batch.commit();
-  console.log(`Flushed ${devices.length} device registrations from mailbox.`);
-  return devices;
 };
