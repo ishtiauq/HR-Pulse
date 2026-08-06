@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { clearLocalCache } from '../services/db.js'
-import { createBackup } from '../services/googleDrive.js'
+import { clearLocalCache, createBackup } from '../services/database.js'
 import Icon from "@/components/ui/Icon.jsx"
 import { useConfirm } from './useConfirm'
 

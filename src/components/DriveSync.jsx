@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import AdSlot from './AdSlot'
-import { clearLocalCache } from '../services/db.js'
-import { createBackup, listBackups, restoreBackup } from '../services/googleDrive.js'
+import { clearLocalCache, createBackup, listBackups, restoreBackup } from '../services/database.js'
 import { formatDateTime } from '../services/date.js'
 
 export default function DriveSync({ user, driveConnected, setDriveConnected, addLog, addToast }) {
