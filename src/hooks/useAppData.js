@@ -3,6 +3,7 @@ import { readMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBac
 import { validateDatabase } from '../services/validator.js'
 import { encryptJson, decryptJson } from '../services/crypto.js'
 import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges } from '../utils/helpers.js'
+import { syncEmployeeSnapshot, submitAttendanceToMailbox, flushAttendanceMailbox } from '../services/bridge.js'
 
 export default function useAppData({ user, addToast }) {
   /* ─── Drive / DB state ─── */
@@ -273,6 +274,21 @@ export default function useAppData({ user, addToast }) {
         } else {
           setDbStatus('healthy')
           setMetaManifest(meta)
+          
+          // CRITICAL FIX: Flush any pending offline writes BEFORE reading tables
+          // to ensure we don't overwrite offline changes with stale cloud data.
+          await new Promise(resolve => {
+            flushPendingWrites(
+              user.token, meta,
+              (conflicts, data, tableName) => {
+                addLog('Offline Sync', `Flushed offline changes for ${tableName}`, 'success')
+              },
+              (syncedCount) => {
+                if (syncedCount > 0) addToast(`${syncedCount} offline changes synced to Drive`, 'success')
+                resolve()
+              }
+            )
+          })
         }
 
         const defaultContent = []
@@ -333,6 +349,35 @@ export default function useAppData({ user, addToast }) {
           await writeTable('leave_balances', balancesData, meta, user.token)
           await writeTable('attendance_logs', logsData, meta, user.token)
         }
+
+        // --- Hybrid Bridge: Flush Mailbox for Admin ---
+        if (!user.isEmployee && user.uid) {
+          const mailboxLogs = await flushAttendanceMailbox(user.uid)
+          if (mailboxLogs && mailboxLogs.length > 0) {
+            addLog('Hybrid Sync', `Found ${mailboxLogs.length} remote attendance submissions. Merging...`, 'info')
+            mailboxLogs.forEach(log => {
+              if (log.data.leaves) {
+                leavesData = [...leavesData, ...log.data.leaves]
+                const seen = new Set(); leavesData = leavesData.filter(l => { if (seen.has(l.id)) return false; seen.add(l.id); return true })
+              }
+              if (log.data.dailyLogs) {
+                Object.keys(log.data.dailyLogs).forEach(month => {
+                  if (!logsData[month]) logsData[month] = []
+                  logsData[month] = [...logsData[month], ...log.data.dailyLogs[month]]
+                  const seen = new Set(); logsData[month] = logsData[month].filter(l => { if (seen.has(l.id)) return false; seen.add(l.id); return true })
+                })
+              }
+              if (log.data.balances && log.employeeId && log.data.balances[log.employeeId]) {
+                balancesData[log.employeeId] = log.data.balances[log.employeeId]
+              }
+            })
+            await writeTable('leave_requests', leavesData, meta, user.token)
+            await writeTable('leave_balances', balancesData, meta, user.token)
+            await writeTable('attendance_logs', logsData, meta, user.token)
+            addToast(`Synced ${mailboxLogs.length} remote attendance records!`, 'success')
+          }
+        }
+
         setAttendanceRaw({ leaves: leavesData, balances: balancesData, dailyLogs: logsData })
 
         const defaultTasks = []
@@ -432,7 +477,12 @@ export default function useAppData({ user, addToast }) {
             setMetaManifest(meta)
             if (offline) { addToast('Offline - saved locally. Will sync when connected.', 'warning'); setEmployeesRaw(updatedData) }
             else if (conflicts && conflicts.length > 0) { setSyncConflicts(c => [...c, ...conflicts]); addToast('Sync conflict auto-resolved. Review flagged items.', 'warning'); setEmployeesRaw(updatedData) }
-            else { addLog('Database Saved', 'Changes successfully uploaded to Google Drive.', 'success') }
+            else { 
+              addLog('Database Saved', 'Changes successfully uploaded to Google Drive.', 'success')
+              if (!user.isEmployee && user.uid) {
+                syncEmployeeSnapshot(user.uid, next)
+              }
+            }
           })
           .catch((err) => { setDbStatus('corruption'); addLog('Save Failed', 'Could not save changes to cloud: ' + err.message, 'danger') })
       }
@@ -510,9 +560,26 @@ export default function useAppData({ user, addToast }) {
     setAttendanceRaw((prev) => {
       const rawNext = typeof updater === 'function' ? updater(prev) : updater
       const next = { ...rawNext, leaves: timestampArrayChanges(prev.leaves, rawNext.leaves) }
-      if (user && driveConnected && metaManifest) {
+      
+      if (user?.isEmployee && user?.adminUid && (!user.token || !driveConnected)) {
+        // Send to Firebase Mailbox for remote employees
+        submitAttendanceToMailbox(user.adminUid, {
+          employeeId: user.employeeId,
+          data: next,
+          timestamp: new Date().toISOString()
+        })
+          .then(() => addToast('Attendance sent securely.', 'success'))
+          .catch(err => {
+            console.error('Mailbox error:', err)
+            addToast('Failed to sync. Please check connection.', 'error')
+          })
+      } else if (user && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
-        Promise.all([writeTable('leave_requests', next.leaves, meta, user.token), writeTable('leave_balances', next.balances, meta, user.token), writeTable('attendance_logs', next.dailyLogs, meta, user.token)])
+        Promise.all([
+          writeTable('leave_requests', next.leaves, meta, user.token), 
+          writeTable('leave_balances', next.balances, meta, user.token), 
+          writeTable('attendance_logs', next.dailyLogs, meta, user.token)
+        ])
           .then(() => { setMetaManifest(meta); addLog('Attendance Saved', 'Attendance logs synced to Google Drive.', 'success') })
           .catch((err) => { setDbStatus('corruption'); addLog('Save Failed', 'Could not save attendance data to cloud: ' + err.message, 'danger') })
       }

@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import { verifyPassword } from '../services/crypto.js'
+import { fetchEmployeeSnapshot } from '../services/bridge.js'
 
 export default function EmployeeLogin({ onLogin, onBack }) {
+  const [companyId, setCompanyId] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -15,14 +17,26 @@ export default function EmployeeLogin({ onLogin, onBack }) {
     setIsLoading(true)
 
     try {
-      const storedEmployees = localStorage.getItem('hr_pulse_employees_plain')
-      if (!storedEmployees) {
-        setError('No employee data found. Please contact your HR department.')
+      if (!companyId.trim()) {
+        setError('Please enter your Company ID.')
         setIsLoading(false)
         return
       }
 
-      const employees = JSON.parse(storedEmployees)
+      // Check offline device kiosk mode first, then fallback to Firebase Bridge
+      let employees = []
+      const storedEmployees = localStorage.getItem('hr_pulse_employees_plain')
+      if (storedEmployees) {
+        employees = JSON.parse(storedEmployees)
+      } else {
+        employees = await fetchEmployeeSnapshot(companyId.trim())
+      }
+
+      if (!employees || employees.length === 0) {
+        setError('No employee data found. Please check your Company ID or contact HR.')
+        setIsLoading(false)
+        return
+      }
       const employee = employees.find(e => e.email === email)
 
       if (!employee) {
@@ -48,7 +62,8 @@ export default function EmployeeLogin({ onLogin, onBack }) {
         avatar: employee.avatar || '',
         isEmployee: true,
         employeeId: employee.id,
-        token: hrToken || ''
+        token: hrToken || '',
+        adminUid: companyId.trim()
       }
 
       onLogin(employeeUser)
@@ -91,6 +106,28 @@ export default function EmployeeLogin({ onLogin, onBack }) {
               {error}
             </div>
           )}
+
+          <div className="mb-4">
+            <label htmlFor="company-id" className="block mb-1.5" style={{ font: "500 13px 'Roboto'", color: 'var(--text-secondary)' }}>
+              Company ID (Ask Admin if you don't know)
+            </label>
+            <input
+              id="company-id"
+              type="text"
+              value={companyId}
+              onChange={(e) => setCompanyId(e.target.value)}
+              placeholder="Paste Company ID here"
+              required
+              className="w-full px-4 py-3 rounded-[10px] outline-none"
+              style={{
+                border: '1px solid var(--color-md-sys-outline-variant)',
+                background: 'var(--color-md-sys-surface)',
+                color: 'var(--text-primary)',
+                font: "400 14px 'Roboto'",
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
 
           <div className="mb-4">
             <label htmlFor="emp-email" className="block mb-1.5" style={{ font: "500 13px 'Roboto'", color: 'var(--text-secondary)' }}>

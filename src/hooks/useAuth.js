@@ -10,14 +10,15 @@ export function useAuth() {
     setUser(userInfo)
     localStorage.setItem('hr_pulse_user', JSON.stringify(userInfo))
     if (!userInfo.isEmployee && userInfo.token) {
-      sessionStorage.setItem('hr_pulse_hr_token', userInfo.token)
+      localStorage.setItem('hr_pulse_hr_token', userInfo.token)
     }
   }
 
   const handleLogout = () => {
     setUser(null)
     localStorage.removeItem('hr_pulse_user')
-    sessionStorage.removeItem('hr_pulse_hr_token')
+    // Deliberately keep hr_pulse_hr_token in localStorage so employees can still log in on this device
+    // even if the admin logs out, effectively turning the device into a kiosk.
   }
 
   return { user, setUser, handleLogin, handleLogout }
