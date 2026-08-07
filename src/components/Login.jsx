@@ -7,6 +7,7 @@ import heroCharacters from '../Assets/hero-characters.png'
 import { fetchUserProfile } from '../services/googleDrive.js'
 import { verifyPassword, hashPassword } from '../services/crypto.js'
 import { loginWithGoogle, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, updateProfileData, updateDriveConnectionStatus, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp } from '../services/auth.js'
+import { fetchEmployeeSnapshot } from '../services/bridge.js'
 import Dashboard from './Dashboard.jsx'
 import { allNavItems } from '../utils/helpers.js'
 import painStripIllustration from '../Assets/pain-strip.png'
@@ -491,8 +492,11 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   // --- Employee state ---
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [otp, setOtp] = useState('')
+  const [verificationId, setVerificationId] = useState('')
   const [fullName, setFullName] = useState('')
   const [companyName, setCompanyName] = useState('')
+  const [companyId, setCompanyId] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
 
@@ -689,14 +693,36 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     e.preventDefault()
     setError('')
     setIsLoading(true)
+    
+    // Automatically extract Company ID from URL query params if present, otherwise use the state.
+    const searchParams = new URLSearchParams(window.location.search);
+    const urlCompanyId = searchParams.get('company');
+    const finalCompanyId = urlCompanyId || companyId.trim();
+
     try {
-      const storedEmployees = localStorage.getItem('kormiis_employees_plain')
-      if (!storedEmployees) {
-        setError('No employee data found. Please contact your HR department.')
+      let employees = []
+      if (finalCompanyId) {
+        employees = await fetchEmployeeSnapshot(finalCompanyId)
+      }
+
+      // Fallback to localStorage if Firebase fails or is offline, but ONLY if we didn't specify a company ID or if Firebase returned nothing.
+      if (!employees || employees.length === 0) {
+        const storedEmployees = localStorage.getItem('kormiis_employees_plain')
+        if (storedEmployees) {
+          employees = JSON.parse(storedEmployees)
+        }
+      }
+
+      if (!employees || employees.length === 0) {
+        if (!finalCompanyId) {
+           setError('Please provide a Company ID (ask your admin) or use a login link.')
+        } else {
+           setError('No employee data found for this company. Please contact your HR department.')
+        }
         setIsLoading(false)
         return
       }
-      const employees = JSON.parse(storedEmployees)
+
       const employee = employees.find(e => e.email === email)
       if (!employee) {
         setError('Invalid email or password.')
@@ -709,7 +735,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         setIsLoading(false)
         return
       }
-      const hrToken = localStorage.getItem('kormiis_hr_token')
+      
+      const hrToken = localStorage.getItem('kormiis_hr_token') // Optional fallback
       const employeeUser = {
         name: employee.name,
         email: employee.email,
@@ -718,6 +745,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         avatar: employee.avatar || '',
         isEmployee: true,
         employeeId: employee.id,
+        adminUid: finalCompanyId || localStorage.getItem('kormiis_last_admin_uid'), // Critical for Firebase real-time sync!
         token: hrToken || ''
       }
       onLogin(employeeUser)
@@ -1290,6 +1318,18 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                         </>
                       ) : (
                         <form onSubmit={handleEmployeeSubmit} className="space-y-4">
+                          <div>
+                            <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Company ID (Admin UID)</label>
+                            <input
+                              type="text"
+                              value={new URLSearchParams(window.location.search).get('company') || companyId}
+                              onChange={e => setCompanyId(e.target.value)}
+                              placeholder="e.g. abc123xyz"
+                              className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all"
+                              disabled={!!new URLSearchParams(window.location.search).get('company')}
+                            />
+                            <p className="text-xs text-muted-foreground mt-1 px-1">Optional if logging in on the same device as your admin.</p>
+                          </div>
                           <div>
                             <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
                             <input

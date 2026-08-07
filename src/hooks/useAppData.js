@@ -174,6 +174,16 @@ export default function useAppData({ user, addToast }) {
     const applyUpdate = (setter, driveWriter, tableName, data) => {
       if (data) {
         setter(prev => {
+          // Safeguard: If Firebase writes are failing, the remote data will be older than local data.
+          // Since we don't have accurate timestamps on every Firebase record in this MVP,
+          // we use a simple heuristic: if the remote array has FEWER items than the local array,
+          // we assume the remote is outdated (e.g. an add operation failed to save to Firebase).
+          // This prevents catastrophic data erasure on page refresh.
+          if (Array.isArray(prev) && Array.isArray(data) && data.length < prev.length) {
+            console.warn(`[Sync Warning] Ignoring remote update for ${tableName} because remote has ${data.length} items but local has ${prev.length} items. This usually means a recent write to Firebase failed.`);
+            return prev;
+          }
+
           if (JSON.stringify(prev) !== JSON.stringify(data)) {
             // Data changed from remote Firestore
             if (!user?.isEmployee && driveConnected && metaManifest) {
