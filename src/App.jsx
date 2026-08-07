@@ -111,10 +111,10 @@ export default function App() {
     return <Login onLogin={handleLogin} themeMode={themeMode} toggleTheme={toggleTheme} setThemeMode={setThemeMode} />
   }
 
-  if (appData.simulatedRole === 'Teammate' || user.isEmployee) {
+  if (user.isEmployee || user.role === 'Teammate') {
     return (
       <EmployeePortal
-        currentUser={{...user, id: (appData.simulatedRole === 'Teammate' && user.role !== 'Teammate') ? (appData.employees?.[0]?.id || 'simulated-admin-id') : (user.id || user.employeeId || 'simulated-admin-id'), role: user.role || 'Teammate', department: user.department || 'Engineering'}}
+        currentUser={{...user, id: user.id || user.employeeId, role: user.role || 'Teammate', department: user.department || 'Engineering'}}
         themeMode={themeMode}
         toggleTheme={toggleTheme}
         employees={appData.employees}
@@ -150,11 +150,7 @@ export default function App() {
         setDocuments={appData.handleSetDocuments}
         notes={appData.notes}
         setNotes={appData.handleSetNotes}
-        simulatedRole={appData.simulatedRole}
-        setSimulatedRole={appData.setSimulatedRole}
         handleLogout={handleLogout}
-        showRoleModal={appData.showRoleModal}
-        setShowRoleModal={appData.setShowRoleModal}
         showNotifications={appData.showNotifications}
         setShowNotifications={appData.setShowNotifications}
         notifications={appData.notifications}
@@ -178,16 +174,12 @@ export default function App() {
         isDarkMode={isDarkMode}
         currentView={currentView}
         setCurrentView={setCurrentView}
-        mobileMenuOpen={mobileMenuOpen}
+        mobileMenuOpen={showMobileMenu}
         toggleSidebar={toggleSidebar}
         user={user}
-        simulatedRole={appData.simulatedRole}
-        showRoleModal={appData.showRoleModal}
-        setShowRoleModal={appData.setShowRoleModal}
         handleLogout={handleLogout}
         setIsCollapsed={setIsCollapsed}
-        setSimulatedRole={appData.setSimulatedRole}
-        setMobileMenuOpen={setMobileMenuOpen}
+        setMobileMenuOpen={setShowMobileMenu}
       />
 
 
@@ -232,7 +224,6 @@ export default function App() {
             setCurrentView={setCurrentView}
             isAppLoading={appData.isAppLoading}
             hasPermission={appData.hasPermission}
-            simulatedRole={appData.simulatedRole}
             user={user}
             addToast={addToast}
             themeMode={themeMode}

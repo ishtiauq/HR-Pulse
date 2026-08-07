@@ -14,7 +14,7 @@ import ProfileView from './ProfileView.jsx'
 import Notes from './Notes.jsx'
 import { Skeleton } from "@/components/ui/skeleton"
 
-export default function AppContent({ currentView, setCurrentView, isAppLoading, hasPermission, simulatedRole, user, isSidebarCollapsed, themeMode, toggleTheme, ...data }) {
+export default function AppContent({ currentView, setCurrentView, isAppLoading, hasPermission, user, isSidebarCollapsed, themeMode, toggleTheme, ...data }) {
   const renderBreadcrumbs = () => {
     if (currentView === 'dashboard') return null
     return (

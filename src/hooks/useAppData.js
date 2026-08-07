@@ -22,13 +22,6 @@ export default function useAppData({ user, addToast }) {
   const syncRef = useRef(null)
   const syncedForUser = useRef(null)
 
-  /* ─── UI state ─── */
-  const [simulatedRole, setSimulatedRole] = useState(() => localStorage.getItem('kormiis_simulated_role') || 'Admin')
-  
-  useEffect(() => {
-    localStorage.setItem('kormiis_simulated_role', simulatedRole)
-  }, [simulatedRole])
-  const [showRoleModal, setShowRoleModal] = useState(false)
   const [pendingProfileEdits, setPendingProfileEdits] = useState([])
   const [auditLogs, setAuditLogs] = useState([
     { id: 'audit-1', timestamp: new Date(Date.now() - 86400000).toISOString(), user: 'System', action: 'CREATE', entity: 'System', details: 'Initialized audit logging.', ip: 'N/A' }
@@ -48,7 +41,7 @@ export default function useAppData({ user, addToast }) {
   }
 
   const hasPermission = (resource) => {
-    const currentRole = user?.isSimulated ? simulatedRole : (user?.role || 'Teammate')
+    const currentRole = user?.role || 'Teammate'
     if (currentRole === 'Admin') return true
     
     // For Teammates, base permissions + custom permissions

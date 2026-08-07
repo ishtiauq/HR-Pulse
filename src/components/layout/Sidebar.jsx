@@ -5,9 +5,8 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 
 export default function Sidebar({
   visibleNavItems, isCollapsed, isDarkMode, currentView, setCurrentView,
-  mobileMenuOpen, toggleSidebar, user, simulatedRole,
-  showRoleModal, setShowRoleModal, handleLogout,
-  setIsCollapsed, setSimulatedRole, setMobileMenuOpen
+  mobileMenuOpen, toggleSidebar, user, handleLogout,
+  setIsCollapsed, setMobileMenuOpen
 }) {
   return (
     <>      <aside 
@@ -102,26 +101,11 @@ export default function Sidebar({
               maxWidth: !isCollapsed ? '200px' : 0,
             }}>
               <p className="text-sm font-semibold m-0 text-sidebar-foreground whitespace-nowrap leading-tight">{user?.name || "Ishtiaq Rizve"}</p>
-              <p className="text-[11px] font-medium m-0 text-sidebar-foreground/70 whitespace-nowrap">{simulatedRole || user?.role || "Admin"}</p>
+              <p className="text-[11px] font-medium m-0 text-sidebar-foreground/70 whitespace-nowrap">{user?.role || "Admin"}</p>
             </div>
           </button>
 
-          {/* ACTION BUTTONS */}
-          <TooltipPopover label="Switch Role" isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
-            <button
-              onClick={() => setShowRoleModal && setShowRoleModal(true)}
-              className="btn-shimmer w-full flex items-center gap-3 px-3 rounded-md bg-[#2563eb] hover:bg-[#1d4ed8] text-white transition-colors cursor-pointer h-9 box-border border-none"
-            >
-              <div className="size-6 flex items-center justify-center shrink-0">
-                <Icon name="swap_horiz" size={16} />
-              </div>
-              <span className="whitespace-nowrap overflow-hidden transition-[opacity,max-width] duration-300 text-left font-medium text-xs pr-2" style={{
-                opacity: !isCollapsed ? 1 : 0,
-                maxWidth: !isCollapsed ? '300px' : 0,
-              }}>Switch Role</span>
-            </button>
-          </TooltipPopover>
-          
+
           <TooltipPopover label="Logout" isCollapsed={isCollapsed} isDarkMode={isDarkMode}>
             <button
               onClick={handleLogout}
@@ -138,48 +122,6 @@ export default function Sidebar({
           </TooltipPopover>
         </div>
       </aside>
-
-      {/* Role Switch Modal */}
-      <AlertDialog open={showRoleModal} onOpenChange={setShowRoleModal}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <div className="flex items-center justify-between">
-              <AlertDialogTitle>Switch Role</AlertDialogTitle>
-              <button onClick={() => setShowRoleModal(false)} className="size-8 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer" aria-label="Close">
-                <Icon name="close" size={16} />
-              </button>
-            </div>
-            <AlertDialogDescription>Choose a role to simulate. Permissions and visible modules will adjust accordingly.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="flex flex-col gap-2 py-2">
-            {[
-              { id: 'Admin', label: 'Admin', icon: <Icon name="shield" size={16} />, desc: 'Full access to all modules' },
-              { id: 'Teammate', label: 'Teammate', icon: <Icon name="person" size={16} />, desc: 'Self-service portal access and tasks' },
-            ].map(role => (
-              <button
-                key={role.id}
-                onClick={() => { setSimulatedRole(role.id); setShowRoleModal(false) }}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm font-semibold transition-all cursor-pointer border ${
-                  simulatedRole === role.id
-                    ? 'bg-primary/10 text-primary border-primary/30'
-                    : 'bg-muted/40 text-foreground border-border hover:bg-muted'
-                }`}
-              >
-                <div className="size-9 flex items-center justify-center rounded-lg bg-background border border-border shrink-0">
-                  {role.icon}
-                </div>
-                <div className="flex flex-col">
-                  <span>{role.label}</span>
-                  <span className="text-[11px] font-normal text-muted-foreground">{role.desc}</span>
-                </div>
-                {simulatedRole === role.id && (
-                  <span className="ml-auto text-[10px] uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">Active</span>
-                )}
-              </button>
-            ))}
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
 
       {/* Scoped scrollbar styles */}
       <style>{`
