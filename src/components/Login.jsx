@@ -573,8 +573,21 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setError('')
     setIsLoading(true)
     try {
-      await loginWithGoogle()
-      // Redirecting to Google — login continues in getGoogleRedirectResult on return
+      const { user, mode } = await loginWithGoogle()
+      if (mode === 'redirect') {
+        // Redirecting to Google — login continues in getGoogleRedirectResult on return
+        return
+      }
+      setFirebaseUser(user)
+      const { data } = await checkAndCreateUserDoc(user)
+      setIsLoading(false)
+      if (!data?.fullName || !data?.companyName) {
+        setOnboardingStep(2)
+      } else {
+        setFullName(data.fullName)
+        setCompanyName(data.companyName)
+        setOnboardingStep(3)
+      }
     } catch (err) {
       setError('Google Login failed: ' + err.message)
       setIsLoading(false)

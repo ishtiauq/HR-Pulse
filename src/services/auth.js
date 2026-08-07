@@ -1,4 +1,4 @@
-import { auth, db, GoogleAuthProvider, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber } from './firebase.js';
+import { auth, db, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber } from './firebase.js';
 
 /**
  * Ensures a user document exists in Firestore. 
@@ -38,10 +38,22 @@ export const updateDriveConnectionStatus = async (uid, status = true) => {
   await setDoc(userRef, { driveConnected: status }, { merge: true });
 };
 
+// Tries popup sign-in first (works on all browsers). Falls back to
+// redirect-based sign-in only when the popup is blocked (e.g. strict popup
+// blockers). Redirect is deprecated on Chrome, so it's only a last resort.
 export const loginWithGoogle = async () => {
   if (!auth) throw new Error('Firebase not configured');
   const provider = new GoogleAuthProvider();
-  await signInWithRedirect(auth, provider);
+  try {
+    const result = await signInWithPopup(auth, provider);
+    return { user: result.user, mode: 'popup' };
+  } catch (err) {
+    if (err.code === 'auth/popup-blocked') {
+      await signInWithRedirect(auth, provider);
+      return { user: null, mode: 'redirect' };
+    }
+    throw err;
+  }
 };
 
 export const getGoogleRedirectResult = async () => {
