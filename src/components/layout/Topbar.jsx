@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, dataIntegrityIssues = [], showCorruptionModal, setShowCorruptionModal, handleAutoRepairDatabase, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications, onProfileClick, showThemeToggle = true, user, setCurrentView }) {
+export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, dataIntegrityIssues = [], showCorruptionModal, setShowCorruptionModal, handleAutoRepairDatabase, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications, onProfileClick, handleLogout, showThemeToggle = true, user, setCurrentView }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const buttonRef = useRef(null)
   const [modalPos, setModalPos] = useState({ top: 0, right: 0 })
@@ -372,6 +372,18 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
               <Button variant="outline" onClick={() => setShowSyncErrorModal(false)} className="rounded-full font-semibold">
                 Cancel
               </Button>
+              {handleLogout && (
+                <Button 
+                  variant="secondary" 
+                  onClick={() => {
+                    setShowSyncErrorModal(false);
+                    handleLogout();
+                  }} 
+                  className="rounded-full font-bold px-6"
+                >
+                  Sign In Again
+                </Button>
+              )}
               <Button 
                 variant="default" 
                 onClick={() => {

@@ -213,6 +213,7 @@ export default function App() {
                 notifications={appData.notifications}
                 clearNotifications={appData.clearNotifications}
                 onProfileClick={() => setCurrentView('profile')}
+                handleLogout={handleLogout}
                 setCurrentView={setCurrentView}
                 user={user}
               />

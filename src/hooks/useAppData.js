@@ -335,7 +335,7 @@ export default function useAppData({ user, addToast }) {
   /* ─── Drive sync effect ─── */
   useEffect(() => {
     const syncDatabase = async () => {
-      if (!user || !driveConnected) { setIsAppLoading(false); return }
+      if (!user || !driveConnected || user.isEmployee) { setIsAppLoading(false); return }
 
       const bgSyncCallback = (tableName, data) => {
         addToast(`Background sync updated ${tableName} with remote changes.`, 'info')
@@ -832,7 +832,13 @@ export default function useAppData({ user, addToast }) {
     })
   }
 
-  const handleSync = () => { if (syncRef.current && !isSyncing) syncRef.current() }
+  const handleSync = () => { 
+    addToast('Retrying sync...', 'info');
+    setDriveConnected(true);
+    setTimeout(() => {
+      if (syncRef.current && !isSyncing) syncRef.current()
+    }, 0);
+  }
 
   /* ─── Auto sync log interval ─── */
   useEffect(() => {
