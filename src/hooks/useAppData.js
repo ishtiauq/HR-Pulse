@@ -23,7 +23,11 @@ export default function useAppData({ user, addToast }) {
   const syncedForUser = useRef(null)
 
   /* ─── UI state ─── */
-  const [simulatedRole, setSimulatedRole] = useState('Admin')
+  const [simulatedRole, setSimulatedRole] = useState(() => localStorage.getItem('kormiis_simulated_role') || 'Admin')
+  
+  useEffect(() => {
+    localStorage.setItem('kormiis_simulated_role', simulatedRole)
+  }, [simulatedRole])
   const [showRoleModal, setShowRoleModal] = useState(false)
   const [pendingProfileEdits, setPendingProfileEdits] = useState([])
   const [auditLogs, setAuditLogs] = useState([
