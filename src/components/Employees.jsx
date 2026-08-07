@@ -16,7 +16,7 @@ import { DatePicker } from "@/components/ui/date-picker"
 
 
 
-export default function Employees({ employees, setEmployees, addLog, driveConnected, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast, selectedEmployeeId, setSelectedEmployeeId, isSidebarCollapsed }) {
+export default function Employees({ employees, setEmployees, addLog, driveConnected, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast, selectedEmployeeId, setSelectedEmployeeId, isSidebarCollapsed, adminUid, currentUser }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [deptFilter, setDeptFilter] = useState('All')
@@ -121,6 +121,17 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
       setDragStart(null)
     }
   }
+
+  const handleCopyInviteLink = () => {
+    const companyId = adminUid || currentUser?.uid;
+    if (!companyId) {
+      addToast('Error: Company ID not found. Ensure you are logged in correctly.', 'danger');
+      return;
+    }
+    const inviteLink = `${window.location.origin}?company=${companyId}`;
+    navigator.clipboard.writeText(inviteLink);
+    addToast('Invite link copied to clipboard!', 'success');
+  };
 
   const handleOpenAddForm = () => {
     const generatedId = `EMP-${Math.floor(100 + Math.random() * 900)}`
@@ -574,6 +585,9 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
                 }
               }}
             />
+            <Button variant="outline" onClick={handleCopyInviteLink} className="shadow-sm flex-1 sm:flex-none">
+              <Icon name="link" size={16} className="mr-2 h-4 w-4 text-primary" /> Invite Link
+            </Button>
             <Button variant="outline" onClick={() => document.getElementById('csv-file-input').click()} className="shadow-sm flex-1 sm:flex-none">
               <Icon name="table_chart" size={16} className="mr-2 h-4 w-4" /> Import CSV
             </Button>
