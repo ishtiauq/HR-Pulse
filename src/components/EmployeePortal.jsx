@@ -287,6 +287,7 @@ export default function EmployeePortal({
     { id: 'payslips', icon: <Icon name="account_balance" size={18} />, label: 'Payslips' },
     { id: 'expenses', icon: <Icon name="wallet" size={18} />, label: 'Expenses' },
     { id: 'documents', icon: <Icon name="folder_open" size={18} />, label: 'Documents' },
+    { id: 'notes', icon: <Icon name="sticky_note_2" size={18} />, label: 'Notes' },
     { id: 'leave', icon: <Icon name="calendar_month" size={18} />, label: 'Leave' },
     { id: 'profile', icon: <Icon name="person" size={18} />, label: 'Profile' }
   ]

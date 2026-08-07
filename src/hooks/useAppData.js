@@ -199,16 +199,6 @@ export default function useAppData({ user, addToast }) {
     const applyUpdate = (setter, driveWriter, tableName, data) => {
       if (data) {
         setter(prev => {
-          // Safeguard: If Firebase writes are failing, the remote data will be older than local data.
-          // Since we don't have accurate timestamps on every Firebase record in this MVP,
-          // we use a simple heuristic: if the remote array has FEWER items than the local array,
-          // we assume the remote is outdated (e.g. an add operation failed to save to Firebase).
-          // This prevents catastrophic data erasure on page refresh.
-          if (Array.isArray(prev) && Array.isArray(data) && data.length < prev.length) {
-            console.warn(`[Sync Warning] Ignoring remote update for ${tableName} because remote has ${data.length} items but local has ${prev.length} items. This usually means a recent write to Firebase failed.`);
-            return prev;
-          }
-
           if (JSON.stringify(prev) !== JSON.stringify(data)) {
             // Data changed from remote Firestore
             if (!user?.isEmployee && driveConnected && metaManifest) {
@@ -392,15 +382,23 @@ export default function useAppData({ user, addToast }) {
         const defaultContent = []
 
         let empData = await readTable('employees', user.token, bgSyncCallback)
+        const plainStr = localStorage.getItem(EMPLOYEES_STORAGE_KEY + '_plain')
+        let savedEmp = null;
+        if (plainStr) { try { savedEmp = JSON.parse(plainStr) } catch(e){} }
+        if (!savedEmp) {
+          const saved = localStorage.getItem(EMPLOYEES_STORAGE_KEY)
+          if (saved) { try { const keyMaterial = user?.token || 'kormiis-local-fallback-key'; savedEmp = await decryptJson(saved, keyMaterial) } catch (e) {} }
+        }
+
         if (!empData) {
-          const plain = localStorage.getItem(EMPLOYEES_STORAGE_KEY + '_plain')
-          if (plain) { try { const p = JSON.parse(plain); if (Array.isArray(p) && p.length > 0) empData = p } catch (e) {} }
-          if (!empData) {
-            const saved = localStorage.getItem(EMPLOYEES_STORAGE_KEY)
-            if (saved) { try { const keyMaterial = user?.token || 'kormiis-local-fallback-key'; empData = await decryptJson(saved, keyMaterial) } catch (e) { console.error('Failed to decrypt saved employees for Drive init:', e) } }
-          }
-          if (!empData) empData = defaultContent
+          empData = savedEmp || defaultContent
           await writeTable('employees', empData, meta, user.token)
+        } else if (Array.isArray(empData) && Array.isArray(savedEmp)) {
+          if (savedEmp.length > empData.length) {
+            console.warn('[Sync] Local employees list is larger than remote Drive data. Keeping local to prevent data loss.');
+            empData = savedEmp;
+            await writeTable('employees', empData, meta, user.token)
+          }
         }
         setEmployeesRaw(empData)
 
@@ -476,6 +474,12 @@ export default function useAppData({ user, addToast }) {
         if (!tasksData || (Array.isArray(tasksData) && tasksData.length === 0 && Array.isArray(savedTasks) && savedTasks.length > 0)) {
           tasksData = savedTasks || defaultTasks
           await writeTable('tasks', tasksData, meta, user.token)
+        } else if (Array.isArray(tasksData) && Array.isArray(savedTasks)) {
+          if (savedTasks.length > tasksData.length) {
+            console.warn('[Sync] Local tasks list is larger than remote Drive data. Keeping local to prevent data loss.');
+            tasksData = savedTasks;
+            await writeTable('tasks', tasksData, meta, user.token)
+          }
         }
         setTasks(tasksData)
 
