@@ -104,7 +104,7 @@ export default function App() {
   }, [])
 
   const { showCommandPalette, setShowCommandPalette, commandSearch, setCommandSearch, paletteIndex, setPaletteIndex, filteredItems, selectPaletteItem, getCategoryIcon, ConfirmDialog } = useCommandPalette({
-    user, employees: appData.employees, themeMode, toggleTheme, setCurrentView, addToast, setSelectedEmployeeId
+    employees: appData.employees, themeMode, toggleTheme, setCurrentView, addToast, setSelectedEmployeeId
   })
 
   if (!user) {
@@ -200,8 +200,6 @@ export default function App() {
                 toggleTheme={toggleTheme}
                 handleSync={appData.handleSync}
                 isSyncing={appData.isSyncing}
-                driveConnected={appData.driveConnected}
-                syncConflicts={appData.syncConflicts}
                 dataIntegrityIssues={appData.dataIntegrityIssues}
                 showCorruptionModal={appData.showCorruptionModal}
                 setShowCorruptionModal={appData.setShowCorruptionModal}

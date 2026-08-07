@@ -17,7 +17,6 @@ export const checkAndCreateUserDoc = async (user) => {
       email: user.email,
       fullName: user.displayName || '',
       companyName: '', // To be filled in profile setup
-      driveConnected: false,
       createdAt: serverTimestamp(),
     });
     return { isNewUser: true, data: null };
@@ -30,12 +29,6 @@ export const updateProfileData = async (uid, fullName, companyName) => {
   if (!db) return;
   const userRef = doc(db, 'users', uid);
   await setDoc(userRef, { fullName, companyName }, { merge: true });
-};
-
-export const updateDriveConnectionStatus = async (uid, status = true) => {
-  if (!db) return;
-  const userRef = doc(db, 'users', uid);
-  await setDoc(userRef, { driveConnected: status }, { merge: true });
 };
 
 // Tries popup sign-in first (works on all browsers). Falls back to

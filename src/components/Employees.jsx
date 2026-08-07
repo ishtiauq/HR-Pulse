@@ -16,7 +16,7 @@ import { DatePicker } from "@/components/ui/date-picker"
 
 
 
-export default function Employees({ employees, setEmployees, addLog, driveConnected, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast, selectedEmployeeId, setSelectedEmployeeId, isSidebarCollapsed, adminUid, currentUser }) {
+export default function Employees({ employees, setEmployees, addLog, addAuditLog, pendingProfileEdits, setPendingProfileEdits, addToast, selectedEmployeeId, setSelectedEmployeeId, isSidebarCollapsed, adminUid, currentUser }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
   const [deptFilter, setDeptFilter] = useState('All')
@@ -191,13 +191,13 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
         photoZoom: photoZoom
       } : emp))
       
-      addLog('Updated employee profile', `Saved edits for ${newName} (${newEmpId}) to Google Drive`)
+      addLog('Updated employee profile', `Saved edits for ${newName} (${newEmpId})`)
       if (addAuditLog) addAuditLog('UPDATE', 'Employee', `Updated employee profile for ${newName} (${newEmpId})`)
       if (newCvFileName) {
-        addLog('CV Synced', `Uploaded CV (${newCvFileName}) for ${newName} to Drive EMP folder`)
+        addLog('CV Uploaded', `Uploaded CV (${newCvFileName}) for ${newName}`)
       }
       if (newNidFileName) {
-        addLog('Identity Synced', `Uploaded ID/Passport (${newNidFileName}) for ${newName} to Drive secure folder`)
+        addLog('Identity Uploaded', `Uploaded ID/Passport (${newNidFileName}) for ${newName}`)
       }
     } else {
       // Add new employee
@@ -221,13 +221,13 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
         photoZoom: photoZoom
       }
       setEmployees(prev => [...prev, newEmp])
-      addLog('Added new employee', `Saved ${newName} (${newEmpId}) to Google Drive db folder`)
+      addLog('Added new employee', `Saved ${newName} (${newEmpId})`)
       if (addAuditLog) addAuditLog('CREATE', 'Employee', `Created new employee profile for ${newName} (${newEmpId})`)
       if (newCvFileName) {
-        addLog('CV Uploaded', `Synced CV (${newCvFileName}) to Google Drive employee directory`)
+        addLog('CV Uploaded', `Synced CV (${newCvFileName}) to employee directory`)
       }
       if (newNidFileName) {
-        addLog('Identity Uploaded', `Synced ID/Passport (${newNidFileName}) to Google Drive employee directory`)
+        addLog('Identity Uploaded', `Synced ID/Passport (${newNidFileName}) to employee directory`)
       }
     }
 
@@ -261,7 +261,7 @@ export default function Employees({ employees, setEmployees, addLog, driveConnec
 
   const handleDeleteEmployee = (id, name) => {
     setEmployees(prev => prev.filter(emp => emp.id !== id))
-    addLog('Deleted employee record', `Removed ${name} (${id}) from Google Drive db folder`)
+    addLog('Deleted employee record', `Removed ${name} (${id})`)
     if (addAuditLog) addAuditLog('DELETE', 'Employee', `Deleted employee profile for ${name} (${id})`)
   }
 

@@ -45,7 +45,7 @@ function LocationMarker({ position, setPosition }) {
   )
 }
 
-export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, simulatedRole, syncConflicts, setSyncConflicts, themeMode, toggleTheme }) {
+export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, themeMode, toggleTheme }) {
   const [activeSubmenu, setActiveSubmenu] = useState(() => localStorage.getItem('kormiis_settings_tab') || null)
   const [panelOpen, setPanelOpen] = useState(false)
   const setTab = (id) => {
@@ -178,9 +178,9 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
         company: { ...settings.company, name: companyName, email: companyEmail, website: companyWebsite, logo, logoX, logoY, logoZoom },
         notifications: { syncAlerts, emailDigests }
       })
-      addLog('Settings Updated', 'Saved system settings and synced configurations with Google Drive', 'success')
+      addLog('Settings Updated', 'Saved system settings and synced configurations', 'success')
       setIsSaving(false)
-      if (addToast) addToast("Settings saved successfully and synced to Google Drive!", "success")
+      if (addToast) addToast("Settings saved successfully!", "success")
       else addLog('Settings Saved', 'Settings saved successfully', 'success')
     })
   }
@@ -217,7 +217,6 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     { id: 'notifications', icon: <Icon name="notifications_active" size={20} />, label: 'Notifications' },
     { id: 'audit', icon: <Icon name="list" size={20} />, label: 'Audit Logs' },
     { id: 'security', icon: <Icon name="verified_user" size={20} />, label: 'Security' },
-    { id: 'sync', icon: <Icon name="monitoring" size={20} />, label: 'Sync Conflicts', badge: syncConflicts?.length },
   ]
 
   const handleExportCSV = () => {
@@ -407,7 +406,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
           </CardHeader>
           <CardContent className="flex flex-col">
             {[
-              { label: 'Enable Real-time Sync Alerts', desc: 'Displays popups when files successfully sync with Google Drive.', val: syncAlerts, set: setSyncAlerts },
+              { label: 'Enable Real-time Sync Alerts', desc: 'Displays popups when data changes sync successfully.', val: syncAlerts, set: setSyncAlerts },
               { label: 'Email Monthly Payout Digest', desc: 'Sends a copy of the payroll statements to the HR support inbox.', val: emailDigests, set: setEmailDigests },
             ].map((item, i) => (
               <div key={item.label} className={`py-4 flex justify-between items-center ${i === 0 ? 'border-b border-border' : ''}`}>
@@ -738,88 +737,6 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 </Button>
               </div>
             )}
-          </CardContent>
-        </Card>
-      )
-      case 'sync': return (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Icon name="monitoring" size={20} className="h-5 w-5 text-muted-foreground" />
-              <CardTitle className="text-lg">Sync Conflicts</CardTitle>
-            </div>
-            <CardDescription>Review and resolve data conflicts between local and remote databases.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {/* Desktop Table View */}
-            <div className="hidden lg:block border border-border rounded-lg overflow-hidden">
-              <Table>
-                <TableHeader className="bg-muted/50">
-                  <TableRow>
-                    <TableHead>File</TableHead>
-                    <TableHead>Record ID</TableHead>
-                    <TableHead>Local Value</TableHead>
-                    <TableHead>Remote Value</TableHead>
-                    <TableHead>Resolution</TableHead>
-                    <TableHead className="text-center">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {!syncConflicts || syncConflicts.length === 0 ? (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No sync conflicts detected.</TableCell></TableRow>
-                  ) : (
-                    syncConflicts.map((conflict, i) => (
-                      <TableRow key={`${conflict.file}-${conflict.recordId}`}>
-                        <TableCell className="font-medium">{conflict.file}</TableCell>
-                        <TableCell>{conflict.recordId}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground max-w-[150px] break-words">{JSON.stringify(conflict.localValue)}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground max-w-[150px] break-words">{JSON.stringify(conflict.remoteValue)}</TableCell>
-                        <TableCell className="text-xs">{conflict.resolution}</TableCell>
-                        <TableCell className="text-center">
-                          <Button variant="outline" size="sm" onClick={() => { setSyncConflicts(prev => prev.filter((_, idx) => idx !== i)); if (addToast) addToast("Conflict acknowledged", "success") }}>
-                            Acknowledge
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Mobile Card View */}
-            <div className="lg:hidden flex flex-col gap-4">
-              {!syncConflicts || syncConflicts.length === 0 ? (
-                <div className="text-center text-muted-foreground py-8 border border-border rounded-lg border-dashed">No sync conflicts detected.</div>
-              ) : (
-                syncConflicts.map((conflict, i) => (
-                  <div key={`${conflict.file}-${conflict.recordId}-mobile`} className="flex flex-col gap-3 p-4 bg-muted/20 border border-border rounded-lg">
-                    <div className="flex justify-between items-start gap-2">
-                      <div>
-                        <div className="font-semibold text-sm text-foreground">{conflict.file}</div>
-                        <div className="text-xs text-muted-foreground">ID: {conflict.recordId}</div>
-                      </div>
-                      <Badge variant="outline" className="text-[10px] uppercase whitespace-nowrap">{conflict.resolution}</Badge>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
-                      <div className="bg-background rounded-md p-2.5 border border-border/50">
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Local Value</span>
-                        <div className="text-xs break-words font-mono text-muted-foreground">{JSON.stringify(conflict.localValue)}</div>
-                      </div>
-                      <div className="bg-background rounded-md p-2.5 border border-border/50">
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Remote Value</span>
-                        <div className="text-xs break-words font-mono text-muted-foreground">{JSON.stringify(conflict.remoteValue)}</div>
-                      </div>
-                    </div>
-                    
-                    <Button variant="outline" size="sm" className="w-full mt-1" onClick={() => { setSyncConflicts(prev => prev.filter((_, idx) => idx !== i)); if (addToast) addToast("Conflict acknowledged", "success") }}>
-                      Acknowledge
-                    </Button>
-                  </div>
-                ))
-              )}
-            </div>
           </CardContent>
         </Card>
       )

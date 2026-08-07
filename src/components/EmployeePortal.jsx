@@ -335,8 +335,6 @@ export default function EmployeePortal({
                 toggleTheme={toggleTheme}
                 handleSync={() => {}} 
                 isSyncing={false}
-                driveConnected={true}
-                syncConflicts={[]}
                 setShowNotifications={setShowNotifications}
                 markNotificationsRead={markNotificationsRead}
                 unreadCount={notifications ? notifications.filter(n => !n.read).length : 0}

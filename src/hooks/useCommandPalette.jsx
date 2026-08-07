@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import { clearLocalCache } from '../services/db.js'
-import { createBackup } from '../services/googleDrive.js'
 import Icon from "@/components/ui/Icon.jsx"
 import { useConfirm } from './useConfirm'
 
-export function useCommandPalette({ user, employees, themeMode, toggleTheme, setCurrentView, addToast, setSelectedEmployeeId }) {
+export function useCommandPalette({ employees, themeMode, toggleTheme, setCurrentView, addToast, setSelectedEmployeeId }) {
   const [showCommandPalette, setShowCommandPalette] = useState(false)
   const [commandSearch, setCommandSearch] = useState('')
   const [paletteIndex, setPaletteIndex] = useState(0)
@@ -42,8 +41,7 @@ export function useCommandPalette({ user, employees, themeMode, toggleTheme, set
       { id: 'page-documents', category: 'Pages', label: 'Go to Documents', action: () => setCurrentView('documents'), keywords: 'documents files upload download manager' },
       { id: 'page-assets', category: 'Pages', label: 'Go to Assets', action: () => setCurrentView('assets'), keywords: 'assets inventory devices macbook laptop' },
       { id: 'page-expenses', category: 'Pages', label: 'Go to Expenses', action: () => setCurrentView('expenses'), keywords: 'expenses claims reimbursements money' },
-      { id: 'page-settings', category: 'Pages', label: 'Go to Settings', action: () => setCurrentView('settings'), keywords: 'settings admin config role audit' },
-      { id: 'page-drive', category: 'Pages', label: 'Go to Google Drive Sync', action: () => setCurrentView('drive'), keywords: 'drive sync backup restore cloud' }
+      { id: 'page-settings', category: 'Pages', label: 'Go to Settings', action: () => setCurrentView('settings'), keywords: 'settings admin config role audit' }
     ]
 
     const recent = recentActions.map((act) => {
@@ -56,9 +54,6 @@ export function useCommandPalette({ user, employees, themeMode, toggleTheme, set
           const ok = await confirm('Unsynced offline changes will be lost, and the app will reload.', 'Clear Cache?', { destructive: true, confirmText: 'Clear' })
           if (!ok) return
           clearLocalCache().then(() => window.location.reload())
-        }
-        if (act.id === 'action-backup') actionFn = () => {
-          if (user?.token) createBackup(user.token).then(() => addToast('Backup created', 'success'))
         }
       } else if (act.type === 'employee') {
         actionFn = () => {
@@ -91,15 +86,7 @@ export function useCommandPalette({ user, employees, themeMode, toggleTheme, set
         const ok = await confirm('Unsynced offline changes will be lost, and the app will reload.', 'Clear Cache?', { destructive: true, confirmText: 'Clear' })
         if (!ok) return
         clearLocalCache().then(() => window.location.reload())
-      }, keywords: 'clear cache reset clean reload' },
-      { id: 'action-backup', category: 'Actions', label: 'Trigger Drive Backup', action: () => {
-        if (user?.token) {
-          addToast('Creating backup...', 'info')
-          createBackup(user.token).then(() => addToast('Backup created successfully', 'success'))
-        } else {
-          addToast('Drive connection required for backup', 'warning')
-        }
-      }, keywords: 'backup save snapshot archive drive' }
+      }, keywords: 'clear cache reset clean reload' }
     ]
 
     if (!query) {
@@ -147,10 +134,8 @@ export function useCommandPalette({ user, employees, themeMode, toggleTheme, set
     if (category === 'Recent Actions') return <Icon name="history" size={16} />
     if (id.includes('darkmode')) return themeMode === 'light' ? <Icon name="dark_mode" size={16} /> : <Icon name="light_mode" size={16} />
     if (id.includes('clearcache')) return <Icon name="delete" size={16} />
-    if (id.includes('backup')) return <Icon name="storage" size={16} />
     if (id.includes('dashboard')) return <Icon name="dashboard" size={16} />
     if (id.includes('settings')) return <Icon name="settings" size={16} />
-    if (id.includes('drive')) return <Icon name="storage" size={16} />
     if (id.includes('employees')) return <Icon name="person" size={16} />
     return <Icon name="description" size={16} />
   }

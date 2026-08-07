@@ -13,7 +13,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
 
-export default function Payroll({ employees, payroll, setPayroll, addLog, driveConnected, settings, simulatedRole, addAuditLog }) {
+export default function Payroll({ employees, payroll, setPayroll, addLog, settings, simulatedRole, addAuditLog }) {
   const now = new Date()
   const [selectedMonth, setSelectedMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`)
   const [searchTerm, setSearchTerm] = useState('')
@@ -468,7 +468,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(8)
     doc.setTextColor(100, 100, 100)
-    doc.text('Payment Method: Direct Deposit (Google Drive Ledger)', margin, y); y += 4
+    doc.text('Payment Method: Direct Deposit', margin, y); y += 4
     doc.text('Status: PAID / SUCCESSFUL', margin, y); y += 8
 
     // Footer

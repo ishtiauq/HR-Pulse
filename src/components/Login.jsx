@@ -4,9 +4,8 @@ import Icon from "@/components/ui/Icon.jsx"
 import kormiisLogo from '../Assets/Kormiis Logo Final.svg'
 import kormiisMembershipLogo from '../Assets/Kormiis Logo Membership.svg'
 import heroCharacters from '../Assets/hero-characters.png'
-import { fetchUserProfile } from '../services/googleDrive.js'
 import { verifyPassword, hashPassword } from '../services/crypto.js'
-import { loginWithGoogle, getGoogleRedirectResult, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, updateProfileData, updateDriveConnectionStatus, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp, ensureAnonymousAuth, ensureEmployeeFirebaseSession } from '../services/auth.js'
+import { loginWithGoogle, getGoogleRedirectResult, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, updateProfileData, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp, ensureAnonymousAuth, ensureEmployeeFirebaseSession } from '../services/auth.js'
 import { fetchEmployeeSnapshot } from '../services/bridge.js'
 import Dashboard from './Dashboard.jsx'
 import { allNavItems } from '../utils/helpers.js'
@@ -52,7 +51,6 @@ const MOCK_DASHBOARD_DATA = {
   tasks: [{ id: 't1', title: 'Complete Onboarding', status: 'Pending' }],
   documents: [],
   assets: [{ id: 'as1', name: 'MacBook Pro', status: 'Assigned' }],
-  driveConnected: true,
   hasPermission: () => true,
   simulatedRole: 'Admin',
   currentUser: { name: 'Admin', role: 'Admin' }
@@ -117,16 +115,16 @@ function MarketingSectionOne({ containerRef }) {
       )
     },
     {
-      title: "Your drive, Your Rules",
-      subtitle: "Everything is stored in your secure Google Drive. We don't lock you in.",
+      title: "Your data, Your Rules",
+      subtitle: "Everything is stored in your own secure cloud database. We don't lock you in.",
       bgColor: "bg-[#FE4D01] text-white",
       iconColor: "bg-black/10 text-white",
       iconName: "cloud_done",
       content: (
         <ul className="flex flex-col gap-2 w-full mt-2">
-          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-90"><Icon name="check_circle" size={18} className="text-white/60" /> Files are saved straight to your Google Drive</li>
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-90"><Icon name="check_circle" size={18} className="text-white/60" /> Data is saved securely to the cloud</li>
           <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-90"><Icon name="check_circle" size={18} className="text-white/60" /> You own your company data, not us</li>
-          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-90"><Icon name="check_circle" size={18} className="text-white/60" /> Backed by bank-level Google security</li>
+          <li className="flex items-center gap-2 text-sm sm:text-base font-semibold opacity-90"><Icon name="check_circle" size={18} className="text-white/60" /> Backed by bank-level cloud security</li>
         </ul>
       )
     },
@@ -276,7 +274,7 @@ function MarketingSectionTwo() {
 const FAQ_ITEMS = [
   {
     q: 'Can Kormiis read my company data?',
-    a: 'No — encrypted in a private app-data folder in your own Google Drive; only you and your team decide access.',
+    a: 'No — data is stored in your own secure cloud database with strict access controls; only you and your team decide access.',
   },
   {
     q: "What's the catch if it's free?",
@@ -288,7 +286,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Where is my company data stored?',
-    a: 'Everything lives in an encrypted app-data folder inside your own Google Drive. Only you decide what is shared and who gets access.',
+    a: 'Everything lives in your own secure cloud database. Only you decide what is shared and who gets access.',
   },
   {
     q: 'How do teammates sign in?',
@@ -397,7 +395,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   const [otpCode, setOtpCode] = useState('')
   const [confirmationResult, setConfirmationResult] = useState(null) // 'signin' | 'signup'
   const [isLoading, setIsLoading] = useState(false)
-  const [showIntermediateModal, setShowIntermediateModal] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
   const scrollToAuth = () => {
@@ -669,56 +666,13 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     }
   }
 
-  // --- Google Drive Connection ---
-  const triggerDriveOAuth = () => {
+  // --- Complete admin onboarding & sign in ---
+  const completeAdminLogin = () => {
     setIsLoading(true)
-    if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
-      console.warn("Google Client Library not detected. Falling back to simulated login.");
-      setTimeout(() => {
-        setIsLoading(false)
-        onLogin(adminSession({ id: firebaseUser?.uid || 'local', name: fullName || 'System Admin', email: firebaseUser?.email || 'admin@company.com', companyName: companyName || 'Acme' }))
-      }, 1200)
-      return
-    }
-    try {
-      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
-      const client = window.google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/drive.appdata email profile openid',
-        callback: async (tokenResponse) => {
-          if (tokenResponse && tokenResponse.access_token) {
-            try {
-              if (firebaseUser) {
-                await updateDriveConnectionStatus(firebaseUser.uid, true)
-              }
-              const adminUser = {
-                name: fullName || 'Admin',
-                email: firebaseUser?.email || '',
-                companyName: companyName,
-                role: 'Admin',
-                token: tokenResponse.access_token,
-                uid: firebaseUser?.uid
-              }
-              setIsLoading(false)
-              onLogin(adminUser)
-            } catch (err) {
-              setIsLoading(false)
-              setError("Failed during Drive connection: " + err.message)
-            }
-          } else {
-            setIsLoading(false)
-          }
-        },
-        error_callback: (err) => {
-          setIsLoading(false)
-          setError("Authorization error: " + err.message)
-        }
-      })
-      client.requestAccessToken({ prompt: 'consent' })
-    } catch (e) {
+    setTimeout(() => {
       setIsLoading(false)
-      setError("Error initializing Google Login client: " + e.message)
-    }
+      onLogin(adminSession({ id: firebaseUser?.uid || 'local', name: fullName || 'System Admin', email: firebaseUser?.email || 'admin@company.com', companyName: companyName || 'Acme' }))
+    }, 300)
   }
 
   // --- Employee login logic ---
@@ -950,7 +904,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   No setup fees. No per-user licenses. No 3-month onboarding or subscription fee!
                 </p>
                 <p className="text-foreground font-semibold">
-                  One central hub for your entire business. Secured automatically in your company Google Drive.
+                  One central hub for your entire business. Secured automatically in the cloud.
                 </p>
               </motion.div>
 
@@ -1086,7 +1040,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   </div>
                   <div className="p-5 sm:p-6 flex items-start gap-3 sm:gap-4 bg-[#FE4D01] group-hover:brightness-95 transition-all border-l border-[#FE4D01]/20 relative">
                     <Icon name="check" size={20} className="text-white shrink-0 mt-0.5" />
-                    <span className="text-sm sm:text-base font-medium text-white/95 leading-snug">Everything secured directly in your company Google Drive</span>
+                    <span className="text-sm sm:text-base font-medium text-white/95 leading-snug">Everything secured directly in your company cloud</span>
                   </div>
                 </div>
 
@@ -1115,7 +1069,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       {/* Section 7: Auth Modal */}
       <section id="auth-section" className="relative min-h-dvh w-full bg-black flex items-center justify-center px-4 sm:px-8 lg:px-16 py-12 lg:py-0 snap-start overflow-hidden">
         <div className="max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left Grid: Google Drive & Privacy Info */}
+          {/* Left Grid: Cloud & Privacy Info */}
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -1135,12 +1089,12 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                 
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-6">
                   Your Data, <br className="hidden lg:block"/>
-                  Your <span className="text-primary">Google Drive</span>.
+                  Your <span className="text-primary">Cloud</span>.
                 </h2>
                 
                 <div className="space-y-6 text-white/80 text-base sm:text-lg font-medium">
                   <p>
-                    We believe your company data belongs to you. That's why Kormiis uses your secure Google Drive as its database.
+                    We believe your company data belongs to you. That's why Kormiis stores it in your own secure cloud database.
                   </p>
                   
                   <ul className="space-y-4">
@@ -1148,26 +1102,26 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
                         <Icon name="check" size={14} />
                       </div>
-                      <span><strong className="text-white">Zero Lock-in:</strong> You have direct access to your data files at all times. If you leave, your data stays with you.</span>
+                      <span><strong className="text-white">Zero Lock-in:</strong> You have direct access to your data at all times. If you leave, your data stays with you.</span>
                     </li>
                     <li className="flex items-start gap-4">
                       <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
                         <Icon name="check" size={14} />
                       </div>
-                      <span><strong className="text-white">Bank-level Security:</strong> Secured by Google's world-class infrastructure and encryption.</span>
+                      <span><strong className="text-white">Bank-level Security:</strong> Secured by world-class cloud infrastructure and encryption.</span>
                     </li>
                     <li className="flex items-start gap-4">
                       <div className="mt-1 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/30 text-green-600 flex items-center justify-center shrink-0 shadow-sm">
                         <Icon name="check" size={14} />
                       </div>
-                      <span><strong className="text-white">Private App Data:</strong> Kormiis stores data in an isolated, hidden folder that doesn't clutter your Drive.</span>
+                      <span><strong className="text-white">Private by Design:</strong> Kormiis keeps data isolated and encrypted — only you and your team can access it.</span>
                     </li>
                   </ul>
                   
                   <div className="pt-6 border-t border-border mt-8 flex items-center gap-3">
                     <Icon name="info" size={20} className="text-primary shrink-0" />
                     <p className="text-sm opacity-90 leading-snug">
-                      By logging in, you'll connect Kormiis to your Drive to securely sync attendance, payroll, and tasks.
+                      By logging in, your attendance, payroll, and tasks sync securely to the cloud automatically.
                     </p>
                   </div>
                 </div>
@@ -1536,9 +1490,9 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 border border-primary/20">
                       <Icon name="shield" size={24} className="text-primary" />
                     </div>
-                    <h3 className="text-lg font-bold mb-2 text-foreground">Connect Google Drive</h3>
+                    <h3 className="text-lg font-bold mb-2 text-foreground">You're all set!</h3>
                     <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-                      Kormiis requires access to your Google Drive to store company data securely.
+                      Your company workspace is ready. Data syncs securely to the cloud automatically.
                     </p>
                     {error && (
                       <div className="p-3.5 mb-4 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
@@ -1547,11 +1501,11 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       </div>
                     )}
                     <button 
-                      onClick={triggerDriveOAuth} 
+                      onClick={completeAdminLogin} 
                       disabled={isLoading} 
                       className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
                     >
-                      {isLoading ? 'Connecting...' : 'Authorize & Connect'} <Icon name="cloud" size={18} />
+                      {isLoading ? 'Loading...' : 'Enter Dashboard'} <Icon name="arrow_forward" size={18} />
                     </button>
                   </div>
                 ) : null}
@@ -1577,38 +1531,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
 
       {/* Footer */}
       <FooterSection themeMode={themeMode} logoSrc={kormiisLogo} />
-
-      {/* Intermediate Auth Modal */}
-      {showIntermediateModal && (
-        <div className="fixed inset-0 z-[100] flex overflow-y-auto p-4 bg-black/50">
-          <div 
-            role="dialog"
-            className="m-auto p-8 max-w-sm w-full animate-fade-in"
-          >
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 border border-primary/20">
-              <Icon name="shield" size={24} className="text-primary" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Connect Google Drive</h3>
-            <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
-              Kormiis requires access to your Google Drive to store company data securely. We only access the dedicated app-data folder.
-            </p>
-            <div className="flex flex-col gap-3">
-              <button 
-                onClick={handleConfirmAuthorize}
-                className="w-full py-3 rounded-full text-base font-bold bg-primary text-primary-foreground"
-              >
-                Authorize & Connect
-              </button>
-              <button 
-                onClick={() => setShowIntermediateModal(false)}
-                className="w-full py-3 rounded-full text-base font-bold bg-muted text-foreground"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

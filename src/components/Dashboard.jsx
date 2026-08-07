@@ -34,7 +34,7 @@ const DashboardWidget = ({
   )
 }
 
-export default function Dashboard({ employees, driveConnected, onSync, attendance, setAttendance, currentUser, addToast, setCurrentView, announcements, events, payroll, isSidebarCollapsed, simulatedRole, hasPermission, tasks = [], documents = [], assets = [], settings, notes = [], setNotes }) {
+export default function Dashboard({ employees, onSync, attendance, setAttendance, currentUser, addToast, setCurrentView, announcements, events, payroll, isSidebarCollapsed, simulatedRole, hasPermission, tasks = [], documents = [], assets = [], settings, notes = [], setNotes }) {
   const [expandedWidgets, setExpandedWidgets] = useState([])
   
   const toggleWidget = (id) => setExpandedWidgets(prev => prev.includes(id) ? prev.filter(w => w !== id) : [...prev, id])
@@ -46,7 +46,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
   const canViewPayroll = hasPermission ? hasPermission('payroll') : true
   const canViewCalendar = hasPermission ? hasPermission('calendar') : true
   const canViewAnnouncements = hasPermission ? hasPermission('announcements') : true
-  const canViewDrive = hasPermission ? hasPermission('drive') : true
   const canViewTasks = hasPermission ? hasPermission('tasks') : true
   const canViewDocuments = hasPermission ? hasPermission('documents') : true
   const canViewAssets = hasPermission ? hasPermission('assets') : true
@@ -54,7 +53,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
   const [totalEmployees, setTotalEmployees] = useState(0)
   const [activeCount, setActiveCount] = useState(0)
   const [leaveCount, setLeaveCount] = useState(0)
-  const [syncLogs, setSyncLogs] = useState([])
   const [upcomingMilestones, setUpcomingMilestones] = useState([])
   const [todayStats, setTodayStats] = useState({ present: 0, absent: 0, onLeave: 0 })
   const [attendanceLists, setAttendanceLists] = useState({ present: [], absent: [], onLeave: [] })
@@ -68,13 +66,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
       const active = employees.filter(emp => emp.status?.toLowerCase() !== 'inactive').length
     setActiveCount(active)
     setLeaveCount(employees.filter(emp => emp.status?.toLowerCase() === 'on leave').length)
-
-    // Set mock sync logs
-    setSyncLogs([
-      { id: 1, action: 'Directory Pulled', timestamp: 'Just now', details: 'Retrieved 8 personnel entries successfully.', status: 'success' },
-      { id: 2, action: 'Roster Synced', timestamp: '12 mins ago', details: 'Uploaded today\'s biometric clock-in logs.', status: 'warn' },
-      { id: 3, action: 'Leave Ledgers Failed', timestamp: '1 hr ago', details: 'Network timeout while updating sickness allowances.', status: 'error' },
-    ])
 
     // Compute upcoming milestones (Birthdays & Workversaries) in the next 30 days
     const milestones = calculateUpcomingMilestones(employees)
@@ -597,27 +588,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         </DashboardWidget>
       )}
 
-{/* Widget 3 — Drive Connection (Span 4) */}
-        {canViewDrive && (
-          <DashboardWidget
-          id="w3"
-          title="Drive Connection"
-          icon={<Icon name="cloud" size={18} />}
-          action={<Badge variant={driveConnected ? "outline" : "destructive"}>{driveConnected ? 'Synced' : 'Error'}</Badge>}
-          contentClass="flex flex-col justify-between pt-4"
-          {...wProps}
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-lg sm:text-xl xl:text-2xl font-black text-foreground leading-tight truncate">
-              {driveConnected ? 'Healthy Connection' : 'Drive Disconnected'}
-            </span>
-          </div>
-          <p className="text-xs font-medium m-0 mt-3 text-muted-foreground leading-relaxed">
-            {driveConnected ? 'Google Drive biometric & roster logs sync automatically.' : 'Re-authenticate with Google Drive to enable auto sync.'}
-          </p>
-        </DashboardWidget>
-        )}
-
         {/* Widget 8 — Upcoming Milestones (Span 4) */}
         {canViewEmployees && (
           <DashboardWidget
@@ -656,34 +626,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         </DashboardWidget>
         )}
 
-      {/* Widget 7 — Drive Sync Logs */}
-        {canViewDrive && (
-          <DashboardWidget
-          id="w7"
-          title="Drive Sync Logs"
-          icon={<Icon name="trending_up" size={18} />}
-          action={<Badge variant="success">Live</Badge>}
-          contentClass="flex flex-col justify-start gap-2.5 pt-4"
-            {...wProps}
-        >
-          {(syncLogs || []).slice(0, 5).map((log) => (
-            <div key={log.id} className="flex items-center gap-3 p-3 px-3.5 rounded-lg bg-muted/40 border border-border/50">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-muted text-muted-foreground shrink-0 border border-border/40">
-                <Icon name="download" size={15} />
-              </div>
-              <div className="flex-1 min-w-0 pr-2">
-                <p className="m-0 text-xs font-bold text-foreground break-words">{log.action}</p>
-                <p className="m-0 mt-0.5 text-[11px] font-medium text-muted-foreground break-words">{log.details}</p>
-              </div>
-              <Badge variant={log.status === 'success' ? 'success' : log.status === 'error' ? 'destructive' : 'warning'} className="uppercase text-[10px]">
-                {log.status === 'success' ? 'Synced' : log.status === 'error' ? 'Failed' : 'Pending'}
-              </Badge>
-            </div>
-          ))}
-        </DashboardWidget>
-        )}
-
-              {/* SPACER for bottom padding */}
+      {/* SPACER for bottom padding */}
       <div className="h-8 col-span-full"></div>
     </div>
     </div>

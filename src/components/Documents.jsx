@@ -140,10 +140,10 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
           uploadedBy: currentUser?.id || 'unknown',
           uploadedAt: new Date().toISOString(),
           downloadUrl,
-          status: 'pending_sync', // Triggers the Admin node to move it to Google Drive
+          status: 'synced',
         }
         setDocuments(prev => [newDoc, ...prev])
-        addToast('Document uploaded successfully. Syncing to secure storage...', 'success')
+        addToast('Document uploaded and stored securely.', 'success')
         addLog('Document Uploaded', formName)
         if (addNotification) addNotification(`New company document available: "${formName}"`)
       }

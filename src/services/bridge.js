@@ -33,6 +33,22 @@ export const writeToTable = async (adminUid, tableName, data) => {
 };
 
 /**
+ * Reads a table's snapshot from Firebase.
+ * Returns null if the table doesn't exist yet.
+ */
+export const fetchTableFromFirestore = async (adminUid, tableName) => {
+  if (!db || !adminUid) return null;
+  const tableRef = doc(db, 'companies', adminUid, 'snapshots', tableName);
+  try {
+    const snap = await getDoc(tableRef);
+    if (snap.exists() && snap.data().data) return snap.data().data;
+  } catch (error) {
+    console.error(`Failed to fetch ${tableName} from Firestore:`, error);
+  }
+  return null;
+};
+
+/**
  * Uploads a read-only snapshot of the employee directory to Firestore.
  * This allows employees to authenticate from their personal devices
  */
@@ -99,7 +115,7 @@ export const downloadFromFirebaseStorage = async (adminUid, path) => {
 };
 
 /**
- * Deletes a file from Firebase Storage after it has been safely synced to Google Drive.
+ * Deletes a file from Firebase Storage.
  */
 export const deleteFromFirebaseStorage = async (adminUid, path) => {
   if (!storage) return;

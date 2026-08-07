@@ -8,7 +8,6 @@ import Calendar from './Calendar.jsx'
 import Documents from './Documents.jsx'
 import Assets from './Assets.jsx'
 import Settings from './Settings.jsx'
-import DriveSync from './DriveSync.jsx'
 import Tasks from './Tasks.jsx'
 import ProfileView from './ProfileView.jsx'
 import Notes from './Notes.jsx'
@@ -22,7 +21,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
         <span className="breadcrumb-item" onClick={() => setCurrentView('dashboard')}>Dashboard</span>
         <span>/</span>
         <span className="breadcrumb-current" style={{ textTransform: 'capitalize' }}>
-          {currentView === 'drive' ? 'Google Drive Sync' : currentView === 'profile' ? 'My Profile' : currentView}
+          {currentView === 'profile' ? 'My Profile' : currentView}
         </span>
       </div>
     )
@@ -86,7 +85,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
     }
     const layoutKey = currentView === 'dashboard' ? 'dashboard'
       : currentView === 'employees' ? 'employees'
-      : (currentView === 'settings' || currentView === 'drive' || currentView === 'profile') ? 'settings'
+      : (currentView === 'settings' || currentView === 'profile') ? 'settings'
       : 'table'
     return skeletonLayouts[layoutKey]
   }
@@ -107,13 +106,13 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
 
   switch (currentView) {
     case 'dashboard':
-      return <Dashboard employees={data.employees} syncLogs={data.syncLogs} driveConnected={data.driveConnected} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} settings={data.settings} notes={data.notes} setNotes={data.handleSetNotes} />
+      return <Dashboard employees={data.employees} syncLogs={data.syncLogs} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} settings={data.settings} notes={data.notes} setNotes={data.handleSetNotes} />
     case 'employees':
-      return <Employees employees={data.employees} setEmployees={data.handleSetEmployees} addLog={data.addLog} driveConnected={data.driveConnected} addAuditLog={data.addAuditLog} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} selectedEmployeeId={data.selectedEmployeeId} setSelectedEmployeeId={data.setSelectedEmployeeId} isSidebarCollapsed={isSidebarCollapsed} adminUid={data.adminUid} currentUser={user} />
+      return <Employees employees={data.employees} setEmployees={data.handleSetEmployees} addLog={data.addLog} addAuditLog={data.addAuditLog} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} selectedEmployeeId={data.selectedEmployeeId} setSelectedEmployeeId={data.setSelectedEmployeeId} isSidebarCollapsed={isSidebarCollapsed} adminUid={data.adminUid} currentUser={user} />
     case 'payroll':
-      return <Payroll employees={data.employees} payroll={data.payroll} setPayroll={data.handleSetPayroll} addLog={data.addLog} driveConnected={data.driveConnected} settings={data.settings} addAuditLog={data.addAuditLog} />
+      return <Payroll employees={data.employees} payroll={data.payroll} setPayroll={data.handleSetPayroll} addLog={data.addLog} settings={data.settings} addAuditLog={data.addAuditLog} />
     case 'attendance':
-      return <Attendance employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} roster={data.roster} setRoster={data.setRoster} shiftSwaps={data.shiftSwaps} setShiftSwaps={data.setShiftSwaps} shiftTemplates={data.settings?.shiftTemplates} overtimeClaims={data.overtimeClaims} setOvertimeClaims={data.setOvertimeClaims} addLog={data.addLog} driveConnected={data.driveConnected} addToast={data.addToast} addNotification={data.addNotification} addAuditLog={data.addAuditLog} settings={data.settings} />
+      return <Attendance employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} roster={data.roster} setRoster={data.setRoster} shiftSwaps={data.shiftSwaps} setShiftSwaps={data.setShiftSwaps} shiftTemplates={data.settings?.shiftTemplates} overtimeClaims={data.overtimeClaims} setOvertimeClaims={data.setOvertimeClaims} addLog={data.addLog} addToast={data.addToast} addNotification={data.addNotification} addAuditLog={data.addAuditLog} settings={data.settings} />
     case 'announcements':
       return <Announcements employees={data.employees} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} />
     case 'calendar':
@@ -127,14 +126,12 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
     case 'expenses':
       return <Expenses employees={data.employees} expenses={data.expenses} setExpenses={data.handleSetExpenses} settings={data.settings} addLog={data.addLog} addToast={data.addToast} addAuditLog={data.addAuditLog} currentUser={user} />
     case 'settings':
-      return <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} syncConflicts={data.syncConflicts} setSyncConflicts={data.setSyncConflicts} themeMode={themeMode} toggleTheme={toggleTheme} />
+      return <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} themeMode={themeMode} toggleTheme={toggleTheme} />
     case 'profile':
       return <ProfileView currentUser={user} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} addLog={data.addLog} settings={data.settings} setSettings={data.handleSetSettings} employees={data.employees} setEmployees={data.handleSetEmployees} />
-    case 'drive':
-      return <DriveSync user={user} driveConnected={data.driveConnected} setDriveConnected={data.setDriveConnected} addLog={data.addLog} addToast={data.addToast} />
     case 'notes':
       return <Notes notes={data.notes} setNotes={data.handleSetNotes} currentUser={user} addToast={data.addToast} />
     default:
-      return <Dashboard employees={data.employees} syncLogs={data.syncLogs} driveConnected={data.driveConnected} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} />
+      return <Dashboard employees={data.employees} syncLogs={data.syncLogs} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} />
   }
 }

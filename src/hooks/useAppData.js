@@ -1,23 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { readMeta, readTable, writeTable, flushPendingWrites, checkAndRunAutoBackup, getOrCreateFilesFolder, uploadBinaryFile } from '../services/googleDrive.js'
 import { validateDatabase } from '../services/validator.js'
 import { encryptJson, decryptJson } from '../services/crypto.js'
 import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, getDeviceInfo } from '../utils/helpers.js'
-import { syncEmployeeSnapshot, subscribeToTable, writeToTable, deleteFromFirebaseStorage, downloadFromFirebaseStorage } from '../services/bridge.js'
+import { syncEmployeeSnapshot, subscribeToTable, writeToTable, fetchTableFromFirestore } from '../services/bridge.js'
 
 export default function useAppData({ user, addToast }) {
-  /* ─── Drive / DB state ─── */
-  const [driveConnected, setDriveConnected] = useState(true)
-  const [driveFileId, setDriveFileId] = useState(null)
-  const [payrollFileId, setPayrollFileId] = useState(null)
-  const [settingsFileId, setSettingsFileId] = useState(null)
-  const [attendanceFileId, setAttendanceFileId] = useState(null)
+  /* ─── DB state ─── */
   const [isSyncing, setIsSyncing] = useState(false)
   const [dbStatus, setDbStatus] = useState('healthy')
   const [dataIntegrityIssues, setDataIntegrityIssues] = useState([])
   const [showCorruptionModal, setShowCorruptionModal] = useState(false)
-  const [syncConflicts, setSyncConflicts] = useState([])
-  const [metaManifest, setMetaManifest] = useState(null)
   const [isAppLoading, setIsAppLoading] = useState(true)
   const syncRef = useRef(null)
   const syncedForUser = useRef(null)
@@ -196,12 +188,12 @@ export default function useAppData({ user, addToast }) {
   useEffect(() => {
     if (!adminUid) return;
 
-    const applyUpdate = (setter, driveWriter, tableName, data, lastUpdated) => {
+    const applyUpdate = (setter, tableName, data, lastUpdated) => {
       if (data) {
         // Freshness guard: if this Firestore snapshot is older than the last
         // local edit for this table, it is stale (e.g. a delete that was still
         // in flight when the page refreshed). Skip it so deleted items are not
-        // resurrected and stale data is not written back to Drive.
+        // resurrected.
         const localEdit = Number(localStorage.getItem(`kormiis_${tableName}_updatedAt`) || 0);
         const fbMs = lastUpdated
           ? (typeof lastUpdated.toMillis === 'function' ? lastUpdated.toMillis() : new Date(lastUpdated).getTime())
@@ -210,11 +202,6 @@ export default function useAppData({ user, addToast }) {
 
         setter(prev => {
           if (JSON.stringify(prev) !== JSON.stringify(data)) {
-            // Data changed from remote Firestore
-            if (!user?.isEmployee && driveConnected && metaManifest) {
-              // Master Node: Backup to Drive
-              driveWriter(tableName, data, { ...metaManifest }, user.token).catch(e => console.error(e));
-            }
             return data;
           }
           return prev;
@@ -222,21 +209,21 @@ export default function useAppData({ user, addToast }) {
       }
     };
 
-    const unsubEmployees = subscribeToTable(adminUid, 'employees', (data, lastUpdated) => applyUpdate(setEmployeesRaw, writeTable, 'employees', data, lastUpdated));
-    const unsubPayroll = subscribeToTable(adminUid, 'payroll', (data, lastUpdated) => applyUpdate(setPayrollRaw, writeTable, 'payroll', data, lastUpdated));
-    const unsubSettings = subscribeToTable(adminUid, 'settings', (data, lastUpdated) => applyUpdate(setSettingsRaw, writeTable, 'settings', data, lastUpdated));
-    const unsubTasks = subscribeToTable(adminUid, 'tasks', (data, lastUpdated) => applyUpdate(setTasks, writeTable, 'tasks', data, lastUpdated));
-    const unsubNotes = subscribeToTable(adminUid, 'notes', (data, lastUpdated) => applyUpdate(setNotesRaw, writeTable, 'notes', data, lastUpdated));
-    const unsubExpenses = subscribeToTable(adminUid, 'expenses', (data, lastUpdated) => applyUpdate(setExpensesRaw, writeTable, 'expenses', data, lastUpdated));
-    const unsubEvents = subscribeToTable(adminUid, 'events', (data, lastUpdated) => applyUpdate(setEvents, writeTable, 'events', data, lastUpdated));
-    const unsubDocuments = subscribeToTable(adminUid, 'documents', (data, lastUpdated) => applyUpdate(setDocuments, writeTable, 'documents', data, lastUpdated));
-    const unsubRoster = subscribeToTable(adminUid, 'roster', (data, lastUpdated) => applyUpdate(setRoster, writeTable, 'roster', data, lastUpdated));
-    const unsubShiftSwaps = subscribeToTable(adminUid, 'shift_swaps', (data, lastUpdated) => applyUpdate(setShiftSwaps, writeTable, 'shift_swaps', data, lastUpdated));
-    const unsubOvertime = subscribeToTable(adminUid, 'overtime_claims', (data, lastUpdated) => applyUpdate(setOvertimeClaims, writeTable, 'overtime_claims', data, lastUpdated));
-    const unsubAnnouncements = subscribeToTable(adminUid, 'announcements', (data, lastUpdated) => applyUpdate(setAnnouncements, writeTable, 'announcements', data, lastUpdated));
-    const unsubAssets = subscribeToTable(adminUid, 'assets', (data, lastUpdated) => applyUpdate(setAssets, writeTable, 'assets', data, lastUpdated));
-    const unsubAssetRequests = subscribeToTable(adminUid, 'asset_requests', (data, lastUpdated) => applyUpdate(setAssetRequests, writeTable, 'asset_requests', data, lastUpdated));
-    const unsubAssetCategories = subscribeToTable(adminUid, 'asset_categories', (data, lastUpdated) => applyUpdate(setAssetCategories, writeTable, 'asset_categories', data, lastUpdated));
+    const unsubEmployees = subscribeToTable(adminUid, 'employees', (data, lastUpdated) => applyUpdate(setEmployeesRaw, 'employees', data, lastUpdated));
+    const unsubPayroll = subscribeToTable(adminUid, 'payroll', (data, lastUpdated) => applyUpdate(setPayrollRaw, 'payroll', data, lastUpdated));
+    const unsubSettings = subscribeToTable(adminUid, 'settings', (data, lastUpdated) => applyUpdate(setSettingsRaw, 'settings', data, lastUpdated));
+    const unsubTasks = subscribeToTable(adminUid, 'tasks', (data, lastUpdated) => applyUpdate(setTasks, 'tasks', data, lastUpdated));
+    const unsubNotes = subscribeToTable(adminUid, 'notes', (data, lastUpdated) => applyUpdate(setNotesRaw, 'notes', data, lastUpdated));
+    const unsubExpenses = subscribeToTable(adminUid, 'expenses', (data, lastUpdated) => applyUpdate(setExpensesRaw, 'expenses', data, lastUpdated));
+    const unsubEvents = subscribeToTable(adminUid, 'events', (data, lastUpdated) => applyUpdate(setEvents, 'events', data, lastUpdated));
+    const unsubDocuments = subscribeToTable(adminUid, 'documents', (data, lastUpdated) => applyUpdate(setDocuments, 'documents', data, lastUpdated));
+    const unsubRoster = subscribeToTable(adminUid, 'roster', (data, lastUpdated) => applyUpdate(setRoster, 'roster', data, lastUpdated));
+    const unsubShiftSwaps = subscribeToTable(adminUid, 'shift_swaps', (data, lastUpdated) => applyUpdate(setShiftSwaps, 'shift_swaps', data, lastUpdated));
+    const unsubOvertime = subscribeToTable(adminUid, 'overtime_claims', (data, lastUpdated) => applyUpdate(setOvertimeClaims, 'overtime_claims', data, lastUpdated));
+    const unsubAnnouncements = subscribeToTable(adminUid, 'announcements', (data, lastUpdated) => applyUpdate(setAnnouncements, 'announcements', data, lastUpdated));
+    const unsubAssets = subscribeToTable(adminUid, 'assets', (data, lastUpdated) => applyUpdate(setAssets, 'assets', data, lastUpdated));
+    const unsubAssetRequests = subscribeToTable(adminUid, 'asset_requests', (data, lastUpdated) => applyUpdate(setAssetRequests, 'asset_requests', data, lastUpdated));
+    const unsubAssetCategories = subscribeToTable(adminUid, 'asset_categories', (data, lastUpdated) => applyUpdate(setAssetCategories, 'asset_categories', data, lastUpdated));
 
     const handleAttUpdate = (key, data, lastUpdated) => {
       if(data) {
@@ -250,9 +237,6 @@ export default function useAppData({ user, addToast }) {
         setAttendanceRaw(prev => {
           if (JSON.stringify(prev[key]) !== JSON.stringify(data)) {
             const next = { ...prev, [key]: data };
-            if (!user?.isEmployee && driveConnected && metaManifest) {
-               writeTable(tn, data, { ...metaManifest }, user.token).catch(e => console.error(e));
-            }
             return next;
           }
           return prev;
@@ -268,7 +252,7 @@ export default function useAppData({ user, addToast }) {
       unsubDocuments(); unsubRoster(); unsubShiftSwaps(); unsubOvertime(); unsubAnnouncements(); unsubAssets();
       unsubAssetRequests(); unsubAssetCategories(); unsubLeaves(); unsubBalances(); unsubLogs();
     };
-  }, [adminUid, driveConnected, metaManifest, user]);
+  }, [adminUid, user]);
 
   /* ─── Birthday / Work anniversary auto-post ─── */
   useEffect(() => {
@@ -322,232 +306,102 @@ export default function useAppData({ user, addToast }) {
     if (newPosts.length > 0) setAnnouncements(prev => [...newPosts, ...prev])
   }, [employees])
 
-  /* ─── Online handler ─── */
-  useEffect(() => {
-    const handleOnline = () => {
-      if (user && metaManifest) {
-        flushPendingWrites(
-          user.token, metaManifest,
-          (conflicts, data, tableName) => {
-            if (conflicts && conflicts.length > 0) {
-              setSyncConflicts(c => [...c, ...conflicts])
-              addToast(`Offline changes synced. Conflicts detected in ${tableName}.`, 'warning')
-              if (tableName === 'employees') setEmployeesRaw(data)
-              if (tableName === 'payroll') setPayrollRaw(data)
-              if (tableName === 'settings') setSettingsRaw(data)
-              if (tableName === 'attendance_logs') setAttendanceRaw(prev => ({ ...prev, dailyLogs: data }))
-              if (tableName === 'leave_requests') setAttendanceRaw(prev => ({ ...prev, leaves: data }))
-              if (tableName === 'leave_balances') setAttendanceRaw(prev => ({ ...prev, balances: data }))
-            }
-          },
-          (syncedCount) => addToast(`${syncedCount} changes synced`, 'success')
-        )
-      }
-    }
-    window.addEventListener('online', handleOnline)
-    return () => window.removeEventListener('online', handleOnline)
-  }, [user, metaManifest])
-
-  /* ─── Drive sync effect ─── */
+  /* ─── Firestore load effect (source of truth) ─── */
   useEffect(() => {
     const syncDatabase = async () => {
-      if (!user || !driveConnected || user.isEmployee) { setIsAppLoading(false); return }
+      if (!user) { setIsAppLoading(false); return }
+      const ownerId = user.isEmployee ? user.adminUid : user.uid
+      if (!ownerId) { setIsAppLoading(false); return }
 
-      const bgSyncCallback = (tableName, data) => {
-        addToast(`Background sync updated ${tableName} with remote changes.`, 'info')
-        if (tableName === 'employees') setEmployeesRaw(data)
-        if (tableName === 'payroll') setPayrollRaw(data)
-        if (tableName === 'settings') setSettingsRaw(data)
-        if (tableName === 'expenses') setExpensesRaw(data)
-        if (tableName === 'attendance_logs') setAttendanceRaw(prev => ({ ...prev, dailyLogs: data }))
-        if (tableName === 'leave_requests') setAttendanceRaw(prev => ({ ...prev, leaves: data }))
-        if (tableName === 'leave_balances') setAttendanceRaw(prev => ({ ...prev, balances: data }))
-        if (tableName === 'notes') setNotesRaw(data)
+      const readLocal = (key) => {
+        const raw = localStorage.getItem(key)
+        if (raw) { try { return JSON.parse(raw) } catch (e) {} }
+        return null
+      }
+
+      // Load a table from Firestore. If missing, fall back to the local cache
+      // and migrate it up to Firestore once.
+      const loadTable = async (tableName, localKey) => {
+        let data = await fetchTableFromFirestore(ownerId, tableName)
+        if (data != null) return data
+        const localData = readLocal(localKey)
+        if (localData != null) {
+          await writeToTable(ownerId, tableName, localData).catch(e => console.error(`Migration push ${tableName}:`, e))
+          return localData
+        }
+        return null
       }
 
       try {
         setIsSyncing(true)
-        addLog('Connecting to Drive', 'Initializing strict DB workspace folder')
+        setDbStatus('healthy')
 
-        let meta = await readMeta(user.token)
-
-        if (!meta) {
-          setDbStatus('rebuilding')
-          addLog('DB Status', 'No _meta.json found. Rebuilding from defaults.', 'warning')
-          meta = { schema_version: "1.0", last_sync: new Date().toISOString(), files: {} }
-        } else {
-          setDbStatus('healthy')
-          setMetaManifest(meta)
-          
-          // CRITICAL FIX: Flush any pending offline writes BEFORE reading tables
-          // to ensure we don't overwrite offline changes with stale cloud data.
-          await new Promise(resolve => {
-            flushPendingWrites(
-              user.token, meta,
-              (conflicts, data, tableName) => {
-                addLog('Offline Sync', `Flushed offline changes for ${tableName}`, 'success')
-              },
-              (syncedCount) => {
-                if (syncedCount > 0) addToast(`${syncedCount} offline changes synced to Drive`, 'success')
-                resolve()
-              }
-            )
-          })
-        }
-
-        const defaultContent = []
-
-        let empData = await readTable('employees', user.token, bgSyncCallback)
-        const plainStr = localStorage.getItem(EMPLOYEES_STORAGE_KEY + '_plain')
-        let savedEmp = null;
-        if (plainStr) { try { savedEmp = JSON.parse(plainStr) } catch(e){} }
-        if (!savedEmp) {
-          const saved = localStorage.getItem(EMPLOYEES_STORAGE_KEY)
-          if (saved) { try { const keyMaterial = user?.token || 'kormiis-local-fallback-key'; savedEmp = await decryptJson(saved, keyMaterial) } catch (e) {} }
-        }
-
-        if (!empData) {
-          empData = savedEmp || defaultContent
-          await writeTable('employees', empData, meta, user.token)
-        } else if (Array.isArray(empData) && Array.isArray(savedEmp)) {
-          if (savedEmp.length > empData.length) {
-            console.warn('[Sync] Local employees list is larger than remote Drive data. Keeping local to prevent data loss.');
-            empData = savedEmp;
-            await writeTable('employees', empData, meta, user.token)
+        // Employees (decrypted local storage)
+        let empData = await fetchTableFromFirestore(ownerId, 'employees')
+        if (empData == null) {
+          const plainStr = localStorage.getItem(EMPLOYEES_STORAGE_KEY + '_plain')
+          let savedEmp = null
+          if (plainStr) { try { savedEmp = JSON.parse(plainStr) } catch (e) {} }
+          if (!savedEmp) {
+            const saved = localStorage.getItem(EMPLOYEES_STORAGE_KEY)
+            if (saved) { try { const keyMaterial = user?.token || 'kormiis-local-fallback-key'; savedEmp = await decryptJson(saved, keyMaterial) } catch (e) {} }
+          }
+          if (Array.isArray(savedEmp)) {
+            empData = savedEmp
+            await writeToTable(ownerId, 'employees', empData).catch(e => console.error('Migration push employees:', e))
           }
         }
-        setEmployeesRaw(empData)
+        setEmployeesRaw(empData || [])
 
-        const defaultPayroll = {}
-        let payrollData = await readTable('payroll', user.token, bgSyncCallback)
-        if (!payrollData) {
-          const saved = localStorage.getItem('kormiis_payroll')
-          if (saved) { try { payrollData = JSON.parse(saved) } catch (e) {} }
-          if (!payrollData) payrollData = defaultPayroll
-          await writeTable('payroll', payrollData, meta, user.token)
-        }
+        let payrollData = await loadTable('payroll', 'kormiis_payroll')
+        if (!payrollData) payrollData = {}
         if (Array.isArray(payrollData)) payrollData = { '2026-07': payrollData }
         setPayrollRaw(payrollData)
 
         const defaultSettings = { currency: '৳', salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'Kormiis Ltd.', email: 'hr@kormiis.io', website: 'www.kormiis.io' }, notifications: { syncAlerts: true, emailDigests: false } }
-        let settingsData = await readTable('settings', user.token, bgSyncCallback)
-        if (!settingsData) {
-          const saved = localStorage.getItem('kormiis_settings')
-          if (saved) { try { settingsData = JSON.parse(saved) } catch (e) {} }
-          if (!settingsData) settingsData = defaultSettings
-          await writeTable('settings', settingsData, meta, user.token)
-        }
+        let settingsData = await loadTable('settings', 'kormiis_settings')
+        if (!settingsData) settingsData = defaultSettings
+        setSettingsRaw(settingsData)
 
         if (!user.isEmployee && user.uid) {
           const currentDevice = getDeviceInfo()
           const adminDevices = settingsData.adminDevices || []
           const existingDevice = adminDevices.find(d => d.deviceId === currentDevice.deviceId)
-          
           if (!existingDevice) {
             settingsData.adminDevices = [...adminDevices, currentDevice]
-            await writeTable('settings', settingsData, meta, user.token)
+            await writeToTable(ownerId, 'settings', settingsData).catch(e => console.error(e))
           } else {
             settingsData.adminDevices = adminDevices.map(d => d.deviceId === currentDevice.deviceId ? { ...d, lastLogin: currentDevice.lastLogin } : d)
-            await writeTable('settings', settingsData, meta, user.token)
+            await writeToTable(ownerId, 'settings', settingsData).catch(e => console.error(e))
           }
         }
 
-        setSettingsRaw(settingsData)
-
-        const defaultLeaves = []
-        const defaultBalances = {}
-        const defaultLogs = {}
-
-        let leavesData = await readTable('leave_requests', user.token, bgSyncCallback)
-        let balancesData = await readTable('leave_balances', user.token, bgSyncCallback)
-        let logsData = await readTable('attendance_logs', user.token, bgSyncCallback)
-
-        if (!leavesData || !balancesData || !logsData) {
-          const savedAtt = localStorage.getItem('kormiis_attendance')
+        let leavesData = await loadTable('leave_requests', null)
+        let balancesData = await loadTable('leave_balances', null)
+        let logsData = await loadTable('attendance_logs', null)
+        if (leavesData == null || balancesData == null || logsData == null) {
+          const savedAtt = readLocal('kormiis_attendance')
           if (savedAtt) {
-            try { const parsed = JSON.parse(savedAtt); leavesData = leavesData || parsed.leaves || defaultLeaves; balancesData = balancesData || parsed.balances || defaultBalances; logsData = logsData || parsed.dailyLogs || defaultLogs } catch (e) {}
+            leavesData = leavesData ?? savedAtt.leaves ?? []
+            balancesData = balancesData ?? savedAtt.balances ?? {}
+            logsData = logsData ?? savedAtt.dailyLogs ?? {}
           }
-          if (!leavesData || !balancesData || !logsData) {
-            const legacyAtt = await readTable('attendance', user.token, bgSyncCallback)
-            if (legacyAtt) { leavesData = leavesData || legacyAtt.leaves || defaultLeaves; balancesData = balancesData || legacyAtt.balances || defaultBalances; logsData = logsData || legacyAtt.dailyLogs || defaultLogs }
-            else { leavesData = leavesData || defaultLeaves; balancesData = balancesData || defaultBalances; logsData = logsData || defaultLogs }
-          }
-          await writeTable('leave_requests', leavesData, meta, user.token)
-          await writeTable('leave_balances', balancesData, meta, user.token)
-          await writeTable('attendance_logs', logsData, meta, user.token)
+          if (leavesData == null) leavesData = []
+          if (balancesData == null) balancesData = {}
+          if (logsData == null) logsData = {}
         }
-
-
-
         setAttendanceRaw({ leaves: leavesData, balances: balancesData, dailyLogs: logsData })
 
-        const defaultTasks = []
-        let tasksData = await readTable('tasks', user.token, bgSyncCallback)
-        const savedTasksStr = localStorage.getItem('kormiis_tasks')
-        let savedTasks = null
-        if (savedTasksStr) { try { savedTasks = JSON.parse(savedTasksStr) } catch (e) {} }
-        
-        if (!tasksData || (Array.isArray(tasksData) && tasksData.length === 0 && Array.isArray(savedTasks) && savedTasks.length > 0)) {
-          tasksData = savedTasks || defaultTasks
-          await writeTable('tasks', tasksData, meta, user.token)
-        } else if (Array.isArray(tasksData) && Array.isArray(savedTasks)) {
-          if (savedTasks.length > tasksData.length) {
-            console.warn('[Sync] Local tasks list is larger than remote Drive data. Keeping local to prevent data loss.');
-            tasksData = savedTasks;
-            await writeTable('tasks', tasksData, meta, user.token)
-          }
-        }
-        setTasks(tasksData)
+        let tasksData = await loadTable('tasks', 'kormiis_tasks')
+        setTasks(tasksData || [])
 
-        let notesData = await readTable('notes', user.token, bgSyncCallback)
-        const savedNotesStr = localStorage.getItem('kormiis_notes')
-        let savedNotes = null
-        if (savedNotesStr) { try { savedNotes = JSON.parse(savedNotesStr) } catch (e) {} }
-        
-        let shouldUploadNotes = false;
-        if (!notesData || (Array.isArray(notesData) && notesData.length === 0 && Array.isArray(savedNotes) && savedNotes.length > 0)) {
-          notesData = savedNotes || []
-          shouldUploadNotes = true;
-        } else if (Array.isArray(notesData) && Array.isArray(savedNotes)) {
-          // Prevent local data loss on refresh if local is newer
-          const getLatestUpdate = (arr) => arr.reduce((latest, n) => {
-            const d = new Date(n.updatedAt || 0).getTime();
-            return d > latest ? d : latest;
-          }, 0);
-          
-          const localLatest = getLatestUpdate(savedNotes);
-          const remoteLatest = getLatestUpdate(notesData);
-          
-          if (localLatest > remoteLatest) {
-            console.warn('[Sync] Local notes are newer than remote notes. Keeping local notes to prevent data loss.');
-            notesData = savedNotes;
-            shouldUploadNotes = true;
-          }
-        }
-        
-        if (shouldUploadNotes) {
-          await writeTable('notes', notesData, meta, user.token)
-        }
-        setNotesRaw(notesData)
+        let notesData = await loadTable('notes', 'kormiis_notes')
+        setNotesRaw(notesData || [])
 
-        const defaultExpenses = []
-        let expensesData = await readTable('expenses', user.token, bgSyncCallback)
-        const savedExpensesStr = localStorage.getItem('kormiis_expenses')
-        let savedExpenses = null
-        if (savedExpensesStr) { try { savedExpenses = JSON.parse(savedExpensesStr) } catch (e) {} }
-        
-        if (!expensesData || (Array.isArray(expensesData) && expensesData.length === 0 && Array.isArray(savedExpenses) && savedExpenses.length > 0)) {
-          expensesData = savedExpenses || defaultExpenses
-          await writeTable('expenses', expensesData, meta, user.token)
-        }
-        setExpensesRaw(expensesData)
+        let expensesData = await loadTable('expenses', 'kormiis_expenses')
+        setExpensesRaw(expensesData || [])
 
-        if (dbStatus === 'rebuilding') {
-          setMetaManifest(meta)
-          setDbStatus('healthy')
-        }
-
-        const issues = validateDatabase(empData, logsData, leavesData, payrollData, expensesData)
+        const issues = validateDatabase(empData || [], logsData || {}, leavesData || [], payrollData || {}, expensesData || [])
         setDataIntegrityIssues(issues)
         if (issues.length > 0) {
           setDbStatus('corruption')
@@ -556,19 +410,12 @@ export default function useAppData({ user, addToast }) {
         }
 
         setIsSyncing(false)
-        addLog('Database Synced', 'Strict schema successfully loaded from Drive.', 'success')
-        checkAndRunAutoBackup(user.token)
+        addLog('Database Synced', 'Loaded from Firestore.', 'success')
       } catch (err) {
         setIsSyncing(false)
         setIsAppLoading(false)
         setDbStatus('corruption')
-        setDriveConnected(false)
-        if (err.message && (err.message.includes('Unauthorized') || err.message.includes('401'))) {
-          addToast('Google Drive session expired. Please sign in again.', 'warning');
-          addLog('Sync Paused', 'Session expired. Please sign in to Google Drive.', 'warning');
-        } else {
-          addLog('Sync Failed', 'Could not sync database with Google Drive: ' + err.message, 'danger')
-        }
+        addLog('Sync Failed', 'Could not load database: ' + err.message, 'danger')
         console.error(err)
       }
     }
@@ -583,20 +430,9 @@ export default function useAppData({ user, addToast }) {
   const handleSetEmployees = (updater) => {
     setEmployeesRaw((prev) => {
       const next = timestampArrayChanges(prev, typeof updater === 'function' ? updater(prev) : updater)
-      if (adminUid) writeToTable(adminUid, 'employees', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
-        const meta = { ...metaManifest }
-        writeTable('employees', next, meta, user.token)
-          .then(({ updatedData, conflicts, offline }) => {
-            setMetaManifest(meta)
-            if (offline) { addToast('Offline - saved locally. Will sync when connected.', 'warning'); setEmployeesRaw(updatedData) }
-            else if (conflicts && conflicts.length > 0) { setSyncConflicts(c => [...c, ...conflicts]); addToast('Sync conflict auto-resolved. Review flagged items.', 'warning'); setEmployeesRaw(updatedData) }
-            else { 
-              addLog('Database Saved', 'Changes successfully uploaded to Google Drive.', 'success')
-              syncEmployeeSnapshot(user.uid, next)
-            }
-          })
-          .catch((err) => { setDbStatus('corruption'); addLog('Save Failed', 'Could not save changes to cloud: ' + err.message, 'danger') })
+      if (adminUid) {
+        writeToTable(adminUid, 'employees', next).catch(e => console.error(e));
+        syncEmployeeSnapshot(adminUid, next)
       }
       return next
     })
@@ -606,17 +442,6 @@ export default function useAppData({ user, addToast }) {
     setPayrollRaw((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       if (adminUid) writeToTable(adminUid, 'payroll', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
-        const meta = { ...metaManifest }
-        writeTable('payroll', next, meta, user.token)
-          .then(({ updatedData, conflicts, offline }) => {
-            setMetaManifest(meta)
-            if (offline) { addToast('Offline - saved locally. Will sync when connected.', 'warning'); setPayrollRaw(updatedData) }
-            else if (conflicts && conflicts.length > 0) { setSyncConflicts(c => [...c, ...conflicts]); addToast('Sync conflict auto-resolved. Review flagged items.', 'warning'); setPayrollRaw(updatedData) }
-            else { addLog('Payroll Saved', 'Salary updates synced to Google Drive.', 'success') }
-          })
-          .catch((err) => { setDbStatus('corruption'); addLog('Save Failed', 'Could not save payroll data to cloud: ' + err.message, 'danger') })
-      }
       return next
     })
   }
@@ -626,17 +451,6 @@ export default function useAppData({ user, addToast }) {
       const next = typeof updater === 'function' ? updater(prev) : updater
       localStorage.setItem('kormiis_settings', JSON.stringify(next))
       if (adminUid) writeToTable(adminUid, 'settings', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
-        const meta = { ...metaManifest }
-        writeTable('settings', next, meta, user.token)
-          .then(({ updatedData, conflicts, offline }) => {
-            setMetaManifest(meta)
-            if (offline) { addToast('Offline - saved locally. Will sync when connected.', 'warning'); setSettingsRaw(updatedData) }
-            else if (conflicts && conflicts.length > 0) { setSyncConflicts(c => [...c, ...conflicts]); addToast('Sync conflict auto-resolved. Review flagged items.', 'warning'); setSettingsRaw(updatedData) }
-            else { addLog('Settings Saved', 'System configurations synced to Google Drive.', 'success') }
-          })
-          .catch((err) => { setDbStatus('corruption'); addLog('Save Failed', 'Could not save settings configurations to cloud: ' + err.message, 'danger') })
-      }
       return next
     })
   }
@@ -646,10 +460,9 @@ export default function useAppData({ user, addToast }) {
     try {
       setIsSyncing(true)
       addLog('Repairing DB', 'Running comprehensive deduplication and logical constraint repairs...')
-      const meta = { ...metaManifest }
       
       // 1. Employees
-      let empData = await readTable('employees', user.token) || []
+      let empData = await fetchTableFromFirestore(adminUid, 'employees') || []
       const uniqueEmps = []
       const seenIds = new Set()
       const seenEmails = new Set()
@@ -662,7 +475,7 @@ export default function useAppData({ user, addToast }) {
       })
 
       // 2. Leaves
-      let leavesData = await readTable('leave_requests', user.token) || []
+      let leavesData = await fetchTableFromFirestore(adminUid, 'leave_requests') || []
       const approvedLeavesByEmp = {}
       const fixedLeaves = leavesData.filter(leave => {
         if (!seenIds.has(leave.employeeId)) return false // Remove orphaned
@@ -688,10 +501,10 @@ export default function useAppData({ user, addToast }) {
         }
         return true
       })
-      const balancesData = await readTable('leave_balances', user.token) || {}
+      const balancesData = await fetchTableFromFirestore(adminUid, 'leave_balances') || {}
 
       // 3. Attendance Logs
-      let logsData = await readTable('attendance_logs', user.token) || {}
+      let logsData = await fetchTableFromFirestore(adminUid, 'attendance_logs') || {}
       const fixedLogs = { ...logsData }
       Object.keys(fixedLogs).forEach(date => {
         if (fixedLogs[date] && typeof fixedLogs[date] === 'object') {
@@ -702,7 +515,7 @@ export default function useAppData({ user, addToast }) {
       })
 
       // 4. Payroll
-      let payrollData = await readTable('payroll', user.token) || {}
+      let payrollData = await fetchTableFromFirestore(adminUid, 'payroll') || {}
       const fixedPayroll = { ...payrollData }
       Object.keys(fixedPayroll).forEach(month => {
         if (Array.isArray(fixedPayroll[month])) {
@@ -713,18 +526,18 @@ export default function useAppData({ user, addToast }) {
       })
 
       // 5. Expenses
-      let expensesData = await readTable('expenses', user.token) || []
+      let expensesData = await fetchTableFromFirestore(adminUid, 'expenses') || []
       const fixedExpenses = expensesData
         .filter(exp => seenIds.has(exp.employeeId))
         .map(exp => ({ ...exp, amount: Math.max(0, exp.amount || 0) }))
 
       // Save fixed data
       await Promise.all([
-        writeTable('employees', uniqueEmps, meta, user.token),
-        writeTable('leave_requests', fixedLeaves, meta, user.token),
-        writeTable('attendance_logs', fixedLogs, meta, user.token),
-        writeTable('payroll', fixedPayroll, meta, user.token),
-        writeTable('expenses', fixedExpenses, meta, user.token)
+        writeToTable(adminUid, 'employees', uniqueEmps),
+        writeToTable(adminUid, 'leave_requests', fixedLeaves),
+        writeToTable(adminUid, 'attendance_logs', fixedLogs),
+        writeToTable(adminUid, 'payroll', fixedPayroll),
+        writeToTable(adminUid, 'expenses', fixedExpenses)
       ])
 
       // Update state
@@ -759,17 +572,6 @@ export default function useAppData({ user, addToast }) {
         writeToTable(adminUid, 'leave_balances', next.balances).catch(e => console.error(e));
         writeToTable(adminUid, 'attendance_logs', next.dailyLogs).catch(e => console.error(e));
       }
-      
-      if (!user?.isEmployee && driveConnected && metaManifest) {
-        const meta = { ...metaManifest }
-        Promise.all([
-          writeTable('leave_requests', next.leaves, meta, user.token), 
-          writeTable('leave_balances', next.balances, meta, user.token), 
-          writeTable('attendance_logs', next.dailyLogs, meta, user.token)
-        ])
-          .then(() => { setMetaManifest(meta); addLog('Attendance Saved', 'Attendance logs synced to Google Drive.', 'success') })
-          .catch((err) => { setDbStatus('corruption'); addLog('Save Failed', 'Could not save attendance data to cloud: ' + err.message, 'danger') })
-      }
       return next
     })
   }
@@ -778,17 +580,6 @@ export default function useAppData({ user, addToast }) {
     setExpensesRaw((prev) => {
       const next = timestampArrayChanges(prev, typeof updater === 'function' ? updater(prev) : updater)
       if (adminUid) writeToTable(adminUid, 'expenses', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
-        const meta = { ...metaManifest }
-        writeTable('expenses', next, meta, user.token)
-          .then(({ updatedData, conflicts, offline }) => {
-            setMetaManifest(meta)
-            if (offline) { addToast('Offline - saved locally. Will sync when connected.', 'warning'); setExpensesRaw(updatedData) }
-            else if (conflicts && conflicts.length > 0) { setSyncConflicts(c => [...c, ...conflicts]); addToast('Sync conflict auto-resolved. Review flagged items.', 'warning'); setExpensesRaw(updatedData) }
-            else { addLog('Expenses Saved', 'Expenses synced to Google Drive.', 'success') }
-          })
-          .catch((err) => { setDbStatus('corruption'); addLog('Save Failed', 'Could not save expenses data to cloud: ' + err.message, 'danger') })
-      }
       return next
     })
   }
@@ -797,9 +588,6 @@ export default function useAppData({ user, addToast }) {
     setEvents((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       if (adminUid) writeToTable(adminUid, 'events', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
-        writeTable('events', next, { ...metaManifest }, user.token).catch(err => console.error(err))
-      }
       return next
     })
   }
@@ -810,11 +598,6 @@ export default function useAppData({ user, addToast }) {
       localStorage.setItem('kormiis_tasks', JSON.stringify(next))
       localStorage.setItem('kormiis_tasks_updatedAt', String(Date.now()))
       if (adminUid) writeToTable(adminUid, 'tasks', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
-        const meta = { ...metaManifest }
-        writeTable('tasks', next, meta, user.token)
-          .catch((err) => { setDbStatus('corruption'); addLog('Save Failed', 'Could not save tasks data to cloud: ' + err.message, 'danger') })
-      }
       return next
     })
   }
@@ -825,16 +608,6 @@ export default function useAppData({ user, addToast }) {
       localStorage.setItem('kormiis_notes', JSON.stringify(next))
       localStorage.setItem('kormiis_notes_updatedAt', String(Date.now()))
       if (adminUid) writeToTable(adminUid, 'notes', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
-        const meta = { ...metaManifest }
-        writeTable('notes', next, meta, user.token)
-          .then(({ updatedData, conflicts, offline }) => {
-            setMetaManifest(meta)
-            if (offline) { addToast('Offline - notes saved locally.', 'warning'); setNotesRaw(updatedData) }
-            else if (conflicts && conflicts.length > 0) { setSyncConflicts(c => [...c, ...conflicts]); addToast('Sync conflict auto-resolved.', 'warning'); setNotesRaw(updatedData) }
-          })
-          .catch((err) => { setDbStatus('corruption'); addLog('Save Failed', 'Could not save notes data to cloud: ' + err.message, 'danger') })
-      }
       return next
     })
   }
@@ -843,108 +616,24 @@ export default function useAppData({ user, addToast }) {
     setDocuments((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       if (adminUid) writeToTable(adminUid, 'documents', next).catch(e => console.error(e));
-      if (!user?.isEmployee && driveConnected && metaManifest) {
-        writeTable('documents', next, { ...metaManifest }, user.token).catch(err => console.error(err))
-      }
       return next
     })
   }
 
   const handleSync = () => { 
     addToast('Retrying sync...', 'info');
-    setDriveConnected(true);
     setTimeout(() => {
       if (syncRef.current && !isSyncing) syncRef.current()
     }, 0);
   }
 
-  /* ─── Auto sync log interval ─── */
-  useEffect(() => {
-    if (!driveConnected) return
-    const interval = setInterval(() => {
-      const actions = [
-        { action: 'Auto-sync database.json', details: 'No changes detected' },
-        { action: 'Checked connection state', details: 'Google Drive API v3 - Connected' },
-        { action: 'Refreshed folder credentials', details: 'Token valid' }
-      ]
-      const randomAction = actions[Math.floor(Math.random() * actions.length)]
-      const newLog = { id: `log-${Date.now()}`, action: randomAction.action, status: 'success', timestamp: 'Just now', details: randomAction.details }
-      setSyncLogs(prev => [newLog, ...prev.slice(0, 4)])
-    }, 45000)
-    return () => clearInterval(interval)
-  }, [driveConnected])
-
-  /* ─── Background File Sync (Admin Node Only) ─── */
-  useEffect(() => {
-    // Only the Admin (Master Node) with Drive connected processes pending syncs
-    if (!user || user.isEmployee || !driveConnected || !adminUid || !documents || !documents.length || !metaManifest) return;
-
-    const pendingDocs = documents.filter(doc => doc.status === 'pending_sync' && doc.downloadUrl);
-    if (pendingDocs.length === 0) return;
-
-    let isProcessing = false;
-
-    const syncPendingFiles = async () => {
-      if (isProcessing) return;
-      isProcessing = true;
-
-      try {
-        const folderId = await getOrCreateFilesFolder(user.token);
-        
-        for (const doc of pendingDocs) {
-          try {
-            console.log(`Syncing document ${doc.name} to Google Drive...`);
-            
-            // 1. Download from Firebase Storage bypassing CORS
-            const storagePath = `${doc.id}_${doc.fileName}`;
-            const blob = await downloadFromFirebaseStorage(adminUid, storagePath);
-            
-            // 2. Upload to Google Drive
-            const driveData = await uploadBinaryFile(doc.fileName, blob, doc.fileType, folderId, user.token);
-            
-            // 3. Update Firestore Document with the permanent Drive link
-            const nextDocs = documents.map(d => d.id === doc.id ? { 
-              ...d, 
-              status: 'synced', 
-              downloadUrl: driveData.webContentLink,
-              driveFileId: driveData.id
-            } : d);
-            
-            await writeToTable(adminUid, 'documents', nextDocs).catch(e => console.error(e));
-            await writeTable('documents', nextDocs, { ...metaManifest }, user.token).catch(e => console.error(e));
-            
-            // Update local state early to avoid redundant processing
-            setDocuments(nextDocs);
-            
-            // 4. Delete temporary file from Firebase Storage
-            await deleteFromFirebaseStorage(adminUid, storagePath);
-            
-            console.log(`Document ${doc.name} successfully moved to Google Drive.`);
-          } catch(e) {
-            console.error(`Failed to sync doc ${doc.id}:`, e);
-          }
-        }
-      } catch (e) {
-        console.error("Failed to initialize drive files folder:", e);
-      } finally {
-        isProcessing = false;
-      }
-    };
-    
-    syncPendingFiles();
-  }, [documents, user, driveConnected, adminUid, metaManifest]);
-
   return {
-    /* Drive / DB */
+    /* DB */
     adminUid,
-    driveConnected, setDriveConnected,
-    driveFileId, setDriveFileId, setPayrollFileId, setSettingsFileId, setAttendanceFileId,
     isSyncing, setIsSyncing,
     dbStatus, setDbStatus,
     dataIntegrityIssues, setDataIntegrityIssues,
     showCorruptionModal, setShowCorruptionModal,
-    syncConflicts, setSyncConflicts,
-    metaManifest, setMetaManifest,
     isAppLoading, setIsAppLoading,
 
     /* UI */

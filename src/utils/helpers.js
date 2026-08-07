@@ -33,7 +33,6 @@ export const allNavItems = [
   { id: 'assets', label: 'Assets', icon: createElement(Icon, { name: 'devices_other', size: 18 }) },
   { id: 'settings', label: 'Settings', icon: createElement(Icon, { name: 'settings', size: 18 }) },
   { id: 'notes', label: 'Notes', icon: createElement(Icon, { name: 'sticky_note_2', size: 18 }) },
-  { id: 'drive', label: 'Drive Sync', icon: createElement(Icon, { name: 'cloud_sync', size: 18 }) },
   { id: 'profile', label: 'Profile', icon: createElement(Icon, { name: 'person', size: 18 }) },
 ]
 
