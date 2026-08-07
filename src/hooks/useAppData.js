@@ -84,27 +84,27 @@ export default function useAppData({ user, addToast }) {
     if (plain) { try { const p = JSON.parse(plain); if (Array.isArray(p) && p.length > 0) return p } catch (e) {} }
     return []
   })
-  const [payroll, setPayrollRaw] = useState(() => loadSaved('hr_pulse_payroll') || {})
+  const [payroll, setPayrollRaw] = useState(() => loadSaved('kormiis_payroll') || {})
 
-  const [attendance, setAttendanceRaw] = useState(() => loadSaved('hr_pulse_attendance') || { leaves: [], dailyLogs: {}, balances: {} })
-  const [expenses, setExpensesRaw] = useState(() => loadSaved('hr_pulse_expenses') || [])
-  const [events, setEvents] = useState(() => loadSaved('hr_pulse_events') || [])
-  const [documents, setDocuments] = useState(() => loadSaved('hr_pulse_documents') || [])
-  const [roster, setRoster] = useState(() => loadSaved('hr_pulse_roster') || [])
-  const [shiftSwaps, setShiftSwaps] = useState(() => loadSaved('hr_pulse_shift_swaps') || [])
-  const [overtimeClaims, setOvertimeClaims] = useState(() => loadSaved('hr_pulse_overtime_claims') || [])
+  const [attendance, setAttendanceRaw] = useState(() => loadSaved('kormiis_attendance') || { leaves: [], dailyLogs: {}, balances: {} })
+  const [expenses, setExpensesRaw] = useState(() => loadSaved('kormiis_expenses') || [])
+  const [events, setEvents] = useState(() => loadSaved('kormiis_events') || [])
+  const [documents, setDocuments] = useState(() => loadSaved('kormiis_documents') || [])
+  const [roster, setRoster] = useState(() => loadSaved('kormiis_roster') || [])
+  const [shiftSwaps, setShiftSwaps] = useState(() => loadSaved('kormiis_shift_swaps') || [])
+  const [overtimeClaims, setOvertimeClaims] = useState(() => loadSaved('kormiis_overtime_claims') || [])
   const [announcements, setAnnouncements] = useState(() => {
-    const saved = loadSaved('hr_pulse_announcements')
+    const saved = loadSaved('kormiis_announcements')
     if (saved) return saved
     return []
   })
-  const [tasks, setTasks] = useState(() => loadSaved('hr_pulse_tasks') || [])
-  const [notes, setNotesRaw] = useState(() => loadSaved('hr_pulse_notes') || [])
-  const [assets, setAssets] = useState(() => loadSaved('hr_pulse_assets') || [])
-  const [assetRequests, setAssetRequests] = useState(() => loadSaved('hr_pulse_asset_requests') || [])
-  const [assetCategories, setAssetCategories] = useState(() => loadSaved('hr_pulse_asset_categories') || ['Laptop', 'Phone', 'Monitor', 'Peripherals', 'Access Card'])
-  const [settings, setSettingsRaw] = useState(() => loadSaved('hr_pulse_settings') || { currency: '৳', officeLocation: { lat: 23.8103, lng: 90.4125, radius: 100 }, salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'HR Pulse Ltd.', email: 'hr@hrpulse.io', website: 'www.hrpulse.io', logo: '', logoX: 0, logoY: 0, logoZoom: 1 }, shiftTemplates: [{ id: 'st-1', name: 'Morning Shift', start: '09:00', end: '18:00', break: 60, color: '#3b82f6' }, { id: 'st-2', name: 'Evening Shift', start: '14:00', end: '23:00', break: 60, color: '#8b5cf6' }, { id: 'st-3', name: 'Night Shift', start: '22:00', end: '07:00', break: 60, color: '#1e293b' }, { id: 'st-4', name: 'Half-Day', start: '09:00', end: '13:00', break: 0, color: '#f59e0b' }], overtimeRules: { multiplierWeekday: 1.5, multiplierWeekend: 2.0 }, notifications: { syncAlerts: true, emailDigests: false } })
-  const [syncLogs, setSyncLogs] = useState(() => loadSaved('hr_pulse_sync_logs') || [])
+  const [tasks, setTasks] = useState(() => loadSaved('kormiis_tasks') || [])
+  const [notes, setNotesRaw] = useState(() => loadSaved('kormiis_notes') || [])
+  const [assets, setAssets] = useState(() => loadSaved('kormiis_assets') || [])
+  const [assetRequests, setAssetRequests] = useState(() => loadSaved('kormiis_asset_requests') || [])
+  const [assetCategories, setAssetCategories] = useState(() => loadSaved('kormiis_asset_categories') || ['Laptop', 'Phone', 'Monitor', 'Peripherals', 'Access Card'])
+  const [settings, setSettingsRaw] = useState(() => loadSaved('kormiis_settings') || { currency: '৳', officeLocation: { lat: 23.8103, lng: 90.4125, radius: 100 }, salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'Kormiis Ltd.', email: 'hr@kormiis.io', website: 'www.kormiis.io', logo: '', logoX: 0, logoY: 0, logoZoom: 1 }, shiftTemplates: [{ id: 'st-1', name: 'Morning Shift', start: '09:00', end: '18:00', break: 60, color: '#3b82f6' }, { id: 'st-2', name: 'Evening Shift', start: '14:00', end: '23:00', break: 60, color: '#8b5cf6' }, { id: 'st-3', name: 'Night Shift', start: '22:00', end: '07:00', break: 60, color: '#1e293b' }, { id: 'st-4', name: 'Half-Day', start: '09:00', end: '13:00', break: 0, color: '#f59e0b' }], overtimeRules: { multiplierWeekday: 1.5, multiplierWeekend: 2.0 }, notifications: { syncAlerts: true, emailDigests: false } })
+  const [syncLogs, setSyncLogs] = useState(() => loadSaved('kormiis_sync_logs') || [])
 
   /* ─── addLog ─── */
   const addLog = (action, details, status = 'success') => {
@@ -121,7 +121,7 @@ export default function useAppData({ user, addToast }) {
       const saved = localStorage.getItem(EMPLOYEES_STORAGE_KEY)
       if (!saved) return
       try {
-        const keyMaterial = user?.token || 'hr-pulse-local-fallback-key'
+        const keyMaterial = user?.token || 'kormiis-local-fallback-key'
         const parsed = await decryptJson(saved, keyMaterial)
         if (Array.isArray(parsed)) {
           setEmployeesRaw(parsed)
@@ -138,7 +138,7 @@ export default function useAppData({ user, addToast }) {
     if (!didPersistEmployees.current) { didPersistEmployees.current = true; return }
     const persistEmployees = async () => {
       try {
-        const keyMaterial = user?.token || 'hr-pulse-local-fallback-key'
+        const keyMaterial = user?.token || 'kormiis-local-fallback-key'
         const encrypted = await encryptJson(employees, keyMaterial)
         localStorage.setItem(EMPLOYEES_STORAGE_KEY, encrypted)
         localStorage.setItem(EMPLOYEES_STORAGE_KEY + '_plain', JSON.stringify(employees))
@@ -149,17 +149,17 @@ export default function useAppData({ user, addToast }) {
 
   /* ─── Persistence effects ─── */
   const persistStates = [
-    { key: 'hr_pulse_payroll', val: payroll },
-    { key: 'hr_pulse_attendance', val: attendance },
-    { key: 'hr_pulse_expenses', val: expenses },
-    { key: 'hr_pulse_sync_logs', val: syncLogs },
-    { key: 'hr_pulse_announcements', val: announcements },
-    { key: 'hr_pulse_assets', val: assets },
-    { key: 'hr_pulse_asset_requests', val: assetRequests },
-    { key: 'hr_pulse_asset_categories', val: assetCategories },
-    { key: 'hr_pulse_events', val: events },
-    { key: 'hr_pulse_documents', val: documents },
-    { key: 'hr_pulse_notes', val: notes },
+    { key: 'kormiis_payroll', val: payroll },
+    { key: 'kormiis_attendance', val: attendance },
+    { key: 'kormiis_expenses', val: expenses },
+    { key: 'kormiis_sync_logs', val: syncLogs },
+    { key: 'kormiis_announcements', val: announcements },
+    { key: 'kormiis_assets', val: assets },
+    { key: 'kormiis_asset_requests', val: assetRequests },
+    { key: 'kormiis_asset_categories', val: assetCategories },
+    { key: 'kormiis_events', val: events },
+    { key: 'kormiis_documents', val: documents },
+    { key: 'kormiis_notes', val: notes },
   ]
   persistStates.forEach(({ key, val }) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -362,7 +362,7 @@ export default function useAppData({ user, addToast }) {
           if (plain) { try { const p = JSON.parse(plain); if (Array.isArray(p) && p.length > 0) empData = p } catch (e) {} }
           if (!empData) {
             const saved = localStorage.getItem(EMPLOYEES_STORAGE_KEY)
-            if (saved) { try { const keyMaterial = user?.token || 'hr-pulse-local-fallback-key'; empData = await decryptJson(saved, keyMaterial) } catch (e) { console.error('Failed to decrypt saved employees for Drive init:', e) } }
+            if (saved) { try { const keyMaterial = user?.token || 'kormiis-local-fallback-key'; empData = await decryptJson(saved, keyMaterial) } catch (e) { console.error('Failed to decrypt saved employees for Drive init:', e) } }
           }
           if (!empData) empData = defaultContent
           await writeTable('employees', empData, meta, user.token)
@@ -372,7 +372,7 @@ export default function useAppData({ user, addToast }) {
         const defaultPayroll = {}
         let payrollData = await readTable('payroll', user.token, bgSyncCallback)
         if (!payrollData) {
-          const saved = localStorage.getItem('hr_pulse_payroll')
+          const saved = localStorage.getItem('kormiis_payroll')
           if (saved) { try { payrollData = JSON.parse(saved) } catch (e) {} }
           if (!payrollData) payrollData = defaultPayroll
           await writeTable('payroll', payrollData, meta, user.token)
@@ -380,10 +380,10 @@ export default function useAppData({ user, addToast }) {
         if (Array.isArray(payrollData)) payrollData = { '2026-07': payrollData }
         setPayrollRaw(payrollData)
 
-        const defaultSettings = { currency: '৳', salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'HR Pulse Ltd.', email: 'hr@hrpulse.io', website: 'www.hrpulse.io' }, notifications: { syncAlerts: true, emailDigests: false } }
+        const defaultSettings = { currency: '৳', salaryStructure: [{ id: 'basic', name: 'Basic Salary', percentage: 50, type: 'earning' }, { id: 'hra', name: 'House Rent Allowance (HRA)', percentage: 25, type: 'earning' }, { id: 'medical', name: 'Medical Allowance', percentage: 10, type: 'earning' }, { id: 'conveyance', name: 'Conveyance Allowance', percentage: 10, type: 'earning' }, { id: 'pf', name: 'Provident Fund (PF)', percentage: 5, type: 'deduction' }], company: { name: 'Kormiis Ltd.', email: 'hr@kormiis.io', website: 'www.kormiis.io' }, notifications: { syncAlerts: true, emailDigests: false } }
         let settingsData = await readTable('settings', user.token, bgSyncCallback)
         if (!settingsData) {
-          const saved = localStorage.getItem('hr_pulse_settings')
+          const saved = localStorage.getItem('kormiis_settings')
           if (saved) { try { settingsData = JSON.parse(saved) } catch (e) {} }
           if (!settingsData) settingsData = defaultSettings
           await writeTable('settings', settingsData, meta, user.token)
@@ -414,7 +414,7 @@ export default function useAppData({ user, addToast }) {
         let logsData = await readTable('attendance_logs', user.token, bgSyncCallback)
 
         if (!leavesData || !balancesData || !logsData) {
-          const savedAtt = localStorage.getItem('hr_pulse_attendance')
+          const savedAtt = localStorage.getItem('kormiis_attendance')
           if (savedAtt) {
             try { const parsed = JSON.parse(savedAtt); leavesData = leavesData || parsed.leaves || defaultLeaves; balancesData = balancesData || parsed.balances || defaultBalances; logsData = logsData || parsed.dailyLogs || defaultLogs } catch (e) {}
           }
@@ -434,7 +434,7 @@ export default function useAppData({ user, addToast }) {
 
         const defaultTasks = []
         let tasksData = await readTable('tasks', user.token, bgSyncCallback)
-        const savedTasksStr = localStorage.getItem('hr_pulse_tasks')
+        const savedTasksStr = localStorage.getItem('kormiis_tasks')
         let savedTasks = null
         if (savedTasksStr) { try { savedTasks = JSON.parse(savedTasksStr) } catch (e) {} }
         
@@ -445,7 +445,7 @@ export default function useAppData({ user, addToast }) {
         setTasks(tasksData)
 
         let notesData = await readTable('notes', user.token, bgSyncCallback)
-        const savedNotesStr = localStorage.getItem('hr_pulse_notes')
+        const savedNotesStr = localStorage.getItem('kormiis_notes')
         let savedNotes = null
         if (savedNotesStr) { try { savedNotes = JSON.parse(savedNotesStr) } catch (e) {} }
         
@@ -477,7 +477,7 @@ export default function useAppData({ user, addToast }) {
 
         const defaultExpenses = []
         let expensesData = await readTable('expenses', user.token, bgSyncCallback)
-        const savedExpensesStr = localStorage.getItem('hr_pulse_expenses')
+        const savedExpensesStr = localStorage.getItem('kormiis_expenses')
         let savedExpenses = null
         if (savedExpensesStr) { try { savedExpenses = JSON.parse(savedExpensesStr) } catch (e) {} }
         
@@ -569,7 +569,7 @@ export default function useAppData({ user, addToast }) {
   const handleSetSettings = (updater) => {
     setSettingsRaw((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
-      localStorage.setItem('hr_pulse_settings', JSON.stringify(next))
+      localStorage.setItem('kormiis_settings', JSON.stringify(next))
       if (adminUid) writeToTable(adminUid, 'settings', next).catch(e => console.error(e));
       if (!user?.isEmployee && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
@@ -752,7 +752,7 @@ export default function useAppData({ user, addToast }) {
   const handleSetTasks = (updater) => {
     setTasks((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
-      localStorage.setItem('hr_pulse_tasks', JSON.stringify(next))
+      localStorage.setItem('kormiis_tasks', JSON.stringify(next))
       if (adminUid) writeToTable(adminUid, 'tasks', next).catch(e => console.error(e));
       if (!user?.isEmployee && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
@@ -766,7 +766,7 @@ export default function useAppData({ user, addToast }) {
   const handleSetNotes = (updater) => {
     setNotesRaw((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
-      localStorage.setItem('hr_pulse_notes', JSON.stringify(next))
+      localStorage.setItem('kormiis_notes', JSON.stringify(next))
       if (adminUid) writeToTable(adminUid, 'notes', next).catch(e => console.error(e));
       if (!user?.isEmployee && driveConnected && metaManifest) {
         const meta = { ...metaManifest }

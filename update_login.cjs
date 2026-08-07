@@ -507,7 +507,7 @@ code = code.replace(
                     </div>
                     <h3 className="text-lg font-bold mb-2 text-foreground">Connect Google Drive</h3>
                     <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-                      HR Pulse requires access to your Google Drive to store company data securely.
+                      Kormiis requires access to your Google Drive to store company data securely.
                     </p>
                     {error && (
                       <div className="p-3.5 mb-4 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">

@@ -38,7 +38,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
     const nextState = !driveConnected
     setDriveConnected(nextState)
     if (nextState) {
-      addLog('Google Drive Connection Restored', 'Re-established sync tunnel with /HR-Pulse-DB/')
+      addLog('Google Drive Connection Restored', 'Re-established sync tunnel with /Kormiis-DB/')
     } else {
       addLog('Google Drive Connection Paused', 'Local storage offline, cloud sync suspended', 'warning')
     }
@@ -105,7 +105,7 @@ export default function DriveSync({ user, driveConnected, setDriveConnected, add
               </h3>
               <div className="text-muted-foreground text-[0.85rem] mt-1">
                 {driveConnected
-                  ? 'Database tables are synced with the /HR-Pulse-DB/ folder on Google Drive.'
+                  ? 'Database tables are synced with the /Kormiis-DB/ folder on Google Drive.'
                   : 'Local database is working offline. Operations will be buffered until connection resumes.'}
               </div>
             </div>

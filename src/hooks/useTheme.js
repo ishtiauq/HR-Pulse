@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 
 export function useTheme() {
   const [themeMode, setThemeMode] = useState(() => {
-    const saved = localStorage.getItem('hr_pulse_theme')
+    const saved = localStorage.getItem('kormiis_theme')
     if (saved === 'system') return 'light'
     return saved || 'light'
   })
@@ -24,7 +24,7 @@ export function useTheme() {
   }, [isDarkMode])
 
   useEffect(() => {
-    localStorage.setItem('hr_pulse_theme', themeMode)
+    localStorage.setItem('kormiis_theme', themeMode)
   }, [themeMode])
 
   return { themeMode, isDarkMode, toggleTheme, setThemeMode }

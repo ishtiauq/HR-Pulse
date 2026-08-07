@@ -1,15 +1,15 @@
 /**
  * Strict Google Drive Database Service
- * Uses a visible /HR-Pulse-DB/ folder in the user's Drive.
+ * Uses a visible /Kormiis-DB/ folder in the user's Drive.
  */
 
 import { setLastKnownModifiedTime, getLastKnownModifiedTime, getLocalFile, setLocalFile, addPendingWrite, getPendingWrites, removePendingWrite } from './db.js';
 
 const DRIVE_UPLOAD_URL = 'https://www.googleapis.com/upload/drive/v3/files';
 const DRIVE_FILES_URL = 'https://www.googleapis.com/drive/v3/files';
-const FOLDER_NAME = 'HR-Pulse-DB';
+const FOLDER_NAME = 'Kormiis-DB';
 
-const MOCK_DRIVE_KEY = 'hr_pulse_mock_drive_files';
+const MOCK_DRIVE_KEY = 'kormiis_mock_drive_files';
 
 function isMockToken(token) {
   return !token || token.startsWith('mock-');
@@ -100,7 +100,7 @@ export async function getOrCreateDbFolder(token) {
  */
 export async function getOrCreateFilesFolder(token) {
   if (isMockToken(token)) return 'mock-folder-root-id';
-  const folderName = 'HR Pulse Documents';
+  const folderName = 'Kormiis Documents';
   const query = encodeURIComponent(`name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
   const url = `${DRIVE_FILES_URL}?q=${query}&fields=files(id,name)`;
   
@@ -215,7 +215,7 @@ export async function createFileInFolder(filename, folderId, content, token) {
     parents: [folderId]
   };
 
-  const boundary = 'hr_pulse_multipart_boundary';
+  const boundary = 'kormiis_multipart_boundary';
   const delimiter = `\r\n--${boundary}\r\n`;
   const closeDelimiter = `\r\n--${boundary}--`;
 

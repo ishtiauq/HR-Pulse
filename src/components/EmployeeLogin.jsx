@@ -26,7 +26,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
 
       // Check offline device kiosk mode first, then fallback to Firebase Bridge
       let employees = []
-      const storedEmployees = localStorage.getItem('hr_pulse_employees_plain')
+      const storedEmployees = localStorage.getItem('kormiis_employees_plain')
       if (storedEmployees) {
         employees = JSON.parse(storedEmployees)
       } else {
@@ -77,7 +77,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
         }
       }
 
-      const hrToken = localStorage.getItem('hr_pulse_hr_token')
+      const hrToken = localStorage.getItem('kormiis_hr_token')
 
       const employeeUser = {
         name: employee.name,
@@ -105,7 +105,7 @@ export default function EmployeeLogin({ onLogin, onBack }) {
           <Icon name="monitoring" size={24} className="text-white" />
         </div>
         <div>
-          <span className="welcome-title">HR Pulse</span>
+          <span className="welcome-title">Kormiis</span>
           <span className="welcome-tagline">EMPLOYEE LOGIN</span>
         </div>
       </div>

@@ -26,7 +26,7 @@ export default function App() {
 
   const appData = useAppData({ user, addToast })
 
-  const [currentView, setCurrentView] = useState(() => localStorage.getItem('hr_pulse_current_view') || 'dashboard')
+  const [currentView, setCurrentView] = useState(() => localStorage.getItem('kormiis_current_view') || 'dashboard')
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [isScrollingDown, setIsScrollingDown] = useState(false)
@@ -36,7 +36,7 @@ export default function App() {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null)
 
   useEffect(() => {
-    localStorage.setItem('hr_pulse_current_view', currentView)
+    localStorage.setItem('kormiis_current_view', currentView)
     const timer = setTimeout(() => appData.setIsAppLoading(false), 500)
     return () => clearTimeout(timer)
   }, [currentView])

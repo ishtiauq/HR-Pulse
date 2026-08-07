@@ -35,7 +35,7 @@ export default function AdSlot({ type = 'horizontal', style = {} }) {
           </span>
         </div>
         <span className="text-[0.7rem] text-[var(--text-muted)]">
-          (Keeps HR Pulse 100% Free)
+          (Keeps Kormiis 100% Free)
         </span>
       </div>
 

@@ -1,6 +1,6 @@
 import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
-import hrPulseLogo from '../../Assets/Kormiis Logo Final.svg'
+import kormiisLogo from '../../Assets/Kormiis Logo Final.svg'
 
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
@@ -34,8 +34,8 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
         <header aria-label="Top bar" className="topbar topbar-bar w-full h-14 px-4 flex items-center justify-between text-foreground transition-all duration-300">
           <div className="flex items-center shrink-0">
             <img 
-              src={hrPulseLogo} 
-              alt="HR Pulse Logo" 
+              src={kormiisLogo} 
+              alt="Kormiis Logo" 
               className={`block h-9 w-auto max-w-[160px] object-contain shrink-0 drop-shadow-sm ${isDarkMode ? 'invert' : ''}`} 
             />
           </div>
@@ -65,8 +65,8 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
 
             <div className="flex items-center px-2 min-[400px]:px-3 py-1 sm:py-1.5 rounded-xl bg-transparent border-transparent">
               <img 
-                src={hrPulseLogo} 
-                alt="HR Pulse Logo" 
+                src={kormiisLogo} 
+                alt="Kormiis Logo" 
                 className={`h-8 sm:h-10 w-auto max-w-[140px] sm:max-w-[180px] object-contain shrink-0 drop-shadow-sm ${isDarkMode ? 'invert' : ''}`} 
               />
             </div>

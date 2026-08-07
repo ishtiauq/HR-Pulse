@@ -1,6 +1,6 @@
-# HR Pulse Design System (DESIGN.md)
+# Kormiis Design System (DESIGN.md)
 
-This file contains the structured design rules and styling tokens for the **HR Pulse** web application, utilizing the **macOS 27 Liquid Glass** design language.
+This file contains the structured design rules and styling tokens for the **Kormiis** web application, utilizing the **macOS 27 Liquid Glass** design language.
 
 ## Visual Theme: macOS 27 Liquid Glass (System Responsive)
 Inspired by macOS 27, this design leverages translucent backgrounds, vibrant gradients, and pronounced background blurs to create a sense of depth. It embraces smooth micro-animations and system-native typography.

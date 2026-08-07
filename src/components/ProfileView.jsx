@@ -186,7 +186,7 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
               <p className="text-sm text-muted-foreground">No devices found.</p>
             )}
             {userDevices.map(device => {
-              const currentDeviceId = localStorage.getItem('hr_pulse_device_id')
+              const currentDeviceId = localStorage.getItem('kormiis_device_id')
               const isCurrent = device.deviceId === currentDeviceId
               return (
                 <div key={device.deviceId} className="flex items-center justify-between p-4 rounded-xl border border-border bg-card">

@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, useScroll, useTransform, useSpring, useMotionValueEvent, useMotionValue, useMotionTemplate } from 'framer-motion'
 import Icon from "@/components/ui/Icon.jsx"
-import hrPulseLogo from '../Assets/Kormiis Logo Final.svg'
-import hrPulseMembershipLogo from '../Assets/Kormiis Logo Membership.svg'
+import kormiisLogo from '../Assets/Kormiis Logo Final.svg'
+import kormiisMembershipLogo from '../Assets/Kormiis Logo Membership.svg'
 import heroCharacters from '../Assets/hero-characters.png'
 import { fetchUserProfile } from '../services/googleDrive.js'
 import { verifyPassword, hashPassword } from '../services/crypto.js'
@@ -16,7 +16,7 @@ import card1Illustration from '../Assets/card-1.png'
 import card2Illustration from '../Assets/card-2.png'
 import card3Illustration from '../Assets/card-3.png'
 
-const ADMIN_ACCOUNTS_KEY = 'hr_pulse_admin_accounts'
+const ADMIN_ACCOUNTS_KEY = 'kormiis_admin_accounts'
 
 const MARKETING_PILLARS = [
   {
@@ -45,7 +45,7 @@ const MOCK_DASHBOARD_DATA = {
   attendance: {},
   payroll: {},
   announcements: [
-    { id: 'a1', title: 'Welcome to HR Pulse', authorId: '1', date: new Date().toISOString(), priority: 'Important' }
+    { id: 'a1', title: 'Welcome to Kormiis', authorId: '1', date: new Date().toISOString(), priority: 'Important' }
   ],
   events: [],
   tasks: [{ id: 't1', title: 'Complete Onboarding', status: 'Pending' }],
@@ -237,7 +237,7 @@ function MarketingSectionTwo() {
             </span>
             {/* Logo / Brand mark */}
             <div className="flex items-center opacity-90">
-              <img src={hrPulseMembershipLogo} alt="Kormiis Logo" className="h-5 sm:h-7 w-auto object-contain drop-shadow-md" />
+              <img src={kormiisMembershipLogo} alt="Kormiis Logo" className="h-5 sm:h-7 w-auto object-contain drop-shadow-md" />
             </div>
           </div>
 
@@ -282,7 +282,7 @@ const FAQ_ITEMS = [
     a: 'No catch — free for a limited time for growing teams; no subscriptions, no card.',
   },
   {
-    q: 'Is HR Pulse really free?',
+    q: 'Is Kormiis really free?',
     a: 'Yes — creating a workspace is 100% free. No credit card, no trial clock, no hidden fees. You stay in full control of everything.',
   },
   {
@@ -294,7 +294,7 @@ const FAQ_ITEMS = [
     a: 'Your dashboard creates teammate accounts with work emails. Each teammate signs in with their email and a secure password — no extra setup.',
   },
   {
-    q: 'Can I use HR Pulse on any device?',
+    q: 'Can I use Kormiis on any device?',
     a: 'Yes. The app is fully responsive, so attendance, payroll, and asset tracking work smoothly on desktop, tablet, and mobile browsers.',
   },
   {
@@ -690,7 +690,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setError('')
     setIsLoading(true)
     try {
-      const storedEmployees = localStorage.getItem('hr_pulse_employees_plain')
+      const storedEmployees = localStorage.getItem('kormiis_employees_plain')
       if (!storedEmployees) {
         setError('No employee data found. Please contact your HR department.')
         setIsLoading(false)
@@ -709,7 +709,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         setIsLoading(false)
         return
       }
-      const hrToken = localStorage.getItem('hr_pulse_hr_token')
+      const hrToken = localStorage.getItem('kormiis_hr_token')
       const employeeUser = {
         name: employee.name,
         email: employee.email,
@@ -768,8 +768,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             className="flex items-center gap-3"
           >
             <img 
-              src={hrPulseLogo} 
-              alt="HR Pulse Logo" 
+              src={kormiisLogo} 
+              alt="Kormiis Logo" 
               className={`block h-7 sm:h-9 w-auto max-w-[130px] sm:max-w-[160px] object-contain shrink-0 drop-shadow-sm ${themeMode === 'dark' ? 'invert' : ''}`} 
             />
           </motion.div>
@@ -1450,7 +1450,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                     </div>
                     <h3 className="text-lg font-bold mb-2 text-foreground">Connect Google Drive</h3>
                     <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-                      HR Pulse requires access to your Google Drive to store company data securely.
+                      Kormiis requires access to your Google Drive to store company data securely.
                     </p>
                     {error && (
                       <div className="p-3.5 mb-4 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
@@ -1488,7 +1488,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       <FaqSection />
 
       {/* Footer */}
-      <FooterSection themeMode={themeMode} logoSrc={hrPulseLogo} />
+      <FooterSection themeMode={themeMode} logoSrc={kormiisLogo} />
 
       {/* Intermediate Auth Modal */}
       {showIntermediateModal && (
@@ -1502,7 +1502,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
             </div>
             <h3 className="text-xl font-bold mb-2">Connect Google Drive</h3>
             <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
-              HR Pulse requires access to your Google Drive to store company data securely. We only access the dedicated app-data folder.
+              Kormiis requires access to your Google Drive to store company data securely. We only access the dedicated app-data folder.
             </p>
             <div className="flex flex-col gap-3">
               <button 

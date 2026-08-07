@@ -377,7 +377,7 @@ export default function Payroll({ employees, payroll, setPayroll, addLog, driveC
     doc.setTextColor(255, 255, 255)
     doc.setFontSize(11)
     doc.setFont('helvetica', 'bold')
-    doc.text('HR PULSE — PAYSLIP RECEIPT', pageW / 2, y + 9, { align: 'center' })
+    doc.text('KORMIIS — PAYSLIP RECEIPT', pageW / 2, y + 9, { align: 'center' })
     y += 22
 
     // Employee info

@@ -11,7 +11,7 @@ export function useCommandPalette({ user, employees, themeMode, toggleTheme, set
 
   const { confirm, ConfirmDialog } = useConfirm()
   const [recentActions, setRecentActions] = useState(() => {
-    const saved = localStorage.getItem('hr_pulse_recent_actions')
+    const saved = localStorage.getItem('kormiis_recent_actions')
     return saved ? JSON.parse(saved) : [
       { id: 'page-employees', type: 'page', label: 'Go to Employees', view: 'employees' },
       { id: 'page-attendance', type: 'page', label: 'Go to Attendance & Leaves', view: 'attendance' }
@@ -19,7 +19,7 @@ export function useCommandPalette({ user, employees, themeMode, toggleTheme, set
   })
 
   useEffect(() => {
-    localStorage.setItem('hr_pulse_recent_actions', JSON.stringify(recentActions))
+    localStorage.setItem('kormiis_recent_actions', JSON.stringify(recentActions))
   }, [recentActions])
 
   const trackRecentAction = (action) => {

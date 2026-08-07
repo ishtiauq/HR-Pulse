@@ -925,7 +925,7 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
 
       doc.text('Terms and Conditions:', 20, finalY)
       doc.setFontSize(10)
-      doc.text('1. The asset remains the property of HR Pulse Ltd.', 20, finalY + 10)
+      doc.text('1. The asset remains the property of Kormiis Ltd.', 20, finalY + 10)
       doc.text('2. The employee agrees to keep the asset in good condition.', 20, finalY + 20)
       doc.text('3. The employee must return the asset upon termination of employment.', 20, finalY + 30)
 

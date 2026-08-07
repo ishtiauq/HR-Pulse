@@ -1,8 +1,8 @@
 /**
- * IndexedDB Helper for HR Pulse (Offline-First Cache Layer)
+ * IndexedDB Helper for Kormiis (Offline-First Cache Layer)
  */
 
-const DB_NAME = 'hr_pulse_sync_db';
+const DB_NAME = 'kormiis_sync_db';
 const DB_VERSION = 2; // Upgraded to v2
 
 const STORE_FILES = 'files';

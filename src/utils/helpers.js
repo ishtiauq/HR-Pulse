@@ -1,7 +1,7 @@
 import { createElement } from 'react'
 import Icon from '../components/ui/Icon.jsx'
 
-export const EMPLOYEES_STORAGE_KEY = 'hr_pulse_employees'
+export const EMPLOYEES_STORAGE_KEY = 'kormiis_employees'
 
 export function timestampArrayChanges(prev, next) {
   if (!Array.isArray(prev) || !Array.isArray(next)) return next;
@@ -38,10 +38,10 @@ export const allNavItems = [
 ]
 
 export function getDeviceInfo() {
-  let deviceId = localStorage.getItem('hr_pulse_device_id')
+  let deviceId = localStorage.getItem('kormiis_device_id')
   if (!deviceId) {
-    deviceId = 'dev_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-    localStorage.setItem('hr_pulse_device_id', deviceId)
+    deviceId = crypto.randomUUID()
+    localStorage.setItem('kormiis_device_id', deviceId)
   }
 
   const ua = navigator.userAgent

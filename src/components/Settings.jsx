@@ -46,7 +46,7 @@ function LocationMarker({ position, setPosition }) {
 }
 
 export default function Settings({ settings, setSettings, addLog, addToast, auditLogs, simulatedRole, syncConflicts, setSyncConflicts, themeMode, toggleTheme }) {
-  const [activeSubmenu, setActiveSubmenu] = useState(() => localStorage.getItem('hr_pulse_settings_tab') || null)
+  const [activeSubmenu, setActiveSubmenu] = useState(() => localStorage.getItem('kormiis_settings_tab') || null)
   const [panelOpen, setPanelOpen] = useState(false)
   const setTab = (id) => {
     if (activeSubmenu === id && panelOpen) {
@@ -54,7 +54,7 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
     } else {
       setActiveSubmenu(id)
       setPanelOpen(true)
-      localStorage.setItem('hr_pulse_settings_tab', id)
+      localStorage.setItem('kormiis_settings_tab', id)
     }
   }
 
@@ -67,9 +67,9 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
   const [salaryStructure, setSalaryStructure] = useState(settings.salaryStructure || [])
   const [expensePolicies, setExpensePolicies] = useState(settings.expensePolicies || { Travel: 500, Meals: 50, 'Office Supplies': 100, Medical: 200, Other: 50 })
   const [leavePolicies, setLeavePolicies] = useState(settings.leavePolicies || { Annual: 14, Sick: 7, Casual: 3, Unpaid: 0 })
-  const [companyName, setCompanyName] = useState(settings.company?.name || 'HR Pulse Ltd.')
-  const [companyEmail, setCompanyEmail] = useState(settings.company?.email || 'hr@hrpulse.io')
-  const [companyWebsite, setCompanyWebsite] = useState(settings.company?.website || 'www.hrpulse.io')
+  const [companyName, setCompanyName] = useState(settings.company?.name || 'Kormiis Ltd.')
+  const [companyEmail, setCompanyEmail] = useState(settings.company?.email || 'hr@kormiis.io')
+  const [companyWebsite, setCompanyWebsite] = useState(settings.company?.website || 'www.kormiis.io')
   const [logo, setLogo] = useState(settings.company?.logo || '')
   const [logoX, setLogoX] = useState(settings.company?.logoX || 0)
   const [logoY, setLogoY] = useState(settings.company?.logoY || 0)
@@ -375,21 +375,21 @@ export default function Settings({ settings, setSettings, addLog, addToast, audi
                 <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Legal Entity Name</label>
                 <div className="relative">
                   <Icon name="apartment" size={16} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="HR Pulse Ltd." className="pl-9" />
+                  <Input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="Kormiis Ltd." className="pl-9" />
                 </div>
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">HR Support Email</label>
                 <div className="relative">
                   <Icon name="mail" size={16} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="hr@hrpulse.io" className="pl-9" />
+                  <Input type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} placeholder="hr@kormiis.io" className="pl-9" />
                 </div>
               </div>
               <div className="flex flex-col gap-2 md:col-span-2">
                 <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-[11px]">Company Website URL</label>
                 <div className="relative">
                   <Icon name="language" size={16} className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input value={companyWebsite} onChange={e => setCompanyWebsite(e.target.value)} placeholder="www.hrpulse.io" className="pl-9" />
+                  <Input value={companyWebsite} onChange={e => setCompanyWebsite(e.target.value)} placeholder="www.kormiis.io" className="pl-9" />
                 </div>
               </div>
             </div>
