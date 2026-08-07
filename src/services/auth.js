@@ -1,4 +1,4 @@
-import { auth, db, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber } from './firebase.js';
+import { auth, db, GoogleAuthProvider, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber } from './firebase.js';
 
 /**
  * Ensures a user document exists in Firestore. 
@@ -41,8 +41,13 @@ export const updateDriveConnectionStatus = async (uid, status = true) => {
 export const loginWithGoogle = async () => {
   if (!auth) throw new Error('Firebase not configured');
   const provider = new GoogleAuthProvider();
-  const result = await signInWithPopup(auth, provider);
-  return result.user;
+  await signInWithRedirect(auth, provider);
+};
+
+export const getGoogleRedirectResult = async () => {
+  if (!auth) return null;
+  const result = await getRedirectResult(auth);
+  return result?.user || null;
 };
 
 export const loginWithEmail = async (email, password) => {

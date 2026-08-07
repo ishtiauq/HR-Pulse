@@ -6,7 +6,7 @@ import kormiisMembershipLogo from '../Assets/Kormiis Logo Membership.svg'
 import heroCharacters from '../Assets/hero-characters.png'
 import { fetchUserProfile } from '../services/googleDrive.js'
 import { verifyPassword, hashPassword } from '../services/crypto.js'
-import { loginWithGoogle, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, updateProfileData, updateDriveConnectionStatus, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp } from '../services/auth.js'
+import { loginWithGoogle, getGoogleRedirectResult, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, updateProfileData, updateDriveConnectionStatus, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp } from '../services/auth.js'
 import { fetchEmployeeSnapshot } from '../services/bridge.js'
 import Dashboard from './Dashboard.jsx'
 import { allNavItems } from '../utils/helpers.js'
@@ -573,22 +573,42 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setError('')
     setIsLoading(true)
     try {
-      const user = await loginWithGoogle()
-      setFirebaseUser(user)
-      const { data } = await checkAndCreateUserDoc(user)
-      setIsLoading(false)
-      if (!data?.fullName || !data?.companyName) {
-        setOnboardingStep(2)
-      } else {
-        setFullName(data.fullName)
-        setCompanyName(data.companyName)
-        setOnboardingStep(3)
-      }
+      await loginWithGoogle()
+      // Redirecting to Google — login continues in getGoogleRedirectResult on return
     } catch (err) {
       setError('Google Login failed: ' + err.message)
       setIsLoading(false)
     }
   }
+
+  // Finish Google sign-in when redirected back from Google
+  useEffect(() => {
+    let cancelled = false
+    const finishGoogleRedirect = async () => {
+      try {
+        const user = await getGoogleRedirectResult()
+        if (cancelled || !user) return
+        setFirebaseUser(user)
+        const { data } = await checkAndCreateUserDoc(user)
+        if (cancelled) return
+        setIsLoading(false)
+        if (!data?.fullName || !data?.companyName) {
+          setOnboardingStep(2)
+        } else {
+          setFullName(data.fullName)
+          setCompanyName(data.companyName)
+          setOnboardingStep(3)
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError('Google Login failed: ' + err.message)
+          setIsLoading(false)
+        }
+      }
+    }
+    finishGoogleRedirect()
+    return () => { cancelled = true }
+  }, [])
 
   // --- Phone Auth (Firebase) ---
   const handleSendPhoneOtp = async (e) => {
