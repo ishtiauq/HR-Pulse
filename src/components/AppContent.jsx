@@ -115,13 +115,13 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
     case 'attendance':
       return <Attendance employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} roster={data.roster} setRoster={data.setRoster} shiftSwaps={data.shiftSwaps} setShiftSwaps={data.setShiftSwaps} shiftTemplates={data.settings?.shiftTemplates} overtimeClaims={data.overtimeClaims} setOvertimeClaims={data.setOvertimeClaims} addLog={data.addLog} driveConnected={data.driveConnected} addToast={data.addToast} addNotification={data.addNotification} simulatedRole={simulatedRole} addAuditLog={data.addAuditLog} settings={data.settings} />
     case 'announcements':
-      return <Announcements employees={data.employees} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} />
+      return <Announcements employees={data.employees} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} addNotification={data.addNotification} />
     case 'calendar':
-      return <Calendar events={data.events} setEvents={data.handleSetEvents} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} />
+      return <Calendar events={data.events} setEvents={data.handleSetEvents} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} addNotification={data.addNotification} />
     case 'documents':
-      return <Documents documents={data.documents} setDocuments={data.handleSetDocuments} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} adminUid={data.adminUid} />
+      return <Documents documents={data.documents} setDocuments={data.handleSetDocuments} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} adminUid={data.adminUid} addNotification={data.addNotification} />
     case 'assets':
-      return <Assets employees={data.employees} assets={data.assets} setAssets={data.setAssets} assetRequests={data.assetRequests} setAssetRequests={data.setAssetRequests} assetCategories={data.assetCategories} setAssetCategories={data.setAssetCategories} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} />
+      return <Assets employees={data.employees} assets={data.assets} setAssets={data.setAssets} assetRequests={data.assetRequests} setAssetRequests={data.setAssetRequests} assetCategories={data.assetCategories} setAssetCategories={data.setAssetCategories} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} addNotification={data.addNotification} />
     case 'tasks':
       return <Tasks tasks={data.tasks} setTasks={data.handleSetTasks} employees={data.employees} currentUser={user} addToast={data.addToast} simulatedRole={simulatedRole} addLog={data.addLog} addNotification={data.addNotification} />
     case 'expenses':

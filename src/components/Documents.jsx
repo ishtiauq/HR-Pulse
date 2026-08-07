@@ -37,7 +37,7 @@ const formatFileSize = (bytes) => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
-export default function Documents({ documents, setDocuments, addLog, addToast, currentUser, simulatedRole }) {
+export default function Documents({ documents, setDocuments, addLog, addToast, currentUser, simulatedRole, adminUid, addNotification }) {
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [filterFormat, setFilterFormat] = useState('all')
@@ -118,6 +118,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
         setDocuments(prev => prev.map(d => d.id === editingDoc.id ? { ...d, name: formName, category: formCategory, description: formDescription } : d))
         addToast('Document metadata updated', 'success')
         addLog('Document Updated', formName)
+        if (addNotification) addNotification(`Company document updated: "${formName}"`)
       } else {
         const id = `doc-${Date.now()}`;
         const fileName = formFile?.name || `${formName.replace(/\s+/g, '_')}.pdf`;
@@ -144,6 +145,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
         setDocuments(prev => [newDoc, ...prev])
         addToast('Document uploaded successfully. Syncing to secure storage...', 'success')
         addLog('Document Uploaded', formName)
+        if (addNotification) addNotification(`New company document available: "${formName}"`)
       }
 
       setShowUploadModal(false)

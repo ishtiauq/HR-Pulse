@@ -759,7 +759,7 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
   )
 }
 
-export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, assetCategories, setAssetCategories, addLog, addToast, currentUser, simulatedRole }) {
+export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, assetCategories, setAssetCategories, addLog, addToast, currentUser, simulatedRole, addNotification }) {
   // SETTING DEFAULT TO INVENTORY AS DASHBOARD IS REMOVED
   const [activeView, setActiveView] = useState('inventory')
   const [search, setSearch] = useState('')
@@ -898,7 +898,9 @@ export default function Assets({ employees, assets, setAssets, assetRequests, se
 
     setShowAssignModal(false)
     addToast('Asset assigned successfully', 'success')
-    addLog('Asset "' + assignTarget.name + '" assigned to ' + (employees.find(emp => emp.id === assignForm.employeeId)?.name || 'unknown'))
+    const empName = employees.find(emp => emp.id === assignForm.employeeId)?.name || 'unknown'
+    addLog('Asset "' + assignTarget.name + '" assigned to ' + empName)
+    if (addNotification) addNotification(`You have been assigned a new asset: "${assignTarget.name}"`)
     generateAgreementPDF(assignTarget, employees.find(emp => emp.id === assignForm.employeeId), assignForm.notes)
   }
 

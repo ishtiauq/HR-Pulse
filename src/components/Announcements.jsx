@@ -23,7 +23,7 @@ const HoverTooltip = ({ content, children, position = 'center' }) => {
   )
 }
 
-export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, simulatedRole, headline = 'Announcements' }) {
+export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, simulatedRole, addNotification, headline = 'Announcements' }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingPostId, setEditingPostId] = useState(null)
 
@@ -100,11 +100,12 @@ export default function Announcements({ employees, announcements, setAnnouncemen
         } : null
       }
       setAnnouncements(prev => [newPost, ...prev])
-      addToast('Announcement published successfully!', 'success')
-      addLog('Announcement Created', `Title: ${title}`)
+      addToast('Announcement posted', 'success')
+      addLog('Posted Announcement', title)
+      if (addNotification) addNotification(`New announcement posted: "${title}"`)
     }
 
-    setTitle('')
+    setIsDialogOpen(false)
     setContent('')
     setCategory('General')
     setPriority('Normal')

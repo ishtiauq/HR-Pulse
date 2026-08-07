@@ -21,7 +21,7 @@ const EVENT_TYPES = [
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-export default function Calendar({ events, setEvents, employees, addLog, addToast, currentUser, simulatedRole }) {
+export default function Calendar({ events, setEvents, employees, addLog, addToast, currentUser, simulatedRole, addNotification }) {
   const today = new Date()
   const [currentMonth, setCurrentMonth] = useState(today.getMonth())
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
@@ -90,6 +90,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
       ))
       addToast('Event updated', 'success')
       addLog('Event Updated', `${formTitle} on ${formDate}`)
+      if (addNotification) addNotification(`Company event updated: "${formTitle}" on ${formDate}`)
     } else {
       const newEvent = {
         id: `evt-${Date.now()}`,
@@ -104,6 +105,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
       setEvents(prev => [...prev, newEvent])
       addToast('Event created', 'success')
       addLog('Event Created', `${formTitle} on ${formDate}`)
+      if (addNotification) addNotification(`New company event scheduled: "${formTitle}" on ${formDate}`)
     }
 
     setShowEventModal(false)
