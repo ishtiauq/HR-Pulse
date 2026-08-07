@@ -99,7 +99,7 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
         </div>
         <h2 style={{ fontSize: '1.8rem', color: 'var(--color-md-sys-error)', marginBottom: '16px' }}>403 Forbidden</h2>
         <p style={{ color: 'var(--color-md-sys-on-surface-variant)', maxWidth: '400px', margin: '0 auto' }}>
-          Your current role (<strong>{simulatedRole}</strong>) does not have permission to access the <strong>{currentView}</strong> module.
+          Your current role (<strong>{user?.role || (user?.isEmployee ? 'Teammate' : 'Admin')}</strong>) does not have permission to access the <strong>{currentView}</strong> module.
         </p>
       </div>
     )
@@ -107,34 +107,34 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
 
   switch (currentView) {
     case 'dashboard':
-      return <Dashboard employees={data.employees} syncLogs={data.syncLogs} driveConnected={data.driveConnected} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} simulatedRole={simulatedRole} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} settings={data.settings} notes={data.notes} setNotes={data.handleSetNotes} />
+      return <Dashboard employees={data.employees} syncLogs={data.syncLogs} driveConnected={data.driveConnected} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} settings={data.settings} notes={data.notes} setNotes={data.handleSetNotes} />
     case 'employees':
-      return <Employees employees={data.employees} setEmployees={data.handleSetEmployees} addLog={data.addLog} driveConnected={data.driveConnected} simulatedRole={simulatedRole} addAuditLog={data.addAuditLog} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} selectedEmployeeId={data.selectedEmployeeId} setSelectedEmployeeId={data.setSelectedEmployeeId} isSidebarCollapsed={isSidebarCollapsed} adminUid={data.adminUid} currentUser={user} />
+      return <Employees employees={data.employees} setEmployees={data.handleSetEmployees} addLog={data.addLog} driveConnected={data.driveConnected} addAuditLog={data.addAuditLog} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} selectedEmployeeId={data.selectedEmployeeId} setSelectedEmployeeId={data.setSelectedEmployeeId} isSidebarCollapsed={isSidebarCollapsed} adminUid={data.adminUid} currentUser={user} />
     case 'payroll':
-      return <Payroll employees={data.employees} payroll={data.payroll} setPayroll={data.handleSetPayroll} addLog={data.addLog} driveConnected={data.driveConnected} settings={data.settings} simulatedRole={simulatedRole} addAuditLog={data.addAuditLog} />
+      return <Payroll employees={data.employees} payroll={data.payroll} setPayroll={data.handleSetPayroll} addLog={data.addLog} driveConnected={data.driveConnected} settings={data.settings} addAuditLog={data.addAuditLog} />
     case 'attendance':
-      return <Attendance employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} roster={data.roster} setRoster={data.setRoster} shiftSwaps={data.shiftSwaps} setShiftSwaps={data.setShiftSwaps} shiftTemplates={data.settings?.shiftTemplates} overtimeClaims={data.overtimeClaims} setOvertimeClaims={data.setOvertimeClaims} addLog={data.addLog} driveConnected={data.driveConnected} addToast={data.addToast} addNotification={data.addNotification} simulatedRole={simulatedRole} addAuditLog={data.addAuditLog} settings={data.settings} />
+      return <Attendance employees={data.employees} attendance={data.attendance} setAttendance={data.handleSetAttendance} roster={data.roster} setRoster={data.setRoster} shiftSwaps={data.shiftSwaps} setShiftSwaps={data.setShiftSwaps} shiftTemplates={data.settings?.shiftTemplates} overtimeClaims={data.overtimeClaims} setOvertimeClaims={data.setOvertimeClaims} addLog={data.addLog} driveConnected={data.driveConnected} addToast={data.addToast} addNotification={data.addNotification} addAuditLog={data.addAuditLog} settings={data.settings} />
     case 'announcements':
-      return <Announcements employees={data.employees} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} addNotification={data.addNotification} />
+      return <Announcements employees={data.employees} announcements={data.announcements} setAnnouncements={data.setAnnouncements} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} />
     case 'calendar':
-      return <Calendar events={data.events} setEvents={data.handleSetEvents} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} addNotification={data.addNotification} />
+      return <Calendar events={data.events} setEvents={data.handleSetEvents} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} />
     case 'documents':
-      return <Documents documents={data.documents} setDocuments={data.handleSetDocuments} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} adminUid={data.adminUid} addNotification={data.addNotification} />
+      return <Documents documents={data.documents} setDocuments={data.handleSetDocuments} employees={data.employees} addLog={data.addLog} addToast={data.addToast} currentUser={user} adminUid={data.adminUid} addNotification={data.addNotification} />
     case 'assets':
-      return <Assets employees={data.employees} assets={data.assets} setAssets={data.setAssets} assetRequests={data.assetRequests} setAssetRequests={data.setAssetRequests} assetCategories={data.assetCategories} setAssetCategories={data.setAssetCategories} addLog={data.addLog} addToast={data.addToast} currentUser={user} simulatedRole={simulatedRole} addNotification={data.addNotification} />
+      return <Assets employees={data.employees} assets={data.assets} setAssets={data.setAssets} assetRequests={data.assetRequests} setAssetRequests={data.setAssetRequests} assetCategories={data.assetCategories} setAssetCategories={data.setAssetCategories} addLog={data.addLog} addToast={data.addToast} currentUser={user} addNotification={data.addNotification} />
     case 'tasks':
-      return <Tasks tasks={data.tasks} setTasks={data.handleSetTasks} employees={data.employees} currentUser={user} addToast={data.addToast} simulatedRole={simulatedRole} addLog={data.addLog} addNotification={data.addNotification} />
+      return <Tasks tasks={data.tasks} setTasks={data.handleSetTasks} employees={data.employees} currentUser={user} addToast={data.addToast} addLog={data.addLog} addNotification={data.addNotification} />
     case 'expenses':
-      return <Expenses employees={data.employees} expenses={data.expenses} setExpenses={data.handleSetExpenses} settings={data.settings} addLog={data.addLog} addToast={data.addToast} addAuditLog={data.addAuditLog} simulatedRole={simulatedRole} currentUser={user} />
+      return <Expenses employees={data.employees} expenses={data.expenses} setExpenses={data.handleSetExpenses} settings={data.settings} addLog={data.addLog} addToast={data.addToast} addAuditLog={data.addAuditLog} currentUser={user} />
     case 'settings':
-      return <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} simulatedRole={simulatedRole} syncConflicts={data.syncConflicts} setSyncConflicts={data.setSyncConflicts} themeMode={themeMode} toggleTheme={toggleTheme} />
+      return <Settings settings={data.settings} setSettings={data.handleSetSettings} addLog={data.addLog} addToast={data.addToast} auditLogs={data.auditLogs} syncConflicts={data.syncConflicts} setSyncConflicts={data.setSyncConflicts} themeMode={themeMode} toggleTheme={toggleTheme} />
     case 'profile':
       return <ProfileView currentUser={user} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} addLog={data.addLog} settings={data.settings} setSettings={data.handleSetSettings} employees={data.employees} setEmployees={data.handleSetEmployees} />
     case 'drive':
       return <DriveSync user={user} driveConnected={data.driveConnected} setDriveConnected={data.setDriveConnected} addLog={data.addLog} addToast={data.addToast} />
     case 'notes':
-      return <Notes notes={data.notes} setNotes={data.handleSetNotes} currentUser={user} addToast={data.addToast} simulatedRole={simulatedRole} />
+      return <Notes notes={data.notes} setNotes={data.handleSetNotes} currentUser={user} addToast={data.addToast} />
     default:
-      return <Dashboard employees={data.employees} syncLogs={data.syncLogs} driveConnected={data.driveConnected} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} simulatedRole={simulatedRole} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} />
+      return <Dashboard employees={data.employees} syncLogs={data.syncLogs} driveConnected={data.driveConnected} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} />
   }
 }
