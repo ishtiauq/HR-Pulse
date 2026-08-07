@@ -546,8 +546,8 @@ export default function useAppData({ user, addToast }) {
         setIsSyncing(false)
         setIsAppLoading(false)
         setDbStatus('corruption')
+        setDriveConnected(false)
         if (err.message && (err.message.includes('Unauthorized') || err.message.includes('401'))) {
-          setDriveConnected(false);
           addToast('Google Drive session expired. Please sign in again.', 'warning');
           addLog('Sync Paused', 'Session expired. Please sign in to Google Drive.', 'warning');
         } else {
