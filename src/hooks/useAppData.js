@@ -196,8 +196,18 @@ export default function useAppData({ user, addToast }) {
   useEffect(() => {
     if (!adminUid) return;
 
-    const applyUpdate = (setter, driveWriter, tableName, data) => {
+    const applyUpdate = (setter, driveWriter, tableName, data, lastUpdated) => {
       if (data) {
+        // Freshness guard: if this Firestore snapshot is older than the last
+        // local edit for this table, it is stale (e.g. a delete that was still
+        // in flight when the page refreshed). Skip it so deleted items are not
+        // resurrected and stale data is not written back to Drive.
+        const localEdit = Number(localStorage.getItem(`kormiis_${tableName}_updatedAt`) || 0);
+        const fbMs = lastUpdated
+          ? (typeof lastUpdated.toMillis === 'function' ? lastUpdated.toMillis() : new Date(lastUpdated).getTime())
+          : 0;
+        if (fbMs && localEdit && fbMs < localEdit) return;
+
         setter(prev => {
           if (JSON.stringify(prev) !== JSON.stringify(data)) {
             // Data changed from remote Firestore
@@ -212,29 +222,35 @@ export default function useAppData({ user, addToast }) {
       }
     };
 
-    const unsubEmployees = subscribeToTable(adminUid, 'employees', (data) => applyUpdate(setEmployeesRaw, writeTable, 'employees', data));
-    const unsubPayroll = subscribeToTable(adminUid, 'payroll', (data) => applyUpdate(setPayrollRaw, writeTable, 'payroll', data));
-    const unsubSettings = subscribeToTable(adminUid, 'settings', (data) => applyUpdate(setSettingsRaw, writeTable, 'settings', data));
-    const unsubTasks = subscribeToTable(adminUid, 'tasks', (data) => applyUpdate(setTasks, writeTable, 'tasks', data));
-    const unsubNotes = subscribeToTable(adminUid, 'notes', (data) => applyUpdate(setNotesRaw, writeTable, 'notes', data));
-    const unsubExpenses = subscribeToTable(adminUid, 'expenses', (data) => applyUpdate(setExpensesRaw, writeTable, 'expenses', data));
-    const unsubEvents = subscribeToTable(adminUid, 'events', (data) => applyUpdate(setEvents, writeTable, 'events', data));
-    const unsubDocuments = subscribeToTable(adminUid, 'documents', (data) => applyUpdate(setDocuments, writeTable, 'documents', data));
-    const unsubRoster = subscribeToTable(adminUid, 'roster', (data) => applyUpdate(setRoster, writeTable, 'roster', data));
-    const unsubShiftSwaps = subscribeToTable(adminUid, 'shift_swaps', (data) => applyUpdate(setShiftSwaps, writeTable, 'shift_swaps', data));
-    const unsubOvertime = subscribeToTable(adminUid, 'overtime_claims', (data) => applyUpdate(setOvertimeClaims, writeTable, 'overtime_claims', data));
-    const unsubAnnouncements = subscribeToTable(adminUid, 'announcements', (data) => applyUpdate(setAnnouncements, writeTable, 'announcements', data));
-    const unsubAssets = subscribeToTable(adminUid, 'assets', (data) => applyUpdate(setAssets, writeTable, 'assets', data));
-    const unsubAssetRequests = subscribeToTable(adminUid, 'asset_requests', (data) => applyUpdate(setAssetRequests, writeTable, 'asset_requests', data));
-    const unsubAssetCategories = subscribeToTable(adminUid, 'asset_categories', (data) => applyUpdate(setAssetCategories, writeTable, 'asset_categories', data));
+    const unsubEmployees = subscribeToTable(adminUid, 'employees', (data, lastUpdated) => applyUpdate(setEmployeesRaw, writeTable, 'employees', data, lastUpdated));
+    const unsubPayroll = subscribeToTable(adminUid, 'payroll', (data, lastUpdated) => applyUpdate(setPayrollRaw, writeTable, 'payroll', data, lastUpdated));
+    const unsubSettings = subscribeToTable(adminUid, 'settings', (data, lastUpdated) => applyUpdate(setSettingsRaw, writeTable, 'settings', data, lastUpdated));
+    const unsubTasks = subscribeToTable(adminUid, 'tasks', (data, lastUpdated) => applyUpdate(setTasks, writeTable, 'tasks', data, lastUpdated));
+    const unsubNotes = subscribeToTable(adminUid, 'notes', (data, lastUpdated) => applyUpdate(setNotesRaw, writeTable, 'notes', data, lastUpdated));
+    const unsubExpenses = subscribeToTable(adminUid, 'expenses', (data, lastUpdated) => applyUpdate(setExpensesRaw, writeTable, 'expenses', data, lastUpdated));
+    const unsubEvents = subscribeToTable(adminUid, 'events', (data, lastUpdated) => applyUpdate(setEvents, writeTable, 'events', data, lastUpdated));
+    const unsubDocuments = subscribeToTable(adminUid, 'documents', (data, lastUpdated) => applyUpdate(setDocuments, writeTable, 'documents', data, lastUpdated));
+    const unsubRoster = subscribeToTable(adminUid, 'roster', (data, lastUpdated) => applyUpdate(setRoster, writeTable, 'roster', data, lastUpdated));
+    const unsubShiftSwaps = subscribeToTable(adminUid, 'shift_swaps', (data, lastUpdated) => applyUpdate(setShiftSwaps, writeTable, 'shift_swaps', data, lastUpdated));
+    const unsubOvertime = subscribeToTable(adminUid, 'overtime_claims', (data, lastUpdated) => applyUpdate(setOvertimeClaims, writeTable, 'overtime_claims', data, lastUpdated));
+    const unsubAnnouncements = subscribeToTable(adminUid, 'announcements', (data, lastUpdated) => applyUpdate(setAnnouncements, writeTable, 'announcements', data, lastUpdated));
+    const unsubAssets = subscribeToTable(adminUid, 'assets', (data, lastUpdated) => applyUpdate(setAssets, writeTable, 'assets', data, lastUpdated));
+    const unsubAssetRequests = subscribeToTable(adminUid, 'asset_requests', (data, lastUpdated) => applyUpdate(setAssetRequests, writeTable, 'asset_requests', data, lastUpdated));
+    const unsubAssetCategories = subscribeToTable(adminUid, 'asset_categories', (data, lastUpdated) => applyUpdate(setAssetCategories, writeTable, 'asset_categories', data, lastUpdated));
 
-    const handleAttUpdate = (key, data) => {
+    const handleAttUpdate = (key, data, lastUpdated) => {
       if(data) {
+        const tn = key === 'leaves' ? 'leave_requests' : key === 'balances' ? 'leave_balances' : 'attendance_logs';
+        const localEdit = Number(localStorage.getItem(`kormiis_${tn}_updatedAt`) || 0);
+        const fbMs = lastUpdated
+          ? (typeof lastUpdated.toMillis === 'function' ? lastUpdated.toMillis() : new Date(lastUpdated).getTime())
+          : 0;
+        if (fbMs && localEdit && fbMs < localEdit) return;
+
         setAttendanceRaw(prev => {
           if (JSON.stringify(prev[key]) !== JSON.stringify(data)) {
             const next = { ...prev, [key]: data };
             if (!user?.isEmployee && driveConnected && metaManifest) {
-               const tn = key === 'leaves' ? 'leave_requests' : key === 'balances' ? 'leave_balances' : 'attendance_logs';
                writeTable(tn, data, { ...metaManifest }, user.token).catch(e => console.error(e));
             }
             return next;
@@ -243,9 +259,9 @@ export default function useAppData({ user, addToast }) {
         });
       }
     };
-    const unsubLeaves = subscribeToTable(adminUid, 'leave_requests', (data) => handleAttUpdate('leaves', data));
-    const unsubBalances = subscribeToTable(adminUid, 'leave_balances', (data) => handleAttUpdate('balances', data));
-    const unsubLogs = subscribeToTable(adminUid, 'attendance_logs', (data) => handleAttUpdate('dailyLogs', data));
+    const unsubLeaves = subscribeToTable(adminUid, 'leave_requests', (data, lastUpdated) => handleAttUpdate('leaves', data, lastUpdated));
+    const unsubBalances = subscribeToTable(adminUid, 'leave_balances', (data, lastUpdated) => handleAttUpdate('balances', data, lastUpdated));
+    const unsubLogs = subscribeToTable(adminUid, 'attendance_logs', (data, lastUpdated) => handleAttUpdate('dailyLogs', data, lastUpdated));
 
     return () => {
       unsubEmployees(); unsubPayroll(); unsubSettings(); unsubTasks(); unsubNotes(); unsubExpenses(); unsubEvents();
@@ -792,6 +808,7 @@ export default function useAppData({ user, addToast }) {
     setTasks((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       localStorage.setItem('kormiis_tasks', JSON.stringify(next))
+      localStorage.setItem('kormiis_tasks_updatedAt', String(Date.now()))
       if (adminUid) writeToTable(adminUid, 'tasks', next).catch(e => console.error(e));
       if (!user?.isEmployee && driveConnected && metaManifest) {
         const meta = { ...metaManifest }
@@ -806,6 +823,7 @@ export default function useAppData({ user, addToast }) {
     setNotesRaw((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       localStorage.setItem('kormiis_notes', JSON.stringify(next))
+      localStorage.setItem('kormiis_notes_updatedAt', String(Date.now()))
       if (adminUid) writeToTable(adminUid, 'notes', next).catch(e => console.error(e));
       if (!user?.isEmployee && driveConnected && metaManifest) {
         const meta = { ...metaManifest }

@@ -11,9 +11,9 @@ export const subscribeToTable = (adminUid, tableName, onDataCallback) => {
   
   return onSnapshot(tableRef, (snapshot) => {
     if (snapshot.exists() && snapshot.data().data) {
-      onDataCallback(snapshot.data().data);
+      onDataCallback(snapshot.data().data, snapshot.data().lastUpdated || null);
     } else {
-      onDataCallback(null);
+      onDataCallback(null, null);
     }
   }, (error) => {
     console.error(`Error subscribing to ${tableName}:`, error);
