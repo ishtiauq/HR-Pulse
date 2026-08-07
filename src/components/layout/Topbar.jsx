@@ -10,6 +10,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const buttonRef = useRef(null)
   const [modalPos, setModalPos] = useState({ top: 0, right: 0 })
+  const [showSyncErrorModal, setShowSyncErrorModal] = useState(false)
   const [notificationTab, setNotificationTab] = useState('all')
   const filteredNotifications = notificationTab === 'unread' ? notifications.filter(n => !n.read) : notifications
 
@@ -84,6 +85,8 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
               onClick={() => {
                 if (dataIntegrityIssues && dataIntegrityIssues.length > 0) {
                   if (setShowCorruptionModal) setShowCorruptionModal(true)
+                } else if (!driveConnected || (syncConflicts && syncConflicts.length > 0)) {
+                  setShowSyncErrorModal(true)
                 } else {
                   if (handleSync) handleSync()
                 }
@@ -316,7 +319,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
             </DialogHeader>
             <div className="px-6 py-2">
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                The database validator has found {dataIntegrityIssues?.length || 0} issues. These might be duplicate records, orphaned data, or incorrect values.
+                We found {dataIntegrityIssues?.length || 0} discrepancies in your data. Clicking <strong>Auto-Repair</strong> will automatically clean up orphaned records, fix incorrect values, and rebuild your local cache to match the cloud database.
               </p>
               <div className="max-h-[250px] overflow-y-auto space-y-2 pr-2 mb-4">
                 {(dataIntegrityIssues || []).map((issue, idx) => (
@@ -331,8 +334,54 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
               <Button variant="outline" onClick={() => setShowCorruptionModal(false)} className="rounded-full font-semibold">
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={() => { if(handleAutoRepairDatabase) handleAutoRepairDatabase(); }} className="rounded-full shadow-lg shadow-destructive/20 font-bold px-6">
-                Auto-Repair Database
+              <Button 
+                variant="destructive" 
+                onClick={() => { if(handleAutoRepairDatabase) handleAutoRepairDatabase(); }} 
+                disabled={isSyncing}
+                className="rounded-full shadow-lg shadow-destructive/20 font-bold px-6"
+              >
+                {isSyncing ? 'Repairing...' : 'Auto-Repair Database'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Sync Disconnected Modal */}
+      {showSyncErrorModal !== undefined && (
+        <Dialog open={showSyncErrorModal} onOpenChange={setShowSyncErrorModal}>
+          <DialogContent className="max-w-md bg-card border-warning/20 shadow-2xl p-0 overflow-hidden sm:rounded-[24px]">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-400 to-yellow-500 z-10" />
+            <DialogHeader className="p-6 pb-4">
+              <DialogTitle className="text-xl font-extrabold flex items-center gap-2.5 text-foreground">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-orange-500/10 text-orange-500 shrink-0">
+                  <Icon name="cloud_off" size={22} />
+                </div>
+                Sync Disconnected
+              </DialogTitle>
+            </DialogHeader>
+            <div className="px-6 py-2">
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                The application has lost its connection to Google Drive. This usually happens if your session has expired, or if there's a temporary network issue.
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                Your recent changes have been saved locally, but they will not sync to the cloud until you reconnect.
+              </p>
+            </div>
+            <DialogFooter className="p-4 px-6 bg-muted/10 pb-6 flex justify-end gap-3 mt-4 border-t border-border/50">
+              <Button variant="outline" onClick={() => setShowSyncErrorModal(false)} className="rounded-full font-semibold">
+                Cancel
+              </Button>
+              <Button 
+                variant="default" 
+                onClick={() => {
+                  setShowSyncErrorModal(false);
+                  if (handleSync) handleSync();
+                }} 
+                disabled={isSyncing}
+                className="rounded-full shadow-lg font-bold px-6 bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                {isSyncing ? 'Retrying...' : 'Retry Sync'}
               </Button>
             </DialogFooter>
           </DialogContent>
