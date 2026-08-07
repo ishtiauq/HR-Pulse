@@ -21,7 +21,7 @@ const EVENT_TYPES = [
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-export default function Calendar({ events, setEvents, employees, addLog, addToast, currentUser, simulatedRole, addNotification }) {
+export default function Calendar({ events, setEvents, employees, addLog, addToast, currentUser, addNotification }) {
   const today = new Date()
   const [currentMonth, setCurrentMonth] = useState(today.getMonth())
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
@@ -171,7 +171,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
               <Icon name="chevron_right" size={18} />
             </Button>
           </div>
-          {(simulatedRole === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
+          {(currentUser?.role === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
             <Button className="w-full sm:w-auto" onClick={() => openCreateModal(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`)}>
               <Icon name="add" size={16} className="mr-1.5" /> Add Event
             </Button>
@@ -263,7 +263,7 @@ export default function Calendar({ events, setEvents, employees, addLog, addToas
                           <p className="text-xs m-0 mt-1.5 text-muted-foreground">{ev.description}</p>
                         )}
                       </div>
-                      {!ev.isAuto && (simulatedRole === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
+                      {!ev.isAuto && (currentUser?.role === 'Admin' || currentUser?.permissions?.includes('approve_leaves')) && (
                         <div className="flex items-center gap-1 shrink-0 -mr-1">
                           <Button variant="ghost" size="icon" className="size-8" onClick={() => openEditModal(ev)} aria-label="Edit event">
                             <Icon name="edit" size={14} />

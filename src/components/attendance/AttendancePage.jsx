@@ -22,7 +22,6 @@ export default function AttendancePage({
   addLog, 
   addToast, 
   addNotification, 
-  simulatedRole, 
   addAuditLog,
   settings,
   headline = 'Attendance & Leaves'

@@ -23,7 +23,7 @@ const HoverTooltip = ({ content, children, position = 'center' }) => {
   )
 }
 
-export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, simulatedRole, addNotification, headline = 'Announcements' }) {
+export default function Announcements({ employees, announcements, setAnnouncements, addLog, addToast, currentUser, addNotification, headline = 'Announcements' }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingPostId, setEditingPostId] = useState(null)
 

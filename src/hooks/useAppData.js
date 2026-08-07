@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { validateDatabase } from '../services/validator.js'
 import { encryptJson, decryptJson } from '../services/crypto.js'
 import { EMPLOYEES_STORAGE_KEY, timestampArrayChanges, getDeviceInfo } from '../utils/helpers.js'
-import { syncEmployeeSnapshot, subscribeToTable, writeToTable, fetchTableFromFirestore } from '../services/bridge.js'
+import { subscribeToTable, writeToTable, fetchTableFromFirestore } from '../services/bridge.js'
 
 export default function useAppData({ user, addToast }) {
   /* ─── DB state ─── */
@@ -432,7 +432,6 @@ export default function useAppData({ user, addToast }) {
       const next = timestampArrayChanges(prev, typeof updater === 'function' ? updater(prev) : updater)
       if (adminUid) {
         writeToTable(adminUid, 'employees', next).catch(e => console.error(e));
-        syncEmployeeSnapshot(adminUid, next)
       }
       return next
     })

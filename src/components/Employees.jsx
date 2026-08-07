@@ -3,7 +3,7 @@ import Icon from "@/components/ui/Icon.jsx"
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
-import { hashPassword } from '../services/crypto.js'
+import { provisionEmployeeAccount, updateEmployeeAuthAccount, deleteEmployeeAccount } from '../services/auth.js'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -157,18 +157,18 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
       return
     }
 
-    let passwordHash;
     if (editingEmployee) {
-      if (newPassword) {
-        passwordHash = await hashPassword(newPassword);
-      } else {
-        passwordHash = editingEmployee.passwordHash || editingEmployee.password || '';
+      // Update Firebase Auth account (email/password changes) if needed
+      const authChanged = (newEmail && newEmail !== editingEmployee.email) || newPassword
+      if (authChanged) {
+        try {
+          await updateEmployeeAuthAccount(editingEmployee.uid, { email: newEmail, password: newPassword || undefined })
+        } catch (err) {
+          addToast('Failed to update login credentials: ' + err.message, 'danger')
+          return
+        }
       }
-    } else {
-      passwordHash = newPassword ? await hashPassword(newPassword) : '';
-    }
 
-    if (editingEmployee) {
       // Update employee list
       setEmployees(prev => prev.map(emp => emp.id === editingEmployee.id ? {
         ...emp,
@@ -180,7 +180,6 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         department: finalDept,
         status: newStatus,
         email: newEmail,
-        passwordHash,
         dob: newDob,
         joiningDate: newJoiningDate,
         cvFileName: newCvFileName,
@@ -200,6 +199,31 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         addLog('Identity Uploaded', `Uploaded ID/Passport (${newNidFileName}) for ${newName}`)
       }
     } else {
+      if (!newPassword) {
+        addToast('A password is required so the teammate can sign in.', 'warning')
+        return
+      }
+
+      // Provision a real Firebase Auth account for the teammate
+      let uid = null
+      const companyUid = adminUid || currentUser?.uid
+      try {
+        const result = await provisionEmployeeAccount({
+          email: newEmail,
+          password: newPassword,
+          name: newName,
+          role: newRole,
+          companyUid,
+          employeeId: newEmpId,
+          department: finalDept,
+          avatar: newAvatar || ''
+        })
+        uid = result.uid
+      } catch (err) {
+        addToast('Failed to create login account: ' + err.message, 'danger')
+        return
+      }
+
       // Add new employee
       const newEmp = {
         id: newEmpId,
@@ -210,7 +234,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
         department: finalDept,
         status: newStatus,
         email: newEmail,
-        passwordHash,
+        uid,
         avatar: newAvatar || `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 1000000)}?auto=format&fit=crop&q=80&w=200`,
         dob: newDob,
         joiningDate: newJoiningDate,
@@ -259,10 +283,17 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     setShowAddForm(false)
   }
 
-  const handleDeleteEmployee = (id, name) => {
+  const handleDeleteEmployee = async (id, name) => {
+    const emp = employees.find(e => e.id === id)
     setEmployees(prev => prev.filter(emp => emp.id !== id))
     addLog('Deleted employee record', `Removed ${name} (${id})`)
     if (addAuditLog) addAuditLog('DELETE', 'Employee', `Deleted employee profile for ${name} (${id})`)
+    if (emp?.uid) {
+      const removed = await deleteEmployeeAccount(emp.uid)
+      if (!removed) {
+        addLog('Login account retained', `Teammate login for ${name} can only be deleted via Firebase console (client SDK limitation).`, 'warning')
+      }
+    }
   }
 
   const toggleSelect = (id, e) => {
@@ -404,7 +435,7 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     addToast('Profile updates rejected.', 'info')
   }
 
-  const expectedHeaders = ['id', 'name', 'email', 'department', 'role', 'status', 'dob', 'joiningDate', 'avatar', 'password', 'passwordHash']
+  const expectedHeaders = ['id', 'name', 'email', 'department', 'role', 'status', 'dob', 'joiningDate', 'avatar', 'password']
 
   const validateCSVRow = (row) => {
     if (!row.name || !row.name.trim()) return 'Name is required'
@@ -559,7 +590,23 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                           continue;
                         }
                         if (row.password) {
-                          row.passwordHash = await hashPassword(row.password);
+                          try {
+                            const companyUid = adminUid || currentUser?.uid
+                            const prov = await provisionEmployeeAccount({
+                              email: row.email,
+                              password: row.password,
+                              name: row.name,
+                              role: row.role || 'Teammate',
+                              companyUid,
+                              employeeId: row.id,
+                              department: row.department || '',
+                              avatar: row.avatar || ''
+                            })
+                            row.uid = prov.uid
+                          } catch (provErr) {
+                            errors.push(`Row ${i + 1}: account not created (${provErr.message})`)
+                            continue
+                          }
                           delete row.password;
                         }
                         row.avatar = row.avatar || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200`;

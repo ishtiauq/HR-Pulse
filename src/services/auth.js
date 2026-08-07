@@ -1,4 +1,4 @@
-import { auth, db, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signInAnonymously, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber } from './firebase.js';
+import { auth, db, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateEmail, updatePassword, deleteUser, signOut, doc, setDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber } from './firebase.js';
 
 /**
  * Ensures a user document exists in Firestore. 
@@ -25,10 +25,93 @@ export const checkAndCreateUserDoc = async (user) => {
   return { isNewUser: false, data: userSnap.data() };
 };
 
-export const updateProfileData = async (uid, fullName, companyName) => {
-  if (!db) return;
+/**
+ * Returns the company + employee linkage for an authenticated user.
+ * Reads users/{uid}; workspace owners have companyUid === uid, teammates
+ * have it set at provisioning time.
+ */
+export const getCompanyForUser = async (uid) => {
+  if (!db || !uid) return null;
   const userRef = doc(db, 'users', uid);
-  await setDoc(userRef, { fullName, companyName }, { merge: true });
+  try {
+    const snap = await getDocFromServer(userRef);
+    if (!snap.exists()) return null;
+    const data = snap.data();
+    return {
+      companyUid: data.companyUid || null,
+      employeeId: data.employeeId || null,
+      role: data.role || null,
+      fullName: data.fullName || data.name || null,
+      department: data.department || null,
+      avatar: data.avatar || null,
+    };
+  } catch (error) {
+    console.error('Failed to read user doc:', error);
+    return null;
+  }
+};
+
+/**
+ * Creates a real Firebase Auth account for a teammate and links it to the
+ * admin's company. Teammates sign in with email + password (no company ID).
+ */
+export const provisionEmployeeAccount = async ({ email, password, name, role, companyUid, employeeId, department, avatar }) => {
+  if (!auth) throw new Error('Firebase not configured');
+  if (!email || !password) throw new Error('Email and password are required to create a teammate account.');
+  if (!companyUid) throw new Error('Missing company ID — cannot provision teammate account.');
+
+  const result = await createUserWithEmailAndPassword(auth, email, password);
+  const uid = result.user.uid;
+
+  if (db) {
+    await setDoc(doc(db, 'users', uid), {
+      uid,
+      email,
+      fullName: name || '',
+      companyUid,
+      employeeId,
+      role: role || 'Teammate',
+      department: department || '',
+      avatar: avatar || '',
+      createdAt: serverTimestamp(),
+    });
+    await setDoc(doc(db, 'companies', companyUid, 'members', uid), {
+      employeeId: employeeId || '',
+      email,
+      name: name || '',
+      role: role || 'Teammate',
+      registeredAt: serverTimestamp(),
+    }, { merge: true });
+  }
+  return { uid };
+};
+
+/**
+ * Updates a teammate's Firebase Auth email/password.
+ * Firestore linkage is updated by the caller (employee record).
+ */
+export const updateEmployeeAuthAccount = async (uid, { email, password }) => {
+  if (!auth) throw new Error('Firebase not configured');
+  const account = auth.currentUser?.uid === uid ? auth.currentUser : null;
+  if (!account) throw new Error('Cannot update this account from the current session.');
+  if (email && email !== account.email) await updateEmail(account, email);
+  if (password) await updatePassword(account, password);
+};
+
+/**
+ * Attempts to delete a teammate's Firebase Auth account. Client SDK can only
+ * delete the currently signed-in user; deleting arbitrary users requires a
+ * Cloud Function. Returns true if deleted, false if it must be deferred.
+ */
+export const deleteEmployeeAccount = async (uid) => {
+  if (!auth) return false;
+  if (auth.currentUser?.uid !== uid) return false;
+  try {
+    await deleteUser(auth.currentUser);
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 // Tries popup sign-in first (works on all browsers). Falls back to
@@ -53,40 +136,6 @@ export const getGoogleRedirectResult = async () => {
   if (!auth) return null;
   const result = await getRedirectResult(auth);
   return result?.user || null;
-};
-
-/**
- * Ensures an authenticated (anonymous) Firebase session exists. Employees must
- * be signed in before they can read the company auth snapshot for login.
- */
-export const ensureAnonymousAuth = async () => {
-  if (!auth) return null;
-  if (auth.currentUser) return auth.currentUser;
-  const result = await signInAnonymously(auth);
-  return result.user;
-};
-
-/**
- * Registers the (already authenticated) employee as a member of the company.
- * This is what lets employees read/write company data and get real-time sync
- * across devices.
- */
-export const ensureEmployeeFirebaseSession = async (adminUid, employee) => {
-  if (!auth || !db || !adminUid || !employee) return null;
-
-  const fbUser = await ensureAnonymousAuth();
-  if (!fbUser) return null;
-
-  const memberRef = doc(db, 'companies', adminUid, 'members', fbUser.uid);
-  await setDoc(memberRef, {
-    employeeId: employee.id || employee.employeeId || '',
-    email: employee.email || '',
-    name: employee.name || '',
-    role: employee.role || 'Teammate',
-    registeredAt: serverTimestamp(),
-  }, { merge: true });
-
-  return fbUser;
 };
 
 export const loginWithEmail = async (email, password) => {

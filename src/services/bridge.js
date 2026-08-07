@@ -49,52 +49,6 @@ export const fetchTableFromFirestore = async (adminUid, tableName) => {
 };
 
 /**
- * Uploads a read-only snapshot of the employee directory to Firestore.
- * This allows employees to authenticate from their personal devices
- */
-export const syncEmployeeSnapshot = async (adminUid, employees) => {
-  if (!db || !adminUid) return;
-  const snapshotRef = doc(db, 'companies', adminUid, 'auth', 'employees');
-  
-  // Extract only the minimal fields necessary for login to maintain privacy
-  const snapshotData = employees.map(emp => ({
-    id: emp.id,
-    name: emp.name,
-    email: emp.email,
-    passwordHash: emp.passwordHash || emp.password,
-    role: emp.role || 'Employee',
-    department: emp.department || '',
-    avatar: emp.avatar || '',
-    devices: emp.devices || []
-  }));
-
-  try {
-    await setDoc(snapshotRef, { data: snapshotData, lastUpdated: new Date().toISOString() });
-    console.log('Employee snapshot synced to Firebase bridge.');
-  } catch (error) {
-    console.error('Failed to sync employee snapshot:', error);
-  }
-};
-
-/**
- * Fetches the employee snapshot from Firestore for employee login verification.
- */
-export const fetchEmployeeSnapshot = async (adminUid) => {
-  if (!db || !adminUid) return [];
-  const snapshotRef = doc(db, 'companies', adminUid, 'auth', 'employees');
-  
-  try {
-    const snap = await getDoc(snapshotRef);
-    if (snap.exists() && snap.data().data) {
-      return snap.data().data;
-    }
-  } catch (error) {
-    console.error('Failed to fetch employee snapshot:', error);
-  }
-  return [];
-};
-
-/**
  * Uploads a file to Firebase Storage temporarily for the File Bridge.
  */
 export const uploadToFirebaseStorage = async (adminUid, file, path) => {

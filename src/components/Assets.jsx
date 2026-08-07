@@ -759,7 +759,7 @@ function AddAssetModal({ showAddModal, setShowAddModal, newAsset, setNewAsset, h
   )
 }
 
-export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, assetCategories, setAssetCategories, addLog, addToast, currentUser, simulatedRole, addNotification }) {
+export default function Assets({ employees, assets, setAssets, assetRequests, setAssetRequests, assetCategories, setAssetCategories, addLog, addToast, currentUser, addNotification }) {
   // SETTING DEFAULT TO INVENTORY AS DASHBOARD IS REMOVED
   const [activeView, setActiveView] = useState('inventory')
   const [search, setSearch] = useState('')

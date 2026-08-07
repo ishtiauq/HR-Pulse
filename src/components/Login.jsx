@@ -4,19 +4,13 @@ import Icon from "@/components/ui/Icon.jsx"
 import kormiisLogo from '../Assets/Kormiis Logo Final.svg'
 import kormiisMembershipLogo from '../Assets/Kormiis Logo Membership.svg'
 import heroCharacters from '../Assets/hero-characters.png'
-import { verifyPassword, hashPassword } from '../services/crypto.js'
-import { loginWithGoogle, getGoogleRedirectResult, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, updateProfileData, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp, ensureAnonymousAuth, ensureEmployeeFirebaseSession } from '../services/auth.js'
-import { fetchEmployeeSnapshot } from '../services/bridge.js'
-import Dashboard from './Dashboard.jsx'
-import { allNavItems } from '../utils/helpers.js'
+import { loginWithGoogle, getGoogleRedirectResult, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, getCompanyForUser, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp } from '../services/auth.js'
 import painStripIllustration from '../Assets/pain-strip.png'
 import threeStepsIllustration from '../Assets/three-steps.png'
 import faqIllustration from '../Assets/faq-illustration.png'
 import card1Illustration from '../Assets/card-1.png'
 import card2Illustration from '../Assets/card-2.png'
 import card3Illustration from '../Assets/card-3.png'
-
-const ADMIN_ACCOUNTS_KEY = 'kormiis_admin_accounts'
 
 const MARKETING_PILLARS = [
   {
@@ -35,26 +29,6 @@ const MARKETING_PILLARS = [
     desc: 'Announcements, events, tasks & documents — one home for the whole squad.'
   }
 ]
-
-const MOCK_DASHBOARD_DATA = {
-  employees: [
-    { id: '1', name: 'John Doe', role: 'Developer', status: 'Active' },
-    { id: '2', name: 'Jane Smith', role: 'Designer', status: 'Active' },
-    { id: '3', name: 'Mike Ross', role: 'Manager', status: 'Active' }
-  ],
-  attendance: {},
-  payroll: {},
-  announcements: [
-    { id: 'a1', title: 'Welcome to Kormiis', authorId: '1', date: new Date().toISOString(), priority: 'Important' }
-  ],
-  events: [],
-  tasks: [{ id: 't1', title: 'Complete Onboarding', status: 'Pending' }],
-  documents: [],
-  assets: [{ id: 'as1', name: 'MacBook Pro', status: 'Assigned' }],
-  hasPermission: () => true,
-  simulatedRole: 'Admin',
-  currentUser: { name: 'Admin', role: 'Admin' }
-}
 
 function MarketingSectionOne({ containerRef }) {
   const cards = [
@@ -389,8 +363,6 @@ function FooterSection({ themeMode, logoSrc }) {
 export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode }) {
   const [role, setRole] = useState('admin') // 'admin' | 'employee'
   const [mode, setMode] = useState('signin')
-  const [onboardingStep, setOnboardingStep] = useState(1)
-  const [firebaseUser, setFirebaseUser] = useState(null)
   const [phoneNumber, setPhoneNumber] = useState('')
   const [otpCode, setOtpCode] = useState('')
   const [confirmationResult, setConfirmationResult] = useState(null) // 'signin' | 'signup'
@@ -489,24 +461,12 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   // --- Employee state ---
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [otp, setOtp] = useState('')
-  const [verificationId, setVerificationId] = useState('')
-  const [fullName, setFullName] = useState('')
-  const [companyName, setCompanyName] = useState('')
-  const [companyId, setCompanyId] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
 
-  const getAdminAccounts = () => {
-    try {
-      return JSON.parse(localStorage.getItem(ADMIN_ACCOUNTS_KEY)) || []
-    } catch {
-      return []
-    }
-  }
-
   const adminSession = (account) => ({
     id: account.id,
+    uid: account.id,
     name: account.name,
     email: account.email,
     role: 'Admin',
@@ -514,7 +474,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     avatar: '',
     isWorkspaceOwner: true,
     adminAccountId: account.id,
-    token: 'mock-token-' + Date.now()
+    token: account.id // stable key material for local encrypted cache
   })
 
   // --- Admin signup (Firebase) ---
@@ -532,10 +492,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setIsLoading(true)
     try {
       const user = await registerWithEmail(email.trim(), password)
-      setFirebaseUser(user)
       await checkAndCreateUserDoc(user)
-      setIsLoading(false)
-      setOnboardingStep(2)
+      completeAdminLogin(user)
     } catch (err) {
       setError('Sign up failed: ' + err.message)
       setIsLoading(false)
@@ -549,16 +507,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setIsLoading(true)
     try {
       const user = await loginWithEmail(email.trim(), password)
-      setFirebaseUser(user)
-      const { data } = await checkAndCreateUserDoc(user)
-      setIsLoading(false)
-      if (!data?.fullName || !data?.companyName) {
-        setOnboardingStep(2)
-      } else {
-        setFullName(data.fullName)
-        setCompanyName(data.companyName)
-        setOnboardingStep(3)
-      }
+      await checkAndCreateUserDoc(user)
+      completeAdminLogin(user)
     } catch (err) {
       setError('Login failed: ' + err.message)
       setIsLoading(false)
@@ -575,16 +525,8 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         // Redirecting to Google — login continues in getGoogleRedirectResult on return
         return
       }
-      setFirebaseUser(user)
-      const { data } = await checkAndCreateUserDoc(user)
-      setIsLoading(false)
-      if (!data?.fullName || !data?.companyName) {
-        setOnboardingStep(2)
-      } else {
-        setFullName(data.fullName)
-        setCompanyName(data.companyName)
-        setOnboardingStep(3)
-      }
+      await checkAndCreateUserDoc(user)
+      completeAdminLogin(user)
     } catch (err) {
       setError('Google Login failed: ' + err.message)
       setIsLoading(false)
@@ -598,17 +540,9 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
       try {
         const user = await getGoogleRedirectResult()
         if (cancelled || !user) return
-        setFirebaseUser(user)
-        const { data } = await checkAndCreateUserDoc(user)
+        await checkAndCreateUserDoc(user)
         if (cancelled) return
-        setIsLoading(false)
-        if (!data?.fullName || !data?.companyName) {
-          setOnboardingStep(2)
-        } else {
-          setFullName(data.fullName)
-          setCompanyName(data.companyName)
-          setOnboardingStep(3)
-        }
+        completeAdminLogin(user)
       } catch (err) {
         if (!cancelled) {
           setError('Google Login failed: ' + err.message)
@@ -650,105 +584,51 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     setIsLoading(true)
     try {
       const user = await verifyPhoneOtp(confirmationResult, otpCode)
-      setFirebaseUser(user)
-      const { data } = await checkAndCreateUserDoc(user)
-      setIsLoading(false)
-      if (!data?.fullName || !data?.companyName) {
-        setOnboardingStep(2)
-      } else {
-        setFullName(data.fullName)
-        setCompanyName(data.companyName)
-        setOnboardingStep(3)
-      }
+      await checkAndCreateUserDoc(user)
+      completeAdminLogin(user)
     } catch (err) {
       setError('Failed to verify code: ' + err.message)
       setIsLoading(false)
     }
   }
 
-  // --- Complete admin onboarding & sign in ---
-  const completeAdminLogin = () => {
+  // --- Complete admin sign in & enter dashboard ---
+  const completeAdminLogin = (user) => {
     setIsLoading(true)
     setTimeout(() => {
       setIsLoading(false)
-      onLogin(adminSession({ id: firebaseUser?.uid || 'local', name: fullName || 'System Admin', email: firebaseUser?.email || 'admin@company.com', companyName: companyName || 'Acme' }))
+      onLogin(adminSession({ id: user?.uid || 'local', name: user?.displayName || 'System Admin', email: user?.email || 'admin@company.com', companyName: 'Kormiis Ltd.' }))
     }, 300)
   }
 
-  // --- Employee login logic ---
+  // --- Employee login (Firebase) ---
   const handleEmployeeSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setIsLoading(true)
-    
-    // Automatically extract Company ID from URL query params if present, otherwise use the state.
-    const searchParams = new URLSearchParams(window.location.search);
-    const urlCompanyId = searchParams.get('company');
-    const finalCompanyId = urlCompanyId || companyId.trim();
 
     try {
-      // Establish an anonymous Firebase session first so Firestore reads (auth snapshot) are permitted.
-      try {
-        await ensureAnonymousAuth()
-      } catch (anonErr) {
-        console.warn('Anonymous auth unavailable (will fall back to local snapshot):', anonErr)
-      }
+      const user = await loginWithEmail(email.trim(), password)
+      const company = await getCompanyForUser(user.uid)
 
-      let employees = []
-      if (finalCompanyId) {
-        employees = await fetchEmployeeSnapshot(finalCompanyId)
-      }
-
-      // Fallback to localStorage if Firebase fails or is offline, but ONLY if we didn't specify a company ID or if Firebase returned nothing.
-      if (!employees || employees.length === 0) {
-        const storedEmployees = localStorage.getItem('kormiis_employees_plain')
-        if (storedEmployees) {
-          employees = JSON.parse(storedEmployees)
-        }
-      }
-
-      if (!employees || employees.length === 0) {
-        if (!finalCompanyId) {
-           setError('Please provide a Company ID (ask your admin) or use a login link.')
-        } else {
-           setError('No employee data found for this company. Please contact your HR department.')
-        }
+      if (!company?.companyUid) {
+        setError('This account is not linked to any company. Please contact your HR administrator.')
         setIsLoading(false)
         return
       }
 
-      const employee = employees.find(e => e.email === email)
-      if (!employee) {
-        setError('Invalid email or password.')
-        setIsLoading(false)
-        return
-      }
-      const valid = await verifyPassword(password, employee.passwordHash || employee.password)
-      if (!valid) {
-        setError('Invalid email or password.')
-        setIsLoading(false)
-        return
-      }
-
-      // Establish an anonymous Firebase session + register company membership
-      // so the employee gets real-time sync across devices.
-      try {
-        await ensureEmployeeFirebaseSession(finalCompanyId, employee)
-      } catch (fbErr) {
-        console.warn('Employee Firebase session setup failed (continuing in local mode):', fbErr)
-      }
-
-      const hrToken = localStorage.getItem('kormiis_hr_token') // Optional fallback
       const employeeUser = {
-        name: employee.name,
-        email: employee.email,
-        role: employee.role || 'Teammate',
-        department: employee.department,
-        avatar: employee.avatar || '',
+        name: company.fullName || user.displayName || email,
+        email: user.email,
+        role: company.role || 'Teammate',
+        department: company.department || '',
+        avatar: company.avatar || '',
         isEmployee: true,
-        employeeId: employee.id,
-        adminUid: finalCompanyId || localStorage.getItem('kormiis_last_admin_uid'), // Critical for Firebase real-time sync!
-        token: hrToken || ''
+        id: company.employeeId,
+        employeeId: company.employeeId,
+        adminUid: company.companyUid,
+        uid: user.uid,
+        token: ''
       }
       onLogin(employeeUser)
     } catch (err) {
@@ -1170,7 +1050,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                   {mode === 'signup' ? 'Sign Up' : 'Sign In'}
                 </h2>
 
-                {onboardingStep === 1 && mode === 'signup' ? (
+                {mode === 'signup' ? (
                   <>
                     <form onSubmit={handleSignup} className="space-y-3.5 mt-5">
                       <div>
@@ -1219,7 +1099,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       </button>
                     </form>
                   </>
-                ) : onboardingStep === 1 && mode === 'signin' ? (
+                ) : mode === 'signin' ? (
                   <>
                     <div className="flex p-1.5 bg-muted/60 rounded-full mb-4 mt-4 border border-border">
                       <button
@@ -1321,18 +1201,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       ) : (
                         <form onSubmit={handleEmployeeSubmit} className="space-y-4">
                           <div>
-                            <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Company ID (Admin UID)</label>
-                            <input
-                              type="text"
-                              value={new URLSearchParams(window.location.search).get('company') || companyId}
-                              onChange={e => setCompanyId(e.target.value)}
-                              placeholder="e.g. abc123xyz"
-                              className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all"
-                              disabled={!!new URLSearchParams(window.location.search).get('company')}
-                            />
-                            <p className="text-xs text-muted-foreground mt-1 px-1">Optional if logging in on the same device as your admin.</p>
-                          </div>
-                          <div>
                             <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Work Email</label>
                             <input
                               type="text"
@@ -1374,7 +1242,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                       )}
                     </div>
                   </>
-                ) : onboardingStep === 1 && mode === 'phone' ? (
+                ) : mode === 'phone' ? (
                   <div className="mt-5">
                     {!confirmationResult ? (
                       <form onSubmit={handleSendPhoneOtp} className="space-y-4">
@@ -1440,73 +1308,6 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
                         </button>
                       </form>
                     )}
-                  </div>
-                ) : onboardingStep === 2 ? (
-                  <form onSubmit={async (e) => {
-                    e.preventDefault();
-                    setIsLoading(true);
-                    await updateProfileData(firebaseUser.uid, fullName, companyName);
-                    setIsLoading(false);
-                    setOnboardingStep(3);
-                  }} className="space-y-3.5 mt-5">
-                    <div>
-                      <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Full Name</label>
-                      <input
-                        type="text"
-                        value={fullName}
-                        onChange={e => setFullName(e.target.value)}
-                        placeholder="Jane Doe"
-                        className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-base font-bold text-muted-foreground uppercase tracking-wider mb-2">Company Name</label>
-                      <input
-                        type="text"
-                        value={companyName}
-                        onChange={e => setCompanyName(e.target.value)}
-                        placeholder="Acme Inc."
-                        className="w-full bg-background/40 border border-input text-foreground px-4 py-3 text-base font-medium rounded-xl focus:outline-none transition-all"
-                        required
-                      />
-                    </div>
-                    {error && (
-                      <div className="p-3.5 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                        {error}
-                      </div>
-                    )}
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
-                    >
-                      {isLoading ? 'Saving...' : 'Complete Profile'} <Icon name="arrow_forward" size={18} />
-                    </button>
-                  </form>
-                ) : onboardingStep === 3 ? (
-                  <div className="mt-8 text-center">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 border border-primary/20">
-                      <Icon name="shield" size={24} className="text-primary" />
-                    </div>
-                    <h3 className="text-lg font-bold mb-2 text-foreground">You're all set!</h3>
-                    <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-                      Your company workspace is ready. Data syncs securely to the cloud automatically.
-                    </p>
-                    {error && (
-                      <div className="p-3.5 mb-4 text-sm font-medium bg-red-500/10 border border-red-500/30 text-red-500 rounded-xl flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                        {error}
-                      </div>
-                    )}
-                    <button 
-                      onClick={completeAdminLogin} 
-                      disabled={isLoading} 
-                      className="w-full py-4 rounded-full text-base font-bold flex items-center justify-center gap-2 bg-primary text-primary-foreground mt-2 disabled:opacity-50"
-                    >
-                      {isLoading ? 'Loading...' : 'Enter Dashboard'} <Icon name="arrow_forward" size={18} />
-                    </button>
                   </div>
                 ) : null}
 

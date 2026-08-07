@@ -312,15 +312,7 @@ export default function App() {
           <div className="h-px bg-border/60 my-4 mx-2 shrink-0" />
           
           <button 
-            className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white transition-colors cursor-pointer border-none shadow-sm"
-            onClick={() => { appData.setShowRoleModal(true); setShowMobileMenu(false) }}
-          >
-            <Icon name="swap_horiz" size={20} />
-            <span className="font-semibold text-base">Switch Role</span>
-          </button>
-
-          <button 
-            className="btn-shimmer mt-2 w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer border-none shadow-sm"
+            className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer border-none shadow-sm"
             onClick={() => { handleLogout(); setShowMobileMenu(false) }}
           >
             <Icon name="logout" size={20} />

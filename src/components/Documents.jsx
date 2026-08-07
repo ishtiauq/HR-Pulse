@@ -37,7 +37,7 @@ const formatFileSize = (bytes) => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
-export default function Documents({ documents, setDocuments, addLog, addToast, currentUser, simulatedRole, adminUid, addNotification }) {
+export default function Documents({ documents, setDocuments, addLog, addToast, currentUser, adminUid, addNotification }) {
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [filterFormat, setFilterFormat] = useState('all')
@@ -349,7 +349,7 @@ export default function Documents({ documents, setDocuments, addLog, addToast, c
                     <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-primary" onClick={() => handleDownload(doc)}>
                       <Icon name="download" size={16} /> {isMobile ? 'Download' : ''}
                     </Button>
-                    {(simulatedRole === 'Admin' || doc.uploadedBy === currentUser?.id) && (
+                    {(currentUser?.role === 'Admin' || doc.uploadedBy === currentUser?.id) && (
                       <>
                         <Button variant="ghost" size="xs" className="text-muted-foreground hover:text-primary" onClick={() => { setEditingDoc(doc); setFormName(doc.name); setFormCategory(doc.category); setFormDescription(doc.description || ''); setFormFile(null); setShowUploadModal(true) }}>
                           <Icon name="edit" size={16} /> {isMobile ? 'Edit' : ''}

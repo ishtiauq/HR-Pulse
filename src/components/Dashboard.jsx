@@ -34,7 +34,7 @@ const DashboardWidget = ({
   )
 }
 
-export default function Dashboard({ employees, onSync, attendance, setAttendance, currentUser, addToast, setCurrentView, announcements, events, payroll, isSidebarCollapsed, simulatedRole, hasPermission, tasks = [], documents = [], assets = [], settings, notes = [], setNotes }) {
+export default function Dashboard({ employees, onSync, attendance, setAttendance, currentUser, addToast, setCurrentView, announcements, events, payroll, isSidebarCollapsed, hasPermission, tasks = [], documents = [], assets = [], settings, notes = [], setNotes }) {
   const [expandedWidgets, setExpandedWidgets] = useState([])
   
   const toggleWidget = (id) => setExpandedWidgets(prev => prev.includes(id) ? prev.filter(w => w !== id) : [...prev, id])
@@ -210,7 +210,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
   return (
     <div className="animate-fade-in flex flex-col gap-4 sm:gap-6 lg:gap-8">
       
-      {simulatedRole === 'Teammate' && currentUser && (
+      {currentUser?.role === 'Teammate' && currentUser && (
         <GeoCheckInWidget 
           currentUser={currentUser} 
           attendance={attendance} 

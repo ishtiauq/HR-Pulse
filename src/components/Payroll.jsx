@@ -13,7 +13,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
 
-export default function Payroll({ employees, payroll, setPayroll, addLog, settings, simulatedRole, addAuditLog }) {
+export default function Payroll({ employees, payroll, setPayroll, addLog, settings, addAuditLog }) {
   const now = new Date()
   const [selectedMonth, setSelectedMonth] = useState(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`)
   const [searchTerm, setSearchTerm] = useState('')

@@ -12,7 +12,7 @@ import { Select, SelectItem } from "@/components/ui/select"
 import AdSlot from './AdSlot'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
-export default function Expenses({ employees, expenses, setExpenses, settings, addLog, addToast, addAuditLog, simulatedRole, currentUser }) {
+export default function Expenses({ employees, expenses, setExpenses, settings, addLog, addToast, addAuditLog, currentUser }) {
   const [activeTab, setActiveTab] = useState('submit')
 
   // Employee Submission States
@@ -82,20 +82,20 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
   }
 
   const handleApprove = (id) => {
-    setExpenses(prev => prev.map(exp => exp.id === id ? { ...exp, status: 'Approved', approvedBy: simulatedRole || 'Admin', actionDate: new Date().toISOString() } : exp))
+    setExpenses(prev => prev.map(exp => exp.id === id ? { ...exp, status: 'Approved', approvedBy: currentUser?.role || 'Admin', actionDate: new Date().toISOString() } : exp))
     addToast('Expense approved.', 'success')
     addAuditLog('UPDATE', 'Expense', `Approved expense ${id}`)
   }
 
   const handleReject = () => {
-    setExpenses(prev => prev.map(exp => exp.id === rejectReasonModal.id ? { ...exp, status: 'Rejected', rejectReason: rejectReasonModal.reason, rejectedBy: simulatedRole || 'Admin', actionDate: new Date().toISOString() } : exp))
+    setExpenses(prev => prev.map(exp => exp.id === rejectReasonModal.id ? { ...exp, status: 'Rejected', rejectReason: rejectReasonModal.reason, rejectedBy: currentUser?.role || 'Admin', actionDate: new Date().toISOString() } : exp))
     addToast('Expense rejected.', 'success')
     addAuditLog('UPDATE', 'Expense', `Rejected expense ${rejectReasonModal.id}`)
     setRejectReasonModal({ open: false, id: null, reason: '' })
   }
 
   const handleBulkApprove = () => {
-    setExpenses(prev => prev.map(exp => selectedExpenses.includes(exp.id) ? { ...exp, status: 'Approved', approvedBy: simulatedRole || 'Admin', actionDate: new Date().toISOString() } : exp))
+    setExpenses(prev => prev.map(exp => selectedExpenses.includes(exp.id) ? { ...exp, status: 'Approved', approvedBy: currentUser?.role || 'Admin', actionDate: new Date().toISOString() } : exp))
     setSelectedExpenses([])
     addToast(`${selectedExpenses.length} expenses approved.`, 'success')
     addAuditLog('UPDATE', 'Expense', `Bulk approved ${selectedExpenses.length} expenses`)
@@ -108,7 +108,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
   const handleMarkReimbursed = (id) => {
     const ref = prompt("Enter bank transaction reference:")
     if (ref) {
-      setExpenses(prev => prev.map(exp => exp.id === id ? { ...exp, status: 'Reimbursed', transactionRef: ref, reimbursedBy: simulatedRole || 'Admin', actionDate: new Date().toISOString() } : exp))
+      setExpenses(prev => prev.map(exp => exp.id === id ? { ...exp, status: 'Reimbursed', transactionRef: ref, reimbursedBy: currentUser?.role || 'Admin', actionDate: new Date().toISOString() } : exp))
       addToast('Expense marked as reimbursed.', 'success')
       addAuditLog('UPDATE', 'Expense', `Reimbursed expense ${id} (Ref: ${ref})`)
     }
@@ -141,8 +141,8 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
   const pendingQueue = expenses.filter(e => e.status === 'Pending')
   const approvedQueue = expenses.filter(e => e.status === 'Approved')
   // Expense Approvers or Admins can see all expenses in the queue. Regular Teammates see only their own.
-  const canApprove = simulatedRole === 'Admin' || currentUser?.permissions?.includes('approve_expenses')
-  const canReimburse = simulatedRole === 'Admin' || currentUser?.permissions?.includes('approve_expenses')
+  const canApprove = currentUser?.role === 'Admin' || currentUser?.permissions?.includes('approve_expenses')
+  const canReimburse = currentUser?.role === 'Admin' || currentUser?.permissions?.includes('approve_expenses')
   
   const myClaimsQueue = canApprove ? expenses : expenses.filter(e => e.employeeId === (currentUser?.employeeId || currentUser?.id || 'SYS-ADMIN'))
   const historyQueue = expenses.filter(e => e.status !== 'Pending')

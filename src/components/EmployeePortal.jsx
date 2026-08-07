@@ -82,11 +82,7 @@ export default function EmployeePortal({
   settings,
   notes,
   setNotes,
-  simulatedRole,
-  setSimulatedRole,
   handleLogout,
-  showRoleModal,
-  setShowRoleModal,
   showNotifications,
   setShowNotifications,
   notifications,
@@ -221,7 +217,7 @@ export default function EmployeePortal({
                  setAnnouncements={setAnnouncements} 
                  addToast={addToast}
                  addLog={addLog}
-                 simulatedRole="Teammate"
+                
                  headline="Feed"
                />
       case 'payslips':
@@ -242,15 +238,15 @@ export default function EmployeePortal({
                  addToast={addToast}
                />
       case 'my-tasks':
-        return <div className="max-w-[1200px] mx-auto w-full"><Tasks tasks={tasks} setTasks={setTasks} employees={employees} currentUser={currentUser} addToast={addToast} simulatedRole="Teammate" addLog={addLog} /></div>
+        return <div className="max-w-[1200px] mx-auto w-full"><Tasks tasks={tasks} setTasks={setTasks} employees={employees} currentUser={currentUser} addToast={addToast} addLog={addLog} /></div>
       case 'events':
-        return <div className="max-w-[1200px] mx-auto w-full"><Calendar events={events} setEvents={setEvents} employees={employees} addLog={addLog} addToast={addToast} currentUser={currentUser} simulatedRole="Teammate" /></div>
+        return <div className="max-w-[1200px] mx-auto w-full"><Calendar events={events} setEvents={setEvents} employees={employees} addLog={addLog} addToast={addToast} currentUser={currentUser} /></div>
       case 'expenses':
-        return <div className="max-w-[1200px] mx-auto w-full"><Expenses employees={employees} expenses={expenses} setExpenses={setExpenses} settings={settings} addLog={addLog} addToast={addToast} addAuditLog={addLog} simulatedRole="Teammate" currentUser={currentUser} /></div>
+        return <div className="max-w-[1200px] mx-auto w-full"><Expenses employees={employees} expenses={expenses} setExpenses={setExpenses} settings={settings} addLog={addLog} addToast={addToast} addAuditLog={addLog} currentUser={currentUser} /></div>
       case 'documents':
-        return <div className="max-w-[1200px] mx-auto w-full"><Documents documents={documents} setDocuments={setDocuments} addLog={addLog} addToast={addToast} currentUser={currentUser} simulatedRole="Teammate" /></div>
+        return <div className="max-w-[1200px] mx-auto w-full"><Documents documents={documents} setDocuments={setDocuments} addLog={addLog} addToast={addToast} currentUser={currentUser} /></div>
       case 'notes':
-        return <div className="max-w-[1200px] mx-auto w-full"><Notes notes={notes} setNotes={setNotes} currentUser={currentUser} addToast={addToast} simulatedRole="Teammate" /></div>
+        return <div className="max-w-[1200px] mx-auto w-full"><Notes notes={notes} setNotes={setNotes} currentUser={currentUser} addToast={addToast} /></div>
       default:
         return <DashboardView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} expenses={expenses} announcements={announcements} tasks={tasks} events={events} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} settings={settings} notes={notes} setNotes={setNotes} />
       case 'team_attendance':
@@ -268,7 +264,6 @@ export default function EmployeePortal({
             setOvertimeClaims={setOvertimeClaims} 
             addLog={addLog} 
             addToast={addToast} 
-            simulatedRole={currentUser.role} 
             settings={settings}
             headline="Team Attendance"
           />
@@ -304,12 +299,8 @@ export default function EmployeePortal({
         mobileMenuOpen={showMobileMenu}
         toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         user={currentUser}
-        simulatedRole={simulatedRole}
-        showRoleModal={showRoleModal}
-        setShowRoleModal={setShowRoleModal}
         handleLogout={handleLogout}
         setIsCollapsed={setIsSidebarCollapsed}
-        setSimulatedRole={setSimulatedRole}
         setMobileMenuOpen={setShowMobileMenu}
       />
 
@@ -480,16 +471,6 @@ export default function EmployeePortal({
           
           <div className="h-px bg-border/60 my-4 mx-2 shrink-0" />
           
-          {!currentUser.isEmployee && (
-            <button 
-              className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white transition-colors cursor-pointer border-none shadow-sm mb-2"
-              onClick={() => { setShowRoleModal(true); setShowMobileMenu(false) }}
-            >
-              <Icon name="swap_horiz" size={20} />
-              <span className="font-semibold text-base">Switch Role</span>
-            </button>
-          )}
-
           <button 
             className="btn-shimmer w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-[#dc2626] hover:bg-[#b91c1c] text-white transition-colors cursor-pointer border-none shadow-sm"
             onClick={() => { handleLogout(); setShowMobileMenu(false) }}
