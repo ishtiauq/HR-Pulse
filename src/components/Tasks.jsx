@@ -87,6 +87,14 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
       setTasks(prev => prev.map(t => t.id === editingTask.id ? { ...t, ...taskForm } : t))
       addToast('Task updated successfully', 'success')
       addLog('Updated Task', `Title: ${taskForm.title}`)
+      
+      if (addNotification) {
+        taskForm.assigneeIds.forEach(id => {
+          if (id !== currentUser?.id && !editingTask.assigneeIds?.includes(id)) {
+            addNotification(`You have been assigned to task: "${taskForm.title}"`)
+          }
+        })
+      }
     } else {
       const newTask = {
         ...taskForm,
@@ -95,6 +103,14 @@ export default function Tasks({ tasks = [], setTasks, employees = [], currentUse
       setTasks(prev => [newTask, ...prev])
       addToast('Task created successfully', 'success')
       addLog('Created Task', `Title: ${taskForm.title}`)
+      
+      if (addNotification && taskForm.assigneeIds?.length > 0) {
+        taskForm.assigneeIds.forEach(id => {
+          if (id !== currentUser?.id) {
+            addNotification(`You have been assigned a new task: "${taskForm.title}"`)
+          }
+        })
+      }
     }
     closeModal()
   }
