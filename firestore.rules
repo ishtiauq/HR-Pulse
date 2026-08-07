@@ -8,5 +8,10 @@ service cloud.firestore {
       // If employees are authenticated via Firebase Auth in the future, you would add their authorization here.
       allow read, write: if request.auth != null && request.auth.uid == adminUid;
     }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
   }
 }

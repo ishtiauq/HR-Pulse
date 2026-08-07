@@ -221,6 +221,7 @@ export default function App() {
                 notifications={appData.notifications}
                 clearNotifications={appData.clearNotifications}
                 onProfileClick={() => setCurrentView('profile')}
+                setCurrentView={setCurrentView}
                 user={user}
               />
           </div>

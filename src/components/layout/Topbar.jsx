@@ -6,10 +6,13 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, dataIntegrityIssues = [], showCorruptionModal, setShowCorruptionModal, handleAutoRepairDatabase, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications, onProfileClick, showThemeToggle = true, user }) {
+export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, driveConnected, syncConflicts, dataIntegrityIssues = [], showCorruptionModal, setShowCorruptionModal, handleAutoRepairDatabase, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications, onProfileClick, showThemeToggle = true, user, setCurrentView }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const buttonRef = useRef(null)
   const [modalPos, setModalPos] = useState({ top: 0, right: 0 })
+  const [notificationTab, setNotificationTab] = useState('all')
+  const filteredNotifications = notificationTab === 'unread' ? notifications.filter(n => !n.read) : notifications
+
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
@@ -133,22 +136,52 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
       {showNotifications && isMobile && (
         <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
           <DialogContent className="sm:max-w-[425px] p-0">
-            <DialogHeader className="p-4 px-6 border-b border-border bg-muted/30 pb-4">
+            <DialogHeader className="p-4 px-6 border-b border-border/50 bg-muted/20 pb-3">
               <div className="flex justify-between items-center w-full">
-                <DialogTitle className="text-sm">Notifications</DialogTitle>
+                <DialogTitle className="text-lg font-extrabold tracking-tight text-foreground leading-none">Notifications</DialogTitle>
                 <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
-                  {notifications.length} Total
+                  {filteredNotifications.length} Total
                 </Badge>
+              </div>
+              <div className="flex gap-2 mt-4">
+                <Button 
+                  variant={notificationTab === 'all' ? 'default' : 'outline'} 
+                  size="sm" 
+                  onClick={() => setNotificationTab('all')}
+                  className="h-7 text-xs rounded-full px-4"
+                >
+                  All
+                </Button>
+                <Button 
+                  variant={notificationTab === 'unread' ? 'default' : 'outline'} 
+                  size="sm" 
+                  onClick={() => setNotificationTab('unread')}
+                  className="h-7 text-xs rounded-full px-4"
+                >
+                  Unread
+                </Button>
               </div>
             </DialogHeader>
             <div className="max-h-[60vh] overflow-y-auto p-2">
-              {notifications.length === 0 ? (
+              {filteredNotifications.length === 0 ? (
                 <div className="p-8 text-center text-sm text-muted-foreground">No new notifications</div>
               ) : (
-                notifications.map(n => (
-                  <div role="listitem" key={n.id} className="p-3 px-4 rounded-xl hover:bg-muted/60 transition-colors cursor-pointer my-1 border border-transparent hover:border-border/50">
-                    <p className="text-sm m-0 leading-relaxed text-foreground" style={{ fontWeight: n.read ? 400 : 600 }}>{n.text}</p>
-                    <span className="text-[11px] font-medium block mt-1.5 text-muted-foreground">{n.time}</span>
+                filteredNotifications.map(n => (
+                  <div 
+                    role="listitem" 
+                    key={n.id} 
+                    onClick={() => {
+                      if (n.view && setCurrentView) {
+                        setCurrentView(n.view);
+                      }
+                      if (markNotificationsRead) markNotificationsRead(n.id);
+                      setShowNotifications(false);
+                    }}
+                    className={`p-3 px-4 rounded-xl transition-colors cursor-pointer my-1 border relative ${n.read ? 'bg-background hover:bg-muted/50 border-transparent opacity-70' : 'bg-primary/5 hover:bg-primary/10 border-primary/20 shadow-sm'}`}
+                  >
+                    {!n.read && <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-primary" />}
+                    <p className={`text-sm m-0 leading-relaxed text-foreground ${!n.read ? 'pl-2 font-semibold' : 'font-medium'}`}>{n.text}</p>
+                    <span className={`text-[11px] block mt-1.5 text-muted-foreground ${!n.read ? 'pl-2' : ''}`}>{n.time}</span>
                   </div>
                 ))
               )}
@@ -193,20 +226,52 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
             onClick={(e) => e.stopPropagation()}
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-rose-500 to-primary z-10" />
-            <div className="p-4 px-6 flex justify-between items-center border-b border-border/50 bg-muted/20 relative z-20">
-              <h2 className="text-lg font-extrabold tracking-tight text-foreground leading-none">Notifications</h2>
-              <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
-                {notifications.length} Total
-              </Badge>
+            <div className="p-4 px-6 flex flex-col gap-4 border-b border-border/50 bg-muted/20 relative z-20">
+              <div className="flex justify-between items-center w-full">
+                <h2 className="text-lg font-extrabold tracking-tight text-foreground leading-none">Notifications</h2>
+                <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
+                  {filteredNotifications.length} Total
+                </Badge>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant={notificationTab === 'all' ? 'default' : 'outline'} 
+                  size="sm" 
+                  onClick={() => setNotificationTab('all')}
+                  className="h-7 text-xs rounded-full px-4"
+                >
+                  All
+                </Button>
+                <Button 
+                  variant={notificationTab === 'unread' ? 'default' : 'outline'} 
+                  size="sm" 
+                  onClick={() => setNotificationTab('unread')}
+                  className="h-7 text-xs rounded-full px-4"
+                >
+                  Unread
+                </Button>
+              </div>
             </div>
             <div className="max-h-[350px] overflow-y-auto p-2">
-              {notifications.length === 0 ? (
+              {filteredNotifications.length === 0 ? (
                 <div className="p-8 text-center text-sm text-muted-foreground">No new notifications</div>
               ) : (
-                notifications.map(n => (
-                  <div role="listitem" key={n.id} className="p-3 px-4 rounded-xl hover:bg-muted/60 transition-colors cursor-pointer my-1 border border-transparent hover:border-border/50">
-                    <p className="text-sm m-0 leading-relaxed text-foreground" style={{ fontWeight: n.read ? 400 : 600 }}>{n.text}</p>
-                    <span className="text-[11px] font-medium block mt-1.5 text-muted-foreground">{n.time}</span>
+                filteredNotifications.map(n => (
+                  <div 
+                    role="listitem" 
+                    key={n.id} 
+                    onClick={() => {
+                      if (n.view && setCurrentView) {
+                        setCurrentView(n.view);
+                      }
+                      if (markNotificationsRead) markNotificationsRead(n.id);
+                      setShowNotifications(false);
+                    }}
+                    className={`p-3 px-4 rounded-xl transition-colors cursor-pointer my-1 border relative ${n.read ? 'bg-background hover:bg-muted/50 border-transparent opacity-70' : 'bg-primary/5 hover:bg-primary/10 border-primary/20 shadow-sm'}`}
+                  >
+                    {!n.read && <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-primary" />}
+                    <p className={`text-sm m-0 leading-relaxed text-foreground ${!n.read ? 'pl-2 font-semibold' : 'font-medium'}`}>{n.text}</p>
+                    <span className={`text-[11px] block mt-1.5 text-muted-foreground ${!n.read ? 'pl-2' : ''}`}>{n.time}</span>
                   </div>
                 ))
               )}

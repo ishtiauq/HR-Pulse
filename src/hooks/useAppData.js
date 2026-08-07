@@ -61,15 +61,43 @@ export default function useAppData({ user, addToast }) {
   }
 
   /* ─── Notifications ─── */
-  const [notifications, setNotifications] = useState([])
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem('kormiis_notifications')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        const fortyEightHoursAgo = Date.now() - (48 * 60 * 60 * 1000)
+        return parsed.filter(n => (n.timestamp || Date.now()) > fortyEightHoursAgo)
+      } catch (e) {
+        return []
+      }
+    }
+    return []
+  })
+  
+  useEffect(() => {
+    localStorage.setItem('kormiis_notifications', JSON.stringify(notifications))
+  }, [notifications])
+
   const [showNotifications, setShowNotifications] = useState(false)
 
-  const addNotification = (text) => {
-    setNotifications(prev => [{ id: `notif-${Date.now()}`, text, read: false, time: 'Just now' }, ...prev])
+  const addNotification = (text, view = null) => {
+    setNotifications(prev => [{ 
+      id: `notif-${Date.now()}`, 
+      text, 
+      read: false, 
+      timestamp: Date.now(),
+      time: 'Just now',
+      view 
+    }, ...prev])
   }
 
-  const markNotificationsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+  const markNotificationsRead = (id = null) => {
+    if (id) {
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+    } else {
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    }
   }
 
   const clearNotifications = () => {

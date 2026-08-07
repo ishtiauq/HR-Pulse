@@ -343,6 +343,7 @@ export default function EmployeePortal({
                 notifications={notifications}
                 clearNotifications={clearNotifications}
                 onProfileClick={() => setActiveTab('profile')}
+                setCurrentView={setActiveTab}
                 user={currentUser}
             />
           </div>
