@@ -924,8 +924,8 @@ export default function useAppData({ user, addToast }) {
     isAppLoading, setIsAppLoading,
 
     /* UI */
-    simulatedRole, setSimulatedRole,
-    showRoleModal, setShowRoleModal,
+
+
     pendingProfileEdits, setPendingProfileEdits,
     auditLogs,
     notifications, showNotifications, setShowNotifications,
