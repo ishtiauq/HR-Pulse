@@ -83,6 +83,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
       id: editingNote ? editingNote.id : `note-${Date.now()}`,
       title, content, type, items, color, priority, pinned, audioURL,
       isDailyChecklist: type === 'checklist' ? isDailyChecklist : false,
+      ownerId: currentUser?.id || currentUser?.uid || '',
       updatedAt: new Date().toISOString()
     }
 
@@ -164,8 +165,10 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
     setAudioURL(null)
   }
 
-  const pinnedNotes = notes.filter(n => n.pinned)
-  const otherNotes = notes.filter(n => !n.pinned)
+  const myOwnerId = currentUser?.id || currentUser?.uid || ''
+  const myNotes = notes.filter(n => !n.ownerId || n.ownerId === myOwnerId)
+  const pinnedNotes = myNotes.filter(n => n.pinned)
+  const otherNotes = myNotes.filter(n => !n.pinned)
 
   const NoteCard = ({ note }) => (
     <motion.div
@@ -247,7 +250,7 @@ export default function Notes({ notes = [], setNotes, currentUser, addToast }) {
         </Button>
       </div>
 
-      {notes.length === 0 ? (
+      {myNotes.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center px-4">
           <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4">
             <Icon name="edit_note" size={40} />

@@ -338,7 +338,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
         )}
 
         {/* Widget 4 — Daily Checklist */}
-        <DailyChecklistWidget notes={notes} setNotes={setNotes} cardClass="" />
+        <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} cardClass="" />
 
         {/* 8. TASKS WIDGET */}
       {canViewTasks && (

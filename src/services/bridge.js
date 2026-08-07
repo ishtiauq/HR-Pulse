@@ -38,7 +38,7 @@ export const writeToTable = async (adminUid, tableName, data) => {
  */
 export const syncEmployeeSnapshot = async (adminUid, employees) => {
   if (!db || !adminUid) return;
-  const snapshotRef = doc(db, 'companies', adminUid, 'snapshots', 'employees_auth');
+  const snapshotRef = doc(db, 'companies', adminUid, 'auth', 'employees');
   
   // Extract only the minimal fields necessary for login to maintain privacy
   const snapshotData = employees.map(emp => ({
@@ -65,7 +65,7 @@ export const syncEmployeeSnapshot = async (adminUid, employees) => {
  */
 export const fetchEmployeeSnapshot = async (adminUid) => {
   if (!db || !adminUid) return [];
-  const snapshotRef = doc(db, 'companies', adminUid, 'snapshots', 'employees_auth');
+  const snapshotRef = doc(db, 'companies', adminUid, 'auth', 'employees');
   
   try {
     const snap = await getDoc(snapshotRef);

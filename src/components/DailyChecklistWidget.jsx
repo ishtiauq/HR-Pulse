@@ -1,9 +1,9 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import Icon from "@/components/ui/Icon.jsx"
 
-export default function DailyChecklistWidget({ notes = [], setNotes, cardClass = '' }) {
+export default function DailyChecklistWidget({ notes = [], setNotes, ownerId = '', cardClass = '' }) {
   // Find the most recently updated note that is marked as a daily checklist and is a list type
-  const dailyChecklists = notes.filter(n => n.type === 'list' && n.isDailyChecklist)
+  const dailyChecklists = notes.filter(n => (n.ownerId === ownerId || !n.ownerId) && n.type === 'list' && n.isDailyChecklist)
   // Sort by updatedAt descending
   dailyChecklists.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
   

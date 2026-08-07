@@ -1,14 +1,37 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Companies collection
-    match /companies/{adminUid}/snapshots/{document=**} {
-      // Allow the Admin to read and write their own company's data.
-      // Note: In this MVP, employees log in via a fallback mechanism or custom token.
-      // If employees are authenticated via Firebase Auth in the future, you would add their authorization here.
-      allow read, write: if request.auth != null && request.auth.uid == adminUid;
+    function isAdmin(adminUid) {
+      return request.auth != null && request.auth.uid == adminUid;
     }
-    
+
+    // An employee is a registered company member (anonymous session)
+    function isMember(adminUid) {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/companies/$(adminUid)/members/$(request.auth.uid));
+    }
+
+    // Company data snapshots: admin + registered members can read/write.
+    // This powers real-time sync across all devices.
+    match /companies/{adminUid}/snapshots/{document=**} {
+      allow read: if isAdmin(adminUid) || isMember(adminUid);
+      allow write: if isAdmin(adminUid) || isMember(adminUid);
+    }
+
+    // Employee auth snapshot — readable by any authenticated (incl. anonymous)
+    // user so employees can verify credentials from any device before they
+    // become registered members. Only the admin can write it.
+    match /companies/{adminUid}/auth/employees {
+      allow read: if request.auth != null;
+      allow write: if isAdmin(adminUid);
+    }
+
+    // Company membership registry — employees register themselves on login.
+    match /companies/{adminUid}/members/{employeeUid} {
+      allow read: if isAdmin(adminUid) || request.auth.uid == employeeUid;
+      allow write: if isAdmin(adminUid) || request.auth.uid == employeeUid;
+    }
+
     // Users collection
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;

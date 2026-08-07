@@ -6,7 +6,7 @@ import kormiisMembershipLogo from '../Assets/Kormiis Logo Membership.svg'
 import heroCharacters from '../Assets/hero-characters.png'
 import { fetchUserProfile } from '../services/googleDrive.js'
 import { verifyPassword, hashPassword } from '../services/crypto.js'
-import { loginWithGoogle, getGoogleRedirectResult, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, updateProfileData, updateDriveConnectionStatus, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp } from '../services/auth.js'
+import { loginWithGoogle, getGoogleRedirectResult, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, updateProfileData, updateDriveConnectionStatus, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp, ensureAnonymousAuth, ensureEmployeeFirebaseSession } from '../services/auth.js'
 import { fetchEmployeeSnapshot } from '../services/bridge.js'
 import Dashboard from './Dashboard.jsx'
 import { allNavItems } from '../utils/helpers.js'
@@ -733,6 +733,13 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
     const finalCompanyId = urlCompanyId || companyId.trim();
 
     try {
+      // Establish an anonymous Firebase session first so Firestore reads (auth snapshot) are permitted.
+      try {
+        await ensureAnonymousAuth()
+      } catch (anonErr) {
+        console.warn('Anonymous auth unavailable (will fall back to local snapshot):', anonErr)
+      }
+
       let employees = []
       if (finalCompanyId) {
         employees = await fetchEmployeeSnapshot(finalCompanyId)
@@ -768,7 +775,15 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         setIsLoading(false)
         return
       }
-      
+
+      // Establish an anonymous Firebase session + register company membership
+      // so the employee gets real-time sync across devices.
+      try {
+        await ensureEmployeeFirebaseSession(finalCompanyId, employee)
+      } catch (fbErr) {
+        console.warn('Employee Firebase session setup failed (continuing in local mode):', fbErr)
+      }
+
       const hrToken = localStorage.getItem('kormiis_hr_token') // Optional fallback
       const employeeUser = {
         name: employee.name,

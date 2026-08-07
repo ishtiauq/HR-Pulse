@@ -1,4 +1,4 @@
-import { auth, db, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber } from './firebase.js';
+import { auth, db, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signInAnonymously, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, doc, setDoc, getDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber } from './firebase.js';
 
 /**
  * Ensures a user document exists in Firestore. 
@@ -60,6 +60,40 @@ export const getGoogleRedirectResult = async () => {
   if (!auth) return null;
   const result = await getRedirectResult(auth);
   return result?.user || null;
+};
+
+/**
+ * Ensures an authenticated (anonymous) Firebase session exists. Employees must
+ * be signed in before they can read the company auth snapshot for login.
+ */
+export const ensureAnonymousAuth = async () => {
+  if (!auth) return null;
+  if (auth.currentUser) return auth.currentUser;
+  const result = await signInAnonymously(auth);
+  return result.user;
+};
+
+/**
+ * Registers the (already authenticated) employee as a member of the company.
+ * This is what lets employees read/write company data and get real-time sync
+ * across devices.
+ */
+export const ensureEmployeeFirebaseSession = async (adminUid, employee) => {
+  if (!auth || !db || !adminUid || !employee) return null;
+
+  const fbUser = await ensureAnonymousAuth();
+  if (!fbUser) return null;
+
+  const memberRef = doc(db, 'companies', adminUid, 'members', fbUser.uid);
+  await setDoc(memberRef, {
+    employeeId: employee.id || employee.employeeId || '',
+    email: employee.email || '',
+    name: employee.name || '',
+    role: employee.role || 'Teammate',
+    registeredAt: serverTimestamp(),
+  }, { merge: true });
+
+  return fbUser;
 };
 
 export const loginWithEmail = async (email, password) => {

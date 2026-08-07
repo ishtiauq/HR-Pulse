@@ -168,7 +168,7 @@ export default function GeoCheckInWidget({ currentUser, attendance, setAttendanc
       }))
       
       // Auto-reset Daily Checklist
-      const dailyChecklists = notes.filter(n => n.type === 'list' && n.isDailyChecklist)
+      const dailyChecklists = notes.filter(n => (n.ownerId === (currentUser?.id || currentUser?.uid) || !n.ownerId) && n.type === 'list' && n.isDailyChecklist)
       if (dailyChecklists.length > 0 && setNotes) {
         // Sort by updatedAt descending to get the active one
         dailyChecklists.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
