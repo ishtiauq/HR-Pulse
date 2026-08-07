@@ -524,7 +524,7 @@ function AssetRequests({ assetRequests, employees, handleRequestAction }) {
                       {req.urgency} Priority
                     </Badge>
                   </div>
-                  <div className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border/50 italic flex gap-3 items-start">
+                  <div className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border/50 flex gap-3 items-start">
                     <span className="text-2xl leading-none text-muted-foreground/30 font-serif">"</span>
                     <div className="pt-1">{req.justification}</div>
                   </div>

@@ -218,14 +218,15 @@ function MarketingSectionTwo() {
         
         {/* Perspective wrapper for 3D pop */}
         <div style={{ perspective: "1000px" }} className="w-full h-full relative">
+          {/* Subtle Orange Glow Behind the Card */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-[120%] max-h-[600px] bg-primary/40 rounded-[100%] blur-[80px] pointer-events-none" />
+          
           <motion.div 
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{ rotateX, rotateY, borderColor: 'rgba(255,255,255,0.1)', transformStyle: "preserve-3d" }}
-            className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-card border border-border shadow-[0_20px_100px_rgba(254,77,1,0.15)] text-foreground group hover:shadow-[0_40px_120px_rgba(254,77,1,0.3)] transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
+            className="relative w-full max-w-4xl mx-auto flex flex-col justify-between overflow-hidden rounded-[2.5rem] bg-zinc-900 border border-zinc-800 text-zinc-50 transition-shadow duration-700 p-8 sm:p-14 aspect-auto md:aspect-[1.65/1] outline-none ring-0"
           >
-          {/* Sleek Orange Blob for ambient glow */}
-          <div className="absolute top-[-5%] right-[5%] w-[30%] h-[40%] bg-primary/40 rounded-full blur-[70px] pointer-events-none" />
 
           <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/50 opacity-40 pointer-events-none" />
 

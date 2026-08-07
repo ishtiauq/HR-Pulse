@@ -143,7 +143,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
             </DialogHeader>
             <div className="max-h-[60vh] overflow-y-auto p-2">
               {notifications.length === 0 ? (
-                <div className="p-8 text-center text-sm text-muted-foreground italic">No new notifications</div>
+                <div className="p-8 text-center text-sm text-muted-foreground">No new notifications</div>
               ) : (
                 notifications.map(n => (
                   <div role="listitem" key={n.id} className="p-3 px-4 rounded-xl hover:bg-muted/60 transition-colors cursor-pointer my-1 border border-transparent hover:border-border/50">
@@ -201,7 +201,7 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
             </div>
             <div className="max-h-[350px] overflow-y-auto p-2">
               {notifications.length === 0 ? (
-                <div className="p-8 text-center text-sm text-muted-foreground italic">No new notifications</div>
+                <div className="p-8 text-center text-sm text-muted-foreground">No new notifications</div>
               ) : (
                 notifications.map(n => (
                   <div role="listitem" key={n.id} className="p-3 px-4 rounded-xl hover:bg-muted/60 transition-colors cursor-pointer my-1 border border-transparent hover:border-border/50">

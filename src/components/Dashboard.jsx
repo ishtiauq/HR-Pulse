@@ -367,7 +367,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
               </div>
             ))}
             {pendingTasksCount === 0 && (
-              <p className="text-sm text-muted-foreground italic">No pending tasks! Great job.</p>
+              <p className="text-sm text-muted-foreground">No pending tasks! Great job.</p>
             )}
           </div>
         </DashboardWidget>
@@ -400,7 +400,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 {attFilter === item.key && (
                   <div className="px-6 pb-4 pt-1 bg-muted/20">
                     {attendanceLists[item.key].length === 0 ? (
-                      <p className="my-1.5 text-xs text-muted-foreground italic">No personnel in this category</p>
+                      <p className="my-1.5 text-xs text-muted-foreground">No personnel in this category</p>
                     ) : (
                       attendanceLists[item.key].map((emp) => (
                         <div key={emp.id} className="flex items-center gap-3.5 py-2 border-b border-border/40 last:border-none">
@@ -489,7 +489,7 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
               </div>
             )) : (
               <div className="flex-1 flex items-center justify-center">
-                <p className="text-sm text-muted-foreground italic text-center">No documents found.</p>
+                <p className="text-sm text-muted-foreground text-center">No documents found.</p>
               </div>
             )}
           </div>
@@ -581,7 +581,6 @@ export default function Dashboard({ employees, driveConnected, onSync, attendanc
                 <span className="text-xs font-semibold text-teal-600/80 uppercase tracking-wider mb-1">Total Assets</span>
                 <span className="text-2xl font-black text-foreground">{assets.length}</span>
               </div>
-              <Icon name="laptop_windows" size={40} className="text-teal-500/30" />
             </div>
             
             <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border">

@@ -369,7 +369,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                           <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Date</span>
                           <span className="font-mono text-sm mt-1">{exp.date}</span>
                         </div>
-                        <div className="col-span-2 text-xs text-muted-foreground italic">
+                        <div className="col-span-2 text-xs text-muted-foreground">
                           "{exp.description}"
                         </div>
                         {isOverLimit && (
@@ -538,7 +538,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                           <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Date</span>
                           <span className="font-mono text-sm mt-1">{exp.date}</span>
                         </div>
-                        <div className="col-span-2 text-xs text-muted-foreground italic">
+                        <div className="col-span-2 text-xs text-muted-foreground">
                           "{exp.description}"
                         </div>
                         {exp.rejectReason && (
@@ -607,7 +607,7 @@ export default function Expenses({ employees, expenses, setExpenses, settings, a
                           <span className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Date</span>
                           <span className="font-mono text-sm mt-1">{exp.date}</span>
                         </div>
-                        <div className="col-span-2 text-xs text-muted-foreground italic">
+                        <div className="col-span-2 text-xs text-muted-foreground">
                           "{exp.description}"
                         </div>
                         {exp.rejectReason && (
