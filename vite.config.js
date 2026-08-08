@@ -10,7 +10,10 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['logo.svg'],
+      includeAssets: ['logo.svg', 'pwa-192x192.jpg', 'pwa-512x512.jpg', 'screenshot-desktop.jpg', 'screenshot-mobile.jpg'],
+      devOptions: {
+        enabled: true
+      },
       workbox: {
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
@@ -25,6 +28,34 @@ export default defineConfig({
             sizes: '192x192 512x512',
             type: 'image/svg+xml',
             purpose: 'any maskable'
+          },
+          {
+            src: 'pwa-192x192.jpg',
+            sizes: '192x192',
+            type: 'image/jpeg',
+            purpose: 'any maskable'
+          },
+          {
+            src: 'pwa-512x512.jpg',
+            sizes: '512x512',
+            type: 'image/jpeg',
+            purpose: 'any maskable'
+          }
+        ],
+        screenshots: [
+          {
+            src: 'screenshot-desktop.jpg',
+            sizes: '1024x1024',
+            type: 'image/jpeg',
+            form_factor: 'wide',
+            label: 'Desktop Dashboard'
+          },
+          {
+            src: 'screenshot-mobile.jpg',
+            sizes: '1024x1024',
+            type: 'image/jpeg',
+            form_factor: 'narrow',
+            label: 'Mobile Dashboard'
           }
         ]
       }
