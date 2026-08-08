@@ -127,8 +127,6 @@ export default function useAppData({ user, addToast }) {
   const addLog = (action, details, status = 'success') => {
     const newLog = { id: `log-${Date.now()}`, action, status, timestamp: 'Just now', details }
     setSyncLogs(prev => [newLog, ...prev.slice(0, 4)])
-    if (status === 'success') addToast(action, 'success')
-    else if (status === 'danger') addToast(action, 'error')
   }
 
   /* ─── Encrypted employee loading ─── */
