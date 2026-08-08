@@ -116,10 +116,25 @@ async function getCompanyIdForUid(uid) {
 }
 
 async function isAdmin(uid) {
+  const userJson = localStorage.getItem('kormiis_user');
+  let localRole = null;
+  let localIsWorkspaceOwner = false;
+  if (userJson) {
+    try {
+      const uObj = JSON.parse(userJson);
+      localRole = uObj.role;
+      localIsWorkspaceOwner = !!uObj.isWorkspaceOwner;
+    } catch(e){}
+  }
+
   const u = await getUser(uid);
-  if (!u) return false;
+  if (!u) {
+    // Fallback to local storage role if Firestore doc is missing
+    return localIsWorkspaceOwner || ['Admin', 'HR'].includes(localRole);
+  }
+  
   if (!u.companyUid || u.companyUid === uid) return true;
-  return ['Admin', 'HR'].includes(u.role);
+  return ['Admin', 'HR'].includes(u.role) || localIsWorkspaceOwner || ['Admin', 'HR'].includes(localRole);
 }
 
 function assertAuth(context) {
@@ -154,9 +169,21 @@ function iso(ts) {
 // Mock onCall to replicate firebase functions behaviour locally
 const onCall = (handler) => {
   return async (data) => {
-    const auth = getAuth();
-    const uid = auth.currentUser?.uid;
-    if (!uid) throw new Error('You must be signed in.');
+    let uid = null;
+    try {
+      const userJson = localStorage.getItem('kormiis_user');
+      if (userJson) {
+        const uObj = JSON.parse(userJson);
+        uid = uObj.uid || uObj.id;
+      }
+    } catch(e) {}
+    
+    if (!uid) {
+      const auth = getAuth();
+      uid = auth.currentUser?.uid;
+    }
+    
+    if (!uid) throw new Error('unauthenticated: You must be signed in.');
     return handler({ data, auth: { uid } });
   }
 }

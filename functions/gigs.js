@@ -52,14 +52,17 @@ exports.createGig = onCall(async (request) => {
 
   const data = request.data || {};
   const title = String(data.title || '').trim();
-  const requiredSkill = String(data.requiredSkill || '').trim();
-  if (!title || !requiredSkill) {
-    throw new HttpsError('invalid-argument', 'title and requiredSkill are required.');
-  }
-  const estimatedHours = Math.max(0, Number(data.estimatedHours) || 0);
   const description = String(data.description || '').trim();
+  const skills = (Array.isArray(data.skills) ? data.skills : String(data.skills || '').split(','))
+    .map((s) => String(s || '').trim())
+    .filter(Boolean);
+  const requiredSkill = String(data.requiredSkill || skills[0] || '').trim();
+  const estimatedHours = Math.max(0, Number(data.estimatedHours) || 0);
+  if (!title || !description) {
+    throw new HttpsError('invalid-argument', 'title and description are required.');
+  }
 
-    const poster = await getUser(uid);
+  const poster = await getUser(uid);
   const posterEmployeeId = (poster && poster.employeeId) || uid;
 
   const gig = {
@@ -68,6 +71,7 @@ exports.createGig = onCall(async (request) => {
     description,
     postedBy: posterEmployeeId,
     postedByUid: uid,
+    skills,
     requiredSkill,
     estimatedHours,
     status: 'open',
@@ -78,11 +82,11 @@ exports.createGig = onCall(async (request) => {
   };
 
   // Auto-notify employees who list the required skill.
-  const skills = await getSkillsForCompany(companyId);
+  const skillMap = await getSkillsForCompany(companyId);
   const want = normalizeSkill(requiredSkill);
-  const matches = Object.keys(skills).filter(
-    (empId) => (skills[empId] || []).some((s) => normalizeSkill(s) === want)
-  );
+  const matches = want ? Object.keys(skillMap).filter(
+    (empId) => (skillMap[empId] || []).some((s) => normalizeSkill(s) === want)
+  ) : [];
   gig.notifiedTo = matches;
   for (const empId of matches) {
     await pushNotification(companyId, empId, `A new gig "${title}" matches your skill (${requiredSkill}).`, { table: 'gigs', id: gig.id });
@@ -118,7 +122,8 @@ exports.getOpenGigs = onCall(async (request) => {
     description: g.description || '',
     postedBy: g.postedBy,
     postedByName: (empMap.get(g.postedBy) || {}).name || g.postedBy,
-    requiredSkill: g.requiredSkill,
+    skills: Array.isArray(g.skills) ? g.skills : (g.requiredSkill ? [g.requiredSkill] : []),
+    requiredSkill: g.requiredSkill || '',
     estimatedHours: g.estimatedHours || 0,
     status: g.status,
     assignedTo: g.assignedTo,
@@ -133,7 +138,7 @@ exports.getOpenGigs = onCall(async (request) => {
   const myPosted = gigs.filter((g) => g.postedBy === myEmployeeId).map(decorate);
   const myAssigned = gigs.filter((g) => g.assignedTo === myEmployeeId).map(decorate);
 
-  return { open, myPosted, myAssigned, myEmployeeId };
+  return { open, myPosted, myAssigned, myEmployeeId, skills: skills[myEmployeeId] || [] };
 });
 
 exports.applyForGig = onCall(async (request) => {
@@ -275,7 +280,8 @@ exports.addSkill = onCall(async (request) => {
   const companyId = await getCompanyIdForUid(uid);
   if (!companyId) throw new HttpsError('failed-precondition', 'Account is not linked to a company.');
 
-  const skill = String((request.data && request.data.skillName) || '').trim();
+  const raw = (request.data && (request.data.skillName || request.data.skill)) || '';
+  const skill = String(raw).trim();
   if (!skill) throw new HttpsError('invalid-argument', 'skillName is required.');
 
   const me = await getUser(uid);
@@ -296,7 +302,7 @@ exports.removeSkill = onCall(async (request) => {
   const companyId = await getCompanyIdForUid(uid);
   if (!companyId) throw new HttpsError('failed-precondition', 'Account is not linked to a company.');
 
-  const skill = String((request.data && request.data.skillName) || '').trim();
+  const skill = String((request.data && (request.data.skillName || request.data.skill)) || '').trim();
   const me = await getUser(uid);
   const myEmployeeId = (me && me.employeeId) || uid;
 

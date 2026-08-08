@@ -23,14 +23,15 @@ export default function GigBoardPage({ adminUid, currentUser, employees, addToas
   const [skills, setSkills] = useState([])
   const [newSkill, setNewSkill] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
-  const [form, setForm] = useState({ title: '', description: '', skills: [], rewardType: 'leave', rewardValue: '', tags: '' })
+  const [form, setForm] = useState({ title: '', description: '', skills: '' })
   const [expanded, setExpanded] = useState(null)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
       const res = await gigApi.getOpenGigs({ view })
-      setGigs(res.gigs || [])
+      const list = view === 'myPosted' ? res.myPosted : view === 'myAssigned' ? res.myAssigned : res.open
+      setGigs(list || [])
       setSkills(res.skills || [])
     } catch (e) {
       addToast(e.message, 'error')
@@ -54,12 +55,10 @@ export default function GigBoardPage({ adminUid, currentUser, employees, addToas
         title: form.title.trim(),
         description: form.description.trim(),
         skills: form.skills.split(',').map(s => s.trim()).filter(Boolean),
-        rewardType: form.rewardType,
-        rewardValue: form.rewardValue ? Number(form.rewardValue) : 0,
       })
       addToast('Gig posted. Matching employees were notified.', 'success')
       setCreateOpen(false)
-      setForm({ title: '', description: '', skills: [], rewardType: 'leave', rewardValue: '', tags: '' })
+      setForm({ title: '', description: '', skills: '' })
       load()
     } catch (e) {
       addToast(e.message, 'error')
@@ -73,6 +72,16 @@ export default function GigBoardPage({ adminUid, currentUser, employees, addToas
       setExpanded(null)
       load()
       return res
+    } catch (e) {
+      addToast(e.message, 'error')
+    }
+  }
+
+  const assignGig = async (gig, applicantId) => {
+    try {
+      await gigApi.assignGig({ gigId: gig.id, applicantId })
+      addToast('Gig assigned.', 'success')
+      load()
     } catch (e) {
       addToast(e.message, 'error')
     }
@@ -157,7 +166,7 @@ export default function GigBoardPage({ adminUid, currentUser, employees, addToas
                   </div>
                   <div className="mt-auto flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-muted-foreground">
-                      Reward: {gig.rewardValue > 0 ? `${gig.rewardValue} ${gig.rewardType} ${gig.rewardType === 'leave' ? 'days' : ''}` : `${gig.rewardType} bonus`}
+                      {gig.requiredSkill ? `Required: ${gig.requiredSkill}` : 'Open to everyone'}
                     </span>
                     <div className="flex items-center gap-2">
                       {gig.status === 'open' && !applied && !isPosted && (
@@ -171,7 +180,7 @@ export default function GigBoardPage({ adminUid, currentUser, employees, addToas
                       )}
                       {(isPosted || isAdmin) && gig.status === 'open' && (
                         <Select value={gig.assignedTo || ''} placeholder="Assign to..." className="w-[150px]"
-                          onValueChange={(uid) => uid && act(gig, gigApi.assignGig, 'Gig assigned.')}>
+                          onValueChange={(uid) => uid && assignGig(gig, uid)}>
                           {(gig.applicants || []).map((uid) => {
                             const emp = employees?.find((e) => e.id === uid)
                             return <SelectItem key={uid} value={uid}>{emp?.name || uid.slice(0, 6)}</SelectItem>
@@ -209,19 +218,6 @@ export default function GigBoardPage({ adminUid, currentUser, employees, addToas
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-muted-foreground">Skills needed (comma-separated)</label>
               <Input value={form.skills} onChange={(e) => setForm({ ...form, skills: e.target.value })} placeholder="excel, design, content" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-muted-foreground">Reward type</label>
-                <Select value={form.rewardType} onValueChange={(v) => setForm({ ...form, rewardType: v })}>
-                  <SelectItem value="leave">Leave days</SelectItem>
-                  <SelectItem value="bonus">Bonus</SelectItem>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-muted-foreground">Reward value</label>
-                <Input type="number" min="0" value={form.rewardValue} onChange={(e) => setForm({ ...form, rewardValue: e.target.value })} placeholder="e.g. 1" />
-              </div>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={() => setCreateOpen(false)}>Cancel</Button>
