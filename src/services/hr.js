@@ -5,6 +5,28 @@ import { db } from './firebase.js'
 
 const functions = getFunctions(getApp(), 'asia-south1')
 
+function friendlyError(e) {
+  const code = String(e?.code || '')
+  const raw = String(e?.message || '')
+  const details = e?.details?.message
+  const low = raw.toLowerCase()
+
+  if (code.includes('not-found') || low.includes('does not exist') || low.includes('function of cloud function')) {
+    return 'This feature is not live yet — deploy the backend Cloud Functions (asia-south1) with `firebase deploy --only functions`.'
+  }
+  if (code.includes('unavailable') || code.includes('network') || low.includes('unavailable') || low.includes('network')) {
+    return 'Backend functions are unreachable. Check your connection.'
+  }
+  if (code.includes('permission-denied') || low.includes('permission')) {
+    return 'You do not have permission to do this.'
+  }
+  if (code === 'internal' || low.includes('internal') || low.includes('request to')) {
+    return 'Something went wrong on the backend. Please try again.'
+  }
+  if (details && typeof details === 'string') return details
+  return raw || 'Request failed'
+}
+
 function wrap(name) {
   const fn = httpsCallable(functions, name)
   return async (data) => {
@@ -12,8 +34,7 @@ function wrap(name) {
       const res = await fn(data)
       return res.data
     } catch (e) {
-      const msg = (e && e.details && e.details.message) || e?.message || 'Request failed'
-      throw new Error(msg)
+      throw new Error(friendlyError(e))
     }
   }
 }
