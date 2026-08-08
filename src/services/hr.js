@@ -11,8 +11,11 @@ function friendlyError(e) {
   const details = e?.details?.message
   const low = raw.toLowerCase()
 
-  if (code.includes('not-found') || low.includes('does not exist') || low.includes('function of cloud function')) {
-    return 'This feature is not live yet — deploy the backend Cloud Functions (asia-south1) with `firebase deploy --only functions`.'
+  // A callable endpoint that 404s with a non-JSON body (function not deployed
+  // yet, or deployed to the wrong region) surfaces as 'internal' + "Response
+  // is not valid JSON object." Catch it before the generic internal branch.
+  if (code.includes('not-found') || low.includes('does not exist') || low.includes('function of cloud function') || low.includes('not valid json')) {
+    return 'Backend Cloud Functions are not deployed yet (region asia-south1). Run `firebase deploy --only functions` from the project root, then reload.'
   }
   if (code.includes('unavailable') || code.includes('network') || low.includes('unavailable') || low.includes('network')) {
     return 'Backend functions are unreachable. Check your connection.'

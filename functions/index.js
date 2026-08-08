@@ -14,6 +14,12 @@
  */
 
 const { admin } = require('./common');
+const { setGlobalOptions } = require('firebase-functions/v2');
+
+// The frontend (src/services/hr.js) creates its callable client with this
+// region. Without setting it here the SDK would default to us-central1 and
+// every call from the app would 404.
+setGlobalOptions({ region: 'asia-south1' });
 
 admin.initializeApp();
 
