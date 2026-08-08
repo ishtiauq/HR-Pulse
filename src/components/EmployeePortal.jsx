@@ -25,6 +25,8 @@ import MobileTabButton from './layout/MobileTabButton.jsx'
 import ProfileView from './ProfileView.jsx'
 import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
 import AttendancePage from './attendance/AttendancePage.jsx'
+import GigBoardPage from './hr/GigBoardPage.jsx'
+import PerformancePage from './hr/PerformancePage.jsx'
 
 // Dummy profile image generation based on initials
 const getInitialsAvatar = (name) => {
@@ -247,6 +249,10 @@ export default function EmployeePortal({
         return <div className="max-w-[1200px] mx-auto w-full"><Documents documents={documents} setDocuments={setDocuments} addLog={addLog} addToast={addToast} currentUser={currentUser} /></div>
       case 'notes':
         return <div className="max-w-[1200px] mx-auto w-full"><Notes notes={notes} setNotes={setNotes} currentUser={currentUser} addToast={addToast} /></div>
+      case 'gigs':
+        return <div className="max-w-[1200px] mx-auto w-full"><GigBoardPage adminUid={currentUser.adminUid} currentUser={currentUser} employees={employees} addToast={addToast} /></div>
+      case 'performance':
+        return <div className="max-w-[1200px] mx-auto w-full"><PerformancePage adminUid={currentUser.adminUid} currentUser={currentUser} addToast={addToast} /></div>
       default:
         return <DashboardView currentUser={currentUser} attendance={attendance} setAttendance={setAttendance} addToast={addToast} expenses={expenses} announcements={announcements} tasks={tasks} events={events} setActiveTab={setActiveTab} setShowPunchModal={setShowPunchModal} settings={settings} notes={notes} setNotes={setNotes} />
       case 'team_attendance':
@@ -284,6 +290,8 @@ export default function EmployeePortal({
     { id: 'documents', icon: <Icon name="folder_open" size={18} />, label: 'Documents' },
     { id: 'notes', icon: <Icon name="sticky_note_2" size={18} />, label: 'Notes' },
     { id: 'leave', icon: <Icon name="calendar_month" size={18} />, label: 'Leave' },
+    { id: 'gigs', icon: <Icon name="workspaces" size={18} />, label: 'Gigs' },
+    { id: 'performance', icon: <Icon name="insights" size={18} />, label: 'Performance' },
     { id: 'profile', icon: <Icon name="person" size={18} />, label: 'Profile' }
   ]
 

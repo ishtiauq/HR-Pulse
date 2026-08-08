@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { formatDateShort } from '../services/date.js'
 import GeoCheckInWidget from './attendance/GeoCheckInWidget.jsx'
 import DailyChecklistWidget from './DailyChecklistWidget.jsx'
+import HrOverview from './hr/HrOverview.jsx'
 
 const DashboardWidget = ({ 
   id, title, icon, action, 
@@ -330,6 +331,9 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
 
         {/* Widget 4 — Daily Checklist */}
         <DailyChecklistWidget notes={notes} setNotes={setNotes} ownerId={currentUser?.id || currentUser?.uid || ''} cardClass="" />
+
+        {/* HR Automation — People Insights */}
+        <HrOverview adminUid={currentUser?.uid} currentUser={currentUser} setCurrentView={setCurrentView} addToast={addToast} />
 
         {/* 8. TASKS WIDGET */}
       {canViewTasks && (

@@ -11,6 +11,11 @@ import Settings from './Settings.jsx'
 import Tasks from './Tasks.jsx'
 import ProfileView from './ProfileView.jsx'
 import Notes from './Notes.jsx'
+import GigBoardPage from './hr/GigBoardPage.jsx'
+import PerformancePage from './hr/PerformancePage.jsx'
+import WellbeingPage from './hr/WellbeingPage.jsx'
+import CompliancePage from './hr/CompliancePage.jsx'
+import LifeEventsPage from './hr/LifeEventsPage.jsx'
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AppContent({ currentView, setCurrentView, isAppLoading, hasPermission, user, isSidebarCollapsed, themeMode, toggleTheme, ...data }) {
@@ -131,6 +136,16 @@ export default function AppContent({ currentView, setCurrentView, isAppLoading, 
       return <ProfileView currentUser={user} pendingProfileEdits={data.pendingProfileEdits} setPendingProfileEdits={data.setPendingProfileEdits} addToast={data.addToast} addLog={data.addLog} settings={data.settings} setSettings={data.handleSetSettings} employees={data.employees} setEmployees={data.handleSetEmployees} />
     case 'notes':
       return <Notes notes={data.notes} setNotes={data.handleSetNotes} currentUser={user} addToast={data.addToast} />
+    case 'gigs':
+      return <GigBoardPage adminUid={data.adminUid} currentUser={user} employees={data.employees} addToast={data.addToast} />
+    case 'performance':
+      return <PerformancePage adminUid={data.adminUid} currentUser={user} addToast={data.addToast} />
+    case 'wellbeing':
+      return <WellbeingPage adminUid={data.adminUid} currentUser={user} employees={data.employees} addToast={data.addToast} />
+    case 'compliance':
+      return <CompliancePage adminUid={data.adminUid} addToast={data.addToast} />
+    case 'life-events':
+      return <LifeEventsPage adminUid={data.adminUid} currentUser={user} addToast={data.addToast} />
     default:
       return <Dashboard employees={data.employees} syncLogs={data.syncLogs} addLog={data.addLog} onSync={data.handleSync} setCurrentView={setCurrentView} announcements={data.announcements} events={data.events} payroll={data.payroll} isSidebarCollapsed={isSidebarCollapsed} hasPermission={hasPermission} tasks={data.tasks} documents={data.documents} assets={data.assets} attendance={data.attendance} setAttendance={data.handleSetAttendance} currentUser={user} addToast={data.addToast} />
   }

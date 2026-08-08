@@ -5,6 +5,7 @@ import kormiisLogo from '../Assets/Kormiis Logo Final.svg'
 import kormiisMembershipLogo from '../Assets/Kormiis Logo Membership.svg'
 import heroCharacters from '../Assets/hero-characters.png'
 import { loginWithGoogle, getGoogleRedirectResult, loginWithEmail, registerWithEmail, checkAndCreateUserDoc, getCompanyForUser, setupRecaptcha, requestPhoneOtp, verifyPhoneOtp } from '../services/auth.js'
+import { recordLoginActivity } from '../services/hr.js'
 import painStripIllustration from '../Assets/pain-strip.png'
 import threeStepsIllustration from '../Assets/three-steps.png'
 import faqIllustration from '../Assets/faq-illustration.png'
@@ -595,6 +596,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
   // --- Complete admin sign in & enter dashboard ---
   const completeAdminLogin = (user) => {
     setIsLoading(true)
+    recordLoginActivity(user?.uid, user?.uid)
     setTimeout(() => {
       setIsLoading(false)
       onLogin(adminSession({ id: user?.uid || 'local', name: user?.displayName || 'System Admin', email: user?.email || 'admin@company.com', companyName: 'Kormiis Ltd.' }))
@@ -630,6 +632,7 @@ export default function Login({ onLogin, themeMode, toggleTheme, setThemeMode })
         uid: user.uid,
         token: ''
       }
+      recordLoginActivity(company.companyUid, user.uid)
       onLogin(employeeUser)
     } catch (err) {
       setError('Login failed: ' + err.message)
