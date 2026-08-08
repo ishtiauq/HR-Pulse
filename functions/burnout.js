@@ -8,7 +8,6 @@
  * alerts HR when the score crosses the threshold.
  */
 
-const { onSchedule } = require('firebase-functions/v2/scheduler');
 const {
   onCall,
   HttpsError,
@@ -22,7 +21,6 @@ const {
   getSnapshot,
   setSnapshot,
   updateSnapshot,
-  listCompanyIds,
   requireAdmin,
   notifyHR,
   iso,
@@ -148,21 +146,7 @@ async function runBurnoutAnalysis(companyId, ym) {
   return newRisks;
 }
 
-exports.scheduledBurnoutAnalysis = onSchedule(
-  { schedule: '0 0 1 * *', timeZone: 'Asia/Dhaka' },
-  async () => {
-    const ym = lastMonthKey();
-    const companies = await listCompanyIds();
-    for (const companyId of companies) {
-      try {
-        await runBurnoutAnalysis(companyId, ym);
-        console.log(`[burnout] ${companyId} analyzed for ${ym}`);
-      } catch (e) {
-        console.error(`[burnout] failed for ${companyId}:`, e);
-      }
-    }
-  }
-);
+// --- Burnout logic ----------------------------------------------------------
 
 exports.getBurnoutRisks = onCall(async (request) => {
   const { companyId } = await requireAdmin(request);

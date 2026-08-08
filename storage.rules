@@ -1,0 +1,20 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAdmin(adminUid) {
+      return request.auth != null && request.auth.uid == adminUid;
+    }
+
+    // An employee is a registered company member (anonymous session)
+    function isMember(adminUid) {
+      return request.auth != null
+        && firestore.exists(/databases/(default)/documents/companies/$(adminUid)/members/$(request.auth.uid));
+    }
+
+    // Company uploads (documents, images) stored under the company's bucket
+    // path — readable/writable by the admin and registered members.
+    match /companies/{adminUid}/pending_uploads/{allPaths=**} {
+      allow read, write: if isAdmin(adminUid) || isMember(adminUid);
+    }
+  }
+}

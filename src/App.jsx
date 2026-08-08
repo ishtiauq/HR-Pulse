@@ -17,6 +17,7 @@ import { useTheme } from './hooks/useTheme.js'
 import { useToast } from './hooks/useToast.js'
 import { useAuth } from './hooks/useAuth.js'
 import { useCommandPalette } from './hooks/useCommandPalette.jsx'
+import LoadingScreen from './components/layout/LoadingScreen.jsx'
 import useAppData from './hooks/useAppData.js'
 
 export default function App() {
@@ -26,6 +27,7 @@ export default function App() {
 
   const appData = useAppData({ user, addToast })
 
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
   const [currentView, setCurrentView] = useState(() => localStorage.getItem('kormiis_current_view') || 'dashboard')
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
@@ -34,6 +36,11 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true')
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsInitialLoading(false), 1200)
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     localStorage.setItem('kormiis_current_view', currentView)
@@ -106,6 +113,10 @@ export default function App() {
   const { showCommandPalette, setShowCommandPalette, commandSearch, setCommandSearch, paletteIndex, setPaletteIndex, filteredItems, selectPaletteItem, getCategoryIcon, ConfirmDialog } = useCommandPalette({
     employees: appData.employees, themeMode, toggleTheme, setCurrentView, addToast, setSelectedEmployeeId
   })
+
+  if (isInitialLoading) {
+    return <LoadingScreen isDarkMode={isDarkMode} message="Welcome to Kormiis..." />
+  }
 
   if (!user) {
     return <Login onLogin={handleLogin} themeMode={themeMode} toggleTheme={toggleTheme} setThemeMode={setThemeMode} />

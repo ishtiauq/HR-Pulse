@@ -7,7 +7,6 @@
  * contributions. Weights are configurable in companies/{id}/snapshots/performance_weights.
  */
 
-const { onSchedule } = require('firebase-functions/v2/scheduler');
 const {
   onCall,
   HttpsError,
@@ -19,7 +18,6 @@ const {
   getSnapshot,
   setSnapshot,
   updateSnapshot,
-  listCompanyIds,
   getCompanyIdForUid,
   getUser,
   requireAdmin,
@@ -200,21 +198,7 @@ async function runPerformanceCalculation(companyId, ym) {
   return rows;
 }
 
-exports.scheduledPerformanceCalculation = onSchedule(
-  { schedule: '0 0 1 * *', timeZone: 'Asia/Dhaka' },
-  async () => {
-    const ym = lastMonthKey();
-    const companies = await listCompanyIds();
-    for (const companyId of companies) {
-      try {
-        await runPerformanceCalculation(companyId, ym);
-        console.log(`[performance] ${companyId} scored for ${ym}`);
-      } catch (e) {
-        console.error(`[performance] failed for ${companyId}:`, e);
-      }
-    }
-  }
-);
+// --- Performance logic ------------------------------------------------------
 
 exports.calculateMonthlyPerformance = onCall(async (request) => {
   const { companyId } = await requireAdmin(request);

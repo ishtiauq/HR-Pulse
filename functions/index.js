@@ -5,9 +5,9 @@
  *
  * No external AI. All logic is plain JavaScript over Firestore.
  *
- * Scheduled jobs:
- *   - scheduledBurnoutAnalysis       (1st of each month, Asia/Dhaka)
- *   - scheduledPerformanceCalculation(1st of each month, Asia/Dhaka)
+ * Note: scheduled (onSchedule) jobs were removed because they require the
+ * Blaze plan. Analysis runs on demand from the UI instead ("Run analysis" /
+ * "Calculate month").
  *
  * Deploy: firebase deploy --only functions
  */
@@ -28,7 +28,6 @@ const performance = require('./performance');
 
 module.exports = {
   // Feature 1
-  scheduledBurnoutAnalysis: burnout.scheduledBurnoutAnalysis,
   getBurnoutRisks: burnout.getBurnoutRisks,
   acknowledgeRiskAlert: burnout.acknowledgeRiskAlert,
   runBurnoutAnalysisNow: burnout.runBurnoutAnalysisNow,
@@ -44,7 +43,6 @@ module.exports = {
   removeSkill: gigs.removeSkill,
 
   // Feature 5
-  scheduledPerformanceCalculation: performance.scheduledPerformanceCalculation,
   calculateMonthlyPerformance: performance.calculateMonthlyPerformance,
   getPerformanceScores: performance.getPerformanceScores,
   getMyScore: performance.getMyScore,

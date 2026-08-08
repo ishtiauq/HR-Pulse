@@ -8,11 +8,22 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleTheme, handleSync, isSyncing, dataIntegrityIssues = [], showCorruptionModal, setShowCorruptionModal, handleAutoRepairDatabase, setShowNotifications, markNotificationsRead, unreadCount, showNotifications, notifications = [], clearNotifications, onProfileClick, handleLogout, showThemeToggle = true, user, setCurrentView }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true)
   const buttonRef = useRef(null)
   const [modalPos, setModalPos] = useState({ top: 0, right: 0 })
   const [notificationTab, setNotificationTab] = useState('all')
   const filteredNotifications = notificationTab === 'unread' ? notifications.filter(n => !n.read) : notifications
 
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
@@ -75,25 +86,24 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
             </div>
           </div>
 
-          {/* Right Section: Sync Badge + Theme Toggle + Notification Trigger */}
+          {/* Right Section: Live Status Badge + Theme Toggle + Notification Trigger */}
           <div className="flex items-center gap-0.5 min-[400px]:gap-2 sm:gap-3 shrink-0">
             
-            {/* Sync Status Button */}
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (dataIntegrityIssues && dataIntegrityIssues.length > 0) {
-                  if (setShowCorruptionModal) setShowCorruptionModal(true)
-                } else {
-                  if (handleSync) handleSync()
-                }
-              }}
-              disabled={isSyncing}
-              className="h-8 w-8 p-0 sm:w-auto sm:h-9 sm:px-4 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-semibold gap-1.5 sm:gap-2 shrink-0"
-            >
-              <span className={`w-2 h-2 min-w-[8px] min-h-[8px] block rounded-full shrink-0 ${isSyncing ? 'bg-status-warning animate-spin' : dataIntegrityIssues.length > 0 ? 'bg-status-error animate-pulse' : 'bg-status-success animate-pulse'}`}></span>
-              <span className="hidden sm:inline">{isSyncing ? 'Syncing...' : dataIntegrityIssues.length > 0 ? 'Data Error' : 'Synced'}</span>
-            </Button>
+            {/* 3D Live / Offline Status Badge */}
+            {isOnline ? (
+              <div className="px-3.5 py-1.5 rounded-full text-xs font-black tracking-wider uppercase text-white bg-gradient-to-b from-red-500 to-red-600 border border-red-400/40 shadow-[0_3px_0_0_#991b1b,0_4px_12px_rgba(239,68,68,0.4)] flex items-center gap-2 select-none shrink-0 transition-all duration-300">
+                <span className="relative flex size-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-80"></span>
+                  <span className="relative inline-flex rounded-full size-2 bg-white"></span>
+                </span>
+                <span>LIVE</span>
+              </div>
+            ) : (
+              <div className="px-3.5 py-1.5 rounded-full text-xs font-black tracking-wider uppercase text-zinc-200 bg-gradient-to-b from-zinc-500 to-zinc-600 border border-zinc-400/30 shadow-[0_3px_0_0_#3f3f46] flex items-center gap-2 select-none shrink-0 transition-all duration-300">
+                <span className="w-2 h-2 rounded-full bg-zinc-300"></span>
+                <span>OFFLINE</span>
+              </div>
+            )}
 
             {/* Theme Toggle Button */}
             {showThemeToggle && (
