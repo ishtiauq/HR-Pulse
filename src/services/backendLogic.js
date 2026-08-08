@@ -111,13 +111,15 @@ async function getUser(uid) {
 
 async function getCompanyIdForUid(uid) {
   const u = await getUser(uid);
-  return u && u.companyUid ? u.companyUid : null;
+  if (!u) return null;
+  return u.companyUid || uid; // Workspace owner's companyId is their uid
 }
 
 async function isAdmin(uid) {
   const u = await getUser(uid);
   if (!u) return false;
-  return u.companyUid === uid || ['Admin', 'HR'].includes(u.role);
+  if (!u.companyUid || u.companyUid === uid) return true;
+  return ['Admin', 'HR'].includes(u.role);
 }
 
 function assertAuth(context) {
