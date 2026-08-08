@@ -1,4 +1,4 @@
-import { auth, db, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateEmail, updatePassword, deleteUser, signOut, doc, setDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber } from './firebase.js';
+import { auth, db, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, updatePassword, deleteUser, signOut, doc, setDoc, getDocFromServer, serverTimestamp, RecaptchaVerifier, signInWithPhoneNumber, EmailAuthProvider, reauthenticateWithCredential } from './firebase.js';
 
 /**
  * Ensures a user document exists in Firestore. 
@@ -87,15 +87,21 @@ export const provisionEmployeeAccount = async ({ email, password, name, role, co
 };
 
 /**
- * Updates a teammate's Firebase Auth email/password.
- * Firestore linkage is updated by the caller (employee record).
+ * Self-service password change for the currently signed-in user (teammate).
+ * Re-authenticates with the current password first (which both validates it
+ * and refreshes the session so updatePassword doesn't hit requires-recent-login).
+ * Only the signed-in user's own password can be changed from the client.
  */
-export const updateEmployeeAuthAccount = async (uid, { email, password }) => {
+export const changeEmployeePassword = async (currentPassword, newPassword) => {
   if (!auth) throw new Error('Firebase not configured');
-  const account = auth.currentUser?.uid === uid ? auth.currentUser : null;
-  if (!account) throw new Error('Cannot update this account from the current session.');
-  if (email && email !== account.email) await updateEmail(account, email);
-  if (password) await updatePassword(account, password);
+  const account = auth.currentUser;
+  if (!account || !account.email) throw new Error('You must be signed in to change your password.');
+  if (!currentPassword) throw new Error('Please enter your current password.');
+  if (!newPassword || newPassword.length < 6) throw new Error('New password must be at least 6 characters.');
+
+  const credential = EmailAuthProvider.credential(account.email, currentPassword);
+  await reauthenticateWithCredential(account, credential);
+  await updatePassword(auth.currentUser, newPassword);
 };
 
 /**

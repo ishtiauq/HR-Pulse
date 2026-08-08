@@ -3,6 +3,7 @@ import Icon from "@/components/ui/Icon.jsx"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { changeEmployeePassword } from '../services/auth.js'
 
 const getInitialsAvatar = (name) => {
   const parts = name.split(' ')
@@ -23,6 +24,10 @@ const getInitialsAvatar = (name) => {
 
 export default function ProfileView({ currentUser, pendingProfileEdits, setPendingProfileEdits, addToast, addLog, settings, setSettings, employees, setEmployees }) {
   const [editMode, setEditMode] = useState(false)
+  const [pwCurrent, setPwCurrent] = useState('')
+  const [pwNew, setPwNew] = useState('')
+  const [pwConfirm, setPwConfirm] = useState('')
+  const [pwLoading, setPwLoading] = useState(false)
   const [formData, setFormData] = useState({
     personalEmail: currentUser.personalEmail || '',
     phone: currentUser.phone || '',
@@ -74,6 +79,35 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
       )
       setSettings({ ...settings, adminDevices: updatedDevices })
       addToast(currentStatus ? 'Device access restored.' : 'Device access revoked.', 'success')
+    }
+  }
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault()
+    setPwLoading(true)
+    try {
+      if (!pwCurrent) {
+        addToast('Please enter your current password.', 'warning')
+        return
+      }
+      if (pwNew.length < 6) {
+        addToast('New password must be at least 6 characters.', 'warning')
+        return
+      }
+      if (pwNew !== pwConfirm) {
+        addToast('New passwords do not match.', 'warning')
+        return
+      }
+      await changeEmployeePassword(pwCurrent, pwNew)
+      setPwCurrent('')
+      setPwNew('')
+      setPwConfirm('')
+      addToast('Password changed successfully.', 'success')
+      if (addLog) addLog('Password Changed', `${currentUser.name} changed their password.`, 'info')
+    } catch (err) {
+      addToast('Failed to change password: ' + err.message, 'danger')
+    } finally {
+      setPwLoading(false)
     }
   }
 
@@ -186,6 +220,36 @@ export default function ProfileView({ currentUser, pendingProfileEdits, setPendi
           )}
         </CardContent>
       </Card>
+
+      {currentUser.isEmployee && currentUser.uid && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Change Password</CardTitle>
+            <p className="text-sm text-muted-foreground">Update the password you use to sign in. Your sign-in email is managed by your HR administrator.</p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleChangePassword} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">Current Password</label>
+                <Input type="password" value={pwCurrent} onChange={e => setPwCurrent(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">New Password</label>
+                <Input type="password" value={pwNew} onChange={e => setPwNew(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none">Confirm New Password</label>
+                <Input type="password" value={pwConfirm} onChange={e => setPwConfirm(e.target.value)} />
+              </div>
+              <div className="sm:col-span-2 flex gap-3 mt-4">
+                <Button type="submit" disabled={pwLoading}>
+                  {pwLoading ? 'Updating...' : 'Update Password'}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Connected Devices Section */}
       <Card>

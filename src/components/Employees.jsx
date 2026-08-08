@@ -3,7 +3,7 @@ import Icon from "@/components/ui/Icon.jsx"
 import { useModal } from '../services/useModal.js'
 import AdSlot from './AdSlot.jsx'
 import { formatDate } from '../services/date.js'
-import { provisionEmployeeAccount, updateEmployeeAuthAccount, deleteEmployeeAccount } from '../services/auth.js'
+import { provisionEmployeeAccount, deleteEmployeeAccount } from '../services/auth.js'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -158,15 +158,11 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
     }
 
     if (editingEmployee) {
-      // Update Firebase Auth account (email/password changes) if needed
-      const authChanged = (newEmail && newEmail !== editingEmployee.email) || newPassword
-      if (authChanged) {
-        try {
-          await updateEmployeeAuthAccount(editingEmployee.uid, { email: newEmail, password: newPassword || undefined })
-        } catch (err) {
-          addToast('Failed to update login credentials: ' + err.message, 'danger')
-          return
-        }
+      // The teammate manages their own login password (self-service in their
+      // profile). The Firebase sign-in email can't be changed from the client
+      // SDK, so an admin edit only updates the directory record here.
+      if (newEmail && newEmail !== editingEmployee.email) {
+        addToast('Email updated in the directory. The sign-in email is unchanged — reset it in the Firebase console if needed.', 'warning')
       }
 
       // Update employee list
@@ -1099,11 +1095,17 @@ export default function Employees({ employees, setEmployees, addLog, addAuditLog
                 <label className="text-sm font-medium">Email Address</label>
                 <Input type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
               </div>
-              
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Password {editingEmployee && <span className="text-xs text-muted-foreground font-normal">(Leave blank to keep)</span>}</label>
-                <Input type="text" placeholder={editingEmployee ? "Leave blank" : "Set password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-              </div>
+
+              {!editingEmployee ? (
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium">Password</label>
+                  <Input type="password" placeholder="Set password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 rounded-md bg-muted/50 px-3 py-2.5 text-xs text-muted-foreground">
+                  Sign-in password is managed by the teammate from their Profile (Change Password). Sign-in email changes require the Firebase console.
+                </div>
+              )}
 
               <DatePicker label="Date of Birth" value={newDob} onChange={(e) => setNewDob(e.target.value)} />
 
