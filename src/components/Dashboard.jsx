@@ -512,7 +512,7 @@ export default function Dashboard({ employees, onSync, attendance, setAttendance
                 </div>
                 <div className="col-span-2 border-t border-border/50 pt-2 mt-1">
                   <span className="block text-xs font-medium text-muted-foreground">Total Payroll</span>
-                  <span className="text-xl sm:text-2xl font-black tabular-nums text-foreground mt-0.5 block">${totalPayrollCost.toLocaleString()}</span>
+                  <span className="text-xl sm:text-2xl font-black tabular-nums text-foreground mt-0.5 block">{settings?.currency || '$'}{totalPayrollCost.toLocaleString()}</span>
                 </div>
               </div>
               <div className="mt-3 pt-3 flex justify-between items-center border-t border-border">
