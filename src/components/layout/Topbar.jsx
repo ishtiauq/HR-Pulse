@@ -89,9 +89,9 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
           {/* Right Section: Live Status Badge + Theme Toggle + Notification Trigger */}
           <div className="flex items-center gap-0.5 min-[400px]:gap-2 sm:gap-3 shrink-0">
             
-            {/* 3D Live / Offline Status Badge */}
+            {/* Flat Live / Offline Status Badge with Shimmer */}
             {isOnline ? (
-              <div className="px-3.5 py-1.5 rounded-full text-xs font-black tracking-wider uppercase text-white bg-gradient-to-b from-red-500 to-red-600 border border-red-400/40 shadow-[0_3px_0_0_#991b1b,0_4px_12px_rgba(239,68,68,0.4)] flex items-center gap-2 select-none shrink-0 transition-all duration-300">
+              <div className="btn-shimmer bg-live-red h-8 px-3 rounded-full text-xs font-black tracking-wider uppercase flex items-center gap-2 select-none shrink-0 shadow-xs">
                 <span className="relative flex size-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-80"></span>
                   <span className="relative inline-flex rounded-full size-2 bg-white"></span>
@@ -99,8 +99,8 @@ export default function Topbar({ isDarkMode, toggleSidebar, themeMode, toggleThe
                 <span>LIVE</span>
               </div>
             ) : (
-              <div className="px-3.5 py-1.5 rounded-full text-xs font-black tracking-wider uppercase text-zinc-200 bg-gradient-to-b from-zinc-500 to-zinc-600 border border-zinc-400/30 shadow-[0_3px_0_0_#3f3f46] flex items-center gap-2 select-none shrink-0 transition-all duration-300">
-                <span className="w-2 h-2 rounded-full bg-zinc-300"></span>
+              <div className="h-8 px-3 rounded-full text-xs font-bold tracking-wider uppercase text-muted-foreground bg-muted border border-border flex items-center gap-2 select-none shrink-0">
+                <span className="w-2 h-2 rounded-full bg-muted-foreground/60"></span>
                 <span>OFFLINE</span>
               </div>
             )}

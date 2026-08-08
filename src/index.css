@@ -292,6 +292,29 @@ svg.lucide {
 .bg-status-success { background-color: #10b981 !important; color: white !important; }
 .bg-status-warning { background-color: #f59e0b !important; color: white !important; }
 .bg-status-error { background-color: #ef4444 !important; color: white !important; }
+.bg-live-red { background-color: #dc2626 !important; color: #ffffff !important; border: none !important; }
+
+/* Global Shimmer Effect */
+@keyframes shimmer-slide {
+  0% { transform: translateX(-150%) skewX(-20deg); }
+  30% { transform: translateX(150%) skewX(-20deg); }
+  100% { transform: translateX(150%) skewX(-20deg); }
+}
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.2) 20%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.2) 80%, transparent);
+  animation: shimmer-slide 4s infinite ease-in-out;
+  pointer-events: none;
+}
 
 /* Custom Sharp Blink Animation */
 @keyframes sharpBlink {
@@ -371,8 +394,18 @@ input:focus, select:focus, textarea:focus, .focus-within\:ring-2:focus-within {
   border-color: var(--primary) !important;
 }
 
+/* Prevent Flash of Unstyled Text (FOUT) for Icon Glyphs */
+@font-face {
+  font-family: "Material Symbols Rounded";
+  font-display: block;
+}
+@font-face {
+  font-family: "Material Symbols Rounded Variable";
+  font-display: block;
+}
+
 .msr {
-  font-family: "Material Symbols Rounded Variable", "Material Symbols Rounded";
+  font-family: "Material Symbols Rounded", "Material Symbols Rounded Variable";
   font-weight: 400;
   font-style: normal;
   font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0;
@@ -389,6 +422,13 @@ input:focus, select:focus, textarea:focus, .focus-within\:ring-2:focus-within {
   text-rendering: optimizeLegibility;
   font-feature-settings: "liga";
   user-select: none;
+  transition: opacity 0.15s ease-in;
+}
+
+/* Hide raw text strings (e.g. 'favorite', 'home') until icon font finishes loading */
+html:not(.fonts-loaded) .msr {
+  color: transparent !important;
+  opacity: 0;
 }
 
 /* Bottom Nav Mobile Icon States */
