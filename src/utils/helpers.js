@@ -34,8 +34,6 @@ export const allNavItems = [
   { id: 'gigs', label: 'Gigs', icon: createElement(Icon, { name: 'workspaces', size: 18 }) },
   { id: 'performance', label: 'Performance', icon: createElement(Icon, { name: 'insights', size: 18 }) },
   { id: 'wellbeing', label: 'Well-being', icon: createElement(Icon, { name: 'favorite', size: 18 }) },
-  { id: 'compliance', label: 'Compliance', icon: createElement(Icon, { name: 'gavel', size: 18 }) },
-  { id: 'life-events', label: 'Life Events', icon: createElement(Icon, { name: 'celebration', size: 18 }) },
   { id: 'settings', label: 'Settings', icon: createElement(Icon, { name: 'settings', size: 18 }) },
   { id: 'notes', label: 'Notes', icon: createElement(Icon, { name: 'sticky_note_2', size: 18 }) },
   { id: 'profile', label: 'Profile', icon: createElement(Icon, { name: 'person', size: 18 }) },

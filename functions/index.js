@@ -7,7 +7,6 @@
  *
  * Scheduled jobs:
  *   - scheduledBurnoutAnalysis       (1st of each month, Asia/Dhaka)
- *   - scheduledComplianceCheck       (nightly, Asia/Dhaka)
  *   - scheduledPerformanceCalculation(1st of each month, Asia/Dhaka)
  *
  * Deploy: firebase deploy --only functions
@@ -25,8 +24,6 @@ admin.initializeApp();
 
 const burnout = require('./burnout');
 const gigs = require('./gigs');
-const compliance = require('./compliance');
-const lifeEvents = require('./lifeEvents');
 const performance = require('./performance');
 
 module.exports = {
@@ -45,23 +42,6 @@ module.exports = {
   getMySkills: gigs.getMySkills,
   addSkill: gigs.addSkill,
   removeSkill: gigs.removeSkill,
-
-  // Feature 3
-  scheduledComplianceCheck: compliance.scheduledComplianceCheck,
-  complianceLeaveTrigger: compliance.complianceLeaveTrigger,
-  getComplianceAlerts: compliance.getComplianceAlerts,
-  resolveAlert: compliance.resolveAlert,
-  getComplianceRules: compliance.getComplianceRules,
-  updateComplianceRule: compliance.updateComplianceRule,
-  addFestivalDate: compliance.addFestivalDate,
-  removeFestivalDate: compliance.removeFestivalDate,
-
-  // Feature 4
-  leaveLifeEventTrigger: lifeEvents.leaveLifeEventTrigger,
-  profileLifeEventTrigger: lifeEvents.profileLifeEventTrigger,
-  getLifeEvents: lifeEvents.getLifeEvents,
-  getMyLifeEvents: lifeEvents.getMyLifeEvents,
-  completeLifeEventTask: lifeEvents.completeLifeEventTask,
 
   // Feature 5
   scheduledPerformanceCalculation: performance.scheduledPerformanceCalculation,

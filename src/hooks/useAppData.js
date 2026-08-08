@@ -303,7 +303,7 @@ export default function useAppData({ user, addToast }) {
         }
       }
     })
-    if (newPosts.length > 0) setAnnouncements(prev => [...newPosts, ...prev])
+    if (newPosts.length > 0) handleSetAnnouncements(prev => [...newPosts, ...prev])
   }, [employees])
 
   /* ─── Firestore load effect (source of truth) ─── */
@@ -619,6 +619,16 @@ export default function useAppData({ user, addToast }) {
     })
   }
 
+  const handleSetAnnouncements = (updater) => {
+    setAnnouncements((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater
+      localStorage.setItem('kormiis_announcements', JSON.stringify(next))
+      localStorage.setItem('kormiis_announcements_updatedAt', String(Date.now()))
+      if (adminUid) writeToTable(adminUid, 'announcements', next).catch(e => console.error(e));
+      return next
+    })
+  }
+
   const handleSync = () => { 
     addToast('Retrying sync...', 'info');
     setTimeout(() => {
@@ -646,7 +656,7 @@ export default function useAppData({ user, addToast }) {
     employees, payroll, attendance, expenses, events, documents, tasks, notes,
     roster, setRoster, shiftSwaps, setShiftSwaps,
     overtimeClaims, setOvertimeClaims,
-    announcements, setAnnouncements,
+    announcements, setAnnouncements: handleSetAnnouncements,
     assets, setAssets, assetRequests, setAssetRequests, assetCategories, setAssetCategories,
     settings, syncLogs,
 

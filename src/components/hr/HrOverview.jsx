@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Icon from "@/components/ui/Icon.jsx"
 import { Card, CardHeader, CardTitle } from "@/components/ui/card"
-import { burnoutApi, complianceApi, gigApi, lifeEventsApi, lastMonthKey } from '../../services/hr.js'
+import { burnoutApi, gigApi, lastMonthKey } from '../../services/hr.js'
 
 const stat = (icon, label, value, tone, view, setCurrentView) => (
   <button key={label}
@@ -17,22 +17,18 @@ const stat = (icon, label, value, tone, view, setCurrentView) => (
 )
 
 export default function HrOverview({ adminUid, currentUser, setCurrentView, addToast }) {
-  const [counts, setCounts] = useState({ highRisk: '—', alerts: '—', gigs: '—', tasks: '—' })
+  const [counts, setCounts] = useState({ highRisk: '—', gigs: '—' })
 
   const load = useCallback(async () => {
     if (!adminUid) return
     const results = await Promise.allSettled([
       burnoutApi.getBurnoutRisks({ month: lastMonthKey() }),
-      complianceApi.getAlerts(),
       gigApi.getOpenGigs({ view: 'browse' }),
-      lifeEventsApi.getLifeEvents(),
     ])
-    const [wb, ca, gg, le] = results.map((r) => (r.status === 'fulfilled' ? r.value : null))
+    const [wb, gg] = results.map((r) => (r.status === 'fulfilled' ? r.value : null))
     setCounts({
       highRisk: wb?.highRiskCount ?? 0,
-      alerts: ca?.alerts?.filter((a) => !a.resolved).length ?? 0,
       gigs: gg?.gigs?.length ?? 0,
-      tasks: le?.events?.reduce((n, e) => n + (e.tasks?.filter((t) => !t.completed) || []).length, 0) ?? 0,
     })
   }, [adminUid])
 
@@ -54,9 +50,7 @@ export default function HrOverview({ adminUid, currentUser, setCurrentView, addT
       </CardHeader>
       <div className="p-4 pt-0 grid grid-cols-2 gap-2.5 flex-1">
         {stat('favorite', 'Well-being risks', counts.highRisk, 'bg-red-500/10 text-red-600', 'wellbeing', setCurrentView)}
-        {stat('gavel', 'Compliance alerts', counts.alerts, 'bg-amber-500/10 text-amber-600', 'compliance', setCurrentView)}
         {stat('workspaces', 'Open gigs', counts.gigs, 'bg-emerald-500/10 text-emerald-600', 'gigs', setCurrentView)}
-        {stat('celebration', 'Pending life-event tasks', counts.tasks, 'bg-sky-500/10 text-sky-600', 'life-events', setCurrentView)}
       </div>
     </Card>
   )

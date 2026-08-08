@@ -59,21 +59,6 @@ export const gigApi = {
   removeSkill: wrap('removeSkill'),
 }
 
-export const complianceApi = {
-  getAlerts: wrap('getComplianceAlerts'),
-  resolveAlert: wrap('resolveAlert'),
-  getRules: wrap('getComplianceRules'),
-  updateRule: wrap('updateComplianceRule'),
-  addFestival: wrap('addFestivalDate'),
-  removeFestival: wrap('removeFestivalDate'),
-}
-
-export const lifeEventsApi = {
-  getLifeEvents: wrap('getLifeEvents'),
-  getMine: wrap('getMyLifeEvents'),
-  completeTask: wrap('completeLifeEventTask'),
-}
-
 export const performanceApi = {
   calculate: wrap('calculateMonthlyPerformance'),
   getScores: wrap('getPerformanceScores'),
