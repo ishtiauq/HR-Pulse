@@ -401,6 +401,36 @@ export default function useAppData({ user, addToast }) {
         let expensesData = await loadTable('expenses', 'kormiis_expenses')
         setExpensesRaw(expensesData || [])
 
+        // Shared tables — load from Firestore so a newly-joined employee on a
+        // fresh device sees ALL company activity (announcements, events, docs,
+        // assets, etc.), and so pre-existing local-only data is migrated up.
+        let announcementsData = await loadTable('announcements', 'kormiis_announcements')
+        setAnnouncements(announcementsData || [])
+
+        let eventsData = await loadTable('events', 'kormiis_events')
+        setEvents(eventsData || [])
+
+        let documentsData = await loadTable('documents', 'kormiis_documents')
+        setDocuments(documentsData || [])
+
+        let assetsData = await loadTable('assets', 'kormiis_assets')
+        setAssets(assetsData || [])
+
+        let assetRequestsData = await loadTable('asset_requests', 'kormiis_asset_requests')
+        setAssetRequests(assetRequestsData || [])
+
+        let assetCategoriesData = await loadTable('asset_categories', 'kormiis_asset_categories')
+        setAssetCategories(assetCategoriesData || ['Laptop', 'Phone', 'Monitor', 'Peripherals', 'Access Card'])
+
+        let rosterData = await loadTable('roster', 'kormiis_roster')
+        setRoster(rosterData || [])
+
+        let shiftSwapsData = await loadTable('shift_swaps', 'kormiis_shift_swaps')
+        setShiftSwaps(shiftSwapsData || [])
+
+        let overtimeClaimsData = await loadTable('overtime_claims', 'kormiis_overtime_claims')
+        setOvertimeClaims(overtimeClaimsData || [])
+
         const issues = validateDatabase(empData || [], logsData || {}, leavesData || [], payrollData || {}, expensesData || [])
         setDataIntegrityIssues(issues)
         if (issues.length > 0) {
